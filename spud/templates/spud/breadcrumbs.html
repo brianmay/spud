@@ -1,0 +1,6 @@
+<div class="breadcrumbs">
+{% for bc in breadcrumbs %}
+<a href="{{bc.url}}">{{bc.name}}</a> &rsaquo;
+{% endfor %}
+{{object.name}}
+</div>

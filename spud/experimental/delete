@@ -1,0 +1,14 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*- 
+
+#import photos.manage
+#import django.core.management
+#django.core.management.setup_environ(photos.manage.settings)
+
+import re
+
+from spud import models
+
+for p in models.photo.objects.filter(status='D'):
+    print p.get_orig_path(), p.get_thumb_path("mid"), p.get_thumb_path("thumb")
+    p.delete()

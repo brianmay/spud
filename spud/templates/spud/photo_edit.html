@@ -1,0 +1,107 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/forms.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Edit {{ object }}{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+{{ media }}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/core.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/CollapsedFieldsets.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<h1>Edit {{ object }}</h1>
+
+<form method="post">
+
+<div class='photo_edit photo_{{object.status}}'>
+<div class='photo_edit_photo'>
+<p><img src="{% get_thumb_url object "mid" %}" alt="{{ object.title }}" /></p>
+</div>
+
+<div class='photo_edit_photo_detail'>
+{% photo_edit_buttons page_obj %}
+
+<div class="inline-group">
+<div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
+<fieldset class="module collapse">
+   <h2>Basic Details</h2>
+   <table><tbody>
+   {{ form.as_table }}
+   {{ form_extra.as_table }}
+   </tbody></table>
+</fieldset>
+</div>
+</div>
+
+</div>
+
+<div class='photo_edit_people_detail'>
+{% photo_edit_buttons page_obj %}
+
+<div class="inline-group">
+<div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
+{{ formset_person.management_form }}
+<fieldset class="module collapse">
+   <h2>People</h2>
+   {{ formset_person.non_form_errors }}
+   <table>
+     <thead><tr>
+       <th></th>
+       <th>Person</th>
+       <th>Position</th>
+       <th>Delete?</th>
+     </tr></thead>
+
+     <tbody>
+     {% for inline_form in formset_person.forms %}
+        {% if inline_form.non_field_errors %}
+        <tr><td colspan="{{ inline_form.field_count }}">{{ inline_form.non_field_errors }}</td></tr>
+        {% endif %}
+        <tr class="{% cycle row1,row2 %}"
+
+        <td class="number">
+          {{ forloop.counter }}
+          {% spaceless %}
+              {% for field in inline_form %}
+                {% if field.is_hidden %} {{ field }} {% endif %}
+              {% endfor %}
+          {% endspaceless %}
+        </td>
+
+        {% for field in inline_form %}
+          {% if not field.is_hidden %}
+            <td class="{{ field.name }}"> {{ field.errors.as_ul }} {{ field }} </td>
+          {% endif %}
+        {% endfor %}
+
+        {% if formset_person.formset.can_delete %}
+          <td class="delete">{% if inline_form.original %}{{ inline_form.deletion_field.field }}{% endif %}</td>
+        {% endif %}
+
+        </tr>
+
+     {% endfor %}
+
+     </tbody>
+   </table>
+
+</fieldset>
+</div>
+</div>
+</div>
+
+<br class="clear"/>
+</div>
+
+{% photo_edit_buttons page_obj %}
+
+</form>
+
+{% endblock %}

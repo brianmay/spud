@@ -1,0 +1,12 @@
+{% load photo %}
+{% load i18n %}
+{% if pagination_required %}
+<p class="paginator">
+{% paginator_prev page_obj links %}
+{% paginator_random page_obj links %}
+{% paginator_next page_obj links %}
+{% for i in page_range %}
+    {% paginator_number page_obj links i %}
+{% endfor %}
+</p>
+{% endif %}

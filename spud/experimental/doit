@@ -1,0 +1,334 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*- 
+
+#import photos.manage
+#import django.core.management
+#django.core.management.setup_environ(photos.manage.settings)
+
+import re
+
+import datetime
+
+from spud import models
+
+import pytz
+
+def set_album_list(photo, pk_list):
+    pa_list = photo.photo_album_set.all()
+    for pa in pa_list:
+        if pa.album.pk in pk_list:
+            pk_list.remove(pa.album.pk)
+        else:
+            pa.delete()
+
+    for pk in pk_list:
+        pa = models.photo_album.objects.create(photo=photo,album_id=pk)
+
+def set_category_list(photo, pk_list):
+    pa_list = photo.photo_category_set.all()
+    for pa in pa_list:
+        if pa.category.pk in pk_list:
+            pk_list.remove(pa.category.pk)
+        else:
+            pa.delete()
+
+    for pk in pk_list:
+        pa = models.photo_category.objects.create(photo=photo,category_id=pk)
+
+i = 0
+l = models.place.objects.get(title="Whitsunday Islands")
+for p in models.photo.objects.filter(albums__in=[106]).order_by("name"):
+    print p
+    hour = i / 60
+    minute = i % 60
+    print hour,minute
+    p.datetime = datetime.datetime.combine(datetime.date(year=2002,month=07,day=1),datetime.time(hour=hour,minute=minute))
+    p.timezone = "Australia/Brisbane"
+    p.location = l
+    p.save()
+    i = i + 1
+
+exit(0)
+
+a = models.album.objects.get(pk=88,album="Merimbula 2004")
+ca = models.category.objects.get(category="Oceans")
+for i in models.photo.objects.filter(albums=a)[177:218]:
+    i.location = models.place.objects.get(title="Gippsland")
+    i.save()
+#    models.photo_category.objects.get_or_create(photo=i,category=ca)
+
+exit(0)
+
+a = models.album.objects.get(pk=87,album="Robe 2002")
+ca = models.category.objects.get(category="Aerial")
+for i in models.photo.objects.filter(albums=a)[:37]:
+    i.datetime = i.datetime+datetime.timedelta(minutes=30)
+#    i.location = models.place.objects.get(title="Victoria")
+    i.save()
+#    models.photo_category.objects.get_or_create(photo=i,category=ca)
+
+exit(0)
+
+a = models.album.objects.get(pk=83,album="Lake Mungo 2001")
+ca = models.category.objects.get(category="Aerial")
+for i in models.photo.objects.filter(albums=a)[100:]:
+    i.location = models.place.objects.get(title="Victoria")
+    i.save()
+    models.photo_category.objects.get_or_create(photo=i,category=ca)
+
+exit(0)
+
+a = models.album.objects.get(pk=73,album="lca2007")
+ca = models.category.objects.get(category="Aircraft")
+ja = models.category.objects.get(category="Jet Aircraft")
+for i in models.photo.objects.filter(albums=a,categorys=ca):
+    models.photo_category.objects.get_or_create(photo=i,category=ja)
+    models.photo_category.objects.get(photo=i,category=ca).delete()
+
+exit(0)
+
+a = models.album.objects.get(pk=80,album="Avalon Airshow 2007")
+ma = models.category.objects.get(category="Millitary Aircraft")
+ha = models.category.objects.get(category="Historic Aircraft")
+la = models.category.objects.get(category="Light Aircraft")
+for i in models.photo.objects.filter(albums=a)[422:446]:
+    models.photo_category.objects.get_or_create(photo=i, category=la)
+
+exit(0)
+
+p = models.person.objects.get(first_name="Jan", last_name="May")
+album = models.album.objects.get(pk=78,album="Bairnsdale Airshow 2005")
+albums =  album.get_descendants()
+photos = models.photo.objects.filter(albums__in=albums, photographer=p)
+for p in photos:
+    adjusted = p.datetime-datetime.timedelta(minutes=2)
+
+    from_tz = pytz.utc
+    to_tz = pytz.timezone(p.timezone)
+    current = from_tz.localize(p.datetime)
+    current = current.astimezone(to_tz)
+    new = from_tz.localize(adjusted)
+    new = new.astimezone(to_tz)
+    print "%-30s %s; %s - %s; %s"%(p, p.datetime, current, adjusted, new)
+
+    p.datetime = adjusted
+    p.save()
+
+exit(0)
+
+place = models.place.objects.get(pk=294,title="Canada")
+places = place.get_descendants()
+models.photo.objects.filter(location__in=places).update(timezone="America/Toronto")
+
+exit(0)
+
+p = models.place.objects.get(pk=298,title="Ottawa")
+a = models.album.objects.get(pk=75,album="ols2002")
+a_list = a.get_descendants()
+bm = models.person.objects.get(first_name="Brian",last_name="May")
+models.photo.objects.filter(albums__in=a_list).update(photographer=bm)
+for i in models.photo.objects.filter(albums=a):
+    i.location=p
+    i.save()
+
+exit(0)
+
+p = models.place.objects.get(pk=287,title="University of New South Wales")
+rrc = models.place.objects.get(pk=289,title="Randwick Racecourse")
+sc = models.place.objects.get(pk=288,title="Sydney City")
+cat = models.category.objects.get(category="Airports")
+a = models.album.objects.get(pk=73,album="lca2007")
+a_list = a.get_descendants()
+#bm = models.person.objects.get(first_name="Brian",last_name="May")
+#models.photo.objects.filter(albums__in=a_list).update(photographer=bm)
+for i in models.photo.objects.filter(albums=a,location=293):
+#    i.location=sc
+#    i.save()
+    pc = models.photo_category.objects.get_or_create(photo=i,category=cat)
+#models.photo_category.objects.filter(photo__albums=73,category=16).update(category=305)
+exit(0)
+
+p = models.place.objects.get(pk=282,title="Australian National University")
+a = models.album.objects.get(pk=71,album="lca2005")
+a_list = a.get_descendants()
+#p = models.person.objects.get(first_name="Brian",last_name="May")
+#models.photo.objects.filter(albums__in=a_list).update(photographer=p)
+for i in models.photo.objects.filter(albums=a)[65:339]:
+    i.location=p
+    i.save()
+exit(0)
+
+album = models.album.objects.get(pk=69,album="lca2003")
+albums =  album.get_descendants()
+photos = models.photo.objects.filter(albums__in=albums)
+for p in photos:
+    adjusted = p.datetime-datetime.timedelta(hours=3)
+
+    from_tz = pytz.utc
+    to_tz = pytz.timezone(p.timezone)
+    current = from_tz.localize(p.datetime)
+    current = current.astimezone(to_tz)
+    new = from_tz.localize(adjusted)
+    new = new.astimezone(to_tz)
+    print "%-30s %s; %s - %s; %s"%(p, p.datetime, current, adjusted, new)
+
+    p.datetime = adjusted
+    p.save()
+
+exit(0)
+
+for i in models.photo.objects.filter(location=281,albums=69,categorys=286):
+    c = models.category.objects.get(pk=123)
+    models.photo_category.objects.get_or_create(photo=i,category=c)
+
+exit(0)
+
+models.album.objects.filter(sortname__isnull=True).update(sortname="")
+models.category.objects.filter(sortname__isnull=True).update(sortname="")
+exit(0)
+
+uwa = models.place.objects.get(pk=266,title="University of Western Australia")
+pz = models.place.objects.get(pk=267,title="Perth Zoo")
+p = models.person.objects.get(first_name="Brian",last_name="May")
+a = models.album.objects.get(pk=69,album="lca2003")
+#a_list = a.get_descendants()
+#models.photo.objects.filter(albums__in=a_list).update(photographer=p)
+for i in models.photo.objects.filter(albums=a)[1:270]:
+    i.location=uwa
+    i.save()
+
+for i in models.photo.objects.filter(albums=a)[276:355]:
+    i.location=pz
+    i.save()
+
+exit(0)
+
+p = models.place.objects.get(pk=264,title="Camberville")
+a = models.album.objects.get(pk=46,album="Camberville")
+a_list = a.get_descendants()
+models.photo.objects.filter(albums__in=a_list).update(location=p)
+exit(0)
+
+p = models.place.objects.get(pk=262,title="Marysville National Park")
+a = models.album.objects.get(pk=45,album="Marysville")
+a_list = a.get_descendants()
+models.photo.objects.filter(albums__in=a_list).update(location=p)
+exit(0)
+
+src = models.album.objects.get(pk=77,album="Tyabb Airshow")
+dst = models.album.objects.get(pk=42,album="Tyabb Airshow")
+for p in models.photo.objects.filter(albums=src):
+    set_album_list(p, [dst.pk])
+exit(0)
+
+album = models.album.objects.get(pk=36,album="Iandra")
+albums =  get_album_descendants(album)
+photos = models.photo.objects.filter(albums__in=albums)
+for p in photos:
+    from_tz = pytz.utc
+    to_tz = pytz.timezone(p.timezone)
+
+    value = from_tz.localize(p.datetime)
+    value = value.astimezone(to_tz)
+
+    adjusted = from_tz.localize(p.datetime+datetime.timedelta(hours=17))
+    adjusted = adjusted.astimezone(to_tz)
+    print "%-30s %s %s"%(p, value, adjusted)
+
+    p.datetime = p.datetime+datetime.timedelta(hours=17)
+    p.save()
+
+exit(0)
+
+models.photo.objects.filter(albums__in=[10]).update(location=248)
+exit(0)
+
+i = 0
+for p in models.photo.objects.filter(albums__in=[63]).order_by("name"):
+    print p
+#    p.datetime = datetime.datetime.combine(datetime.date(year=2002,month=02,day=17),datetime.time(hour=14,minute=i))
+#    p.save()
+    i = i + 1
+
+exit(0)
+
+#src = models.album.objects.get(pk=259,album="Family")
+#place = models.place.objects.get(pk=47,title="Home")
+#dst = models.album.objects.get(pk=305,album="birds")
+#for p in models.photo.objects.filter(albums=src, location=place):
+#    set_album_list(p, [dst.pk])
+
+def update_places(place,timezone):
+    models.photo.objects.filter(location=place).update(timezone=timezone)
+    src = models.place.objects.get(pk=2,title="Göteburg")
+    for p in place.children.all():
+        update_places(p,timezone)
+
+models.photo.objects.filter(albums__in=[69]).update(location=241)
+models.photo.objects.filter(albums__in=[68]).update(location=243)
+
+place = models.place.objects.get(pk=2,title="Göteburg")
+update_places(place,"Europe/Stockholm")
+
+place = models.place.objects.get(pk=15,title="China")
+update_places(place,"Asia/Shanghai")
+
+place = models.place.objects.get(pk=7,title="England")
+update_places(place,"Europe/London")
+
+place = models.place.objects.get(pk=3,title="Netherlands")
+update_places(place,"Europe/Amsterdam")
+
+place = models.place.objects.get(pk=84,title="New Zealand")
+update_places(place,"NZ")
+
+place = models.place.objects.get(pk=16,title="Singapore")
+update_places(place,"Asia/Singapore")
+
+place = models.place.objects.get(pk=32,title="Victoria")
+update_places(place,"Australia/Melbourne")
+
+place = models.place.objects.get(pk=134,title="Tasmania")
+update_places(place,"Australia/Hobart")
+
+place = models.place.objects.get(pk=130,title="South Australia")
+update_places(place,"Australia/Adelaide")
+
+place = models.place.objects.get(pk=42,title="New South Wales")
+update_places(place,"Australia/Sydney")
+
+place = models.place.objects.get(pk=139,title="Australian Capital Territory")
+update_places(place,"Australia/Canberra")
+
+place = models.place.objects.get(pk=239,title="Western Australia")
+update_places(place,"Australia/Perth")
+
+place = models.place.objects.get(pk=44,title="Queensland")
+update_places(place,"Australia/Brisbane")
+
+for p in models.photo.objects.all():
+    print p.pk
+    value = datetime.datetime.combine(p.date,p.time)
+    from_tz = pytz.timezone(p.timezone)
+    to_tz = pytz.timezone("UTC")
+    value = from_tz.localize(value)
+    value = value.astimezone(to_tz)
+    p.datetime = datetime.datetime.combine(value.date(),value.time())
+    p.save()
+
+#for a in models.photo.objects.all():
+#    m = re.match("^(\d\d\d\d)$",a.date)
+#    if m is not None:
+#        print "1",a.pk,a.date
+#        a.date = "%s-01-01"%(m.group(1))
+#        print "1",a.pk,a.date
+#
+#    m = re.match("^(\d\d\d\d)-(\d\d)$",a.date)
+#    if m is not None:
+#        print "2",a.pk,a.date
+#        a.date = "%s-%s-01"%(m.group(1),m.group(2))
+#        print "2",a.pk,a.date
+#
+#    m = re.match("^(\d\d\d\d)-(\d\d)-(\d\d)$",a.date)
+#    if m is None:
+#        print a.pk,a.date

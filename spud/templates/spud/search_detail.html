@@ -1,0 +1,27 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Search results{% endblock %}
+
+{% block content %}
+{% pagination page_obj %}
+
+<h1>Search results</h1>
+
+<dl class="infobox">
+{% for criteria in object.criteria %}
+<dt>{{criteria.key}}</dt>
+<dd>{{criteria.value}}</dd>
+{% endfor %}
+</dl>
+
+{% show_photo_list page_obj links %}
+
+{% pagination page_obj %}
+
+{% endblock %}

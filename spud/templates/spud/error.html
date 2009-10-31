@@ -1,0 +1,13 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+{% show_error_list error_list %}
+
+{% endblock %}

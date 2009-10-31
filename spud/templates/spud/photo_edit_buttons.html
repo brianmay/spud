@@ -1,0 +1,9 @@
+<div class="submit-row">
+{% if page_obj %}
+<input type="submit" name="goto" value="prev" />
+{% endif %}
+<input type="submit" name="goto" value="save" />
+{% if page_obj %}
+<input type="submit" name="goto" value="next" />
+{% endif %}
+</div>

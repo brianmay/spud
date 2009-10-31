@@ -1,0 +1,47 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}People{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+{{ media }}
+{% endblock %}
+
+{% block content %}
+
+<h1>People</h1>
+
+{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user type %}
+{% if add_perm %}
+<ul class="object-tools">
+<li><a class="addlink" href="{% url person_create %}">Create</a></li>
+</ul>
+{% endif %}
+
+<h2>Search</h2>
+
+<form method="post">
+<table>{{ form.as_table }}</table>
+<input type="submit" />
+</form>
+
+<h2>People</h2>
+
+{% if page_obj.object_list %}
+    <ul>
+    {% for person in page_obj.object_list %}
+        <li><a href="{{ person.get_absolute_url }}">{{ person }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No people are available.</p>
+{% endif %}
+
+{% pagination page_obj %}
+
+{% endblock %}

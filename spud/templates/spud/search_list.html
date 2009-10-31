@@ -1,0 +1,22 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Search{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+{{ media }}
+{% endblock %}
+
+{% block content %}
+
+<h1>Search</h1>
+
+<form method="post">
+<table>{{ form.as_table }}</table>
+<input type="submit" />
+</form>
+
+{% endblock %}

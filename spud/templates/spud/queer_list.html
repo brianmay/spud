@@ -1,0 +1,57 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Queers{% endblock %}
+
+{% block content %}
+
+<h1>Queers</h1>
+
+{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user type %}
+{% if add_perm %}
+<ul class="object-tools">
+<li><a class="addlink" href="{{ type.get_create_url }}">Create</a></li>
+</ul>
+{% endif %}
+
+{% if page_obj.object_list %}
+    <table>
+        <thead>
+            <tr>
+                <th colspan="1">Name</th>
+                {% if edit_perm or delete_perm %}
+                <th colspan="2">Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for queer in page_obj.object_list %}
+            <tr>
+                <td><a href="{{ queer.get_absolute_url }}">{{  queer }}</a></td>
+{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user queer.type %}
+{% if edit_perm %}
+                <td><a class="changelink" href="{{ queer.get_edit_url }}">edit</a></td>
+{% else %}
+                <td></td>
+{% endif %}
+{% if delete_perm %}
+                <td><a class="deletelink" href="{{ queer.get_delete_url }}">delete</a></td>
+{% else %}
+                <td></td>
+{% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No queers are available.</p>
+{% endif %}
+
+{% pagination page_obj %}
+
+{% endblock %}

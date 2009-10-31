@@ -1,0 +1,10 @@
+Incompatable changes with zoph schema:
+
+1. parent_album_id, parent_place_id, parent_categegory_id set to NULL if no parent, not 0.
+2. many to many tables have new primary key, as Django doesn't support multi primary keys.
+3. some CharFields replaced with TextField: notes (person), notes (place),
+   album_description (album), category_description (category), comment (photo)
+4. Django tables used for comments.
+5. Replaced date (photo), time (photo) with datetime and timezone.
+6. Photo contains status field.
+7. Comments/rating uses django tables.

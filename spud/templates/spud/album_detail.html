@@ -1,0 +1,49 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}{{object}}{% endblock %}
+
+{% block content %}
+{% pagination page_obj %}
+
+<h1>{{object}}</h1>
+
+{% if object %}
+{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user object.type %}
+{% if add_perm or edit_perm or delete_perm %}
+<ul class="object-tools">
+{% if add_perm %}
+<li><a class="addlink" href="{{ object.get_create_url }}">Create</a></li>
+{% endif %}
+{% if edit_perm %}
+<li><a class="changelink" href="{{ object.get_edit_url }}">Edit</a></li>
+{% endif %}
+{% if delete_perm %}
+<li><a class="deletelink" href="{{ object.get_delete_url }}">Delete</a></li>
+{% endif %}
+</ul>
+{% endif %}
+
+{% if object.album_description %}<p>{{object.album_description|urlizetrunc:40|linebreaks}}</p>{% endif %}
+{% endif %}
+
+{%ifequal page_obj.number 1 %}
+{% if object.children.all %}
+    <ul class="children">
+    {% for album in object.children.all %}
+        <li><a href="{{ album.get_absolute_url }}">{{ album }}</a>{% if album.album_description %}: {{album.album_description|urlizetrunc:40|truncatewords:10}}{% endif %} {% if album.sortname %}({{album.sortname}} {{album.sortorder}}){% endif %}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endifequal %}
+
+{% show_photo_list page_obj links %}
+
+{% pagination page_obj %}
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Delete {{ object }}{% endblock %}
+
+{% block content %}
+
+<h2>Delete {{ object }}</h2>
+
+{% if errorlist %}
+<ul class="errorlist">
+{% for error in errorlist %}
+<li>{{ error }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>Are you sure you want to delete {{ object }}?</p>
+<form method="post">
+  <div>
+    <input type="hidden" name="post" value="yes" />
+    <input type="submit" value="{% trans "Yes, I'm sure" %}" />
+  </div>
+</form>
+{% endif %}
+
+{% endblock %}

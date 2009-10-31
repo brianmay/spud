@@ -1,0 +1,59 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Relations{% endblock %}
+
+{% block content %}
+
+<h1>Relations</h1>
+
+{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user type %}
+{% if add_perm %}
+<ul class="object-tools">
+<li><a class="addlink" href="{{ type.get_create_url }}">Create</a></li>
+</ul>
+{% endif %}
+
+{% if page_obj.object_list %}
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2">Photo 1</th>
+                <th colspan="2">Photo 2</th>
+                {% if edit_perm or delete_perm %}
+                <th colspan="2">Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for relation in page_obj.object_list %}
+            <tr>
+                <td><a href="{{ relation.photo_1.get_absolute_url }}">{{  relation.photo_1 }}</td><td>{{ relation.desc_1 }}</a></td>
+                <td><a href="{{ relation.photo_2.get_absolute_url }}">{{  relation.photo_2 }}</td><td>{{ relation.desc_2 }}</a></td>
+{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user relation.type %}
+{% if edit_perm %}
+                <td><a class="changelink" href="{{ relation.get_edit_url }}">edit</a></td>
+{% else %}
+                <td></td>
+{% endif %}
+{% if delete_perm %}
+                <td><a class="deletelink" href="{{ relation.get_delete_url }}">delete</a></td>
+{% else %}
+                <td></td>
+{% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No relations are available.</p>
+{% endif %}
+
+{% pagination page_obj %}
+
+{% endblock %}

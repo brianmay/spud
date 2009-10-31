@@ -1,0 +1,27 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}People{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+{{ media }}
+{% endblock %}
+
+{% block content %}
+
+<h1>Status</h1>
+
+<ul>
+{% for result in page_obj.object_list %}
+<li><a href="{{ result.get_absolute_url }}">{{ result }}</li>
+{% endfor %}
+</ul>
+
+{% pagination page_obj %}
+
+{% endblock %}

@@ -1,0 +1,24 @@
+#!/usr/bin/python
+
+from spud import models
+
+def main():
+
+    parser = OptionParser()
+    parser.add_option("-r", "--rotate",action="store", dest="rotate",
+                      help="Amount to rotate photo")
+    (options, args) = parser.parse_args()
+
+    if options.rotate is None
+        options.rotate = "90"
+
+    for p in models.photo.objects.filter(pk__in=args):
+        p.rotate(options.rotate)
+        p.save()
+
+        p.generate_thumbnails()
+
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

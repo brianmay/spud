@@ -1,0 +1,28 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}
+  {% if object %}Edit {{ object }}{% else %}Create {{ type }}{% endif %}
+{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+{{ media }}
+{% endblock %}
+
+{% block content %}
+
+{% if object %}
+<h1>Edit {{ object }}</h1>
+{% else %}
+<h1>Create {{ type.single_name }}</h1>
+{% endif %}
+
+<form method="post">
+<table>{{ form.as_table }}</table>
+<input type="submit" />
+</form>
+
+{% endblock %}

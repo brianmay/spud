@@ -1,0 +1,20 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}{{object}}{% endblock %}
+
+{% block content %}
+{% pagination page_obj %}
+
+<h1>{{object}}</h1>
+
+{% show_photo_list page_obj links %}
+
+{% pagination page_obj %}
+
+{% endblock %}

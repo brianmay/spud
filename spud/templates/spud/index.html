@@ -1,0 +1,24 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<ul>
+<li><a href="{% url album_detail 1 %}">albums</a></li>
+<li><a href="{% url category_detail 1 %}">categories</a></li>
+<li><a href="{% url place_detail 1 %}">places</a></li>
+<li><a href="{% url person_list %}">people</a></li>
+<li><a href="{% url date_list %}">dates</a></li>
+<li><a href="{% url photo_relation_list %}">relations</a></li>
+<li><a href="{% url search_list %}">search</a></li>
+{% if user.is_staff %}
+<li><a href="{% url queer_list %}">queers</a></li>
+{% endif %}
+</ul>
+
+{% endblock %}
