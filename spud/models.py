@@ -14,6 +14,9 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
+from django.utils.http import urlquote
+from django.utils.encoding import iri_to_uri
+
 import os
 import datetime
 
@@ -707,7 +710,7 @@ class photo(base_model):
     def get_thumb_url(self,size):
         if size in settings.IMAGE_SIZES:
             (shortname, extension) = os.path.splitext(self.name)
-            return u"%s%s/%s/%s_%s.jpg"%(settings.IMAGE_URL,self.path,size,size,shortname)
+            return iri_to_uri(u"%s%s/%s/%s_%s.jpg"%(settings.IMAGE_URL,urlquote(self.path),urlquote(size),urlquote(size),urlquote(shortname)))
         else:
             raise RuntimeError("unknown image size %s"%(size))
 
@@ -719,7 +722,7 @@ class photo(base_model):
             raise RuntimeError("unknown image size %s"%(size))
 
     def get_orig_url(self):
-        return u"%s%s/%s"%(settings.IMAGE_URL,self.path,self.name)
+        return iri_to_uri(u"%s%s/%s"%(settings.IMAGE_URL,urlquote(self.path),urlquote(self.name)))
 
     def get_orig_path(self):
         return u"%s%s/%s"%(settings.IMAGE_PATH,self.path,self.name)
