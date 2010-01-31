@@ -44,7 +44,7 @@ def _get_link(links,i):
 @register.simple_tag
 def paginator_random(page_obj,links):
     if links is not None:
-        return mark_safe(u"<a href='%s'>R</a>" % (links.photo_detail_link("random")))
+        return mark_safe(u"<a href='%s' accesskey='r'>R</a>" % (links.photo_detail_link("random")))
     else:
         return mark_safe(u'')
 
@@ -53,14 +53,14 @@ def paginator_prev(page_obj,links):
     if page_obj.number <= 1:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s'>&lt;</a>" % (_get_link(links,page_obj.number-1)))
+        return mark_safe(u"<a href='%s' accesskey='p'>&lt;</a>" % (_get_link(links,page_obj.number-1)))
 
 @register.simple_tag
 def paginator_next(page_obj,links):
     if page_obj.number >= page_obj.paginator.num_pages:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s'>&gt;</a>" % (_get_link(links,page_obj.number+1)))
+        return mark_safe(u"<a href='%s' accesskey='n'>&gt;</a>" % (_get_link(links,page_obj.number+1)))
 
 @register.simple_tag
 def paginator_number(page_obj,links,i):

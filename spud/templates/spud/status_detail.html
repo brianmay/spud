@@ -9,9 +9,7 @@
 {% block title %}status: {{ object }}{% endblock %}
 
 {% block content %}
-{% pagination page_obj %}
-
-<h1>status: {{ object }}</h1>
+<h1>Status: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
 {% show_photo_list page_obj links %}
 

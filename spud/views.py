@@ -317,88 +317,126 @@ def object_photo_edit(request,object,number,photo_list,links):
     photo_object = page_obj.object_list[0]
 
     if request.method == 'POST':
-        if 'queer' in request.POST:
-            try:
-                photo_id = request.POST['photo_id']
-                photo_id = int(str(photo_id))
-            except KeyError, e:
-                raise Http404("photo_id not given")
-            except (ValueError,TypeError), e:
-                raise Http404("photo_id is invalid")
-
-            if photo_object.pk != photo_id:
-                photo_object = get_object_or_404(models.photo, pk=photo_id)
-
-            queer = get_object_or_404(models.queer, name=request.POST['queer'])
-
-            photo_object.update_from_queer(queer)
-            photo_object.save()
-
-            url = links.photo_detail_link(page_obj.number)
-            return HttpResponseRedirect(url)
-
-    person_formset_factory = inlineformset_factory(models.photo, models.photo_person,
-                                form=forms.photo_person_form)
-
-    if request.method == 'POST':
-        form_extra = forms.photo_extra_form(request.POST)
+        form = forms.photo_extra_form(request.POST)
 
         # search result may have changed, value in form is
         # authoritive
-        if form_extra.is_valid():
-                photo_id = form_extra.cleaned_data['photo_id']
+        if form.is_valid():
+            photo_id = form.cleaned_data['photo_id']
+            if photo_object.pk != photo_id:
+                    photo_object = get_object_or_404(models.photo, pk=photo_id)
+
+            updates = form.cleaned_data['updates']
+            for update in updates:
+                if update.verb == "add" and update.noun == "person":
+                    for o in update.objects:
+
+                        # try to guess the position we should assign
+                        if o.position == "":
+                            pp = models.photo_person.objects.filter(photo=photo_object).order_by("-position")
+                            try:
+                                if pp[0].position is not None:
+                                    position = pp[0].position + 1
+                                else:
+                                    position = None
+                            except IndexError:
+                                position = 1
+                        else:
+                            position = o.position
+
+                        models.photo_person.objects.get_or_create(photo=photo_object,person=o.person,
+                                defaults={'position': position}
+                        )
+                elif update.verb == "delete" and update.noun == "person":
+                    for o in update.objects:
+                        if o.position == "":
+                            models.photo_person.objects.filter(photo=photo_object,person=o.person).delete()
+                        else:
+                            models.photo_person.objects.filter(photo=photo_object,person=o.person,position=o.position).delete()
+                elif update.verb == "set" and update.noun == "person":
+                    models.photo_person.objects.filter(photo=photo_object,person=update.object).update(position=update.position)
+                elif update.verb == "add" and update.noun == "album":
+                    for album in update.objects:
+                        models.photo_album.objects.get_or_create(photo=photo_object,album=album)
+                elif update.verb == "delete" and update.noun == "album":
+                    for album in update.objects:
+                        models.photo_album.objects.filter(photo=photo_object,album=album).delete()
+                elif update.verb == "add" and update.noun == "category":
+                    for category in update.objects:
+                        models.photo_category.objects.get_or_create(photo=photo_object,category=category)
+                elif update.verb == "delete" and update.noun == "category":
+                    for category in update.objects:
+                        models.photo_category.objects.filter(photo=photo_object,category=category).delete()
+                elif update.verb == "set" and update.noun == "place":
+                    if update.object == "None":
+                        photo_object.place = None
+                    else:
+                        photo_object.place = update.object
+                elif update.verb == "set" and update.noun == "photographer":
+                    if update.object == "None":
+                        photo_object.photographer = None
+                    else:
+                        photo_object.photographer = update.object
+                elif update.verb == "set" and update.noun == "title":
+                    if update.object == "None":
+                        photo_object.title = ""
+                    else:
+                        photo_object.title = update.object
+                elif update.verb == "set" and update.noun == "description":
+                    if update.object == "None":
+                        photo_object.description = ""
+                    else:
+                        photo_object.description = update.object
+
+                else:
+                    raise Http404("operation '%s' '%s' not implemented"%(update.verb, update.noun))
+
+            if 'queer' in request.POST:
+                try:
+                    photo_id = request.POST['photo_id']
+                    photo_id = int(str(photo_id))
+                except KeyError, e:
+                    raise Http404("photo_id not given")
+                except (ValueError,TypeError), e:
+                    raise Http404("photo_id is invalid")
+
                 if photo_object.pk != photo_id:
-                        photo_object = get_object_or_404(models.photo, pk=photo_id)
+                    photo_object = get_object_or_404(models.photo, pk=photo_id)
 
-        form = forms.photo_form(request.POST,instance=photo_object)
+                queer = get_object_or_404(models.queer, name=request.POST['queer'])
 
-        formset_person = person_formset_factory(request.POST,instance=photo_object)
+                photo_object.update_from_queer(queer)
 
-        if form.is_valid() and form_extra.is_valid() and formset_person.is_valid():
-            instance = form.save(commit=False)
+            photo_object.save()
 
-            if form_extra.cleaned_data['rotate']:
-                instance.rotate(form_extra.cleaned_data['rotate'])
-                instance.generate_thumbnails()
-
-            instance.save()
-
-            set_album_list(instance, form_extra.cleaned_data['albums'])
-            set_category_list(instance, form_extra.cleaned_data['categorys'])
-            formset_person.save()
 
             if "goto" not in request.POST:
-                request.POST['goto'] = 'save'
+                goto = 'save'
+            else:
+                goto = request.POST['goto']
 
-            if request.POST["goto"] == "prev":
+            if goto == "prev":
                 number = page_obj.number - 1
                 if number < 1:
                     number = 1
                 url = links.photo_edit_link(number)
-            elif request.POST["goto"] == "next":
+            elif goto == "next":
                 number = page_obj.number + 1
                 if number > page_obj.paginator.num_pages:
                     number = page_obj.paginator.num_pages
                 url = links.photo_edit_link(number)
+            elif goto == "save":
+                url = links.photo_edit_link(page_obj.number)
             else:
                 url = links.photo_detail_link(page_obj.number)
 
             return HttpResponseRedirect(url)
 
     else:
-        form = forms.photo_form(instance=photo_object)
-
-        album_list = "|" + "|".join( str(o.album.pk) for o in photo_object.photo_album_set.all() ) + "|"
-        category_list = "|" + "|".join( str(o.category.pk) for o in photo_object.photo_category_set.all() ) + "|"
-        person_list = "|" + "|".join( str(o.person.pk) for o in photo_object.photo_person_set.all() ) + "|"
-
-        form_extra = forms.photo_extra_form({
+        form = forms.photo_extra_form({
                                 'photo_id': photo_object.pk,
-                                'albums': album_list,
-                                'categorys': category_list,
-                                'persons': person_list})
-
-        formset_person = person_formset_factory(instance=photo_object)
+                                'updates': '',
+                                })
 
     # can't do this until after we confirm the object
     detail_url = links.photo_detail_link(page_obj.number)
@@ -412,9 +450,7 @@ def object_photo_edit(request,object,number,photo_list,links):
             'page_obj': page_obj,
             'links': links,
             'form' : form, 'breadcrumbs': breadcrumbs,
-            'form_extra' : form_extra,
-            'media' : form.media + form_extra.media,
-            'formset_person' : formset_person,
+            'media' : form.media,
             },context_instance=RequestContext(request))
 
 ############

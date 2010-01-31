@@ -10,11 +10,7 @@
 {% block title %}{{ object }}{% endblock %}
 
 {% block content %}
-{% if page_obj %}
-{% pagination_with_links page_obj links %}
-{% endif %}
-
-<h1>{{ object }}</h1>
+<h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
 {% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user object.type %}
 {% if edit_perm or delete_perm %}

@@ -9,9 +9,7 @@
 {% block title %}{{object}}{% endblock %}
 
 {% block content %}
-{% pagination page_obj %}
-
-<h1>{{object}}</h1>
+<h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
 {% if object %}
 {% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user object.type %}

@@ -8,93 +8,121 @@
 
 {% block title %}Edit {{ object }}{% endblock %}
 
-{% block extrahead %}{{ block.super }}
-{{ media }}
-<script type="text/javascript" src="{{ MEDIA_URL }}js/core.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/CollapsedFieldsets.js"></script>
-{% endblock %}
-
 {% block content %}
 
 <h1>Edit {{ object }}</h1>
 
-<form method="post">
+<form method="post" action="{% photo_edit_url links page_obj.number %}">
+<input type="hidden" name="photo_id" value="{{ object.pk }}" />
+{% for queer in object.queers %}
+<input type="submit" name="queer" value="{{ queer.name }}"/>
+{% endfor %}
 
-<div class='photo_edit photo_{{object.status}}'>
-<div class='photo_edit_photo'>
-<p><img src="{% get_thumb_url object "mid" %}" alt="{{ object.title }}" /></p>
+<div class='photo_detail photo_{{object.status}}'>
+<div class='photo_detail_photo'>
+
+<a href="{{ object.get_orig_url }}">
+<img src="{% get_thumb_url object "mid" %}" alt="{{ object.title }}" />
+</a>
 </div>
 
-<div class='photo_edit_photo_detail'>
-{% photo_edit_buttons page_obj %}
+<div class='photo_detail_photo_detail'>
+<h2>Photo Details</h2>
 
-<div class="inline-group">
-<div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
-<fieldset class="module collapse">
-   <h2>Basic Details</h2>
-   <table><tbody>
-   {{ form.as_table }}
-   {{ form_extra.as_table }}
-   </tbody></table>
-</fieldset>
+<dl>
+{% if object.title %}
+<dt>Title</dt><dd>{{object.title}}</dd>
+{% endif %}
+{% if object.description %}
+<dt>Description</dt><dd>{{object.description|urlizetrunc:40|linebreaks}}</dd>
+{% endif %}
+{% if object.photo_person_set.all %}
+<dt>People</dt><dd>
+  {% for pp in object.photo_person_set.all %}
+    <a href="{{ pp.person.get_absolute_url }}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}; {% endif %}
+  {% endfor %}
+</dd>
+{% endif %}
+{% if object.location %}
+<dt>Location</dt><dd><a href="{{ object.location.get_absolute_url }}">{{ object.location }}</a></dd>
+{% endif %}
+<dt>Albums</dt><dd>
+  {% for pa in object.photo_album_set.all %}
+    <a href="{{ pa.album.get_absolute_url }}">{{pa.album}}</a>{% if not forloop.last %}; {% endif %}
+  {% endfor %}
+</dd>
+<dt>Categories</dt><dd>
+  {% for pc in object.photo_category_set.all %}
+    <a href="{{ pc.category.get_absolute_url }}">{{pc.category}}</a>{% if not forloop.last %}; {% endif %}
+  {% endfor %}
+</dd>
+<dt>Date &amp; time</dt><dd>
+  {{ object.datetime|show_datetime:object.timezone }}
+</dd>
+{% if object.photographer %}
+<dt>Photographer</dt><dd><a href="{{ object.photographer.get_absolute_url }}">{{object.photographer}}</a></dd>
+{% endif %}
+<dt>Rating</dt><dd>{{object.rating}}</dd>
+{% if object.relations_1.all or object.relations_2.all or perms.spud.add_relation %}
+<dt>Related photos</dt><dd>
+  {% if perms.spud.add_relation %}
+    <ul class="object-tools">
+    <li><a class="addlink" href="{{ object.get_create_photo_relation_url }}">Create</a></li>
+    </ul>
+  {% endif %}
+  <table>
+  {% for relation in object.relations_1.all %}
+            {% get_permissions_from_type "r_add_perm" "r_edit_perm" "r_delete_perm" user relation.type %}
+            <tr>
+            <td><a href="{{ relation.photo_2.get_absolute_url }}">{{ relation.desc_2 }}</a>
+            {% if r_edit_perm %}
+            <td><a class="changelink" href="{{ relation.get_edit_url }}">Edit</a></td>
+            {% endif %}
+            {% if r_delete_perm %}
+            <td><a class="deletelink" href="{{ relation.get_delete_url }}">Delete</a></td>
+            {% endif %}
+            </tr>
+  {% endfor %}
+  {% for relation in object.relations_2.all %}
+            {% get_permissions_from_type "r_add_perm" "r_edit_perm" "r_delete_perm" user relation.type %}
+            <tr>
+            <td><a href="{{ relation.photo_1.get_absolute_url }}">{{ relation.desc_1 }}</a></td>
+            {% if r_edit_perm %}
+            <td><a class="changelink" href="{{ relation.get_edit_url }}">Edit</a></td>
+            {% endif %}
+            {% if r_delete_perm %}
+            <td><a class="deletelink" href="{{ relation.get_delete_url }}">Delete</a></td>
+            {% endif %}
+            </tr>
+  {% endfor %}
+  </table>
+</dd>
+{% endif %}
+{% if user.is_staff %}
+{% if object.similar_photos.all %}
+<dt>Similar photos</dt><dd>
+  {% for photo in object.similar_photos.all %}
+    <a href="{{ photo.get_absolute_url }}">{{photo}}</a>{% if not forloop.last %}; {% endif %}
+  {% endfor %}
+</dd>
+{% endif %}
+{% endif %}
+<dt>Status</dt><dd>{% show_status_with_link object.status %}</dd>
+</dl>
 </div>
-</div>
 
-</div>
+<div class='photo_detail_camera_detail'>
+<h2>Camera Details</h2>
 
-<div class='photo_edit_people_detail'>
-{% photo_edit_buttons page_obj %}
-
-<div class="inline-group">
-<div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
-{{ formset_person.management_form }}
-<fieldset class="module collapse">
-   <h2>People</h2>
-   {{ formset_person.non_form_errors }}
-   <table>
-     <thead><tr>
-       <th></th>
-       <th>Person</th>
-       <th>Position</th>
-       <th>Delete?</th>
-     </tr></thead>
-
-     <tbody>
-     {% for inline_form in formset_person.forms %}
-        {% if inline_form.non_field_errors %}
-        <tr><td colspan="{{ inline_form.field_count }}">{{ inline_form.non_field_errors }}</td></tr>
-        {% endif %}
-        <tr class="{% cycle row1,row2 %}"
-
-        <td class="number">
-          {{ forloop.counter }}
-          {% spaceless %}
-              {% for field in inline_form %}
-                {% if field.is_hidden %} {{ field }} {% endif %}
-              {% endfor %}
-          {% endspaceless %}
-        </td>
-
-        {% for field in inline_form %}
-          {% if not field.is_hidden %}
-            <td class="{{ field.name }}"> {{ field.errors.as_ul }} {{ field }} </td>
-          {% endif %}
-        {% endfor %}
-
-        {% if formset_person.formset.can_delete %}
-          <td class="delete">{% if inline_form.original %}{{ inline_form.deletion_field.field }}{% endif %}</td>
-        {% endif %}
-
-        </tr>
-
-     {% endfor %}
-
-     </tbody>
-   </table>
-
-</fieldset>
-</div>
-</div>
+<dl>
+<dt>Camera</dt><dd>{{object.camera_make}} {{object.camera_model}}</dd>
+<dt>Flash</dt><dd>{{object.flash_used}}</dd>
+<dt>Focal length</dt><dd> {{object.focal_length}}</dd>
+<dt>Exposure</dt><dd>{{object.exposure}}</dd>
+<dt>Aperture</dt><dd>{{object.aperture}}</dd>
+<dt>ISO</dt><dd>{{object.iso_equiv}}</dd>
+<dt>Metering Mode</dt><dd>{{object.metering_mode}}</dd>
+</dl>
 </div>
 
 <br class="clear"/>
@@ -102,6 +130,13 @@
 
 {% photo_edit_buttons page_obj %}
 
+{{ form }}
+
+
 </form>
+
+<script type="text/javascript">
+document.getElementById('id_updates').focus();
+</script>
 
 {% endblock %}

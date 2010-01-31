@@ -27,9 +27,7 @@ class photo_form(forms.ModelForm):
 
 class photo_extra_form(forms.Form):
     photo_id = forms.IntegerField(widget=forms.HiddenInput())
-    albums = AutoCompleteSelectMultipleField('album', required=False)
-    categorys = AutoCompleteSelectMultipleField('category', required=False)
-    rotate = forms.ChoiceField(required=False,choices=PHOTO_ROTATE)
+    updates = fields.photo_update_field(widget=forms.Textarea,required=False)
 
 class place_form(forms.ModelForm):
     parent_place = AutoCompleteSelectField('place', required=False)

@@ -14,7 +14,7 @@
 {% pagination_with_links page_obj links %}
 {% endif %}
 
-<h1>{{ object }}</h1>
+<h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
 {% with object.error_list as error_list %}{% if error_list %}
 {% show_error_list error_list %}
@@ -25,17 +25,6 @@
 <li><a class="linklink" href="{{ object.get_absolute_url }}">Link</a></li>
 {% if edit_perm %}<li><a class="changelink" href="{% photo_edit_url links page_obj.number %}">Edit</a></li>{% endif %}
 </ul>
-
-{% if edit_perm %}
-{% if object.queers %}
-<form method="post" action="{% photo_edit_url links page_obj.number %}">
-<input type="hidden" name="photo_id" value="{{ object.pk }}" />
-{% for queer in object.queers %}
-<input type="submit" name="queer" value="{{ queer.name }}"/>
-{% endfor %}
-</form>
-{% endif %}
-{% endif %}
 
 <div class='photo_detail photo_{{object.status}}'>
 <div class='photo_detail_photo'>
@@ -58,7 +47,7 @@
 {% if object.photo_person_set.all %}
 <dt>People</dt><dd>
   {% for pp in object.photo_person_set.all %}
-    <a href="{{ pp.person.get_absolute_url }}">{{pp.person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{{ pp.person.get_absolute_url }}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
@@ -164,7 +153,4 @@
 {% render_comment_form for object %}
 </div>
 
-{% if page_obj %}
-{% pagination_with_links page_obj links %}
-{% endif %}
 {% endblock %}

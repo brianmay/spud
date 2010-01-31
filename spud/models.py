@@ -1059,3 +1059,5 @@ class queer(base_model):
     class type(base_model.type):
         type_id = "queer"
 
+    class Meta:
+        ordering = [ 'name' ]
