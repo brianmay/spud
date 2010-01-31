@@ -148,5 +148,4 @@ class photo_update_field(forms.CharField):
             except p.ParseBaseException, e:
                 raise ValidationError(u"Cannot parse line '%s' loc: %s msg: %s"%(line, e.loc, e.msg))
 
-        print results
         return results
