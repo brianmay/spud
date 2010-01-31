@@ -35,6 +35,14 @@ def set_category_list(photo, pk_list):
     for pk in pk_list:
         pa = models.photo_category.objects.create(photo=photo,category_id=pk)
 
+a = models.album.objects.get(pk=326,album="Townsville 2009")
+l = models.place.objects.get(title="Brisbane City")
+for p in models.photo.objects.filter(albums=a,location=l):
+    p.location = models.place.objects.get(title="Brisbane")
+    p.save()
+
+exit(0)
+
 i = 0
 l = models.place.objects.get(title="Whitsunday Islands")
 for p in models.photo.objects.filter(albums__in=[106]).order_by("name"):
