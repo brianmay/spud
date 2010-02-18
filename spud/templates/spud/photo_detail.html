@@ -143,7 +143,7 @@
 {% for comment in comment_list %}
     <div class="comment_{% cycle odd,even %}" id="c{{ comment.id }}">
     <span class="comnum"><a id="c{{ comment.id }}" href="#c{{ comment.id }}">#{{ forloop.counter }}</a></span>
-    <p><b>{{ comment.user_name }}</b> gave the photo a rating of {{ comment.rating }} out of 10, on {{ comment.submit_date|date:"F j, Y" }} at {{ comment.submit_date|date:"P" }}:</p>
+    <p><b>{% if comment.user_email %}<a href="mailto:{{ comment.user_email }}">{{ comment.user_name }}</a>{% else %}{{ comment.user_name }}{% endif %}</b> gave the photo a rating of {{ comment.rating }} out of 10, on {{ comment.submit_date|date:"F j, Y" }} at {{ comment.submit_date|date:"P" }}:</p>
     {{ comment.comment|urlizetrunc:40|linebreaks }}
     </div>
 {% endfor %}
