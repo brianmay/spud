@@ -103,41 +103,41 @@ class photo_update_field(forms.CharField):
         place = p.Regex('[a-zA-Z0-9 \/]+')
         place.setParseAction(get_place)
 
-        person_operation = ( (p.Keyword("add",caseless=True) | p.Keyword("delete",caseless=True)).setResultsName("verb")
-                            + p.Keyword("person").setResultsName("noun")
+        person_operation = (p.Keyword("person").setResultsName("noun")
                             + p.Group(p.delimitedList( 
                                 p.Group(person.setResultsName("person") + p.Optional("(" + p.Word(p.nums).setParseAction(get_int).setResultsName("position") + ")"))
                             )).setResultsName( "objects" ) )
-        person_operation = person_operation | ( p.Keyword("set",caseless=True).setResultsName("verb")
-                            + p.Keyword("person").setResultsName("noun")
-                            + person.setResultsName( "object" )
-                            + p.Optional("(" + p.Word(p.nums).setParseAction(get_int).setResultsName("position") + ")" ) )
 
-        album_operation = ( (p.Keyword("add",caseless=True) | p.Keyword("delete",caseless=True)).setResultsName("verb")
-                            + p.Keyword("album").setResultsName("noun")
+        album_operation = (p.Keyword("album").setResultsName("noun")
                             + p.Group(p.delimitedList( album )).setResultsName( "objects" ))
 
-        category_operation = ( (p.Keyword("add",caseless=True) | p.Keyword("delete",caseless=True)).setResultsName("verb")
-                            + p.Keyword("category").setResultsName("noun")
+        category_operation = (p.Keyword("category").setResultsName("noun")
                             + p.Group(p.delimitedList( category )).setResultsName( "objects" ))
 
-        place_operation = ( p.Keyword("set",caseless=True).setResultsName("verb")
-                            + p.Keyword("place").setResultsName("noun")
+        place_operation = (p.Keyword("place").setResultsName("noun")
                             + (p.Keyword("None",caseless=True) | place).setResultsName( "object" ))
 
-        photographer_operation = ( p.Keyword("set",caseless=True).setResultsName("verb")
-                            + p.Keyword("photographer").setResultsName("noun")
+        photographer_operation = (p.Keyword("photographer").setResultsName("noun")
                             + (p.Keyword("None",caseless=True) | person).setResultsName( "object" ))
 
-        title_operation = ( p.Keyword("set",caseless=True).setResultsName("verb")
-                            + p.Keyword("title").setResultsName("noun")
+        title_operation = (p.Keyword("title").setResultsName("noun")
                             +  (p.Keyword("None",caseless=True) | p.Regex(".+")).setResultsName( "object" ))
 
-        description_operation = ( p.Keyword("set",caseless=True).setResultsName("verb")
-                            + p.Keyword("description").setResultsName("noun")
+        description_operation = (p.Keyword("description").setResultsName("noun")
                             +  (p.Keyword("None",caseless=True) | p.Regex(".+")).setResultsName( "object" ))
 
-        parser = person_operation | album_operation | category_operation | place_operation | photographer_operation | title_operation | description_operation
+
+        add_operation = ( p.Keyword("add",caseless=True).setResultsName("verb")
+                            + ( person_operation | album_operation | category_operation ) )
+
+        set_operation = ( p.Keyword("set",caseless=True).setResultsName("verb")
+                            + ( person_operation | place_operation | photographer_operation | title_operation | description_operation ) )
+
+        delete_operation = ( p.Keyword("delete",caseless=True).setResultsName("verb")
+                            + ( person_operation | album_operation | category_operation ) )
+
+
+        parser = add_operation | set_operation | delete_operation
 
         list = value.split("\n")
         results = []

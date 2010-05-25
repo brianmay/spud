@@ -354,7 +354,10 @@ def object_photo_edit(request,object,number,photo_list,links):
                         else:
                             models.photo_person.objects.filter(photo=photo_object,person=o.person,position=o.position).delete()
                 elif update.verb == "set" and update.noun == "person":
-                    models.photo_person.objects.filter(photo=photo_object,person=update.object).update(position=update.position)
+                    for o in update.objects:
+                        pp = models.photo_person.objects.get(photo=photo_object,person=o.person)
+                        pp.position=o.position
+                        pp.save()
                 elif update.verb == "add" and update.noun == "album":
                     for album in update.objects:
                         models.photo_album.objects.get_or_create(photo=photo_object,album=album)
