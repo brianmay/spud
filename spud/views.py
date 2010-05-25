@@ -369,9 +369,9 @@ def object_photo_edit(request,object,number,photo_list,links):
                         models.photo_category.objects.filter(photo=photo_object,category=category).delete()
                 elif update.verb == "set" and update.noun == "place":
                     if update.object == "None":
-                        photo_object.place = None
+                        photo_object.location = None
                     else:
-                        photo_object.place = update.object
+                        photo_object.location = update.object
                 elif update.verb == "set" and update.noun == "photographer":
                     if update.object == "None":
                         photo_object.photographer = None
