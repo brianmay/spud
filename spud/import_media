@@ -122,6 +122,9 @@ class defaults:
     pass
 
 def main():
+        spud_file = u"%s/%s"%(settings.IMAGE_PATH,".spud.txt")
+        if not os.path.exists(spud_file):
+            raise RuntimeError("Cannot find spud file. Is '%s' mounted???"%(settings.IMAGE_PATH))
 
         parser = OptionParser()
         parser.add_option("-f", "--force",action="store_true", dest="force",default=False,
