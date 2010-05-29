@@ -103,27 +103,27 @@ class photo_update_field(forms.CharField):
         place = p.Regex('[a-zA-Z0-9 \/]+')
         place.setParseAction(get_place)
 
-        person_operation = (p.Keyword("person").setResultsName("noun")
+        person_operation = (p.Keyword("person",caseless=True).setResultsName("noun")
                             + p.Group(p.delimitedList( 
                                 p.Group(person.setResultsName("person") + p.Optional("(" + p.Word(p.nums).setParseAction(get_int).setResultsName("position") + ")"))
                             )).setResultsName( "objects" ) )
 
-        album_operation = (p.Keyword("album").setResultsName("noun")
+        album_operation = (p.Keyword("album",caseless=True).setResultsName("noun")
                             + p.Group(p.delimitedList( album )).setResultsName( "objects" ))
 
-        category_operation = (p.Keyword("category").setResultsName("noun")
+        category_operation = (p.Keyword("category",caseless=True).setResultsName("noun")
                             + p.Group(p.delimitedList( category )).setResultsName( "objects" ))
 
-        place_operation = (p.Keyword("place").setResultsName("noun")
+        place_operation = (p.Keyword("place",caseless=True).setResultsName("noun")
                             + (p.Keyword("None",caseless=True) | place).setResultsName( "object" ))
 
-        photographer_operation = (p.Keyword("photographer").setResultsName("noun")
+        photographer_operation = (p.Keyword("photographer",caseless=True).setResultsName("noun")
                             + (p.Keyword("None",caseless=True) | person).setResultsName( "object" ))
 
-        title_operation = (p.Keyword("title").setResultsName("noun")
+        title_operation = (p.Keyword("title",caseless=True).setResultsName("noun")
                             +  (p.Keyword("None",caseless=True) | p.Regex(".+")).setResultsName( "object" ))
 
-        description_operation = (p.Keyword("description").setResultsName("noun")
+        description_operation = (p.Keyword("description",caseless=True).setResultsName("noun")
                             +  (p.Keyword("None",caseless=True) | p.Regex(".+")).setResultsName( "object" ))
 
 
