@@ -35,6 +35,20 @@ def set_category_list(photo, pk_list):
     for pk in pk_list:
         pa = models.photo_category.objects.create(photo=photo,category_id=pk)
 
+a = models.album.objects.get(pk=340,album="Tyabb Airshow 2010")
+ca = models.category.objects.get(category="Aerial")
+for p in models.photo.objects.filter(albums=a)[1041:]:
+    models.photo_category.objects.get_or_create(photo=p,category=ca)
+
+#    if p.camera_make == "SAMSUNG TECHWIN CO., LTD.":
+#        print p, p.datetime
+#        p.datetime = p.datetime-datetime.timedelta(minutes=9,seconds=29)
+#        print p, p.datetime
+#        print
+#        p.save()
+
+exit(0)
+
 a = models.album.objects.get(pk=326,album="Townsville 2009")
 l = models.place.objects.get(title="Brisbane City")
 for p in models.photo.objects.filter(albums=a,location=l):
@@ -63,7 +77,6 @@ ca = models.category.objects.get(category="Oceans")
 for i in models.photo.objects.filter(albums=a)[177:218]:
     i.location = models.place.objects.get(title="Gippsland")
     i.save()
-#    models.photo_category.objects.get_or_create(photo=i,category=ca)
 
 exit(0)
 
