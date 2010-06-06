@@ -1,0 +1,35 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+{% load photo %}
+
+{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+
+{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+
+{% block title %}Albums{% endblock %}
+
+{% block content %}
+
+<h1>Albums</h1>
+
+{% if page_obj.object_list %}
+  <table>
+    <thead>
+      <tr><th>Album</th><th>Last Revised</th></tr>
+    </thead>
+    <tbody>
+      {% for album in page_obj.object_list %}
+        <tr>
+        <td><a href="{{ album.get_absolute_url }}">{{ album }}</a></li></td>
+        <td>{{ album.revised }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+    <p>No albums are available.</p>
+{% endif %}
+
+{% pagination page_obj %}
+
+{% endblock %}
