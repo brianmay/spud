@@ -20,6 +20,7 @@ urlpatterns = patterns('',
     url(r'^place/(?P<object_id>\d+|none)/edit/(?P<number>\d+|random)/$', 'spud.views.place_photo_edit', name='place_photo_edit'),
 
     (r'^album/$', 'spud.views.album_redirect', {'object_id': 1}),
+    url(r'^album/todo/$', 'spud.views.album_todo', name='album_todo'),
     url(r'^album/(?P<object_id>\d+|none)/$', 'spud.views.album_detail', name='album_detail'),
     url(r'^album/(?P<object_id>\d+)/edit/$', 'spud.views.album_edit', name='album_edit'),
     url(r'^album/(?P<object_id>\d+)/create/$', 'spud.views.album_create', name='album_create'),

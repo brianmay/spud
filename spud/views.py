@@ -662,6 +662,11 @@ def album_detail(request, object_id):
     links = album_links(object_id)
     return object_photo_list(request,object,photo_list,links,context=context)
 
+def album_todo(request):
+    parent = get_object_or_404(models.album, pk=1)
+    objects = models.album.objects.all().order_by('revised','-pk')
+    return object_list(request,objects,models.album.type,kwargs={ 'parent': parent })
+
 def album_create(request, object_id):
     type = models.album.type
     parent = get_object_or_404(models.album, pk=object_id)
