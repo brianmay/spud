@@ -591,9 +591,9 @@ def place_detail(request, object_id):
 
     context = { 'form': form, 'media': form.media }
     object = get_object_or_404(models.place, pk=object_id)
-    photo_list = models.photo.objects.filter(location=object,context=context)
+    photo_list = models.photo.objects.filter(location=object)
     links = place_links(object_id)
-    return object_photo_list(request,object,photo_list,links)
+    return object_photo_list(request,object,photo_list,links,context=context)
 
 def place_create(request, object_id):
     type = models.place.type
