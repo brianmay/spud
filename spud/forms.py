@@ -73,6 +73,15 @@ class photo_relation_form(forms.ModelForm):
     class Meta:
         model = models.photo_relation
 
+class search_album_form(forms.Form):
+    album = AutoCompleteSelectField('album', required=True)
+
+class search_category_form(forms.Form):
+    category = AutoCompleteSelectField('category', required=True)
+
+class search_place_form(forms.Form):
+    place = AutoCompleteSelectField('place', required=True)
+
 class search_person_form(forms.Form):
     person = AutoCompleteSelectField('person', required=True)
 

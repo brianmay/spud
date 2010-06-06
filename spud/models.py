@@ -330,6 +330,8 @@ class album(base_model):
     coverphoto = models.ForeignKey('photo', db_column='coverphoto', related_name='album_cover_of', null=True, blank=True)
     sortname = models.CharField(max_length=96, blank=True)
     sortorder = models.CharField(max_length=96, blank=True)
+    revised = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         db_table = u'zoph_albums'
         ordering = [ 'sortname', 'sortorder', 'album' ]

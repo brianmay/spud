@@ -8,6 +8,10 @@
 
 {% block title %}{{object}}{% endblock %}
 
+{% block extrahead %}{{ block.super }}
+{{ media }}
+{% endblock %}
+
 {% block content %}
 <h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
@@ -79,5 +83,12 @@
 {% show_photo_list page_obj links %}
 
 {% pagination page_obj %}
+
+<h2>Search</h2>
+
+<form method="post">
+<table>{{ form.as_table }}</table>
+<input type="submit" />
+</form>
 
 {% endblock %}

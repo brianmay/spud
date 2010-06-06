@@ -234,7 +234,7 @@ def object_delete(request, object, template=None):
             'errorlist': errorlist,
             },context_instance=RequestContext(request))
 
-def object_photo_list(request,object,photo_list,links,template=None):
+def object_photo_list(request,object,photo_list,links,template=None,context={}):
     breadcrumbs = object.get_breadcrumbs()
     paginator = Paginator(photo_list, 25) # Show 25 photos per page
 
@@ -253,12 +253,15 @@ def object_photo_list(request,object,photo_list,links,template=None):
     except (EmptyPage, InvalidPage):
         page_obj = paginator.page(paginator.num_pages)
 
-    return render_to_response(template, {
-                                "object": object,
-                                "page_obj": page_obj,
-                                "links": links,
-                                'breadcrumbs': breadcrumbs},
-                                context_instance=RequestContext(request))
+    defaults = {
+            'object': object,
+            'page_obj': page_obj,
+            'links': links,
+            'breadcrumbs': breadcrumbs,
+    }
+    defaults.update(context)
+    return render_to_response(template, defaults,
+                              context_instance=RequestContext(request))
 
 
 def object_photo_detail(request,object,number,photo_list,links):
@@ -576,8 +579,19 @@ def place_redirect(request,object_id):
     return HttpResponseRedirect(object.get_absolute_url())
 
 def place_detail(request, object_id):
+    if request.method == 'POST':
+        form = forms.search_place_form(request.POST)
+
+        if form.is_valid():
+            place = form.cleaned_data['place']
+            url=place.get_absolute_url()
+            return HttpResponseRedirect(url)
+    else:
+        form = forms.search_place_form()
+
+    context = { 'form': form, 'media': form.media }
     object = get_object_or_404(models.place, pk=object_id)
-    photo_list = models.photo.objects.filter(location=object)
+    photo_list = models.photo.objects.filter(location=object,context=context)
     links = place_links(object_id)
     return object_photo_list(request,object,photo_list,links)
 
@@ -632,10 +646,21 @@ def album_redirect(request,object_id):
     return HttpResponseRedirect(object.get_absolute_url())
 
 def album_detail(request, object_id):
+    if request.method == 'POST':
+        form = forms.search_album_form(request.POST)
+
+        if form.is_valid():
+            album = form.cleaned_data['album']
+            url=album.get_absolute_url()
+            return HttpResponseRedirect(url)
+    else:
+        form = forms.search_album_form()
+
+    context = { 'form': form, 'media': form.media }
     object = get_object_or_404(models.album, pk=object_id)
     photo_list = models.photo.objects.filter(albums=object)
     links = album_links(object_id)
-    return object_photo_list(request,object,photo_list,links)
+    return object_photo_list(request,object,photo_list,links,context=context)
 
 def album_create(request, object_id):
     type = models.album.type
@@ -688,10 +713,21 @@ def category_redirect(request,object_id):
     return HttpResponseRedirect(object.get_absolute_url())
 
 def category_detail(request, object_id):
+    if request.method == 'POST':
+        form = forms.search_category_form(request.POST)
+
+        if form.is_valid():
+            category = form.cleaned_data['category']
+            url=category.get_absolute_url()
+            return HttpResponseRedirect(url)
+    else:
+        form = forms.search_category_form()
+
+    context = { 'form': form, 'media': form.media }
     object = get_object_or_404(models.category, pk=object_id)
     photo_list = models.photo.objects.filter(categorys=object)
     links = category_links(object_id)
-    return object_photo_list(request,object,photo_list,links)
+    return object_photo_list(request,object,photo_list,links,context=context)
 
 def category_create(request, object_id):
     type = models.category.type
