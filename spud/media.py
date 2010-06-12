@@ -34,8 +34,11 @@ class media:
         return value.astimezone(dst_timezone)
 
     def create_thumbnail(self, dst_path, max_size):
-        im = Image.open(self.src_full)
-        (width,height) = im.size
+        image = Image.open(self.src_full)
+        _create_thumbnail(self, dst_path, max_size, image)
+
+    def _create_thumbnail(self, dst_path, max_size, image):
+        (width,height) = image.size
 
         if width > max_size or height > max_size:
             thumb_width = max_size
@@ -46,8 +49,9 @@ class media:
             else:
                 thumb_width = int(max_size*1.0/height * width)
 
-        im.thumbnail((thumb_width,thumb_height),Image.ANTIALIAS)
-        im.save(dst_path)
+            image.thumbnail((thumb_width,thumb_height),Image.ANTIALIAS)
+
+        image.save(dst_path)
 
     def rotate(self,amount):
         raise RuntimeError("rotate not implemented")
@@ -69,11 +73,23 @@ class media_jpeg(media):
 
         subprocess.check_call(["exiftran","-i",arg,self.get_path()])
 
+class media_video(media):
+
+    def create_thumbnail(self, dst_path, max_size):
+        import pyffmpeg
+        mp=pyffmpeg.FFMpegReader()
+        mp.open(self.src_full,track_selector=pyffmpeg.TS_VIDEO_PIL)
+        video = mp.get_tracks()[0]
+        image = video.get_current_frame()[2]
+        self._create_thumbnail(dst_path, max_size, image)
+
 def get_media(file):
     (root,extension) = os.path.splitext(file)
     extension = extension.lower()
     if extension == ".jpg":
         return media_jpeg(file)
+    elif extension == ".avi":
+        return media_video(file)
     elif extension == ".cr2" or extension == ".png":
         return media(file)
     else:
