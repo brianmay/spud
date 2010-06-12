@@ -24,12 +24,13 @@
 <ul class="object-tools">
 <li><a class="linklink" href="{{ object.get_absolute_url }}">Link</a></li>
 {% if edit_perm %}<li><a class="changelink" href="{% photo_edit_url links page_obj.number %}">Edit</a></li>{% endif %}
+{% if edit_perm %}<li><a class="linklink" href="{{ object.get_orig_url }}">Orig</a></li>{% endif %}
 </ul>
 
 <div class='photo_detail photo_{{object.status}}'>
 <div class='photo_detail_photo'>
 
-<a href="{{ object.get_orig_url }}">
+<a href="{% get_thumb_url object "hd" %}">
 <img src="{% get_thumb_url object "mid" %}" alt="{{ object.title }}" />
 </a>
 </div>
