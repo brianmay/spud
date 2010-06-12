@@ -765,7 +765,7 @@ class photo(base_model):
         return
     rotate.alters_data = True
 
-    def generate_thumbnails(self):
+    def generate_thumbnails(self,overwrite):
         m = media.get_media(self.get_orig_path())
         umask = os.umask(0022)
 
@@ -773,7 +773,8 @@ class photo(base_model):
             dst = self.get_thumb_path(size)
             if not os.path.lexists(os.path.dirname(dst)):
                 os.makedirs(os.path.dirname(dst),0755)
-            m.create_thumbnail(dst,max)
+            if overwrite or not os.path.lexists(dst):
+                m.create_thumbnail(dst,max)
 
         os.umask(umask)
         return

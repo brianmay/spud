@@ -107,7 +107,7 @@ def import_photo(file,d,options):
     if options.rotate:
         photo.rotate(options.rotate)
 
-    photo.generate_thumbnails()
+    photo.generate_thumbnails(overwrite=True)
     photo.update_from_source()
 
     photo.save()
