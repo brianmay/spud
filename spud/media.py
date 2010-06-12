@@ -35,7 +35,7 @@ class media:
 
     def create_thumbnail(self, dst_path, max_size):
         image = Image.open(self.src_full)
-        _create_thumbnail(self, dst_path, max_size, image)
+        self._create_thumbnail(dst_path, max_size, image)
 
     def _create_thumbnail(self, dst_path, max_size, image):
         (width,height) = image.size
