@@ -79,7 +79,6 @@ def import_photo(file,d,options):
     photo.view = ''
     photo.rating = None
     photo.description = ''
-    photo.timezone = 'Australia/Melbourne'
     photo.comment = ""
     photo.level = 1
 
