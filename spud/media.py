@@ -1,3 +1,4 @@
+import tempfile
 import subprocess
 import os
 import pyexiv2
@@ -83,6 +84,21 @@ class media_video(media):
         image = video.get_current_frame()[2]
         self._create_thumbnail(dst_path, max_size, image)
 
+class media_raw(media):
+
+    def create_thumbnail(self, dst_path, max_size):
+        cmd = ["dcraw","-T","-c",self.src_full]
+        t = tempfile.TemporaryFile()
+        p = subprocess.Popen(cmd,stdout=t)
+        rc = p.wait()
+        if rc != 0:
+            raise subprocess.CalledProcessError(rc,cmd)
+
+        t.seek(0)
+        image = Image.open(t)
+        self._create_thumbnail(dst_path, max_size, image)
+        t.close()
+
 def get_media(file):
     (root,extension) = os.path.splitext(file)
     extension = extension.lower()
@@ -90,7 +106,9 @@ def get_media(file):
         return media_jpeg(file)
     elif extension == ".avi":
         return media_video(file)
-    elif extension == ".cr2" or extension == ".png":
+    elif extension == ".png":
         return media(file)
+    elif extension == ".cr2":
+        return media_raw(file)
     else:
         raise RuntimeError("unknown media type for %s"%(file))
