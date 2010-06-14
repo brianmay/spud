@@ -28,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^album/(?P<object_id>\d+|none)/detail/(?P<number>\d+|random)/$', 'spud.views.album_photo_detail', name='album_photo_detail'),
     url(r'^album/(?P<object_id>\d+|none)/edit/(?P<number>\d+|random)/$', 'spud.views.album_photo_edit', name='album_photo_edit'),
 
-    (r'^categegory/$', 'spud.views.category_redirect', {'object_id': 1}),
+    (r'^category/$', 'spud.views.category_redirect', {'object_id': 1}),
     url(r'^category/(?P<object_id>\d+|none)/$', 'spud.views.category_detail', name='category_detail'),
     url(r'^category/(?P<object_id>\d+)/edit/$', 'spud.views.category_edit', name='category_edit'),
     url(r'^category/(?P<object_id>\d+)/create/$', 'spud.views.category_create', name='category_create'),
