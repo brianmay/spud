@@ -59,11 +59,11 @@ def import_photo(file,d,options):
 
     print "importing %s to %s/%s"%(file,path,name)
 
-    db_exists = False
-    photos = models.photo.objects.filter(path=path,name=name)
+    (shortname, extension) = os.path.splitext(name)
+    photos = models.photo.objects.filter(path=path,name__startswith="%s."%(shortname))
     count = photos.count()
     if count > 1:
-        raise RuntimeError("Multiple DB entries exist for %s/%s"%(path,name))
+        raise RuntimeError("Multiple DB entries exist for %s/%s.*"%(path,shortname))
 
     if count > 0:
         db_exists = True
@@ -91,9 +91,9 @@ def import_photo(file,d,options):
     if options.force:
         pass
     elif db_exists and len(error_list)==0:
-        raise photo_already_exists_error("photo %d already exists at %s/%s"%(photo.pk,path,name))
+        raise photo_already_exists_error("photo %d already exists at %s/%s as %s/%s"%(photo.pk,path,name,photos[0].path,photos[0].name))
     elif db_exists:
-        raise RuntimeError("photo %d already exists at %s/%s but contains errors"%(photo.pk,path,name))
+        raise RuntimeError("photo %d already exists at %s/%s as %s/%s but contains errors"%(photo.pk,path,name,photos[0].path,photos[0].name))
     elif os.path.lexists(dst):
         raise RuntimeError("file already exists at %s/%s but has no db entry"%(path,name))
 
