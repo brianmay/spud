@@ -1,0 +1,60 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*- 
+
+import os
+import re
+import datetime
+import pytz
+import shutil
+
+
+from django.conf import settings
+
+from spud import models
+
+for p in models.photo.objects.all():
+    print p
+
+    to_tz = pytz.timezone(p.timezone)
+    local = pytz.utc.localize(p.datetime)
+    local = local.astimezone(to_tz)
+    path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
+    name = p.name
+    (shortname, extension) = os.path.splitext(name)
+
+    old_path = { }
+    for size in settings.IMAGE_SIZES:
+        old_path[size] = p.get_thumb_path(size)
+    old_orig_path = p.get_orig_path()
+
+    p.path = path
+
+    for size in settings.IMAGE_SIZES:
+        src = old_path[size]
+        dst = p.get_thumb_path_2(size)
+
+        if src != dst:
+            print "Moving '%s' to '%s'"%(src,dst)
+            if not os.path.lexists(src):
+                raise RuntimeError("Source '%s' not already exists"%(src))
+            if os.path.lexists(dst):
+                raise RuntimeError("Destination '%s' already exists"%(dst))
+            #if not os.path.lexists(os.path.dirname(dst)):
+            #    os.makedirs(os.path.dirname(dst),0755)
+            #shutil.move(src,dst)
+
+    src = old_orig_path
+    dst = p.get_orig_path_2()
+    if src != dst:
+        print  "Moving '%s' to '%s'"%(src,dst)
+        if not os.path.lexists(src):
+            raise RuntimeError("Source '%s' not already exists"%(src))
+        if os.path.lexists(dst):
+            raise RuntimeError("Destination '%s' already exists"%(dst))
+#        if not os.path.lexists(os.path.dirname(dst)):
+#            os.makedirs(os.path.dirname(dst),0755)
+#        shutil.move(src,dst)
+
+#    p.save()
+
+#    p.generate_thumbnails(overwrite=False)

@@ -709,26 +709,74 @@ class photo(base_model):
     def get_create_photo_relation_url(self):
         return('photo_relation_create', [ str(self.photo_id)])
 
-    def get_thumb_url(self,size):
+    # OLD PATHS
+    def get_thumb_url_1(self,size):
         if size in settings.IMAGE_SIZES:
             (shortname, extension) = os.path.splitext(self.name)
             return iri_to_uri(u"%s%s/%s/%s_%s.jpg"%(settings.IMAGE_URL,urlquote(self.path),urlquote(size),urlquote(size),urlquote(shortname)))
         else:
             raise RuntimeError("unknown image size %s"%(size))
 
-    def get_thumb_path(self,size):
+    def get_thumb_path_1(self,size):
         if size in settings.IMAGE_SIZES:
             (shortname, extension) = os.path.splitext(self.name)
             return u"%s%s/%s/%s_%s.jpg"%(settings.IMAGE_PATH,self.path,size,size,shortname)
         else:
             raise RuntimeError("unknown image size %s"%(size))
 
-    def get_orig_url(self):
+    def get_orig_url_1(self):
         return iri_to_uri(u"%s%s/%s"%(settings.IMAGE_URL,urlquote(self.path),urlquote(self.name)))
 
-    def get_orig_path(self):
+    def get_orig_path_1(self):
         return u"%s%s/%s"%(settings.IMAGE_PATH,self.path,self.name)
 
+    # NEW PATHS
+    def get_thumb_url_2(self,size):
+        if size in settings.IMAGE_SIZES:
+            (shortname, extension) = os.path.splitext(self.name)
+            return iri_to_uri(u"%sthumb/%s/%s/%s.jpg"%(settings.IMAGE_URL,urlquote(size),urlquote(self.path),urlquote(shortname)))
+        else:
+            raise RuntimeError("unknown image size %s"%(size))
+
+    def get_thumb_path_2(self,size):
+        if size in settings.IMAGE_SIZES:
+            (shortname, extension) = os.path.splitext(self.name)
+            return u"%sthumb/%s/%s/%s.jpg"%(settings.IMAGE_PATH,size,self.path,shortname)
+        else:
+            raise RuntimeError("unknown image size %s"%(size))
+
+    def get_orig_url_2(self):
+        return iri_to_uri(u"%sorig/%s/%s"%(settings.IMAGE_URL,urlquote(self.path),urlquote(self.name)))
+
+    def get_orig_path_2(self):
+        return u"%sorig/%s/%s"%(settings.IMAGE_PATH,self.path,self.name)
+
+    # CHOOSE NEW/OLD PATHS
+    def get_thumb_url(self,size):
+        if os.path.exists(self.get_thumb_path_1(size)):
+            return self.get_thumb_url_1(size)
+        else:
+            return self.get_thumb_url_2(size)
+
+    def get_thumb_path(self,size):
+        if os.path.exists(self.get_thumb_path_1(size)):
+            return self.get_thumb_path_1(size)
+        else:
+            return self.get_thumb_path_2(size)
+
+    def get_orig_url(self):
+        if os.path.exists(self.get_orig_path_1()):
+            return self.get_orig_url_1()
+        else:
+            return self.get_orig_url_2()
+
+    def get_orig_path(self):
+        if os.path.exists(self.get_orig_path_1()):
+            return self.get_orig_path_1()
+        else:
+            return self.get_orig_path_2()
+
+    # Other stuff
     def get_breadcrumbs(self):
         breadcrumbs = []
         breadcrumbs.append(breadcrumb(reverse("spud_root"),"home"))
