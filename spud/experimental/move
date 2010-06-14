@@ -40,9 +40,9 @@ for p in models.photo.objects.all():
                 raise RuntimeError("Source '%s' not already exists"%(src))
             if os.path.lexists(dst):
                 raise RuntimeError("Destination '%s' already exists"%(dst))
-            #if not os.path.lexists(os.path.dirname(dst)):
-            #    os.makedirs(os.path.dirname(dst),0755)
-            #shutil.move(src,dst)
+            if not os.path.lexists(os.path.dirname(dst)):
+                os.makedirs(os.path.dirname(dst),0755)
+            shutil.move(src,dst)
 
     src = old_orig_path
     dst = p.get_orig_path_2()
@@ -52,9 +52,9 @@ for p in models.photo.objects.all():
             raise RuntimeError("Source '%s' not already exists"%(src))
         if os.path.lexists(dst):
             raise RuntimeError("Destination '%s' already exists"%(dst))
-#        if not os.path.lexists(os.path.dirname(dst)):
-#            os.makedirs(os.path.dirname(dst),0755)
-#        shutil.move(src,dst)
+        if not os.path.lexists(os.path.dirname(dst)):
+            os.makedirs(os.path.dirname(dst),0755)
+        shutil.move(src,dst)
 
-#    p.save()
+    p.save()
 
