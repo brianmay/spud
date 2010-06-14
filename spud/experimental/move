@@ -14,6 +14,7 @@ from spud import models
 
 for p in models.photo.objects.all():
     print p
+    p.generate_thumbnails(overwrite=False)
 
     to_tz = pytz.timezone(p.timezone)
     local = pytz.utc.localize(p.datetime)
@@ -57,4 +58,3 @@ for p in models.photo.objects.all():
 
 #    p.save()
 
-#    p.generate_thumbnails(overwrite=False)
