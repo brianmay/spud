@@ -91,16 +91,16 @@ class photo_update_field(forms.CharField):
         if value in ('',None):
             return []
 
-        person = p.Regex('[a-zA-Z0-9\' \/]+')
+        person = p.Regex('[a-zA-Z0-9\' \/-]+')
         person.setParseAction(get_person)
 
-        album = p.Regex('[a-zA-Z0-9 \/]+')
+        album = p.Regex('[a-zA-Z0-9\' \/-]+')
         album.setParseAction(get_album)
 
-        category = p.Regex('[a-zA-Z0-9 \/]+')
+        category = p.Regex('[a-zA-Z0-9\' \/-]+')
         category.setParseAction(get_category)
 
-        place = p.Regex('[a-zA-Z0-9 \/]+')
+        place = p.Regex('[a-zA-Z0-9\' \/-]+')
         place.setParseAction(get_place)
 
         person_operation = (p.Keyword("person",caseless=True).setResultsName("noun")
