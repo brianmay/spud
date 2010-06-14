@@ -998,7 +998,7 @@ class photo(base_model):
 
         if queer.rotate:
             self.rotate(queer.rotate)
-            self.generate_thumbnails()
+            self.generate_thumbnails(overwrite=True)
     update_from_queer.alters_data = True
 
     class type(base_model.type):
