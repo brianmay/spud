@@ -797,7 +797,9 @@ class photo(base_model):
         self.person_cover_of.clear()
         os.unlink(self.get_orig_path())
         for size in settings.IMAGE_SIZES:
-            os.unlink(self.get_thumb_path(size))
+            path = self.get_thumb_path(size)
+            if os.path.lexists(path):
+                os.unlink(path)
         super(photo, self).delete()
     delete.alters_data = True
 
