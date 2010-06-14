@@ -107,15 +107,6 @@
   </table>
 </dd>
 {% endif %}
-{% if user.is_staff %}
-{% if object.similar_photos.all %}
-<dt>Similar photos</dt><dd>
-  {% for photo in object.similar_photos.all %}
-    <a href="{{ photo.get_absolute_url }}">{{photo}}</a>{% if not forloop.last %}; {% endif %}
-  {% endfor %}
-</dd>
-{% endif %}
-{% endif %}
 <dt>Status</dt><dd>{% show_status_with_link object.status %}</dd>
 </dl>
 </div>

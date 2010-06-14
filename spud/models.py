@@ -783,9 +783,6 @@ class photo(base_model):
         breadcrumbs.append(breadcrumb(self.get_absolute_url(),self))
         return breadcrumbs
 
-    def similar_photos(self):
-        return photo.objects.filter(name=self.name)
-
     def check_delete(self):
         errorlist = []
         return errorlist
