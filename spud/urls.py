@@ -55,9 +55,9 @@ urlpatterns = patterns('',
     url(r'^status/(?P<object_id>[A-Z]|none)/edit/(?P<number>\d+|random)/$', 'spud.views.status_photo_edit', name='status_photo_edit'),
 
     url(r'^search/$', 'spud.views.search_list', name='search_list'),
-    url(r'^search/(?P<object_id>[A-Za-z0-9=,;!_\.-]*)/$', 'spud.views.search_detail', name='search_detail'),
-    url(r'^search/(?P<object_id>[A-Za-z0-9=,;!_\.-]*)/detail/(?P<number>\d+|random)/$', 'spud.views.search_photo_detail', name='search_photo_detail'),
-    url(r'^search/(?P<object_id>[A-Za-z0-9=,;!_\.-]*)/edit/(?P<number>\d+|random)/$', 'spud.views.search_photo_edit', name='search_photo_edit'),
+    url(r'^search/(?P<object_id>[A-Za-z0-9=,;!_ \'\.-]*)/$', 'spud.views.search_detail', name='search_detail'),
+    url(r'^search/(?P<object_id>[A-Za-z0-9=,;!_ \'\.-]*)/detail/(?P<number>\d+|random)/$', 'spud.views.search_photo_detail', name='search_photo_detail'),
+    url(r'^search/(?P<object_id>[A-Za-z0-9=,;!_ \'\.-]*)/edit/(?P<number>\d+|random)/$', 'spud.views.search_photo_edit', name='search_photo_edit'),
 
     url(r'^relation/$', 'spud.views.photo_relation_list', name='photo_relation_list'),
     url(r'^relation/create/$', 'spud.views.photo_relation_create', name='photo_relation_create'),

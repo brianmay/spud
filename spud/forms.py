@@ -93,7 +93,7 @@ class search_form(forms.Form):
     last_date = forms.DateField(required=False)
     lower_rating = forms.FloatField(required=False)
     upper_rating = forms.FloatField(required=False)
-    title = forms.CharField(required=False)
+    title = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
     photographer = AutoCompleteSelectField('person', required=False)
     person = AutoCompleteSelectMultipleField('person', required=False)
     location = AutoCompleteSelectField('place', required=False)
@@ -103,8 +103,8 @@ class search_form(forms.Form):
     category = AutoCompleteSelectMultipleField('category', required=False)
     category_descendants = forms.BooleanField(required=False)
     status = forms.ChoiceField(required=False,choices=PHOTO_STATUS)
-    path = forms.CharField(required=False)
-    name = forms.CharField(required=False)
+    path = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
+    name = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
 
 class queer_form(forms.ModelForm):
     update_photographer = AutoCompleteSelectField('person', required=False)
