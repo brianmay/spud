@@ -1109,6 +1109,14 @@ class search_class:
                     value = decode_string(value)
                     criteria.append({'key': key, 'value': "contains %s"%(value)})
                     search = search & Q(title__icontains=value)
+                elif key == "camera_make":
+                    value = decode_string(value)
+                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    search = search & Q(camera_make__icontains=value)
+                elif key == "camera_model":
+                    value = decode_string(value)
+                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    search = search & Q(camera_model__icontains=value)
                 elif key  == "photographer":
                     value = decode_string(value)
                     object = get_object_or_404(models.person, pk=value)
@@ -1152,6 +1160,22 @@ class search_class:
                         else:
                             criteria.append({'key': key, 'value': "is %s"%(object)})
                             photo_list=photo_list.filter(categorys=object)
+                elif key  == "location_none":
+                    value = decode_boolean(value)
+                    if value:
+                        search = search & Q(location=None)
+                elif key  == "person_none":
+                    value = decode_boolean(value)
+                    if value:
+                        search = search & Q(persons=None)
+                elif key  == "album_none":
+                    value = decode_boolean(value)
+                    if value:
+                        search = search & Q(albums=None)
+                elif key  == "category_none":
+                    value = decode_boolean(value)
+                    if value:
+                        search = search & Q(categorys=None)
                 elif key  == "status":
                     value = decode_string(value)
                     criteria.append({'key': key, 'value': "is %s"%(models.status_to_string(value))})
