@@ -1163,18 +1163,22 @@ class search_class:
                 elif key  == "location_none":
                     value = decode_boolean(value)
                     if value:
+                        criteria.append({'key': "location", 'value': "is %s"%("none")})
                         search = search & Q(location=None)
                 elif key  == "person_none":
                     value = decode_boolean(value)
                     if value:
+                        criteria.append({'key': "person", 'value': "is %s"%("none")})
                         search = search & Q(persons=None)
                 elif key  == "album_none":
                     value = decode_boolean(value)
                     if value:
+                        criteria.append({'key': "album", 'value': "is %s"%("none")})
                         search = search & Q(albums=None)
                 elif key  == "category_none":
                     value = decode_boolean(value)
                     if value:
+                        criteria.append({'key': "category", 'value': "is %s"%("none")})
                         search = search & Q(categorys=None)
                 elif key  == "status":
                     value = decode_string(value)
