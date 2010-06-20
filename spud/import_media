@@ -69,6 +69,7 @@ def import_photo(file,d,options):
         db_exists = True
         photo = photos[0]
     else:
+        db_exists = False
         photo = models.photo()
 
     photo.path = path
