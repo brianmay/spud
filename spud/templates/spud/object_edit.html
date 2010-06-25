@@ -20,7 +20,7 @@
 <h1>Create {{ type.single_name }}</h1>
 {% endif %}
 
-<form method="post">
+<form method="post">{% csrf_token %}
 <table>{{ form.as_table }}</table>
 <input type="submit" />
 </form>

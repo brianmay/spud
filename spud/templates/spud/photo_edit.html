@@ -12,7 +12,7 @@
 
 <h1>Edit {{ object }}</h1>
 
-<form method="post" action="{% photo_edit_url links page_obj.number %}">
+<form method="post" action="{% photo_edit_url links page_obj.number %}">{% csrf_token %}
 <input type="hidden" name="photo_id" value="{{ object.pk }}" />
 {% for queer in object.queers %}
 <input type="submit" name="queer" value="{{ queer.name }}"/>
