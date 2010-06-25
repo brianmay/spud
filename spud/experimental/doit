@@ -35,6 +35,16 @@ def set_category_list(photo, pk_list):
     for pk in pk_list:
         pa = models.photo_category.objects.create(photo=photo,category_id=pk)
 
+
+a = models.album.objects.get(pk=353,album="Rialto 2010")
+for p in models.photo.objects.filter(albums=a):
+       print p, p.datetime
+       p.datetime = p.datetime-datetime.timedelta(hours=10)
+       print p, p.datetime
+       print
+       p.save()
+
+exit(0)
 a = models.album.objects.get(pk=340,album="Tyabb Airshow 2010")
 ca = models.category.objects.get(category="Aerial")
 for p in models.photo.objects.filter(albums=a)[1041:]:
