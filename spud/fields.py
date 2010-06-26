@@ -21,6 +21,20 @@ class photo_field(forms.IntegerField):
 
 
 def get_person(s, loc, toks):
+    try:
+        return models.person.objects.get(first_name=toks[0])
+    except models.person.DoesNotExist, e:
+        pass
+    except models.person.MultipleObjectsReturned, e:
+        pass
+
+    try:
+        return models.person.objects.get(last_name=toks[0])
+    except models.person.DoesNotExist, e:
+        pass
+    except models.person.MultipleObjectsReturned, e:
+        pass
+
     (first_name, sep, last_name) = toks[0].strip().rpartition(" ")
     if first_name == "":
         first_name = last_name
