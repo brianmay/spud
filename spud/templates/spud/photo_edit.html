@@ -10,7 +10,7 @@
 
 {% block content %}
 
-<h1>Edit {{ object }}</h1>
+<h1>Edit {{ object }} ({{ page_obj.number }} of {{ page_obj.paginator.num_pages }})</h1>
 
 <form method="post" action="{% photo_edit_url links page_obj.number %}">{% csrf_token %}
 <input type="hidden" name="photo_id" value="{{ object.pk }}" />
