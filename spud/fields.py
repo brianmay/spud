@@ -43,7 +43,9 @@ def get_person(s, loc, toks):
     try:
         return models.person.objects.get(first_name=first_name,last_name=last_name)
     except models.person.DoesNotExist, e:
-        raise p.ParseFatalException(u"Person '%s %s' not found"%(first_name,last_name), loc)
+        raise p.ParseFatalException(u"Person '%s' '%s' not found"%(first_name,last_name), loc)
+    except models.person.MultipleObjectsReturned, e:
+        raise p.ParseFatalException(u"Person '%s' '%s' not unique"%(first_name,last_name), loc)
     except Exception, e:
         raise p.ParseFatalException(u"Unknown exception: %s"%(e), loc)
 
@@ -60,6 +62,8 @@ def get_album(s, loc, toks):
         return parent
     except models.album.DoesNotExist, e:
         raise p.ParseFatalException(u"Album '%s' not found"%(item), loc)
+    except models.album.MultipleObjectsReturned, e:
+        raise p.ParseFatalException(u"Album '%s' not unique"%(item), loc)
     except Exception, e:
         raise p.ParseFatalException(u"Unknown exception: %s"%(e), loc)
 
@@ -76,6 +80,8 @@ def get_category(s, loc, toks):
         return parent
     except models.category.DoesNotExist, e:
         raise p.ParseFatalException(u"Category '%s' not found"%(item), loc)
+    except models.catrgory.MultipleObjectsReturned, e:
+        raise p.ParseFatalException(u"Category '%s' not unique"%(item), loc)
     except Exception, e:
         raise p.ParseFatalException(u"Unknown exception: %s"%(e), loc)
 
