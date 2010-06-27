@@ -667,7 +667,8 @@ def album_detail(request, object_id):
 
 def album_todo(request):
     parent = get_object_or_404(models.album, pk=1)
-    objects = models.album.objects.all().order_by('revised','-pk')
+    dt = datetime.now()-timedelta(days=365)
+    objects = models.album.objects.filter(Q(revised__lt=dt) | Q(revised__isnull=True)).order_by('revised','-pk')
     return object_list(request,objects,models.album.type,kwargs={ 'parent': parent })
 
 def album_create(request, object_id):
