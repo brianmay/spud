@@ -4,7 +4,7 @@
 <div class='spud'><ul class='photo_list'>
 
 {% for photo in page_obj.object_list %}
-<li class='photo_list_item photo_{{photo.status}}'>
+<li class='photo_list_item photo_{{photo.action}}'>
 <a href='{% photo_detail_url_by_page links page_obj forloop.counter0 %}'><img src='{% get_thumb_url photo "thumb" %}' alt='{{photo}}'/></a>
 <div class='title'>{{photo}}</div>
 </li>

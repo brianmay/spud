@@ -40,6 +40,15 @@ PHOTO_ROTATE = (
     ('270', '270 degrees clockwise'),
 )
 
+PHOTO_ACTION = (
+    ('D', 'delete'),
+    ('R', 'regenerate thumbnail'),
+    ('AUTO', 'rotate automatic'),
+    ('90', 'rotate 90 degrees clockwise'),
+    ('180', 'rotate 180 degrees clockwise'),
+    ('270', 'rotate 270 degrees clockwise'),
+)
+
 def sex_to_string(sex):
     if sex == '1':
         return u'male'
@@ -48,15 +57,21 @@ def sex_to_string(sex):
     else:
         return u'unknown'
 
-def status_to_string(status):
-    if status == '':
+def action_to_string(action):
+    if action is None:
         return u'none'
-    elif status == 'K':
-        return u'keep'
-    elif status == 'R':
-        return u'review'
-    elif status == 'D':
+    elif action == 'D':
         return u'delete'
+    elif action == 'R':
+        return u'regenerate'
+    elif action == 'AUTO':
+        return u'rotate auto'
+    elif action == '90':
+        return u'rotate 90'
+    elif action == '180':
+        return u'rotate 180'
+    elif action == '270':
+        return u'rotate 270'
     else:
         return u'unknown'
 
@@ -680,6 +695,7 @@ class photo(base_model):
     ccd_width = models.CharField(max_length=16, blank=True)
     comment = models.TextField(blank=True)
     status = models.CharField(max_length=1, blank=True, choices=PHOTO_STATUS, db_index=True)
+    action = models.CharField(max_length=4, null=True, blank=True, choices=PHOTO_ACTION, db_index=True)
     timestamp = models.DateTimeField()
 
     albums = models.ManyToManyField(album, through='photo_album', related_name='photos')
@@ -995,9 +1011,14 @@ class photo(base_model):
         for person in queer.delete_persons.all():
             photo_person.objects.filter(photo=self,person=person).delete()
 
+        if queer.update_status == "D":
+            self.action = "D"
+        elif queer.update_status == "K" and self.action == "D":
+            self.action = None
+
         if queer.rotate:
-            self.rotate(queer.rotate)
-            self.generate_thumbnails(overwrite=True)
+            self.action = queer.rotate
+
     update_from_queer.alters_data = True
 
     class type(base_model.type):

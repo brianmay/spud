@@ -909,75 +909,75 @@ def date_photo_edit(request, object_id, number):
     return object_photo_edit(request,object,number,photo_list,links)
 
 ##########
-# STATUS #
+# ACTION #
 ##########
 
-class status_links:
+class action_links:
     def __init__(self,object_id):
         self.object_id = object_id
 
     def photo_detail_link(self,number):
-        return reverse("status_photo_detail", kwargs={ 'object_id': self.object_id, 'number': number })
+        return reverse("action_photo_detail", kwargs={ 'object_id': self.object_id, 'number': number })
 
     def photo_edit_link(self,number):
-        return reverse("status_photo_edit", kwargs={ 'object_id': self.object_id, 'number': number })
+        return reverse("action_photo_edit", kwargs={ 'object_id': self.object_id, 'number': number })
 
-class status_class:
+class action_class:
 
-    def __init__(self,status):
-        if status == "none":
-            self.status = ""
+    def __init__(self,action):
+        if action == "none":
+            self.action = None
         else:
-            self.status=status
+            self.action=action
 
     def results(self):
-        status = self.status
-        photo_list = models.photo.objects.filter(status=status)
+        action = self.action
+        photo_list = models.photo.objects.filter(action=action)
         return photo_list
 
     def get_breadcrumbs(self):
-        status = self.status
-        if status == "":
-            status="none"
+        action = self.action
+        if action is None:
+            action="none"
         breadcrumbs = self.type.get_breadcrumbs()
-        breadcrumbs.append(models.breadcrumb(reverse("status_detail",kwargs={'object_id':status}),self))
+        breadcrumbs.append(models.breadcrumb(reverse("action_detail",kwargs={'object_id':action}),self))
         return breadcrumbs
 
     def get_absolute_url(self):
-        status = self.status
-        if status == "":
-            status="none"
-        return reverse("status_detail",kwargs={'object_id':status})
+        action = self.action
+        if action is None:
+            action="none"
+        return reverse("action_detail",kwargs={'object_id':action})
 
     def __unicode__(self):
-        return models.status_to_string(self.status)
+        return models.action_to_string(self.action)
 
     class type(models.base_model.type):
-        type_id = "status"
-        verbose_name_plural = "status"
+        type_id = "action"
+        verbose_name_plural = "action"
 
-def status_list(request):
-    type = status_class.type
-    list = [ status_class("") ]
-    list.extend( [ status_class(i[0]) for i in models.PHOTO_STATUS ] )
+def action_list(request):
+    type = action_class.type
+    list = [ action_class(None) ]
+    list.extend( [ action_class(i[0]) for i in models.PHOTO_ACTION ] )
     return object_list(request, list, type)
 
-def status_detail(request, object_id):
-    object = status_class(object_id)
+def action_detail(request, object_id):
+    object = action_class(object_id)
     photo_list = object.results()
-    links = status_links(object_id)
+    links = action_links(object_id)
     return object_photo_list(request,object,photo_list,links)
 
-def status_photo_detail(request, object_id, number):
-    object = status_class(object_id)
+def action_photo_detail(request, object_id, number):
+    object = action_class(object_id)
     photo_list = object.results()
-    links = status_links(object_id)
+    links = action_links(object_id)
     return object_photo_detail(request,object,number,photo_list,links)
 
-def status_photo_edit(request, object_id, number):
-    object = status_class(object_id)
+def action_photo_edit(request, object_id, number):
+    object = action_class(object_id)
     photo_list = object.results()
-    links = status_links(object_id)
+    links = action_links(object_id)
     return object_photo_edit(request,object,number,photo_list,links)
 
 ##########
@@ -1180,10 +1180,14 @@ class search_class:
                     if value:
                         criteria.append({'key': "category", 'value': "is %s"%("none")})
                         search = search & Q(categorys=None)
-                elif key  == "status":
+                elif key  == "action":
                     value = decode_string(value)
-                    criteria.append({'key': key, 'value': "is %s"%(models.status_to_string(value))})
-                    search = search & Q(status=value)
+                    if value == "none":
+                        criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(None))})
+                        search = search & Q(action__isnull=True)
+                    else:
+                        criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(value))})
+                        search = search & Q(action=value)
                 elif key  == "path":
                     value = decode_string(value)
                     criteria.append({'key': key, 'value': "is %s"%(value)})
@@ -1245,7 +1249,7 @@ def search_list(request):
     context = { 'form': form, 'media': form.media }
     type = search_class.type
     list = [ search_class("") ]
-    list.extend( [ search_class(i[0]) for i in models.PHOTO_STATUS ] )
+    list.extend( [ search_class(i[0]) for i in models.PHOTO_ACTION ] )
     return object_list(request, list, type, context=context)
 
 def search_detail(request, object_id):

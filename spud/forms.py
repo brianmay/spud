@@ -17,13 +17,24 @@ PHOTO_ROTATE = (
     ('270', '270 degrees clockwise'),
 )
 
+PHOTO_ACTION = (
+    ('', '----'),
+    ('none', 'none'),
+    ('D', 'delete'),
+    ('R', 'regenerate thumbnail'),
+    ('AUTO', 'rotate automatic'),
+    ('90', 'rotate 90 degrees clockwise'),
+    ('180', 'rotate 180 degrees clockwise'),
+    ('270', 'rotate 270 degrees clockwise'),
+)
+
 class photo_form(forms.ModelForm):
     photographer = AutoCompleteSelectField('person', required=False)
     location = AutoCompleteSelectField('place', required=False)
 
     class Meta:
         model = models.photo
-        fields = ('title','photographer','location','view','description','comment','timezone','datetime','status')
+        fields = ('title','photographer','location','view','description','comment','timezone','datetime','action')
 
 class photo_extra_form(forms.Form):
     photo_id = forms.IntegerField(widget=forms.HiddenInput())
@@ -106,7 +117,7 @@ class search_form(forms.Form):
     category = AutoCompleteSelectMultipleField('category', required=False)
     category_descendants = forms.BooleanField(required=False)
     category_none = forms.BooleanField(required=False)
-    status = forms.ChoiceField(required=False,choices=PHOTO_STATUS)
+    action = forms.ChoiceField(required=False,choices=PHOTO_ACTION)
     path = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
     name = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
     camera_make = forms.CharField(required=False)

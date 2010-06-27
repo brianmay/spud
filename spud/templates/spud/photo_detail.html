@@ -20,6 +20,12 @@
 {% show_error_list error_list %}
 {% endif %}{% endwith %}
 
+{% if object.action %}
+<ul class="messagelist">
+<li>Marked action: {% show_action_with_link object.action %}</li>
+</ul>
+{% endif %}
+
 {% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user object.type %}
 <ul class="object-tools">
 <li><a class="linklink" href="{{ object.get_absolute_url }}">Link</a></li>
@@ -27,7 +33,7 @@
 {% if edit_perm %}<li><a class="linklink" href="{{ object.get_orig_url }}">Orig</a></li>{% endif %}
 </ul>
 
-<div class='photo_detail photo_{{object.status}}'>
+<div class='photo_detail photo_{{object.action}}'>
 <div class='photo_detail_photo'>
 
 <a href="{% get_thumb_url object "large" %}">
@@ -107,7 +113,7 @@
   </table>
 </dd>
 {% endif %}
-<dt>Status</dt><dd>{% show_status_with_link object.status %}</dd>
+<dt>Action</dt><dd>{% show_action_with_link object.action %}</dd>
 </dl>
 </div>
 

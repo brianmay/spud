@@ -6,10 +6,10 @@
 
 {% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
 
-{% block title %}status: {{ object }}{% endblock %}
+{% block title %}action: {{ object }}{% endblock %}
 
 {% block content %}
-<h1>Status: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
+<h1>Action: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
 {% show_photo_list page_obj links %}
 

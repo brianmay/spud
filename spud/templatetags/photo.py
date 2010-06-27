@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 import pytz
 from django.conf import settings
 
-from spud.models import sex_to_string, status_to_string
+from spud.models import sex_to_string, action_to_string
 
 register = template.Library()
 
@@ -152,16 +152,16 @@ def show_sex(sex):
     return mark_safe(sex_to_string(sex))
 
 @register.simple_tag
-def show_status(status):
-    return mark_safe(status_to_string(status))
+def show_action(action):
+    return mark_safe(action_to_string(action))
 
 @register.simple_tag
-def show_status_with_link(status):
-    value = status_to_string(status)
-    if status=="":
-        status="none";
+def show_action_with_link(action):
+    value = action_to_string(action)
+    if action is None:
+        action="none";
     return mark_safe("<a href='%s'>%s</a>"%(
-            reverse("status_detail",kwargs={'object_id': status}),
+            reverse("action_detail",kwargs={'object_id': action}),
             value))
 
 @register.tag

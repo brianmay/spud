@@ -6,7 +6,7 @@
 
 {% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
 
-{% block title %}People{% endblock %}
+{% block title %}Actions{% endblock %}
 
 {% block extrahead %}{{ block.super }}
 {{ media }}
@@ -14,7 +14,7 @@
 
 {% block content %}
 
-<h1>Status</h1>
+<h1>Actions</h1>
 
 <ul>
 {% for result in page_obj.object_list %}
