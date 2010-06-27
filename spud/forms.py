@@ -27,21 +27,21 @@ class photo_extra_form(forms.Form):
 
 class place_form(forms.ModelForm):
     parent_place = AutoCompleteSelectField('place', required=False)
+    coverphoto = AutoCompleteSelectField('photo', required=False)
     class Meta:
         model = models.place
-        exclude = ('coverphoto')
 
 class album_form(forms.ModelForm):
     parent_album = AutoCompleteSelectField('album', required=False)
+    coverphoto = AutoCompleteSelectField('photo', required=False)
     class Meta:
         model = models.album
-        exclude = ('coverphoto')
 
 class category_form(forms.ModelForm):
     parent_category = AutoCompleteSelectField('category', required=False)
+    coverphoto = AutoCompleteSelectField('photo', required=False)
     class Meta:
         model = models.category
-        exclude = ('coverphoto')
 
 class person_form(forms.ModelForm):
     home = AutoCompleteSelectField('place', required=False)
@@ -49,10 +49,10 @@ class person_form(forms.ModelForm):
     father = AutoCompleteSelectField('person', required=False)
     mother = AutoCompleteSelectField('person', required=False)
     spouse = AutoCompleteSelectField('person', required=False)
+    coverphoto = AutoCompleteSelectField('photo', required=False)
 
     class Meta:
         model = models.person
-        exclude = ('coverphoto')
 
 class photo_person_form(forms.ModelForm):
     person = AutoCompleteSelectField('person', required=True)
@@ -61,9 +61,9 @@ class photo_person_form(forms.ModelForm):
         model = models.photo_person
 
 class photo_relation_form(forms.ModelForm):
-    photo_1 = fields.photo_field()
+    photo_1 = AutoCompleteSelectField('photo', required=False)
     desc_1 = forms.CharField(required=False)
-    photo_2 = fields.photo_field()
+    photo_2 = AutoCompleteSelectField('photo', required=False)
     desc_2 = forms.CharField(required=False)
 
     class Meta:

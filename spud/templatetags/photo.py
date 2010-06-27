@@ -147,6 +147,19 @@ def show_datetime(value, timezone=None):
             reverse("date_detail",kwargs={'object_id': value.date()}),
             local.date(),local.time(),local.tzinfo))
 
+@register.filter
+def show_date(value, timezone=None):
+    if timezone is None:
+        timezone = settings.TIME_ZONE
+
+    from_tz = pytz.utc
+    to_tz = pytz.timezone(timezone)
+
+    local = from_tz.localize(value)
+    local = local.astimezone(to_tz)
+
+    return mark_safe(local.date())
+
 @register.simple_tag
 def show_sex(sex):
     return mark_safe(sex_to_string(sex))

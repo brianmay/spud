@@ -5,21 +5,6 @@ from spud import models
 
 import pyparsing as p
 
-class photo_field(forms.IntegerField):
-    def clean(self, value):
-        value=super(photo_field, self).clean(value)
-
-        if value in ('',None):
-            return None
-
-        try:
-            photo=models.photo.objects.get(pk=value)
-        except models.photo.DoesNotExist, e:
-            raise ValidationError(u"Cannot find photo %s: %s" % (value,e))
-
-        return photo
-
-
 def get_person(s, loc, toks):
     try:
         return models.person.objects.get(first_name=toks[0])

@@ -71,11 +71,21 @@
 </dl>
 
 {% if object.children.all %}
-    <ul class="children">
-    {% for place in object.children.all %}
-        <li><a href="{{ place.get_absolute_url }}">{{ place }}</a></li>
+<div class="children">
+    <ul class="photo_list">
+    {% for album in object.children.all %}
+        <li class='photo_list_item' onClick='parent.location="{{ album.get_absolute_url }}"'>
+            <a href="{{ album.get_absolute_url }}">
+                {% with album.get_cover_photo as photo %}{% if photo %}<img src='{% get_thumb_url photo "thumb" %}' alt=''/><br/>{% endif %}{% endwith %}
+                <div class='title'>{{ album }}</div>
+            </a>
+            {% if album.sortname %}<div class='sort'>({{album.sortname}} {{album.sortorder}})</div>{% endif %}
+            {% if album.album_description %}<div class='desc' onClick='parent.location="{{ album.get_absolute_url }}"'>{{album.album_description|urlizetrunc:20}}</div>{% endif %}
+        </li>
     {% endfor %}
+    <br class="clear"/>
     </ul>
+</div>
 {% endif %}
 {% endifequal %}
 {% endif %}

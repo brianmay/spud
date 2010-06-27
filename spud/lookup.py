@@ -2,6 +2,13 @@ from spud import models
 from django.db.models import Q
 from django.utils.html import escape
 
+def format_result(object):
+    photo = object.get_cover_photo()
+    if photo is None:
+        return u"%s"%(escape(object))
+    else:
+        return u"<img src='%s' alt=""/>%s"%(photo.get_thumb_url("thumb"),escape(object))
+
 class person_lookup(object):
 
     def get_query(self,q,request):
@@ -14,7 +21,7 @@ class person_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return escape(object)
+        return format_result(object)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -37,7 +44,7 @@ class place_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return object.get_full_name()
+        return format_result(object)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -57,7 +64,7 @@ class album_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return escape(object.get_full_name())
+        return format_result(object)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -77,10 +84,30 @@ class category_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return escape(object.get_full_name())
+        return format_result(object)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
             this is for displaying the currently selected items (in the case of a ManyToMany field)
         """
         return models.category.objects.filter(pk__in=ids)
+
+class photo_lookup(object):
+
+    def get_query(self,q,request):
+        """ return a query set.  you also have access to request.user if needed """
+        return models.photo.objects.filter(Q(title__istartswith=q))
+
+    def format_item(self,object):
+        """ simple display of an object when it is displayed in the list of selected objects """
+        return unicode(object)
+
+    def format_result(self,object):
+        """ a more verbose display, used in the search results display.  may contain html and multi-lines """
+        return u"<img src='%s' alt=""/>%s"%(object.get_thumb_url("thumb"),escape(object))
+
+    def get_objects(self,ids):
+        """ given a list of ids, return the objects ordered as you would like them on the admin page.
+            this is for displaying the currently selected items (in the case of a ManyToMany field)
+        """
+        return models.photo.objects.filter(pk__in=ids)

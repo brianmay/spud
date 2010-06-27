@@ -36,11 +36,21 @@
 
 {%ifequal page_obj.number 1 %}
 {% if object.children.all %}
-    <ul class="children">
+<div class="children">
+    <ul class="photo_list">
     {% for category in object.children.all %}
-        <li><a href="{{ category.get_absolute_url }}">{{ category }}</a>{% if category.category_description %}: {{category.category_description|urlizetrunc:40|truncatewords:10}}{% endif %} {% if category.sortname %}({{category.sortname}} {{category.sortorder}}){% endif %}</li>
+        <li class='photo_list_item' onClick='parent.location="{{ category.get_absolute_url }}"'>
+            <a href="{{ category.get_absolute_url }}">
+                {% with category.get_cover_photo as photo %}{% if photo %}<img src='{% get_thumb_url photo "thumb" %}' alt=''/><br/>{% endif %}{% endwith %}
+                <div class='title'>{{ category }}</div>
+            </a>
+            {% if category.sortname %}<div class='sort'>({{category.sortname}} {{category.sortorder}})</div>{% endif %}
+            {% if category.category_description %}<div class='desc' onClick='parent.location="{{ category.get_absolute_url }}"'>{{category.category_description|urlizetrunc:20}}</div>{% endif %}
+        </li>
     {% endfor %}
+    <br class="clear"/>
     </ul>
+</div>
 {% endif %}
 {% endifequal %}
 

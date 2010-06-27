@@ -104,10 +104,7 @@ def import_photo(file,d,options):
         os.makedirs(os.path.dirname(dst),0755)
     shutil.copyfile(file,dst)
 
-    if options.rotate:
-        photo.rotate(options.rotate)
-
-    photo.generate_thumbnails(overwrite=True)
+    photo.action = options.action
     photo.update_from_source()
 
     photo.save()
@@ -147,17 +144,18 @@ def main():
                           help="Timezone that should be used to display photos")
         (options, args) = parser.parse_args()
 
+        options.action = "R"
         if options.rotate:
-            if options.rotate == "auto":
+            if options.action == "0":
                 pass
-            elif options.rotate == "0":
-                pass
-            elif options.rotate == "90":
-                pass
-            elif options.rotate == "180":
-                pass
-            elif options.rotate == "270":
-                pass
+            elif options.action == "auto":
+                options.action = "auto"
+            elif options.action == "90":
+                options.action = "90"
+            elif options.action == "180":
+                options.action = "180"
+            elif options.action == "270":
+                options.action = "270"
             else:
                 parser.error("unknown value '%s' for rotate"%(options.rotate))
 

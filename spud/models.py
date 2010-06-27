@@ -324,6 +324,17 @@ class place(base_model):
         def get_create_url(cls, parent):
             return(cls.type_id+"_create", [ parent.pk ] )
 
+    def get_cover_photo(self):
+        photo = None
+        if self.coverphoto is not None:
+            photo = self.coverphoto
+        else:
+            try:
+                photo = self.photos.filter().reverse()[0]
+            except IndexError, e:
+                pass
+        return photo
+
 class album(base_model):
     album_id = models.AutoField(primary_key=True)
     parent_album = models.ForeignKey('self', related_name='children', null=True, blank=True)
@@ -431,6 +442,17 @@ class album(base_model):
         def get_create_url(cls, parent):
             return(cls.type_id+"_create", [ parent.pk ] )
 
+    def get_cover_photo(self):
+        photo = None
+        if self.coverphoto is not None:
+            photo = self.coverphoto
+        else:
+            try:
+                photo = self.photos.filter().reverse()[0]
+            except IndexError, e:
+                pass
+        return photo
+
 class category(base_model):
     category_id = models.AutoField(primary_key=True)
     parent_category = models.ForeignKey('self', related_name='children', null=True, blank=True)
@@ -535,6 +557,17 @@ class category(base_model):
         @models.permalink
         def get_create_url(cls, parent):
             return(cls.type_id+"_create", [ parent.pk ] )
+
+    def get_cover_photo(self):
+        photo = None
+        if self.coverphoto is not None:
+            photo = self.coverphoto
+        else:
+            try:
+                photo = self.photos.filter().reverse()[0]
+            except IndexError, e:
+                pass
+        return photo
 
 class person(base_model):
     person_id = models.AutoField(primary_key=True)
@@ -650,6 +683,17 @@ class person(base_model):
 
     class type(base_model.type):
         type_id = "person"
+
+    def get_cover_photo(self):
+        photo = None
+        if self.coverphoto is not None:
+            photo = coverphoto
+        else:
+            try:
+                photo = self.photos.filter().reverse()[0]
+            except IndexError, e:
+                pass
+        return photo
 
 # ---------------------------------------------------------------------------
 
