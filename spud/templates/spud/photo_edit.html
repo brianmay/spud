@@ -28,7 +28,7 @@
 </ul>
 {% endif %}
 
-<div class='photo_detail photo_{{object.action}}'>
+<div class='photo_detail {{object.get_style}}'>
 <div class='photo_detail_photo'>
 
 <a href="{{ object.get_orig_url }}">

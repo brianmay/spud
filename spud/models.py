@@ -775,6 +775,17 @@ class photo(base_model):
     def get_orig_path(self):
         return u"%sorig/%s/%s"%(settings.IMAGE_PATH,self.path,self.name)
 
+    def get_style(self):
+        if self.action is None:
+            return ""
+        elif self.action=="D":
+            return "photo_D"
+        elif (self.action=="R"
+                or self.action=="AUTO"
+                or self.action=="90" or self.action=="180" or self.action=="270"):
+            return "photo_R"
+        return ""
+
     # Other stuff
     def get_breadcrumbs(self):
         breadcrumbs = []
