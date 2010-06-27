@@ -2,21 +2,6 @@ from spud import models, fields
 from django import forms
 from ajax_select.fields import AutoCompleteSelectMultipleField, AutoCompleteSelectField
 
-PHOTO_STATUS = (
-    ('','none'),
-    ('D', 'delete'),
-    ('R', 'review'),
-    ('K', 'keep'),
-)
-
-PHOTO_ROTATE = (
-    ('','none'),
-    ('auto', 'automatic'),
-    ('90', '90 degrees clockwise'),
-    ('180', '180 degrees clockwise'),
-    ('270', '270 degrees clockwise'),
-)
-
 PHOTO_ACTION = (
     ('', '----'),
     ('none', 'none'),

@@ -27,19 +27,6 @@ SEX_CHOICES = (
     ('2', 'female'),
 )
 
-PHOTO_STATUS = (
-    ('D', 'delete'),
-    ('R', 'review'),
-    ('K', 'keep'),
-)
-
-PHOTO_ROTATE = (
-    ('auto', 'automatic'),
-    ('90', '90 degrees clockwise'),
-    ('180', '180 degrees clockwise'),
-    ('270', '270 degrees clockwise'),
-)
-
 PHOTO_ACTION = (
     ('D', 'delete'),
     ('R', 'regenerate thumbnail'),
@@ -694,7 +681,6 @@ class photo(base_model):
     focus_dist = models.CharField(max_length=16, blank=True)
     ccd_width = models.CharField(max_length=16, blank=True)
     comment = models.TextField(blank=True)
-    status = models.CharField(max_length=1, blank=True, choices=PHOTO_STATUS, db_index=True)
     action = models.CharField(max_length=4, null=True, blank=True, choices=PHOTO_ACTION, db_index=True)
     timestamp = models.DateTimeField()
 

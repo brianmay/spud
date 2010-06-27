@@ -6,5 +6,5 @@ Incompatable changes with zoph schema:
    album_description (album), category_description (category), comment (photo)
 4. Django tables used for comments.
 5. Replaced date (photo), time (photo) with datetime and timezone.
-6. Photo contains status field.
+6. Photo contains action field.
 7. Comments/rating uses django tables.
