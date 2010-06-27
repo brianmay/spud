@@ -11,33 +11,33 @@ from spud import models
 
 for p in models.photo.objects.filter(action__isnull=False):
     if p.action == "D":
-        print "delete '%s':"%(p.get_orig_path())
+        print "delete '%s'."%(p.get_orig_path())
 #        p.delete()
     elif p.action == "R":
-        print "regenerate '%s':"%(p.get_orig_path())
+        print "regenerate '%s'."%(p.get_orig_path())
         p.generate_thumbnails(overwrite=True)
         p.action = None
         p.save()
     elif p.action == "AUTO":
-        print "rotate '%s' by '%s':"%(p.get_orig_path(),p.action)
+        print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
         p.save()
     elif p.action == "90":
-        print "rotate '%s' by '%s':"%(p.get_orig_path(),p.action)
+        print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
         p.save()
     elif p.action == "180":
-        print "rotate '%s' by '%s':"%(p.get_orig_path(),p.action)
+        print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
         p.save()
     elif p.action == "270":
-        print "rotate '%s' by '%s':"%(p.get_orig_path(),p.action)
+        print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
