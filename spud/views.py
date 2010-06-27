@@ -1350,29 +1350,3 @@ def legacy_detail(request,type,object_id):
 
     return HttpResponseRedirect(url)
 
-#########
-# QUEER #
-#########
-
-def queer_list(request):
-    type = models.queer.type
-    list = models.queer.objects.all()
-    return object_list(request, list, type)
-
-def queer_detail(request, object_id):
-    object = get_object_or_404(models.queer, pk=object_id)
-    return object_detail(request, object)
-
-def queer_create(request):
-    type = models.queer.type
-    modal_form = forms.queer_form
-    return object_create(request, type, modal_form)
-
-def queer_edit(request, object_id):
-    object = get_object_or_404(models.queer, pk=object_id)
-    return object_edit(request, object, forms.queer_form)
-
-def queer_delete(request,object_id):
-    object = get_object_or_404(models.queer, pk=object_id)
-    return object_delete(request, object)
-
