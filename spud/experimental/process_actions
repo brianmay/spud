@@ -9,7 +9,12 @@ import re
 
 from spud import models
 
-for p in models.photo.objects.filter(action__isnull=False):
+while True:
+    try:
+        p = models.photo.objects.filter(action__isnull=False).exclude(action="D")[0]
+    except IndexError, e:
+        exit(0)
+
     if p.action == "D":
         print "delete '%s'."%(p.get_orig_path())
 #        p.delete()
