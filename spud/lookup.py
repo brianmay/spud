@@ -1,5 +1,6 @@
 from spud import models
 from django.db.models import Q
+from django.utils.html import escape
 
 class person_lookup(object):
 
@@ -13,7 +14,7 @@ class person_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return u"%s" % (object)
+        return escape(object)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -56,7 +57,7 @@ class album_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return object.get_full_name()
+        return escape(object.get_full_name())
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -76,7 +77,7 @@ class category_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return object.get_full_name()
+        return escape(object.get_full_name())
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
