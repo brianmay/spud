@@ -397,21 +397,24 @@ def object_photo_edit(request,object,number,photo_list,links):
                 else:
                     raise Http404("operation '%s' '%s' not implemented"%(update.verb, update.noun))
 
-            if 'queer' in request.POST:
-                try:
-                    photo_id = request.POST['photo_id']
-                    photo_id = int(str(photo_id))
-                except KeyError, e:
-                    raise Http404("photo_id not given")
-                except (ValueError,TypeError), e:
-                    raise Http404("photo_id is invalid")
-
-                if photo_object.pk != photo_id:
-                    photo_object = get_object_or_404(models.photo, pk=photo_id)
-
-                queer = get_object_or_404(models.queer, name=request.POST['queer'])
-
-                photo_object.update_from_queer(queer)
+            if 'action' in request.POST:
+                action = request.POST['action']
+                if action == "nop":
+                    photo_object.action = None
+                elif action == "delete":
+                    photo_object.action = "D"
+                elif action == "regenerate":
+                    photo_object.action = "R"
+                elif action == "rotate 90":
+                    photo_object.action = "90"
+                elif action == "rotate 180":
+                    photo_object.action = "180"
+                elif action == "rotate 270":
+                    photo_object.action = "270"
+                elif action == "rotate auto":
+                    photo_object.action = "AUTO"
+                else:
+                    raise Http404("Action '%s' not implemented"%(action))
 
             photo_object.save()
 

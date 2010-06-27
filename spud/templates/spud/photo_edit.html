@@ -14,9 +14,13 @@
 
 <form method="post" action="{% photo_edit_url links page_obj.number %}">{% csrf_token %}
 <input type="hidden" name="photo_id" value="{{ object.pk }}" />
-{% for queer in object.queers %}
-<input type="submit" name="queer" value="{{ queer.name }}"/>
-{% endfor %}
+<input type="submit" name="action" value="nop"/>
+<input type="submit" name="action" value="delete"/>
+<input type="submit" name="action" value="rotate 90"/>
+<input type="submit" name="action" value="rotate 180"/>
+<input type="submit" name="action" value="rotate 270"/>
+<input type="submit" name="action" value="rotate auto"/>
+<input type="submit" name="action" value="regenerate"/>
 
 {% if object.action %}
 <ul class="messagelist">
