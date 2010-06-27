@@ -123,16 +123,3 @@ class search_form(forms.Form):
     camera_make = forms.CharField(required=False)
     camera_model = forms.CharField(required=False)
 
-class queer_form(forms.ModelForm):
-    update_photographer = AutoCompleteSelectField('person', required=False)
-    update_location = AutoCompleteSelectField('place', required=False)
-    add_albums = AutoCompleteSelectMultipleField('album', required=False)
-    delete_albums = AutoCompleteSelectMultipleField('album', required=False)
-    add_categorys = AutoCompleteSelectMultipleField('category', required=False)
-    delete_categorys = AutoCompleteSelectMultipleField('category', required=False)
-    add_persons = AutoCompleteSelectMultipleField('person', required=False)
-    delete_persons = AutoCompleteSelectMultipleField('person', required=False)
-
-    class Meta:
-        model = models.queer
-

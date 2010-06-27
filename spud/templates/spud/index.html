@@ -16,9 +16,6 @@
 <li><a href="{% url date_list %}">dates</a></li>
 <li><a href="{% url photo_relation_list %}">relations</a></li>
 <li><a href="{% url search_list %}">search</a></li>
-{% if user.is_staff %}
-<li><a href="{% url queer_list %}">queers</a></li>
-{% endif %}
 </ul>
 
 {% endblock %}

@@ -65,12 +65,6 @@ urlpatterns = patterns('',
     url(r'^relation/(?P<object_id>\d+)/edit/$', 'spud.views.photo_relation_edit', name='photo_relation_edit'),
     url(r'^relation/(?P<object_id>\d+)/delete/$', 'spud.views.photo_relation_delete', name='photo_relation_delete'),
 
-    url(r'^queer/$', 'spud.views.queer_list', name='queer_list'),
-    url(r'^queer/create/$', 'spud.views.queer_create', name='queer_create'),
-    url(r'^queer/(?P<object_id>\d+)/$', 'spud.views.queer_detail', name='queer_detail'),
-    url(r'^queer/(?P<object_id>\d+)/edit/$', 'spud.views.queer_edit', name='queer_edit'),
-    url(r'^queer/(?P<object_id>\d+)/delete/$', 'spud.views.queer_delete', name='queer_delete'),
-
     (r'^comments/', include('django.contrib.comments.urls')),
 
     url(r'^ajax/', include('ajax_select.urls')),
