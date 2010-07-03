@@ -83,7 +83,7 @@ def import_photo(file,d,options):
     photo.comment = ""
     photo.level = 1
 
-    photo.timezone = dt.tzinfo
+    photo.timezone = dt.tzinfo.zone
     photo.datetime = dt.astimezone(pytz.utc).replace(tzinfo=None)
 
     error_list = photo.error_list()
