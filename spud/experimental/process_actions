@@ -38,7 +38,7 @@ while True:
         p.save()
     elif p.action == "90":
         print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-        move_photo(p)
+        p.move()
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
