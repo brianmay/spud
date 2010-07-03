@@ -19,6 +19,7 @@ from datetime import *
 
 import re
 import random
+import pytz
 
 def spud_root(request):
     breadcrumbs = [ ]
@@ -393,6 +394,15 @@ def object_photo_edit(request,object,number,photo_list,links):
                         photo_object.description = ""
                     else:
                         photo_object.description = update.object
+                elif update.verb == "set" and update.noun == "timezone":
+                    if photo_object.timezone != update.timezone:
+                        photo_object.timezone = update.timezone
+                        if photo_object.action is None:
+                            photo_object.action = "M"
+                elif update.verb == "set" and update.noun == "datetime":
+                    src_timezone = pytz.timezone(photo_object.timezone)
+                    value = src_timezone.localize(update.datetime)
+                    photo_object.datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
 
                 else:
                     raise Http404("operation '%s' '%s' not implemented"%(update.verb, update.noun))

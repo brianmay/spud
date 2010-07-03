@@ -4,6 +4,8 @@ from django.forms.util import ValidationError
 from spud import models
 
 import pyparsing as p
+import pytz
+import datetime
 
 def get_person(s, loc, toks):
     try:
@@ -89,6 +91,26 @@ def get_place(s, loc, toks):
 def get_int(s, loc, toks):
     return int(toks[0])
 
+def get_timezone(s, loc, toks):
+    try:
+        return pytz.timezone(toks[0])
+    except pytz.UnknownTimeZoneError, e:
+        raise p.ParseFatalException(u"Unknown timezone '%s'"%(toks[0]), loc)
+    except Exception, e:
+        raise p.ParseFatalException(u"Unknown exception '%s': '%s'"%(type(e),e), loc)
+
+def get_datetime(s, loc, toks):
+    try:
+        (date,time) = toks[0].split(" ")
+        (year,month,day) = date.split("-")
+        (hour,minute,second) = time.split(":")
+        print year,month,day,hour,minute,second
+        return datetime.datetime(int(year),int(month),int(day),int(hour),int(minute),int(second))
+    except ValueError, e:
+        raise p.ParseFatalException(u"Illegal date/time '%s': '%s'"%(toks[0],e), loc)
+    except Exception, e:
+        raise p.ParseFatalException(u"Unknown exception '%s': '%s'"%(type(e),e), loc)
+
 class photo_update_field(forms.CharField):
     def clean(self, value):
         value=super(photo_update_field, self).clean(value)
@@ -131,12 +153,18 @@ class photo_update_field(forms.CharField):
         description_operation = (p.Keyword("description",caseless=True).setResultsName("noun")
                             +  (p.Keyword("None",caseless=True) | p.Regex(".+")).setResultsName( "object" ))
 
+        datetime_operation = (p.Keyword("datetime",caseless=True).setResultsName("noun")
+                            +  (p.Regex("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d(:\\d\\d)?")).setParseAction(get_datetime).setResultsName( "datetime" )
+                         )
+
+        timezone_operation = (p.Keyword("timezone",caseless=True).setResultsName("noun")
+                            +  (p.Regex("[A-Za-z\/]+")).setParseAction(get_timezone).setResultsName( "timezone" ))
 
         add_operation = ( p.Keyword("add",caseless=True).setResultsName("verb")
                             + ( person_operation | album_operation | category_operation ) )
 
         set_operation = ( p.Keyword("set",caseless=True).setResultsName("verb")
-                            + ( person_operation | place_operation | photographer_operation | title_operation | description_operation ) )
+                            + ( person_operation | place_operation | photographer_operation | title_operation | description_operation | datetime_operation | timezone_operation ) )
 
         delete_operation = ( p.Keyword("delete",caseless=True).setResultsName("verb")
                             + ( person_operation | album_operation | category_operation ) )
