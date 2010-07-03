@@ -103,8 +103,14 @@ def get_datetime(s, loc, toks):
     try:
         (date,time) = toks[0].split(" ")
         (year,month,day) = date.split("-")
-        (hour,minute,second) = time.split(":")
-        print year,month,day,hour,minute,second
+
+        thetime = time.split(":")
+        (hour,minute) = thetime[0:2]
+        if len(thetime) >= 3:
+            second=thetime[2]
+        else:
+            second=0
+
         return datetime.datetime(int(year),int(month),int(day),int(hour),int(minute),int(second))
     except ValueError, e:
         raise p.ParseFatalException(u"Illegal date/time '%s': '%s'"%(toks[0],e), loc)
