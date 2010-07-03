@@ -19,6 +19,7 @@ from django.utils.encoding import iri_to_uri
 
 import os
 import datetime
+import pytz
 
 from spud import media
 
@@ -931,6 +932,53 @@ class photo(base_model):
 
         return
     update_from_source.alters_data = True
+
+    def move(self):
+        to_tz = pytz.timezone(self.timezone)
+        local = pytz.utc.localize(self.datetime)
+        local = local.astimezone(to_tz)
+        path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
+        name = self.name
+        (shortname, extension) = os.path.splitext(name)
+
+        old_path = { }
+        for size in settings.IMAGE_SIZES:
+            old_path[size] = self.get_thumb_path(size)
+        old_orig_path = self.get_orig_path()
+
+        self.path = path
+
+        for size in settings.IMAGE_SIZES:
+            src = old_path[size]
+            dst = self.get_thumb_path(size)
+
+            if src != dst:
+                print "Moving '%s' to '%s'"%(src,dst)
+                if not os.path.lexists(src):
+                    raise RuntimeError("Source '%s' not already exists"%(src))
+                if os.path.lexists(dst):
+                    raise RuntimeError("Destination '%s' already exists"%(dst))
+                if not os.path.lexists(os.path.dirname(dst)):
+                    os.makedirs(os.path.dirname(dst),0755)
+                shutil.move(src,dst)
+
+        src = old_orig_path
+        dst = self.get_orig_path()
+        if src != dst:
+            print  "Moving '%s' to '%s'"%(src,dst)
+            if not os.path.lexists(src):
+                raise RuntimeError("Source '%s' not already exists"%(src))
+            if os.path.lexists(dst):
+                raise RuntimeError("Destination '%s' already exists"%(dst))
+            if not os.path.lexists(os.path.dirname(dst)):
+                os.makedirs(os.path.dirname(dst),0755)
+            shutil.move(src,dst)
+
+        self.save()
+        return
+    move.alters_data = True
+
+
 
     def error_list(self):
         error_list = []

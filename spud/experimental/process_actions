@@ -14,50 +14,6 @@ from django.conf import settings
 
 from spud import models
 
-def move_photo(p):
-    to_tz = pytz.timezone(p.timezone)
-    local = pytz.utc.localize(p.datetime)
-    local = local.astimezone(to_tz)
-    path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
-    name = p.name
-    (shortname, extension) = os.path.splitext(name)
-
-    old_path = { }
-    for size in settings.IMAGE_SIZES:
-        old_path[size] = p.get_thumb_path(size)
-    old_orig_path = p.get_orig_path()
-
-    p.path = path
-
-    for size in settings.IMAGE_SIZES:
-        src = old_path[size]
-        dst = p.get_thumb_path(size)
-
-        if src != dst:
-            print "Moving '%s' to '%s'"%(src,dst)
-            if not os.path.lexists(src):
-                raise RuntimeError("Source '%s' not already exists"%(src))
-            if os.path.lexists(dst):
-                raise RuntimeError("Destination '%s' already exists"%(dst))
-            if not os.path.lexists(os.path.dirname(dst)):
-                os.makedirs(os.path.dirname(dst),0755)
-            shutil.move(src,dst)
-
-    src = old_orig_path
-    dst = p.get_orig_path()
-    if src != dst:
-        print  "Moving '%s' to '%s'"%(src,dst)
-        if not os.path.lexists(src):
-            raise RuntimeError("Source '%s' not already exists"%(src))
-        if os.path.lexists(dst):
-            raise RuntimeError("Destination '%s' already exists"%(dst))
-        if not os.path.lexists(os.path.dirname(dst)):
-            os.makedirs(os.path.dirname(dst),0755)
-        shutil.move(src,dst)
-
-    p.save()
-
-
 while True:
     try:
         p = models.photo.objects.filter(action__isnull=False).exclude(action="D")[0]
@@ -69,13 +25,13 @@ while True:
 #        p.delete()
     elif p.action == "R":
         print "regenerate '%s'."%(p.get_orig_path())
-        move_photo(p)
+        p.move()
         p.generate_thumbnails(overwrite=True)
         p.action = None
         p.save()
     elif p.action == "AUTO":
         print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-        move_photo(p)
+        p.move()
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
@@ -89,20 +45,20 @@ while True:
         p.save()
     elif p.action == "180":
         print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-        move_photo(p)
+        p.move()
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
         p.save()
     elif p.action == "270":
         print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-        move_photo(p)
+        p.move()
         p.rotate(p.action)
         p.generate_thumbnails(overwrite=True)
         p.action = None
         p.save()
     elif p.action == "M":
-        move_photo(p)
+        p.move()
         p.action = None
         p.save()
     else:
