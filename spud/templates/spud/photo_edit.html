@@ -16,11 +16,12 @@
 <input type="hidden" name="photo_id" value="{{ object.pk }}" />
 <input type="submit" name="action" value="nop"/>
 <input type="submit" name="action" value="delete"/>
+<input type="submit" name="action" value="regenerate"/>
+<input type="submit" name="action" value="move"/>
 <input type="submit" name="action" value="rotate 90"/>
 <input type="submit" name="action" value="rotate 180"/>
 <input type="submit" name="action" value="rotate 270"/>
 <input type="submit" name="action" value="rotate auto"/>
-<input type="submit" name="action" value="regenerate"/>
 
 {% if object.action %}
 <ul class="messagelist">

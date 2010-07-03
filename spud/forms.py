@@ -7,6 +7,7 @@ PHOTO_ACTION = (
     ('none', 'none'),
     ('D', 'delete'),
     ('R', 'regenerate thumbnail'),
+    ('M', 'move photo'),
     ('AUTO', 'rotate automatic'),
     ('90', 'rotate 90 degrees clockwise'),
     ('180', 'rotate 180 degrees clockwise'),

@@ -405,6 +405,8 @@ def object_photo_edit(request,object,number,photo_list,links):
                     photo_object.action = "D"
                 elif action == "regenerate":
                     photo_object.action = "R"
+                elif action == "move":
+                    photo_object.action = "M"
                 elif action == "rotate 90":
                     photo_object.action = "90"
                 elif action == "rotate 180":

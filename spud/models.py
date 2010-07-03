@@ -30,6 +30,7 @@ SEX_CHOICES = (
 PHOTO_ACTION = (
     ('D', 'delete'),
     ('R', 'regenerate thumbnail'),
+    ('M', 'move photo'),
     ('AUTO', 'rotate automatic'),
     ('90', 'rotate 90 degrees clockwise'),
     ('180', 'rotate 180 degrees clockwise'),
@@ -51,6 +52,8 @@ def action_to_string(action):
         return u'delete'
     elif action == 'R':
         return u'regenerate'
+    elif action == 'M':
+        return u'move'
     elif action == 'AUTO':
         return u'rotate auto'
     elif action == '90':
@@ -687,7 +690,7 @@ class person(base_model):
     def get_cover_photo(self):
         photo = None
         if self.coverphoto is not None:
-            photo = coverphoto
+            photo = self.coverphoto
         else:
             try:
                 photo = self.photos.filter().reverse()[0]
@@ -781,6 +784,7 @@ class photo(base_model):
         elif self.action=="D":
             return "photo_D"
         elif (self.action=="R"
+                or self.action=="M"
                 or self.action=="AUTO"
                 or self.action=="90" or self.action=="180" or self.action=="270"):
             return "photo_R"
