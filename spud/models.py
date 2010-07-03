@@ -978,8 +978,6 @@ class photo(base_model):
         return
     move.alters_data = True
 
-
-
     def error_list(self):
         error_list = []
 
