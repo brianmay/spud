@@ -58,6 +58,7 @@ while True:
         p.action = None
         p.save()
     elif p.action == "M":
+        print "move '%s'."%(p.get_orig_path())
         p.move()
         p.action = None
         p.save()
