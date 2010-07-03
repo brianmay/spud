@@ -28,7 +28,12 @@ class media:
         exif = self.get_exif()
         try:
             value = exif['Exif.Photo.DateTimeOriginal']
+            if isinstance(value, str):
+                value = None
         except KeyError:
+            value = None
+
+        if value is None:
             value = datetime.datetime.fromtimestamp(os.path.getmtime(self.src_full))
 
         value = src_timezone.localize(value)
