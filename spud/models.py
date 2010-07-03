@@ -20,6 +20,7 @@ from django.utils.encoding import iri_to_uri
 import os
 import datetime
 import pytz
+import shutil
 
 from spud import media
 
