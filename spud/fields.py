@@ -34,7 +34,7 @@ def get_person(s, loc, toks):
     except models.person.MultipleObjectsReturned, e:
         raise p.ParseFatalException(u"Person '%s' '%s' not unique"%(first_name,last_name), loc)
     except Exception, e:
-        raise p.ParseFatalException(u"Unknown exception: %s"%(e), loc)
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
 
 def get_album(s, loc, toks):
     list = toks[0].split("/")
@@ -52,7 +52,7 @@ def get_album(s, loc, toks):
     except models.album.MultipleObjectsReturned, e:
         raise p.ParseFatalException(u"Album '%s' not unique"%(item), loc)
     except Exception, e:
-        raise p.ParseFatalException(u"Unknown exception: %s"%(e), loc)
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
 
 def get_category(s, loc, toks):
     list = toks[0].split("/")
@@ -70,7 +70,7 @@ def get_category(s, loc, toks):
     except models.catrgory.MultipleObjectsReturned, e:
         raise p.ParseFatalException(u"Category '%s' not unique"%(item), loc)
     except Exception, e:
-        raise p.ParseFatalException(u"Unknown exception: %s"%(e), loc)
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
 
 def get_place(s, loc, toks):
     list = toks[0].split("/")
@@ -86,7 +86,7 @@ def get_place(s, loc, toks):
     except models.place.DoesNotExist, e:
         raise p.ParseFatalException(u"Place '%s' not found"%(item), loc)
     except Exception, e:
-        raise p.ParseFatalException(u"Unknown exception: %s"%(e), loc)
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
 
 def get_int(s, loc, toks):
     return int(toks[0])
@@ -97,7 +97,7 @@ def get_timezone(s, loc, toks):
     except pytz.UnknownTimeZoneError, e:
         raise p.ParseFatalException(u"Unknown timezone '%s'"%(toks[0]), loc)
     except Exception, e:
-        raise p.ParseFatalException(u"Unknown exception '%s': '%s'"%(type(e),e), loc)
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
 
 def get_datetime(s, loc, toks):
     try:
@@ -109,7 +109,7 @@ def get_datetime(s, loc, toks):
     except ValueError, e:
         raise p.ParseFatalException(u"Illegal date/time '%s': '%s'"%(toks[0],e), loc)
     except Exception, e:
-        raise p.ParseFatalException(u"Unknown exception '%s': '%s'"%(type(e),e), loc)
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
 
 class photo_update_field(forms.CharField):
     def clean(self, value):
@@ -179,6 +179,6 @@ class photo_update_field(forms.CharField):
                 if line != "":
                     results.append(parser.parseString(line, parseAll=True))
             except p.ParseBaseException, e:
-                raise ValidationError(u"Cannot parse line '%s' loc: %s msg: %s"%(line, e.loc, e.msg))
+                raise ValidationError(u"Cannot parse line '%s' loc: '%s' msg: '%s'"%(line, e.loc, e.msg))
 
         return results
