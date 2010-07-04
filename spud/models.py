@@ -709,7 +709,7 @@ class photo(base_model):
     width = models.IntegerField(null=True, blank=True)
     height = models.IntegerField(null=True, blank=True)
     size = models.IntegerField(null=True, blank=True)
-    title = models.CharField(max_length=64, blank=True)
+    title = models.CharField(max_length=64, blank=True, db_index=True)
     photographer = models.ForeignKey(person, null=True, blank=True, related_name='photographed')
     location = models.ForeignKey(place, null=True, blank=True, related_name='photos')
     view = models.CharField(max_length=64, blank=True)
