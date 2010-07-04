@@ -29,6 +29,8 @@ class media:
         try:
             value = exif['Exif.Photo.DateTimeOriginal']
             if isinstance(value, str):
+                value = exif['Exif.Photo.DateTimeDigitized']
+            if isinstance(value, str):
                 value = None
         except KeyError:
             value = None
