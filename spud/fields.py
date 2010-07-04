@@ -8,33 +8,63 @@ import pytz
 import datetime
 
 def get_person(s, loc, toks):
+    # input "Abc Def Xyz"
+
+    # Try first_name="Abc" last_name="Xyz" middle_name="Def"
+    parts = toks[0].split(" ")
+    try:
+        if len(parts)==3:
+            (first_name, middle_name, last_name) = parts
+            return models.person.objects.get(first_name=first_name,last_name=last_name,middle_name=middle_name)
+    except models.person.DoesNotExist, e:
+        pass
+    except models.person.MultipleObjectsReturned, e:
+        raise p.ParseFatalException(u"First name '%s' middle name '%s' last name '%s' found multiple times"%(first_name,middle_name,last_name), loc)
+    except Exception, e:
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
+
+    # Try first_name="Abc" last_name="" middle_name=""
+    try:
+        if len(parts)==3:
+            (first_name, middle_name, last_name) = parts
+            middle_name=""
+            return models.person.objects.get(first_name=first_name,last_name=last_name,middle_name=middle_name)
+    except models.person.DoesNotExist, e:
+        pass
+    except models.person.MultipleObjectsReturned, e:
+        raise p.ParseFatalException(u"First name '%s' middle name '%s' last name '%s' found multiple times"%(first_name,middle_name,last_name), loc)
+    except Exception, e:
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
+
+    # Try first_name="Abc Def" last_name="Xyz"
+    (first_name, sep, last_name) = toks[0].strip().rpartition(" ")
+    try:
+        if first_name != "":
+            return models.person.objects.get(first_name=first_name,last_name=last_name)
+    except models.person.DoesNotExist, e:
+        pass
+    except models.person.MultipleObjectsReturned, e:
+        raise p.ParseFatalException(u"First name '%s' last name '%s' found multiple times"%(first_name,last_name), loc)
+    except Exception, e:
+        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
+
+    # Try first_name="Abc Def Xyz"
     try:
         return models.person.objects.get(first_name=toks[0])
     except models.person.DoesNotExist, e:
         pass
     except models.person.MultipleObjectsReturned, e:
-        pass
+        raise p.ParseFatalException(u"First name '%s' found multiple times"%(toks[0]), loc)
 
+    # Try last_name="Abc Def Xyz"
     try:
         return models.person.objects.get(last_name=toks[0])
     except models.person.DoesNotExist, e:
         pass
     except models.person.MultipleObjectsReturned, e:
-        pass
+        raise p.ParseFatalException(u"Last name '%s' found multiple times"%(toks[0]), loc)
 
-    (first_name, sep, last_name) = toks[0].strip().rpartition(" ")
-    if first_name == "":
-        first_name = last_name
-        last_name = ""
-
-    try:
-        return models.person.objects.get(first_name=first_name,last_name=last_name)
-    except models.person.DoesNotExist, e:
-        raise p.ParseFatalException(u"Person '%s' '%s' not found"%(first_name,last_name), loc)
-    except models.person.MultipleObjectsReturned, e:
-        raise p.ParseFatalException(u"Person '%s' '%s' not unique"%(first_name,last_name), loc)
-    except Exception, e:
-        raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
+    raise p.ParseFatalException(u"Person '%s' not found"%(toks[0]), loc)
 
 def get_album(s, loc, toks):
     list = toks[0].split("/")
