@@ -96,7 +96,7 @@ class photo_lookup(object):
 
     def get_query(self,q,request):
         """ return a query set.  you also have access to request.user if needed """
-        return models.photo.objects.filter(Q(title__istartswith=q))
+        return models.photo.objects.filter(Q(title__istartswith=q) | Q(name__istartswith=q))
 
     def format_item(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
