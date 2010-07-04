@@ -403,6 +403,8 @@ def object_photo_edit(request,object,number,photo_list,links):
                     src_timezone = pytz.timezone(photo_object.timezone)
                     value = src_timezone.localize(update.datetime)
                     photo_object.datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
+                    if photo_object.action is None:
+                        photo_object.action = "M"
 
                 else:
                     raise Http404("operation '%s' '%s' not implemented"%(update.verb, update.noun))
