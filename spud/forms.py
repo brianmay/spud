@@ -104,7 +104,7 @@ class search_form(forms.Form):
     category_descendants = forms.BooleanField(required=False)
     category_none = forms.BooleanField(required=False)
     action = forms.ChoiceField(required=False,choices=PHOTO_ACTION)
-    path = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
+    path = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.\/-]*$")
     name = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
     camera_make = forms.CharField(required=False)
     camera_model = forms.CharField(required=False)
