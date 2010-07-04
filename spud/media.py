@@ -106,6 +106,19 @@ class media_raw(media):
         self._create_thumbnail(dst_path, max_size, image)
         t.close()
 
+    def get_size(self):
+        cmd = ["dcraw","-T","-c",self.src_full]
+        t = tempfile.TemporaryFile()
+        p = subprocess.Popen(cmd,stdout=t)
+        rc = p.wait()
+        if rc != 0:
+            raise subprocess.CalledProcessError(rc,cmd)
+
+        t.seek(0)
+        image = Image.open(t)
+        t.close()
+        return image.size
+
 def get_media(file):
     (root,extension) = os.path.splitext(file)
     extension = extension.lower()
