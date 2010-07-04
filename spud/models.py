@@ -934,31 +934,65 @@ class photo(base_model):
         return
     update_from_source.alters_data = True
 
-    def move(self):
+    def move(self,new_name=None):
+        # Work out new path
         to_tz = pytz.timezone(self.timezone)
         local = pytz.utc.localize(self.datetime)
         local = local.astimezone(to_tz)
-        path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
-        name = self.name
-        (shortname, extension) = os.path.splitext(name)
+        new_path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
 
+        # Work out new name
+        if new_name is None:
+            new_name = self.name
+
+        # Get current paths
         old_path = { }
         for size in settings.IMAGE_SIZES:
             old_path[size] = self.get_thumb_path(size)
         old_orig_path = self.get_orig_path()
 
-        self.path = path
+        # Check that something has changed
+        if self.path == new_path and self.name == new_name:
+            # nothing to do, good bye cruel world
+            return
 
+        # Update the values so we get new paths
+        self.path = new_path
+        self.name = new_name
+
+        # Check to ensure no conflicts
+        (shortname, extension) = os.path.splitext(self.name)
+        photos = photo.objects.filter(path=self.path,name__startswith="%s."%(shortname))
+        count = photos.count()
+        if count > 0:
+            raise RuntimeError("DB entries exist already for %s/%s.*"%(self.path,shortname))
+
+        # First pass, check for anything that could go wrong before doing anything
+        for size in settings.IMAGE_SIZES:
+            src = old_path[size]
+            dst = self.get_thumb_path(size)
+
+            if src != dst:
+                if not os.path.lexists(src):
+                    raise RuntimeError("Source '%s' not already exists"%(src))
+                if os.path.lexists(dst):
+                    raise RuntimeError("Destination '%s' already exists"%(dst))
+
+        src = old_orig_path
+        dst = self.get_orig_path()
+        if src != dst:
+            if not os.path.lexists(src):
+                raise RuntimeError("Source '%s' not already exists"%(src))
+            if os.path.lexists(dst):
+                raise RuntimeError("Destination '%s' already exists"%(dst))
+
+        # Second pass. Nothing can go wrong go wrong go wrong go wrong go wrong
         for size in settings.IMAGE_SIZES:
             src = old_path[size]
             dst = self.get_thumb_path(size)
 
             if src != dst:
                 print "Moving '%s' to '%s'"%(src,dst)
-                if not os.path.lexists(src):
-                    raise RuntimeError("Source '%s' not already exists"%(src))
-                if os.path.lexists(dst):
-                    raise RuntimeError("Destination '%s' already exists"%(dst))
                 if not os.path.lexists(os.path.dirname(dst)):
                     os.makedirs(os.path.dirname(dst),0755)
                 shutil.move(src,dst)
@@ -967,14 +1001,12 @@ class photo(base_model):
         dst = self.get_orig_path()
         if src != dst:
             print  "Moving '%s' to '%s'"%(src,dst)
-            if not os.path.lexists(src):
-                raise RuntimeError("Source '%s' not already exists"%(src))
-            if os.path.lexists(dst):
-                raise RuntimeError("Destination '%s' already exists"%(dst))
             if not os.path.lexists(os.path.dirname(dst)):
                 os.makedirs(os.path.dirname(dst),0755)
             shutil.move(src,dst)
 
+        # Hurry! Save the new path and name before we forgot
+        # ... err what did we just do?
         self.save()
         return
     move.alters_data = True

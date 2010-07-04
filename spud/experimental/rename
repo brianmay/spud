@@ -1,0 +1,32 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*- 
+
+import os
+import re
+import datetime
+import pytz
+import shutil
+import sys
+from optparse import OptionParser
+
+from django.conf import settings
+
+from spud import models
+
+def rename(pk,name):
+    p = models.photo.objects.get(pk=pk)
+    p.move(name)
+
+def main():
+        spud_file = u"%s/%s"%(settings.IMAGE_PATH,".spud.txt")
+        if not os.path.exists(spud_file):
+            raise RuntimeError("Cannot find spud file. Is '%s' mounted???"%(settings.IMAGE_PATH))
+
+        parser = OptionParser()
+        (options, args) = parser.parse_args()
+
+        rename(args[0],args[1])
+        return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
