@@ -25,8 +25,8 @@ while True:
         p.delete()
     elif p.action == "R":
         print "regenerate '%s'."%(p.get_orig_path())
-        p.move()
         p.generate_thumbnails(overwrite=True)
+        p.move()
         p.action = None
         p.save()
     elif p.action == "AUTO":
