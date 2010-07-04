@@ -843,8 +843,12 @@ class photo(base_model):
         return
     generate_thumbnails.alters_data = True
 
-    def update_from_source(self):
-        m = media.get_media(self.get_orig_path())
+    def update_from_source(self, media=None):
+        if media is None:
+            m = media.get_media(self.get_orig_path())
+        else:
+            m = media
+
         exif = m.get_exif()
 
         (width,height) = m.get_size()

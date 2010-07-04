@@ -105,7 +105,7 @@ def import_photo(file,d,options):
     shutil.copyfile(file,dst)
 
     photo.action = options.action
-    photo.update_from_source()
+    photo.update_from_source(media=m)
 
     photo.save()
     set_album_list(photo, d.albums)
