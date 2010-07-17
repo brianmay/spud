@@ -10,3 +10,6 @@ clean::
 	rm -rf build build-stamp configure-stamp build/ MANIFEST
 	dh_clean
 
+install/spud::
+	rm debian/spud/usr/share/spud/media/js/jquery.js
+	ln -s /usr/share/javascript/jquery/jquery.js debian/spud/usr/share/spud/media/js/jquery.js
