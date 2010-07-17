@@ -65,14 +65,9 @@ AJAX_LOOKUP_CHANNELS = {
 
 COMMENTS_APP = "spud.comments"
 
-EMAIL_HOST="mail.microcomaustralia.com.au"
-DEFAULT_FROM_EMAIL = "Brian May <brian@microcomaustralia.com.au>"
 LOGIN_REDIRECT_URL = "/"
 
-IMAGE_URL="http://staff.microcomaustralia.com.au/images/"
-IMAGE_PATH="/home/brian/zoph/"
-IMAGE_CHECK_EXISTS=False
-
+IMAGE_CHECK_EXISTS=True
 IMAGE_SIZES = {
     'mid': 480,
     'thumb': 120,
