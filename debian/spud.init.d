@@ -29,6 +29,16 @@ DESC="SPUD photo album"
 NAME=$0
 SCRIPTNAME=/etc/init.d/$NAME
 
+if [ -f "/etc/default/spud" ]
+then
+    . /etc/default/spud
+fi
+
+if [ -z "$START" ]
+then
+    exit 0
+fi
+
 running()
 {
     local pidfile="$1"
