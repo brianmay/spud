@@ -1,11 +1,44 @@
 from django import forms
 from django.forms.util import ValidationError
+from django.utils.translation import ugettext as _
 
 from spud import models
 
 import pyparsing as p
 import pytz
 import datetime
+
+import ajax_select.fields
+
+class select_widget(ajax_select.fields.AutoCompleteSelectWidget):
+    class Media:
+        css = {
+            'all': ( 'css/jquery.autocomplete.css', )
+        }
+        js = ('js/jquery.js','js/jquery.autocomplete.js',)
+
+class select_field(ajax_select.fields.AutoCompleteSelectField):
+
+    def __init__(self, channel, *args, **kwargs):
+        widget = kwargs.get("widget", None)
+        if widget is None:
+            kwargs["widget"] = select_widget(channel=channel,help_text=kwargs.get('help_text',_('Enter text to search.')))
+        super(select_field, self).__init__(channel, *args, **kwargs)
+
+class select_multiple_widget(ajax_select.fields.AutoCompleteSelectMultipleWidget):
+    class Media:
+        css = {
+            'all': ( 'css/jquery.autocomplete.css', )
+        }
+        js = ('js/jquery.js','js/jquery.autocomplete.js',)
+
+class select_multiple_field(ajax_select.fields.AutoCompleteSelectMultipleField):
+
+    def __init__(self, channel, *args, **kwargs):
+        widget = kwargs.get("widget", None)
+        if widget is None:
+            kwargs["widget"] = select_widget(channel=channel,help_text=kwargs.get('help_text',_('Enter text to search.')))
+        super(select_multiple_field, self).__init__(channel, *args, **kwargs)
 
 def get_person(s, loc, toks):
     # input "Abc Def Xyz"
