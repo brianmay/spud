@@ -72,7 +72,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'bdist_wininst':
     for file_info in data_files:
         file_info[0] = '\\PURELIB\\%s' % file_info[0]
 
-data_files += [ ( "/etc/spud",  [ "conf/settings.py" ] ) ]
+# data_files += [ ( "/etc/spud",  [ "conf/settings.py" ] ) ]
 
 scripts = [
     'bin/spud',
