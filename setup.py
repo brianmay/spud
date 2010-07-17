@@ -60,7 +60,6 @@ for code_dir in [ 'photos', 'spud' ]:
             data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
 for dirpath, dirnames, filenames in os.walk("media"):
-        print dirpath, dirnames, filenames
         # Ignore dirnames that start with '.'
         for i, dirname in enumerate(dirnames):
             if dirname.startswith('.'): del dirnames[i]
