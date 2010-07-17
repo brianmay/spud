@@ -1,0 +1,42 @@
+@import url('base.css');
+
+/* Photo list */
+
+.photo_list .title {
+font-weight:bold;
+}
+.photo_list {
+padding-left:0;
+}
+.photo_list li {
+display:inline;
+float:left;
+height:150px;
+margin:10px;
+padding-top:10px;
+text-align: center;
+width:170px;
+}
+
+.photo_list li .desc { float:left; display:none; }
+.photo_list li:HOVER { border:1px solid #000; }
+.photo_list li:HOVER .desc { display:inline; background:#ddd; foreground:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
+
+/* PAGINATOR */
+.paginator { font-size:11px; padding-top:10px; padding-bottom:10px; line-height:22px; margin:0; solid #ddd; }
+.paginator a:link, .paginator a:visited { padding:2px 6px; border:solid 1px #ccc; background:white; text-decoration:none; }
+.paginator a.showall { padding:0 !important; border:none !important; }
+.paginator a.showall:hover { color:#036 !important; background:transparent !important; }
+.paginator .end { border-width:2px !important; margin-right:6px; }
+.paginator .this-page { padding:2px 6px; font-weight:bold; font-size:13px; vertical-align:top; }
+.paginator a:hover { color:white; background:#5b80b2; border-color:#036; }
+
+/* Children list */
+.infobox { float:left; border:1px solid #dddddd; padding:10px; margin:10px; width:340px; }
+
+.children {
+padding-left:50px;
+border:1px solid #f00;
+}
+
+
