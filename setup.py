@@ -60,10 +60,10 @@ for code_dir in [ 'photos', 'spud' ]:
             data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
 for dirpath, dirnames, filenames in os.walk("media"):
-        # Ignore dirnames that start with '.'
-        for i, dirname in enumerate(dirnames):
-            if dirname.startswith('.'): del dirnames[i]
-        data_files.append([os.path.join("/usr/share/spud",dirpath), [os.path.join(dirpath, f) for f in filenames]])
+    # Ignore dirnames that start with '.'
+    for i, dirname in enumerate(dirnames):
+        if dirname.startswith('.'): del dirnames[i]
+    data_files.append([os.path.join("/usr/share/spud",dirpath), [os.path.join(dirpath, f) for f in filenames]])
 
 # Small hack for working with bdist_wininst.
 # See http://mail.python.org/pipermail/distutils-sig/2004-August/004134.html
