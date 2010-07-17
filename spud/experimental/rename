@@ -12,6 +12,7 @@ from optparse import OptionParser
 from django.conf import settings
 
 from spud import models
+from spud import media
 
 def rename(pk,name):
     p = models.photo.objects.get(pk=pk)
@@ -29,4 +30,16 @@ def main():
         return 0
 
 if __name__ == "__main__":
-    sys.exit(main())
+#    sys.exit(main())
+
+    for photo in models.photo.objects.filter(name__startswith="F"):
+        print photo.name
+        m = media.get_media(photo.get_orig_path())
+        src_timezone = pytz.timezone("Australia/Melbourne")
+        dst_timezone = pytz.timezone(photo.timezone)
+        dt = m.get_datetime(src_timezone,dst_timezone)
+        print photo.datetime
+        photo.datetime = dt.astimezone(pytz.utc).replace(tzinfo=None)
+        print photo.datetime
+        print
+        photo.move()
