@@ -27,7 +27,6 @@ set -e
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DESC="SPUD photo album"
 NAME=$0
-SCRIPTNAME=/etc/init.d/$NAME
 
 if [ -f "/etc/default/spud" ]
 then
