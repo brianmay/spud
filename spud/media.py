@@ -122,7 +122,7 @@ class media_raw(media):
 def get_media(file):
     (root,extension) = os.path.splitext(file)
     extension = extension.lower()
-    if extension == ".jpg":
+    if extension == ".jpg" or extension == ".tif":
         return media_jpeg(file)
     elif extension == ".avi":
         return media_video(file)
