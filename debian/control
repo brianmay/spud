@@ -7,7 +7,7 @@ Standards-Version: 3.8.4.0
 
 Package: spud
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-django (>= 1.2.1), python-django-south (>= 0.7)
+Depends: ${misc:Depends}, ${python:Depends}, python-django (>= 1.2.1), python-django-south (>= 0.7), django-ajax-selects
 Description: A Sortable Photo album Using a Django based database.
  Features 
  .
