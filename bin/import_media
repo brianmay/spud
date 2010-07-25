@@ -218,6 +218,7 @@ def main():
 
             d.offset = datetime.timedelta(hours=hh, minutes=mm, seconds=ss)
         else:
+            d.direction = '+'
             d.offset = datetime.timedelta(hours=0, minutes=0, seconds=0)
 
         warnings = 0
