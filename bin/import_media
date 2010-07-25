@@ -171,12 +171,12 @@ def main():
         d = defaults()
 
         d.photographer = None
-        if options.photographer != None:
+        if options.photographer is not None:
             (first_name,last_name) = options.photographer.split(" ")
             d.photographer = models.person.objects.get(first_name=first_name,last_name=last_name)
 
         d.location = None
-        if options.location != None:
+        if options.location is not None:
             d.location = models.place.objects.get(title=options.location)
 
         d.albums = []
@@ -192,13 +192,13 @@ def main():
             d.categorys.append(models.category.objects.get(category=category).pk)
 
         timezone = settings.TIME_ZONE
-        if options.src_timezone == None:
+        if options.src_timezone is None:
             d.src_timezone = pytz.timezone(settings.TIME_ZONE)
         else:
             d.src_timezone = pytz.timezone(options.src_timezone)
 
         timezone = settings.TIME_ZONE
-        if options.dst_timezone == None:
+        if options.dst_timezone is None:
             d.dst_timezone = pytz.timezone(settings.TIME_ZONE)
         else:
             d.dst_timezone = pytz.timezone(options.dst_timezone)
