@@ -53,6 +53,10 @@ def import_photo(file,d,options):
 
     m = media.get_media(file)
     dt = m.get_datetime(d.src_timezone,d.dst_timezone)
+    if d.direction == '+':
+        dt += d.offset
+    else:
+        dt -= d.offset
     path = "%04d/%02d/%02d"%(dt.year,dt.month,dt.day)
     name = os.path.basename(file)
 
@@ -145,6 +149,8 @@ def main():
                           help="Source timezone that camera was set to")
         parser.add_option("-t", "--timezone",action="store", dest="dst_timezone",
                           help="Timezone that should be used to display photos")
+        parser.add_option("-o", "--offset",action="store", dest="offset",
+                          help="Adjust the time by [+-]HH:MM:SS")
         (options, args) = parser.parse_args()
 
         options.action = "R"
@@ -196,6 +202,23 @@ def main():
             d.dst_timezone = pytz.timezone(settings.TIME_ZONE)
         else:
             d.dst_timezone = pytz.timezone(options.dst_timezone)
+
+        offset = options.offset
+        if offset is not None:
+            if offset[0] == '+' or offset[0] == '-':
+                d.direction = offset[0]
+                offset = offset[1:]
+            else:
+                d.direction = '+'
+            (hh,mm,ss) = offset.split(":")
+
+            hh = int(hh)
+            mm = int(mm)
+            ss = int(ss)
+
+            d.offset = datetime.timedelta(hours=hh, minutes=mm, seconds=ss)
+        else:
+            d.offset = datetime.timedelta(hours=0, minutes=0, seconds=0)
 
         warnings = 0
         for arg in args:
