@@ -86,16 +86,16 @@ d_start()
     do
         echo -n "$SEP$SITE"
         SEP=", "
-        if running "/var/run/$SITE.pid" "python"; then
+        if running "/var/run/spud/$SITE.pid" "python"; then
             echo -n " already running"
         else
-            rm -f /var/run/$SITE.pid
+            rm -f /var/run/spud/$SITE.pid
             start-stop-daemon --start --quiet \
-                       --pidfile /var/run/$SITE.pid \
+                       --pidfile /var/run/spud/$SITE.pid \
                        --chuid $RUN_AS --exec /usr/bin/env -- python \
-                       spud runfcgi \
-                       socket=/var/run/$SITE.socket \
-                       pidfile=/var/run/$SITE.pid \
+                       /usr/bin/spud runfcgi \
+                       socket=/var/run/spud/$SITE.socket \
+                       pidfile=/var/run/spud/$SITE.pid \
                        errlog=/var/log/$SITE.log \
                        outlog=/var/log/$SITE.log 
             chmod 400 /var/run/$SITE.pid
@@ -112,13 +112,13 @@ d_stop() {
     do
         echo -n "$SEP$SITE"
         SEP=", "
-        if ! running "/var/run/$SITE.pid" "python"; then
+        if ! running "/var/run/spud/$SITE.pid" "python"; then
                 echo -n " not running"
         else
-                start-stop-daemon --stop --quiet --pidfile /var/run/$SITE.pid \
+                start-stop-daemon --stop --quiet --pidfile /var/run/spud/$SITE.pid \
                                   || echo -n " not running"
-                if [ -f /var/run/$SITE.pid ]; then
-                   rm /var/run/$SITE.pid
+                if [ -f /var/run/spud/$SITE.pid ]; then
+                   rm /var/run/spud/$SITE.pid
                 fi
         fi
     done
