@@ -77,7 +77,7 @@ class media_jpeg(media):
         elif amount == "270":
             arg = "-2"
         else:
-            raise RuntimeError("rotate mount %s unknown"%(rotate))
+            raise RuntimeError("rotate amount %s unknown"%(amount))
 
         subprocess.check_call(["exiftran","-i",arg,self.get_path()])
 
