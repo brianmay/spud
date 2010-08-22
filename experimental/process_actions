@@ -16,7 +16,7 @@ from spud import models
 
 while True:
     try:
-        p = models.photo.objects.filter(action__isnull=False)[0]
+        p = models.photo.objects.filter(action__isnull=False).order_by()[0]
     except IndexError, e:
         exit(0)
 

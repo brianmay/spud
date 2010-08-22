@@ -110,4 +110,4 @@ class photo_lookup(object):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
             this is for displaying the currently selected items (in the case of a ManyToMany field)
         """
-        return models.photo.objects.filter(pk__in=ids)
+        return models.photo.objects.filter(pk__in=ids).order_by()
