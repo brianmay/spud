@@ -426,7 +426,7 @@ def object_photo_edit(request,object,number,photo_list,links):
                 elif action == "rotate 270":
                     photo_object.action = "270"
                 elif action == "rotate auto":
-                    photo_object.action = "AUTO"
+                    photo_object.action = "auto"
                 else:
                     raise Http404("Action '%s' not implemented"%(action))
 

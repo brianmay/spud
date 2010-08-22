@@ -29,7 +29,7 @@ while True:
         p.move()
         p.action = None
         p.save()
-    elif p.action == "AUTO":
+    elif p.action == "auto":
         print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
         p.move()
         p.rotate(p.action)

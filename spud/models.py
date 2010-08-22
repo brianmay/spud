@@ -33,7 +33,7 @@ PHOTO_ACTION = (
     ('D', 'delete'),
     ('R', 'regenerate thumbnail'),
     ('M', 'move photo'),
-    ('AUTO', 'rotate automatic'),
+    ('auto', 'rotate automatic'),
     ('90', 'rotate 90 degrees clockwise'),
     ('180', 'rotate 180 degrees clockwise'),
     ('270', 'rotate 270 degrees clockwise'),
@@ -56,7 +56,7 @@ def action_to_string(action):
         return u'regenerate'
     elif action == 'M':
         return u'move'
-    elif action == 'AUTO':
+    elif action == 'auto':
         return u'rotate auto'
     elif action == '90':
         return u'rotate 90'
@@ -787,7 +787,7 @@ class photo(base_model):
             return "photo_D"
         elif (self.action=="R"
                 or self.action=="M"
-                or self.action=="AUTO"
+                or self.action=="auto"
                 or self.action=="90" or self.action=="180" or self.action=="270"):
             return "photo_R"
         return ""
