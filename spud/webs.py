@@ -975,6 +975,13 @@ class photo_relation_web(base_web):
         breadcrumbs.append(breadcrumb(self.get_edit_url(instance), "edit"))
         return breadcrumbs
 
+    # get breadcrumbs to show while deleting this object
+    def get_delete_breadcrumbs(self, instance):
+        self.assert_instance_type(instance)
+        breadcrumbs = self.get_list_breadcrumbs()
+        breadcrumbs.append(breadcrumb(self.get_delete_url(instance), "delete"))
+        return breadcrumbs
+
 class photo_web(photo_base_web):
     web_id = "photo"
     model = models.photo

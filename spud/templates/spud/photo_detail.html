@@ -75,7 +75,7 @@
 <dt>Rating</dt><dd>{{object.rating}}</dd>
 {% if object.relations_1.all or object.relations_2.all or perms.spud.add_relation %}
 <dt>Related photos</dt><dd>
-  {% if perms.spud.add_relation %}
+  {% if perms.spud.add_photo_relation %}
     <ul class="object-tools">
     <li><a class="addlink" href="{{ object.get_create_photo_relation_url }}">Create</a></li>
     </ul>
@@ -84,22 +84,22 @@
   {% for relation in object.relations_1.all %}
             <tr>
             <td><a href="{% get_view_url relation.photo_2 %}">{{ relation.desc_2 }}</a>
-            {% if r_edit_perm %}
-            <td><a class="changelink" href="{{ relation.get_edit_url }}">Edit</a></td>
+            {% if perms.spud.edit_photo_relation %}
+            <td><a class="changelink" href="{% get_edit_url relation %}">Edit</a></td>
             {% endif %}
-            {% if r_delete_perm %}
-            <td><a class="deletelink" href="{{ relation.get_delete_url }}">Delete</a></td>
+            {% if perms.spud.delete_photo_relation %}
+            <td><a class="deletelink" href="{% get_delete_url relation %}">Delete</a></td>
             {% endif %}
             </tr>
   {% endfor %}
   {% for relation in object.relations_2.all %}
             <tr>
             <td><a href="{% get_view_url relation.photo_1 %}">{{ relation.desc_1 }}</a></td>
-            {% if r_edit_perm %}
-            <td><a class="changelink" href="{{ relation.get_edit_url }}">Edit</a></td>
+            {% if perms.spud.edit_photo_relation %}
+            <td><a class="changelink" href="{% get_edit_url relation %}">Edit</a></td>
             {% endif %}
-            {% if r_delete_perm %}
-            <td><a class="deletelink" href="{{ relation.get_delete_url }}">Delete</a></td>
+            {% if perms.spud.delete_photo_relation %}
+            <td><a class="deletelink" href="{% get_delete_url relation %}">Delete</a></td>
             {% endif %}
             </tr>
   {% endfor %}

@@ -27,6 +27,16 @@ def get_view_url(instance):
     web = webs.get_web_from_object(instance)
     return mark_safe(web.get_view_url(instance))
 
+@register.simple_tag
+def get_edit_url(instance):
+    web = webs.get_web_from_object(instance)
+    return mark_safe(web.get_edit_url(instance))
+
+@register.simple_tag
+def get_delete_url(instance):
+    web = webs.get_web_from_object(instance)
+    return mark_safe(web.get_delete_url(instance))
+
 @register.inclusion_tag('spud/show_error_list.html')
 def show_error_list(error_list):
     return {

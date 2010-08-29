@@ -762,3 +762,6 @@ class photo_relation(base_model):
     class Meta:
         db_table = u'zoph_photo_relations'
 
+    def __unicode__(self):
+        return "relationship '%s' to '%s'"%(self.photo_1,self.photo_2)
+
