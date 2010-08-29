@@ -15,37 +15,22 @@
 {% block content %}
 <h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
-{% if object %}
-{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user object.type %}
-{% if add_perm or edit_perm or delete_perm %}
-<ul class="object-tools">
-{% if add_perm %}
-<li><a class="addlink" href="{{ object.get_create_url }}">Create</a></li>
-{% endif %}
-{% if edit_perm %}
-<li><a class="changelink" href="{{ object.get_edit_url }}">Edit</a></li>
-{% endif %}
-{% if delete_perm %}
-<li><a class="deletelink" href="{{ object.get_delete_url }}">Delete</a></li>
-{% endif %}
-</ul>
-{% endif %}
+{% show_view_buttons web user object %}
 
 {% if object.album_description %}<p>{{object.album_description|urlizetrunc:40|linebreaks}}</p>{% endif %}
-{% endif %}
 
 {%ifequal page_obj.number 1 %}
 {% if object.children.all %}
 <div class="children">
     <ul class="photo_list">
     {% for album in object.children.all %}
-        <li class='photo_list_item' onClick='parent.location="{{ album.get_absolute_url }}"'>
-            <a href="{{ album.get_absolute_url }}">
+        <li class='photo_list_item' onClick='parent.location="{% get_view_url album %}"'>
+            <a href="{% get_view_url album %}">
                 {% with album.get_cover_photo as photo %}{% if photo %}<img src='{% get_thumb_url photo "thumb" %}' alt=''/><br/>{% endif %}{% endwith %}
                 <div class='title'>{{ album }}</div>
             </a>
             {% if album.sortname %}<div class='sort'>({{album.sortname}} {{album.sortorder}})</div>{% endif %}
-            {% if album.album_description %}<div class='desc' onClick='parent.location="{{ album.get_absolute_url }}"'>{{album.album_description|urlizetrunc:20}}</div>{% endif %}
+            {% if album.album_description %}<div class='desc' onClick='parent.location="{% get_view_url album %}"'>{{album.album_description|urlizetrunc:20}}</div>{% endif %}
         </li>
     {% endfor %}
     <br class="clear"/>
@@ -54,9 +39,9 @@
 {% endif %}
 {% endifequal %}
 
-{% show_photo_list page_obj links %}
+{% show_photo_list page_obj web object %}
 
-{% pagination page_obj %}
+{% pagination page_obj web %}
 
 <h2>Search</h2>
 

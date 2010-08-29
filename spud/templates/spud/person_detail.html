@@ -11,18 +11,7 @@
 {% block content %}
 <h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
-{% if object %}
-{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user object.type %}
-{% if edit_perm or delete_perm %}
-<ul class="object-tools">
-{% if edit_perm %}
-<li><a class="changelink" href="{{ object.get_edit_url }}">Edit</a></li>
-{% endif %}
-{% if delete_perm %}
-<li><a class="deletelink" href="{{ object.get_delete_url }}">Delete</a></li>
-{% endif %}
-</ul>
-{% endif %}
+{% show_view_buttons web user object %}
 
 {% ifequal page_obj.number 1 %}
 {% if user.is_staff %}
@@ -133,10 +122,9 @@
 </dL>
 {% endif %}
 {% endifequal %}
-{% endif %}
 
-{% show_photo_list page_obj links %}
+{% show_photo_list page_obj web object %}
 
-{% pagination page_obj %}
+{% pagination page_obj web %}
 
 {% endblock %}

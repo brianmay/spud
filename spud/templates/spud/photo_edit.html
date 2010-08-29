@@ -12,7 +12,7 @@
 
 <h1>Edit {{ object }} ({{ page_obj.number }} of {{ page_obj.paginator.num_pages }})</h1>
 
-<form method="post" action="{% photo_edit_url links page_obj.number %}">{% csrf_token %}
+<form method="post" action="{% photo_edit_url web parent page_obj.number %}">{% csrf_token %}
 <input type="hidden" name="photo_id" value="{{ object.pk }}" />
 <input type="submit" name="action" value="nop"/>
 <input type="submit" name="action" value="delete"/>
@@ -25,7 +25,7 @@
 
 {% if object.action %}
 <ul class="messagelist">
-<li>Marked action: {% show_action_with_link object.action %}</li>
+<li>Marked action: {% show_action_with_url object.action %}</li>
 </ul>
 {% endif %}
 
@@ -83,7 +83,6 @@
   {% endif %}
   <table>
   {% for relation in object.relations_1.all %}
-            {% get_permissions_from_type "r_add_perm" "r_edit_perm" "r_delete_perm" user relation.type %}
             <tr>
             <td><a href="{{ relation.photo_2.get_absolute_url }}">{{ relation.desc_2 }}</a>
             {% if r_edit_perm %}
@@ -95,7 +94,6 @@
             </tr>
   {% endfor %}
   {% for relation in object.relations_2.all %}
-            {% get_permissions_from_type "r_add_perm" "r_edit_perm" "r_delete_perm" user relation.type %}
             <tr>
             <td><a href="{{ relation.photo_1.get_absolute_url }}">{{ relation.desc_1 }}</a></td>
             {% if r_edit_perm %}
@@ -109,16 +107,7 @@
   </table>
 </dd>
 {% endif %}
-{% if user.is_staff %}
-{% if object.similar_photos.all %}
-<dt>Similar photos</dt><dd>
-  {% for photo in object.similar_photos.all %}
-    <a href="{{ photo.get_absolute_url }}">{{photo}}</a>{% if not forloop.last %}; {% endif %}
-  {% endfor %}
-</dd>
-{% endif %}
-{% endif %}
-<dt>Action</dt><dd>{% show_action_with_link object.action %}</dd>
+<dt>Action</dt><dd>{% show_action_with_url object.action %}</dd>
 </dl>
 </div>
 

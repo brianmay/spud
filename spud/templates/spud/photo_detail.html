@@ -11,7 +11,7 @@
 
 {% block content %}
 {% if page_obj %}
-{% pagination_with_links page_obj links %}
+{% pagination_with_parent page_obj web parent %}
 {% endif %}
 
 <h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
@@ -22,16 +22,11 @@
 
 {% if object.action %}
 <ul class="messagelist">
-<li>Marked action: {% show_action_with_link object.action %}</li>
+<li>Marked action: {% show_action_with_url object.action %}</li>
 </ul>
 {% endif %}
 
-{% get_permissions_from_type "add_perm" "edit_perm" "delete_perm" user object.type %}
-<ul class="object-tools">
-<li><a class="linklink" href="{{ object.get_absolute_url }}">Link</a></li>
-{% if edit_perm %}<li><a class="changelink" href="{% photo_edit_url links page_obj.number %}">Edit</a></li>{% endif %}
-{% if edit_perm %}<li><a class="linklink" href="{{ object.get_orig_url }}">Orig</a></li>{% endif %}
-</ul>
+{% show_photo_buttons user web parent page_obj.number object %}
 
 <div class='photo_detail {{object.get_style}}'>
 <div class='photo_detail_photo'>
@@ -87,7 +82,6 @@
   {% endif %}
   <table>
   {% for relation in object.relations_1.all %}
-            {% get_permissions_from_type "r_add_perm" "r_edit_perm" "r_delete_perm" user relation.type %}
             <tr>
             <td><a href="{{ relation.photo_2.get_absolute_url }}">{{ relation.desc_2 }}</a>
             {% if r_edit_perm %}
@@ -99,7 +93,6 @@
             </tr>
   {% endfor %}
   {% for relation in object.relations_2.all %}
-            {% get_permissions_from_type "r_add_perm" "r_edit_perm" "r_delete_perm" user relation.type %}
             <tr>
             <td><a href="{{ relation.photo_1.get_absolute_url }}">{{ relation.desc_1 }}</a></td>
             {% if r_edit_perm %}
@@ -113,7 +106,7 @@
   </table>
 </dd>
 {% endif %}
-<dt>Action</dt><dd>{% show_action_with_link object.action %}</dd>
+<dt>Action</dt><dd>{% show_action_with_url object.action %}</dd>
 </dl>
 </div>
 

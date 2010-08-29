@@ -1,4 +1,4 @@
-from spud import models
+from spud import models, webs
 from django.db.models import Q
 from django.utils.html import escape
 
@@ -7,7 +7,8 @@ def format_result(object):
     if photo is None:
         return u"%s"%(escape(object))
     else:
-        return u"<img src='%s' alt=""/>%s"%(photo.get_thumb_url("thumb"),escape(object))
+        web = webs.photo_web()
+        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(photo,"thumb"),escape(object))
 
 class person_lookup(object):
 

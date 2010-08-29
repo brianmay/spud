@@ -35,12 +35,17 @@ def set_category_list(photo, pk_list):
     for pk in pk_list:
         pa = models.photo_category.objects.create(photo=photo,category_id=pk)
 
-for p in models.photo.objects.filter(camera_model__contains="5D"):
+for p in models.photo.objects.filter(albums__in=[474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486]):
+    print p.name
+    if p.camera_model == "Canon EOS 350D DIGITAL":
        print p, p.datetime
-       p.datetime = p.datetime-datetime.timedelta(hours=1)
+       p.datetime = p.datetime+datetime.timedelta(seconds=3)
        print p, p.datetime
        print
        p.save()
+    else:
+        print p.datetime
+        print
 exit(0)
 
 a = models.album.objects.get(pk=353,album="Rialto 2010")

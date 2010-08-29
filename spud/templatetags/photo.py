@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*- 
 
+import pytz
+
 from django import template
 from django.utils.safestring import mark_safe
 from django.utils.http import urlquote
 from django.core.urlresolvers import reverse
-
-import pytz
+from django.utils.html import conditional_escape
 from django.conf import settings
+from django.template import RequestContext
 
 from spud.models import sex_to_string, action_to_string
+from spud import webs
 
 register = template.Library()
 
@@ -16,7 +19,13 @@ DOT = '.'
 
 @register.simple_tag
 def get_thumb_url(photo,size):
-    return mark_safe(photo.get_thumb_url(size))
+    web = webs.photo_web()
+    return mark_safe(web.get_thumb_url(photo,size))
+
+@register.simple_tag
+def get_view_url(instance):
+    web = webs.get_web_from_object(instance)
+    return mark_safe(web.get_view_url(instance))
 
 @register.inclusion_tag('spud/show_error_list.html')
 def show_error_list(error_list):
@@ -24,54 +33,64 @@ def show_error_list(error_list):
         'error_list': error_list,
     };
 
+@register.inclusion_tag('spud/show_object_list.html', takes_context=True)
+def show_list(context, table, rows, web, sort="sort"):
+    dict = RequestContext(context['request'])
+    dict['table'] = table
+    dict['web'] = web
+    dict['rows'] = rows
+    dict['sort'] = sort
+    return dict
+
 @register.inclusion_tag('spud/show_photo_list.html')
-def show_photo_list(page_obj, links):
+def show_photo_list(page_obj, web, parent):
         return {
                 'page_obj': page_obj,
-                'links': links,
+                'web': web,
+                'parent': parent,
                 };
 
 @register.inclusion_tag('spud/breadcrumbs.html')
 def show_breadcrumbs(breadcrumbs):
         return {'breadcrumbs': breadcrumbs[:-1], 'object': breadcrumbs[-1] };
 
-def _get_link(links,i):
-    if links is not None:
-        return links.photo_detail_link(i)
+def _get_url(web, instance, i):
+    if instance is not None:
+        return web.photo_detail_url(instance,i)
     else:
         return u"?page=%d"%(i)
 
 @register.simple_tag
-def paginator_random(page_obj,links):
-    if links is not None:
-        return mark_safe(u"<a href='%s' accesskey='r'>R</a>" % (links.photo_detail_link("random")))
+def paginator_random(page_obj, web, instance):
+    if instance is not None:
+        return mark_safe(u"<a href='%s' accesskey='r'>R</a>" % (web.photo_detail_url(instance, "random")))
     else:
         return mark_safe(u'')
 
 @register.simple_tag
-def paginator_prev(page_obj,links):
+def paginator_prev(page_obj, web, instance):
     if page_obj.number <= 1:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s' accesskey='p'>&lt;</a>" % (_get_link(links,page_obj.number-1)))
+        return mark_safe(u"<a href='%s' accesskey='p'>&lt;</a>" % (_get_url(web, instance, page_obj.number-1)))
 
 @register.simple_tag
-def paginator_next(page_obj,links):
+def paginator_next(page_obj, web, instance):
     if page_obj.number >= page_obj.paginator.num_pages:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s' accesskey='n'>&gt;</a>" % (_get_link(links,page_obj.number+1)))
+        return mark_safe(u"<a href='%s' accesskey='n'>&gt;</a>" % (_get_url(web, instance, page_obj.number+1)))
 
 @register.simple_tag
-def paginator_number(page_obj,links,i):
+def paginator_number(page_obj, web, instance, i):
     if i == DOT:
         return mark_safe(u'... ')
     elif i == page_obj.number:
         return mark_safe(u'<span class="this-page">%d</span> ' % (i))
     else:
-        return mark_safe(u'<a href="%s"%s>%d</a> ' % (_get_link(links,i), (i == page_obj.paginator.num_pages and ' class="end"' or ''), i))
+        return mark_safe(u'<a href="%s"%s>%d</a> ' % (_get_url(web, instance, i), (i == page_obj.paginator.num_pages and ' class="end"' or ''), i))
 
-def _pagination(page_obj, links):
+def _pagination(page_obj, web, instance):
     paginator, page_num = page_obj.paginator, page_obj.number
 
     if paginator.num_pages <= 1:
@@ -109,24 +128,25 @@ def _pagination(page_obj, links):
         'pagination_required': pagination_required,
         'page_obj': page_obj,
         'page_range': page_range,
-        'links': links
+        'web': web,
+        'object': instance,
     }
 
 @register.inclusion_tag('spud/pagination.html')
-def pagination(page_obj):
-    return _pagination(page_obj, None)
+def pagination(page_obj, web):
+    return _pagination(page_obj, web, None)
 
 @register.inclusion_tag('spud/pagination.html')
-def pagination_with_links(page_obj, links):
-    return _pagination(page_obj, links)
+def pagination_with_parent(page_obj, web, instance):
+    return _pagination(page_obj, web, instance)
 
 @register.simple_tag
-def photo_detail_url_by_page(links,page_obj,number):
-    return links.photo_detail_link(page_obj.start_index()+number)
+def photo_detail_url_by_page(web, instance, page_obj, number):
+    return web.photo_detail_url(instance, page_obj.start_index()+number)
 
 @register.simple_tag
-def photo_edit_url(links,number):
-    return links.photo_edit_link(number)
+def photo_edit_url(web, instance, number):
+    return web.photo_edit_url(instance, number)
 
 @register.inclusion_tag('spud/photo_edit_buttons.html')
 def photo_edit_buttons(page_obj):
@@ -169,7 +189,7 @@ def show_action(action):
     return mark_safe(action_to_string(action))
 
 @register.simple_tag
-def show_action_with_link(action):
+def show_action_with_url(action):
     value = action_to_string(action)
     if action is None:
         action="none";
@@ -177,30 +197,68 @@ def show_action_with_link(action):
             reverse("action_detail",kwargs={'object_id': action}),
             value))
 
-@register.tag
-def get_permissions_from_type(parser, token):
-    try:
-        tag_name, add_tag, edit_tag, delete_tag, user, type = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError, "%r tag requires exactly four arguments" % token.contents.split()[0]
-    return get_permissions_from_type_node(add_tag, edit_tag, delete_tag, user, type)
+class url_with_param_node(template.Node):
+    def __init__(self, changes):
+        self.changes = []
+        for key, newvalue in changes:
+            key = template.Variable(key)
+            newvalue = template.Variable(newvalue)
+            self.changes.append( (key,newvalue,) )
 
-class get_permissions_from_type_node(template.Node):
-    def __init__(self, add_tag, edit_tag, delete_tag, user, type):
-        self.add_tag = template.Variable(add_tag)
-        self.edit_tag = template.Variable(edit_tag)
-        self.delete_tag = template.Variable(delete_tag)
-        self.user = template.Variable(user)
-        self.type = template.Variable(type)
     def render(self, context):
-        add_tag = self.add_tag.resolve(context)
-        edit_tag = self.edit_tag.resolve(context)
-        delete_tag = self.delete_tag.resolve(context)
-        user = self.user.resolve(context)
-        type = self.type.resolve(context)
+        if 'request' not in context:
+            raise template.TemplateSyntaxError, "request not in context"
 
-        context[add_tag] = type.has_add_perms(user)
-        context[edit_tag] = type.has_edit_perms(user)
-        context[delete_tag] = type.has_delete_perms(user)
-        return ''
+        request = context['request']
 
+        result = {}
+        for key, newvalue in request.GET.items():
+            result[key] = newvalue
+
+        for key, newvalue in self.changes:
+            key = key.resolve(context)
+            newvalue = newvalue.resolve(context)
+            result[key] = newvalue
+
+        quoted = []
+        for key, newvalue in result.items():
+            quoted.append("%s=%s"%(urlquote(key),urlquote(newvalue)))
+
+        return conditional_escape('?'+"&".join(quoted))
+
+@register.tag
+def url_with_param(parser, token):
+    bits = token.split_contents()
+    qschanges = []
+    for i in bits[1:]:
+        try:
+            key, newvalue = i.split('=', 1);
+            qschanges.append( (key,newvalue,) )
+        except ValueError:
+            raise template.TemplateSyntaxError, "Argument syntax wrong: should be key=value"
+    return url_with_param_node(qschanges)
+
+@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
+def show_list_buttons(context, web, user):
+    dict = {}
+    dict['buttons'] = web.get_list_buttons(user)
+    return dict
+
+@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
+def show_view_buttons(context, web, user, instance):
+    dict = {}
+    dict['buttons'] = web.get_view_buttons(user, instance)
+    return dict
+
+@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
+def show_object_view_buttons(context, user, instance):
+    web = webs.get_web_from_object(instance)
+    dict = {}
+    dict['buttons'] = web.get_view_buttons(user, instance)
+    return dict
+
+@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
+def show_photo_buttons(context, user, web, instance, number, photo):
+    dict = {}
+    dict['buttons'] = web.get_photo_buttons(user, instance, number, photo)
+    return dict

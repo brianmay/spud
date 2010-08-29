@@ -11,8 +11,11 @@
 {% block content %}
 <h1>Action: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
 
-{% show_photo_list page_obj links %}
+{% show_view_buttons web user object %}
 
-{% pagination page_obj %}
+
+{% show_photo_list page_obj web object %}
+
+{% pagination page_obj web %}
 
 {% endblock %}

@@ -2,11 +2,11 @@
 {% load i18n %}
 {% if pagination_required %}
 <p class="paginator">
-{% paginator_prev page_obj links %}
-{% paginator_random page_obj links %}
-{% paginator_next page_obj links %}
+{% paginator_prev page_obj web object %}
+{% paginator_random page_obj web object %}
+{% paginator_next page_obj web object %}
 {% for i in page_range %}
-    {% paginator_number page_obj links i %}
+    {% paginator_number page_obj web object i %}
 {% endfor %}
 </p>
 {% endif %}
