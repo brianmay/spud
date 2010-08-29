@@ -41,33 +41,35 @@ class person_table(tables.ModelTable):
         photo = data.get_cover_photo()
         if photo is not None:
             web = webs.photo_web()
-            return mark_safe(u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,'thumb')))
+            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,'thumb'))
         else:
-            return mark_safe(u"No Photo")
+            value = u"No Photo"
+
+        return mark_safe(u"<a href='%s'>%s</a>"%(self.web.get_view_url(data),value))
 
     def render_called(self, data):
         value = data.called
         if not value:
             value="-"
-        return mark_safe(u"<a href='%s'>%s</a>"%(self.web.get_view_url(data),conditional_escape(value)))
+        return mark_safe(conditional_escape(value))
 
     def render_first_name(self, data):
         value = data.first_name
         if not value:
             value="-"
-        return mark_safe(u"<a href='%s'>%s</a>"%(self.web.get_view_url(data),conditional_escape(value)))
+        return mark_safe(conditional_escape(value))
 
     def render_middle_name(self, data):
         value = data.middle_name
         if not value:
             value="-"
-        return mark_safe(u"<a href='%s'>%s</a>"%(self.web.get_view_url(data),conditional_escape(value)))
+        return mark_safe(conditional_escape(value))
 
     def render_last_name(self, data):
         value = data.last_name
         if not value:
             value="-"
-        return mark_safe(u"<a href='%s'>%s</a>"%(self.web.get_view_url(data),conditional_escape(value)))
+        return mark_safe(conditional_escape(value))
 
     def render_edit(self, data):
         web = webs.get_web_from_object(data)
