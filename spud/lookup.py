@@ -105,7 +105,8 @@ class photo_lookup(object):
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
-        return u"<img src='%s' alt=""/>%s"%(object.get_thumb_url("thumb"),escape(object))
+        web = webs.photo_web()
+        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(object,"thumb"),escape(object))
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.

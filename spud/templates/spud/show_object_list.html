@@ -1,0 +1,31 @@
+{% load photo %}
+{% if rows %}
+<table>
+<tr>
+    {% for column in table.columns %}
+    <th>
+    {% if column.sortable %}
+        <a href="{% url_with_param sort=column.name_toggled %}">{{ column }}</a>
+        {% if column.is_ordered_straight %}<img src="{{ MEDIA_URL }}img/admin/arrow-down.gif" />{% endif %}
+        {% if column.is_ordered_reverse %}<img src="{{ MEDIA_URL }}img/admin/arrow-up.gif" />{% endif %}
+        </a>
+    {% else %}
+        {{ column }}
+    {% endif %}
+    </th>
+    {% endfor %}
+</tr>
+{% for row in rows %}
+    {% with row.data.error_list as error_list %}{% if error_list %}
+    <tr><td colspan='20'>{% show_error_list error_list %}</td></tr>
+    {% endif %}{% endwith %}
+    <tr>
+    {% for value in row %}
+        <td>{{ value }}</td>
+    {% endfor %}
+    </tr>
+{% endfor %}
+</table>
+{% else %}
+No {{ web.plural_name }} available.
+{% endif %}

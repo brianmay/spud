@@ -770,9 +770,9 @@ def photo_relation_add(request, object_id=None):
     web = webs.photo_relation_web()
 
     if object_id is not None:
-        photo = get_object_or_404(models.photo, pk=object_id)
+        web.initial_photo = get_object_or_404(models.photo, pk=object_id)
     else:
-        photo = None
+        web.initial_photo = None
 
     return web.object_add(request)
 
