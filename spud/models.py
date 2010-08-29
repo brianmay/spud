@@ -244,22 +244,6 @@ class category(base_model):
     def __unicode__(self):
         return self.category
 
-    @models.permalink
-    def get_absolute_url(self):
-        return('category_detail', [ str(self.category_id)])
-
-    @models.permalink
-    def get_create_url(self):
-        return('category_create', [ str(self.category_id)])
-
-    @models.permalink
-    def get_edit_url(self):
-        return('category_edit', [ str(self.category_id)])
-
-    @models.permalink
-    def get_delete_url(self):
-        return('category_delete', [ str(self.category_id)])
-
     def get_full_name(self):
         list = []
 
@@ -338,13 +322,6 @@ class person(base_model):
         if self.last_name is not None and self.last_name!="":
             result += u" %s"%(self.last_name)
         return result
-
-    def get_breadcrumbs(self):
-        breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("spud_root"),"home"))
-        breadcrumbs.append(breadcrumb(reverse("person_list"),"people"))
-        breadcrumbs.append(breadcrumb(self.get_absolute_url(),self))
-        return breadcrumbs
 
     def check_delete(self):
         errorlist = []
@@ -490,12 +467,6 @@ class photo(base_model):
         return ""
 
     # Other stuff
-    def get_breadcrumbs(self):
-        breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("spud_root"),"home"))
-        breadcrumbs.append(breadcrumb(self.get_absolute_url(),self))
-        return breadcrumbs
-
     def check_delete(self):
         errorlist = []
         return errorlist
