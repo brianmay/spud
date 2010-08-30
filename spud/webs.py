@@ -132,6 +132,7 @@ class base_web(object):
         return self.model()
 
     def pre_save(self, instance, form):
+        self.assert_instance_type(instance)
         return True
 
     ###############
@@ -347,6 +348,7 @@ class base_web(object):
                     return HttpResponseRedirect(url)
         else:
             instance = self.get_instance(**kwargs)
+            self.assert_instance_type(instance)
             form = self.form(instance=instance)
 
         return render_to_response(template, {
@@ -372,7 +374,7 @@ class base_web(object):
             if form.is_valid():
                 valid = True
                 instance = form.save(commit=False)
-                valid = pre_save(instance=instance, form=form)
+                valid = self.pre_save(instance=instance, form=form)
 
                 if valid:
                     instance.save()
