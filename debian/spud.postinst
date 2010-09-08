@@ -7,7 +7,7 @@ case "$1" in
         then
             cp /usr/share/doc/spud/examples/settings.py /etc/spud/settings.py
         fi
-        spud_update_scret_key
+        spud_update_secret_key
     ;;
     (abort-upgrade|abort-remove|abort-deconfigure)
         exit 0

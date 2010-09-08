@@ -18,7 +18,7 @@ class person_lookup(object):
 
     def format_item(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
-        return unicode(object)
+        return escape(unicode(object))
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
@@ -41,7 +41,7 @@ class place_lookup(object):
 
     def format_item(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
-        return unicode(object)
+        return escape(unicode(object))
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
@@ -61,7 +61,7 @@ class album_lookup(object):
 
     def format_item(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
-        return unicode(object)
+        return escape(unicode(object))
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
@@ -81,7 +81,7 @@ class category_lookup(object):
 
     def format_item(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
-        return unicode(object)
+        return escape(unicode(object))
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
@@ -101,7 +101,7 @@ class photo_lookup(object):
 
     def format_item(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
-        return unicode(object)
+        return escape(unicode(object))
 
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """

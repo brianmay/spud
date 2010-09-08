@@ -50,9 +50,9 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'photos',
     'spud',
     'spud.comments',
-    'photos',
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',
