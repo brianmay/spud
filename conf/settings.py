@@ -40,5 +40,6 @@ DEFAULT_FROM_EMAIL = "Name <email@example.org>"
 IMAGE_URL="http://website.example.org/images/"
 IMAGE_PATH="/var/lib/spud/"
 
-LOGIN_URL="/spud/accounts/login/"
+LOGIN_URL="/spud/account/login/"
+LOGOUT_URL = "/spud/account/login/"
 LOGIN_REDIRECT_URL="/spud/"
