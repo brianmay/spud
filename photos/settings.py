@@ -11,12 +11,12 @@ MEDIA_ROOT = "/usr/share/spud/media"
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/media/'
+MEDIA_URL = '/spud/media/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/admin_media/'
+ADMIN_MEDIA_PREFIX = '/spud/admin_media/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -63,6 +63,10 @@ INSTALLED_APPS = (
     'south',
 )
 
+LOGIN_URL = "/spud/account/login/"
+LOGIN_REDIRECT_URL = "/spud/"
+LOGOUT_URL = "/spud/account/login/"
+
 AJAX_LOOKUP_CHANNELS = {
     'person' : ('spud.lookup', 'person_lookup'),
     'place' : ('spud.lookup', 'place_lookup'),
@@ -72,8 +76,6 @@ AJAX_LOOKUP_CHANNELS = {
 }
 
 COMMENTS_APP = "spud.comments"
-
-LOGIN_REDIRECT_URL = "/"
 
 IMAGE_CHECK_EXISTS=True
 IMAGE_SIZES = {
