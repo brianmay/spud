@@ -3,20 +3,27 @@ set -e
 
 case "$1" in
     (configure)
+        for i in /var/lib/spud
+        do
+            # only do something when no setting exists
+            if ! dpkg-statoverride --list $i >/dev/null 2>&1
+            then
+                dpkg-statoverride --update --add root www-data 775 $i
+            fi
+        done
+
         if [ ! -f /etc/spud/settings.py ]
         then
             cp /usr/share/doc/spud/examples/settings.py /etc/spud/settings.py
         fi
-        spud_update_secret_key
-    ;;
-    (abort-upgrade|abort-remove|abort-deconfigure)
-        exit 0
-    ;;
-    (*)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 0
-    ;;
 esac
 
-
 #DEBHELPER#
+
+case "$1" in
+    (configure)
+        spud_update_secret_key
+        spud syncdb --migrate
+        chown www-data:www-data /var/lib/spud/spud.db
+    ;;
+esac

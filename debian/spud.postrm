@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+case "$1" in
+    (purge)
+        for i in /var/lib/spud
+        do
+            if dpkg-statoverride --list $i >/dev/null 2>&1
+            then
+                dpkg-statoverride --remove $i
+            fi
+        done
+        rm /etc/spud/settings.py*
+        rm /var/lib/spud/spud.db*
+    ;;
+esac
+
+
+#DEBHELPER#

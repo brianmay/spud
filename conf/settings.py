@@ -11,8 +11,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'database.db',           # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '/var/lib/spud/spud.db', # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -39,3 +39,6 @@ DEFAULT_FROM_EMAIL = "Name <email@example.org>"
 
 IMAGE_URL="http://website.example.org/images/"
 IMAGE_PATH="/var/lib/spud/"
+
+LOGIN_URL="/spud/accounts/login/"
+LOGIN_REDIRECT_URL="/spud/"

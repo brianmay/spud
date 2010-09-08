@@ -1,2 +1,3 @@
 /etc/spud
-/var/run/spud
+/var/lib/spud
+/usr/share/spud

@@ -1,0 +1,2 @@
+conf/apache2.conf /etc/spud
+conf/spud.wsgi /usr/share/spud
