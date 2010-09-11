@@ -692,7 +692,7 @@ def search_list(request):
     web = webs.search_web()
     breadcrumbs = web.get_list_breadcrumbs()
 
-    error = webs.check_list_perms(request, breadcrumbs, web)
+    error = web.check_list_perms(request, breadcrumbs)
     if error is not None:
         return error
 
