@@ -39,14 +39,14 @@
     {% if object.work_of.all %}
     <dt>Work of</dt><dd>
       {% for place in object.work_of.all %}
-        <a href="{{ place.get_absolute_url }}">{{place}}</a>{% if not forloop.last %}; {% endif %}
+        <a href="{% get_view_url place %}">{{place}}</a>{% if not forloop.last %}; {% endif %}
       {% endfor %}
     </dd>
     {% endif %}
     {% if object.home_of.all %}
     <dt>Home of</dt><dd>
       {% for place in object.home_of.all %}
-        <a href="{{ place.get_absolute_url }}">{{place}}</a>{% if not forloop.last %}; {% endif %}
+        <a href="{% get_view_url place %}">{{place}}</a>{% if not forloop.last %}; {% endif %}
       {% endfor %}
     </dd>
     {% endif %}

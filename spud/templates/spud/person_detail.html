@@ -38,10 +38,10 @@
 <dt>Date of death</dt><dd>{{object.dod}}</dd>
 {% endif %}
 {% if object.home %}
-<dt>Home</dt><dd><a href="{{object.home.get_absolute_url}}">{{object.home}}</a></dd>
+<dt>Home</dt><dd><a href="{% get_view_url object.home %}">{{object.home}}</a></dd>
 {% endif %}
 {% if object.work %}
-<dt>Work</dt><dd><a href="{{object.work.get_absolute_url}}">{{object.work}}</a></dd>
+<dt>Work</dt><dd><a href="{% get_view_url object.work %}">{{object.work}}</a></dd>
 {% endif %}
 {% if object.notes %}
 <dt>Notes</dt><dd>{{object.notes|urlizetrunc:40|linebreaks}}</dd>
@@ -52,34 +52,34 @@
 {% if object.grandparents.all %}
 <dt>Grand Parents</dt><dd>
   {% for person in object.grandparents.all %}
-    <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
 {% if object.father or object.mother %}
   <dt>Parents</dt><dd>
   {% if object.father %}
-    <a href="{{object.father.get_absolute_url}}">{{object.father}}</a>{% endif %}{% if object.father and object.mother %};{% endif %}
+    <a href="{% get_view_url object.father %}">{{object.father}}</a>{% endif %}{% if object.father and object.mother %};{% endif %}
   {% if object.mother %}
-    <a href="{{object.mother.get_absolute_url}}">{{object.mother}}</a>
+    <a href="{% get_view_url object.mother %}">{{object.mother}}</a>
   {% endif %}
   </dd>
 {% endif %}
 {% if object.uncles_aunts.all %}
 <dt>Uncles/Aunts</dt><dd>
   {% for person in object.uncles_aunts.all %}
-    <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
 {% if object.spouse or object.reverse_spouses.all %}
   <dt>Spouse/Partner</dt>
   {% if object.spouse %}
-  <a href="{{object.spouse.get_absolute_url}}">{{object.spouse}}</a>
+  <a href="{% get_view_url object.spouse %}">{{object.spouse}}</a>
   {% endif %}
   {% if object.reverse_spouses.all %}
     ({% for person in object.reverse_spouses.all %}
-      <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+      <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
     {% endfor %})
   {% endif %}
   </dd>
@@ -87,35 +87,35 @@
 {% if object.siblings.all %}
 <dt>Siblings</dt><dd>
   {% for person in object.siblings.all %}
-    <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
 {% if object.cousins.all %}
 <dt>Cousins</dt><dd>
   {% for person in object.cousins.all %}
-    <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
 {% if object.children.all %}
 <dt>Children</dt><dd>
   {% for person in object.children.all %}
-    <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
 {% if object.nephews_nieces.all %}
 <dt>Nephews/Nieces</dt><dd>
   {% for person in object.nephews_nieces.all %}
-    <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
 {% if object.grandchildren.all %}
 <dt>Grand Children</dt><dd>
   {% for person in object.grandchildren.all %}
-    <a href="{{ person.get_absolute_url }}">{{person}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}

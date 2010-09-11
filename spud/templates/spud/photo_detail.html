@@ -49,28 +49,28 @@
 {% if object.photo_person_set.all %}
 <dt>People</dt><dd>
   {% for pp in object.photo_person_set.all %}
-    <a href="{{ pp.person.get_absolute_url }}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 {% endif %}
 {% if object.location %}
-<dt>Location</dt><dd><a href="{{ object.location.get_absolute_url }}">{{ object.location }}</a></dd>
+<dt>Location</dt><dd><a href="{% get_view_url object.location %}">{{ object.location }}</a></dd>
 {% endif %}
 <dt>Albums</dt><dd>
   {% for pa in object.photo_album_set.all %}
-    <a href="{{ pa.album.get_absolute_url }}">{{pa.album}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url pa.album %}">{{pa.album}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 <dt>Categories</dt><dd>
   {% for pc in object.photo_category_set.all %}
-    <a href="{{ pc.category.get_absolute_url }}">{{pc.category}}</a>{% if not forloop.last %}; {% endif %}
+    <a href="{% get_view_url pc.category %}">{{pc.category}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 <dt>Date &amp; time</dt><dd>
   {{ object.datetime|show_datetime:object.timezone }}
 </dd>
 {% if object.photographer %}
-<dt>Photographer</dt><dd><a href="{{ object.photographer.get_absolute_url }}">{{object.photographer}}</a></dd>
+<dt>Photographer</dt><dd><a href="{% get_view_url object.photographer %}">{{object.photographer}}</a></dd>
 {% endif %}
 <dt>Rating</dt><dd>{{object.rating}}</dd>
 {% if object.relations_1.all or object.relations_2.all or perms.spud.add_relation %}

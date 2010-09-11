@@ -24,13 +24,13 @@
 <div class="children">
     <ul class="photo_list">
     {% for category in object.children.all %}
-        <li class='photo_list_item' onClick='parent.location="{{ category.get_absolute_url }}"'>
-            <a href="{{ category.get_absolute_url }}">
+        <li class='photo_list_item' onClick='parent.location="{% get_view_url category %}"'>
+            <a href="{% get_view_url category %}">
                 {% with category.get_cover_photo as photo %}{% if photo %}<img src='{% get_thumb_url photo "thumb" %}' alt=''/><br/>{% endif %}{% endwith %}
                 <div class='title'>{{ category }}</div>
             </a>
             {% if category.sortname %}<div class='sort'>({{category.sortname}} {{category.sortorder}})</div>{% endif %}
-            {% if category.category_description %}<div class='desc' onClick='parent.location="{{ category.get_absolute_url }}"'>{{category.category_description|urlizetrunc:20}}</div>{% endif %}
+            {% if category.category_description %}<div class='desc' onClick='parent.location="{% get_view_url category %}"'>{{category.category_description|urlizetrunc:20}}</div>{% endif %}
         </li>
     {% endfor %}
     <br class="clear"/>
