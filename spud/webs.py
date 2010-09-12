@@ -804,6 +804,15 @@ class album_web(photo_base_web):
     # LIST ACTION #
     ###############
 
+    def get_list_breadcrumbs(self):
+        breadcrumbs = self.get_breadcrumbs()
+        breadcrumbs.append(breadcrumb(reverse("album_todo"), "todo"))
+        return breadcrumbs
+
+    def get_list_buttons(self, user):
+        buttons = []
+        return buttons
+
     ###############
     # VIEW ACTION #
     ###############
