@@ -20,7 +20,6 @@ from spud import tables
 from datetime import *
 
 import re
-import pytz
 
 def spud_root(request):
     breadcrumbs = []
