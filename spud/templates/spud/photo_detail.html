@@ -43,6 +43,7 @@
 {% if object.title %}
 <dt>Title</dt><dd>{{object.title}}</dd>
 {% endif %}
+<dt>Original</dt><dd>{{object.name}} ({{object.width}}x{{object.height}})</dd>
 {% if object.description %}
 <dt>Description</dt><dd>{{object.description|urlizetrunc:40|linebreaks}}</dd>
 {% endif %}
