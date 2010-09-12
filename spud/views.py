@@ -210,7 +210,8 @@ def album_todo(request):
     parent = get_object_or_404(models.album, pk=1)
     dt = datetime.now()-timedelta(days=365)
     objects = models.album.objects.filter(Q(revised__lt=dt) | Q(revised__isnull=True)).order_by('revised','-pk')
-    return web.object_list(request,objects,kwargs={ 'parent': parent })
+    table = tables.album_table(request.user, web, objects, order_by=request.GET.get('sort'))
+    return web.object_list(request, None, table)
 
 def album_add(request, object_id):
     web = webs.album_web()
