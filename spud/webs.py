@@ -876,7 +876,7 @@ class category_web(photo_base_web):
     form = forms.category_form
 
     def get_instance(self, parent):
-        instance = category.category()
+        instance = models.category()
         instance.parent_category = parent
         return instance
 
