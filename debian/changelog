@@ -1,3 +1,9 @@
+spud (0.2-1) lucid; urgency=low
+
+  * Many bugs removed to a better place.
+
+ -- Brian May <bam@debian.org>  Mon, 13 Sep 2010 13:15:09 +1000
+
 spud (0.1-1) lucid; urgency=low
 
   * Initial release.
