@@ -22,7 +22,7 @@ class action_table(web_table):
         return mark_safe(u"<a href='%s'>%s</a>"%(self.web.get_view_url(data),conditional_escape(u"%s"%(data))))
 
 class person_table(tables.ModelTable):
-    coverphoto = tables.Column(sortable=False)
+    cover_photo = tables.Column(sortable=False)
     called = tables.Column()
     first_name = tables.Column()
     middle_name = tables.Column()
@@ -37,7 +37,7 @@ class person_table(tables.ModelTable):
         if web.has_delete_perms(user):
             self.base_columns["delete"] = tables.Column(sortable=False)
 
-    def render_coverphoto(self, data):
+    def render_cover_photo(self, data):
         photo = data.get_cover_photo()
         if photo is not None:
             web = webs.photo_web()
@@ -84,7 +84,7 @@ class person_table(tables.ModelTable):
                 "delete"))
 
 class album_table(tables.ModelTable):
-    coverphoto = tables.Column(sortable=False)
+    cover_photo = tables.Column(sortable=False)
     album = tables.Column()
     sortname = tables.Column()
     sortorder = tables.Column()
@@ -99,7 +99,7 @@ class album_table(tables.ModelTable):
         if web.has_delete_perms(user):
             self.base_columns["delete"] = tables.Column(sortable=False)
 
-    def render_coverphoto(self, data):
+    def render_cover_photo(self, data):
         photo = data.get_cover_photo()
         if photo is not None:
             web = webs.photo_web()

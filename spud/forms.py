@@ -27,19 +27,19 @@ class photo_extra_form(forms.Form):
 
 class place_form(forms.ModelForm):
     parent_place = fields.select_field('place', required=False)
-    coverphoto = fields.select_field('photo', required=False)
+    cover_photo = fields.select_field('photo', required=False)
     class Meta:
         model = models.place
 
 class album_form(forms.ModelForm):
     parent_album = fields.select_field('album', required=False)
-    coverphoto = fields.select_field('photo', required=False)
+    cover_photo = fields.select_field('photo', required=False)
     class Meta:
         model = models.album
 
 class category_form(forms.ModelForm):
     parent_category = fields.select_field('category', required=False)
-    coverphoto = fields.select_field('photo', required=False)
+    cover_photo = fields.select_field('photo', required=False)
     class Meta:
         model = models.category
 
@@ -49,7 +49,7 @@ class person_form(forms.ModelForm):
     father = fields.select_field('person', required=False)
     mother = fields.select_field('person', required=False)
     spouse = fields.select_field('person', required=False)
-    coverphoto = fields.select_field('photo', required=False)
+    cover_photo = fields.select_field('photo', required=False)
 
     class Meta:
         model = models.person

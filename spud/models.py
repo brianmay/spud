@@ -98,7 +98,7 @@ class place(base_model):
     country = models.CharField(max_length=96, blank=True)
     url = models.CharField(max_length=3072, blank=True)
     urldesc = models.CharField(max_length=96, blank=True)
-    coverphoto = models.ForeignKey('photo', db_column='coverphoto', related_name='place_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey('photo', related_name='place_cover_of', null=True, blank=True)
     notes = models.TextField(blank=True)
     class Meta:
         db_table = u'zoph_places'
@@ -155,8 +155,8 @@ class place(base_model):
 
     def get_cover_photo(self):
         photo = None
-        if self.coverphoto is not None:
-            photo = self.coverphoto
+        if self.cover_photo is not None:
+            photo = self.cover_photo
         else:
             try:
                 photo = self.photos.filter().reverse()[0]
@@ -169,7 +169,7 @@ class album(base_model):
     parent_album = models.ForeignKey('self', related_name='children', null=True, blank=True)
     album = models.CharField(max_length=96, db_index=True)
     album_description = models.TextField(blank=True)
-    coverphoto = models.ForeignKey('photo', db_column='coverphoto', related_name='album_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey('photo', related_name='album_cover_of', null=True, blank=True)
     sortname = models.CharField(max_length=96, blank=True)
     sortorder = models.CharField(max_length=96, blank=True)
     revised = models.DateTimeField(null=True, blank=True)
@@ -220,8 +220,8 @@ class album(base_model):
 
     def get_cover_photo(self):
         photo = None
-        if self.coverphoto is not None:
-            photo = self.coverphoto
+        if self.cover_photo is not None:
+            photo = self.cover_photo
         else:
             try:
                 photo = self.photos.filter().reverse()[0]
@@ -234,7 +234,7 @@ class category(base_model):
     parent_category = models.ForeignKey('self', related_name='children', null=True, blank=True)
     category = models.CharField(max_length=96, db_index=True)
     category_description = models.TextField(blank=True)
-    coverphoto = models.ForeignKey('photo', db_column='coverphoto', related_name='category_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey('photo', related_name='category_cover_of', null=True, blank=True)
     sortname = models.CharField(max_length=96, blank=True)
     sortorder = models.CharField(max_length=96, blank=True)
     class Meta:
@@ -283,8 +283,8 @@ class category(base_model):
 
     def get_cover_photo(self):
         photo = None
-        if self.coverphoto is not None:
-            photo = self.coverphoto
+        if self.cover_photo is not None:
+            photo = self.cover_photo
         else:
             try:
                 photo = self.photos.filter().reverse()[0]
@@ -307,7 +307,7 @@ class person(base_model):
     mother = models.ForeignKey('self', null=True, blank=True, related_name='mother_of')
     spouse = models.ForeignKey('self', null=True, blank=True, related_name='reverse_spouses')
     notes = models.TextField(blank=True)
-    coverphoto = models.ForeignKey('photo', db_column='coverphoto', related_name='person_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey('photo', related_name='person_cover_of', null=True, blank=True)
     email = models.CharField(max_length=192, blank=True)
     class Meta:
         db_table = u'zoph_people'
@@ -387,8 +387,8 @@ class person(base_model):
 
     def get_cover_photo(self):
         photo = None
-        if self.coverphoto is not None:
-            photo = self.coverphoto
+        if self.cover_photo is not None:
+            photo = self.cover_photo
         else:
             try:
                 photo = self.photos.filter().reverse()[0]
