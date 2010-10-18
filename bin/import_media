@@ -143,6 +143,8 @@ def main():
                           help="Amount to rotate imported photos (auto,0,90,180,270)")
         parser.add_option("-a", "--album",action="append", dest="album",
                           help="Name of album to use when importing images")
+        parser.add_option("--parent", action="store", dest="parent",
+                          help="Name of parent album to use; if Album doesn't exist it will be created")
         parser.add_option("-c", "--category",action="append", dest="category",
                           help="Name of category to use when importing images")
         parser.add_option("-s", "--source-timezone",action="store", dest="src_timezone",
@@ -182,8 +184,14 @@ def main():
         d.albums = []
         if options.album is None:
             options.album = []
-        for album in options.album:
-            d.albums.append(models.album.objects.get(album=album).pk)
+        if options.parent is None:
+            for album in options.album:
+                d.albums.append(models.album.objects.get(album=album).pk)
+        else:
+            parent = models.album.objects.get(album=options.parent)
+            for album in options.album:
+                album,c = models.album.objects.get_or_create(parent_album=parent,album=album)
+                d.albums.append(album.pk)
 
         d.categorys = []
         if options.category is None:
