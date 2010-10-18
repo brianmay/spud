@@ -23,7 +23,6 @@ esac
 case "$1" in
     (configure)
         spud_update_secret_key
-        spud syncdb --migrate
-        chown www-data:www-data /var/lib/spud/spud.db
+        su -s /usr/bin/spud www-data -- syncdb --migrate
     ;;
 esac
