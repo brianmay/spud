@@ -1,3 +1,11 @@
+spud (0.2-2) lucid; urgency=low
+
+  * Fix postinst script.
+  * Remove obsolete fastcgi stuff.
+  * Turn on following symlinks under media directory.
+
+ -- Brian May <bam@debian.org>  Tue, 19 Oct 2010 09:37:30 +1100
+
 spud (0.2-1) lucid; urgency=low
 
   * Many bugs removed to a better place.
