@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
-#import photos.manage
-#import django.core.management
-#django.core.management.setup_environ(photos.manage.settings)
+from django.core.management import setup_environ
+from photos import settings
+setup_environ(settings)
 
 import os
 import pytz

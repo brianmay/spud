@@ -77,6 +77,7 @@ scripts = [
     'bin/spud',
     'bin/import_media',
     'bin/spud_update_secret_key',
+    'bin/spud_process_actions',
 ]
 
 setup(
