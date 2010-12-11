@@ -1,3 +1,10 @@
+spud (0.2-3) lucid; urgency=low
+
+  * Add missing depends on python-pyparsing and python-imaging.
+  * Add suggests on python-mysqldb.
+
+ -- Brian May <bam@debian.org>  Thu, 09 Dec 2010 10:19:37 +1100
+
 spud (0.2-2) lucid; urgency=low
 
   * Fix postinst script.
