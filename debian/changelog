@@ -4,7 +4,7 @@ spud (0.2-3) lucid; urgency=low
   * Add suggests on python-mysqldb.
   * Add spud_process_actions binary to package.
 
- -- Brian May <brian@jzhang8-unimelb>  Wed, 02 Mar 2011 11:28:33 +1100
+ -- Brian May <brian@debian.org>  Wed, 02 Mar 2011 11:28:33 +1100
 
 spud (0.2-2) lucid; urgency=low
 
