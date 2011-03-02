@@ -2,8 +2,9 @@ spud (0.2-3) lucid; urgency=low
 
   * Add missing depends on python-pyparsing and python-imaging.
   * Add suggests on python-mysqldb.
+  * Add spud_process_actions binary to package.
 
- -- Brian May <bam@debian.org>  Thu, 09 Dec 2010 10:19:37 +1100
+ -- Brian May <brian@jzhang8-unimelb>  Wed, 02 Mar 2011 11:28:33 +1100
 
 spud (0.2-2) lucid; urgency=low
 
