@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
-#import photos.manage
-#import django.core.management
-#django.core.management.setup_environ(photos.manage.settings)
+from django.core.management import setup_environ
+from photos import settings
+setup_environ(settings)
 
 import re
 
@@ -34,6 +34,30 @@ def set_category_list(photo, pk_list):
 
     for pk in pk_list:
         pa = models.photo_category.objects.create(photo=photo,category_id=pk)
+
+for p in models.photo.objects.filter(datetime__gt="2010-01-01",datetime__lt="2010-03-01",camera_model__contains="350D"):
+   print p.name
+   print p, p.datetime
+   p.datetime = p.datetime+datetime.timedelta(days=365)
+   print p, p.datetime
+   p.save()
+
+exit(0)
+for p in models.photo.objects.filter(albums__in=[634, ]):
+   print p.name
+   print p, p.datetime
+   p.datetime = p.datetime-datetime.timedelta(hours=1)
+   print p, p.datetime
+   print
+   p.save()
+
+exit(0)
+a = models.album.objects.get(pk=633,album="Robe")
+a2 = models.album.objects.get(pk=87,album="Robe 2002")
+for p in models.photo.objects.filter(albums=a):
+    set_album_list(p, [ a2.pk ])
+
+exit(0)
 
 for p in models.photo.objects.filter(albums__in=[474, 475, 476, 477, 478, 479, 480, 481, 482, 483, 484, 485, 486]):
     print p.name
