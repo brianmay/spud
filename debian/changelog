@@ -1,4 +1,4 @@
-spud (0.2-3) lucid; urgency=low
+spud (0.3-1) lucid; urgency=low
 
   * Add missing depends on python-pyparsing and python-imaging.
   * Add suggests on python-mysqldb.
