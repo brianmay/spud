@@ -11,6 +11,7 @@ import pytz
 import datetime
 
 from django.conf import settings
+from django.db import transaction
 
 from spud import models, media
 
@@ -47,6 +48,7 @@ def set_category_list(photo, pk_list):
     for pk in pk_list:
         pa = models.photo_category.objects.create(photo=photo,category_id=pk)
 
+@transaction.commit_on_success
 def import_photo(file,d,options):
     if not os.path.exists(file):
         raise RuntimeError("source photo doesn't exist at %s"%(file))
