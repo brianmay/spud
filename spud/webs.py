@@ -768,6 +768,10 @@ class place_web(photo_base_web):
     def get_add_url(self, parent):
         return(self.web_id+"_add", [ parent.pk ] )
 
+    def get_add_breadcrumbs(self, parent):
+        breadcrumbs = self.get_view_breadcrumbs(parent)
+        breadcrumbs.append(breadcrumb(self.get_add_url(parent), "add"))
+        return breadcrumbs
 
     ###############
     # EDIT ACTION #
@@ -854,6 +858,11 @@ class album_web(photo_base_web):
     def get_add_url(self, parent):
         return(self.web_id+"_add", [ parent.pk ] )
 
+    def get_add_breadcrumbs(self, parent):
+        breadcrumbs = self.get_view_breadcrumbs(parent)
+        breadcrumbs.append(breadcrumb(self.get_add_url(parent), "add"))
+        return breadcrumbs
+
     ###############
     # EDIT ACTION #
     ###############
@@ -927,6 +936,11 @@ class category_web(photo_base_web):
     @m.permalink
     def get_add_url(self, parent):
         return(self.web_id+"_add", [ parent.pk ] )
+
+    def get_add_breadcrumbs(self, parent):
+        breadcrumbs = self.get_view_breadcrumbs(parent)
+        breadcrumbs.append(breadcrumb(self.get_add_url(parent), "add"))
+        return breadcrumbs
 
     ###############
     # EDIT ACTION #
