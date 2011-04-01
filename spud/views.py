@@ -101,14 +101,14 @@ comment_was_posted.connect(update_photo_ratings)
 def photo_orig_redirect(request,object_id):
     web = webs.photo_web()
     object = get_object_or_404(models.photo, pk=object_id)
-    url = object.get_orig_url()
+    url = web.get_orig_url(object)
     return HttpResponseRedirect(url)
 
 def photo_thumb_redirect(request,object_id,size):
     web = webs.photo_web()
     if size in settings.IMAGE_SIZES:
         object = get_object_or_404(models.photo, pk=object_id)
-        url = object.get_thumb_url(size)
+        url = web.get_thumb_url(object,size)
         return HttpResponseRedirect(url)
     else:
         raise Http404("Unknown image size '%s'"%(size))
