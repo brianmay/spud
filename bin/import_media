@@ -50,36 +50,13 @@ def set_category_list(photo, pk_list):
 
 @transaction.commit_on_success
 def import_photo(file,d,options):
+    # check source file
     if not os.path.exists(file):
         raise RuntimeError("source photo doesn't exist at %s"%(file))
-
     m = media.get_media(file)
-    dt = m.get_datetime(d.src_timezone,d.dst_timezone)
-    dt += d.offset
-    path = "%04d/%02d/%02d"%(dt.year,dt.month,dt.day)
-    name = os.path.basename(file)
 
-    if options.dryrun:
-        print "would import %s to %s/%s (%s)"%(file,path,name,dt)
-        return
-
-    print "importing %s to %s/%s"%(file,path,name)
-
-    (shortname, extension) = os.path.splitext(name)
-    photos = models.photo.objects.filter(path=path,name__startswith="%s."%(shortname))
-    count = photos.count()
-    if count > 1:
-        raise RuntimeError("Multiple DB entries exist for %s/%s.*"%(path,shortname))
-
-    if count > 0:
-        db_exists = True
-        photo = photos[0]
-    else:
-        db_exists = False
-        photo = models.photo()
-
-    photo.path = path
-    photo.name = name
+    # set everything without commiting anything
+    photo = models.photo()
     photo.title = ''
     photo.photographer = d.photographer
     photo.location = d.location
@@ -88,30 +65,49 @@ def import_photo(file,d,options):
     photo.description = ''
     photo.comment = ""
     photo.level = 1
+    photo.action = options.action
+
+    photo.update_from_source(media=m)
+
+    # adjust time
+    dt = m.get_datetime(src_timezone,d.dst_timezone)
+    dt += offset
 
     photo.timezone = dt.tzinfo.zone
     photo.datetime = dt.astimezone(pytz.utc).replace(tzinfo=None)
 
-    error_list = photo.error_list()
+    # determine the destination path
+    path = "%04d/%02d/%02d"%(dt.year,dt.month,dt.day)
+    name = os.path.basename(file)
+    photo.path = path
+    photo.name = name
     dst = photo.get_orig_path()
 
-    if options.force:
-        pass
-    elif db_exists and len(error_list)==0:
-        raise photo_already_exists_error("photo %d already exists at %s/%s as %s/%s"%(photo.pk,path,name,photos[0].path,photos[0].name))
-    elif db_exists:
-        raise RuntimeError("photo %d already exists at %s/%s as %s/%s but contains errors"%(photo.pk,path,name,photos[0].path,photos[0].name))
-    elif os.path.lexists(dst):
+    # check for conflicts or errors
+    (shortname, extension) = os.path.splitext(name)
+    dups = models.photo.objects.filter(path=path,name__startswith="%s."%(shortname))
+    count = dups.count()
+    if count > 1:
+        raise RuntimeError("Multiple DB entries exist for %s/%s.*"%(path,shortname))
+
+    if count > 0:
+        raise photo_already_exists_error("photo %d already exists at %s/%s as %s/%s"%(dups[0].pk,path,name,dups[0].path,dups[0].name))
+
+    if os.path.lexists(dst):
         raise RuntimeError("file already exists at %s/%s but has no db entry"%(path,name))
 
-    umask = os.umask(0022)
+    # don't do anything in dryrun mode
+    if options.dryrun:
+        print "would import %s to %s/%s (%s)"%(file,path,name,dt)
+        return
 
+    # Go ahead and do stuff
+    print "importing %s to %s/%s"%(file,path,name)
+
+    umask = os.umask(0022)
     if not os.path.lexists(os.path.dirname(dst)):
         os.makedirs(os.path.dirname(dst),0755)
     shutil.copyfile(file,dst)
-
-    photo.action = options.action
-    photo.update_from_source(media=m)
 
     photo.save()
     set_album_list(photo, d.albums)
