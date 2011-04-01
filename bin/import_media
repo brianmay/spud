@@ -53,10 +53,7 @@ def import_photo(file,d,options):
 
     m = media.get_media(file)
     dt = m.get_datetime(d.src_timezone,d.dst_timezone)
-    if d.direction == '+':
-        dt += d.offset
-    else:
-        dt -= d.offset
+    dt += d.offset
     path = "%04d/%02d/%02d"%(dt.year,dt.month,dt.day)
     name = os.path.basename(file)
 
@@ -213,20 +210,22 @@ def main():
 
         offset = options.offset
         if offset is not None:
-            if offset[0] == '+' or offset[0] == '-':
-                d.direction = offset[0]
+            if offset[0] == '+':
+                direction = 1
+                offset = offset[1:]
+            elif offset[0] == '-':
+                direction = -1
                 offset = offset[1:]
             else:
-                d.direction = '+'
+                direction = 1
             (hh,mm,ss) = offset.split(":")
 
             hh = int(hh)
             mm = int(mm)
             ss = int(ss)
 
-            d.offset = datetime.timedelta(hours=hh, minutes=mm, seconds=ss)
+            d.offset = direction * datetime.timedelta(hours=hh, minutes=mm, seconds=ss)
         else:
-            d.direction = '+'
             d.offset = datetime.timedelta(hours=0, minutes=0, seconds=0)
 
         warnings = 0
