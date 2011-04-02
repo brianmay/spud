@@ -130,7 +130,7 @@ def get_category(s, loc, toks):
         return parent
     except models.category.DoesNotExist, e:
         raise p.ParseFatalException(u"Category '%s' not found"%(item), loc)
-    except models.catrgory.MultipleObjectsReturned, e:
+    except models.category.MultipleObjectsReturned, e:
         raise p.ParseFatalException(u"Category '%s' not unique"%(item), loc)
     except Exception, e:
         raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
