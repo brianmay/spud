@@ -85,4 +85,7 @@ IMAGE_SIZES = {
     'large': 960,
 }
 
+DEFAULT_TIMEZONE = {}
+DEFAULT_DTOFFSET = {}
+
 execfile("/etc/spud/settings.py")

@@ -69,10 +69,31 @@ def import_photo(file,d,options):
 
     photo.update_from_source(media=m)
 
-    # adjust time
-    dt = m.get_datetime(src_timezone,d.dst_timezone)
-    dt += offset
+    # get time
+    print
+    dt = m.get_datetime()
+    print dt
 
+    # adjust time for source timezone
+    if photo.camera_model in settings.DEFAULT_TIMEZONE:
+        src_timezone = settings.DEFAULT_TIMEZONE[photo.camera_model]
+        src_timezone = pytz.timezone(src_timezone)
+    else:
+        src_timezone = d.src_timezone
+    dt = src_timezone.localize(dt)
+    print dt
+
+    # adjust time for destination timezone
+    dt = dt.astimezone(d.dst_timezone)
+    print dt
+
+    # add manual offsets
+    dt += d.offset
+    if photo.camera_model in settings.DEFAULT_DTOFFSET:
+        dt += settings.DEFAULT_DTOFFSET[photo.camera_model]
+    print dt
+
+    # save the time
     photo.timezone = dt.tzinfo.zone
     photo.datetime = dt.astimezone(pytz.utc).replace(tzinfo=None)
 

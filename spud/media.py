@@ -24,7 +24,7 @@ class media:
         exif.readMetadata()
         return exif
 
-    def get_datetime(self,src_timezone,dst_timezone):
+    def get_datetime(self):
         exif = self.get_exif()
         try:
             value = exif['Exif.Photo.DateTimeOriginal']
@@ -38,8 +38,7 @@ class media:
         if value is None:
             value = datetime.datetime.fromtimestamp(os.path.getmtime(self.src_full))
 
-        value = src_timezone.localize(value)
-        return value.astimezone(dst_timezone)
+        return value
 
     def create_thumbnail(self, dst_path, max_size):
         image = Image.open(self.src_full)
