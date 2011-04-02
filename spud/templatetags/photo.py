@@ -64,43 +64,43 @@ def show_photo_list(page_obj, web, parent):
 def show_breadcrumbs(breadcrumbs):
         return {'breadcrumbs': breadcrumbs[:-1], 'object': breadcrumbs[-1] };
 
-def _get_url(web, instance, i):
+def _get_url(web, instance, i, size):
     if instance is not None:
-        return web.photo_detail_url(instance,i)
+        return web.photo_detail_url(instance, i, size)
     else:
         return u"?page=%d"%(i)
 
 @register.simple_tag
-def paginator_random(page_obj, web, instance):
+def paginator_random(page_obj, web, instance, size):
     if instance is not None:
-        return mark_safe(u"<a href='%s' accesskey='r'>R</a>" % (web.photo_detail_url(instance, "random")))
+        return mark_safe(u"<a href='%s' accesskey='r'>R</a>" % (web.photo_detail_url(instance, "random", size)))
     else:
         return mark_safe(u'')
 
 @register.simple_tag
-def paginator_prev(page_obj, web, instance):
+def paginator_prev(page_obj, web, instance, size):
     if page_obj.number <= 1:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s' accesskey='p'>&lt;</a>" % (_get_url(web, instance, page_obj.number-1)))
+        return mark_safe(u"<a href='%s' accesskey='p'>&lt;</a>" % (_get_url(web, instance, page_obj.number-1, size)))
 
 @register.simple_tag
-def paginator_next(page_obj, web, instance):
+def paginator_next(page_obj, web, instance, size):
     if page_obj.number >= page_obj.paginator.num_pages:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s' accesskey='n'>&gt;</a>" % (_get_url(web, instance, page_obj.number+1)))
+        return mark_safe(u"<a href='%s' accesskey='n'>&gt;</a>" % (_get_url(web, instance, page_obj.number+1, size)))
 
 @register.simple_tag
-def paginator_number(page_obj, web, instance, i):
+def paginator_number(page_obj, web, instance, i, size):
     if i == DOT:
         return mark_safe(u'... ')
     elif i == page_obj.number:
         return mark_safe(u'<span class="this-page">%d</span> ' % (i))
     else:
-        return mark_safe(u'<a href="%s"%s>%d</a> ' % (_get_url(web, instance, i), (i == page_obj.paginator.num_pages and ' class="end"' or ''), i))
+        return mark_safe(u'<a href="%s"%s>%d</a> ' % (_get_url(web, instance, i, size), (i == page_obj.paginator.num_pages and ' class="end"' or ''), i))
 
-def _pagination(page_obj, web, instance):
+def _pagination(page_obj, web, instance, size):
     paginator, page_num = page_obj.paginator, page_obj.number
 
     if paginator.num_pages <= 1:
@@ -140,19 +140,20 @@ def _pagination(page_obj, web, instance):
         'page_range': page_range,
         'web': web,
         'object': instance,
+        'size': size,
     }
 
 @register.inclusion_tag('spud/pagination.html')
 def pagination(page_obj, web):
-    return _pagination(page_obj, web, None)
+    return _pagination(page_obj, web, None, None)
 
 @register.inclusion_tag('spud/pagination.html')
-def pagination_with_parent(page_obj, web, instance):
-    return _pagination(page_obj, web, instance)
+def pagination_with_parent(page_obj, web, instance, size):
+    return _pagination(page_obj, web, instance, size)
 
 @register.simple_tag
 def photo_detail_url_by_page(web, instance, page_obj, number):
-    return web.photo_detail_url(instance, page_obj.start_index()+number)
+    return web.photo_detail_url(instance, page_obj.start_index()+number, settings.DEFAULT_SIZE)
 
 @register.simple_tag
 def photo_edit_url(web, instance, number):
@@ -268,7 +269,7 @@ def show_object_view_buttons(context, user, instance):
     return dict
 
 @register.inclusion_tag('spud/show_buttons.html', takes_context=True)
-def show_photo_buttons(context, user, web, instance, number, photo):
+def show_photo_buttons(context, user, web, instance, number, photo, size):
     dict = {}
-    dict['buttons'] = web.get_photo_buttons(user, instance, number, photo)
+    dict['buttons'] = web.get_photo_buttons(user, instance, number, photo, size)
     return dict

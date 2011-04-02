@@ -11,7 +11,7 @@
 
 {% block content %}
 {% if page_obj %}
-{% pagination_with_parent page_obj web parent %}
+{% pagination_with_parent page_obj web parent size %}
 {% endif %}
 
 <h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
@@ -26,16 +26,17 @@
 </ul>
 {% endif %}
 
-{% show_photo_buttons user web parent page_obj.number object %}
+{% show_photo_buttons user web parent page_obj.number object size %}
 
 <div class='photo_detail {{object.get_style}}'>
 <div class='photo_detail_photo'>
 
 <a href="{% get_thumb_url object "large" %}">
-<img src="{% get_thumb_url object "mid" %}" alt="{{ object.title }}" />
+<img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 </a>
 </div>
 
+{% if size != "large" %}
 <div class='photo_detail_photo_detail'>
 <h2>Photo Details</h2>
 
@@ -124,6 +125,7 @@
 <dt>Metering Mode</dt><dd>{{object.metering_mode}}</dd>
 </dl>
 </div>
+{% endif %}
 
 <br class="clear"/>
 </div>

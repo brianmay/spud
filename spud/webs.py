@@ -454,7 +454,7 @@ class photo_base_web(base_web):
                                   context_instance=RequestContext(request))
 
 
-    def object_photo_detail(self, request, instance, number, photo_list):
+    def object_photo_detail(self, request, instance, number, photo_list, size):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
         paginator = Paginator(photo_list, 1)
@@ -463,7 +463,7 @@ class photo_base_web(base_web):
 
         if number == "random":
             number = random.randint(1,paginator.num_pages)
-            url = self.photo_detail_url(instance, number)
+            url = self.photo_detail_url(instance, number, size)
             return HttpResponseRedirect(url)
 
         # If page request (9999) is out of range, deliver last page of results.
@@ -477,12 +477,13 @@ class photo_base_web(base_web):
 
         photo_object = page_obj.object_list[0]
 
-        detail_url = self.photo_detail_url(instance, page_obj.number)
+        detail_url = self.photo_detail_url(instance, page_obj.number, size)
         breadcrumbs.append(breadcrumb(detail_url,photo_object))
 
         return render_to_response(template, {
                                     'parent': instance,
                                     'object': photo_object,
+                                    'size': size,
                                     'web': self,
                                     'page_obj': page_obj,
                                     'breadcrumbs': breadcrumbs,
@@ -643,7 +644,7 @@ class photo_base_web(base_web):
                 elif goto == "save":
                     url = self.photo_edit_url(instance, page_obj.number)
                 else:
-                    url = self.photo_detail_url(instance, page_obj.number)
+                    url = self.photo_detail_url(instance, page_obj.number, settings.DEFAULT_SIZE)
 
                 return HttpResponseRedirect(url)
 
@@ -654,7 +655,7 @@ class photo_base_web(base_web):
                                     })
 
         # can't do this until after we confirm the object
-        detail_url = self.photo_detail_url(instance, page_obj.number)
+        detail_url = self.photo_detail_url(instance, page_obj.number, settings.DEFAULT_SIZE)
         edit_url = self.photo_edit_url(instance, page_obj.number)
 
         breadcrumbs.append(breadcrumb(detail_url,photo_object))
@@ -669,15 +670,15 @@ class photo_base_web(base_web):
                 'media' : form.media,
                 },context_instance=RequestContext(request))
 
-    def photo_detail_url(self, instance, number):
+    def photo_detail_url(self, instance, number, size):
         self.assert_instance_type(instance)
-        return reverse("%s_photo_detail"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'number': number })
+        return reverse("%s_photo_detail"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'number': number, 'size': size })
 
     def photo_edit_url(self, instance, number):
         self.assert_instance_type(instance)
         return reverse("%s_photo_edit"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'number': number })
 
-    def get_photo_buttons(self, user, instance, number, photo):
+    def get_photo_buttons(self, user, instance, number, photo, size):
         self.assert_instance_type(instance)
         buttons = []
 
@@ -685,15 +686,23 @@ class photo_base_web(base_web):
         if self.has_edit_perms(user):
             buttons.append({
                 'class': 'viewlink',
-                'text': 'Large',
+                'text': 'Orig',
                 'url': p_web.get_orig_url(photo),
             })
+
+        for the_size in settings.IMAGE_SIZES:
+            if size != the_size:
+                buttons.append({
+                    'class': 'viewlink',
+                    'text': the_size.capitalize(),
+                    'url': self.photo_detail_url(instance, number, the_size)
+                })
 
         if True:
             buttons.append({
                 'class': 'viewlink',
                 'text': 'Link',
-                'url': p_web.get_view_url(photo),
+                'url': p_web.get_view_url(photo, size),
             })
 
         if self.has_edit_perms(user):
@@ -1013,34 +1022,13 @@ class photo_web(photo_base_web):
     model = models.photo
     form = forms.photo_form
 
-    def photo_detail_url(self, instance, number):
+    def photo_detail_url(self, instance, number, size):
         self.assert_instance_type(instance)
-        return reverse("%s_detail"%(self.url_prefix), kwargs={ 'object_id': instance.pk })
+        return reverse("%s_detail"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'size': size })
 
     def photo_edit_url(self, instance, number):
         self.assert_instance_type(instance)
         return reverse("%s_edit"%(self.url_prefix), kwargs={ 'object_id': instance.pk })
-
-    def get_photo_buttons(self, user, instance, number, photo):
-        self.assert_instance_type(instance)
-        buttons = []
-
-        p_web = photo_web()
-        if self.has_edit_perms(user):
-            buttons.append({
-                'class': 'viewlink',
-                'text': 'Large',
-                'url': p_web.get_orig_url(photo),
-            })
-
-        if self.has_edit_perms(user):
-            buttons.append({
-                'class': 'changelink',
-                'text': 'Edit',
-                'url': self.photo_edit_url(instance, number),
-            })
-
-        return buttons
 
     def get_breadcrumbs(self):
         breadcrumbs = []
@@ -1066,6 +1054,11 @@ class photo_web(photo_base_web):
     def get_orig_url(self, instance):
         self.assert_instance_type(instance)
         return iri_to_uri(u"%sorig/%s/%s"%(settings.IMAGE_URL,urlquote(instance.path),urlquote(instance.name)))
+
+    @m.permalink
+    def get_view_url(self, instance, size):
+        self.assert_instance_type(instance)
+        return(self.url_prefix+'_detail', [ str(instance.pk), size ])
 
     # get the breadcrumbs to show while displaying this object
     def get_view_breadcrumbs(self, instance):

@@ -113,11 +113,11 @@ def photo_thumb_redirect(request,object_id,size):
     else:
         raise Http404("Unknown image size '%s'"%(size))
 
-def photo_detail(request, object_id):
+def photo_detail(request, object_id, size):
     web = webs.photo_web()
     photo_list = models.photo.objects.filter(pk=object_id)
     object = photo_list[0]
-    return web.object_photo_detail(request,object,0,photo_list)
+    return web.object_photo_detail(request,object,0,photo_list,size)
 
 def photo_edit(request, object_id):
     web = webs.photo_web()
@@ -166,11 +166,11 @@ def place_delete(request,object_id):
     object = get_object_or_404(models.place, pk=object_id)
     return web.object_delete(request, object)
 
-def place_photo_detail(request, object_id, number):
+def place_photo_detail(request, object_id, number, size):
     web = webs.place_web()
     object = get_object_or_404(models.place, pk=object_id)
     photo_list = models.photo.objects.filter(location=object)
-    return web.object_photo_detail(request,object,number,photo_list)
+    return web.object_photo_detail(request,object,number,photo_list,size)
 
 def place_photo_edit(request, object_id, number):
     web = webs.place_web()
@@ -227,11 +227,11 @@ def album_delete(request,object_id):
     object = get_object_or_404(models.album, pk=object_id)
     return web.object_delete(request, object)
 
-def album_photo_detail(request, object_id, number):
+def album_photo_detail(request, object_id, number, size):
     web = webs.album_web()
     object = get_object_or_404(models.album, pk=object_id)
     photo_list = models.photo.objects.filter(albums=object)
-    return web.object_photo_detail(request,object,number,photo_list)
+    return web.object_photo_detail(request,object,number,photo_list,size)
 
 def album_photo_edit(request, object_id, number):
     web = webs.album_web()
@@ -280,11 +280,11 @@ def category_delete(request,object_id):
     object = get_object_or_404(models.category, pk=object_id)
     return web.object_delete(request, object)
 
-def category_photo_detail(request, object_id, number):
+def category_photo_detail(request, object_id, number, size):
     web = webs.category_web()
     object = get_object_or_404(models.category, pk=object_id)
     photo_list = models.photo.objects.filter(categorys=object)
-    return web.object_photo_detail(request,object,number,photo_list)
+    return web.object_photo_detail(request,object,number,photo_list,size)
 
 def category_photo_edit(request, object_id, number):
     web = webs.category_web()
@@ -338,11 +338,11 @@ def person_delete(request,object_id):
     object = get_object_or_404(models.person, pk=object_id)
     return web.object_delete(request, object)
 
-def person_photo_detail(request, object_id, number):
+def person_photo_detail(request, object_id, number, size):
     web = webs.person_web()
     object = get_object_or_404(models.person, pk=object_id)
     photo_list = models.photo.objects.filter(persons=object)
-    return web.object_photo_detail(request,object,number,photo_list)
+    return web.object_photo_detail(request,object,number,photo_list,size)
 
 def person_photo_edit(request, object_id, number):
     web = webs.person_web()
@@ -405,11 +405,11 @@ def date_detail(request, object_id):
     photo_list = date_results(object_id)
     return web.object_photo_list(request,object,photo_list)
 
-def date_photo_detail(request, object_id, number):
+def date_photo_detail(request, object_id, number, size):
     web = webs.date_web()
     object = date_class(object_id)
     photo_list = date_results(object_id)
-    return web.object_photo_detail(request,object,number,photo_list)
+    return web.object_photo_detail(request,object,number,photo_list,size)
 
 def date_photo_edit(request, object_id, number):
     web = webs.date_web()
@@ -461,11 +461,11 @@ def action_detail(request, object_id):
     photo_list = action_results(object_id)
     return web.object_photo_list(request,object,photo_list)
 
-def action_photo_detail(request, object_id, number):
+def action_photo_detail(request, object_id, number, size):
     web = webs.action_web()
     object = action_class(object_id)
     photo_list = action_results(object_id)
-    return web.object_photo_detail(request,object,number,photo_list)
+    return web.object_photo_detail(request,object,number,photo_list,size)
 
 def action_photo_edit(request, object_id, number):
     web = webs.action_web()
@@ -744,11 +744,11 @@ def search_detail(request, object_id):
     (photo_list, criteria) = search_results(object_id)
     return web.object_photo_list(request,object,photo_list,context={ 'criteria': criteria })
 
-def search_photo_detail(request, object_id, number):
+def search_photo_detail(request, object_id, number, size):
     web = webs.search_web()
     object = search_class(object_id)
     (photo_list, criteria) = search_results(object_id)
-    return web.object_photo_detail(request,object,number,photo_list)
+    return web.object_photo_detail(request,object,number,photo_list,size)
 
 def search_photo_edit(request, object_id, number):
     web = webs.search_web()
