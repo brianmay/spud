@@ -1,3 +1,12 @@
+spud (0.4-1) lucid; urgency=low
+
+  * Enable sql transaction support by default.
+  * Add ability to override src timezone and offset on per camera basis.
+  * Fix errors when display photos using redirect urls.
+  * Fix errors in breadcrumbs for creating albums,categories and places.
+
+ -- Brian May <bam@debian.org>  Sat, 02 Apr 2011 16:19:01 +1100
+
 spud (0.3-1) lucid; urgency=low
 
   * Add missing depends on python-pyparsing and python-imaging.
