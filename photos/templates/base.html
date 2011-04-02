@@ -3,8 +3,10 @@
 <head>
 <title>{% block title %}{% endblock %}</title>
 <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{{ MEDIA_URL }}css/base.css{% endblock %}" />
-{% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{{ MEDIA_URL }}css/rtl.css{% endblock %}" />{% endif %}
 {% block extrastyle %}{% endblock %}
+<!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% load adminmedia %}{% admin_media_prefix %}css/ie.css{% endblock %}" /><![endif]-->
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% admin_media_prefix %}css/rtl.css{% endblock %}" />{% endif %}
+<script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% admin_media_prefix %}{% endfilter %}";</script>
 {% block extrahead %}{% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
 </head>
@@ -21,25 +23,52 @@
         <div id="branding">
         {% block branding %}{% endblock %}
         </div>
-        {% if user.is_authenticated and user.is_staff %}
-        <div id="user-tools">{% trans 'Welcome,' %} <strong>{% if user.first_name %}{{ user.first_name|escape }}{% else %}{{ user.username }}{% endif %}</strong>. {% block userlinks %}<a href="{% url password_change %}">{% trans 'Change password' %}</a> / <a href="{% url logout %}">{% trans 'Log out' %}</a>{% endblock %}</div>
-        {% else %}
-        <div id="user-tools"><a href="{% url login %}">{% trans 'Log in' %}</a></div>
-        {% endif %}
+        <div id="user-tools">
+            {% if user.is_authenticated %}
+            {% trans 'Welcome,' %}
+            <strong>{% filter force_escape %}{% firstof user.first_name user.username %}{% endfilter %}</strong>.
+            {% endif %}
+            {% block userlinks %}
+                {% url django-admindocs-docroot as docsroot %}
+                {% if docsroot %}
+                    <a href="{{ docsroot }}">{% trans 'Documentation' %}</a> /
+                {% endif %}
+                {% if user.is_authenticated %}
+                {% url password_change as password_change_url %}
+                {% if password_change_url %}
+                    <a href="{{ password_change_url }}">
+                {% else %}
+                    <a href="{{ root_path }}password_change/">
+                {% endif %}
+                {% trans 'Change password' %}</a> /
+                {% url logout as logout_url %}
+                {% if logout_url %}
+                    <a href="{{ logout_url }}">
+                {% else %}
+                    <a href="{{ root_path }}logout/">
+                {% endif %}
+                {% trans 'Log out' %}</a>
+                {% else %}
+                <div id="user-tools"><a href="{% url login %}?next={{ request.path }}">{% trans 'Log in' %}</a></div>
+                {% endif %}
+            {% endblock %}
+        </div>
         {% block nav-global %}{% endblock %}
     </div>
     <!-- END Header -->
-    {% block breadcrumbs %}<div class="breadcrumbs"><a href="/">{% trans 'Home' %}</a>{% if title %} &rsaquo; {{ title|escape }}{% endif %}</div>{% endblock %}
+    {% block breadcrumbs %}<div class="breadcrumbs"><a href="/">{% trans 'Home' %}</a>{% if title %} &rsaquo; {{ title }}{% endif %}</div>{% endblock %}
     {% endif %}
 
         {% if messages %}
-        <ul class="messagelist">{% for message in messages %}<li>{{ message|escape }}</li>{% endfor %}</ul>
+        <ul class="messagelist">{% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	{% endfor %}</ul>
         {% endif %}
 
     <!-- Content -->
     <div id="content" class="{% block coltype %}colM{% endblock %}">
         {% block pretitle %}{% endblock %}
-        {% block content_title %}{% if title %}<h1>{{ title|escape }}</h1>{% endif %}{% endblock %}
+        {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
         {% block content %}
         {% block object-tools %}{% endblock %}
         {{ content }}
