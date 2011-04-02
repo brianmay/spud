@@ -50,6 +50,8 @@ def set_category_list(photo, pk_list):
 
 @transaction.commit_on_success
 def import_photo(file,d,options):
+    print
+
     # check source file
     if not os.path.exists(file):
         raise RuntimeError("source photo doesn't exist at %s"%(file))
@@ -70,7 +72,6 @@ def import_photo(file,d,options):
     photo.update_from_source(media=m)
 
     # get time
-    print
     dt = m.get_datetime()
     print dt
 
