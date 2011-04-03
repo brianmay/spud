@@ -37,6 +37,11 @@
 {% if object.description %}
 {{object.description|urlizetrunc:40|linebreaks}}
 {% endif %}
+{% if object.photo_person_set.all %}
+{% for pp in object.photo_person_set.all %}
+    <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}
+{% endfor %}
+{% endif %}
 </div>
 
 <div class='photo_detail_photo_detail'>
@@ -47,13 +52,6 @@
 <dt>Title</dt><dd>{{object.title}}</dd>
 {% endif %}
 <dt>Original</dt><dd>{{object.name}} ({{object.width}}x{{object.height}})</dd>
-{% if object.photo_person_set.all %}
-<dt>People</dt><dd>
-  {% for pp in object.photo_person_set.all %}
-    <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}; {% endif %}
-  {% endfor %}
-</dd>
-{% endif %}
 {% if object.location %}
 <dt>Location</dt><dd><a href="{% get_view_url object.location %}">{{ object.location }}</a></dd>
 {% endif %}
