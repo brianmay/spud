@@ -35,6 +35,9 @@
 <a href="{% get_thumb_url object "large" %}">
 <img src="{% get_thumb_url object "mid" %}" alt="{{ object.title }}" />
 </a>
+{% if object.description %}
+{{object.description|urlizetrunc:40|linebreaks}}
+{% endif %}
 </div>
 
 <div class='photo_detail_photo_detail'>
@@ -45,9 +48,6 @@
 <dt>Title</dt><dd>{{object.title}}</dd>
 {% endif %}
 <dt>Original</dt><dd>{{object.name}} ({{object.width}}x{{object.height}})</dd>
-{% if object.description %}
-<dt>Description</dt><dd>{{object.description|urlizetrunc:40|linebreaks}}</dd>
-{% endif %}
 {% if object.photo_person_set.all %}
 <dt>People</dt><dd>
   {% for pp in object.photo_person_set.all %}
