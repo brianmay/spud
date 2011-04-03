@@ -10,7 +10,7 @@ urlpatterns = patterns('',
 
     url(r'^photo/(?P<object_id>\d+)/size/(?P<size>\w+)/$', 'spud.views.photo_detail', name='photo_detail'),
     url(r'^photo/(?P<object_id>\d+)/orig/$', 'spud.views.photo_orig_redirect', name='photo_orig_redirect'),
-    url(r'^photo/(?P<object_id>\d+)/edit/(?P<size>\w+)/$', 'spud.views.photo_edit', name='photo_edit'),
+    url(r'^photo/(?P<object_id>\d+)/edit/size/(?P<size>\w+)/$', 'spud.views.photo_edit', name='photo_edit'),
 
     (r'^place/$', 'spud.views.place_redirect', {'object_id': 1}),
     url(r'^place/(?P<object_id>\d+)/$', 'spud.views.place_detail', name='place_detail'),
