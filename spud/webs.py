@@ -490,7 +490,7 @@ class photo_base_web(base_web):
                                     },
                                     context_instance=RequestContext(request))
 
-    def object_photo_edit(self, request, instance, number, photo_list):
+    def object_photo_edit(self, request, instance, number, photo_list, size):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
         paginator = Paginator(photo_list, 1)
@@ -499,7 +499,7 @@ class photo_base_web(base_web):
 
         if number == "random":
             number = random.randint(1,paginator.num_pages)
-            url = self.photo_edit_url(instance, number)
+            url = self.photo_edit_url(instance, number, size)
             return HttpResponseRedirect(url)
 
         # If page request (9999) is out of range, deliver last page of results.
@@ -635,16 +635,16 @@ class photo_base_web(base_web):
                     number = page_obj.number - 1
                     if number < 1:
                         number = 1
-                    url = self.photo_edit_url(instance, number)
+                    url = self.photo_edit_url(instance, number, size)
                 elif goto == "next":
                     number = page_obj.number + 1
                     if number > page_obj.paginator.num_pages:
                         number = page_obj.paginator.num_pages
-                    url = self.photo_edit_url(instance, number)
+                    url = self.photo_edit_url(instance, number, size)
                 elif goto == "save":
-                    url = self.photo_edit_url(instance, page_obj.number)
+                    url = self.photo_edit_url(instance, page_obj.number, size)
                 else:
-                    url = self.photo_detail_url(instance, page_obj.number, settings.DEFAULT_SIZE)
+                    url = self.photo_detail_url(instance, page_obj.number, size)
 
                 return HttpResponseRedirect(url)
 
@@ -655,8 +655,8 @@ class photo_base_web(base_web):
                                     })
 
         # can't do this until after we confirm the object
-        detail_url = self.photo_detail_url(instance, page_obj.number, settings.DEFAULT_SIZE)
-        edit_url = self.photo_edit_url(instance, page_obj.number)
+        detail_url = self.photo_detail_url(instance, page_obj.number, size)
+        edit_url = self.photo_edit_url(instance, page_obj.number, size)
 
         breadcrumbs.append(breadcrumb(detail_url,photo_object))
         breadcrumbs.append(breadcrumb(edit_url,"edit"))
@@ -664,6 +664,7 @@ class photo_base_web(base_web):
         return render_to_response(template, {
                 'parent': instance,
                 'object': photo_object,
+                'size': size,
                 'web': self,
                 'page_obj': page_obj,
                 'form' : form, 'breadcrumbs': breadcrumbs,
@@ -674,9 +675,9 @@ class photo_base_web(base_web):
         self.assert_instance_type(instance)
         return reverse("%s_photo_detail"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'number': number, 'size': size })
 
-    def photo_edit_url(self, instance, number):
+    def photo_edit_url(self, instance, number, size):
         self.assert_instance_type(instance)
-        return reverse("%s_photo_edit"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'number': number })
+        return reverse("%s_photo_edit"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'number': number, 'size': size })
 
     def get_photo_buttons(self, user, instance, number, photo, size):
         self.assert_instance_type(instance)
@@ -709,7 +710,7 @@ class photo_base_web(base_web):
             buttons.append({
                 'class': 'changelink',
                 'text': 'Edit',
-                'url': self.photo_edit_url(instance, number),
+                'url': self.photo_edit_url(instance, number, size),
             })
 
         return buttons
@@ -1026,9 +1027,9 @@ class photo_web(photo_base_web):
         self.assert_instance_type(instance)
         return reverse("%s_detail"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'size': size })
 
-    def photo_edit_url(self, instance, number):
+    def photo_edit_url(self, instance, number, size):
         self.assert_instance_type(instance)
-        return reverse("%s_edit"%(self.url_prefix), kwargs={ 'object_id': instance.pk })
+        return reverse("%s_edit"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'size': size })
 
     def get_breadcrumbs(self):
         breadcrumbs = []

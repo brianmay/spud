@@ -12,7 +12,7 @@
 
 <h1>Edit {{ object }} ({{ page_obj.number }} of {{ page_obj.paginator.num_pages }})</h1>
 
-<form method="post" action="{% photo_edit_url web parent page_obj.number %}">{% csrf_token %}
+<form method="post" action="{% photo_edit_url web parent page_obj.number size %}">{% csrf_token %}
 <input type="hidden" name="photo_id" value="{{ object.pk }}" />
 <input type="submit" name="action" value="nop"/>
 <input type="submit" name="action" value="delete"/>
@@ -33,7 +33,7 @@
 <div class='photo_detail_photo'>
 
 <a href="{% get_thumb_url object "large" %}">
-<img src="{% get_thumb_url object "mid" %}" alt="{{ object.title }}" />
+<img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 </a>
 {% if object.description %}
 {{object.description|urlizetrunc:40|linebreaks}}

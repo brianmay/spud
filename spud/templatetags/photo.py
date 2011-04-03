@@ -156,8 +156,8 @@ def photo_detail_url_by_page(web, instance, page_obj, number):
     return web.photo_detail_url(instance, page_obj.start_index()+number, settings.DEFAULT_SIZE)
 
 @register.simple_tag
-def photo_edit_url(web, instance, number):
-    return web.photo_edit_url(instance, number)
+def photo_edit_url(web, instance, number, size):
+    return web.photo_edit_url(instance, number, size)
 
 @register.inclusion_tag('spud/photo_edit_buttons.html')
 def photo_edit_buttons(page_obj):
