@@ -8,6 +8,7 @@ from django.contrib.comments.moderation import CommentModerator, moderator
 from django.contrib.comments.signals import comment_was_flagged, comment_was_posted
 from django.utils.encoding import smart_unicode
 from django.conf import settings
+from django.utils.translation import ugettext as _
 
 from django.db.models import Count, Q
 
@@ -23,7 +24,7 @@ import re
 
 def root(request):
     breadcrumbs = []
-    breadcrumbs.append(webs.breadcrumb(reverse("root"), "home"))
+    breadcrumbs.append(webs.breadcrumb(reverse("root"), _("Home")))
 
     return render_to_response('spud/index.html', {
                         'breadcrumbs': breadcrumbs,

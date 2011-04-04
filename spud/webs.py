@@ -11,6 +11,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.conf import settings
 from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
+from django.utils.translation import ugettext as _
 
 
 from spud import models,forms
@@ -62,7 +63,7 @@ class base_web(object):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), _("Home")))
         breadcrumbs.append(breadcrumb(reverse(self.url_prefix+"_list"), self.verbose_name_plural))
         return breadcrumbs
 
@@ -731,7 +732,7 @@ class place_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), _("Home")))
         return breadcrumbs
 
     ###############
@@ -812,7 +813,7 @@ class album_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), _("Home")))
         return breadcrumbs
 
     ###############
@@ -901,7 +902,7 @@ class category_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), _("Home")))
         return breadcrumbs
 
     ###############
@@ -1033,7 +1034,7 @@ class photo_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), _("Home")))
         return breadcrumbs
 
     ###############
