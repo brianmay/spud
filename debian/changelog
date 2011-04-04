@@ -1,3 +1,11 @@
+spud (0.6-1) lucid; urgency=low
+
+  * Use secure session cookies by default.
+  * Add missing error templates.
+  * Other minor changes.
+
+ -- Brian May <bam@debian.org>  Mon, 04 Apr 2011 14:57:23 +1000
+
 spud (0.5-1) lucid; urgency=low
 
   * Fix typo that caused error when adding category to image.
