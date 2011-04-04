@@ -1,3 +1,11 @@
+spud (0.5-1) lucid; urgency=low
+
+  * Fix typo that caused error when adding category to image.
+  * Updates to templates. Good? Bad?
+  * Edit now supports showing image in different sizes.
+
+ -- Brian May <bam@debian.org>  Mon, 04 Apr 2011 10:43:47 +1000
+
 spud (0.4-1) lucid; urgency=low
 
   * Enable sql transaction support by default.
