@@ -1,4 +1,5 @@
 SITE_ID = 1
+SESSION_COOKIE_SECURE = True
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
