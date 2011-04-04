@@ -21,9 +21,9 @@ from datetime import *
 
 import re
 
-def spud_root(request):
+def root(request):
     breadcrumbs = []
-    breadcrumbs.append(webs.breadcrumb(reverse("spud_root"), "home"))
+    breadcrumbs.append(webs.breadcrumb(reverse("root"), "home"))
 
     return render_to_response('spud/index.html', {
                         'breadcrumbs': breadcrumbs,

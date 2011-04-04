@@ -62,7 +62,7 @@ class base_web(object):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("spud_root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
         breadcrumbs.append(breadcrumb(reverse(self.url_prefix+"_list"), self.verbose_name_plural))
         return breadcrumbs
 
@@ -731,7 +731,7 @@ class place_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("spud_root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
         return breadcrumbs
 
     ###############
@@ -812,7 +812,7 @@ class album_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("spud_root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
         return breadcrumbs
 
     ###############
@@ -901,7 +901,7 @@ class category_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("spud_root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
         return breadcrumbs
 
     ###############
@@ -1033,7 +1033,7 @@ class photo_web(photo_base_web):
 
     def get_breadcrumbs(self):
         breadcrumbs = []
-        breadcrumbs.append(breadcrumb(reverse("spud_root"), "home"))
+        breadcrumbs.append(breadcrumb(reverse("root"), "home"))
         return breadcrumbs
 
     ###############

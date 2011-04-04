@@ -4,7 +4,7 @@ from spud import models
 from spud import views
 
 urlpatterns = patterns('',
-    url(r'^$', 'spud.views.spud_root', name='spud_root'),
+    url(r'^$', 'spud.views.root', name='root'),
 
     url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$', 'spud.views.photo_thumb_redirect', name='photo_thumb_redirect'),
 
