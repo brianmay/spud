@@ -7,18 +7,45 @@ from django.db import models
 class Migration(SchemaMigration):
     
     def forwards(self, orm):
+        # rename table columns
+        # made complicated due to http://south.aeracode.org/ticket/466
         
-        db.rename_column(u'zoph_categories', 'coverphoto', 'cover_photo_id')
-        db.rename_column(u'zoph_places', 'coverphoto', 'cover_photo_id')
-        db.rename_column(u'zoph_albums', 'coverphoto', 'cover_photo_id')
-        db.rename_column(u'zoph_people', 'coverphoto', 'cover_photo_id')
+        db.add_column(u'zoph_categories', 'cover_photo', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='category_cover_of', null=True, to=orm['spud.photo']), keep_default=False)
+        db.add_column(u'zoph_places', 'cover_photo', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='place_cover_of', null=True, to=orm['spud.photo']), keep_default=False)
+        db.add_column(u'zoph_albums', 'cover_photo', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='album_cover_of', null=True, to=orm['spud.photo']), keep_default=False)
+        db.add_column(u'zoph_people', 'cover_photo', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='person_cover_of', null=True, to=orm['spud.photo']), keep_default=False)
+
+        if not db.dry_run:
+            db.execute('UPDATE zoph_categories SET cover_photo_id=coverphoto')
+            db.execute('UPDATE zoph_places SET cover_photo_id=coverphoto')
+            db.execute('UPDATE zoph_albums SET cover_photo_id=coverphoto')
+            db.execute('UPDATE zoph_people SET cover_photo_id=coverphoto')
+
+        db.delete_column(u'zoph_categories', 'coverphoto')
+        db.delete_column(u'zoph_places', 'coverphoto')
+        db.delete_column(u'zoph_albums', 'coverphoto')
+        db.delete_column(u'zoph_people', 'coverphoto')
+    
     
     def backwards(self, orm):
+        # rename table columns
+        # made complicated due to http://south.aeracode.org/ticket/466
         
-        db.rename_column(u'zoph_categories', 'cover_photo_id', "coverphoto")
-        db.rename_column(u'zoph_places', 'cover_photo_id', "coverphoto")
-        db.rename_column(u'zoph_albums', 'cover_photo_id', "coverphoto")
-        db.rename_column(u'zoph_people', 'cover_photo_id', "coverphoto")
+        db.add_column(u'zoph_categories', 'coverphoto', self.gf('django.db.models.fields.related.ForeignKey')(related_name='category_cover_of', null=True, to=orm['spud.photo'], db_column='coverphoto', blank=True), keep_default=False)
+        db.add_column(u'zoph_places', 'coverphoto', self.gf('django.db.models.fields.related.ForeignKey')(related_name='place_cover_of', null=True, to=orm['spud.photo'], db_column='coverphoto', blank=True), keep_default=False)
+        db.add_column(u'zoph_albums', 'coverphoto', self.gf('django.db.models.fields.related.ForeignKey')(related_name='album_cover_of', null=True, to=orm['spud.photo'], db_column='coverphoto', blank=True), keep_default=False)
+        db.add_column(u'zoph_people', 'coverphoto', self.gf('django.db.models.fields.related.ForeignKey')(related_name='person_cover_of', null=True, to=orm['spud.photo'], db_column='coverphoto', blank=True), keep_default=False)
+
+        if not db.dry_run:
+            db.execute('UPDATE zoph_categories SET coverphoto=cover_photo_id')
+            db.execute('UPDATE zoph_places SET coverphoto=cover_photo_id')
+            db.execute('UPDATE zoph_albums SET coverphoto=cover_photo_id')
+            db.execute('UPDATE zoph_people SET coverphoto=cover_photo_id')
+
+        db.delete_column(u'zoph_categories', 'cover_photo_id')
+        db.delete_column(u'zoph_places', 'cover_photo_id')
+        db.delete_column(u'zoph_albums', 'cover_photo_id')
+        db.delete_column(u'zoph_people', 'cover_photo_id')
     
     
     models = {
