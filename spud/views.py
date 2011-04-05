@@ -117,7 +117,10 @@ def photo_thumb_redirect(request,object_id,size):
 def photo_detail(request, object_id, size):
     web = webs.photo_web()
     photo_list = models.photo.objects.filter(pk=object_id)
-    object = photo_list[0]
+    try:
+        object = photo_list[0]
+    except IndexError, e:
+        raise Http404("Unknown image id '%s'"%(object_id))
     return web.object_photo_detail(request,object,0,photo_list,size)
 
 def photo_edit(request, object_id, size):
