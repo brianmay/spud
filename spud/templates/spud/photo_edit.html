@@ -34,7 +34,7 @@
 
 <a href="{% get_thumb_url object "large" %}">
 <img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
-</a></br>
+</a><br/>
 {% if object.description %}
 {{object.description|urlizetrunc:40|linebreaks}}
 {% endif %}
