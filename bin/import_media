@@ -74,6 +74,7 @@ def import_photo(file,d,options):
     photo.comment = ""
     photo.level = 1
     photo.action = options.action
+    photo.timestamp =datetime.datetime.now()
 
     photo.update_from_source(media=m)
 
