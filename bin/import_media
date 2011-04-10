@@ -20,7 +20,6 @@ from optparse import OptionParser
 def timezone(name):
     if name[0:4] == 'UTC+' or name[0:4] == 'UTC-':
         offset = int(name[3:])*60
-        print offset
         return pytz.FixedOffset(offset)
     else:
         return pytz.timezone(name)
