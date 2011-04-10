@@ -17,6 +17,13 @@ from spud import models, media
 
 from optparse import OptionParser
 
+def timezone(name):
+    if name[0:4] == 'UTC+' or name[0:4] == 'UTC-':
+        offset = int(name[3:])*60
+        print offset
+        return pytz.FixedOffset(offset)
+    else:
+        return pytz.timezone(name)
 
 class photo_already_exists_error(Exception):
         def __init__(self, value):
@@ -78,7 +85,7 @@ def import_photo(file,d,options):
     # adjust time for source timezone
     if photo.camera_model in settings.DEFAULT_TIMEZONE:
         src_timezone = settings.DEFAULT_TIMEZONE[photo.camera_model]
-        src_timezone = pytz.timezone(src_timezone)
+        src_timezone = timezone(src_timezone)
     else:
         src_timezone = d.src_timezone
     dt = src_timezone.localize(dt)
@@ -216,17 +223,15 @@ def main():
         for category in options.category:
             d.categorys.append(models.category.objects.get(category=category).pk)
 
-        timezone = settings.TIME_ZONE
         if options.src_timezone is None:
-            d.src_timezone = pytz.timezone(settings.TIME_ZONE)
+            d.src_timezone = timezone(settings.TIME_ZONE)
         else:
-            d.src_timezone = pytz.timezone(options.src_timezone)
+            d.src_timezone = timezone(options.src_timezone)
 
-        timezone = settings.TIME_ZONE
         if options.dst_timezone is None:
-            d.dst_timezone = pytz.timezone(settings.TIME_ZONE)
+            d.dst_timezone = timezone(settings.TIME_ZONE)
         else:
-            d.dst_timezone = pytz.timezone(options.dst_timezone)
+            d.dst_timezone = timezone(options.dst_timezone)
 
         offset = options.offset
         if offset is not None:
