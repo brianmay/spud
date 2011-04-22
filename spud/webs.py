@@ -12,6 +12,7 @@ from django.conf import settings
 from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
 from django.utils.translation import ugettext as _
+from django.db.models import Count
 
 
 from spud import models,forms
@@ -662,6 +663,11 @@ class photo_base_web(base_web):
         breadcrumbs.append(breadcrumb(detail_url,photo_object))
         breadcrumbs.append(breadcrumb(edit_url,"edit"))
 
+        persons = models.person.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
+        albums = models.album.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
+        categories = models.category.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
+        places = models.place.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
+
         return render_to_response(template, {
                 'parent': instance,
                 'object': photo_object,
@@ -670,6 +676,10 @@ class photo_base_web(base_web):
                 'page_obj': page_obj,
                 'form' : form, 'breadcrumbs': breadcrumbs,
                 'media' : form.media,
+                'persons': persons,
+                'albums': albums,
+                'categorys': categories,
+                'places': places,
                 },context_instance=RequestContext(request))
 
     def photo_detail_url(self, instance, number, size):
