@@ -33,7 +33,8 @@
 
 <a href="{% get_thumb_url object "large" %}">
 <img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
-</a><br/>
+</a>
+<div class="photo_detail_summary">
 {% if object.description %}
 {{object.description|urlizetrunc:40|linebreaks}}
 {% endif %}
@@ -42,6 +43,7 @@
     <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}
 {% endfor %}
 {% endif %}
+</div>
 </div>
 
 <div class='photo_detail_photo_detail'>
