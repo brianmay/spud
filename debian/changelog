@@ -1,10 +1,12 @@
 spud (0.8-1) unstable; urgency=low
 
   * Fix broken XHTML.
-  * Make timezones more flexiblie. Can specify UTC+nn or UTC-nn for imports.
+  * Make timezones more flexible. Can specify UTC+nn or UTC-nn for imports.
   * Improve photo editor, have links to most popular items.
+  * Fix problems with add person and set person logic.
+  * Limit width of photo summary in css.
 
- -- Brian May <bam@debian.org>  Fri, 22 Apr 2011 14:59:00 +1000
+ -- Brian May <bam@debian.org>  Fri, 22 Apr 2011 18:22:48 +1000
 
 spud (0.7-1) lucid; urgency=low
 
