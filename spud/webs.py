@@ -543,9 +543,9 @@ class photo_base_web(base_web):
                             else:
                                 position = o.position
 
-                            models.photo_person.objects.get_or_create(photo=photo_object,person=o.person,
-                                    defaults={'position': position}
-                            )
+                            pp,c = models.photo_person.objects.get_or_create(photo=photo_object,person=o.person)
+                            pp.position = position
+                            pp.save()
                     elif update.verb == "delete" and update.noun == "person":
                         for o in update.objects:
                             if o.position == "":
@@ -554,9 +554,7 @@ class photo_base_web(base_web):
                                 models.photo_person.objects.filter(photo=photo_object,person=o.person,position=o.position).delete()
                     elif update.verb == "set" and update.noun == "person":
                         for o in update.objects:
-                            pp = models.photo_person.objects.get(photo=photo_object,person=o.person)
-                            pp.position=o.position
-                            pp.save()
+                            pp = models.photo_person.objects.filter(photo=photo_object,person=o.person).update(position=o.position)
                     elif update.verb == "add" and update.noun == "album":
                         for album in update.objects:
                             models.photo_album.objects.get_or_create(photo=photo_object,album=album)
