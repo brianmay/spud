@@ -495,7 +495,9 @@ class photo_base_web(base_web):
     def object_photo_edit(self, request, instance, number, photo_list, size):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
-        error = self.check_edit_perms(request, breadcrumbs)
+
+        p_web = photo_web()
+        error = p_web.check_edit_perms(request, breadcrumbs)
         if error is not None:
             return error
 
