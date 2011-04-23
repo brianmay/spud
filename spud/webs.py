@@ -669,10 +669,10 @@ class photo_base_web(base_web):
         breadcrumbs.append(breadcrumb(detail_url,photo_object))
         breadcrumbs.append(breadcrumb(edit_url,"edit"))
 
-        persons = models.person.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
-        albums = models.album.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
-        categories = models.category.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
-        places = models.place.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")
+        persons = models.person.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
+        albums = models.album.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
+        categories = models.category.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
+        places = models.place.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
 
         return render_to_response(template, {
                 'parent': instance,
