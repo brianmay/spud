@@ -9,7 +9,7 @@ from django.contrib.comments.signals import comment_was_flagged, comment_was_pos
 from django.utils.encoding import smart_unicode
 from django.conf import settings
 from django.utils.translation import ugettext as _
-
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Q
 
 from spud.comments.models import CommentWithRating
@@ -150,6 +150,7 @@ def place_redirect(request,object_id):
     object = get_object_or_404(models.place, pk=object_id)
     return HttpResponseRedirect(web.get_view_url(object))
 
+@csrf_exempt
 def place_detail(request, object_id):
     web = webs.place_web()
     if request.method == 'POST':
@@ -209,6 +210,7 @@ def album_redirect(request,object_id):
     object = get_object_or_404(models.album, pk=object_id)
     return HttpResponseRedirect(web.get_view_url(object))
 
+@csrf_exempt
 def album_detail(request, object_id):
     web = webs.album_web()
     if request.method == 'POST':
@@ -276,6 +278,7 @@ def category_redirect(request,object_id):
     object = get_object_or_404(models.category, pk=object_id)
     return HttpResponseRedirect(web.get_view_url(object))
 
+@csrf_exempt
 def category_detail(request, object_id):
     web = webs.category_web()
     if request.method == 'POST':
@@ -330,6 +333,7 @@ def category_photo_update(request, object_id):
 # PERSON #
 ##########
 
+@csrf_exempt
 def person_list(request):
     web = webs.person_web()
     if request.method == 'POST':
@@ -420,6 +424,7 @@ def date_results(date):
         photo_list = models.photo.objects.all()
     return photo_list
 
+@csrf_exempt
 def date_list(request):
     web = webs.date_web()
 
@@ -740,6 +745,7 @@ def search_results(spec):
     return (photo_list, criteria)
 
 
+@csrf_exempt
 def search_list(request):
     web = webs.search_web()
     breadcrumbs = web.get_list_breadcrumbs()
