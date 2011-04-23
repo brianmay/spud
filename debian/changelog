@@ -5,6 +5,7 @@ spud (0.8-1) unstable; urgency=low
   * Improve photo editor, have links to most popular items.
   * Fix problems with add person and set person logic.
   * Limit width of photo summary in css.
+  * Optimize how search string is generated.
 
  -- Brian May <bam@debian.org>  Fri, 22 Apr 2011 18:22:48 +1000
 
