@@ -719,14 +719,17 @@ def search_list(request):
                 elif key == "location_descendants" or key == "album_descendants" or key == "category_descendants":
                     if value:
                         search_dict[key] = encode_string(value)
+                elif key == "location_none" or key == "album_none" or key == "category_none" or key == "person_none":
+                    if value:
+                        search_dict[key] = encode_string("true")
                 else:
                     if value != "" and value is not None:
                         search_dict[key] = encode_string(value)
 
-            search_spec = encode_dict(search_dict)
-
-            url=reverse("search_detail",kwargs={'object_id':search_spec})
-            return HttpResponseRedirect(url)
+            if len(search_dict) > 0:
+                search_spec = encode_dict(search_dict)
+                url=reverse("search_detail",kwargs={'object_id':search_spec})
+                return HttpResponseRedirect(url)
     else:
         form = forms.search_form()
 
