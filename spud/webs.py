@@ -424,6 +424,84 @@ class base_web(object):
 #################
 
 class photo_base_web(base_web):
+    def process_updates(self, photo_object, updates):
+        for update in updates:
+            if update.verb == "add" and update.noun == "person":
+                for o in update.objects:
+                    # try to guess the position we should assign for new pp objects
+                    pp_list = models.photo_person.objects.filter(photo=photo_object).order_by("-position")
+                    try:
+                        if pp_list[0].position is not None:
+                            position = pp_list[0].position + 1
+                        else:
+                            position = None
+                    except IndexError:
+                        position = 1
+
+                    pp,c = models.photo_person.objects.get_or_create(photo=photo_object,person=o.person)
+                    if o.position != "":
+                        # position was provided, use it
+                        pp.position = o.position
+                        pp.save()
+                    elif c:
+                        # if object was created, use the position we calculated
+                        pp.position = position
+                        pp.save()
+            elif update.verb == "delete" and update.noun == "person":
+                for o in update.objects:
+                    if o.position == "":
+                        models.photo_person.objects.filter(photo=photo_object,person=o.person).delete()
+                    else:
+                        models.photo_person.objects.filter(photo=photo_object,person=o.person,position=o.position).delete()
+            elif update.verb == "set" and update.noun == "person":
+                for o in update.objects:
+                    pp = models.photo_person.objects.filter(photo=photo_object,person=o.person).update(position=o.position)
+            elif update.verb == "add" and update.noun == "album":
+                for album in update.objects:
+                    models.photo_album.objects.get_or_create(photo=photo_object,album=album)
+            elif update.verb == "delete" and update.noun == "album":
+                for album in update.objects:
+                    models.photo_album.objects.filter(photo=photo_object,album=album).delete()
+            elif update.verb == "add" and update.noun == "category":
+                for category in update.objects:
+                    models.photo_category.objects.get_or_create(photo=photo_object,category=category)
+            elif update.verb == "delete" and update.noun == "category":
+                for category in update.objects:
+                    models.photo_category.objects.filter(photo=photo_object,category=category).delete()
+            elif update.verb == "set" and update.noun == "place":
+                if update.object == "None":
+                    photo_object.location = None
+                else:
+                    photo_object.location = update.object
+            elif update.verb == "set" and update.noun == "photographer":
+                if update.object == "None":
+                    photo_object.photographer = None
+                else:
+                    photo_object.photographer = update.object
+            elif update.verb == "set" and update.noun == "title":
+                if update.object == "None":
+                    photo_object.title = ""
+                else:
+                    photo_object.title = update.object
+            elif update.verb == "set" and update.noun == "description":
+                if update.object == "None":
+                    photo_object.description = ""
+                else:
+                    photo_object.description = update.object
+            elif update.verb == "set" and update.noun == "timezone":
+                if photo_object.timezone != update.timezone:
+                    photo_object.timezone = update.timezone
+                    if photo_object.action is None:
+                        photo_object.action = "M"
+            elif update.verb == "set" and update.noun == "datetime":
+                src_timezone = pytz.timezone(photo_object.timezone)
+                value = src_timezone.localize(update.datetime)
+                photo_object.datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
+                if photo_object.action is None:
+                    photo_object.action = "M"
+
+            else:
+                raise Http404("operation '%s' '%s' not implemented"%(update.verb, update.noun))
 
     def object_photo_list(self, request, instance, photo_list, template=None, context={}):
         self.assert_instance_type(instance)
@@ -532,83 +610,7 @@ class photo_base_web(base_web):
                         photo_object = get_object_or_404(models.photo, pk=photo_id)
 
                 updates = form.cleaned_data['updates']
-                for update in updates:
-                    if update.verb == "add" and update.noun == "person":
-                        for o in update.objects:
-                            # try to guess the position we should assign for new pp objects
-                            pp_list = models.photo_person.objects.filter(photo=photo_object).order_by("-position")
-                            try:
-                                if pp_list[0].position is not None:
-                                    position = pp_list[0].position + 1
-                                else:
-                                    position = None
-                            except IndexError:
-                                position = 1
-
-                            pp,c = models.photo_person.objects.get_or_create(photo=photo_object,person=o.person)
-                            if o.position != "":
-                                # position was provided, use it
-                                pp.position = o.position
-                                pp.save()
-                            elif c:
-                                # if object was created, use the position we calculated
-                                pp.position = position
-                                pp.save()
-                    elif update.verb == "delete" and update.noun == "person":
-                        for o in update.objects:
-                            if o.position == "":
-                                models.photo_person.objects.filter(photo=photo_object,person=o.person).delete()
-                            else:
-                                models.photo_person.objects.filter(photo=photo_object,person=o.person,position=o.position).delete()
-                    elif update.verb == "set" and update.noun == "person":
-                        for o in update.objects:
-                            pp = models.photo_person.objects.filter(photo=photo_object,person=o.person).update(position=o.position)
-                    elif update.verb == "add" and update.noun == "album":
-                        for album in update.objects:
-                            models.photo_album.objects.get_or_create(photo=photo_object,album=album)
-                    elif update.verb == "delete" and update.noun == "album":
-                        for album in update.objects:
-                            models.photo_album.objects.filter(photo=photo_object,album=album).delete()
-                    elif update.verb == "add" and update.noun == "category":
-                        for category in update.objects:
-                            models.photo_category.objects.get_or_create(photo=photo_object,category=category)
-                    elif update.verb == "delete" and update.noun == "category":
-                        for category in update.objects:
-                            models.photo_category.objects.filter(photo=photo_object,category=category).delete()
-                    elif update.verb == "set" and update.noun == "place":
-                        if update.object == "None":
-                            photo_object.location = None
-                        else:
-                            photo_object.location = update.object
-                    elif update.verb == "set" and update.noun == "photographer":
-                        if update.object == "None":
-                            photo_object.photographer = None
-                        else:
-                            photo_object.photographer = update.object
-                    elif update.verb == "set" and update.noun == "title":
-                        if update.object == "None":
-                            photo_object.title = ""
-                        else:
-                            photo_object.title = update.object
-                    elif update.verb == "set" and update.noun == "description":
-                        if update.object == "None":
-                            photo_object.description = ""
-                        else:
-                            photo_object.description = update.object
-                    elif update.verb == "set" and update.noun == "timezone":
-                        if photo_object.timezone != update.timezone:
-                            photo_object.timezone = update.timezone
-                            if photo_object.action is None:
-                                photo_object.action = "M"
-                    elif update.verb == "set" and update.noun == "datetime":
-                        src_timezone = pytz.timezone(photo_object.timezone)
-                        value = src_timezone.localize(update.datetime)
-                        photo_object.datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
-                        if photo_object.action is None:
-                            photo_object.action = "M"
-
-                    else:
-                        raise Http404("operation '%s' '%s' not implemented"%(update.verb, update.noun))
+                self.process_updates(photo_object, updates)
 
                 if 'action' in request.POST:
                     action = request.POST['action']
