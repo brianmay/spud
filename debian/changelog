@@ -7,8 +7,9 @@ spud (0.8-1) unstable; urgency=low
   * Fix problems with add person and set person logic.
   * Limit width of photo summary in css.
   * Optimize how search string is generated.
+  * Don't use CSRF protection for post requests that don't have side effects.
 
- -- Brian May <bam@debian.org>  Sat, 23 Apr 2011 19:10:24 +1000
+ -- Brian May <bam@debian.org>  Sun, 24 Apr 2011 09:16:42 +1000
 
 spud (0.7-1) lucid; urgency=low
 
