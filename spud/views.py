@@ -132,6 +132,15 @@ def photo_edit(request, object_id, size):
         raise Http404("Unknown image id '%s'"%(object_id))
     return web.object_photo_edit(request,object,0,photo_list,size)
 
+def photo_update(request, object_id):
+    web = webs.photo_web()
+    photo_list = models.photo.objects.filter(pk=object_id)
+    try:
+        object = photo_list[0]
+    except IndexError, e:
+        raise Http404("Unknown image id '%s'"%(object_id))
+    return web.object_photo_update(request,object,photo_list)
+
 #########
 # PLACE #
 #########
@@ -184,6 +193,12 @@ def place_photo_edit(request, object_id, number, size):
     object = get_object_or_404(models.place, pk=object_id)
     photo_list = models.photo.objects.filter(location=object)
     return web.object_photo_edit(request,object,number,photo_list,size)
+
+def place_photo_update(request, object_id):
+    web = webs.place_web()
+    object = get_object_or_404(models.place, pk=object_id)
+    photo_list = models.photo.objects.filter(location=object)
+    return web.object_photo_update(request,object,photo_list)
 
 #########
 # ALBUM #
@@ -246,6 +261,12 @@ def album_photo_edit(request, object_id, number, size):
     photo_list = models.photo.objects.filter(albums=object)
     return web.object_photo_edit(request,object,number,photo_list,size)
 
+def album_photo_update(request, object_id):
+    web = webs.album_web()
+    object = get_object_or_404(models.album, pk=object_id)
+    photo_list = models.photo.objects.filter(albums=object)
+    return web.object_photo_update(request,object,photo_list)
+
 ############
 # CATEGORY #
 ############
@@ -298,6 +319,12 @@ def category_photo_edit(request, object_id, number, size):
     object = get_object_or_404(models.category, pk=object_id)
     photo_list = models.photo.objects.filter(categorys=object)
     return web.object_photo_edit(request,object,number,photo_list,size)
+
+def category_photo_update(request, object_id):
+    web = webs.category_web()
+    object = get_object_or_404(models.category, pk=object_id)
+    photo_list = models.photo.objects.filter(categorys=object)
+    return web.object_photo_update(request,object,photo_list)
 
 ##########
 # PERSON #
@@ -356,6 +383,12 @@ def person_photo_edit(request, object_id, number, size):
     object = get_object_or_404(models.person, pk=object_id)
     photo_list = models.photo.objects.filter(persons=object)
     return web.object_photo_edit(request,object,number,photo_list,size)
+
+def person_photo_update(request, object_id):
+    web = webs.person_web()
+    object = get_object_or_404(models.person, pk=object_id)
+    photo_list = models.photo.objects.filter(persons=object)
+    return web.object_photo_update(request,object,photo_list)
 
 ########
 # DATE #
@@ -424,6 +457,12 @@ def date_photo_edit(request, object_id, number, size):
     photo_list = date_results(object_id)
     return web.object_photo_edit(request,object,number,photo_list,size)
 
+def date_photo_update(request, object_id):
+    web = webs.date_web()
+    object = date_class(object_id)
+    photo_list = date_results(object_id)
+    return web.object_photo_update(request,object,photo_list)
+
 ##########
 # ACTION #
 ##########
@@ -479,6 +518,12 @@ def action_photo_edit(request, object_id, number, size):
     object = action_class(object_id)
     photo_list = action_results(object_id)
     return web.object_photo_edit(request,object,number,photo_list,size)
+
+def action_photo_update(request, object_id):
+    web = webs.action_web()
+    object = action_class(object_id)
+    photo_list = action_results(object_id)
+    return web.object_photo_update(request,object,photo_list)
 
 ##########
 # SEARCH #
@@ -765,6 +810,12 @@ def search_photo_edit(request, object_id, number, size):
     object = search_class(object_id)
     (photo_list, criteria) = search_results(object_id)
     return web.object_photo_edit(request,object,number,photo_list,size)
+
+def search_photo_update(request, object_id):
+    web = webs.search_web()
+    object = search_class(object_id)
+    (photo_list, criteria) = search_results(object_id)
+    return web.object_photo_update(request,object,photo_list)
 
 ############
 # RELATION #

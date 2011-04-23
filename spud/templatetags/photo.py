@@ -273,3 +273,13 @@ def show_photo_buttons(context, user, web, instance, number, photo, size):
     dict = {}
     dict['buttons'] = web.get_photo_buttons(user, instance, number, photo, size)
     return dict
+
+@register.inclusion_tag('spud/show_update_form.html', takes_context=True)
+def show_update_form(context):
+    dict = {}
+    dict['update_form'] = context['update_form']
+    dict['persons'] = context['persons']
+    dict['albums'] = context['albums']
+    dict['categorys'] = context['categorys']
+    dict['places'] = context['places']
+    return dict

@@ -1,0 +1,60 @@
+<div class='photo_edit'>
+
+<div class="photo_edit_form">
+{{ update_form.non_field_errors }}
+{{ update_form.updates.errors }}
+{{ update_form.updates }}
+</div>
+
+<div class="photo_edit_persons">
+<h2>People</h2>
+{% for person in persons %}
+<a href="#" onclick="add_object('person','{{ person }}'); return false;">{{ person }}</a> {{ person.photos__count }}</br>
+{% endfor %}
+</div>
+
+<div class="photo_edit_albums">
+<h2>Albums</h2>
+{% for album in albums %}
+<a href="#" onclick="add_object('album','{{ album }}'); return false;">{{ album }}</a> {{ album.photos__count }}</br>
+{% endfor %}
+</div>
+
+<div class="photo_edit_categorys">
+<h2>Categories</h2>
+{% for category in categorys %}
+<a href="#" onclick="add_object('category','{{ category }}'); return false;">{{ category }}</a> {{ category.photos__count }}</br>
+{% endfor %}
+</div>
+
+<div class="photo_edit_places">
+<h2>Places</h2>
+{% for place in places %}
+<a href="#" onclick="add_object('place','{{ place }}'); return false;">{{ place }}</a> {{ place.photos__count }}</br>
+{% endfor %}
+</div>
+
+<br class="clear"/>
+</div>
+
+<script type="text/javascript">
+document.getElementById('id_updates').focus();
+function replace_selection(ta,replace_str)
+{
+    var start_pos = ta.selectionStart;
+    var end_pos = ta.selectionEnd;
+    if (start_pos > 1 && ta.value.charAt(start_pos-1) != "\n") {
+        replace_str = "\n" + replace_str
+    }
+    ta.value = ta.value.substr(0, start_pos) + replace_str + ta.value.substr(end_pos, ta.value.length);
+    ta.selectionStart = start_pos + replace_str.length
+    ta.selectionEnd = start_pos + replace_str.length
+    return {start: start_pos, end: end_pos, length: replace_str.length, text: replace_str};
+}
+function add_object(type,value)
+{
+    ta = document.getElementById('id_updates');
+    replace_selection(ta, "add "+type+" "+value+"\n")
+    ta.focus();
+}
+</script>

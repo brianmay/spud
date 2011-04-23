@@ -424,6 +424,11 @@ class base_web(object):
 #################
 
 class photo_base_web(base_web):
+    @m.permalink
+    def get_photo_update_url(self, instance):
+        self.assert_instance_type(instance)
+        return(self.url_prefix+'_photo_update', [ str(instance.pk) ])
+
     def process_updates(self, photo_object, updates):
         for update in updates:
             if update.verb == "add" and update.noun == "person":
@@ -682,13 +687,66 @@ class photo_base_web(base_web):
                 'size': size,
                 'web': self,
                 'page_obj': page_obj,
-                'form' : update_form, 'breadcrumbs': breadcrumbs,
+                'update_form' : update_form, 'breadcrumbs': breadcrumbs,
                 'media' : update_form.media,
                 'persons': persons,
                 'albums': albums,
                 'categorys': categories,
                 'places': places,
                 },context_instance=RequestContext(request))
+
+    def object_photo_update(self, request, instance, photo_list):
+        self.assert_instance_type(instance)
+        update_url = self.get_photo_update_url(instance)
+        breadcrumbs = self.get_view_breadcrumbs(instance)
+        breadcrumbs.append(breadcrumb(update_url,"bulk update"))
+
+        p_web = photo_web()
+        error = p_web.check_edit_perms(request, breadcrumbs)
+        if error is not None:
+            return error
+
+        template='spud/photo_update.html'
+
+        if request.method == 'POST':
+            update_form = forms.bulk_update_form(request.POST)
+
+            # search result may have changed, value in form is
+            # authoritive
+            if update_form.is_valid():
+                updates = update_form.cleaned_data['updates']
+                for photo_object in photo_list:
+                    self.process_updates(photo_object, updates)
+                    photo_object.save()
+
+                url = self.get_view_url(instance)
+                return HttpResponseRedirect(url)
+
+        else:
+            update_form = forms.bulk_update_form({
+                                    'updates': '',
+                                    })
+
+        persons = models.person.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
+        albums = models.album.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
+        categories = models.category.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
+        places = models.place.objects.filter(photos__in=photo_list).annotate(Count('photos')).order_by("-photos__count")[:10]
+
+        defaults = {
+                'object': instance,
+                'web': self,
+                'breadcrumbs': breadcrumbs,
+                'update_form': update_form,
+                'media': update_form.media,
+                'persons': persons,
+                'albums': albums,
+                'categorys': categories,
+                'places': places,
+        }
+
+        return render_to_response(template, defaults,
+                                  context_instance=RequestContext(request))
+
 
     def photo_detail_url(self, instance, number, size):
         self.assert_instance_type(instance)
@@ -734,6 +792,19 @@ class photo_base_web(base_web):
 
         return buttons
 
+    def get_view_buttons(self, user, instance):
+        self.assert_instance_type(instance)
+        buttons = super(photo_base_web, self).get_view_buttons(user, instance)
+
+        p_web = photo_web()
+        if p_web.has_edit_perms(user):
+            buttons.insert(0,{
+                'class': 'changelink',
+                'text': 'Bulk update',
+                'url': self.get_photo_update_url(instance),
+            })
+
+        return buttons
 
 
 # ---------------------------------------------------------------------------

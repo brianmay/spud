@@ -25,6 +25,9 @@ class photo_update_form(forms.Form):
     photo_id = forms.IntegerField(widget=forms.HiddenInput())
     updates = fields.photo_update_field(widget=forms.Textarea,required=False)
 
+class bulk_update_form(forms.Form):
+    updates = fields.photo_update_field(widget=forms.Textarea,required=False)
+
 class place_form(forms.ModelForm):
     parent_place = fields.select_field('place', required=False)
     cover_photo = fields.select_field('photo', required=False)
