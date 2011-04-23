@@ -529,21 +529,24 @@ class photo_base_web(base_web):
                 for update in updates:
                     if update.verb == "add" and update.noun == "person":
                         for o in update.objects:
+                            # try to guess the position we should assign for new pp objects
+                            pp_list = models.photo_person.objects.filter(photo=photo_object).order_by("-position")
+                            try:
+                                if pp_list[0].position is not None:
+                                    position = pp_list[0].position + 1
+                                else:
+                                    position = None
+                            except IndexError:
+                                position = 1
+
                             pp,c = models.photo_person.objects.get_or_create(photo=photo_object,person=o.person)
                             if o.position != "":
                                 # position was provided, use it
                                 pp.position = o.position
                                 pp.save()
                             elif c:
-                                # try to guess the position we should assign for new pp objects
-                                pp_list = models.photo_person.objects.filter(photo=photo_object).order_by("-position")
-                                try:
-                                    if pp_list[0].position is not None:
-                                        pp.position = pp_list[0].position + 1
-                                    else:
-                                        pp.position = None
-                                except IndexError:
-                                    pp.position = 1
+                                # if object was created, use the position we calculated
+                                pp.position = position
                                 pp.save()
                     elif update.verb == "delete" and update.noun == "person":
                         for o in update.objects:
