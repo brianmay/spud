@@ -600,16 +600,16 @@ class photo_base_web(base_web):
         photo_object = page_obj.object_list[0]
 
         if request.method == 'POST':
-            form = forms.photo_extra_form(request.POST)
+            update_form = forms.photo_update_form(request.POST)
 
             # search result may have changed, value in form is
             # authoritive
-            if form.is_valid():
-                photo_id = form.cleaned_data['photo_id']
+            if update_form.is_valid():
+                photo_id = update_form.cleaned_data['photo_id']
                 if photo_object.pk != photo_id:
                         photo_object = get_object_or_404(models.photo, pk=photo_id)
 
-                updates = form.cleaned_data['updates']
+                updates = update_form.cleaned_data['updates']
                 self.process_updates(photo_object, updates)
 
                 if 'action' in request.POST:
@@ -659,7 +659,7 @@ class photo_base_web(base_web):
                 return HttpResponseRedirect(url)
 
         else:
-            form = forms.photo_extra_form({
+            update_form = forms.photo_update_form({
                                     'photo_id': photo_object.pk,
                                     'updates': '',
                                     })
@@ -682,8 +682,8 @@ class photo_base_web(base_web):
                 'size': size,
                 'web': self,
                 'page_obj': page_obj,
-                'form' : form, 'breadcrumbs': breadcrumbs,
-                'media' : form.media,
+                'form' : update_form, 'breadcrumbs': breadcrumbs,
+                'media' : update_form.media,
                 'persons': persons,
                 'albums': albums,
                 'categorys': categories,

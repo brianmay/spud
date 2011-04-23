@@ -21,7 +21,7 @@ class photo_form(forms.ModelForm):
         model = models.photo
         fields = ('title','photographer','location','view','description','comment','timezone','datetime','action')
 
-class photo_extra_form(forms.Form):
+class photo_update_form(forms.Form):
     photo_id = forms.IntegerField(widget=forms.HiddenInput())
     updates = fields.photo_update_field(widget=forms.Textarea,required=False)
 
