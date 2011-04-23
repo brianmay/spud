@@ -1,5 +1,6 @@
 spud (0.8-1) unstable; urgency=low
 
+  * Fix permission checks. Security issue, anybody could edit photos.
   * Fix broken XHTML.
   * Make timezones more flexible. Can specify UTC+nn or UTC-nn for imports.
   * Improve photo editor, have links to most popular items.
@@ -7,7 +8,7 @@ spud (0.8-1) unstable; urgency=low
   * Limit width of photo summary in css.
   * Optimize how search string is generated.
 
- -- Brian May <bam@debian.org>  Fri, 22 Apr 2011 18:22:48 +1000
+ -- Brian May <bam@debian.org>  Sat, 23 Apr 2011 19:10:24 +1000
 
 spud (0.7-1) lucid; urgency=low
 

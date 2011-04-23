@@ -221,50 +221,50 @@ class base_web(object):
     def check_list_perms(self, request, breadcrumbs):
         error_list = []
         if not self.has_list_perms(request.user):
-            error_list.append("You cannot list %s objects"%(selfs.verbose_name))
+            error_list.append("You cannot list %s objects"%(self.verbose_name))
 
         if len(error_list) > 0:
-            return permission_denied_response(request, breadcrumbs, error_list)
+            return self.permission_denied_response(request, breadcrumbs, error_list)
         else:
             return None
 
     def check_view_perms(self, request, breadcrumbs):
         error_list = []
         if not self.has_view_perms(request.user):
-            error_list.append("You cannot view a %s object"%(selfs.verbose_name))
+            error_list.append("You cannot view a %s object"%(self.verbose_name))
 
         if len(error_list) > 0:
-            return permission_denied_response(request, breadcrumbs, error_list)
+            return self.permission_denied_response(request, breadcrumbs, error_list)
         else:
             return None
 
     def check_add_perms(self, request, breadcrumbs):
         error_list = []
         if not self.has_add_perms(request.user):
-            error_list.append("You cannot add a %s object"%(selfs.verbose_name))
+            error_list.append("You cannot add a %s object"%(self.verbose_name))
 
         if len(error_list) > 0:
-            return permission_denied_response(request, breadcrumbs, error_list)
+            return self.permission_denied_response(request, breadcrumbs, error_list)
         else:
             return None
 
     def check_edit_perms(self, request, breadcrumbs):
         error_list = []
         if not self.has_edit_perms(request.user):
-            error_list.append("You cannot edit a %s object"%(selfs.verbose_name))
+            error_list.append("You cannot edit a %s object"%(self.verbose_name))
 
         if len(error_list) > 0:
-            return permission_denied_response(request, breadcrumbs, error_list)
+            return self.permission_denied_response(request, breadcrumbs, error_list)
         else:
             return None
 
     def check_delete_perms(self, request, breadcrumbs):
         error_list = []
         if not self.has_delete_perms(request.user):
-            error_list.append("You cannot delete a %s object"%(selfs.verbose_name))
+            error_list.append("You cannot delete a %s object"%(self.verbose_name))
 
         if len(error_list) > 0:
-            return permission_denied_response(request, breadcrumbs, error_list)
+            return self.permission_denied_response(request, breadcrumbs, error_list)
         else:
             return None
 
@@ -495,6 +495,10 @@ class photo_base_web(base_web):
     def object_photo_edit(self, request, instance, number, photo_list, size):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
+        error = self.check_edit_perms(request, breadcrumbs)
+        if error is not None:
+            return error
+
         paginator = Paginator(photo_list, 1)
 
         template='spud/photo_edit.html'
