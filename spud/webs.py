@@ -1109,14 +1109,13 @@ class search_base_web(photo_base_web):
     model = None
     form = None
 
-    def get_list_buttons(self, user):
-        buttons = []
-        return buttons
+    # edit operation makes no sense
+    def has_edit_perms(self, user):
+        return False
 
-    def get_view_buttons(self, user, instance):
-        self.assert_instance_type(instance)
-        buttons = []
-        return buttons
+    # delete operation makes no sense
+    def has_delete_perms(self, user):
+        return False
 
 
 class date_web(search_base_web):
