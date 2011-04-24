@@ -4,6 +4,23 @@
 {{ update_form.non_field_errors }}
 {{ update_form.updates.errors }}
 {{ update_form.updates }}
+<br/><select id="command" onchange="document.getElementById('value').focus();">
+<option>add person</option>
+<option>add album</option>
+<option>add category</option>
+<option>delete person</option>
+<option>delete album</option>
+<option>delete category</option>
+<option>set place</option>
+<option>set person</option>
+<option>set photographer</option>
+<option>set title</option>
+<option>set description</option>
+<option>set datetime</option>
+<option>set timezone</option>
+</select>
+<input type="text" id="value"/>
+<a href="#" onclick="add_custom_command(); return false" accesskey="a">Add</a><br/>
 </div>
 
 <div class="photo_edit_persons">
@@ -56,5 +73,12 @@ function add_command(command)
     ta = document.getElementById('id_updates');
     replace_selection(ta, command+"\n")
     ta.focus();
+}
+function add_custom_command()
+{
+    ta = document.getElementById('id_updates');
+    command = document.getElementById('command');
+    value = document.getElementById('value');
+    add_command(command.value+" "+value.value);
 }
 </script>
