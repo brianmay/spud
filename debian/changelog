@@ -1,3 +1,10 @@
+spud (0.9-1) unstable; urgency=low
+
+  * Improve JavaScript.
+  * Rename database tables.
+
+ -- Brian May <bam@debian.org>  Tue, 26 Apr 2011 15:22:08 +1000
+
 spud (0.8-1) unstable; urgency=low
 
   * Fix permission checks. Security issue, anybody could edit photos.
