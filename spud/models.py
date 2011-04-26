@@ -752,8 +752,8 @@ class place(base_model):
     urldesc = models.CharField(max_length=96, blank=True)
     cover_photo = models.ForeignKey('photo', related_name='place_cover_of', null=True, blank=True)
     notes = models.TextField(blank=True)
+
     class Meta:
-        db_table = u'spud_place'
         ordering = [ 'title' ]
 
     def __unicode__(self):
@@ -827,7 +827,6 @@ class album(base_model):
     revised = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = u'spud_album'
         ordering = [ 'sortname', 'sortorder', 'album' ]
 
     def __unicode__(self):
@@ -889,8 +888,8 @@ class category(base_model):
     cover_photo = models.ForeignKey('photo', related_name='category_cover_of', null=True, blank=True)
     sortname = models.CharField(max_length=96, blank=True)
     sortorder = models.CharField(max_length=96, blank=True)
+
     class Meta:
-        db_table = u'spud_category'
         ordering = [ 'sortname', 'sortorder', 'category' ]
 
     def __unicode__(self):
@@ -961,8 +960,8 @@ class person(base_model):
     notes = models.TextField(blank=True)
     cover_photo = models.ForeignKey('photo', related_name='person_cover_of', null=True, blank=True)
     email = models.CharField(max_length=192, blank=True)
+
     class Meta:
-        db_table = u'spud_person'
         ordering = [ 'last_name', 'first_name' ]
 
     def __unicode__(self):
@@ -1087,7 +1086,6 @@ class photo(base_model):
     relations = models.ManyToManyField('self', through='photo_relation',symmetrical=False)
 
     class Meta:
-        db_table = u'spud_photo'
         ordering = [ 'datetime' ]
 
     def __unicode__(self):
@@ -1359,21 +1357,16 @@ class photo(base_model):
 class photo_album(base_model):
     photo = models.ForeignKey(photo)
     album = models.ForeignKey(album)
-    class Meta:
-        db_table = u'spud_photo_album'
 
 class photo_category(base_model):
     photo = models.ForeignKey(photo)
     category = models.ForeignKey(category)
-    class Meta:
-        db_table = u'spud_photo_category'
 
 class photo_person(base_model):
     photo = models.ForeignKey(photo)
     person = models.ForeignKey(person)
     position = models.IntegerField(null=True, blank=True)
     class Meta:
-        db_table = u'spud_photo_person'
         ordering = [ 'position' ]
 
 class photo_relation(base_model):
@@ -1381,9 +1374,6 @@ class photo_relation(base_model):
     photo_2 = models.ForeignKey(photo, db_column="photo_id_2", related_name="relations_2")
     desc_1 = models.CharField(max_length=384)
     desc_2 = models.CharField(max_length=384)
-
-    class Meta:
-        db_table = u'spud_photo_relation'
 
     def __unicode__(self):
         return "relationship '%s' to '%s'"%(self.photo_1,self.photo_2)
