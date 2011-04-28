@@ -18,6 +18,10 @@ register = template.Library()
 DOT = '.'
 
 @register.simple_tag
+def get_list_thumb_url(photo):
+    return get_thumb_url(photo,settings.DEFAULT_LIST_SIZE)
+
+@register.simple_tag
 def get_thumb_url(photo,size):
     web = webs.photo_web()
     return mark_safe(web.get_thumb_url(photo,size))
@@ -153,7 +157,7 @@ def pagination_with_parent(page_obj, web, instance, size):
 
 @register.simple_tag
 def photo_detail_url_by_page(web, instance, page_obj, number):
-    return web.photo_detail_url(instance, page_obj.start_index()+number, settings.DEFAULT_SIZE)
+    return web.photo_detail_url(instance, page_obj.start_index()+number, settings.DEFAULT_VIEW_SIZE)
 
 @register.simple_tag
 def photo_edit_url(web, instance, number, size):

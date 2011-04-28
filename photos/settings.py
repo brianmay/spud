@@ -85,7 +85,8 @@ IMAGE_SIZES = {
     'thumb': 120,
     'large': 960,
 }
-DEFAULT_SIZE='mid'
+DEFAULT_LIST_SIZE='thumb'
+DEFAULT_VIEW_SIZE='mid'
 
 DEFAULT_TIMEZONE = {}
 DEFAULT_DTOFFSET = {}

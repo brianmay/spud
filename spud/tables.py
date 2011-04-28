@@ -42,7 +42,7 @@ class person_table(tables.ModelTable):
         photo = data.get_cover_photo()
         if photo is not None:
             web = webs.photo_web()
-            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,'thumb'))
+            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE))
         else:
             value = u"No Photo"
 
@@ -104,7 +104,7 @@ class album_table(tables.ModelTable):
         photo = data.get_cover_photo()
         if photo is not None:
             web = webs.photo_web()
-            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,'thumb'))
+            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE))
         else:
             value = u"No Photo"
 
@@ -145,7 +145,7 @@ class photo_relation_table(tables.ModelTable):
         photo = data.photo_1
         if photo is not None:
             web = webs.photo_web()
-            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_SIZE),web.get_thumb_url(photo,'thumb')))
+            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_VIEW_SIZE),web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE)))
         else:
             return mark_safe(u"No Photo")
 
@@ -153,6 +153,6 @@ class photo_relation_table(tables.ModelTable):
         photo = data.photo_2
         if photo is not None:
             web = webs.photo_web()
-            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_SIZE),web.get_thumb_url(photo,'thumb')))
+            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_VIEW_SIZE),web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE)))
         else:
             return mark_safe(u"No Photo")

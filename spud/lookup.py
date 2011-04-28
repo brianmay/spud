@@ -1,6 +1,7 @@
 from spud import models, webs
 from django.db.models import Q
 from django.utils.html import escape
+from django.conf import settings
 
 def format_result(object):
     photo = object.get_cover_photo()
@@ -8,7 +9,7 @@ def format_result(object):
         return u"%s"%(escape(object))
     else:
         web = webs.photo_web()
-        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(photo,"thumb"),escape(object))
+        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE),escape(object))
 
 class person_lookup(object):
 
@@ -106,7 +107,7 @@ class photo_lookup(object):
     def format_result(self,object):
         """ a more verbose display, used in the search results display.  may contain html and multi-lines """
         web = webs.photo_web()
-        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(object,"thumb"),escape(object))
+        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(object,settings.DEFAULT_LIST_SIZE),escape(object))
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.

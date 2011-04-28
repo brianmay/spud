@@ -62,7 +62,7 @@
     {% for place in object.children.all %}
         <li class='photo_list_item' onClick='parent.location="{% get_view_url place %}"'>
             <a href="{% get_view_url place %}">
-                {% with place.get_cover_photo as photo %}{% if photo %}<img src='{% get_thumb_url photo "thumb" %}' alt=''/><br/>{% endif %}{% endwith %}
+                {% with place.get_cover_photo as photo %}{% if photo %}<img src='{% get_list_thumb_url photo %}' alt=''/><br/>{% endif %}{% endwith %}
                 <div class='title'>{{ place }}</div>
             </a>
         </li>
