@@ -84,7 +84,7 @@
   <table>
   {% for relation in object.relations_1.all %}
             <tr>
-            <td><a href="{% get_view_url relation.photo_2 %}">{{ relation.desc_2 }}</a>
+            <td><a href="{% get_photo_view_url relation.photo_2 size %}">{{ relation.desc_2 }}</a>
             {% if perms.spud.edit_photo_relation %}
             <td><a class="changelink" href="{% get_edit_url relation %}">Edit</a></td>
             {% endif %}
@@ -95,7 +95,7 @@
   {% endfor %}
   {% for relation in object.relations_2.all %}
             <tr>
-            <td><a href="{% get_view_url relation.photo_1 %}">{{ relation.desc_1 }}</a></td>
+            <td><a href="{% get_photo_view_url relation.photo_1 size %}">{{ relation.desc_1 }}</a></td>
             {% if perms.spud.edit_photo_relation %}
             <td><a class="changelink" href="{% get_edit_url relation %}">Edit</a></td>
             {% endif %}

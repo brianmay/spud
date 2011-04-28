@@ -27,6 +27,16 @@ def get_thumb_url(photo,size):
     return mark_safe(web.get_thumb_url(photo,size))
 
 @register.simple_tag
+def get_photo_view_url(instance, size):
+    web = webs.photo_web()
+    return mark_safe(web.get_view_url(instance, size))
+
+@register.simple_tag
+def get_photo_edit_url(instance, size):
+    web = webs.photo_web()
+    return mark_safe(web.get_edit_url(instance, size))
+
+@register.simple_tag
 def get_view_url(instance):
     web = webs.get_web_from_object(instance)
     return mark_safe(web.get_view_url(instance))
