@@ -761,7 +761,7 @@ class photo_base_web(base_web):
         buttons = []
 
         p_web = photo_web()
-        if self.has_edit_perms(user):
+        if p_web.has_edit_perms(user):
             buttons.append({
                 'class': 'viewlink',
                 'text': 'Orig',
@@ -783,7 +783,7 @@ class photo_base_web(base_web):
                 'url': p_web.get_view_url(photo, size),
             })
 
-        if self.has_edit_perms(user):
+        if p_web.has_edit_perms(user):
             buttons.append({
                 'class': 'changelink',
                 'text': 'Edit',
@@ -1179,6 +1179,10 @@ class photo_web(photo_base_web):
 class search_base_web(photo_base_web):
     model = None
     form = None
+
+    # edit operation makes no sense
+    def has_add_perms(self, user):
+        return False
 
     # edit operation makes no sense
     def has_edit_perms(self, user):

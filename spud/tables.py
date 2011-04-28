@@ -3,6 +3,7 @@ import django_tables as tables
 
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 class web_table(tables.MemoryTable):
     def __init__(self, web, *args, **kwargs):
@@ -144,7 +145,7 @@ class photo_relation_table(tables.ModelTable):
         photo = data.photo_1
         if photo is not None:
             web = webs.photo_web()
-            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo),web.get_thumb_url(photo,'thumb')))
+            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_SIZE),web.get_thumb_url(photo,'thumb')))
         else:
             return mark_safe(u"No Photo")
 
@@ -152,6 +153,6 @@ class photo_relation_table(tables.ModelTable):
         photo = data.photo_2
         if photo is not None:
             web = webs.photo_web()
-            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo),web.get_thumb_url(photo,'thumb')))
+            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_SIZE),web.get_thumb_url(photo,'thumb')))
         else:
             return mark_safe(u"No Photo")
