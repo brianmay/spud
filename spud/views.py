@@ -475,10 +475,10 @@ def date_photo_update(request, object_id):
 class action_class(object):
 
     def __init__(self,action):
-        if action == "none":
+        if action.lower() == "none":
             self.action = None
         else:
-            self.action=action
+            self.action = action
 
     def __unicode__(self):
         return models.action_to_string(self.action)
@@ -496,7 +496,10 @@ class action_class(object):
         return self.action
 
 def action_results(action):
-    photo_list = models.photo.objects.filter(action=action)
+    if action != "None":
+        photo_list = models.photo.objects.filter(action=action)
+    else:
+        photo_list = models.photo.objects.filter(action__isnull=True)
     return photo_list
 
 def action_list(request):
@@ -783,8 +786,6 @@ def search_list(request):
                 return HttpResponseRedirect(url)
     else:
         form = forms.search_form()
-
-    context = { 'form': form, 'media': form.media }
 
     template='spud/search_list.html'
 
