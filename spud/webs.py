@@ -511,8 +511,17 @@ class photo_base_web(base_web):
     def object_photo_list(self, request, instance, photo_list, template=None, context={}):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
-        paginator = Paginator(photo_list, 25) # Show 25 photos per page
 
+        # photos per page
+        try:
+            number = int(request.session.get('photos_per_page',25))
+        except ValueError:
+            number = 25
+
+        # construct paginator for paginating
+        paginator = Paginator(photo_list, number)
+
+        # what template should we use?
         if template is None:
             template='spud/'+self.template_prefix+'_detail.html'
 
@@ -533,6 +542,8 @@ class photo_base_web(base_web):
                 'web': self,
                 'page_obj': page_obj,
                 'breadcrumbs': breadcrumbs,
+                'default_list_size': request.session.get('default_list_size',settings.DEFAULT_LIST_SIZE),
+                'default_view_size': request.session.get('default_view_size',settings.DEFAULT_VIEW_SIZE),
         }
         defaults.update(context)
         return render_to_response(template, defaults,

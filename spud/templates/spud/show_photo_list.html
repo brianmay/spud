@@ -4,8 +4,8 @@
 <ul class='photo_list'>
 
 {% for photo in page_obj.object_list %}
-<li class='photo_list_item {{photo.get_style}}' onClick='parent.location="{% photo_detail_url_by_page web parent page_obj forloop.counter0 %}"'>
-<a href='{% photo_detail_url_by_page web parent page_obj forloop.counter0 %}'><img src='{% get_list_thumb_url photo %}' alt='{{photo}}'/>
+<li class='photo_list_item {{photo.get_style}}' onClick='parent.location="{% photo_detail_url_by_page web parent page_obj forloop.counter0 view_size %}"'>
+<a href='{% photo_detail_url_by_page web parent page_obj forloop.counter0 view_size %}'><img src='{% get_thumb_url photo list_size %}' alt='{{photo}}'/>
 <div class='title'>{{photo}}</div></a>
 <div class='sort'>{{ photo.datetime|show_date:photo.timezone }}</div>
 {% if photo.description %}<div class='desc'>{{photo.description|urlizetrunc:20}}</div>{% endif %}

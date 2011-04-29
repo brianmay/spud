@@ -232,8 +232,9 @@ def album_todo(request):
     web = webs.album_web()
     parent = get_object_or_404(models.album, pk=1)
     dt = datetime.now()-timedelta(days=365)
+    default_list_size = request.session.get('default_list_size', settings.DEFAULT_LIST_SIZE)
     objects = models.album.objects.filter(Q(revised__lt=dt) | Q(revised__isnull=True)).order_by('revised','-pk')
-    table = tables.album_table(request.user, web, objects, order_by=request.GET.get('sort'))
+    table = tables.album_table(request.user, web, default_list_size, objects, order_by=request.GET.get('sort'))
     return web.object_list(request, None, table)
 
 def album_add(request, object_id):
@@ -347,8 +348,9 @@ def person_list(request):
         form = forms.search_person_form()
 
     context = { 'form': form, 'media': form.media }
+    default_list_size = request.session.get('default_list_size', settings.DEFAULT_LIST_SIZE)
     list = models.person.objects.all()
-    table = tables.person_table(request.user, web, list, order_by=request.GET.get('sort'))
+    table = tables.person_table(request.user, web, default_list_size, list, order_by=request.GET.get('sort'))
     return web.object_list(request, form, table)
 
 def person_redirect(request,object_id):
@@ -831,7 +833,9 @@ def search_photo_update(request, object_id):
 def photo_relation_list(request):
     web = webs.photo_relation_web()
     list = models.photo_relation.objects.all()
-    table = tables.photo_relation_table(request.user, web, list, order_by=request.GET.get('sort'))
+    default_list_size = request.session.get('default_list_size', settings.DEFAULT_LIST_SIZE)
+    default_view_size = request.session.get('default_view_size', settings.DEFAULT_VIEW_SIZE)
+    table = tables.photo_relation_table(request.user, web, default_list_size, default_view_size, list, order_by=request.GET.get('sort'))
     return web.object_list(request, None, table)
 
 def photo_relation_add(request, object_id=None):
@@ -854,6 +858,47 @@ def photo_relation_delete(request,object_id):
     object = get_object_or_404(models.photo_relation, pk=object_id)
     return web.object_delete(request, object)
 
+
+############
+# SETTINGS #
+############
+
+def settings_form(request):
+    breadcrumbs = []
+    breadcrumbs.append(webs.breadcrumb(reverse("root"), _("Home")))
+    breadcrumbs.append(webs.breadcrumb(reverse("settings_form"), _("Settings")))
+
+    if request.method == 'POST':
+        form = forms.settings_form(request.POST)
+
+        if form.is_valid():
+            url = reverse("root")
+            url = request.GET.get("next",url)
+
+            request.session["photos_per_page"] = form.cleaned_data['photos_per_page']
+            request.session["default_list_size"] = form.cleaned_data['default_list_size']
+            request.session["default_view_size"] = form.cleaned_data['default_view_size']
+
+            return HttpResponseRedirect(url)
+    else:
+        form = forms.settings_form({
+            'photos_per_page': request.session.get('photos_per_page', 25),
+            'default_list_size': request.session.get('default_list_size', settings.DEFAULT_LIST_SIZE),
+            'default_view_size': request.session.get('default_view_size', settings.DEFAULT_VIEW_SIZE),
+        })
+
+    context = { 'form': form, 'media': form.media }
+
+    template='spud/settings_form.html'
+
+    defaults = {
+            'breadcrumbs': breadcrumbs,
+            'form': form,
+            'media': form.media,
+    }
+
+    return render_to_response(template, defaults,
+            context_instance=RequestContext(request))
 ##########
 # LEGACY #
 ##########

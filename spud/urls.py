@@ -78,6 +78,8 @@ urlpatterns = patterns('',
 
     url(r'^ajax/', include('ajax_select.urls')),
 
+    url(r'^settings/', 'spud.views.settings_form', name='settings_form'),
+
     # legacy
     (r'^all/(?P<object_id>\d+).html$', 'spud.views.legacy_detail',  {'type': 'photo'}),
     (r'^all/(?P<size>\w+)/(?P<object_id>\d+).jpg$', 'spud.views.photo_thumb_redirect'),

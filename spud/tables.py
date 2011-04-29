@@ -3,7 +3,6 @@ import django_tables as tables
 
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
-from django.conf import settings
 
 class web_table(tables.MemoryTable):
     def __init__(self, web, *args, **kwargs):
@@ -29,9 +28,10 @@ class person_table(tables.ModelTable):
     middle_name = tables.Column()
     last_name = tables.Column()
 
-    def __init__(self, user, web, *args, **kwargs):
+    def __init__(self, user, web, default_list_size, *args, **kwargs):
         super(person_table,self).__init__(*args, **kwargs)
         self.web = web
+        self.default_list_size = default_list_size
 
         if web.has_edit_perms(user):
             self.base_columns["edit"] = tables.Column(sortable=False)
@@ -42,7 +42,7 @@ class person_table(tables.ModelTable):
         photo = data.get_cover_photo()
         if photo is not None:
             web = webs.photo_web()
-            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE))
+            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,self.default_list_size))
         else:
             value = u"No Photo"
 
@@ -91,9 +91,10 @@ class album_table(tables.ModelTable):
     sortorder = tables.Column()
     revised = tables.Column()
 
-    def __init__(self, user, web, *args, **kwargs):
+    def __init__(self, user, web, default_list_size, *args, **kwargs):
         super(album_table,self).__init__(*args, **kwargs)
         self.web = web
+        self.default_list_size = default_list_size
 
         if web.has_edit_perms(user):
             self.base_columns["edit"] = tables.Column(sortable=False)
@@ -104,7 +105,7 @@ class album_table(tables.ModelTable):
         photo = data.get_cover_photo()
         if photo is not None:
             web = webs.photo_web()
-            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE))
+            value = u"<img src='%s' alt=''/>"%(web.get_thumb_url(photo,self.default_list_size))
         else:
             value = u"No Photo"
 
@@ -128,9 +129,11 @@ class photo_relation_table(tables.ModelTable):
     photo_2 = tables.Column(sortable=False)
     desc_2 = tables.Column()
 
-    def __init__(self, user, web, *args, **kwargs):
+    def __init__(self, user, web, default_list_size, default_view_size, *args, **kwargs):
         super(photo_relation_table,self).__init__(*args, **kwargs)
         self.web = web
+        self.default_list_size = default_list_size
+        self.default_view_size = default_view_size
 
         if web.has_edit_perms(user):
             self.base_columns["edit"] = tables.Column(sortable=False)
@@ -145,7 +148,7 @@ class photo_relation_table(tables.ModelTable):
         photo = data.photo_1
         if photo is not None:
             web = webs.photo_web()
-            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_VIEW_SIZE),web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE)))
+            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,self.default_view_size),web.get_thumb_url(photo,self.default_list_size)))
         else:
             return mark_safe(u"No Photo")
 
@@ -153,6 +156,6 @@ class photo_relation_table(tables.ModelTable):
         photo = data.photo_2
         if photo is not None:
             web = webs.photo_web()
-            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,settings.DEFAULT_VIEW_SIZE),web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE)))
+            return mark_safe(u"<a href='%s'><img src='%s' alt=''/></a>"%(web.get_view_url(photo,self.default_view_size),web.get_thumb_url(photo,self.default_list_size)))
         else:
             return mark_safe(u"No Photo")

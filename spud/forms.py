@@ -1,5 +1,6 @@
 from spud import models, fields
 from django import forms
+from django.conf import settings
 
 PHOTO_ACTION = (
     ('', '----'),
@@ -111,3 +112,7 @@ class search_form(forms.Form):
     camera_make = forms.CharField(required=False)
     camera_model = forms.CharField(required=False)
 
+class settings_form(forms.Form):
+    photos_per_page = forms.IntegerField()
+    default_list_size = forms.ChoiceField(choices=settings.LIST_SIZES)
+    default_view_size = forms.ChoiceField(choices=settings.VIEW_SIZES)

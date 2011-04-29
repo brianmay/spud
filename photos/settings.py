@@ -81,11 +81,21 @@ COMMENTS_APP = "spud.comments"
 
 IMAGE_CHECK_EXISTS=True
 IMAGE_SIZES = {
-    'mid': 480,
     'thumb': 120,
+    'mid': 480,
     'large': 960,
 }
+
+LIST_SIZES = (
+    ('thumb', 'Thumb'),
+)
 DEFAULT_LIST_SIZE='thumb'
+
+VIEW_SIZES = (
+    ('thumb', 'Thumb'),
+    ('mid', 'Medium'),
+    ('large', 'Large'),
+)
 DEFAULT_VIEW_SIZE='mid'
 
 DEFAULT_TIMEZONE = {}

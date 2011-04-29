@@ -26,7 +26,7 @@
     {% for album in object.children.all %}
         <li class='photo_list_item' onClick='parent.location="{% get_view_url album %}"'>
             <a href="{% get_view_url album %}">
-                {% with album.get_cover_photo as photo %}{% if photo %}<img src='{% get_list_thumb_url photo %}' alt=''/><br/>{% endif %}{% endwith %}
+                {% with album.get_cover_photo as photo %}{% if photo %}<img src='{% get_thumb_url photo default_list_size %}' alt=''/><br/>{% endif %}{% endwith %}
                 <div class='title'>{{ album }}</div>
             </a>
             {% if album.sortname %}<div class='sort'>({{album.sortname}} {{album.sortorder}})</div>{% endif %}
@@ -39,7 +39,7 @@
 {% endif %}
 {% endifequal %}
 
-{% show_photo_list page_obj web object %}
+{% show_photo_list page_obj web object default_list_size default_view_size %}
 
 {% pagination page_obj web %}
 
