@@ -32,7 +32,10 @@ width:170px;
 .paginator a:hover { color:white; background:#5b80b2; border-color:#036; }
 
 /* Children list */
-.infobox { float:left; border:1px solid #dddddd; padding:10px; margin:10px; width:340px; }
+.infobox { border:1px solid #dddddd; padding:10px; margin-bottom:10px; }
+.infobox dl { float: left; width: 200px; margin-top: 0; margin-right: 10px; }
+.infobox dt { margin-top: 0; }
+.infobox dd { padding-left: 10px; }
 
 .children {
 padding-left:50px;

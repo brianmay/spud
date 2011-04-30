@@ -18,9 +18,9 @@
 {% show_view_buttons web user object %}
 
 {%ifequal page_obj.number 1 %}
-<dl class="infobox">
+<div class="infobox">
     {% if object.address or object.address2 or object.city or object.zip or object.state or object.country %}
-    <dt>Address</dt><dd>
+    <dl><dt>Address</dt><dd>
 {% if user.is_staff %}
       {% if object.address %}{{object.address}}<br/>{% endif %}
       {% if object.address2 %}{{object.address2}}<br/>{% endif %}
@@ -30,31 +30,32 @@
       {% if object.city or object.zip %}<br/>{% endif %}
       {% if object.state %}{{object.state}}{% endif %}{% if object.state and object.country %},{% endif %}
       {% if object.country %} {{object.country}}{% endif %}
-    </dd>
+    </dd></dl>
     {% endif %}
     {% if object.notes %}
-    <dt>Notes</dt><dd>{{object.notes|urlizetrunc:40|linebreaks}}</dd>
+    <dl><dt>Notes</dt><dd>{{object.notes|urlizetrunc:40|linebreaks}}</dd></dl>
     {% endif %}
 {% if user.is_staff %}
     {% if object.work_of.all %}
-    <dt>Work of</dt><dd>
+    <dl><dt>Work of</dt><dd>
       {% for place in object.work_of.all %}
         <a href="{% get_view_url place %}">{{place}}</a>{% if not forloop.last %}; {% endif %}
       {% endfor %}
-    </dd>
+    </dd></dl>
     {% endif %}
     {% if object.home_of.all %}
-    <dt>Home of</dt><dd>
+    <dl><dt>Home of</dt><dd>
       {% for place in object.home_of.all %}
         <a href="{% get_view_url place %}">{{place}}</a>{% if not forloop.last %}; {% endif %}
       {% endfor %}
-    </dd>
+    </dd></dl>
     {% endif %}
 {% endif %}
 {% if object.url %}
-<dt>URL</dt><dd><a href="{{object.url}}">{{object.urldesc}}</a></dd>
+<dl><dt>URL</dt><dd><a href="{{object.url}}">{{object.urldesc}}</a></dd></dl>
 {% endif %}
-</dl>
+<br class="clear" />
+</div>
 
 {% if object.children.all %}
 <div class="children">

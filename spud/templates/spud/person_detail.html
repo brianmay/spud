@@ -15,65 +15,65 @@
 
 {% ifequal page_obj.number 1 %}
 {% if user.is_staff %}
-<dl class="infobox">
+<div class="infobox">
 {% if object.first_name %}
-<dt>First name</dt><dd>{{object.first_name}}</dd>
+<dl><dt>First name</dt><dd>{{object.first_name}}</dd></dl>
 {% endif %}
 {% if object.middle_name %}
-<dt>Middle Name</dt><dd>{{object.middle_name}}</dd>
+<dl><dt>Middle Name</dt><dd>{{object.middle_name}}</dd></dl>
 {% endif %}
 {% if object.last_name %}
-<dt>Last name</dt><dd>{{object.last_name}}</dd>
+<dl><dt>Last name</dt><dd>{{object.last_name}}</dd></dl>
 {% endif %}
 {% if object.called %}
-<dt>Called</dt><dd>{{object.called}}</dd>
+<dl><dt>Called</dt><dd>{{object.called}}</dd></dl>
 {% endif %}
 {% if object.gender %}
-<dt>Sex</dt><dd>{% show_sex object.gender %}</dd>
+<dl><dt>Sex</dt><dd>{% show_sex object.gender %}</dd></dl>
 {% endif %}
 {% if object.dob %}
-<dt>Date of birth</dt><dd>{{object.dob}}</dd>
+<dl><dt>Date of birth</dt><dd>{{object.dob}}</dd></dl>
 {% endif %}
 {% if object.dod %}
-<dt>Date of death</dt><dd>{{object.dod}}</dd>
+<dl><dt>Date of death</dt><dd>{{object.dod}}</dd></dl>
 {% endif %}
 {% if object.home %}
-<dt>Home</dt><dd><a href="{% get_view_url object.home %}">{{object.home}}</a></dd>
+<dl><dt>Home</dt><dd><a href="{% get_view_url object.home %}">{{object.home}}</a></dd></dl>
 {% endif %}
 {% if object.work %}
-<dt>Work</dt><dd><a href="{% get_view_url object.work %}">{{object.work}}</a></dd>
+<dl><dt>Work</dt><dd><a href="{% get_view_url object.work %}">{{object.work}}</a></dd></dl>
 {% endif %}
 {% if object.notes %}
-<dt>Notes</dt><dd>{{object.notes|urlizetrunc:40|linebreaks}}</dd>
+<dl><dt>Notes</dt><dd>{{object.notes|urlizetrunc:40|linebreaks}}</dd></dl>
 {% endif %}
 {% if object.email %}
-<dt>E-Mail</dt><dd><a href="email:{{object.email}}">{{object.email}}</a></dd>
+<dl><dt>E-Mail</dt><dd><a href="email:{{object.email}}">{{object.email}}</a></dd></dl>
 {% endif %}
 {% if object.grandparents.all %}
-<dt>Grand Parents</dt><dd>
+<dl><dt>Grand Parents</dt><dd>
   {% for person in object.grandparents.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
-</dd>
+</dd></dl>
 {% endif %}
 {% if object.father or object.mother %}
-  <dt>Parents</dt><dd>
+<dl><dt>Parents</dt><dd>
   {% if object.father %}
     <a href="{% get_view_url object.father %}">{{object.father}}</a>{% endif %}{% if object.father and object.mother %};{% endif %}
   {% if object.mother %}
     <a href="{% get_view_url object.mother %}">{{object.mother}}</a>
   {% endif %}
-  </dd>
+</dd></dl>
 {% endif %}
 {% if object.uncles_aunts.all %}
-<dt>Uncles/Aunts</dt><dd>
+<dl><dt>Uncles/Aunts</dt><dd>
   {% for person in object.uncles_aunts.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
-</dd>
+</dd></dl>
 {% endif %}
 {% if object.spouse or object.reverse_spouses.all %}
-  <dt>Spouse/Partner</dt>
+<dl><dt>Spouse/Partner</dt>
   {% if object.spouse %}
   <a href="{% get_view_url object.spouse %}">{{object.spouse}}</a>
   {% endif %}
@@ -82,44 +82,45 @@
       <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
     {% endfor %})
   {% endif %}
-  </dd>
+</dd></dl>
 {% endif %}
 {% if object.siblings.all %}
-<dt>Siblings</dt><dd>
+<dl><dt>Siblings</dt><dd>
   {% for person in object.siblings.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
-</dd>
+</dd></dl>
 {% endif %}
 {% if object.cousins.all %}
-<dt>Cousins</dt><dd>
+<dl><dt>Cousins</dt><dd>
   {% for person in object.cousins.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
-</dd>
+</dd></dl>
 {% endif %}
 {% if object.children.all %}
-<dt>Children</dt><dd>
+<dl><dt>Children</dt><dd>
   {% for person in object.children.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
-</dd>
+</dd></dl>
 {% endif %}
 {% if object.nephews_nieces.all %}
-<dt>Nephews/Nieces</dt><dd>
+<dl><dt>Nephews/Nieces</dt><dd>
   {% for person in object.nephews_nieces.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
-</dd>
+</dd></dl>
 {% endif %}
 {% if object.grandchildren.all %}
-<dt>Grand Children</dt><dd>
+<dl><dd><dt>Grand Children</dt><dd>
   {% for person in object.grandchildren.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
-</dd>
+</dd></dl>
 {% endif %}
-</dL>
+<br class="clear" />
+</div>
 {% endif %}
 {% endifequal %}
 

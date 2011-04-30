@@ -13,11 +13,12 @@
 
 {% show_view_buttons web user object %}
 
-<dl class="infobox">
+<div class="infobox">
 {% for bit in criteria %}
-<dt>{{bit.key}}</dt>
-<dd>{{bit.value}}</dd>
+<dl><dt>{{bit.key}}</dt>
+<dd>{{bit.value}}</dd></dl>
 {% endfor %}
+<br class="clear" />
 </dl>
 
 {% show_photo_list page_obj web object default_list_size default_view_size %}
