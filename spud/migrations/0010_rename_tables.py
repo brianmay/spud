@@ -124,7 +124,7 @@ class Migration(SchemaMigration):
         db.send_create_signal('spud', ['photo_category_new'])
 
         # Adding model 'photo_person_new'
-        db.create_table(u'zoph_photo_persons', (
+        db.create_table(u'zoph_photo_people', (
             ('position', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('photo', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['spud.photo_new'])),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),

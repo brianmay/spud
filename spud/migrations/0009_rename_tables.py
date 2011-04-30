@@ -5,43 +5,62 @@ from south.v2 import DataMigration
 from django.db import models
 from django.db import connection
 
-def copy_table(old,new):
-        cursor = connection.cursor()
+def strip_dbname(name):
+    return name[2:len(name)-1]
 
-        cursor.execute("SHOW COLUMNS FROM %s" % (old))
-        columns = [ c[0] for c in cursor.fetchall() ]
+def copy_table(old,new):
+        old = Migration.models[old]
+        new = Migration.models[new]
+
+        olddb = strip_dbname(old['Meta']['db_table'])
+        newdb = strip_dbname(old['Meta']['db_table'])
+
+        columns = []
+        for c in old:
+            if c == "Meta":
+                pass
+            elif old[c][0] == "django.db.models.fields.related.ManyToManyField":
+                pass
+            elif "db_column" in old[c][2]:
+                columns.append(old[c][2]["db_column"])
+            elif old[c][0] == "django.db.models.fields.related.ForeignKey":
+                columns.append(c+"_id")
+            else:
+                columns.append(c)
         csql = ",".join(columns)
 
-        print("INSERT INTO %s (%s) SELECT %s FROM %s" % (new, csql, csql, old))
-        cursor.execute("INSERT INTO %s (%s) SELECT %s FROM %s" % (new, csql, csql, old))
+        cursor = connection.cursor()
+
+        print("INSERT INTO %s (%s) SELECT %s FROM %s" % (newdb, csql, csql, olddb))
+        cursor.execute("INSERT INTO %s (%s) SELECT %s FROM %s" % (newdb, csql, csql, olddb))
 
 class Migration(DataMigration):
     
     def forwards(self, orm):
-        copy_table("zoph_albums", "spud_album")
-        copy_table("zoph_categories", "spud_category")
-        copy_table("zoph_places", "spud_place")
-        copy_table("zoph_people", "spud_person")
+        copy_table("spud.album", "spud.album_new")
+        copy_table("spud.category", "spud.category_new")
+        copy_table("spud.place", "spud.place_new")
+        copy_table("spud.person", "spud.person_new")
 
-        copy_table("zoph_photos", "spud_photo")
+        copy_table("spud.photo", "spud.photo_new")
 
-        copy_table("zoph_photo_albums", "spud_photo_album")
-        copy_table("zoph_photo_categories", "spud_photo_category")
-        copy_table("zoph_photo_people", "spud_photo_person")
-        copy_table("zoph_photo_relations", "spud_photo_relation")
+        copy_table("spud.photo_album", "spud.photo_album_new")
+        copy_table("spud.photo_category", "spud.photo_category_new")
+        copy_table("spud.photo_person", "spud.photo_person_new")
+        copy_table("spud.photo_relation", "spud.photo_relation_new")
     
     def backwards(self, orm):
-        copy_table("spud_album", "zoph_albums")
-        copy_table("spud_category", "zoph_categories")
-        copy_table("spud_place", "zoph_places")
-        copy_table("spud_person", "zoph_people")
+        copy_table("spud.album_new", "spud.album")
+        copy_table("spud.category_new", "spud.category")
+        copy_table("spud.place_new", "spud.place")
+        copy_table("spud.person_new", "spud.person")
 
-        copy_table("spud_photo", "zoph_photos")
+        copy_table("spud.photo_new", "spud.photo")
 
-        copy_table("spud_photo_album", "zoph_photo_albums")
-        copy_table("spud_photo_category", "zoph_photo_categories")
-        copy_table("spud_photo_person", "zoph_photo_people")
-        copy_table("spud_photo_relation", "zoph_photo_relations")
+        copy_table("spud.photo_album_new", "spud.photo_album")
+        copy_table("spud.photo_category_new", "spud.photo_category")
+        copy_table("spud.photo_person_new", "spud.photo_person")
+        copy_table("spud.photo_relation_new", "spud.photo_relation")
     
     models = {
         'spud.album': {
