@@ -1,3 +1,14 @@
+spud (0.10-1) unstable; urgency=low
+
+  * Remove obsolete command line option to import program.
+  * Various bugs fixed.
+  * Don't hard code image size or photos per page anywhere. Except for "large".
+  * Allow customization of default settings.
+  * Improve stylesheet for Mobile phone use.
+  * Fix error with migrations on sqlite.
+
+ -- Brian May <bam@debian.org>  Sat, 30 Apr 2011 11:58:45 +1000
+
 spud (0.9-1) unstable; urgency=low
 
   * Improve JavaScript.
