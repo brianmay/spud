@@ -244,6 +244,7 @@ class photo_update_field(forms.CharField):
         list = value.split("\n")
         results = []
         for line in list:
+            line = line.strip()
             try:
                 if line != "":
                     results.append(parser.parseString(line, parseAll=True))
