@@ -116,3 +116,4 @@ class settings_form(forms.Form):
     photos_per_page = forms.IntegerField()
     default_list_size = forms.ChoiceField(choices=settings.LIST_SIZES)
     default_view_size = forms.ChoiceField(choices=settings.VIEW_SIZES)
+    default_click_size = forms.ChoiceField(choices=settings.CLICK_SIZES)

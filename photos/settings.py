@@ -98,6 +98,13 @@ VIEW_SIZES = (
 )
 DEFAULT_VIEW_SIZE='mid'
 
+CLICK_SIZES = (
+    ('thumb', 'Thumb'),
+    ('mid', 'Medium'),
+    ('large', 'Large'),
+)
+DEFAULT_CLICK_SIZE='large'
+
 DEFAULT_TIMEZONE = {}
 DEFAULT_DTOFFSET = {}
 

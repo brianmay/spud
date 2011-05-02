@@ -31,7 +31,7 @@
 <div class='photo_detail {{object.get_style}}'>
 <div class='photo_detail_photo'>
 
-<a href="{% get_thumb_url object "large" %}">
+<a href="{% get_thumb_url object click_size %}">
 <img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 </a>
 <div class="photo_detail_summary">

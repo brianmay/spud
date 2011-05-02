@@ -878,6 +878,7 @@ def settings_form(request):
             request.session["photos_per_page"] = form.cleaned_data['photos_per_page']
             request.session["default_list_size"] = form.cleaned_data['default_list_size']
             request.session["default_view_size"] = form.cleaned_data['default_view_size']
+            request.session["default_click_size"] = form.cleaned_data['default_click_size']
 
             return HttpResponseRedirect(url)
     else:
@@ -885,6 +886,7 @@ def settings_form(request):
             'photos_per_page': request.session.get('photos_per_page', 25),
             'default_list_size': request.session.get('default_list_size', settings.DEFAULT_LIST_SIZE),
             'default_view_size': request.session.get('default_view_size', settings.DEFAULT_VIEW_SIZE),
+            'default_click_size': request.session.get('default_click_size', settings.DEFAULT_CLICK_SIZE),
         })
 
     context = { 'form': form, 'media': form.media }
