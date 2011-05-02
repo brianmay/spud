@@ -614,38 +614,41 @@ class photo_base_web(base_web):
         if page_obj.object_list.count() <= 0:
             raise Http404("No photos were found")
 
-        photo_object = page_obj.object_list[0]
-
         if request.method == 'POST':
+            try:
+                photo_id = int(request.POST.get('photo_id'))
+            except (TypeError, ValueError):
+                raise Http404("photo_id not supplied or not valid")
+            photo_object = get_object_or_404(models.photo, pk=photo_id)
+
+            form = forms.photo_form(request.POST, instance=photo_object)
             update_form = forms.photo_update_form(request.POST)
 
             # search result may have changed, value in form is
             # authoritive
-            if update_form.is_valid():
-                photo_id = update_form.cleaned_data['photo_id']
-                if photo_object.pk != photo_id:
-                        photo_object = get_object_or_404(models.photo, pk=photo_id)
+            if form.is_valid() and update_form.is_valid():
+                form.save()
 
                 updates = update_form.cleaned_data['updates']
                 self.process_updates(photo_object, updates)
 
-                if 'action' in request.POST:
-                    action = request.POST['action']
-                    if action == "nop":
+                if 'update_action' in request.POST:
+                    update_action = request.POST['update_action']
+                    if update_action == "nop":
                         photo_object.action = None
-                    elif action == "delete":
+                    elif update_action == "delete":
                         photo_object.action = "D"
-                    elif action == "regenerate":
+                    elif update_action == "regenerate":
                         photo_object.action = "R"
-                    elif action == "move":
+                    elif update_action == "move":
                         photo_object.action = "M"
-                    elif action == "rotate 90":
+                    elif update_action == "rotate 90":
                         photo_object.action = "90"
-                    elif action == "rotate 180":
+                    elif update_action == "rotate 180":
                         photo_object.action = "180"
-                    elif action == "rotate 270":
+                    elif update_action == "rotate 270":
                         photo_object.action = "270"
-                    elif action == "rotate auto":
+                    elif update_action == "rotate auto":
                         photo_object.action = "auto"
                     else:
                         raise Http404("Action '%s' not implemented"%(action))
@@ -676,8 +679,9 @@ class photo_base_web(base_web):
                 return HttpResponseRedirect(url)
 
         else:
+            photo_object = page_obj.object_list[0]
+            form = forms.photo_form(instance=photo_object)
             update_form = forms.photo_update_form({
-                                    'photo_id': photo_object.pk,
                                     'updates': '',
                                     })
 
@@ -700,8 +704,10 @@ class photo_base_web(base_web):
                 'click_size': request.session.get('default_click_size',settings.DEFAULT_CLICK_SIZE),
                 'web': self,
                 'page_obj': page_obj,
-                'update_form' : update_form, 'breadcrumbs': breadcrumbs,
-                'media' : update_form.media,
+                'form': form,
+                'update_form' : update_form,
+                'media' : form.media + update_form.media,
+                'breadcrumbs': breadcrumbs,
                 'persons': persons,
                 'albums': albums,
                 'categorys': categories,
@@ -722,7 +728,7 @@ class photo_base_web(base_web):
         template='spud/photo_update.html'
 
         if request.method == 'POST':
-            update_form = forms.bulk_update_form(request.POST)
+            update_form = forms.photo_update_form(request.POST)
 
             # search result may have changed, value in form is
             # authoritive
@@ -736,7 +742,7 @@ class photo_base_web(base_web):
                 return HttpResponseRedirect(url)
 
         else:
-            update_form = forms.bulk_update_form({
+            update_form = forms.photo_update_form({
                                     'updates': '',
                                     })
 

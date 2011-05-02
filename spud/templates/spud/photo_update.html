@@ -18,6 +18,11 @@
 <form method="post">{% csrf_token %}
 {% show_update_form %}
 <input type="submit" />
+
+<script type="text/javascript">
+document.getElementById('id_updates').focus();
+</script>
+
 </form>
 {% endblock %}
 

@@ -16,6 +16,10 @@ body { margin:0; padding:0; font-size:12px; font-family:"Lucida Grande","DejaVu 
 .photo_detail_camera_detail { float:left; padding:10px; max-width:200px; }
 
 .photo_edit { border:1px solid #dddddd; }
+.photo_edit .field { float: left; width: 300px; margin: 10px 20px; }
+.photo_edit .field label { display:block; }
+.photo_edit .field input { width: 100%; }
+.photo_edit .field textarea { width: 100%; }
 .photo_edit h2 { font-size:12px; margin:0 0 .5em 0; }
 .photo_edit_photo { padding:10px; }
 .photo_edit_photo_detail  { padding:10px;}

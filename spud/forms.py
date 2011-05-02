@@ -15,18 +15,16 @@ PHOTO_ACTION = (
 )
 
 class photo_form(forms.ModelForm):
+    photo_id = forms.IntegerField(widget=forms.HiddenInput())
     photographer = fields.select_field('person', required=False)
     location = fields.select_field('place', required=False)
+    timezone = fields.timezone_field()
 
     class Meta:
         model = models.photo
-        fields = ('title','photographer','location','view','description','comment','timezone','datetime','action')
+        fields = ('photo_id', 'title','photographer','location','view','description','comment','timezone','datetime','action')
 
 class photo_update_form(forms.Form):
-    photo_id = forms.IntegerField(widget=forms.HiddenInput())
-    updates = fields.photo_update_field(widget=forms.Textarea,required=False)
-
-class bulk_update_form(forms.Form):
     updates = fields.photo_update_field(widget=forms.Textarea,required=False)
 
 class place_form(forms.ModelForm):

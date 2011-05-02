@@ -40,6 +40,15 @@ class select_multiple_field(ajax_select.fields.AutoCompleteSelectMultipleField):
             kwargs["widget"] = select_widget(channel=channel,help_text=kwargs.get('help_text',_('Enter text to search.')))
         super(select_multiple_field, self).__init__(channel, *args, **kwargs)
 
+class timezone_field(forms.CharField):
+    def clean(self, value):
+        value=super(timezone_field, self).clean(value)
+        try:
+            return pytz.timezone(value)
+        except pytz.UnknownTimeZoneError, e:
+            raise ValidationError(u"Cannot find timezone: '%s'"%(value))
+        return value
+
 def get_person(s, loc, toks):
     # input "Abc Def Xyz"
 

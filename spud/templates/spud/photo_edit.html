@@ -8,20 +8,23 @@
 
 {% block title %}Edit {{ object }}{% endblock %}
 
+{% block extrahead %}{{ block.super }}
+{{ media }}
+{% endblock %}
+
 {% block content %}
 
 <h1>Edit {{ object }} ({{ page_obj.number }} of {{ page_obj.paginator.num_pages }})</h1>
 
 <form method="post" action="{% photo_edit_url web parent page_obj.number size %}">{% csrf_token %}
-<input type="hidden" name="photo_id" value="{{ object.pk }}" />
-<input type="submit" name="action" value="nop"/>
-<input type="submit" name="action" value="delete"/>
-<input type="submit" name="action" value="regenerate"/>
-<input type="submit" name="action" value="move"/>
-<input type="submit" name="action" value="rotate 90"/>
-<input type="submit" name="action" value="rotate 180"/>
-<input type="submit" name="action" value="rotate 270"/>
-<input type="submit" name="action" value="rotate auto"/>
+<input type="submit" name="update_action" value="nop"/>
+<input type="submit" name="update_action" value="delete"/>
+<input type="submit" name="update_action" value="regenerate"/>
+<input type="submit" name="update_action" value="move"/>
+<input type="submit" name="update_action" value="rotate 90"/>
+<input type="submit" name="update_action" value="rotate 180"/>
+<input type="submit" name="update_action" value="rotate 270"/>
+<input type="submit" name="update_action" value="rotate auto"/>
 
 {% if object.action %}
 <ul class="messagelist">
@@ -36,13 +39,13 @@
 <img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 </a>
 <div class="photo_detail_summary">
-{% if object.description %}
-{{object.description|urlizetrunc:40|linebreaks}}
-{% endif %}
 {% if object.photo_person_set.all %}
 {% for pp in object.photo_person_set.all %}
     <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}
 {% endfor %}
+{% endif %}
+{% if object.description %}
+{{object.description|urlizetrunc:40|linebreaks}}
 {% endif %}
 </div>
 </div>
@@ -131,7 +134,45 @@
 
 {% photo_edit_buttons page_obj %}
 
+<div class="photo_edit" id="update_fields">
+{% for field in form %}
+    {% if field.is_hidden %}
+            {{ field.errors }}
+            {{ field }}
+    {% else %}
+        <div class="field">
+            {{ field.errors }}
+            {{ field.label_tag }} {{ field }}
+        </div>
+    {% endif %}
+{% endfor %}
+<br class="clear" />
+</div>
+
 {% show_update_form %}
+
+<script type="text/javascript">
+function show_fields()
+{
+    document.getElementById('update_fields').style.display = '';
+    document.getElementById('update_command').style.display = 'none';
+}
+function show_command()
+{
+    document.getElementById('update_fields').style.display = 'none';
+    document.getElementById('update_command').style.display = '';
+    document.getElementById('id_updates').focus();
+}
+// '{{ form.is_bound }}'
+// '{{ form.is_valid }}'
+// '{{ update_form.is_bound }}'
+// '{{ update_form.errors }}'
+{% if form.is_bound and not form.is_valid %}
+show_fields();
+{% else %}
+show_command();
+{% endif %}
+</script>
 
 </form>
 

@@ -1,4 +1,4 @@
-<div class='photo_edit'>
+<div class='photo_edit' id="update_command">
 
 <div class="photo_edit_form">
 {{ update_form.non_field_errors }}
@@ -55,7 +55,6 @@
 </div>
 
 <script type="text/javascript">
-document.getElementById('id_updates').focus();
 function replace_selection(ta,replace_str)
 {
     var start_pos = ta.selectionStart;
