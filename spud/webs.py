@@ -350,9 +350,9 @@ class base_web(object):
                 valid = self.pre_save(instance=instance, form=form)
 
                 if valid:
+                    instance.save()
                     url = self.get_edit_finished_url(instance)
                     url = request.GET.get("next",url)
-                    instance.save()
                     return HttpResponseRedirect(url)
         else:
             instance = self.get_instance(**kwargs)
