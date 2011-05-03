@@ -82,6 +82,10 @@ class base_web(object):
     def has_list_perms(self, user):
         return True
 
+    @m.permalink
+    def get_list_url(self):
+        return(self.url_prefix+'_list',)
+
     def get_list_breadcrumbs(self):
         return self.get_breadcrumbs()
 
@@ -346,8 +350,9 @@ class base_web(object):
                 valid = self.pre_save(instance=instance, form=form)
 
                 if valid:
+                    url = self.get_edit_finished_url(instance)
+                    url = request.GET.get("next",url)
                     instance.save()
-                    url=self.get_edit_finished_url(instance)
                     return HttpResponseRedirect(url)
         else:
             instance = self.get_instance(**kwargs)
@@ -380,8 +385,9 @@ class base_web(object):
                 valid = self.pre_save(instance=instance, form=form)
 
                 if valid:
-                    instance.save()
                     url = self.get_edit_finished_url(instance)
+                    url = request.GET.get("next",url)
+                    instance.save()
                     return HttpResponseRedirect(url)
         else:
             form = self.form(instance=instance)
@@ -410,6 +416,7 @@ class base_web(object):
             errorlist = instance.check_delete()
             if len(errorlist) == 0:
                 url = self.get_delete_finished_url(instance)
+                url = request.GET.get("next",url)
                 instance.delete()
                 return HttpResponseRedirect(url)
 
@@ -1120,6 +1127,11 @@ class photo_relation_web(base_web):
         breadcrumbs.append(breadcrumb(self.get_edit_url(instance), "edit"))
         return breadcrumbs
 
+    # find url we should go to after editing this object
+    def get_edit_finished_url(self, instance):
+        self.assert_instance_type(instance)
+        return self.get_list_url()
+
     # get breadcrumbs to show while deleting this object
     def get_delete_breadcrumbs(self, instance):
         self.assert_instance_type(instance)
@@ -1139,6 +1151,10 @@ class photo_web(photo_base_web):
     def photo_edit_url(self, instance, number, size):
         self.assert_instance_type(instance)
         return reverse("%s_edit"%(self.url_prefix), kwargs={ 'object_id': instance.pk, 'size': size })
+
+    def photo_relation_add_url(self, instance):
+        self.assert_instance_type(instance)
+        return reverse("photo_relation_add", kwargs={ 'object_id': instance.pk })
 
     def get_breadcrumbs(self):
         breadcrumbs = []

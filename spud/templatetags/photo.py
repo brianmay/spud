@@ -33,6 +33,11 @@ def get_photo_edit_url(instance, size):
     return mark_safe(web.get_edit_url(instance, size))
 
 @register.simple_tag
+def photo_relation_add_url(instance):
+    web = webs.photo_web()
+    return mark_safe(web.photo_relation_add_url(instance))
+
+@register.simple_tag
 def get_view_url(instance):
     web = webs.get_web_from_object(instance)
     return mark_safe(web.get_view_url(instance))

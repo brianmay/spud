@@ -63,9 +63,9 @@ class photo_person_form(forms.ModelForm):
         model = models.photo_person
 
 class photo_relation_form(forms.ModelForm):
-    photo_1 = fields.select_field('photo', required=False)
+    photo_1 = fields.select_field('photo', required=True)
     desc_1 = forms.CharField(required=False)
-    photo_2 = fields.select_field('photo', required=False)
+    photo_2 = fields.select_field('photo', required=True)
     desc_2 = forms.CharField(required=False)
 
     class Meta:

@@ -4,6 +4,7 @@ spud (0.11-1) unstable; urgency=low
   * New edit form.
   * Don't hardcode large image size.
   * Fix processing of actions.
+  * Fix various issues surrounding photo relations.
 
  -- Brian May <brian@debian.org>  Tue, 03 May 2011 14:25:24 +1000
 
