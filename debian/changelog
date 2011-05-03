@@ -4,7 +4,7 @@ spud (0.11-1) unstable; urgency=low
   * New edit form.
   * Don't hardcode large image size.
 
- -- Brian May <brian@sys05b>  Tue, 03 May 2011 12:55:49 +1000
+ -- Brian May <brian@debian.org>  Tue, 03 May 2011 12:55:49 +1000
 
 spud (0.10-1) unstable; urgency=low
 
