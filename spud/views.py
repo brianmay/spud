@@ -476,15 +476,20 @@ def date_photo_update(request, object_id):
 
 class action_class(object):
 
+    # action is a url string. "none" == no action
     def __init__(self,action):
+        # translate string into db string. None == no action.
         if action.lower() == "none":
             self.action = None
         else:
             self.action = action
 
+    # User friendly name for action
     def __unicode__(self):
+        # translate db strings into user friendly string
         return models.action_to_string(self.action)
 
+    # Used for ????
     def get(self, key, default):
         if key=="action":
             if self.action is not None:
@@ -493,12 +498,17 @@ class action_class(object):
                 return "None"
         return default
 
+    # Used for URLS
     @property
     def pk(self):
-        return self.action
+        # needs to return a url string. "none" == no action
+        if self.action is None:
+            return "none"
+        else:
+            return self.action
 
 def action_results(action):
-    if action != "None":
+    if action != "none":
         photo_list = models.photo.objects.filter(action=action)
     else:
         photo_list = models.photo.objects.filter(action__isnull=True)
@@ -506,7 +516,7 @@ def action_results(action):
 
 def action_list(request):
     web = webs.action_web()
-    list = [ action_class(None) ]
+    list = [ action_class("none") ]
     list.extend( [ action_class(i[0]) for i in models.PHOTO_ACTION ] )
     table = tables.action_table(web, list, order_by=request.GET.get('sort'))
     return web.object_list(request, None, table)
@@ -729,11 +739,10 @@ def search_results(spec):
                     search = search & Q(categorys=None)
             elif key  == "action":
                 value = decode_string(value)
+                criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(value))})
                 if value == "none":
-                    criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(None))})
                     search = search & Q(action__isnull=True)
                 else:
-                    criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(value))})
                     search = search & Q(action=value)
             elif key  == "path":
                 value = decode_string(value)

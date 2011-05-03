@@ -36,33 +36,25 @@ PHOTO_ACTION = (
     ('270', 'rotate 270 degrees clockwise'),
 )
 
+# db string to something that makes sense to the user
 def sex_to_string(sex):
-    if sex == '1':
-        return u'male'
-    elif sex == '2':
-        return u'female'
-    else:
-        return u'unknown'
+    for s in SEX_CHOICES:
+        if s[0] == sex:
+            return s[1]
 
+    return "unknown sex"
+
+
+# db string to something that makes sense to the user. None == no action.
 def action_to_string(action):
     if action is None:
-        return u'none'
-    elif action == 'D':
-        return u'delete'
-    elif action == 'R':
-        return u'regenerate'
-    elif action == 'M':
-        return u'move'
-    elif action == 'auto':
-        return u'rotate auto'
-    elif action == '90':
-        return u'rotate 90'
-    elif action == '180':
-        return u'rotate 180'
-    elif action == '270':
-        return u'rotate 270'
-    else:
-        return u'unknown'
+        return "no action"
+
+    for a in PHOTO_ACTION:
+        if a[0] == action:
+            return a[1]
+
+    return "unknown action"
 
 # BASE ABSTRACT MODEL CLASS
 
