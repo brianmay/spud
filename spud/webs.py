@@ -1195,9 +1195,6 @@ class photo_web(photo_base_web):
     ##############
     # ADD ACTION #
     ##############
-    def get_add_photo_relation_url(self, instance):
-        self.assert_instance_type(instance)
-        return('photo_relation_add', [ str(self.instance_id)])
 
     ###############
     # EDIT ACTION #
