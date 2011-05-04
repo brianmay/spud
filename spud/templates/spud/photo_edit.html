@@ -163,10 +163,6 @@ function show_command()
     document.getElementById('update_command').style.display = '';
     document.getElementById('id_updates').focus();
 }
-// '{{ form.is_bound }}'
-// '{{ form.is_valid }}'
-// '{{ update_form.is_bound }}'
-// '{{ update_form.errors }}'
 {% if form.is_bound and not form.is_valid %}
 show_fields();
 {% else %}
