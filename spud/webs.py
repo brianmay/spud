@@ -28,6 +28,8 @@ class breadcrumb(object):
 # BASE METHODS #
 ################
 class base_web(object):
+    app_label = "spud"
+
     def assert_instance_type(self, instance):
         type_name = type(instance).__name__
         expected_type = self.web_id
@@ -57,7 +59,7 @@ class base_web(object):
         return self.web_id
 
     def has_name_perms(self, user, name):
-        if user.is_authenticated() and user.has_perm('spud.%s_%s'%(name, self.perm_id)):
+        if user.is_authenticated() and user.has_perm('%s.%s_%s'%(self.app_label, name, self.perm_id)):
             return True
         else:
             return False
@@ -214,7 +216,7 @@ class base_web(object):
     #####################
 
     def permission_denied_response(self, request, breadcrumbs, error_list):
-        t = loader.get_template('spud/error.html')
+        t = loader.get_template('%s/error.html'%self.app_label)
         c = RequestContext(request, {
                 'title': 'Access denied',
                 'error_list': error_list,
@@ -284,7 +286,7 @@ class base_web(object):
             return error
 
         if template is None:
-            template='spud/object_list.html'
+            template='%s/object_list.html'%(self.app_label)
 
         paginator = Paginator(table.rows, 50) # Show 50 objects per page
 
@@ -324,7 +326,7 @@ class base_web(object):
             return error
 
         if template is None:
-            template='spud/'+self.template_prefix+'_detail.html'
+            template='%s/%s_detail.html'%(self.app_label,self.template_prefix)
         return render_to_response(template, {
                 'object': instance,
                 'web': self,
@@ -335,7 +337,7 @@ class base_web(object):
         breadcrumbs = self.get_add_breadcrumbs(**kwargs)
 
         if template is None:
-            template='spud/object_edit.html'
+            template='%s/object_edit.html'%self.app_label
 
         error = self.check_add_perms(request, breadcrumbs)
         if error is not None:
@@ -371,7 +373,7 @@ class base_web(object):
         breadcrumbs = self.get_edit_breadcrumbs(instance)
 
         if template is None:
-            template='spud/object_edit.html'
+            template='%s/object_edit.html'%(self.app_label)
 
         error = self.check_edit_perms(request, breadcrumbs)
         if error is not None:
@@ -405,7 +407,7 @@ class base_web(object):
         breadcrumbs = self.get_delete_breadcrumbs(instance)
 
         if template is None:
-            template='spud/object_confirm_delete.html'
+            template='%s/object_confirm_delete.html'%self.app_label
 
         error = self.check_delete_perms(request, breadcrumbs)
         if error is not None:
