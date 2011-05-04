@@ -168,6 +168,19 @@ show_fields();
 {% else %}
 show_command();
 {% endif %}
+dt = document.getElementById('id_datetime');
+dt.onchange = function()
+{
+    a = document.getElementById('id_action');
+    if (a.value == "") {
+        for (var i=0; i < a.length; i++) {
+            if (a[i].value == "M") {
+                a.selectedIndex = i;
+                break;
+            }
+        }
+    }
+}
 </script>
 
 </form>
