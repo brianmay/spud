@@ -35,6 +35,17 @@ def set_category_list(photo, pk_list):
     for pk in pk_list:
         pa = models.photo_category.objects.create(photo=photo,category_id=pk)
 
+a = models.album.objects.get(album="Avalon Airshow 2011")
+for p in models.photo.objects.filter(albums=a, camera_model="Canon EOS 350D DIGITAL"):
+   print p.name
+   print p, p.datetime
+   p.datetime = p.datetime+datetime.timedelta(hours=1)
+   p.action = 'M'
+   print p, p.datetime
+   print
+   p.save()
+exit(0)
+
 l = models.place.objects.get(title="Avalon Airport")
 a = models.album.objects.get(album="Avalon Airshow 2011")
 for p in models.photo.objects.filter(location=l, camera_model="Canon EOS 5D Mark II"):
