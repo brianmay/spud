@@ -596,7 +596,7 @@ $.Autocompleter.Select = function (options, input, select, config) {
 	
 	function target(event) {
 		var element = event.target;
-		while(element && element.tagName != "LI")
+		while(element && element.tagName.toUpperCase() != "LI")
 			element = element.parentNode;
 		// more fun with IE, sometimes event.target is empty, just ignore it then
 		if(!element)
