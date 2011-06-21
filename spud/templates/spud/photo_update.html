@@ -2,15 +2,7 @@
 {% load i18n %}
 {% load photo %}
 
-{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
-
-{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
-
 {% block title %}Bulk Update of {{object}}{% endblock %}
-
-{% block extrahead %}{{ block.super }}
-{{ media }}
-{% endblock %}
 
 {% block content %}
 <h1>Bulk Update of {{object}}</h1>

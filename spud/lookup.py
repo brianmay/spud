@@ -9,7 +9,7 @@ def format_result(object):
         return u"%s"%(escape(object))
     else:
         web = webs.photo_web()
-        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE),escape(object))
+        return u"<img src='%s' alt=''/>%s"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE),escape(object))
 
 class person_lookup(object):
 

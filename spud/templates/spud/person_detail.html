@@ -1,18 +1,12 @@
-{% extends "base_site.html" %}
+{% extends "django_webs/object_detail.html" %}
 {% load i18n %}
 {% load photo %}
+{% load webs %}
 
-{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+{% block title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block object_title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 
-{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
-
-{% block title %}{{object}}{% endblock %}
-
-{% block content %}
-<h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
-
-{% show_view_buttons web user object %}
-
+{% block object %}
 {% ifequal page_obj.number 1 %}
 {% if user.is_staff %}
 <div class="infobox">
@@ -73,7 +67,7 @@
 </dd></dl>
 {% endif %}
 {% if object.spouse or object.reverse_spouses.all %}
-<dl><dt>Spouse/Partner</dt>
+<dl><dt>Spouse/Partner</dt><dd>
   {% if object.spouse %}
   <a href="{% get_view_url object.spouse %}">{{object.spouse}}</a>
   {% endif %}
@@ -113,7 +107,7 @@
 </dd></dl>
 {% endif %}
 {% if object.grandchildren.all %}
-<dl><dd><dt>Grand Children</dt><dd>
+<dl><dt>Grand Children</dt><dd>
   {% for person in object.grandchildren.all %}
     <a href="{% get_view_url person %}">{{person}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
@@ -126,6 +120,5 @@
 
 {% show_photo_list page_obj web object default_list_size default_view_size %}
 
-{% pagination page_obj web %}
-
+{% pagination page_obj %}
 {% endblock %}

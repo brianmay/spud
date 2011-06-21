@@ -59,7 +59,7 @@ function replace_selection(ta,replace_str)
 {
     var start_pos = ta.selectionStart;
     var end_pos = ta.selectionEnd;
-    if (start_pos > 1 && ta.value.charAt(start_pos-1) != "\n") {
+    if (start_pos > 1 &amp;&amp; ta.value.charAt(start_pos-1) != "\n") {
         replace_str = "\n" + replace_str
     }
     ta.value = ta.value.substr(0, start_pos) + replace_str + ta.value.substr(end_pos, ta.value.length);

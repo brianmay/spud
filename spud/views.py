@@ -400,7 +400,7 @@ def person_photo_update(request, object_id):
 # DATE #
 ########
 
-class date_class(object):
+class date_class(models.base_model):
 
     def __init__(self,date):
         self.date=date
@@ -474,7 +474,7 @@ def date_photo_update(request, object_id):
 # ACTION #
 ##########
 
-class action_class(object):
+class action_class(models.base_model):
 
     # action is a url string. "none" == no action
     def __init__(self,action):
@@ -597,7 +597,7 @@ def encode_array(array):
         result_array.append(s.replace(","," "))
     return ",".join(result_array)
 
-class search_class(object):
+class search_class(models.base_model):
 
     def __init__(self,search):
         self.search=search

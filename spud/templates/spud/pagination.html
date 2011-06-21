@@ -2,11 +2,11 @@
 {% load i18n %}
 {% if pagination_required %}
 <p class="paginator">
-{% paginator_prev page_obj web object size %}
-{% paginator_random page_obj web object size %}
-{% paginator_next page_obj web object size %}
+{% photo_paginator_prev page_obj web object size %}
+{% photo_paginator_random page_obj web object size %}
+{% photo_paginator_next page_obj web object size %}
 {% for i in page_range %}
-    {% paginator_number page_obj web object i size %}
+    {% photo_paginator_number page_obj web object i size %}
 {% endfor %}
 </p>
 {% endif %}

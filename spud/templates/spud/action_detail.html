@@ -1,21 +1,12 @@
-{% extends "base_site.html" %}
+{% extends "django_webs/object_detail.html" %}
 {% load i18n %}
 {% load photo %}
 
-{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+{% block title %}Action: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block object_title %}Action: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 
-{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
-
-{% block title %}action: {{ object }}{% endblock %}
-
-{% block content %}
-<h1>Action: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
-
-{% show_view_buttons web user object %}
-
-
+{% block object %}
 {% show_photo_list page_obj web object default_list_size default_view_size %}
 
 {% pagination page_obj web %}
-
 {% endblock %}

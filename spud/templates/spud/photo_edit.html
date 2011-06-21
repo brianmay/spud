@@ -1,21 +1,12 @@
-{% extends "base_site.html" %}
+{% extends "django_webs/object_edit.html" %}
 {% load i18n %}
 {% load photo %}
+{% load webs %}
 
-{% block stylesheet %}{{ MEDIA_URL }}css/forms.css{% endblock %}
+{% block title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block object_title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 
-{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
-
-{% block title %}Edit {{ object }}{% endblock %}
-
-{% block extrahead %}{{ block.super }}
-{{ media }}
-{% endblock %}
-
-{% block content %}
-
-<h1>Edit {{ object }} ({{ page_obj.number }} of {{ page_obj.paginator.num_pages }})</h1>
-
+{% block object %}
 <form method="post" action="{% photo_edit_url web parent page_obj.number size %}">{% csrf_token %}
 <input type="submit" name="update_action" value="nop"/>
 <input type="submit" name="update_action" value="delete"/>
@@ -173,7 +164,7 @@ dt.onchange = function()
 {
     a = document.getElementById('id_action');
     if (a.value == "") {
-        for (var i=0; i < a.length; i++) {
+        for (var i=0; i &lt; a.length; i++) {
             if (a[i].value == "M") {
                 a.selectedIndex = i;
                 break;

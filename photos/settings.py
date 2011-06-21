@@ -52,6 +52,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'django_webs',
     'photos',
     'spud',
     'spud.comments',

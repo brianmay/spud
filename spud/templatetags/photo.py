@@ -37,35 +37,11 @@ def photo_relation_add_url(instance):
     web = webs.photo_web()
     return mark_safe(web.photo_relation_add_url(instance))
 
-@register.simple_tag
-def get_view_url(instance):
-    web = webs.get_web_from_object(instance)
-    return mark_safe(web.get_view_url(instance))
-
-@register.simple_tag
-def get_edit_url(instance):
-    web = webs.get_web_from_object(instance)
-    return mark_safe(web.get_edit_url(instance))
-
-@register.simple_tag
-def get_delete_url(instance):
-    web = webs.get_web_from_object(instance)
-    return mark_safe(web.get_delete_url(instance))
-
 @register.inclusion_tag('spud/show_error_list.html')
 def show_error_list(error_list):
     return {
         'error_list': error_list,
     };
-
-@register.inclusion_tag('spud/show_object_list.html', takes_context=True)
-def show_list(context, table, rows, web, sort="sort"):
-    dict = RequestContext(context['request'])
-    dict['table'] = table
-    dict['web'] = web
-    dict['rows'] = rows
-    dict['sort'] = sort
-    return dict
 
 @register.inclusion_tag('spud/show_photo_list.html')
 def show_photo_list(page_obj, web, parent, list_size, view_size):
@@ -77,39 +53,32 @@ def show_photo_list(page_obj, web, parent, list_size, view_size):
                 'view_size': view_size,
                 };
 
-@register.inclusion_tag('spud/breadcrumbs.html')
-def show_breadcrumbs(breadcrumbs):
-        return {'breadcrumbs': breadcrumbs[:-1], 'object': breadcrumbs[-1] };
-
 def _get_url(web, instance, i, size):
-    if instance is not None:
-        return web.photo_detail_url(instance, i, size)
-    else:
-        return u"?page=%d"%(i)
+    return web.photo_detail_url(instance, i, size)
 
 @register.simple_tag
-def paginator_random(page_obj, web, instance, size):
+def photo_paginator_random(page_obj, web, instance, size):
     if instance is not None:
         return mark_safe(u"<a href='%s' accesskey='r'>R</a>" % (web.photo_detail_url(instance, "random", size)))
     else:
         return mark_safe(u'')
 
 @register.simple_tag
-def paginator_prev(page_obj, web, instance, size):
+def photo_paginator_prev(page_obj, web, instance, size):
     if page_obj.number <= 1:
         return mark_safe(u'')
     else:
         return mark_safe(u"<a href='%s' accesskey='p'>&lt;</a>" % (_get_url(web, instance, page_obj.number-1, size)))
 
 @register.simple_tag
-def paginator_next(page_obj, web, instance, size):
+def photo_paginator_next(page_obj, web, instance, size):
     if page_obj.number >= page_obj.paginator.num_pages:
         return mark_safe(u'')
     else:
         return mark_safe(u"<a href='%s' accesskey='n'>&gt;</a>" % (_get_url(web, instance, page_obj.number+1, size)))
 
 @register.simple_tag
-def paginator_number(page_obj, web, instance, i, size):
+def photo_paginator_number(page_obj, web, instance, i, size):
     if i == DOT:
         return mark_safe(u'... ')
     elif i == page_obj.number:
@@ -117,7 +86,8 @@ def paginator_number(page_obj, web, instance, i, size):
     else:
         return mark_safe(u'<a href="%s"%s>%d</a> ' % (_get_url(web, instance, i, size), (i == page_obj.paginator.num_pages and ' class="end"' or ''), i))
 
-def _pagination(page_obj, web, instance, size):
+@register.inclusion_tag('spud/pagination.html')
+def photo_pagination(page_obj, web, instance, size):
     paginator, page_num = page_obj.paginator, page_obj.number
 
     if paginator.num_pages <= 1:
@@ -159,14 +129,6 @@ def _pagination(page_obj, web, instance, size):
         'object': instance,
         'size': size,
     }
-
-@register.inclusion_tag('spud/pagination.html')
-def pagination(page_obj, web):
-    return _pagination(page_obj, web, None, None)
-
-@register.inclusion_tag('spud/pagination.html')
-def pagination_with_parent(page_obj, web, instance, size):
-    return _pagination(page_obj, web, instance, size)
 
 @register.simple_tag
 def photo_detail_url_by_page(web, instance, page_obj, number, size):
@@ -266,26 +228,7 @@ def url_with_param(parser, token):
             raise template.TemplateSyntaxError, "Argument syntax wrong: should be key=value"
     return url_with_param_node(qschanges)
 
-@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
-def show_list_buttons(context, web, user):
-    dict = {}
-    dict['buttons'] = web.get_list_buttons(user)
-    return dict
-
-@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
-def show_view_buttons(context, web, user, instance):
-    dict = {}
-    dict['buttons'] = web.get_view_buttons(user, instance)
-    return dict
-
-@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
-def show_object_view_buttons(context, user, instance):
-    web = webs.get_web_from_object(instance)
-    dict = {}
-    dict['buttons'] = web.get_view_buttons(user, instance)
-    return dict
-
-@register.inclusion_tag('spud/show_buttons.html', takes_context=True)
+@register.inclusion_tag('django_webs/show_buttons.html', takes_context=True)
 def show_photo_buttons(context, user, web, instance, number, photo, size):
     dict = {}
     dict['buttons'] = web.get_photo_buttons(user, instance, number, photo, size)

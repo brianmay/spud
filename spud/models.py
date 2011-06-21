@@ -63,10 +63,6 @@ class base_model(models.Model):
     class Meta:
         abstract = True
 
-    def get_history(self):
-        ct = ContentType.objects.get_for_model(self)
-        return history_item.objects.filter(content_type=ct, object_pk=self.pk)
-
     def error_list(self):
         error_list = []
         return error_list
@@ -98,21 +94,6 @@ class place(base_model):
 
     def __unicode__(self):
         return self.title
-
-    def get_full_name(self):
-        list = []
-
-        object=self
-        seen = {}
-        while object is not None and object.pk not in seen:
-            list.insert(0,u"%s"%(object))
-            seen[object.pk] = True
-            object = object.parent_place
-
-        if object is not None:
-            list.insert(0,u"ERROR")
-
-        return "&rsaquo;".join(list)
 
     def _get_descendants(self, descendants):
         if self in descendants:
@@ -172,21 +153,6 @@ class album(base_model):
     def __unicode__(self):
         return self.album
 
-    def get_full_name(self):
-        list = []
-
-        object=self
-        seen = {}
-        while object is not None and object.pk not in seen:
-            list.insert(0,u"%s"%(object))
-            seen[object.pk] = True
-            object = object.parent_album
-
-        if object is not None:
-            list.insert(0,u"ERROR")
-
-        return "&rsaquo;".join(list)
-
     def _get_descendants(self, descendants):
         if self in descendants:
             return descendants
@@ -234,21 +200,6 @@ class category(base_model):
 
     def __unicode__(self):
         return self.category
-
-    def get_full_name(self):
-        list = []
-
-        object=self
-        seen = {}
-        while object is not None and object.pk not in seen:
-            list.insert(0,u"%s"%(object))
-            seen[object.pk] = True
-            object = object.parent_category
-
-        if object is not None:
-            list.insert(0,u"ERROR")
-
-        return "&rsaquo;".join(list)
 
     def _get_descendants(self, descendants):
         if self in descendants:
@@ -517,17 +468,17 @@ class photo(base_model):
         self.size = size
 
         try:
-            self.camera_make = exif['Exif.Image.Make']
+            self.camera_make = exif['Exif.Image.Make'].value
         except KeyError:
             pass
 
         try:
-            self.camera_model = exif['Exif.Image.Model']
+            self.camera_model = exif['Exif.Image.Model'].value
         except KeyError:
             pass
 
         try:
-            if exif['Exif.Photo.Flash'] & 1:
+            if exif['Exif.Photo.Flash'].value & 1:
                 self.flash_used = 'Y'
             else:
                 self.flash_used = 'N'
@@ -535,13 +486,13 @@ class photo(base_model):
             pass
 
         try:
-            focallength = exif['Exif.Photo.FocalLength']
+            focallength = exif['Exif.Photo.FocalLength'].value
             self.focal_length = "%.1f mm"%(focallength.numerator*1.0/focallength.denominator)
         except KeyError:
             pass
 
         try:
-            self.exposure = exif['Exif.Photo.ExposureTime']
+            self.exposure = exif['Exif.Photo.ExposureTime'].value
         except KeyError:
             pass
 
@@ -551,32 +502,32 @@ class photo(base_model):
             pass
 
         try:
-            fnumber = exif['Exif.Photo.FNumber']
+            fnumber = exif['Exif.Photo.FNumber'].value
             self.aperture = "F%.1f"%(fnumber.numerator*1.0/fnumber.denominator)
         except KeyError:
             pass
 
         try:
-            self.iso_equiv = exif['Exif.Photo.ISOSpeedRatings']
+            self.iso_equiv = exif['Exif.Photo.ISOSpeedRatings'].value
         except KeyError:
             pass
 
         try:
-            if exif['Exif.Photo.MeteringMode'] == 0:
+            if exif['Exif.Photo.MeteringMode'].value == 0:
                 self.metering_mode = "unknown"
-            elif exif['Exif.Photo.MeteringMode'] == 1:
+            elif exif['Exif.Photo.MeteringMode'].value == 1:
                 self.metering_mode = "average"
-            elif exif['Exif.Photo.MeteringMode'] == 2:
+            elif exif['Exif.Photo.MeteringMode'].value == 2:
                 self.metering_mode = "center weighted average"
-            elif exif['Exif.Photo.MeteringMode'] == 3:
+            elif exif['Exif.Photo.MeteringMode'].value == 3:
                 self.metering_mode = "spot"
-            elif exif['Exif.Photo.MeteringMode'] == 4:
+            elif exif['Exif.Photo.MeteringMode'].value == 4:
                 self.metering_mode = "multi spot"
-            elif exif['Exif.Photo.MeteringMode'] == 5:
+            elif exif['Exif.Photo.MeteringMode'].value == 5:
                 self.metering_mode = "pattern"
-            elif exif['Exif.Photo.MeteringMode'] == 6:
+            elif exif['Exif.Photo.MeteringMode'].value == 6:
                 self.metering_mode = "partial"
-            elif exif['Exif.Photo.MeteringMode'] == 255:
+            elif exif['Exif.Photo.MeteringMode'].value == 255:
                 self.metering_mode = "other"
             else:
                 self.metering_mode = "reserved"
@@ -584,7 +535,7 @@ class photo(base_model):
             pass
 
         try:
-            self.focus_dist = exif['Exif.CanonSi.SubjectDistance']
+            self.focus_dist = exif['Exif.CanonSi.SubjectDistance'].value
         except KeyError:
             pass
 

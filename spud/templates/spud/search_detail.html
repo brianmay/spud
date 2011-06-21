@@ -1,28 +1,21 @@
-{% extends "base_site.html" %}
+{% extends "django_webs/object_detail.html" %}
 {% load i18n %}
 {% load photo %}
+{% load webs %}
 
-{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+{% block title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block object_title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 
-{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
-
-{% block title %}Search results{% endblock %}
-
-{% block content %}
-<h1>Search results page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
-
-{% show_view_buttons web user object %}
-
+{% block object %}
 <div class="infobox">
 {% for bit in criteria %}
 <dl><dt>{{bit.key}}</dt>
 <dd>{{bit.value}}</dd></dl>
 {% endfor %}
 <br class="clear" />
-</dl>
+</div>
 
 {% show_photo_list page_obj web object default_list_size default_view_size %}
 
-{% pagination page_obj web %}
-
+{% pagination page_obj %}
 {% endblock %}

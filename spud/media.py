@@ -20,16 +20,16 @@ class media:
         return os.path.getsize(self.src_full)
 
     def get_exif(self):
-        exif = pyexiv2.Image(self.src_full)
-        exif.readMetadata()
+        exif = pyexiv2.ImageMetadata(self.src_full)
+        exif.read()
         return exif
 
     def get_datetime(self):
         exif = self.get_exif()
         try:
-            value = exif['Exif.Photo.DateTimeOriginal']
+            value = exif['Exif.Photo.DateTimeOriginal'].value
             if isinstance(value, str):
-                value = exif['Exif.Photo.DateTimeDigitized']
+                value = exif['Exif.Photo.DateTimeDigitized'].value
             if isinstance(value, str):
                 value = None
         except KeyError:

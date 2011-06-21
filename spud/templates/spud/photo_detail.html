@@ -1,32 +1,21 @@
-{% extends "base_site.html" %}
+{% extends "django_webs/object_detail.html" %}
 {% load i18n %}
 {% load photo %}
+{% load webs %}
 {% load comments %}
 
-{% block stylesheet %}{{ MEDIA_URL }}css/photolists.css{% endblock %}
+{% block title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block object_title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block tools %}{% show_photo_buttons user web parent page_obj.number object size %}{% endblock %}
 
-{% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
-
-{% block title %}{{ object }}{% endblock %}
-
-{% block content %}
-{% if page_obj %}
-{% pagination_with_parent page_obj web parent size %}
-{% endif %}
-
-<h1>{{object}} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</h1>
-
-{% with object.error_list as error_list %}{% if error_list %}
-{% show_error_list error_list %}
-{% endif %}{% endwith %}
+{% block object %}
+{% photo_pagination page_obj web parent size %}
 
 {% if object.action %}
 <ul class="messagelist">
 <li>Marked action: {% show_action_with_url object.action %}</li>
 </ul>
 {% endif %}
-
-{% show_photo_buttons user web parent page_obj.number object size %}
 
 <div class='photo_detail {{object.get_style}}'>
 <div class='photo_detail_photo'>
@@ -144,5 +133,4 @@
 
 {% render_comment_form for object %}
 </div>
-
 {% endblock %}
