@@ -51,7 +51,7 @@
 <div class="children">
     <ul class="photo_list">
     {% for place in object.children.all %}
-        <li class='photo_list_item' onClick='parent.location="{% get_view_url place %}"'>
+        <li class='photo_list_item' onclick='parent.location="{% get_view_url place %}"'>
             <a href="{% get_view_url place %}">
                 {% with place.get_cover_photo as photo %}{% if photo %}<img src='{% get_thumb_url photo default_list_size %}' alt=''/><br/>{% endif %}{% endwith %}
                 <div class='title'>{{ place }}</div>
