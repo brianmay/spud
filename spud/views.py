@@ -150,11 +150,10 @@ def place_redirect(request,object_id):
     object = get_object_or_404(models.place, pk=object_id)
     return HttpResponseRedirect(web.get_view_url(object))
 
-@csrf_exempt
 def place_detail(request, object_id):
     web = webs.place_web()
-    if request.method == 'POST':
-        form = forms.search_place_form(request.POST)
+    if 'place' in request.GET:
+        form = forms.search_place_form(request.GET)
 
         if form.is_valid():
             place = form.cleaned_data['place']
@@ -210,11 +209,10 @@ def album_redirect(request,object_id):
     object = get_object_or_404(models.album, pk=object_id)
     return HttpResponseRedirect(web.get_view_url(object))
 
-@csrf_exempt
 def album_detail(request, object_id):
     web = webs.album_web()
-    if request.method == 'POST':
-        form = forms.search_album_form(request.POST)
+    if 'album' in request.GET:
+        form = forms.search_album_form(request.GET)
 
         if form.is_valid():
             album = form.cleaned_data['album']
@@ -279,11 +277,10 @@ def category_redirect(request,object_id):
     object = get_object_or_404(models.category, pk=object_id)
     return HttpResponseRedirect(web.get_view_url(object))
 
-@csrf_exempt
 def category_detail(request, object_id):
     web = webs.category_web()
-    if request.method == 'POST':
-        form = forms.search_category_form(request.POST)
+    if 'category' in request.GET:
+        form = forms.search_category_form(request.GET)
 
         if form.is_valid():
             category = form.cleaned_data['category']
@@ -334,11 +331,10 @@ def category_photo_update(request, object_id):
 # PERSON #
 ##########
 
-@csrf_exempt
 def person_list(request):
     web = webs.person_web()
-    if request.method == 'POST':
-        form = forms.search_person_form(request.POST)
+    if 'person' in request.GET:
+        form = forms.search_person_form(request.GET)
 
         if form.is_valid():
             person = form.cleaned_data['person']
@@ -426,12 +422,11 @@ def date_results(date):
         photo_list = models.photo.objects.all()
     return photo_list
 
-@csrf_exempt
 def date_list(request):
     web = webs.date_web()
 
-    if request.method == 'POST':
-        form = forms.search_date_form(request.POST)
+    if 'date' in request.GET:
+        form = forms.search_date_form(request.GET)
 
         if form.is_valid():
             date = form.cleaned_data['date']
