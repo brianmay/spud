@@ -109,4 +109,6 @@ DEFAULT_CLICK_SIZE='large'
 DEFAULT_TIMEZONE = {}
 DEFAULT_DTOFFSET = {}
 
+DEFAULT_CONTENT_TYPE = "application/xhtml+xml"
+
 execfile("/etc/spud/settings.py")
