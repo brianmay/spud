@@ -2,6 +2,7 @@
 {% load i18n %}
 
 {% block title %}{% trans 'Page not found' %}{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url root %}">{% trans "Home" %}</a> &rsaquo; {% trans "Server error" %}</div>{% endblock %}
 
 {% block content %}
 

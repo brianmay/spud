@@ -1,9 +1,8 @@
 {% extends "base_site.html" %}
 {% load i18n %}
 
-{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url root %}">{% trans "Home" %}</a> &rsaquo; {% trans "Server error" %}</div>{% endblock %}
-
 {% block title %}{% trans 'Server error (500)' %}{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url root %}">{% trans "Home" %}</a> &rsaquo; {% trans "Server error" %}</div>{% endblock %}
 
 {% block content %}
 <h1>{% trans 'Server Error <em>(500)</em>' %}</h1>
