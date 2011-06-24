@@ -1,3 +1,9 @@
+spud (0.13-1) unstable; urgency=low
+
+  * Fix error templates.
+
+ -- Brian May <bam@debian.org>  Fri, 24 Jun 2011 11:56:23 +1000
+
 spud (0.12-1) unstable; urgency=low
 
   * Update standards version to 3.9.2.
