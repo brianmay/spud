@@ -8,6 +8,16 @@
 {% block object_title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 {% block tools %}{% show_photo_buttons user web parent page_obj.number object size %}{% endblock %}
 
+{% block extrahead %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js" />
+<script>
+prev_photo_url="{% photo_url_prev page_obj web parent size %}"
+next_photo_url="{% photo_url_next page_obj web parent size %}"
+prev_photo_thumb_url="{% photo_thumb_url_prev page_obj web parent size %}"
+next_photo_thumb_url="{% photo_thumb_url_next page_obj web parent size %}"
+</script>
+{% endblock %}
+
 {% block object %}
 {% photo_pagination page_obj web parent size %}
 
@@ -20,9 +30,7 @@
 <div class='photo_detail {{object.get_style}}'>
 <div class='photo_detail_photo'>
 
-<a href="{% get_thumb_url object click_size %}">
-<img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
-</a>
+<img id="photo" src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 <div class="photo_detail_summary">
 {% if object.photo_person_set.all %}
 {% for pp in object.photo_person_set.all %}
@@ -35,7 +43,7 @@
 </div>
 </div>
 
-<div class='photo_detail_photo_detail'>
+<div class='photo_detail_block photo_detail_photo_detail'>
 <h2>Photo Details</h2>
 
 <dl>
@@ -100,7 +108,7 @@
 </dl>
 </div>
 
-<div class='photo_detail_camera_detail'>
+<div class='photo_detail_block photo_detail_camera_detail'>
 <h2>Camera Details</h2>
 
 <dl>
@@ -114,13 +122,10 @@
 </dl>
 </div>
 
-<br class="clear"/>
-</div>
-
-<div class='photo_detail_comments'>
-<h2>Comments</h2>
-
 {% get_comment_list for object as comment_list %}
+{% if comment_list %}
+<div class='photo_detail_block photo_detail_comments'>
+<h2>Comments</h2>
 {% for comment in comment_list %}
     <div class="comment_{% cycle odd,even %}" id="c{{ comment.id }}">
     <span class="comnum"><a id="c{{ comment.id }}" href="#c{{ comment.id }}">#{{ forloop.counter }}</a></span>
@@ -128,9 +133,15 @@
     {{ comment.comment|urlizetrunc:40|linebreaks }}
     </div>
 {% endfor %}
+</div>
+{% endif %}
 
+<div class='photo_detail_block photo_detail_add_comment'>
 <h2>Post a comment</h2>
-
 {% render_comment_form for object %}
 </div>
+
+<br class="clear"/>
+</div>
+
 {% endblock %}

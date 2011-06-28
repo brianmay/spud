@@ -1,6 +1,7 @@
 import os
 import random
 import pytz
+import re
 
 from django.core.urlresolvers import reverse
 from django.db import models as m
@@ -12,7 +13,7 @@ from django.conf import settings
 from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
 from django.utils.translation import ugettext as _
-from django.db.models import Count
+from django.db.models import Count, Q
 
 import django_webs
 
@@ -116,9 +117,11 @@ class photo_base_web(base_web):
             else:
                 raise Http404("operation '%s' '%s' not implemented"%(update.verb, update.noun))
 
-    def object_photo_list(self, request, instance, photo_list, template=None, context={}):
+    def object_photo_list(self, request, instance, template=None, context={}):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
+
+        photo_list = self.get_photo_list(instance)
 
         # photos per page
         try:
@@ -158,9 +161,10 @@ class photo_base_web(base_web):
                                   context_instance=RequestContext(request))
 
 
-    def object_photo_detail(self, request, instance, number, photo_list, size):
+    def object_photo_detail(self, request, instance, number, size):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
+        photo_list = self.get_photo_list(instance)
         paginator = Paginator(photo_list, 1)
 
         template='spud/photo_detail.html'
@@ -195,9 +199,11 @@ class photo_base_web(base_web):
                                     },
                                     context_instance=RequestContext(request))
 
-    def object_photo_edit(self, request, instance, number, photo_list, size):
+    def object_photo_edit(self, request, instance, number, size):
         self.assert_instance_type(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
+
+        photo_list = self.get_photo_list(instance)
 
         p_web = photo_web()
         error = p_web.check_edit_perms(request, breadcrumbs)
@@ -322,11 +328,13 @@ class photo_base_web(base_web):
                 'places': places,
                 },context_instance=RequestContext(request))
 
-    def object_photo_update(self, request, instance, photo_list):
+    def object_photo_update(self, request, instance):
         self.assert_instance_type(instance)
         update_url = self.get_photo_update_url(instance)
         breadcrumbs = self.get_view_breadcrumbs(instance)
         breadcrumbs.append(breadcrumb(update_url,"bulk update"))
+
+        photo_list = self.get_photo_list(instance)
 
         p_web = photo_web()
         error = p_web.check_edit_perms(request, breadcrumbs)
@@ -455,6 +463,9 @@ class place_web(photo_base_web):
     # LIST ACTION #
     ###############
 
+    def get_photo_list(self, instance):
+        return models.photo.objects.filter(location=instance)
+
     ###############
     # VIEW ACTION #
     ###############
@@ -535,6 +546,9 @@ class album_web(photo_base_web):
     ###############
     # LIST ACTION #
     ###############
+
+    def get_photo_list(self, instance):
+        return models.photo.objects.filter(albums=instance)
 
     def get_list_breadcrumbs(self):
         breadcrumbs = self.get_breadcrumbs()
@@ -625,6 +639,9 @@ class category_web(photo_base_web):
     # LIST ACTION #
     ###############
 
+    def get_photo_list(self, instance):
+        photo_list = models.photo.objects.filter(categorys=instance)
+
     ###############
     # VIEW ACTION #
     ###############
@@ -693,6 +710,9 @@ class person_web(photo_base_web):
     ###############
     # LIST ACTION #
     ###############
+
+    def get_photo_list(self, instance):
+        return models.photo.objects.filter(persons=instance)
 
     ###############
     # VIEW ACTION #
@@ -766,6 +786,13 @@ class photo_web(photo_base_web):
     # LIST ACTION #
     ###############
 
+    def get_photo_list(self, instance):
+        photo_list = models.photo.objects.filter(pk=instance.pk)
+        try:
+            return photo_list
+        except IndexError, e:
+            raise Http404("Unknown image id '%s'"%(instance))
+
     ###############
     # VIEW ACTION #
     ###############
@@ -833,12 +860,26 @@ class date_web(search_base_web):
     template_prefix = "date"
     verbose_name = "date"
 
+    def get_photo_list(self, instance):
+        m = re.match("^(\d\d\d\d)-(\d\d)-(\d\d)$",instance.pk)
+        if m is not None:
+            (year,month,day)=(int(m.group(1)),int(m.group(2)),int(m.group(3)))
+            return models.photo.objects.filter(datetime__year=year,datetime__month=month,datetime__day=day)
+        else:
+            return models.photo.objects.all()
+
 class action_web(search_base_web):
     web_id = "action_class"
     perm_id = "photo"
     url_prefix = "action"
     template_prefix = "action"
     verbose_name = "action"
+
+    def get_photo_list(self, instance):
+        if instance.pk != "none":
+            return models.photo.objects.filter(action=instance.pk)
+        else:
+            return models.photo.objects.filter(action__isnull=True)
 
 class search_web(search_base_web):
     web_id = "search_class"
@@ -847,6 +888,182 @@ class search_web(search_base_web):
     template_prefix = "search"
     verbose_name = "search"
     verbose_name_plural = "search"
+
+    def decode_dict(self, value):
+        dict = {}
+        if value == "":
+            return dict
+
+        list = value.split(";")
+        for item in list:
+            (key,semicolon,value) = item.partition('=')
+            value = value.replace("!","/")
+            dict[key] = value
+
+        return dict
+
+    def decode_string(self, value):
+        return value
+
+    def decode_boolean(self, value):
+        value = value.lower()
+        if value=="t" or value=="true":
+            return True
+        else:
+            return False
+
+    def decode_array(self, value):
+        return value.split(",")
+
+    def _get_photo_list(self, instance):
+        criteria = []
+
+        search = Q()
+        search_dict = self.decode_dict(instance.pk)
+        photo_list = models.photo.objects.all()
+
+        if "location_descendants" in search_dict:
+            ld = self.decode_boolean(search_dict["location_descendants"])
+        else:
+            ld = False
+
+        if "album_descendants" in search_dict:
+            ad = self.decode_boolean(search_dict["album_descendants"])
+        else:
+            ad = False
+
+        if "category_descendants" in search_dict:
+            cd = self.decode_boolean(search_dict["category_descendants"])
+        else:
+            cd = False
+
+        for key in search_dict:
+            value = search_dict[key]
+
+            if value != "":
+                if key == "location_descendants":
+                    pass
+                elif key == "album_descendants":
+                    pass
+                elif key == "category_descendants":
+                    pass
+                elif key == "first_date":
+                    value = self.decode_string(value)
+                    criteria.append({'key': 'date', 'value': "on or later then %s"%(value)})
+                    search = search & Q(datetime__gte=value)
+                elif key == "last_date":
+                    value = self.decode_string(value)
+                    criteria.append({'key': 'date', 'value': "earlier then %s"%(value)})
+                    search = search & Q(datetime__lt=value)
+                elif key == "lower_rating":
+                    value = self.decode_string(value)
+                    criteria.append({'key': 'rating', 'value': "higher then %s"%(value)})
+                    search = search & Q(rating__gte=value)
+                elif key == "upper_rating":
+                    value = self.decode_string(value)
+                    criteria.append({'key': 'rating', 'value': "less then %s"%(value)})
+                    search = search & Q(rating__lte=value)
+                elif key == "title":
+                    value = self.decode_string(value)
+                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    search = search & Q(title__icontains=value)
+                elif key == "camera_make":
+                    value = self.decode_string(value)
+                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    search = search & Q(camera_make__icontains=value)
+                elif key == "camera_model":
+                    value = self.decode_string(value)
+                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    search = search & Q(camera_model__icontains=value)
+                elif key  == "photographer":
+                    value = self.decode_string(value)
+                    object = get_object_or_404(models.person, pk=value)
+                    criteria.append({'key': key, 'value': "is %s"%(object)})
+                    search = search & Q(photographer=object)
+                elif key  == "location":
+                    value = self.decode_string(value)
+                    object = get_object_or_404(models.place, pk=value)
+                    if ld:
+                        criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
+                        descendants = object.get_descendants()
+                        search = search & Q(location__in=descendants)
+                    else:
+                        criteria.append({'key': key, 'value': "is %s"%(object)})
+                        search = search & Q(location=object)
+                elif key  == "person":
+                    values = self.decode_array(value)
+                    for value in values:
+                        object = get_object_or_404(models.person, pk=value)
+                        criteria.append({'key': key, 'value': "is %s"%(object)})
+                        photo_list=photo_list.filter(persons=object)
+                elif key  == "album":
+                    values = self.decode_array(value)
+                    for value in values:
+                        object = get_object_or_404(models.album, pk=value)
+                        if ad:
+                            criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
+                            descendants = object.get_descendants()
+                            photo_list=photo_list.filter(albums__in=descendants)
+                        else:
+                            criteria.append({'key': key, 'value': "is %s"%(object)})
+                            photo_list=photo_list.filter(albums=object)
+                elif key  == "category":
+                    values = self.decode_array(value)
+                    for value in values:
+                        object = get_object_or_404(models.category, pk=value)
+                        if cd:
+                            criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
+                            descendants = object.get_descendants()
+                            photo_list=photo_list.filter(categorys__in=descendants)
+                        else:
+                            criteria.append({'key': key, 'value': "is %s"%(object)})
+                            photo_list=photo_list.filter(categorys=object)
+                elif key  == "location_none":
+                    value = self.decode_boolean(value)
+                    if value:
+                        criteria.append({'key': "location", 'value': "is %s"%("none")})
+                        search = search & Q(location=None)
+                elif key  == "person_none":
+                    value = self.decode_boolean(value)
+                    if value:
+                        criteria.append({'key': "person", 'value': "is %s"%("none")})
+                        search = search & Q(persons=None)
+                elif key  == "album_none":
+                    value = self.decode_boolean(value)
+                    if value:
+                        criteria.append({'key': "album", 'value': "is %s"%("none")})
+                        search = search & Q(albums=None)
+                elif key  == "category_none":
+                    value = self.decode_boolean(value)
+                    if value:
+                        criteria.append({'key': "category", 'value': "is %s"%("none")})
+                        search = search & Q(categorys=None)
+                elif key  == "action":
+                    value = self.decode_string(value)
+                    criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(value))})
+                    if value == "none":
+                        search = search & Q(action__isnull=True)
+                    else:
+                        search = search & Q(action=value)
+                elif key  == "path":
+                    value = self.decode_string(value)
+                    criteria.append({'key': key, 'value': "is %s"%(value)})
+                    search = search & Q(path=value)
+                elif key  == "name":
+                    value = self.decode_string(value)
+                    criteria.append({'key': key, 'value': "is %s"%(value)})
+                    search = search & Q(name=value)
+                else:
+                    raise Http404("Unknown key %s"%(key))
+
+        photo_list = photo_list.filter(search)
+        return (photo_list, criteria)
+
+    def get_photo_list(self, instance):
+        return self._get_photo_list(instance)[0]
+
+    def get_criteria(self, instance):
+        return self._get_photo_list(instance)[1]
 
 ###############
 # OTHER STUFF #

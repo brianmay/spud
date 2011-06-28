@@ -1,6 +1,7 @@
 {% extends "django_webs/object_detail.html" %}
 {% load i18n %}
 {% load photo %}
+{% load webs %}
 
 {% block title %}Action: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 {% block object_title %}Action: {{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
@@ -8,5 +9,5 @@
 {% block object %}
 {% show_photo_list page_obj web object default_list_size default_view_size %}
 
-{% pagination page_obj web %}
+{% pagination page_obj %}
 {% endblock %}

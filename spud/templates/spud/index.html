@@ -6,14 +6,14 @@
 
 {% block content %}
 
-<ul>
-<li><a href="{% url album_detail 1 %}">albums</a></li>
-<li><a href="{% url category_detail 1 %}">categories</a></li>
-<li><a href="{% url place_detail 1 %}">places</a></li>
-<li><a href="{% url person_list %}">people</a></li>
-<li><a href="{% url date_list %}">dates</a></li>
-<li><a href="{% url photo_relation_list %}">relations</a></li>
-<li><a href="{% url search_list %}">search</a></li>
+<ul class="menu">
+<li onclick='parent.location="{% url album_detail 1 %}"'><a href="{% url album_detail 1 %}">albums</a></li>
+<li onclick='parent.location="{% url category_detail 1 %}"'><a href="{% url category_detail 1 %}">categories</a></li>
+<li onclick='parent.location="{% url place_detail 1 %}"'><a href="{% url place_detail 1 %}">places</a></li>
+<li onclick='parent.location="{% url person_list %}"'><a href="{% url person_list %}">people</a></li>
+<li onclick='parent.location="{% url date_list %}"'><a href="{% url date_list %}">dates</a></li>
+<li onclick='parent.location="{% url photo_relation_list %}"'><a href="{% url photo_relation_list %}">relations</a></li>
+<li onclick='parent.location="{% url search_list %}"'><a href="{% url search_list %}">search</a></li>
 </ul>
 
 {% endblock %}

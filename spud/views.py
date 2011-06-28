@@ -20,8 +20,6 @@ from spud import tables
 
 from datetime import *
 
-import re
-
 def root(request):
     breadcrumbs = []
     breadcrumbs.append(webs.breadcrumb(reverse("root"), _("Home")))
@@ -116,30 +114,18 @@ def photo_thumb_redirect(request,object_id,size):
 
 def photo_detail(request, object_id, size):
     web = webs.photo_web()
-    photo_list = models.photo.objects.filter(pk=object_id)
-    try:
-        object = photo_list[0]
-    except IndexError, e:
-        raise Http404("Unknown image id '%s'"%(object_id))
-    return web.object_photo_detail(request,object,0,photo_list,size)
+    object = get_object_or_404(models.photo, pk=object_id)
+    return web.object_photo_detail(request,object,0,size)
 
 def photo_edit(request, object_id, size):
     web = webs.photo_web()
-    photo_list = models.photo.objects.filter(pk=object_id)
-    try:
-        object = photo_list[0]
-    except IndexError, e:
-        raise Http404("Unknown image id '%s'"%(object_id))
-    return web.object_photo_edit(request,object,0,photo_list,size)
+    object = get_object_or_404(models.photo, pk=object_id)
+    return web.object_photo_edit(request,object,0,size)
 
 def photo_update(request, object_id):
     web = webs.photo_web()
-    photo_list = models.photo.objects.filter(pk=object_id)
-    try:
-        object = photo_list[0]
-    except IndexError, e:
-        raise Http404("Unknown image id '%s'"%(object_id))
-    return web.object_photo_update(request,object,photo_list)
+    object = get_object_or_404(models.photo, pk=object_id)
+    return web.object_photo_update(request,object)
 
 #########
 # PLACE #
@@ -164,8 +150,7 @@ def place_detail(request, object_id):
 
     context = { 'form': form, 'media': form.media }
     object = get_object_or_404(models.place, pk=object_id)
-    photo_list = models.photo.objects.filter(location=object)
-    return web.object_photo_list(request,object,photo_list,context=context)
+    return web.object_photo_list(request,object,context=context)
 
 def place_add(request, object_id):
     web = webs.place_web()
@@ -185,20 +170,17 @@ def place_delete(request,object_id):
 def place_photo_detail(request, object_id, number, size):
     web = webs.place_web()
     object = get_object_or_404(models.place, pk=object_id)
-    photo_list = models.photo.objects.filter(location=object)
-    return web.object_photo_detail(request,object,number,photo_list,size)
+    return web.object_photo_detail(request,object,number,size)
 
 def place_photo_edit(request, object_id, number, size):
     web = webs.place_web()
     object = get_object_or_404(models.place, pk=object_id)
-    photo_list = models.photo.objects.filter(location=object)
-    return web.object_photo_edit(request,object,number,photo_list,size)
+    return web.object_photo_edit(request,object,number,size)
 
 def place_photo_update(request, object_id):
     web = webs.place_web()
     object = get_object_or_404(models.place, pk=object_id)
-    photo_list = models.photo.objects.filter(location=object)
-    return web.object_photo_update(request,object,photo_list)
+    return web.object_photo_update(request,object)
 
 #########
 # ALBUM #
@@ -223,8 +205,7 @@ def album_detail(request, object_id):
 
     context = { 'form': form, 'media': form.media }
     object = get_object_or_404(models.album, pk=object_id)
-    photo_list = models.photo.objects.filter(albums=object)
-    return web.object_photo_list(request,object,photo_list,context=context)
+    return web.object_photo_list(request,object,context=context)
 
 def album_todo(request):
     web = webs.album_web()
@@ -253,20 +234,17 @@ def album_delete(request,object_id):
 def album_photo_detail(request, object_id, number, size):
     web = webs.album_web()
     object = get_object_or_404(models.album, pk=object_id)
-    photo_list = models.photo.objects.filter(albums=object)
-    return web.object_photo_detail(request,object,number,photo_list,size)
+    return web.object_photo_detail(request,object,number,size)
 
 def album_photo_edit(request, object_id, number, size):
     web = webs.album_web()
     object = get_object_or_404(models.album, pk=object_id)
-    photo_list = models.photo.objects.filter(albums=object)
-    return web.object_photo_edit(request,object,number,photo_list,size)
+    return web.object_photo_edit(request,object,number,size)
 
 def album_photo_update(request, object_id):
     web = webs.album_web()
     object = get_object_or_404(models.album, pk=object_id)
-    photo_list = models.photo.objects.filter(albums=object)
-    return web.object_photo_update(request,object,photo_list)
+    return web.object_photo_update(request,object)
 
 ############
 # CATEGORY #
@@ -291,8 +269,7 @@ def category_detail(request, object_id):
 
     context = { 'form': form, 'media': form.media }
     object = get_object_or_404(models.category, pk=object_id)
-    photo_list = models.photo.objects.filter(categorys=object)
-    return web.object_photo_list(request,object,photo_list,context=context)
+    return web.object_photo_list(request,object,context=context)
 
 def category_add(request, object_id):
     web = webs.category_web()
@@ -312,20 +289,17 @@ def category_delete(request,object_id):
 def category_photo_detail(request, object_id, number, size):
     web = webs.category_web()
     object = get_object_or_404(models.category, pk=object_id)
-    photo_list = models.photo.objects.filter(categorys=object)
-    return web.object_photo_detail(request,object,number,photo_list,size)
+    return web.object_photo_detail(request,object,number,size)
 
 def category_photo_edit(request, object_id, number, size):
     web = webs.category_web()
     object = get_object_or_404(models.category, pk=object_id)
-    photo_list = models.photo.objects.filter(categorys=object)
-    return web.object_photo_edit(request,object,number,photo_list,size)
+    return web.object_photo_edit(request,object,number,size)
 
 def category_photo_update(request, object_id):
     web = webs.category_web()
     object = get_object_or_404(models.category, pk=object_id)
-    photo_list = models.photo.objects.filter(categorys=object)
-    return web.object_photo_update(request,object,photo_list)
+    return web.object_photo_update(request,object)
 
 ##########
 # PERSON #
@@ -357,8 +331,7 @@ def person_redirect(request,object_id):
 def person_detail(request, object_id):
     web = webs.person_web()
     object = get_object_or_404(models.person, pk=object_id)
-    photo_list = models.photo.objects.filter(persons=object)
-    return web.object_photo_list(request,object,photo_list)
+    return web.object_photo_list(request,object)
 
 def person_add(request):
     web = webs.person_web()
@@ -377,20 +350,17 @@ def person_delete(request,object_id):
 def person_photo_detail(request, object_id, number, size):
     web = webs.person_web()
     object = get_object_or_404(models.person, pk=object_id)
-    photo_list = models.photo.objects.filter(persons=object)
-    return web.object_photo_detail(request,object,number,photo_list,size)
+    return web.object_photo_detail(request,object,number,size)
 
 def person_photo_edit(request, object_id, number, size):
     web = webs.person_web()
     object = get_object_or_404(models.person, pk=object_id)
-    photo_list = models.photo.objects.filter(persons=object)
-    return web.object_photo_edit(request,object,number,photo_list,size)
+    return web.object_photo_edit(request,object,number,size)
 
 def person_photo_update(request, object_id):
     web = webs.person_web()
     object = get_object_or_404(models.person, pk=object_id)
-    photo_list = models.photo.objects.filter(persons=object)
-    return web.object_photo_update(request,object,photo_list)
+    return web.object_photo_update(request,object)
 
 ########
 # DATE #
@@ -412,15 +382,6 @@ class date_class(models.base_model):
     @property
     def pk(self):
         return self.date
-
-def date_results(date):
-    m = re.match("^(\d\d\d\d)-(\d\d)-(\d\d)$",date)
-    if m is not None:
-        (year,month,day)=(int(m.group(1)),int(m.group(2)),int(m.group(3)))
-        photo_list = models.photo.objects.filter(datetime__year=year,datetime__month=month,datetime__day=day)
-    else:
-        photo_list = models.photo.objects.all()
-    return photo_list
 
 def date_list(request):
     web = webs.date_web()
@@ -444,26 +405,22 @@ def date_list(request):
 def date_detail(request, object_id):
     web = webs.date_web()
     object = date_class(object_id)
-    photo_list = date_results(object_id)
-    return web.object_photo_list(request,object,photo_list)
+    return web.object_photo_list(request,object)
 
 def date_photo_detail(request, object_id, number, size):
     web = webs.date_web()
     object = date_class(object_id)
-    photo_list = date_results(object_id)
-    return web.object_photo_detail(request,object,number,photo_list,size)
+    return web.object_photo_detail(request,object,number,size)
 
 def date_photo_edit(request, object_id, number, size):
     web = webs.date_web()
     object = date_class(object_id)
-    photo_list = date_results(object_id)
-    return web.object_photo_edit(request,object,number,photo_list,size)
+    return web.object_photo_edit(request,object,number,size)
 
 def date_photo_update(request, object_id):
     web = webs.date_web()
     object = date_class(object_id)
-    photo_list = date_results(object_id)
-    return web.object_photo_update(request,object,photo_list)
+    return web.object_photo_update(request,object)
 
 ##########
 # ACTION #
@@ -502,13 +459,6 @@ class action_class(models.base_model):
         else:
             return self.action
 
-def action_results(action):
-    if action != "none":
-        photo_list = models.photo.objects.filter(action=action)
-    else:
-        photo_list = models.photo.objects.filter(action__isnull=True)
-    return photo_list
-
 def action_list(request):
     web = webs.action_web()
     list = [ action_class("none") ]
@@ -519,56 +469,26 @@ def action_list(request):
 def action_detail(request, object_id):
     web = webs.action_web()
     object = action_class(object_id)
-    photo_list = action_results(object_id)
-    return web.object_photo_list(request,object,photo_list)
+    return web.object_photo_list(request,object)
 
 def action_photo_detail(request, object_id, number, size):
     web = webs.action_web()
     object = action_class(object_id)
-    photo_list = action_results(object_id)
-    return web.object_photo_detail(request,object,number,photo_list,size)
+    return web.object_photo_detail(request,object,number,size)
 
 def action_photo_edit(request, object_id, number, size):
     web = webs.action_web()
     object = action_class(object_id)
-    photo_list = action_results(object_id)
-    return web.object_photo_edit(request,object,number,photo_list,size)
+    return web.object_photo_edit(request,object,number,size)
 
 def action_photo_update(request, object_id):
     web = webs.action_web()
     object = action_class(object_id)
-    photo_list = action_results(object_id)
-    return web.object_photo_update(request,object,photo_list)
+    return web.object_photo_update(request,object)
 
 ##########
 # SEARCH #
 ##########
-
-def decode_dict(value):
-    dict = {}
-    if value == "":
-        return dict
-
-    list = value.split(";")
-    for item in list:
-        (key,semicolon,value) = item.partition('=')
-        value = value.replace("!","/")
-        dict[key] = value
-
-    return dict
-
-def decode_string(value):
-    return value
-
-def decode_boolean(value):
-    value = value.lower()
-    if value=="t" or value=="true":
-        return True
-    else:
-        return False
-
-def decode_array(value):
-    return value.split(",")
 
 def encode_dict(dict):
     list = []
@@ -608,151 +528,6 @@ class search_class(models.base_model):
     @property
     def pk(self):
         return self.search
-
-def search_results(spec):
-    criteria = []
-
-    search = Q()
-    search_dict = decode_dict(spec)
-    photo_list = models.photo.objects.all()
-
-    if "location_descendants" in search_dict:
-        ld = decode_boolean(search_dict["location_descendants"])
-    else:
-        ld = False
-
-    if "album_descendants" in search_dict:
-        ad = decode_boolean(search_dict["album_descendants"])
-    else:
-        ad = False
-
-    if "category_descendants" in search_dict:
-        cd = decode_boolean(search_dict["category_descendants"])
-    else:
-        cd = False
-
-    for key in search_dict:
-        value = search_dict[key]
-
-        if value != "":
-            if key == "location_descendants":
-                pass
-            elif key == "album_descendants":
-                pass
-            elif key == "category_descendants":
-                pass
-            elif key == "first_date":
-                value = decode_string(value)
-                criteria.append({'key': 'date', 'value': "on or later then %s"%(value)})
-                search = search & Q(datetime__gte=value)
-            elif key == "last_date":
-                value = decode_string(value)
-                criteria.append({'key': 'date', 'value': "earlier then %s"%(value)})
-                search = search & Q(datetime__lt=value)
-            elif key == "lower_rating":
-                value = decode_string(value)
-                criteria.append({'key': 'rating', 'value': "higher then %s"%(value)})
-                search = search & Q(rating__gte=value)
-            elif key == "upper_rating":
-                value = decode_string(value)
-                criteria.append({'key': 'rating', 'value': "less then %s"%(value)})
-                search = search & Q(rating__lte=value)
-            elif key == "title":
-                value = decode_string(value)
-                criteria.append({'key': key, 'value': "contains %s"%(value)})
-                search = search & Q(title__icontains=value)
-            elif key == "camera_make":
-                value = decode_string(value)
-                criteria.append({'key': key, 'value': "contains %s"%(value)})
-                search = search & Q(camera_make__icontains=value)
-            elif key == "camera_model":
-                value = decode_string(value)
-                criteria.append({'key': key, 'value': "contains %s"%(value)})
-                search = search & Q(camera_model__icontains=value)
-            elif key  == "photographer":
-                value = decode_string(value)
-                object = get_object_or_404(models.person, pk=value)
-                criteria.append({'key': key, 'value': "is %s"%(object)})
-                search = search & Q(photographer=object)
-            elif key  == "location":
-                value = decode_string(value)
-                object = get_object_or_404(models.place, pk=value)
-                if ld:
-                    criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
-                    descendants = object.get_descendants()
-                    search = search & Q(location__in=descendants)
-                else:
-                    criteria.append({'key': key, 'value': "is %s"%(object)})
-                    search = search & Q(location=object)
-            elif key  == "person":
-                values = decode_array(value)
-                for value in values:
-                    object = get_object_or_404(models.person, pk=value)
-                    criteria.append({'key': key, 'value': "is %s"%(object)})
-                    photo_list=photo_list.filter(persons=object)
-            elif key  == "album":
-                values = decode_array(value)
-                for value in values:
-                    object = get_object_or_404(models.album, pk=value)
-                    if ad:
-                        criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
-                        descendants = object.get_descendants()
-                        photo_list=photo_list.filter(albums__in=descendants)
-                    else:
-                        criteria.append({'key': key, 'value': "is %s"%(object)})
-                        photo_list=photo_list.filter(albums=object)
-            elif key  == "category":
-                values = decode_array(value)
-                for value in values:
-                    object = get_object_or_404(models.category, pk=value)
-                    if cd:
-                        criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
-                        descendants = object.get_descendants()
-                        photo_list=photo_list.filter(categorys__in=descendants)
-                    else:
-                        criteria.append({'key': key, 'value': "is %s"%(object)})
-                        photo_list=photo_list.filter(categorys=object)
-            elif key  == "location_none":
-                value = decode_boolean(value)
-                if value:
-                    criteria.append({'key': "location", 'value': "is %s"%("none")})
-                    search = search & Q(location=None)
-            elif key  == "person_none":
-                value = decode_boolean(value)
-                if value:
-                    criteria.append({'key': "person", 'value': "is %s"%("none")})
-                    search = search & Q(persons=None)
-            elif key  == "album_none":
-                value = decode_boolean(value)
-                if value:
-                    criteria.append({'key': "album", 'value': "is %s"%("none")})
-                    search = search & Q(albums=None)
-            elif key  == "category_none":
-                value = decode_boolean(value)
-                if value:
-                    criteria.append({'key': "category", 'value': "is %s"%("none")})
-                    search = search & Q(categorys=None)
-            elif key  == "action":
-                value = decode_string(value)
-                criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(value))})
-                if value == "none":
-                    search = search & Q(action__isnull=True)
-                else:
-                    search = search & Q(action=value)
-            elif key  == "path":
-                value = decode_string(value)
-                criteria.append({'key': key, 'value': "is %s"%(value)})
-                search = search & Q(path=value)
-            elif key  == "name":
-                value = decode_string(value)
-                criteria.append({'key': key, 'value': "is %s"%(value)})
-                search = search & Q(name=value)
-            else:
-                raise Http404("Unknown key %s"%(key))
-
-    photo_list = photo_list.filter(search)
-    return (photo_list, criteria)
-
 
 @csrf_exempt
 def search_list(request):
@@ -809,26 +584,26 @@ def search_list(request):
 def search_detail(request, object_id):
     web = webs.search_web()
     object = search_class(object_id)
-    (photo_list, criteria) = search_results(object_id)
-    return web.object_photo_list(request,object,photo_list,context={ 'criteria': criteria })
+    criteria = web.get_criteria(object)
+    return web.object_photo_list(request,object,context={ 'criteria': criteria })
 
 def search_photo_detail(request, object_id, number, size):
     web = webs.search_web()
     object = search_class(object_id)
-    (photo_list, criteria) = search_results(object_id)
-    return web.object_photo_detail(request,object,number,photo_list,size)
+    criteria = web.get_criteria(object)
+    return web.object_photo_detail(request,object,number,size)
 
 def search_photo_edit(request, object_id, number, size):
     web = webs.search_web()
     object = search_class(object_id)
-    (photo_list, criteria) = search_results(object_id)
-    return web.object_photo_edit(request,object,number,photo_list,size)
+    criteria = web.get_criteria(object)
+    return web.object_photo_edit(request,object,number,size)
 
 def search_photo_update(request, object_id):
     web = webs.search_web()
     object = search_class(object_id)
-    (photo_list, criteria) = search_results(object_id)
-    return web.object_photo_update(request,object,photo_list)
+    criteria = web.get_criteria(object)
+    return web.object_photo_update(request,object)
 
 ############
 # RELATION #

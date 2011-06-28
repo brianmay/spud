@@ -56,31 +56,68 @@ def show_photo_list(page_obj, web, parent, list_size, view_size):
 def _get_url(web, instance, i, size):
     return web.photo_detail_url(instance, i, size)
 
+def _get_thumb_url(web, instance, i, size):
+    try:
+        photo = web.get_photo_list(instance)[i-1]
+        photo_web = webs.photo_web()
+        return photo_web.get_thumb_url(photo, size)
+    except IndexError, e:
+        return None
+
 @register.simple_tag
 def photo_paginator_random(page_obj, web, instance, size):
     if instance is not None:
-        return mark_safe(u"<a href='%s' accesskey='r'>R</a>" % (web.photo_detail_url(instance, "random", size)))
+        return mark_safe(u"<a href='%s' class='relative' accesskey='r'>R</a>" % (web.photo_detail_url(instance, "random", size)))
     else:
         return mark_safe(u'')
+
+@register.simple_tag
+def photo_url_prev(page_obj, web, instance, size):
+    if page_obj.number <= 1:
+        return None
+    else:
+        return mark_safe(_get_url(web, instance, page_obj.number-1, size))
+
+@register.simple_tag
+def photo_url_next(page_obj, web, instance, size):
+    if page_obj.number >= page_obj.paginator.num_pages:
+        return None
+    else:
+        return mark_safe(_get_url(web, instance, page_obj.number+1, size))
+
+@register.simple_tag
+def photo_thumb_url_prev(page_obj, web, instance, size):
+    if page_obj.number <= 1:
+        return None
+    else:
+        return mark_safe(_get_thumb_url(web, instance, page_obj.number-1, size))
+
+@register.simple_tag
+def photo_thumb_url_next(page_obj, web, instance, size):
+    if page_obj.number >= page_obj.paginator.num_pages:
+        return None
+    else:
+        return mark_safe(_get_thumb_url(web, instance, page_obj.number+1, size))
 
 @register.simple_tag
 def photo_paginator_prev(page_obj, web, instance, size):
     if page_obj.number <= 1:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s' accesskey='p'>&lt;</a>" % (_get_url(web, instance, page_obj.number-1, size)))
+        return mark_safe(u"<a href='%s' class='relative' accesskey='p'>&lt;</a>" % (_get_url(web, instance, page_obj.number-1, size)))
 
 @register.simple_tag
 def photo_paginator_next(page_obj, web, instance, size):
     if page_obj.number >= page_obj.paginator.num_pages:
         return mark_safe(u'')
     else:
-        return mark_safe(u"<a href='%s' accesskey='n'>&gt;</a>" % (_get_url(web, instance, page_obj.number+1, size)))
+        return mark_safe(u"<a href='%s' class='relative' accesskey='n'>&gt;</a>" % (_get_url(web, instance, page_obj.number+1, size)))
+
 
 @register.simple_tag
 def photo_paginator_number(page_obj, web, instance, i, size):
     if i == DOT:
-        return mark_safe(u'... ')
+        return mark_safe(u'<span class="dots">... </span>')
     elif i == page_obj.number:
         return mark_safe(u'<span class="this-page">%d</span> ' % (i))
     else:

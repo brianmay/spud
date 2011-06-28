@@ -14,6 +14,12 @@ body { margin:0; padding:0; font-size:12px; font-family:"Lucida Grande","DejaVu 
 .photo_detail_photo_detail  { float:left; padding:10px; max-width:200px; }
 .photo_detail_photo_detail ul  { padding-left: 20px; }
 .photo_detail_camera_detail { float:left; padding:10px; max-width:200px; }
+.photo_detail_comments { float:left; padding:10px; max-width:200px; }
+.photo_detail_add_comment { float:left; padding:10px; max-width:200px; }
+.photo_detail_add_comment label { display:block; font-weight:bold; }
+.photo_detail_add_comment input[type="text"] { width:192px; }
+.photo_detail_add_comment textarea { width:192px; }
+.photo_detail_add_comment select { width:100%; }
 
 .photo_edit { border:1px solid #dddddd; }
 .photo_edit .field { float: left; width: 300px; margin: 10px 20px; }
@@ -55,7 +61,8 @@ width:170px;
 
 /* PAGINATOR */
 .paginator { font-size:11px; padding-top:10px; padding-bottom:10px; line-height:22px; margin:0; solid #ddd; }
-.paginator a:link, .paginator a:visited { padding:2px 6px; border:solid 1px #ccc; background:white; text-decoration:none; }
+.paginator a { padding:2px 6px; border:solid 1px #ccc; }
+.paginator a:link, .paginator a:visited { text-decoration:none; }
 .paginator a.showall { padding:0 !important; border:none !important; }
 .paginator a.showall:hover { color:#036 !important; background:transparent !important; }
 .paginator .end { border-width:2px !important; margin-right:6px; }
@@ -214,3 +221,15 @@ a.deletelink:hover { color:#993333; }
 /* OBJECT HISTORY */
 table#change-history { width:100%; }
 table#change-history tbody th { width:16em; }
+
+@media screen and (max-width: 700px) {
+.menu { padding:0 10px; margin:0; }
+.menu li { list-style:none; border-top: 1px solid #777; padding: 20px 0; margin: 0; }
+.menu li:active { border: 1px solid #000; }
+.photo_detail { border:none; }
+.photo_detail_photo { padding:0; float:none; }
+.photo_detail_photo img { width:100%; }
+.paginator { line-height:42px; }
+.paginator a.relative { display:inline; }
+.paginator a, .paginator .dots, .paginator .this-page { padding:12px 16px; display:none; }
+}
