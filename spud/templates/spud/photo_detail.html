@@ -9,13 +9,13 @@
 {% block tools %}{% show_photo_buttons user web parent page_obj.number object size %}{% endblock %}
 
 {% block extrahead %}
-<script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js" />
 <script>
-prev_photo_url="{% photo_url_prev page_obj web parent size %}"
-next_photo_url="{% photo_url_next page_obj web parent size %}"
-prev_photo_thumb_url="{% photo_thumb_url_prev page_obj web parent size %}"
-next_photo_thumb_url="{% photo_thumb_url_next page_obj web parent size %}"
+var prev_photo_url="{% photo_url_prev page_obj web parent size %}"
+var next_photo_url="{% photo_url_next page_obj web parent size %}"
+var prev_photo_thumb_url="{% photo_thumb_url_prev page_obj web parent size %}"
+var next_photo_thumb_url="{% photo_thumb_url_next page_obj web parent size %}"
 </script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js" />
 {% endblock %}
 
 {% block object %}

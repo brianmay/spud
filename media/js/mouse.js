@@ -8,6 +8,12 @@ var _goto = null;
 
 InitDragDrop();
 
+var next_image = new Image()
+next_image.src = next_photo_thumb_url
+
+var prev_image = new Image()
+prev_image.src = prev_photo_thumb_url
+
 function getElementsByClassName(className)
 {
     var hasClassName = new RegExp("(?:^|\\s)" + className + "(?:$|\\s)");
