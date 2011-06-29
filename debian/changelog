@@ -1,3 +1,9 @@
+spud (0.14-1) unstable; urgency=low
+
+  * Experimental changes designed to improve mobile phone experience.
+
+ -- Brian May <bam@debian.org>  Wed, 29 Jun 2011 18:29:31 +1000
+
 spud (0.13-1) unstable; urgency=low
 
   * Fix error templates.
