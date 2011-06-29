@@ -14,6 +14,7 @@ var prev_photo_url="{% photo_url_prev page_obj web parent size %}"
 var next_photo_url="{% photo_url_next page_obj web parent size %}"
 var prev_photo_thumb_url="{% photo_thumb_url_prev page_obj web parent size %}"
 var next_photo_thumb_url="{% photo_thumb_url_next page_obj web parent size %}"
+var this_photo_thumb_url="{% get_thumb_url object size %}"
 </script>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js" />
 {% endblock %}
@@ -32,6 +33,7 @@ var next_photo_thumb_url="{% photo_thumb_url_next page_obj web parent size %}"
 
 <img id="photo" src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 <div class="photo_detail_summary">
+<div class="title">{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
 {% if object.photo_person_set.all %}
 {% for pp in object.photo_person_set.all %}
     <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}

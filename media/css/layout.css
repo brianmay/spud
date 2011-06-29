@@ -29,5 +29,5 @@
 #content-related .module h2 { background:#eee url(../img/admin/nav-bg.gif) bottom left repeat-x; color:#666; }
 
 @media screen and (max-width: 700px) {
-#content { margin-left:0; margin-right:0; }
+#content { margin:0; }
 }
