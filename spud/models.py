@@ -446,7 +446,8 @@ class photo(base_model):
             if overwrite or not os.path.lexists(dst):
                 xysize = m.create_thumbnail(dst,max)
             else:
-                xysize = m.get_size(dst)
+                mt = media.get_media(dst)
+                xysize = mt.get_size()
             pt,c = photo_thumb.objects.get_or_create(photo=self,size=size)
             pt.width=xysize[0]
             pt.height=xysize[1]
@@ -457,10 +458,10 @@ class photo(base_model):
     generate_thumbnails.alters_data = True
 
     def update_size(self):
-        m = media.get_media(self.get_orig_path())
         for size, max in settings.IMAGE_SIZES.iteritems():
             dst = self.get_thumb_path(size)
-            xysize = m.get_size(dst)
+            mt = media.get_media(dst)
+            xysize = mt.get_size()
             pt,c = photo_thumb.objects.get_or_create(photo=self,size=size)
             pt.width=xysize[0]
             pt.height=xysize[1]
