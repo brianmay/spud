@@ -10,10 +10,10 @@ if (prev_photo_thumb_url != "None") {
     prev_image.src = prev_photo_thumb_url
 }
 
-function resize_photo() {
+function resize_photo(width, height) {
     var img = document.getElementById("photo")
-    var width = img.naturalWidth
-    var height = img.naturalHeight
+    width = width || img.naturalWidth
+    height = height || img.naturalHeight
     var aspect = width/height
 
     if (width > window.innerWidth) {
@@ -34,7 +34,6 @@ function resize_photo() {
     img.height = height
 }
 
-window.onload = function(e) { resize_photo(); }
 window.onresize = function(e) { resize_photo() }
 
 function getElementsByClassName(className)
@@ -122,19 +121,17 @@ function OnDown(e)
             var movedX = (X - _startX);
             if (movedX > 20 && prev_photo_url!="None") {
                 _fixedElement.src = prev_photo_thumb_url
-                 _fixedElement.onload = resize_photo
                 _goto = "prev"
                 visibility = "hidden";
             } else if (movedX < -20 && next_photo_url!="None") {
                 _fixedElement.src = next_photo_thumb_url
-                _fixedElement.onload = resize_photo
                 _goto = "next"
                 visibility = "hidden";
             } else {
                 _fixedElement.src = this_photo_thumb_url
-                _fixedElement.onload = resize_photo
                 _goto = null
             }
+            _fixedElement.onload = function(e) { resize_photo(); }
 
             var list = getElementsByClassName("photo_detail_block")
             list = list.concat(getElementsByClassName("photo_detail_summary"))

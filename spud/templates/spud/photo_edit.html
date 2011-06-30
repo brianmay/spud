@@ -27,7 +27,7 @@
 <div class='photo_detail_photo'>
 
 <a href="{% get_thumb_url object click_size %}">
-<img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
+<img src="{% get_thumb_url object size %}" alt="{{ object.title }}" width="{% get_thumb_width object size %}" height="{% get_thumb_height object size %}"/>
 </a>
 <div class="photo_detail_summary">
 <div class="title">{{ object }}</div>
@@ -50,7 +50,7 @@
 {% if object.title %}
 <dt>Title</dt><dd>{{object.title}}</dd>
 {% endif %}
-<dt>Original</dt><dd>{{object.name}} ({{object.width}}x{{object.height}})</dd>
+<dt>File</dt><dd>{{object.name}} ({% get_thumb_width object size %}x{% get_thumb_height object size %})</dd>
 {% if object.location %}
 <dt>Location</dt><dd><a href="{% get_view_url object.location %}">{{ object.location }}</a></dd>
 {% endif %}

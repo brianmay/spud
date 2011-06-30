@@ -9,12 +9,14 @@
 {% block tools %}{% show_photo_buttons user web parent page_obj.number object size %}{% endblock %}
 
 {% block extrahead %}
-<script>
+<script type="text/javascript">
 var prev_photo_url="{% photo_url_prev page_obj web parent size %}"
 var next_photo_url="{% photo_url_next page_obj web parent size %}"
 var prev_photo_thumb_url="{% photo_thumb_url_prev page_obj web parent size %}"
 var next_photo_thumb_url="{% photo_thumb_url_next page_obj web parent size %}"
 var this_photo_thumb_url="{% get_thumb_url object size %}"
+var this_photo_width={% get_thumb_width object size %}
+var this_photo_height={% get_thumb_height object size %}
 </script>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js" />
 {% endblock %}
@@ -29,7 +31,10 @@ var this_photo_thumb_url="{% get_thumb_url object size %}"
 <div class='photo_detail {{object.get_style}}'>
 <div class='photo_detail_photo'>
 
-<img id="photo" src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
+<img id="photo" src="{% get_thumb_url object size %}" alt="{{ object.title }}"  width="{% get_thumb_width object size %}" height="{% get_thumb_height object size %}"/>
+<script type="text/javascript">
+resize_photo(this_photo_width, this_photo_height)
+</script>
 <div class="photo_detail_summary">
 <div class="title">{{ object }}</div>
 <div class="search">Search {% get_description parent %} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
@@ -51,7 +56,7 @@ var this_photo_thumb_url="{% get_thumb_url object size %}"
 {% if object.title %}
 <dt>Title</dt><dd>{{object.title}}</dd>
 {% endif %}
-<dt>Original</dt><dd>{{object.name}} ({{object.width}}x{{object.height}})</dd>
+<dt>File</dt><dd>{{object.name}} ({% get_thumb_width object size %}x{% get_thumb_height object size %})</dd>
 {% if object.location %}
 <dt>Location</dt><dd><a href="{% get_view_url object.location %}">{{ object.location }}</a></dd>
 {% endif %}
