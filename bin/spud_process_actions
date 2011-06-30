@@ -24,8 +24,14 @@ while True:
         print "delete '%s'."%(p.get_orig_path())
         p.delete()
     elif p.action == "R":
-        print "regenerate '%s'."%(p.get_orig_path())
+        print "regenerate thumbnail '%s'."%(p.get_orig_path())
         p.generate_thumbnails(overwrite=True)
+        p.move()
+        p.action = None
+        p.save()
+    elif p.action == "S":
+        print "regenerate size '%s'."%(p.get_orig_path())
+        p.update_size()
         p.move()
         p.action = None
         p.save()
