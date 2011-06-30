@@ -10,6 +10,7 @@ body { margin:0; padding:0; font-size:12px; font-family:"Lucida Grande","DejaVu 
 .photo_detail { border:1px solid #dddddd; }
 .photo_detail h2 { margin:0 0 .5em 0; }
 .photo_detail_summary { max-width: 400px; }
+.photo_detail_summary .title { font-weight:bold; }
 .photo_detail_photo { float:left; padding:10px; }
 .photo_detail_photo_detail  { float:left; padding:10px; max-width:200px; }
 .photo_detail_photo_detail ul  { padding-left: 20px; }
