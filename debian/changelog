@@ -1,3 +1,10 @@
+spud (0.15-1) unstable; urgency=low
+
+  * Store image sizes in database.
+  * Fix quirks in user interface. e.g. image resized after it is displayed.
+
+ -- Brian May <bam@debian.org>  Thu, 30 Jun 2011 16:10:35 +1000
+
 spud (0.14-1) unstable; urgency=low
 
   * Experimental changes designed to improve mobile phone experience.
