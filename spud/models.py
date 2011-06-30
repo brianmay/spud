@@ -344,8 +344,6 @@ class photo(base_model):
     photo_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=128, blank=True, db_index=True)
     path = models.CharField(max_length=255, blank=True, db_index=True)
-    width = models.IntegerField(null=True, blank=True)
-    height = models.IntegerField(null=True, blank=True)
     size = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=64, blank=True, db_index=True)
     photographer = models.ForeignKey(person, null=True, blank=True, related_name='photographed')
@@ -446,11 +444,29 @@ class photo(base_model):
             if not os.path.lexists(os.path.dirname(dst)):
                 os.makedirs(os.path.dirname(dst),0755)
             if overwrite or not os.path.lexists(dst):
-                m.create_thumbnail(dst,max)
+                xysize = m.create_thumbnail(dst,max)
+            else:
+                xysize = m.get_size(dst)
+            pt,c = photo_thumb.objects.get_or_create(photo=self,size=size)
+            pt.width=xysize[0]
+            pt.height=xysize[1]
+            pt.save()
 
         os.umask(umask)
         return
     generate_thumbnails.alters_data = True
+
+    def update_size(self):
+        m = media.get_media(self.get_orig_path())
+        for size, max in settings.IMAGE_SIZES.iteritems():
+            dst = self.get_thumb_path(size)
+            xysize = m.get_size(dst)
+            pt,c = photo_thumb.objects.get_or_create(photo=self,size=size)
+            pt.width=xysize[0]
+            pt.height=xysize[1]
+            pt.save()
+        return
+    update_size.alters_data = True
 
     def update_from_source(self, media=None):
         if media is None:
@@ -644,6 +660,12 @@ class photo(base_model):
         return error_list
 
 # ---------------------------------------------------------------------------
+
+class photo_thumb(base_model):
+    photo = models.ForeignKey(photo)
+    size = models.CharField(max_length=10, db_index=True)
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
 
 class photo_album(base_model):
     photo = models.ForeignKey(photo)

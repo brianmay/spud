@@ -42,7 +42,7 @@ class media:
 
     def create_thumbnail(self, dst_path, max_size):
         image = Image.open(self.src_full)
-        self._create_thumbnail(dst_path, max_size, image)
+        return self._create_thumbnail(dst_path, max_size, image)
 
     def _create_thumbnail(self, dst_path, max_size, image):
         (width,height) = image.size
@@ -59,6 +59,8 @@ class media:
             image.thumbnail((thumb_width,thumb_height),Image.ANTIALIAS)
 
         image.save(dst_path)
+
+        return (thumb_width,thumb_height)
 
     def rotate(self,amount):
         raise RuntimeError("rotate not implemented")
@@ -88,7 +90,7 @@ class media_video(media):
         mp.open(self.src_full,track_selector=pyffmpeg.TS_VIDEO_PIL)
         video = mp.get_tracks()[0]
         image = video.get_current_frame()[2]
-        self._create_thumbnail(dst_path, max_size, image)
+        return self._create_thumbnail(dst_path, max_size, image)
 
 class media_raw(media):
 
@@ -102,8 +104,9 @@ class media_raw(media):
 
         t.seek(0)
         image = Image.open(t)
-        self._create_thumbnail(dst_path, max_size, image)
+        xysize = self._create_thumbnail(dst_path, max_size, image)
         t.close()
+        return xysize
 
     def get_size(self):
         cmd = ["dcraw","-T","-c",self.src_full]
