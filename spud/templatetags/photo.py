@@ -18,6 +18,11 @@ register = template.Library()
 DOT = '.'
 
 @register.simple_tag
+def get_description(instance):
+    web = webs.get_web_from_object(instance)
+    return web.get_description(instance)
+
+@register.simple_tag
 def get_thumb_url(photo,size):
     web = webs.photo_web()
     return mark_safe(web.get_thumb_url(photo,size))

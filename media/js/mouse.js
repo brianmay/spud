@@ -105,7 +105,8 @@ function OnDown(e)
         _move = true;
 
 //        console.log(_scrollX+","+_scrollY+","+Y+","+_startY)
-//        window.scrollTo(_scrollX,_scrollY-(Y-_startY))
+//        var newY = _scrollY-(Y-_startY)
+//        window.scrollTo(_scrollX,newY)
 
         if (_dragElement != null)
         {

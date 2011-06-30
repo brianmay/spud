@@ -14,6 +14,8 @@ from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
 from django.utils.translation import ugettext as _
 from django.db.models import Count, Q
+from django.utils.html import conditional_escape
+from django.utils.safestring import mark_safe
 
 import django_webs
 
@@ -24,6 +26,12 @@ from spud import models,forms
 ################
 class base_web(django_webs.web):
     app_label = "spud"
+
+    def get_description(self, instance):
+        result = "%s <a href='%s'>%s</a>"%(
+            conditional_escape(self.verbose_name), self.get_view_url(instance),
+            conditional_escape(instance))
+        return mark_safe(result)
 
 get_web_from_object = django_webs.get_web_from_object
 breadcrumb = django_webs.breadcrumb
@@ -782,6 +790,11 @@ class photo_web(photo_base_web):
         breadcrumbs.append(breadcrumb(reverse("root"), _("Home")))
         return breadcrumbs
 
+    def get_description(self, instance):
+        result = "%s %s"%(
+            conditional_escape(self.verbose_name), conditional_escape(instance))
+        return mark_safe(result)
+
     ###############
     # LIST ACTION #
     ###############
@@ -937,6 +950,26 @@ class search_web(search_base_web):
         else:
             cd = False
 
+        def criteria_string(key, pretext, posttext=""):
+            if posttext!="": posttext=" "+posttext
+            evalue = conditional_escape(value)
+            result = mark_safe("%s %s %s%s"%(key, pretext, evalue, posttext))
+            criteria.append({'key': key, 'value': result})
+
+        def criteria_none(key, pretext, posttext=""):
+            if posttext!="": posttext=" "+posttext
+            evalue = conditional_escape(value)
+            result = mark_safe("%s %s %s%s"%(key, pretext, "none", posttext))
+            criteria.append({'key': key, 'value': result})
+
+        def criteria_object(key, pretext, posttext=""):
+            if posttext!="": posttext=" "+posttext
+            web = get_web_from_object(object)
+            result = "%s %s <a href='%s'>%s</a>%s"%(key, pretext,
+                web.get_view_url(object), conditional_escape(object), posttext)
+            result = mark_safe(result)
+            criteria.append({'key': key, 'value': result})
+
         for key in search_dict:
             value = search_dict[key]
 
@@ -949,109 +982,110 @@ class search_web(search_base_web):
                     pass
                 elif key == "first_date":
                     value = self.decode_string(value)
-                    criteria.append({'key': 'date', 'value': "on or later then %s"%(value)})
+                    criteria_string('date', 'on or later then')
                     search = search & Q(datetime__gte=value)
                 elif key == "last_date":
                     value = self.decode_string(value)
-                    criteria.append({'key': 'date', 'value': "earlier then %s"%(value)})
+                    criteria_string('date', 'earlier then')
                     search = search & Q(datetime__lt=value)
                 elif key == "lower_rating":
                     value = self.decode_string(value)
-                    criteria.append({'key': 'rating', 'value': "higher then %s"%(value)})
+                    criteria_string('rating', 'higher then')
                     search = search & Q(rating__gte=value)
                 elif key == "upper_rating":
                     value = self.decode_string(value)
-                    criteria.append({'key': 'rating', 'value': "less then %s"%(value)})
-                    search = search & Q(rating__lte=value)
+                    criteria_string('rating', 'less then')
+                    search = search & Q(rating__lte=valuee)
                 elif key == "title":
                     value = self.decode_string(value)
-                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    criteria_string(key, 'contains')
                     search = search & Q(title__icontains=value)
                 elif key == "camera_make":
                     value = self.decode_string(value)
-                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    criteria_string(key, 'contains')
                     search = search & Q(camera_make__icontains=value)
                 elif key == "camera_model":
                     value = self.decode_string(value)
-                    criteria.append({'key': key, 'value': "contains %s"%(value)})
+                    criteria_string(key, 'contains')
                     search = search & Q(camera_model__icontains=value)
                 elif key  == "photographer":
                     value = self.decode_string(value)
                     object = get_object_or_404(models.person, pk=value)
-                    criteria.append({'key': key, 'value': "is %s"%(object)})
+                    criteria_object(key, 'is')
                     search = search & Q(photographer=object)
                 elif key  == "location":
                     value = self.decode_string(value)
                     object = get_object_or_404(models.place, pk=value)
                     if ld:
-                        criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
+                        criteria_object(key, 'is', '(or descendants)')
                         descendants = object.get_descendants()
                         search = search & Q(location__in=descendants)
                     else:
-                        criteria.append({'key': key, 'value': "is %s"%(object)})
+                        criteria_object(key, 'is')
                         search = search & Q(location=object)
                 elif key  == "person":
                     values = self.decode_array(value)
                     for value in values:
                         object = get_object_or_404(models.person, pk=value)
-                        criteria.append({'key': key, 'value': "is %s"%(object)})
+                        criteria_object(key, 'is')
                         photo_list=photo_list.filter(persons=object)
                 elif key  == "album":
                     values = self.decode_array(value)
                     for value in values:
                         object = get_object_or_404(models.album, pk=value)
                         if ad:
-                            criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
+                            criteria_object(key, 'is', '(or descendants)')
                             descendants = object.get_descendants()
                             photo_list=photo_list.filter(albums__in=descendants)
                         else:
-                            criteria.append({'key': key, 'value': "is %s"%(object)})
+                            criteria_object(key, 'is')
                             photo_list=photo_list.filter(albums=object)
                 elif key  == "category":
                     values = self.decode_array(value)
                     for value in values:
                         object = get_object_or_404(models.category, pk=value)
                         if cd:
-                            criteria.append({'key': key, 'value': "is %s (or descendants)"%(object)})
+                            criteria_object(key, 'is', '(or descendants)')
                             descendants = object.get_descendants()
                             photo_list=photo_list.filter(categorys__in=descendants)
                         else:
-                            criteria.append({'key': key, 'value': "is %s"%(object)})
+                            criteria_object(key, 'is')
                             photo_list=photo_list.filter(categorys=object)
                 elif key  == "location_none":
                     value = self.decode_boolean(value)
                     if value:
-                        criteria.append({'key': "location", 'value': "is %s"%("none")})
+                        criteria_none("location", 'is')
                         search = search & Q(location=None)
                 elif key  == "person_none":
                     value = self.decode_boolean(value)
                     if value:
-                        criteria.append({'key': "person", 'value': "is %s"%("none")})
+                        criteria_none("person", 'is')
                         search = search & Q(persons=None)
                 elif key  == "album_none":
                     value = self.decode_boolean(value)
                     if value:
-                        criteria.append({'key': "album", 'value': "is %s"%("none")})
+                        criteria_none("album", 'is')
                         search = search & Q(albums=None)
                 elif key  == "category_none":
                     value = self.decode_boolean(value)
                     if value:
-                        criteria.append({'key': "category", 'value': "is %s"%("none")})
+                        criteria_none("category", 'is')
                         search = search & Q(categorys=None)
                 elif key  == "action":
                     value = self.decode_string(value)
-                    criteria.append({'key': key, 'value': "is %s"%(models.action_to_string(value))})
                     if value == "none":
                         search = search & Q(action__isnull=True)
                     else:
                         search = search & Q(action=value)
+                    value = models.action_to_string(value)
+                    criteria_string(key, 'is')
                 elif key  == "path":
                     value = self.decode_string(value)
-                    criteria.append({'key': key, 'value': "is %s"%(value)})
+                    criteria_string(key, 'is')
                     search = search & Q(path=value)
                 elif key  == "name":
                     value = self.decode_string(value)
-                    criteria.append({'key': key, 'value': "is %s"%(value)})
+                    criteria_string(key, 'is')
                     search = search & Q(name=value)
                 else:
                     raise Http404("Unknown key %s"%(key))
@@ -1065,19 +1099,17 @@ class search_web(search_base_web):
     def get_criteria(self, instance):
         return self._get_photo_list(instance)[1]
 
-###############
-# OTHER STUFF #
-###############
-types = {
-    'place': place_web,
-    'album': album_web,
-    'category': category_web,
-    'person': person_web,
-    'photo': photo_web,
-    'photo_relation': photo_relation_web,
-}
+    def get_description(self, instance):
+        criteria = self.get_criteria(instance)
 
-def get_web_from_object(self):
-    type_name = type(self).__name__
-    return types[type_name]()
+        description = ""
+        sep = ""
+        for i in criteria:
+            description = description + sep + i['value']
+            sep = " and "
+
+        result = "%s (<a href='%s'>%s</a>)"%(
+            description, self.get_view_url(instance),
+            conditional_escape(instance))
+        return mark_safe(result)
 

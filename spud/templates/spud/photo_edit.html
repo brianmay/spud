@@ -30,6 +30,8 @@
 <img src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 </a>
 <div class="photo_detail_summary">
+<div class="title">{{ object }}</div>
+<div class="search">Search {% get_description parent %} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
 {% if object.photo_person_set.all %}
 {% for pp in object.photo_person_set.all %}
     <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}

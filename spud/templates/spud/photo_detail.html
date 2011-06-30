@@ -20,8 +20,6 @@ var this_photo_thumb_url="{% get_thumb_url object size %}"
 {% endblock %}
 
 {% block object %}
-{% photo_pagination page_obj web parent size %}
-
 {% if object.action %}
 <ul class="messagelist">
 <li>Marked action: {% show_action_with_url object.action %}</li>
@@ -33,7 +31,8 @@ var this_photo_thumb_url="{% get_thumb_url object size %}"
 
 <img id="photo" src="{% get_thumb_url object size %}" alt="{{ object.title }}" />
 <div class="photo_detail_summary">
-<div class="title">{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+<div class="title">{{ object }}</div>
+<div class="search">Search {% get_description parent %} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
 {% if object.photo_person_set.all %}
 {% for pp in object.photo_person_set.all %}
     <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}
@@ -146,4 +145,5 @@ var this_photo_thumb_url="{% get_thumb_url object size %}"
 <br class="clear"/>
 </div>
 
+{% photo_pagination page_obj web parent size %}
 {% endblock %}

@@ -228,13 +228,11 @@ table#change-history tbody th { width:16em; }
 .menu li:active { border: 1px solid #000; }
 .photo_detail { border:none; }
 .photo_detail_photo { padding:0; float:none; }
-/* .photo_detail_photo img { width:100%; height:100%; } */
-.paginator { display:none; }
 #header { display:none; }
 .breadcrumbs { display:none; }
 .object-tools { display:none; }
 #content h1 { display:none; }
-/*.paginator { line-height:42px; }
+.paginator { line-height:42px; }
 .paginator a.relative { display:inline; }
-.paginator a, .paginator .dots, .paginator .this-page { padding:12px 16px; display:none; }*/
+.paginator a, .paginator span { padding:12px 16px; display:none; }
 }
