@@ -117,7 +117,7 @@ function OnDown(e)
         var movedPageX = pageX - startPageX
         var movedPageY = pageY - startPageY
 
-        console.log(moveClientX +","+ moveClientY +" "+ movedPageX+","+movedPageY)
+//        console.log(moveClientX +","+ moveClientY +" "+ movedPageX+","+movedPageY)
 
         if (_dragElement != null)
         {
