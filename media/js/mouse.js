@@ -76,8 +76,10 @@ function OnDown(e)
     // IE is retarded and doesn't pass the event object
     if (e == null) e = window.event;
 
-    var _startX = 0;            // mouse starting positions
-    var _startY = 0;
+    var startPageX = 0;            // mouse starting positions
+    var startPageY = 0;
+    var startClientX = 0;            // mouse starting positions
+    var startClientY = 0;
     var _scrollX = 0;
     var _scrollY = 0;
     var _offsetX = 0;           // current element offset
@@ -93,19 +95,29 @@ function OnDown(e)
         if (e == null) e = window.event;
         if( event.targetTouches )
         {
-            X = event.targetTouches[0].pageX;
-            Y = event.targetTouches[0].pageY;
-
+            pageX = event.targetTouches[0].pageX;
+            pageY = event.targetTouches[0].pageY;
+            clientX = event.targetTouches[0].clientX;
+            clientY = event.targetTouches[0].clientY;
         }
         else {
-            X = event.pageX || event.x;
-            Y = event.pageY || event.y;
+            pageX = event.pageX
+            pageY = event.pageY
+            clientX = event.clientX
+            clientY = event.clientY
         }
+
         _move = true;
 
-//        console.log(_scrollX+","+_scrollY+","+Y+","+_startY)
-//        var newY = _scrollY-(Y-_startY)
-//        window.scrollTo(_scrollX,newY)
+        var moveClientX = clientX - startClientX
+        var moveClientY = clientY - startClientY
+
+//        window.scrollTo(_scrollX, _scrollY - moveClientY)
+
+        var movedPageX = pageX - startPageX
+        var movedPageY = pageY - startPageY
+
+        console.log(moveClientX +","+ moveClientY +" "+ movedPageX+","+movedPageY)
 
         if (_dragElement != null)
         {
@@ -115,15 +127,14 @@ function OnDown(e)
                 var e = window.event;
 
             // this is the actual "drag code"
-            _dragElement.style.left = (_offsetX + X - _startX) + 'px';
-            _dragElement.style.top = (_offsetY + Y - _startY) + 'px';
+            _dragElement.style.left = (_offsetX + movedPageX) + 'px';
+            _dragElement.style.top = (_offsetY + movedPageY) + 'px';
 
-            var movedX = (X - _startX);
-            if (movedX > 20 && prev_photo_url!="None") {
+            if (movedPageX > 20 && prev_photo_url!="None") {
                 _fixedElement.src = prev_photo_thumb_url
                 _goto = "prev"
                 visibility = "hidden";
-            } else if (movedX < -20 && next_photo_url!="None") {
+            } else if (movedPageX < -20 && next_photo_url!="None") {
                 _fixedElement.src = next_photo_thumb_url
                 _goto = "next"
                 visibility = "hidden";
@@ -209,13 +220,16 @@ function OnDown(e)
 
     if( event.targetTouches )
     {
-        X = event.targetTouches[0].pageX;
-        Y = event.targetTouches[0].pageY;
-
+        pageX = event.targetTouches[0].pageX;
+        pageY = event.targetTouches[0].pageY;
+        clientX = event.targetTouches[0].clientX;
+        clientY = event.targetTouches[0].clientY;
     }
     else {
-        X = event.pageX || event.x;
-        Y = event.pageY || event.y;
+        pageX = event.pageX
+        pageY = event.pageY
+        clientX = event.clientX
+        clientY = event.clientY
     }
 
     // IE uses srcElement, others use target
@@ -242,8 +256,10 @@ function OnDown(e)
 //        e.stopPropagation();
 
         // grab the mouse position
-        _startX = X
-        _startY = Y
+        startPageX = pageX
+        startPageY = pageY
+        startClientX = clientX
+        startClientY = clientY
 
         // grab the scroll position
         _scrollX = window.scrollX
@@ -260,8 +276,8 @@ function OnDown(e)
         _dragElement.src = _fixedElement.src
         _dragElement.style.width = _fixedElement.offsetWidth + 'px'
         _dragElement.style.position = "absolute"
-        _dragElement.style.left = (_offsetX + X - _startX) + 'px'
-        _dragElement.style.top = (_offsetY + Y - _startY) + 'px'
+        _dragElement.style.left = (_offsetX + pageX - startPageX) + 'px'
+        _dragElement.style.top = (_offsetY + pageY - startPageY) + 'px'
 
         document.getElementById("content").appendChild(_dragElement);
 
