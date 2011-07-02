@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load photo %}
 {% load webs %}
+{% load comments %}
 
 {% block title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 {% block object_title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
@@ -23,8 +24,8 @@
 </ul>
 {% endif %}
 
-<div class='photo_detail {{object.get_style}}'>
-<div class='photo_detail_photo'>
+<div class='photo_container photo_detail {{object.get_style}}'>
+<div class='photo_block photo_detail_photo'>
 
 <a href="{% get_thumb_url object click_size %}">
 <img src="{% get_thumb_url object size %}" alt="{{ object.title }}" width="{% get_thumb_width object size %}" height="{% get_thumb_height object size %}"/>
@@ -43,7 +44,7 @@
 </div>
 </div>
 
-<div class='photo_detail_block photo_detail_photo_detail'>
+<div class='photo_block photo_detail_photo_detail'>
 <h2>Photo Details</h2>
 
 <dl>
@@ -108,7 +109,7 @@
 </dl>
 </div>
 
-<div class='photo_detail_block photo_detail_camera_detail'>
+<div class='photo_block photo_detail_camera_detail'>
 <h2>Camera Details</h2>
 
 <dl>
@@ -122,23 +123,47 @@
 </dl>
 </div>
 
+{% get_comment_list for object as comment_list %}
+{% if comment_list %}
+<div class='photo_block photo_detail_comments'>
+<h2>Comments</h2>
+{% for comment in comment_list %}
+    <div class="comment_{% cycle odd,even %}" id="c{{ comment.id }}">
+    <span class="comnum"><a id="c{{ comment.id }}" href="#c{{ comment.id }}">#{{ forloop.counter }}</a></span>
+    <p><b>{% if comment.user_email %}<a href="mailto:{{ comment.user_email }}">{{ comment.user_name }}</a>{% else %}{{ comment.user_name }}{% endif %}</b> gave the photo a rating of {{ comment.rating }} out of 10, on {{ comment.submit_date|date:"F j, Y" }} at {{ comment.submit_date|date:"P" }}:</p>
+    {{ comment.comment|urlizetrunc:40|linebreaks }}
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
 <br class="clear"/>
 </div>
 
 {% photo_edit_buttons page_obj %}
 
-<div class="photo_edit" id="update_fields">
+<div class="photo_container photo_edit" id="update_fields">
 {% for field in form %}
     {% if field.is_hidden %}
             {{ field.errors }}
             {{ field }}
-    {% else %}
-        <div class="field">
-            {{ field.errors }}
-            {{ field.label_tag }} {{ field }}
-        </div>
     {% endif %}
 {% endfor %}
+<div class="photo_block">
+    {{ form.title.errors }} {{ form.title.label_tag }} {{ form.title }}
+    {{ form.photographer.errors }} {{ form.photographer.label_tag }} {{ form.photographer }}
+    {{ form.location.errors }} {{ form.location.label_tag }} {{ form.location }}
+    {{ form.view.errors }} {{ form.view.label_tag }} {{ form.view }}
+    {{ form.action.errors }} {{ form.action.label_tag }} {{ form.action }}
+</div>
+<div class="photo_block">
+    {{ form.description.errors }} {{ form.description.label_tag }} {{ form.description }}
+    {{ form.comment.errors }} {{ form.comment.label_tag }} {{ form.comment }}
+</div>
+<div class="photo_block">
+    {{ form.timezone.errors }} {{ form.timezone.label_tag }} {{ form.timezone }}
+    {{ form.datetime.errors }} {{ form.datetime.label_tag }} {{ form.datetime }}
+</div>
 <br class="clear" />
 </div>
 

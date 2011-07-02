@@ -1,6 +1,6 @@
-<div class='photo_edit' id="update_command">
+<div class='photo_container photo_edit' id="update_command">
 
-<div class="photo_edit_form">
+<div class="photo_block photo_edit_form">
 {{ update_form.non_field_errors }}
 {{ update_form.updates.errors }}
 {{ update_form.updates }}
@@ -23,33 +23,41 @@
 <a href="#" onclick="add_custom_command(); return false" accesskey="a">Add</a><br/>
 </div>
 
-<div class="photo_edit_persons">
+{% if persons %}
+<div class="photo_block photo_edit_persons">
 <h2>People</h2>
 {% for person in persons %}
 <a href="#" onclick="add_command('add person {{ person|escapejs }}'); return false;">{{ person }}</a> {{ person.photos__count }}<br/>
 {% endfor %}
 </div>
+{% endif %}
 
-<div class="photo_edit_albums">
+{% if albums %}
+<div class="photo_block photo_edit_albums">
 <h2>Albums</h2>
 {% for album in albums %}
 <a href="#" onclick="add_command('add album {{ album|escapejs }}'); return false;">{{ album }}</a> {{ album.photos__count }}<br/>
 {% endfor %}
 </div>
+{% endif %}
 
-<div class="photo_edit_categorys">
+{% if categorys %}
+<div class="photo_block photo_edit_categorys">
 <h2>Categories</h2>
 {% for category in categorys %}
 <a href="#" onclick="add_command('add category {{ category|escapejs }}'); return false;">{{ category }}</a> {{ category.photos__count }}<br/>
 {% endfor %}
 </div>
+{% endif %}
 
-<div class="photo_edit_places">
+{% if places %}
+<div class="photo_block photo_edit_places">
 <h2>Places</h2>
 {% for place in places %}
 <a href="#" onclick="add_command('set place {{ place|escapejs }}'); return false;">{{ place }}</a> {{ place.photos__count }}<br/>
 {% endfor %}
 </div>
+{% endif %}
 
 <br class="clear"/>
 </div>

@@ -28,8 +28,8 @@ var this_photo_height={% get_thumb_height object size %}
 </ul>
 {% endif %}
 
-<div class='photo_detail {{object.get_style}}'>
-<div class='photo_detail_photo'>
+<div class='photo_container photo_detail {{object.get_style}}'>
+<div class='photo_block photo_detail_photo'>
 
 <img id="photo" src="{% get_thumb_url object size %}" alt="{{ object.title }}"  width="{% get_thumb_width object size %}" height="{% get_thumb_height object size %}"/>
 <script type="text/javascript">
@@ -49,7 +49,7 @@ resize_photo(this_photo_width, this_photo_height)
 </div>
 </div>
 
-<div class='photo_detail_block photo_detail_photo_detail'>
+<div class='photo_block photo_detail_photo_detail'>
 <h2>Photo Details</h2>
 
 <dl>
@@ -114,7 +114,7 @@ resize_photo(this_photo_width, this_photo_height)
 </dl>
 </div>
 
-<div class='photo_detail_block photo_detail_camera_detail'>
+<div class='photo_block photo_detail_camera_detail'>
 <h2>Camera Details</h2>
 
 <dl>
@@ -130,7 +130,7 @@ resize_photo(this_photo_width, this_photo_height)
 
 {% get_comment_list for object as comment_list %}
 {% if comment_list %}
-<div class='photo_detail_block photo_detail_comments'>
+<div class='photo_block photo_detail_comments'>
 <h2>Comments</h2>
 {% for comment in comment_list %}
     <div class="comment_{% cycle odd,even %}" id="c{{ comment.id }}">
@@ -142,7 +142,7 @@ resize_photo(this_photo_width, this_photo_height)
 </div>
 {% endif %}
 
-<div class='photo_detail_block photo_detail_add_comment'>
+<div class='photo_block photo_detail_add_comment'>
 <h2>Post a comment</h2>
 {% render_comment_form for object %}
 </div>

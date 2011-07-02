@@ -16,8 +16,12 @@ function resize_photo(width, height) {
     height = height || img.naturalHeight
     var aspect = width/height
 
-    if (width > window.innerWidth) {
-        width = window.innerWidth
+    var subWidth = 80
+    if (window.innerWidth <= 700) {
+        subWidth = 0
+    }
+    if (width > window.innerWidth-subWidth) {
+        width = window.innerWidth-subWidth
         height = width / aspect
     }
 
@@ -28,6 +32,8 @@ function resize_photo(width, height) {
 
     if (window.innerWidth <= 700) {
         img.style.marginLeft = ((window.innerWidth-width)/2) + "px"
+    } else {
+        img.style.marginLeft = "0px"
     }
 
     img.width = width
@@ -67,6 +73,18 @@ function findPos(obj) {
         } while (obj = obj.offsetParent);
     }
     return [curleft,curtop];
+}
+
+function hide_details(visible)
+{
+        var list = getElementsByClassName("photo_detail_photo_detail")
+        list = list.concat(getElementsByClassName("photo_detail_camera_detail"))
+        list = list.concat(getElementsByClassName("photo_detail_comments"))
+        list = list.concat(getElementsByClassName("photo_detail_add_comment"))
+        list = list.concat(getElementsByClassName("photo_detail_summary"))
+        for (x in list) {
+            list[x].style.visibility = visible?"visible":"hidden"
+        }
 }
 
 var _loading = false;
@@ -121,7 +139,7 @@ function OnDown(e)
 
         if (_dragElement != null)
         {
-            var visibility = "visible";
+            var visible = true;
 
             if (e == null) 
                 var e = window.event;
@@ -133,22 +151,18 @@ function OnDown(e)
             if (movedPageX > 20 && prev_photo_url!="None") {
                 _fixedElement.src = prev_photo_thumb_url
                 _goto = "prev"
-                visibility = "hidden";
+                visible = false;
             } else if (movedPageX < -20 && next_photo_url!="None") {
                 _fixedElement.src = next_photo_thumb_url
                 _goto = "next"
-                visibility = "hidden";
+                visible = false;
             } else {
                 _fixedElement.src = this_photo_thumb_url
                 _goto = null
             }
             _fixedElement.onload = function(e) { resize_photo(); }
 
-            var list = getElementsByClassName("photo_detail_block")
-            list = list.concat(getElementsByClassName("photo_detail_summary"))
-            for (x in list) {
-                list[x].style.visibility = visibility
-            }
+            hide_details(visible)
         }
     }
 
@@ -210,11 +224,7 @@ function OnDown(e)
 
             // Reset page back the way it was
             _fixedElement.src = this_photo_thumb_url
-            var list = getElementsByClassName("photo_detail_block")
-            list = list.concat(getElementsByClassName("photo_detail_summary"))
-            for (x in list) {
-                list[x].style.visibility = "visible"
-            }
+            hide_details(false)
         }
     }
 
