@@ -1,3 +1,10 @@
+spud (0.16-1) unstable; urgency=low
+
+  * Update style.
+  * Improve Javascript code.
+
+ -- Brian May <bam@debian.org>  Sun, 03 Jul 2011 11:15:26 +1000
+
 spud (0.15-1) unstable; urgency=low
 
   * Store image sizes in database.
