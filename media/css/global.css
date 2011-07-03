@@ -44,7 +44,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 
 /* Children list */
 .infobox { border:1px solid #dddddd; padding:10px; margin-bottom:10px; }
-.infobox dl { float: left; width: 200px; margin-top: 0; margin-right: 10px; }
+.infobox dl { display:inline-block; vertical-align:top; width: 200px; margin-top: 0; margin-right: 10px; }
 .infobox dt { margin-top: 0; }
 .infobox dd { padding-left: 10px; }
 
@@ -196,7 +196,7 @@ table#change-history tbody th { width:16em; }
 .menu li:active { border: 1px solid #000; }
 .photo_container { border:none; }
 .photo_block { border:none; max-height:none; margin:0; }
-.photo_detail_photo { padding:0; float:none; }
+.photo_detail_photo { padding:0; }
 #header { display:none; }
 .breadcrumbs { display:none; }
 .object-tools { display:none; }
