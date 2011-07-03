@@ -23,7 +23,6 @@
             {% if album.album_description %}<div class='desc' onclick='parent.location="{% get_view_url album %}"'>{{album.album_description|urlizetrunc:20}}</div>{% endif %}
         </li>
     {% endfor %}
-    <br class="clear"/>
     </ul>
 </div>
 {% endif %}
