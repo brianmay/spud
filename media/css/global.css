@@ -25,22 +25,9 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .photo_edit .photo_block { min-height:200px; } 
 /* Photo list */
 
-.photo_list .title {
-font-weight:bold;
-}
-.photo_list {
-padding-left:0;
-}
-.photo_list li {
-display:inline-block;
-vertical-align:top;
-height:150px;
-margin:10px;
-padding-top:10px;
-text-align: center;
-width:170px;
-}
-
+.photo_list { padding-left:0; }
+.photo_list .title { font-weight:bold; }
+.photo_list li { display:inline-block; vertical-align:top; height:150px; margin:10px; padding-top:10px; text-align: center; width:170px; }
 .photo_list li .desc { float:left; display:none; }
 .photo_list li:HOVER { border:1px solid #000; }
 .photo_list li:HOVER .desc { display:inline; background:#ddd; foreground:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
@@ -61,10 +48,7 @@ width:170px;
 .infobox dt { margin-top: 0; }
 .infobox dd { padding-left: 10px; }
 
-.children {
-padding-left:50px;
-border:1px solid #f00;
-}
+.children { padding-left:50px; border:1px solid #f00; }
 
 /* LINKS */
 a:link, a:visited { color: #5b80b2; text-decoration:none; }
