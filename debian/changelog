@@ -2,8 +2,10 @@ spud (0.16-1) unstable; urgency=low
 
   * Update style.
   * Improve Javascript code.
+  * Convert floats to inline-blocks.
+  * Fix error conditions.
 
- -- Brian May <bam@debian.org>  Sun, 03 Jul 2011 11:15:26 +1000
+ -- Brian May <bam@debian.org>  Sun, 03 Jul 2011 11:40:55 +1000
 
 spud (0.15-1) unstable; urgency=low
 
