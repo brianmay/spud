@@ -648,7 +648,7 @@ class category_web(photo_base_web):
     ###############
 
     def get_photo_list(self, instance):
-        photo_list = models.photo.objects.filter(categorys=instance)
+        return models.photo.objects.filter(categorys=instance)
 
     ###############
     # VIEW ACTION #
@@ -800,11 +800,7 @@ class photo_web(photo_base_web):
     ###############
 
     def get_photo_list(self, instance):
-        photo_list = models.photo.objects.filter(pk=instance.pk)
-        try:
-            return photo_list
-        except IndexError, e:
-            raise Http404("Unknown image id '%s'"%(instance))
+        return models.photo.objects.filter(pk=instance.pk)
 
     ###############
     # VIEW ACTION #
