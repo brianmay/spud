@@ -1,3 +1,9 @@
+spud (0.17-1) unstable; urgency=low
+
+  * Fix various broken things.
+
+ -- Brian May <bam@debian.org>  Fri, 08 Jul 2011 15:07:00 +1000
+
 spud (0.16-1) unstable; urgency=low
 
   * Update style.
