@@ -91,7 +91,7 @@ var _loading = false;
 var _ignore = false;
 function OnDown(e)
 {
-    // IE is retarded and doesn't pass the event object
+// IE is retarded and doesn't pass the event object
     if (e == null) e = window.event;
 
     var startPageX = 0;            // mouse starting positions
@@ -111,18 +111,18 @@ function OnDown(e)
     {
         // IE is retarded and doesn't pass the event object
         if (e == null) e = window.event;
-        if( event.targetTouches )
+        if( e.targetTouches )
         {
-            pageX = event.targetTouches[0].pageX;
-            pageY = event.targetTouches[0].pageY;
-            clientX = event.targetTouches[0].clientX;
-            clientY = event.targetTouches[0].clientY;
+            pageX = e.targetTouches[0].pageX;
+            pageY = e.targetTouches[0].pageY;
+            clientX = e.targetTouches[0].clientX;
+            clientY = e.targetTouches[0].clientY;
         }
         else {
-            pageX = event.pageX
-            pageY = event.pageY
-            clientX = event.clientX
-            clientY = event.clientY
+            pageX = e.pageX
+            pageY = e.pageY
+            clientX = e.clientX
+            clientY = e.clientY
         }
 
         _move = true;
@@ -140,9 +140,6 @@ function OnDown(e)
         if (_dragElement != null)
         {
             var visible = true;
-
-            if (e == null) 
-                var e = window.event;
 
             // this is the actual "drag code"
             _dragElement.style.left = (_offsetX + movedPageX) + 'px';
@@ -228,18 +225,18 @@ function OnDown(e)
         }
     }
 
-    if( event.targetTouches )
+    if( e.targetTouches )
     {
-        pageX = event.targetTouches[0].pageX;
-        pageY = event.targetTouches[0].pageY;
-        clientX = event.targetTouches[0].clientX;
-        clientY = event.targetTouches[0].clientY;
+        pageX = e.targetTouches[0].pageX;
+        pageY = e.targetTouches[0].pageY;
+        clientX = e.targetTouches[0].clientX;
+        clientY = e.targetTouches[0].clientY;
     }
     else {
-        pageX = event.pageX
-        pageY = event.pageY
-        clientX = event.clientX
-        clientY = event.clientY
+        pageX = e.pageX
+        pageY = e.pageY
+        clientX = e.clientX
+        clientY = e.clientY
     }
 
     // IE uses srcElement, others use target
