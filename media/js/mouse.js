@@ -10,8 +10,7 @@ if (prev_photo_thumb_url != "None") {
     prev_image.src = prev_photo_thumb_url
 }
 
-function resize_photo(width, height) {
-    var img = document.getElementById("photo")
+function resize_photo(img, width, height) {
     width = width || img.naturalWidth
     height = height || img.naturalHeight
     var aspect = width/height
@@ -40,7 +39,7 @@ function resize_photo(width, height) {
     img.height = height
 }
 
-window.onresize = function(e) { resize_photo() }
+window.onresize = function(e) { resize_photo(document.getElementById("photo")) }
 
 function getElementsByClassName(className)
 {
@@ -102,6 +101,7 @@ function OnDown(e)
     var _scrollY = 0;
     var _offsetX = 0;           // current element offset
     var _offsetY = 0;
+    var parentElement;
     var _dragElement;
     var _fixedElement;
     var _goto = null;
@@ -157,7 +157,7 @@ function OnDown(e)
                 _fixedElement.src = this_photo_thumb_url
                 _goto = null
             }
-            _fixedElement.onload = function(e) { resize_photo(); }
+            _fixedElement.onload = function(e) { resize_photo(_fixedElement); }
 
             hide_details(visible)
         }
@@ -183,7 +183,7 @@ function OnDown(e)
             document.ontouchcancel = null;
             _dragElement.ondragstart = null;
 
-            document.getElementById("content").removeChild(_dragElement);
+            parentElement.removeChild(_dragElement);
 
             // this is how we know we're not dragging      
             _dragElement = null;
@@ -214,7 +214,7 @@ function OnDown(e)
             document.ontouchcancel = null;
             _dragElement.ondragstart = null;
 
-            document.getElementById("content").removeChild(_dragElement);
+            parentElement.removeChild(_dragElement);
 
             // this is how we know we're not dragging      
             _dragElement = null;
@@ -279,6 +279,7 @@ function OnDown(e)
 
         // we need to access the element in OnMove
         _fixedElement = target;
+
         _dragElement = document.createElement('img')
         _dragElement.src = _fixedElement.src
         _dragElement.style.width = _fixedElement.offsetWidth + 'px'
@@ -286,7 +287,8 @@ function OnDown(e)
         _dragElement.style.left = (_offsetX + pageX - startPageX) + 'px'
         _dragElement.style.top = (_offsetY + pageY - startPageY) + 'px'
 
-        document.getElementById("content").appendChild(_dragElement);
+        parentElement = target.parentElement;
+        parentElement.appendChild(_dragElement);
 
         // bring the clicked element to the front while it is being dragged
         _dragElement.style.zIndex = 10000

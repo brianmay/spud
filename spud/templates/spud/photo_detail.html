@@ -33,7 +33,7 @@ var this_photo_height={% get_thumb_height object size %}
 
 <img id="photo" src="{% get_thumb_url object size %}" alt="{{ object.title }}"  width="{% get_thumb_width object size %}" height="{% get_thumb_height object size %}"/>
 <script type="text/javascript">
-resize_photo(this_photo_width, this_photo_height)
+resize_photo(document.getElementById("photo"), this_photo_width, this_photo_height)
 </script>
 <div class="photo_detail_summary">
 <div class="title">{{ object }}</div>
