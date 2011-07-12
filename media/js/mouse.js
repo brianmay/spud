@@ -97,15 +97,15 @@ function OnDown(e)
     var startPageY = 0;
     var startClientX = 0;            // mouse starting positions
     var startClientY = 0;
-    var _scrollX = 0;
-    var _scrollY = 0;
-    var _offsetX = 0;           // current element offset
-    var _offsetY = 0;
+    var scrollX = 0;
+    var scrollY = 0;
+    var offsetX = 0;           // current element offset
+    var offsetY = 0;
     var parentElement;
-    var _dragElement;
-    var _fixedElement;
-    var _goto = null;
-    var _move = false;
+    var dragElement;
+    var fixedElement;
+    var gotoPhoto = null;
+    var mouseMoved = false;
 
     var OnMove = function(e)
     {
@@ -125,39 +125,39 @@ function OnDown(e)
             clientY = e.clientY
         }
 
-        _move = true;
+        mouseMoved = true;
 
         var moveClientX = clientX - startClientX
         var moveClientY = clientY - startClientY
 
-//        window.scrollTo(_scrollX, _scrollY - moveClientY)
+//        window.scrollTo(scrollX, scrollY - moveClientY)
 
         var movedPageX = pageX - startPageX
         var movedPageY = pageY - startPageY
 
 //        console.log(moveClientX +","+ moveClientY +" "+ movedPageX+","+movedPageY)
 
-        if (_dragElement != null)
+        if (dragElement != null)
         {
             var visible = true;
 
             // this is the actual "drag code"
-            _dragElement.style.left = (_offsetX + movedPageX) + 'px';
-            _dragElement.style.top = (_offsetY + movedPageY) + 'px';
+            dragElement.style.left = (offsetX + movedPageX) + 'px';
+            dragElement.style.top = (offsetY + movedPageY) + 'px';
 
             if (movedPageX > 20 && prev_photo_url!="None") {
-                _fixedElement.src = prev_photo_thumb_url
-                _goto = "prev"
+                fixedElement.src = prev_photo_thumb_url
+                gotoPhoto = "prev"
                 visible = false;
             } else if (movedPageX < -20 && next_photo_url!="None") {
-                _fixedElement.src = next_photo_thumb_url
-                _goto = "next"
+                fixedElement.src = next_photo_thumb_url
+                gotoPhoto = "next"
                 visible = false;
             } else {
-                _fixedElement.src = this_photo_thumb_url
-                _goto = null
+                fixedElement.src = this_photo_thumb_url
+                gotoPhoto = null
             }
-            _fixedElement.onload = function(e) { resize_photo(_fixedElement); }
+            fixedElement.onload = function(e) { resize_photo(fixedElement); }
 
             hide_details(visible)
         }
@@ -168,11 +168,11 @@ function OnDown(e)
         // IE is retarded and doesn't pass the event object
         if (e == null) e = window.event;
 
-        if (!_move) {
+        if (!mouseMoved) {
             _ignore = true
         }
 
-        if (_dragElement != null)
+        if (dragElement != null)
         {
             // we're done with these events until the next OnDown
             document.onmousemove = null;
@@ -181,17 +181,17 @@ function OnDown(e)
             document.onmouseup = null;
             document.ontouchend = null;
             document.ontouchcancel = null;
-            _dragElement.ondragstart = null;
+            dragElement.ondragstart = null;
 
-            parentElement.removeChild(_dragElement);
+            parentElement.removeChild(dragElement);
 
             // this is how we know we're not dragging      
-            _dragElement = null;
+            dragElement = null;
 
-            if (_goto == "prev") {
+            if (gotoPhoto == "prev") {
                 _loading = true
                 parent.location = prev_photo_url;
-            } else if (_goto == "next") {
+            } else if (gotoPhoto == "next") {
                 _loading = true
                 parent.location = next_photo_url;
             }
@@ -203,7 +203,7 @@ function OnDown(e)
         // IE is retarded and doesn't pass the event object
         if (e == null) e = window.event;
 
-        if (_dragElement != null)
+        if (dragElement != null)
         {
             // we're done with these events until the next OnDown
             document.onmousemove = null;
@@ -212,15 +212,15 @@ function OnDown(e)
             document.onmouseup = null;
             document.ontouchend = null;
             document.ontouchcancel = null;
-            _dragElement.ondragstart = null;
+            dragElement.ondragstart = null;
 
-            parentElement.removeChild(_dragElement);
+            parentElement.removeChild(dragElement);
 
             // this is how we know we're not dragging      
-            _dragElement = null;
+            dragElement = null;
 
             // Reset page back the way it was
-            _fixedElement.src = this_photo_thumb_url
+            fixedElement.src = this_photo_thumb_url
             hide_details(false)
         }
     }
@@ -269,29 +269,29 @@ function OnDown(e)
         startClientY = clientY
 
         // grab the scroll position
-        _scrollX = window.scrollX
-        _scrollY = window.scrollY
+        scrollX = window.scrollX
+        scrollY = window.scrollY
 
         // grab the clicked element's position
         var pos = findPos(target)
-        _offsetX = pos[0]
-        _offsetY = pos[1]
+        offsetX = pos[0]
+        offsetY = pos[1]
 
         // we need to access the element in OnMove
-        _fixedElement = target;
+        fixedElement = target;
 
-        _dragElement = document.createElement('img')
-        _dragElement.src = _fixedElement.src
-        _dragElement.style.width = _fixedElement.offsetWidth + 'px'
-        _dragElement.style.position = "absolute"
-        _dragElement.style.left = (_offsetX + pageX - startPageX) + 'px'
-        _dragElement.style.top = (_offsetY + pageY - startPageY) + 'px'
+        dragElement = document.createElement('img')
+        dragElement.src = fixedElement.src
+        dragElement.style.width = fixedElement.offsetWidth + 'px'
+        dragElement.style.position = "absolute"
+        dragElement.style.left = (offsetX + pageX - startPageX) + 'px'
+        dragElement.style.top = (offsetY + pageY - startPageY) + 'px'
 
         parentElement = target.parentElement;
-        parentElement.appendChild(_dragElement);
+        parentElement.appendChild(dragElement);
 
         // bring the clicked element to the front while it is being dragged
-        _dragElement.style.zIndex = 10000
+        dragElement.style.zIndex = 10000
 
         // tell our code to start moving the element with the mouse
         document.onmousemove = OnMove
