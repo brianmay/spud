@@ -23,17 +23,14 @@ def get_description(instance):
     return web.get_description(instance)
 
 @register.simple_tag
-def get_thumb_url(photo,size):
+def get_thumb_url(thumb):
     web = webs.photo_web()
-    return mark_safe(web.get_thumb_url(photo,size))
+    return mark_safe(web.get_thumb_url(thumb.photo,thumb.size))
 
 @register.simple_tag
-def get_thumb_width(photo,size):
-    return mark_safe(photo.get_thumb_size(size)[0])
-
-@register.simple_tag
-def get_thumb_height(photo,size):
-    return mark_safe(photo.get_thumb_size(size)[1])
+def get_photo_thumb_url(photo, size):
+    web = webs.photo_web()
+    return mark_safe(web.get_thumb_url(photo, size))
 
 @register.simple_tag
 def get_photo_view_url(instance, size):

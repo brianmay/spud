@@ -193,13 +193,16 @@ class photo_base_web(base_web):
 
         photo_object = page_obj.object_list[0]
 
+        thumb = photo_object.get_thumb(size)
+        if thumb is None:
+            raise Http404("Thumb of size '%s' for photo was not found"%size)
+
         detail_url = self.photo_detail_url(instance, page_obj.number, size)
         breadcrumbs.append(breadcrumb(detail_url,photo_object))
 
         return render_to_response(template, {
                                     'parent': instance,
-                                    'object': photo_object,
-                                    'size': size,
+                                    'object': thumb,
                                     'click_size': request.session.get('default_click_size',settings.DEFAULT_CLICK_SIZE),
                                     'web': self,
                                     'page_obj': page_obj,
@@ -307,6 +310,10 @@ class photo_base_web(base_web):
                                     'updates': '',
                                     })
 
+        thumb = photo_object.get_thumb(size)
+        if thumb is None:
+            raise Http404("Thumb of size '%s' for photo was not found"%size)
+
         # can't do this until after we confirm the object
         detail_url = self.photo_detail_url(instance, page_obj.number, size)
         edit_url = self.photo_edit_url(instance, page_obj.number, size)
@@ -321,8 +328,7 @@ class photo_base_web(base_web):
 
         return render_to_response(template, {
                 'parent': instance,
-                'object': photo_object,
-                'size': size,
+                'object': thumb,
                 'click_size': request.session.get('default_click_size',settings.DEFAULT_CLICK_SIZE),
                 'web': self,
                 'page_obj': page_obj,
@@ -812,7 +818,7 @@ class photo_web(photo_base_web):
             (shortname, extension) = os.path.splitext(instance.name)
             return iri_to_uri(u"%sthumb/%s/%s/%s.jpg"%(settings.IMAGE_URL,urlquote(size),urlquote(instance.path),urlquote(shortname)))
         else:
-            raise RuntimeError("unknown image size %s"%(size))
+            return None
 
     def get_orig_url(self, instance):
         self.assert_instance_type(instance)

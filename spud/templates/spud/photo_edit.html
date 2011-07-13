@@ -4,11 +4,23 @@
 {% load webs %}
 {% load comments %}
 
-{% block title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
-{% block object_title %}{{ object }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block title %}{{ object.photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block object_title %}{{ object.photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+
+{% block extrahead %}
+<script type="text/javascript">
+var prev_photo_url="None"
+var next_photo_url="None"
+var prev_photo_thumb_url="None"
+var next_photo_thumb_url="None"
+var this_photo_thumb_url="{% get_thumb_url object %}"
+</script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js" />
+{% endblock %}
 
 {% block object %}
-<form method="post" action="{% photo_edit_url web parent page_obj.number size %}">{% csrf_token %}
+{% with object.photo as photo %}
+<form method="post" action="{% photo_edit_url web parent page_obj.number object.size %}">{% csrf_token %}
 <input type="submit" name="update_action" value="nop"/>
 <input type="submit" name="update_action" value="delete"/>
 <input type="submit" name="update_action" value="regenerate"/>
@@ -18,71 +30,73 @@
 <input type="submit" name="update_action" value="rotate 270"/>
 <input type="submit" name="update_action" value="rotate auto"/>
 
-{% if object.action %}
+{% if photo.action %}
 <ul class="messagelist">
-<li>Marked action: {% show_action_with_url object.action %}</li>
+<li>Marked action: {% show_action_with_url photo.action %}</li>
 </ul>
 {% endif %}
 
-<div class='photo_container photo_detail {{object.get_style}}'>
+<div class='photo_container photo_detail {{photo.get_style}}'>
 <div class='photo_block photo_detail_photo'>
 
-<a href="{% get_thumb_url object click_size %}">
-<img src="{% get_thumb_url object size %}" alt="{{ object.title }}" width="{% get_thumb_width object size %}" height="{% get_thumb_height object size %}"/>
-</a>
+<img id="photo" src="{% get_thumb_url object %}" alt="{{ photo.title }}" width="{{ object.width }}" height="{{ object.height }}"/>
+<script type="text/javascript">
+resize_photo(document.getElementById("photo"), {{ object.width }}, {{ object.height }})
+</script>
 <div class="photo_detail_summary">
-<div class="title">{{ object }}</div>
+<div class="title">{{ photo }}</div>
 <div class="search">Search {% get_description parent %} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
-{% if object.photo_person_set.all %}
-{% for pp in object.photo_person_set.all %}
+{% if photo.photo_person_set.all %}
+{% for pp in photo.photo_person_set.all %}
     <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}
 {% endfor %}
 {% endif %}
-{% if object.description %}
-{{object.description|urlizetrunc:40|linebreaks}}
+{% if photo.description %}
+{{photo.description|urlizetrunc:40|linebreaks}}
 {% endif %}
 </div>
+<a href="{% get_photo_thumb_url photo click_size %}">{{click_size}}</a>
 </div>
 
 <div class='photo_block photo_detail_photo_detail'>
 <h2>Photo Details</h2>
 
 <dl>
-{% if object.title %}
-<dt>Title</dt><dd>{{object.title}}</dd>
+{% if photo.title %}
+<dt>Title</dt><dd>{{photo.title}}</dd>
 {% endif %}
-<dt>File</dt><dd>{{object.name}} ({% get_thumb_width object size %}x{% get_thumb_height object size %})</dd>
-{% if object.location %}
-<dt>Location</dt><dd><a href="{% get_view_url object.location %}">{{ object.location }}</a></dd>
+<dt>File</dt><dd>{{photo.name}} ({{ object.width }}x{{ object.height }})</dd>
+{% if photo.location %}
+<dt>Location</dt><dd><a href="{% get_view_url photo.location %}">{{ photo.location }}</a></dd>
 {% endif %}
 <dt>Albums</dt><dd>
-  {% for pa in object.photo_album_set.all %}
+  {% for pa in photo.photo_album_set.all %}
     <a href="{% get_view_url pa.album %}">{{pa.album}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 <dt>Categories</dt><dd>
-  {% for pc in object.photo_category_set.all %}
+  {% for pc in photo.photo_category_set.all %}
     <a href="{% get_view_url pc.category %}">{{pc.category}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 <dt>Date &amp; time</dt><dd>
-  {{ object.datetime|show_datetime:object.timezone }}
+  {{ photo.datetime|show_datetime:photo.timezone }}
 </dd>
-{% if object.photographer %}
-<dt>Photographer</dt><dd><a href="{% get_view_url object.photographer %}">{{object.photographer}}</a></dd>
+{% if photo.photographer %}
+<dt>Photographer</dt><dd><a href="{% get_view_url photo.photographer %}">{{photo.photographer}}</a></dd>
 {% endif %}
-<dt>Rating</dt><dd>{{object.rating}}</dd>
-{% if object.relations_1.all or object.relations_2.all or perms.spud.add_relation %}
+<dt>Rating</dt><dd>{{photo.rating}}</dd>
+{% if photo.relations_1.all or photo.relations_2.all or perms.spud.add_relation %}
 <dt>Related photos</dt><dd>
   {% if perms.spud.add_photo_relation %}
     <ul class="object-tools">
-    <li><a class="addlink" href="{% photo_relation_add_url object %}?next={{ request.path }}">Create</a></li>
+    <li><a class="addlink" href="{% photo_relation_add_url photo %}?next={{ request.path }}">Create</a></li>
     </ul>
   {% endif %}
   <table>
-  {% for relation in object.relations_1.all %}
+  {% for relation in photo.relations_1.all %}
             <tr>
-            <td><a href="{% get_photo_view_url relation.photo_2 size %}">{{ relation.desc_2 }}</a></td>
+            <td><a href="{% get_photo_view_url relation.photo_2 object.size %}">{{ relation.desc_2 }}</a></td>
             {% if perms.spud.edit_photo_relation %}
             <td><a class="changelink" href="{% get_edit_url relation %}?next={{ request.path }}">Edit</a></td>
             {% endif %}
@@ -91,9 +105,9 @@
             {% endif %}
             </tr>
   {% endfor %}
-  {% for relation in object.relations_2.all %}
+  {% for relation in photo.relations_2.all %}
             <tr>
-            <td><a href="{% get_photo_view_url relation.photo_1 size %}">{{ relation.desc_1 }}</a></td>
+            <td><a href="{% get_photo_view_url relation.photo_1 object.size %}">{{ relation.desc_1 }}</a></td>
             {% if perms.spud.edit_photo_relation %}
             <td><a class="changelink" href="{% get_edit_url relation %}?next={{ request.path }}">Edit</a></td>
             {% endif %}
@@ -105,7 +119,7 @@
   </table>
 </dd>
 {% endif %}
-<dt>Action</dt><dd>{% show_action_with_url object.action %}</dd>
+<dt>Action</dt><dd>{% show_action_with_url photo.action %}</dd>
 </dl>
 </div>
 
@@ -113,17 +127,17 @@
 <h2>Camera Details</h2>
 
 <dl>
-<dt>Camera</dt><dd>{{object.camera_make}} {{object.camera_model}}</dd>
-<dt>Flash</dt><dd>{{object.flash_used}}</dd>
-<dt>Focal length</dt><dd> {{object.focal_length}}</dd>
-<dt>Exposure</dt><dd>{{object.exposure}}</dd>
-<dt>Aperture</dt><dd>{{object.aperture}}</dd>
-<dt>ISO</dt><dd>{{object.iso_equiv}}</dd>
-<dt>Metering Mode</dt><dd>{{object.metering_mode}}</dd>
+<dt>Camera</dt><dd>{{photo.camera_make}} {{photo.camera_model}}</dd>
+<dt>Flash</dt><dd>{{photo.flash_used}}</dd>
+<dt>Focal length</dt><dd> {{photo.focal_length}}</dd>
+<dt>Exposure</dt><dd>{{photo.exposure}}</dd>
+<dt>Aperture</dt><dd>{{photo.aperture}}</dd>
+<dt>ISO</dt><dd>{{photo.iso_equiv}}</dd>
+<dt>Metering Mode</dt><dd>{{photo.metering_mode}}</dd>
 </dl>
 </div>
 
-{% get_comment_list for object as comment_list %}
+{% get_comment_list for photo as comment_list %}
 {% if comment_list %}
 <div class='photo_block photo_detail_comments'>
 <h2>Comments</h2>
@@ -201,4 +215,5 @@ dt.onchange = function()
 
 </form>
 
+{% endwith %}
 {% endblock %}

@@ -394,12 +394,14 @@ class photo(base_model):
     def get_orig_path(self):
         return u"%sorig/%s/%s"%(settings.IMAGE_PATH,self.path,self.name)
 
-    def get_thumb_size(self, size):
-        if size in settings.IMAGE_SIZES:
-            pt = self.photo_thumb_set.get(size=size)
-            return (pt.width,pt.height)
-        else:
-            raise RuntimeError("unknown image size %s"%(size))
+    def get_thumb(self, size):
+        if size not in settings.IMAGE_SIZES:
+            return None
+
+        try:
+            return self.photo_thumb_set.get(size=size)
+        except photo_thumb.DoesNotExist, e:
+            return None
 
     def get_style(self):
         if self.action is None:
