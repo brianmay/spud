@@ -1,3 +1,10 @@
+spud (0.18-1) unstable; urgency=low
+
+  * Improve Javascript.
+  * Improve other stuff.
+
+ -- Brian May <bam@debian.org>  Fri, 15 Jul 2011 10:41:33 +1000
+
 spud (0.17-1) unstable; urgency=low
 
   * Fix various broken things.
