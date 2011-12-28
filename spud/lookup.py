@@ -4,6 +4,11 @@ from django.db.models import Q
 from django.utils.html import escape
 from django.conf import settings
 
+class LookupChannel(LookupChannel):
+    # anyone can use these lookup methods
+    def check_auth(self, request):
+        return
+
 def format_match(object, photo=None, description=None):
     result = []
 
