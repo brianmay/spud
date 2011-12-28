@@ -1,7 +1,11 @@
 body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif; color:#333; background:#fff; }
 
-.ui-autocomplete-input { width: 320px; }
-.ui-corner-all img { width: 100px; padding-right: 5px; }
+.ui-autocomplete-input { width:320px; }
+.ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; }
+.ui-corner-all { padding-top:4px; padding-bottom:4px; }
+.ui-corner-all img { float:left; }
+.ui-corner-all .title { margin-left:140px; font-weight:bold; }
+.ui-corner-all .desc { margin-left:140px; }
 
 .photo_ { }
 .photo_D { background:#EEDDDD; color:#333333; }

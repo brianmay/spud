@@ -4,13 +4,22 @@ from django.db.models import Q
 from django.utils.html import escape
 from django.conf import settings
 
-def format_match(object):
-    photo = object.get_cover_photo()
+def format_match(object, photo=None, description=None):
+    result = []
+
     if photo is None:
-        return u"%s"%(escape(object))
-    else:
+        photo = object.get_cover_photo()
+
+    if photo is not None:
         web = webs.photo_web()
-        return u"<img src='%s' alt=''/>%s"%(web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE),escape(object))
+        result.append(u"<img src='%s' alt=''/>"%web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE))
+
+    result.append(u"<div class='title'>%s</div>"%(escape(object)))
+
+    if description:
+        result.append(u"<div class='desc'>%s</div>"%(escape(description)))
+
+    return "".join(result)
 
 class person_lookup(LookupChannel):
 
@@ -47,7 +56,20 @@ class place_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        return format_match(object)
+        description=[]
+        if object.city:
+            description.append(object.city)
+        if object.state:
+            description.append(object.state)
+        if object.country:
+            description.append(object.country)
+
+        if len(description) == 0:
+            description = None
+        else:
+            description = ", ".join(description)
+
+        return format_match(object, description=description)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -67,7 +89,7 @@ class album_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        return format_match(object)
+        return format_match(object, description=object.album_description)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -87,7 +109,7 @@ class category_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        return format_match(object)
+        return format_match(object, description=object.category_description)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -107,8 +129,7 @@ class photo_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        web = webs.photo_web()
-        return u"<img src='%s' alt=''/>%s"%(web.get_thumb_url(object,settings.DEFAULT_LIST_SIZE),escape(object))
+        return format_match(object, photo=object, description=photo.description)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
