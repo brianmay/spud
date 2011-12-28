@@ -108,7 +108,7 @@ class photo_lookup(LookupChannel):
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
         web = webs.photo_web()
-        return u"<img src='%s' alt=""/>%s"%(web.get_thumb_url(object,settings.DEFAULT_LIST_SIZE),escape(object))
+        return u"<img src='%s' alt=''/>%s"%(web.get_thumb_url(object,settings.DEFAULT_LIST_SIZE),escape(object))
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
