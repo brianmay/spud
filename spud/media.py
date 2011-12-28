@@ -57,6 +57,9 @@ class media:
                 thumb_width = int(max_size*1.0/height * width)
 
             image.thumbnail((thumb_width,thumb_height),Image.ANTIALIAS)
+        else:
+            thumb_width = width
+            thumb_height = height
 
         image.save(dst_path)
 
