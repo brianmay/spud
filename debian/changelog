@@ -1,3 +1,10 @@
+spud (0.19-1) unstable; urgency=low
+
+  * Bug fixes.
+  * Support django-ajax-select 1.2.3.
+
+ -- Brian May <bam@debian.org>  Wed, 28 Dec 2011 15:49:28 +1100
+
 spud (0.18-1) unstable; urgency=low
 
   * Improve Javascript.
