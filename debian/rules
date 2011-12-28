@@ -13,3 +13,9 @@ clean::
 install/spud::
 	rm debian/spud/usr/share/spud/media/js/jquery.js
 	ln -s /usr/share/javascript/jquery/jquery.js debian/spud/usr/share/spud/media/js/jquery.js
+	rm debian/spud/usr/share/spud/media/js/jquery-ui.js
+	ln -s /usr/share/javascript/jquery-ui/jquery-ui.js debian/spud/usr/share/spud/media/js/jquery-ui.js
+	rm debian/spud/usr/share/spud/media/css/jquery-ui.css
+	ln -s /usr/share/javascript/jquery-ui/css/smoothness/jquery-ui.css debian/spud/usr/share/spud/media/css/jquery-ui.css
+	rm debian/spud/usr/share/spud/media/css/images
+	ln -s /usr/share/javascript/jquery-ui/css/smoothness/images debian/spud/usr/share/spud/media/css/images

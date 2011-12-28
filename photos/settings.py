@@ -77,6 +77,8 @@ AJAX_LOOKUP_CHANNELS = {
     'category' : ('spud.lookup', 'category_lookup'),
     'photo' : ('spud.lookup', 'photo_lookup'),
 }
+AJAX_SELECT_BOOTSTRAP = False
+AJAX_SELECT_INLINES = None
 
 COMMENTS_APP = "spud.comments"
 

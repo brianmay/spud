@@ -13,9 +13,9 @@ import ajax_select.fields
 class select_widget(ajax_select.fields.AutoCompleteSelectWidget):
     class Media:
         css = {
-            'all': ( 'css/jquery.autocomplete.css', )
+            'all': ( 'css/ajax_select.css', 'css/jquery-ui.css')
         }
-        js = ('js/jquery.js','js/jquery.autocomplete.js',)
+        js = ('js/jquery.js', 'js/jquery-ui.js', 'js/ajax_select.js')
 
 class select_field(ajax_select.fields.AutoCompleteSelectField):
 
@@ -28,9 +28,9 @@ class select_field(ajax_select.fields.AutoCompleteSelectField):
 class select_multiple_widget(ajax_select.fields.AutoCompleteSelectMultipleWidget):
     class Media:
         css = {
-            'all': ( 'css/jquery.autocomplete.css', )
+            'all': ( 'css/ajax_select.css', 'css/jquery-ui.css')
         }
-        js = ('js/jquery.js','js/jquery.autocomplete.js',)
+        js = ('js/jquery.js', 'js/jquery-ui.js', 'js/ajax_select.js')
 
 class select_multiple_field(ajax_select.fields.AutoCompleteSelectMultipleField):
 
