@@ -133,7 +133,7 @@ class place(base_model):
             photo = self.cover_photo
         else:
             try:
-                photo = self.photos.filter().reverse()[0]
+                photo = self.photos.exclude(action='D').reverse()[0]
             except IndexError, e:
                 pass
         return photo
@@ -182,7 +182,7 @@ class album(base_model):
             photo = self.cover_photo
         else:
             try:
-                photo = self.photos.filter().reverse()[0]
+                photo = self.photos.exclude(action='D').reverse()[0]
             except IndexError, e:
                 pass
         return photo
@@ -230,7 +230,7 @@ class category(base_model):
             photo = self.cover_photo
         else:
             try:
-                photo = self.photos.filter().reverse()[0]
+                photo = self.photos.exclude(action='D').reverse()[0]
             except IndexError, e:
                 pass
         return photo
@@ -334,7 +334,7 @@ class person(base_model):
             photo = self.cover_photo
         else:
             try:
-                photo = self.photos.filter().reverse()[0]
+                photo = self.photos.exclude(action='D').reverse()[0]
             except IndexError, e:
                 pass
         return photo

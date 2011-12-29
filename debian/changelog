@@ -2,6 +2,7 @@ spud (0.20-1) unstable; urgency=low
 
   * Improve formatting of AJAX lists.
   * Disable auth checks in AJAX lookups.
+  * Exclude deleted photos from being cover photo.
 
  -- Brian May <bam@debian.org>  Thu, 29 Dec 2011 11:01:06 +1100
 
