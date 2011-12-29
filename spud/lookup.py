@@ -24,6 +24,7 @@ def format_match(object, photo=None, description=None):
     if description:
         result.append(u"<div class='desc'>%s</div>"%(escape(description)))
 
+    result.append(u"<div class='clear'/>")
     return "".join(result)
 
 class person_lookup(LookupChannel):
