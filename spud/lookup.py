@@ -134,7 +134,7 @@ class photo_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        return format_match(object, photo=object, description=photo.description)
+        return format_match(object, photo=object, description=object.description)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
