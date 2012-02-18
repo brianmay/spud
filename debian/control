@@ -10,6 +10,6 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-django (>= 1.2.1), python-django-south (>= 0.7), django-ajax-selects (>= 1.2.3), django-tables, libjs-jquery, libjs-jquery-ui, python-tz, python-pyexiv2, python-pyparsing, python-imaging, django-webs
 Recommends: libapache2-mod-wsgi
 Suggests: python-mysqldb
-Description: A Sortable Photo album Using a Django based database.
+Description: Sortable Photo album Using a Django based database.
  Implements tracking photos by exif information, location, categories, and
  people.
