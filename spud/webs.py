@@ -276,7 +276,7 @@ class photo_base_web(base_web):
                     elif update_action == "rotate auto":
                         photo_object.action = "auto"
                     else:
-                        raise Http404("Action '%s' not implemented"%(action))
+                        raise Http404("Action '%s' not implemented"%(photo_object.action))
 
                 photo_object.save()
 
@@ -997,7 +997,7 @@ class search_web(search_base_web):
                 elif key == "upper_rating":
                     value = self.decode_string(value)
                     criteria_string('rating', 'less then')
-                    search = search & Q(rating__lte=valuee)
+                    search = search & Q(rating__lte=value)
                 elif key == "title":
                     value = self.decode_string(value)
                     criteria_string(key, 'contains')
