@@ -63,6 +63,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.comments',
     'ajax_select',
+    'django_tables2',
     'south',
 )
 
