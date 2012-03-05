@@ -7,15 +7,12 @@
 # Also note: You'll have to insert the output of 'django-admin.py sqlcustom [appname]'
 # into your database.
 
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User as django_user
 from django.conf import settings
 
 from django.db import models
 from django.db.models import Q
 
 import os
-import datetime
 import pytz
 import shutil
 
@@ -134,7 +131,7 @@ class place(base_model):
         else:
             try:
                 photo = self.photos.exclude(action='D').reverse()[0]
-            except IndexError, e:
+            except IndexError:
                 pass
         return photo
 
@@ -183,7 +180,7 @@ class album(base_model):
         else:
             try:
                 photo = self.photos.exclude(action='D').reverse()[0]
-            except IndexError, e:
+            except IndexError:
                 pass
         return photo
 
@@ -231,7 +228,7 @@ class category(base_model):
         else:
             try:
                 photo = self.photos.exclude(action='D').reverse()[0]
-            except IndexError, e:
+            except IndexError:
                 pass
         return photo
 
@@ -335,7 +332,7 @@ class person(base_model):
         else:
             try:
                 photo = self.photos.exclude(action='D').reverse()[0]
-            except IndexError, e:
+            except IndexError:
                 pass
         return photo
 
@@ -386,7 +383,7 @@ class photo(base_model):
 
     def get_thumb_path(self, size):
         if size in settings.IMAGE_SIZES:
-            (shortname, extension) = os.path.splitext(self.name)
+            (shortname, _) = os.path.splitext(self.name)
             return u"%sthumb/%s/%s/%s.jpg"%(settings.IMAGE_PATH,size,self.path,shortname)
         else:
             raise RuntimeError("unknown image size %s"%(size))
@@ -400,7 +397,7 @@ class photo(base_model):
 
         try:
             return self.photo_thumb_set.get(size=size)
-        except photo_thumb.DoesNotExist, e:
+        except photo_thumb.DoesNotExist:
             return None
 
     def get_style(self):
@@ -458,7 +455,7 @@ class photo(base_model):
             else:
                 mt = media.get_media(dst)
                 xysize = mt.get_size()
-            pt,c = photo_thumb.objects.get_or_create(photo=self,size=size)
+            pt,_ = photo_thumb.objects.get_or_create(photo=self,size=size)
             pt.width=xysize[0]
             pt.height=xysize[1]
             pt.save()
@@ -472,7 +469,7 @@ class photo(base_model):
             dst = self.get_thumb_path(size)
             mt = media.get_media(dst)
             xysize = mt.get_size()
-            pt,c = photo_thumb.objects.get_or_create(photo=self,size=size)
+            pt,_ = photo_thumb.objects.get_or_create(photo=self,size=size)
             pt.width=xysize[0]
             pt.height=xysize[1]
             pt.save()
@@ -601,7 +598,7 @@ class photo(base_model):
         self.name = new_name
 
         # Check to ensure no conflicts
-        (shortname, extension) = os.path.splitext(self.name)
+        (shortname, _) = os.path.splitext(self.name)
         photos = photo.objects.filter(path=self.path,name__startswith="%s."%(shortname))
         count = photos.count()
         if count > 0:

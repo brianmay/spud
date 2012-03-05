@@ -7,8 +7,8 @@ from django.core.urlresolvers import reverse
 from django.db import models as m
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext, loader
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.template import RequestContext
+from django.http import HttpResponseRedirect, Http404
 from django.conf import settings
 from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
@@ -815,7 +815,7 @@ class photo_web(photo_base_web):
     def get_thumb_url(self, instance, size):
         self.assert_instance_type(instance)
         if size in settings.IMAGE_SIZES:
-            (shortname, extension) = os.path.splitext(instance.name)
+            (shortname, _) = os.path.splitext(instance.name)
             return iri_to_uri(u"%sthumb/%s/%s/%s.jpg"%(settings.IMAGE_URL,urlquote(size),urlquote(instance.path),urlquote(shortname)))
         else:
             return None
@@ -911,7 +911,7 @@ class search_web(search_base_web):
 
         list = value.split(";")
         for item in list:
-            (key,semicolon,value) = item.partition('=')
+            (key,_,value) = item.partition('=')
             value = value.replace("!","/")
             dict[key] = value
 
@@ -960,7 +960,6 @@ class search_web(search_base_web):
 
         def criteria_none(key, pretext, posttext=""):
             if posttext!="": posttext=" "+posttext
-            evalue = conditional_escape(value)
             result = mark_safe("%s %s %s%s"%(key, pretext, "none", posttext))
             criteria.append({'key': key, 'value': result})
 

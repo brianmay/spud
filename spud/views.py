@@ -1,16 +1,14 @@
 from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext, loader
-from django.forms.models import inlineformset_factory
+from django.template import RequestContext
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse, HttpResponseForbidden, Http404
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.http import HttpResponseRedirect, Http404
 from django.contrib.comments.moderation import CommentModerator, moderator
 from django.contrib.comments.signals import comment_was_flagged, comment_was_posted
 from django.utils.encoding import smart_unicode
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Count, Q
+from django.db.models import Q
 
 from spud.comments.models import CommentWithRating
 from spud import models
@@ -18,7 +16,7 @@ from spud import forms
 from spud import webs
 from spud import tables
 
-from datetime import *
+from datetime import datetime, timedelta
 
 def root(request):
     breadcrumbs = []
@@ -209,7 +207,6 @@ def album_detail(request, object_id):
 
 def album_todo(request):
     web = webs.album_web()
-    parent = get_object_or_404(models.album, pk=1)
     dt = datetime.now()-timedelta(days=365)
     default_list_size = request.session.get('default_list_size', settings.DEFAULT_LIST_SIZE)
     objects = models.album.objects.filter(Q(revised__lt=dt) | Q(revised__isnull=True)).order_by('revised','-pk')
@@ -317,7 +314,6 @@ def person_list(request):
     else:
         form = forms.search_person_form()
 
-    context = { 'form': form, 'media': form.media }
     default_list_size = request.session.get('default_list_size', settings.DEFAULT_LIST_SIZE)
     list = models.person.objects.all()
     table = tables.person_table(request.user, web, default_list_size, list, order_by=request.GET.get('sort'))
@@ -667,8 +663,6 @@ def settings_form(request):
             'default_view_size': request.session.get('default_view_size', settings.DEFAULT_VIEW_SIZE),
             'default_click_size': request.session.get('default_click_size', settings.DEFAULT_CLICK_SIZE),
         })
-
-    context = { 'form': form, 'media': form.media }
 
     template='spud/settings_form.html'
 

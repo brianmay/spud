@@ -45,7 +45,7 @@ class timezone_field(forms.CharField):
         value=super(timezone_field, self).clean(value)
         try:
             return pytz.timezone(value)
-        except pytz.UnknownTimeZoneError, e:
+        except pytz.UnknownTimeZoneError:
             raise ValidationError(u"Cannot find timezone: '%s'"%(value))
         return value
 
@@ -79,7 +79,7 @@ def get_person(s, loc, toks):
         raise p.ParseFatalException(u"Unknown exception '%s' processing '%s': '%s'"%(type(e),toks[0],e), loc)
 
     # Try first_name="Abc Def" last_name="Xyz"
-    (first_name, sep, last_name) = toks[0].strip().rpartition(" ")
+    (first_name, _, last_name) = toks[0].strip().rpartition(" ")
     try:
         if first_name != "":
             return models.person.objects.get(first_name=first_name,last_name=last_name)

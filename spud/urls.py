@@ -1,7 +1,4 @@
-import django.views
-from django.conf.urls.defaults import *
-from spud import models
-from spud import views
+from django.conf.urls.defaults import url, include, patterns
 
 urlpatterns = patterns('',
     url(r'^$', 'spud.views.root', name='root'),

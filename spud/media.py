@@ -125,7 +125,7 @@ class media_raw(media):
         return image.size
 
 def get_media(file):
-    (root,extension) = os.path.splitext(file)
+    (_,extension) = os.path.splitext(file)
     extension = extension.lower()
     if extension == ".jpg" or extension == ".tif":
         return media_jpeg(file)
