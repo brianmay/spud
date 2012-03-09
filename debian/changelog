@@ -1,3 +1,10 @@
+spud (0.21-1) unstable; urgency=low
+
+  * Update to support at least django-tables 0.9.4
+  * Other issues fixed.
+
+ -- Brian May <bam@debian.org>  Fri, 09 Mar 2012 13:13:50 +1100
+
 spud (0.20-1) unstable; urgency=low
 
   * Improve formatting of AJAX lists.
