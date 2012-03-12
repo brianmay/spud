@@ -293,12 +293,17 @@ class person(base_model):
     # parents generation
 
     def uncles_aunts(self):
-        parents = [self.father.pk, self.mother.pk]
+        parents = [ i.pk for i in self.parents() ]
         grandparents = self.grandparents()
         return person.objects.filter(Q(father__in=grandparents) | Q(mother__in=grandparents)).exclude(pk__in=parents)
 
     def parents(self):
-        return [self.father, self.mother]
+        results = []
+        if self.father is not None:
+            results.append(self.father)
+        if self.mother is not None:
+            results.append(self.mother)
+        return results
 
     # this generation
 
