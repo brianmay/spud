@@ -131,12 +131,21 @@ class photo_base_web(base_web):
                 else:
                     photo_object.description = update.object
             elif update.verb == "set" and update.noun == "timezone":
-                if photo_object.timezone != update.timezone:
-                    photo_object.timezone = update.timezone
+                from_tz = pytz.utc
+                to_tz = update.timezone
+
+                local = from_tz.localize(photo_object.datetime)
+                local = local.astimezone(to_tz)
+
+                utc_offset = local.utcoffset().total_seconds() / 60
+
+                photo_object.timezone = update.timezone
+                if photo_object.utc_offset != utc_offset:
+                    photo_object.utc_offset = utc_offset
                     if photo_object.action is None:
                         photo_object.action = "M"
             elif update.verb == "set" and update.noun == "datetime":
-                src_timezone = pytz.timezone(photo_object.timezone)
+                src_timezone = pytz.FixedOffset(photo_object.utc_offset)
                 value = src_timezone.localize(update.datetime)
                 photo_object.datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
                 if photo_object.action is None:

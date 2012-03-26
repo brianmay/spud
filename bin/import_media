@@ -103,6 +103,7 @@ def import_photo(file,d,options):
 
     # save the time
     photo.timezone = dt.tzinfo.zone
+    photo.utc_offset = dt.utcoffset().total_seconds() / 60
     photo.datetime = dt.astimezone(pytz.utc).replace(tzinfo=None)
 
     # determine the destination path

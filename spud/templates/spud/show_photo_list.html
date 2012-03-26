@@ -7,7 +7,7 @@
 <li class='photo_list_item {{photo.get_style}}' onclick='parent.location="{% photo_detail_url_by_page web parent page_obj forloop.counter0 view_size %}"'>
 <a href='{% photo_detail_url_by_page web parent page_obj forloop.counter0 view_size %}'><img src='{% get_photo_thumb_url photo list_size %}' alt='{{photo}}'/>
 <div class='title'>{{photo}}</div></a>
-<div class='sort'>{{ photo.datetime|show_date:photo.timezone }}</div>
+<div class='sort'>{{ photo.datetime|show_date:photo.utc_offset }}</div>
 {% if photo.description %}<div class='desc'>{{photo.description|urlizetrunc:20}}</div>{% endif %}
 </li>
 {% endfor %}

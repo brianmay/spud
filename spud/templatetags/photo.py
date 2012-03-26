@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*- 
 
 import pytz
+import datetime
 
 from django import template
 from django.utils.safestring import mark_safe
 from django.utils.http import urlquote
 from django.core.urlresolvers import reverse
 from django.utils.html import conditional_escape
-from django.conf import settings
 from django.template import RequestContext
 
 from spud.models import sex_to_string, action_to_string
@@ -190,30 +190,31 @@ def photo_edit_buttons(page_obj):
         return { 'page_obj': page_obj };
 
 @register.filter
-def show_datetime(value, timezone=None):
-    if timezone is None:
-        timezone = settings.TIME_ZONE
-
+def show_datetime(value, utc_offset):
     from_tz = pytz.utc
-    to_tz = pytz.timezone(timezone)
+    to_tz = pytz.FixedOffset(utc_offset)
+    to_offset =  datetime.timedelta(minutes=utc_offset)
+
+    if utc_offset < 0:
+        tz_string = "-%02d%02d"%(-utc_offset/60,-utc_offset%60)
+    else:
+        tz_string = "+%02d%02d"%(utc_offset/60,utc_offset%60)
 
     local = from_tz.localize(value)
-    local = local.astimezone(to_tz)
+    local = (local + to_offset).replace(tzinfo=to_tz)
 
     return mark_safe(u"<a href='%s'>%s</a> %s (%s)" % (
             reverse("date_detail",kwargs={'object_id': value.date()}),
-            local.date(),local.time(),local.tzinfo))
+            local.date(),local.time(),tz_string))
 
 @register.filter
-def show_date(value, timezone=None):
-    if timezone is None:
-        timezone = settings.TIME_ZONE
-
+def show_date(value, utc_offset):
     from_tz = pytz.utc
-    to_tz = pytz.timezone(timezone)
+    to_tz = pytz.FixedOffset(utc_offset)
+    to_offset =  datetime.timedelta(minutes=utc_offset)
 
     local = from_tz.localize(value)
-    local = local.astimezone(to_tz)
+    local = (local + to_offset).replace(tzinfo=to_tz)
 
     return mark_safe(local.date())
 

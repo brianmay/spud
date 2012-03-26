@@ -70,7 +70,8 @@ resize_photo(document.getElementById("photo"), {{ object.width }}, {{ object.hei
   {% endfor %}
 </dd>
 <dt>Date &amp; time</dt><dd>
-  {{ photo.datetime|show_datetime:photo.timezone }}
+  {{ photo.datetime|show_datetime:0 }}<br/>
+  {{ photo.datetime|show_datetime:photo.utc_offset }}
 </dd>
 {% if photo.photographer %}
 <dt>Photographer</dt><dd><a href="{% get_view_url photo.photographer %}">{{photo.photographer}}</a></dd>

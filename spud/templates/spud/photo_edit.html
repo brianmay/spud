@@ -80,7 +80,8 @@ resize_photo(document.getElementById("photo"), {{ object.width }}, {{ object.hei
   {% endfor %}
 </dd>
 <dt>Date &amp; time</dt><dd>
-  {{ photo.datetime|show_datetime:photo.timezone }}
+  {{ photo.datetime|show_datetime:0 }}<br/>
+  {{ photo.datetime|show_datetime:photo.utc_offset }}
 </dd>
 {% if photo.photographer %}
 <dt>Photographer</dt><dd><a href="{% get_view_url photo.photographer %}">{{photo.photographer}}</a></dd>
@@ -174,7 +175,7 @@ resize_photo(document.getElementById("photo"), {{ object.width }}, {{ object.hei
     {{ form.comment.errors }} {{ form.comment.label_tag }} {{ form.comment }}
 </div>
 <div class="photo_block">
-    {{ form.timezone.errors }} {{ form.timezone.label_tag }} {{ form.timezone }}
+    {{ form.utc_offset.errors }} {{ form.utc_offset.label_tag }} {{ form.utc_offset }}
     {{ form.datetime.errors }} {{ form.datetime.label_tag }} {{ form.datetime }}
 </div>
 </div>
