@@ -354,7 +354,6 @@ class photo(base_model):
     view = models.CharField(max_length=64, blank=True)
     rating = models.FloatField(null=True, blank=True, db_index=True)
     description = models.TextField(blank=True)
-    timezone = models.CharField(max_length=100)
     utc_offset = models.IntegerField()
     datetime = models.DateTimeField(db_index=True)
     camera_make = models.CharField(max_length=32, blank=True)

@@ -139,7 +139,6 @@ class photo_base_web(base_web):
 
                 utc_offset = local.utcoffset().total_seconds() / 60
 
-                photo_object.timezone = update.timezone
                 if photo_object.utc_offset != utc_offset:
                     photo_object.utc_offset = utc_offset
                     if photo_object.action is None:
