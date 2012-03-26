@@ -213,6 +213,9 @@ class photo_update_field(forms.CharField):
                                 p.Group(person.setResultsName("person") + p.Optional("(" + p.Word(p.nums).setParseAction(get_int).setResultsName("position") + ")"))
                             )).setResultsName( "objects" ) )
 
+        action_operation = (p.Keyword("action",caseless=True).setResultsName("noun")
+                            + p.Group(p.Keyword("nop") | p.Keyword("delete") | p.Keyword("regenerate") | p.Keyword("move") | p.Keyword("90") | p.Keyword("180") | p.Keyword("270")).setResultsName( "action" ))
+
         album_operation = (p.Keyword("album",caseless=True).setResultsName("noun")
                             + p.Group(p.delimitedList( album )).setResultsName( "objects" ))
 
@@ -242,7 +245,7 @@ class photo_update_field(forms.CharField):
                             + ( person_operation | album_operation | category_operation ) )
 
         set_operation = ( p.Keyword("set",caseless=True).setResultsName("verb")
-                            + ( person_operation | place_operation | photographer_operation | title_operation | description_operation | datetime_operation | timezone_operation ) )
+                            + ( action_operation | person_operation | place_operation | photographer_operation | title_operation | description_operation | datetime_operation | timezone_operation ) )
 
         delete_operation = ( p.Keyword("delete",caseless=True).setResultsName("verb")
                             + ( person_operation | album_operation | category_operation ) )

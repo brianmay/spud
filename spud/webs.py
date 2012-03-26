@@ -105,6 +105,26 @@ class photo_base_web(base_web):
                     photo_object.title = ""
                 else:
                     photo_object.title = update.object
+            elif update.verb == "set" and update.noun == "action":
+                action = update.action[0]
+                if action == "nop":
+                    photo_object.action = None
+                elif action == "delete":
+                    photo_object.action = "D"
+                elif action == "regenerate":
+                    photo_object.action = "R"
+                elif action == "move":
+                    photo_object.action = "M"
+                elif action == "auto":
+                    photo_object.action = "auto"
+                elif action == "90":
+                    photo_object.action = "90"
+                elif action == "180":
+                    photo_object.action = "180"
+                elif action == "270":
+                    photo_object.action = "270"
+                else:
+                    raise Http404("action '%s' not implemented"%(action))
             elif update.verb == "set" and update.noun == "description":
                 if update.object == "None":
                     photo_object.description = ""
