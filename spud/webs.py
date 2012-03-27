@@ -2,6 +2,7 @@ import os
 import random
 import pytz
 import re
+import datetime
 
 from django.core.urlresolvers import reverse
 from django.db import models as m
@@ -904,12 +905,19 @@ class date_web(search_base_web):
     verbose_name = "date"
 
     def get_photo_list(self, instance):
-        m = re.match("^(\d\d\d\d)-(\d\d)-(\d\d)$",instance.pk)
-        if m is not None:
-            (year,month,day)=(int(m.group(1)),int(m.group(2)),int(m.group(3)))
-            return models.photo.objects.filter(datetime__year=year,datetime__month=month,datetime__day=day)
-        else:
-            return models.photo.objects.all()
+        dt_begin = instance.get_datetime()
+        utc_offset = instance.get_utc_offset()
+
+        dt_begin = (dt_begin - utc_offset).replace(tzinfo=pytz.utc)
+        dt_end = dt_begin + datetime.timedelta(days=1)
+
+        dt_begin = dt_begin.replace(tzinfo=None)
+        dt_end = dt_end.replace(tzinfo=None)
+
+        print utc_offset
+        print dt_begin, dt_end
+
+        return models.photo.objects.filter(datetime__gte=dt_begin, datetime__lt=dt_end)
 
 class action_web(search_base_web):
     web_id = "action_class"
@@ -947,6 +955,18 @@ class search_web(search_base_web):
 
     def decode_string(self, value):
         return value
+
+    def decode_datetime(self, value, timezone):
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            try:
+                dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M")
+            except ValueError:
+                dt = datetime.datetime.strptime(value, "%Y-%m-%d")
+
+        dt = timezone.localize(dt)
+        return dt
 
     def decode_boolean(self, value):
         value = value.lower()
@@ -1009,14 +1029,26 @@ class search_web(search_base_web):
                     pass
                 elif key == "category_descendants":
                     pass
+                elif key == "timezone":
+                    pass
                 elif key == "first_date":
-                    value = self.decode_string(value)
-                    criteria_string('date', 'on or later then')
-                    search = search & Q(datetime__gte=value)
+                    timezone = settings.TIME_ZONE
+                    if "timezone" in search_dict:
+                        timezone = self.decode_string(search_dict["timezone"])
+                    timezone = pytz.timezone(timezone)
+                    value = self.decode_datetime(value, timezone)
+                    utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+                    criteria_string('date/time', 'at or later then')
+                    search = search & Q(datetime__gte=utc_value)
                 elif key == "last_date":
-                    value = self.decode_string(value)
-                    criteria_string('date', 'earlier then')
-                    search = search & Q(datetime__lt=value)
+                    timezone = settings.TIME_ZONE
+                    if "timezone" in search_dict:
+                        timezone = self.decode_string(search_dict["timezone"])
+                    timezone = pytz.timezone(timezone)
+                    value = self.decode_datetime(value, timezone)
+                    utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+                    criteria_string('date/time', 'earlier then')
+                    search = search & Q(datetime__lt=utc_value)
                 elif key == "lower_rating":
                     value = self.decode_string(value)
                     criteria_string('rating', 'higher then')

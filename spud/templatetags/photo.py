@@ -195,16 +195,18 @@ def show_datetime(value, utc_offset):
     to_tz = pytz.FixedOffset(utc_offset)
     to_offset =  datetime.timedelta(minutes=utc_offset)
 
-    if utc_offset < 0:
-        tz_string = "-%02d%02d"%(-utc_offset/60,-utc_offset%60)
-    else:
-        tz_string = "+%02d%02d"%(utc_offset/60,utc_offset%60)
-
     local = from_tz.localize(value)
     local = (local + to_offset).replace(tzinfo=to_tz)
 
+    if utc_offset < 0:
+        tz_string = "-%02d%02d"%(-utc_offset/60,-utc_offset%60)
+        object_id = "%s-%02d%02d"%(local.date(),-utc_offset/60,-utc_offset%60)
+    else:
+        tz_string = "+%02d%02d"%(utc_offset/60,utc_offset%60)
+        object_id = "%s+%02d%02d"%(local.date(),utc_offset/60,utc_offset%60)
+
     return mark_safe(u"<a href='%s'>%s</a> %s (%s)" % (
-            reverse("date_detail",kwargs={'object_id': value.date()}),
+            reverse("date_detail",kwargs={'object_id':object_id}),
             local.date(),local.time(),tz_string))
 
 @register.filter

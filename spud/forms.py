@@ -86,8 +86,9 @@ class search_date_form(forms.Form):
     date = forms.DateField(required=True)
 
 class search_form(forms.Form):
-    first_date = forms.DateField(required=False)
-    last_date = forms.DateField(required=False)
+    first_date = forms.DateTimeField(required=False)
+    last_date = forms.DateTimeField(required=False)
+    timezone = fields.timezone_field(required=False)
     lower_rating = forms.FloatField(required=False)
     upper_rating = forms.FloatField(required=False)
     title = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")

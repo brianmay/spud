@@ -365,7 +365,9 @@ def person_photo_update(request, object_id):
 class date_class(models.base_model):
 
     def __init__(self,date):
-        self.date=date
+        self.string=date
+        self.date=date[0:10]
+        self.offset=date[10:15]
 
     def __unicode__(self):
         return self.date
@@ -375,9 +377,15 @@ class date_class(models.base_model):
             return self.date
         return default
 
+    def get_datetime(self):
+        return datetime.strptime(self.date, "%Y-%m-%d")
+
+    def get_utc_offset(self):
+        return timedelta(hours=int(self.offset[0:3]),minutes=int(self.offset[3:6]))
+
     @property
     def pk(self):
-        return self.date
+        return self.string
 
 def date_list(request):
     web = webs.date_web()
@@ -386,7 +394,7 @@ def date_list(request):
         form = forms.search_date_form(request.GET)
 
         if form.is_valid():
-            date = form.cleaned_data['date']
+            date = form.cleaned_data['date'].isoformat()+"+0000"
             object = date_class(date)
             url = web.get_view_url(object)
             return HttpResponseRedirect(url)
@@ -394,7 +402,7 @@ def date_list(request):
         form = forms.search_date_form()
 
     list = models.photo.objects.dates('datetime', 'day')
-    list = [ date_class(instance.date().isoformat()) for instance in list ]
+    list = [ date_class(instance.date().isoformat()+"+0000") for instance in list ]
     table = tables.date_table(web, list, order_by=request.GET.get('sort'))
     return web.object_list(request, form, table)
 

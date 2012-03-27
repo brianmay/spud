@@ -43,6 +43,8 @@ class select_multiple_field(ajax_select.fields.AutoCompleteSelectMultipleField):
 class timezone_field(forms.CharField):
     def clean(self, value):
         value=super(timezone_field, self).clean(value)
+        if value == "":
+            return None
         try:
             return pytz.timezone(value)
         except pytz.UnknownTimeZoneError:
