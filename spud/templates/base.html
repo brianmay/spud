@@ -44,7 +44,7 @@
                     <a href="{{ root_path }}password_change/">
                 {% endif %}
                 {% trans 'Change password' %}</a> /
-                <a href="{% url settings_form %}?next={{ request.path }}">Settings</a> /
+                <a href="{% url settings_form %}{% url_with_param next=request.path %}">Settings</a> /
                 {% url logout as logout_url %}
                 {% if logout_url %}
                     <a href="{{ logout_url }}">
@@ -54,8 +54,8 @@
                 {% trans 'Log out' %}</a>
                 {% else %}
                 <div id="user-tools">
-                <a href="{% url settings_form %}?next={{ request.path }}">Settings</a> /
-                <a href="{% url login %}?next={{ request.path }}">{% trans 'Log in' %}</a>
+                <a href="{% url settings_form %}{% url_with_param next=request.path %}">Settings</a> /
+                <a href="{% url login %}{% url_with_param next=request.path %}">{% trans 'Log in' %}</a>
                 </div>
                 {% endif %}
             {% endblock %}
