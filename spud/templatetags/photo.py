@@ -237,47 +237,6 @@ def show_action_with_url(action):
             reverse("action_detail",kwargs={'object_id': action}),
             value))
 
-class url_with_param_node(template.Node):
-    def __init__(self, changes):
-        self.changes = []
-        for key, newvalue in changes:
-            key = template.Variable(key)
-            newvalue = template.Variable(newvalue)
-            self.changes.append( (key,newvalue,) )
-
-    def render(self, context):
-        if 'request' not in context:
-            raise template.TemplateSyntaxError, "request not in context"
-
-        request = context['request']
-
-        result = {}
-        for key, newvalue in request.GET.items():
-            result[key] = newvalue
-
-        for key, newvalue in self.changes:
-            key = key.resolve(context)
-            newvalue = newvalue.resolve(context)
-            result[key] = newvalue
-
-        quoted = []
-        for key, newvalue in result.items():
-            quoted.append("%s=%s"%(urlquote(key),urlquote(newvalue)))
-
-        return conditional_escape('?'+"&".join(quoted))
-
-@register.tag
-def url_with_param(parser, token):
-    bits = token.split_contents()
-    qschanges = []
-    for i in bits[1:]:
-        try:
-            key, newvalue = i.split('=', 1);
-            qschanges.append( (key,newvalue,) )
-        except ValueError:
-            raise template.TemplateSyntaxError, "Argument syntax wrong: should be key=value"
-    return url_with_param_node(qschanges)
-
 @register.inclusion_tag('django_webs/show_buttons.html', takes_context=True)
 def show_photo_buttons(context, user, web, instance, number, photo, size):
     dict = {}
