@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from django.core.management import setup_environ
-from photos import settings
+from spud import settings
 setup_environ(settings)
 
 from django.core.management import execute_manager
