@@ -1,3 +1,12 @@
+spud (0.22-1) unstable; urgency=low
+
+  * Bugs fixed.
+  * Timezone tracking updated.
+  * Date searches improved.
+  * Code restructured.
+
+ -- Brian May <bam@debian.org>  Wed, 28 Mar 2012 12:11:33 +1100
+
 spud (0.21-1) unstable; urgency=low
 
   * Update to support at least django-tables 0.9.4
