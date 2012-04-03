@@ -49,7 +49,7 @@ root_dir = os.path.dirname(__file__)
 if root_dir != '':
     os.chdir(root_dir)
 
-for code_dir in [ 'photos', 'spud' ]:
+for code_dir in [ 'spud' ]:
     for dirpath, dirnames, filenames in os.walk(code_dir):
         # Ignore dirnames that start with '.'
         for i, dirname in enumerate(dirnames):
