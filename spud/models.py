@@ -13,6 +13,7 @@ from django.db import models
 from django.db.models import Q
 
 import os
+import datetime
 import pytz
 import shutil
 
@@ -578,9 +579,13 @@ class photo(base_model):
 
     def move(self,new_name=None):
         # Work out new path
-        to_tz = pytz.timezone(self.timezone)
-        local = pytz.utc.localize(self.datetime)
-        local = local.astimezone(to_tz)
+	from_tz = pytz.utc
+	to_tz = pytz.FixedOffset(self.utc_offset)
+	to_offset =  datetime.timedelta(minutes=self.utc_offset)
+
+	local = from_tz.localize(self.datetime)
+	local = (local + to_offset).replace(tzinfo=to_tz)
+
         new_path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
 
         # Work out new name
