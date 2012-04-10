@@ -138,7 +138,8 @@ class photo_base_web(base_web):
                 local = from_tz.localize(photo_object.datetime)
                 local = local.astimezone(to_tz)
 
-                utc_offset = local.utcoffset().total_seconds() / 60
+                utc_offset = local.utcoffset()
+                utc_offset = utc_offset.seconds/60 + utc_offset.days*24*60
 
                 if photo_object.utc_offset != utc_offset:
                     photo_object.utc_offset = utc_offset
