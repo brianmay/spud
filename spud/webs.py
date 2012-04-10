@@ -146,9 +146,10 @@ class photo_base_web(base_web):
                     if photo_object.action is None:
                         photo_object.action = "M"
             elif update.verb == "set" and update.noun == "datetime":
-                src_timezone = pytz.FixedOffset(photo_object.utc_offset)
-                value = src_timezone.localize(update.datetime)
-                photo_object.datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
+                src_timezone = update.timezone
+                dt = src_timezone.localize(update.datetime)
+                photo_object.utc_offset = dt.utcoffset().total_seconds() / 60
+                photo_object.datetime = dt.astimezone(pytz.utc).replace(tzinfo=None)
                 if photo_object.action is None:
                     photo_object.action = "M"
 

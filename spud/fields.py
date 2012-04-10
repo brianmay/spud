@@ -237,6 +237,7 @@ class photo_update_field(forms.CharField):
                             +  (p.Keyword("None",caseless=True) | p.Regex(".+")).setResultsName( "object" ))
 
         datetime_operation = (p.Keyword("datetime",caseless=True).setResultsName("noun")
+                            +  (p.Regex("[A-Za-z\/]+")).setParseAction(get_timezone).setResultsName( "timezone" )
                             +  (p.Regex("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d(:\\d\\d)?")).setParseAction(get_datetime).setResultsName( "datetime" )
                          )
 
