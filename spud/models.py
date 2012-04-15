@@ -579,12 +579,12 @@ class photo(base_model):
 
     def move(self,new_name=None):
         # Work out new path
-	from_tz = pytz.utc
-	to_tz = pytz.FixedOffset(self.utc_offset)
-	to_offset =  datetime.timedelta(minutes=self.utc_offset)
+        from_tz = pytz.utc
+        to_tz = pytz.FixedOffset(self.utc_offset)
+        to_offset =  datetime.timedelta(minutes=self.utc_offset)
 
-	local = from_tz.localize(self.datetime)
-	local = (local + to_offset).replace(tzinfo=to_tz)
+        local = from_tz.localize(self.datetime)
+        local = (local + to_offset).replace(tzinfo=to_tz)
 
         new_path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
 
