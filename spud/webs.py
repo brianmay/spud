@@ -1034,6 +1034,14 @@ class search_web(search_base_web):
                     pass
                 elif key == "timezone":
                     pass
+                elif key == "first_id":
+                    value = self.decode_string(value)
+                    criteria_string('id', 'is or greator then')
+                    search = search & Q(pk__gte=int(value))
+                elif key == "last_id":
+                    value = self.decode_string(value)
+                    criteria_string('id', 'less then')
+                    search = search & Q(pk__lt=int(value))
                 elif key == "first_date":
                     timezone = settings.TIME_ZONE
                     if "timezone" in search_dict:

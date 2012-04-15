@@ -109,6 +109,8 @@ class search_form(forms.Form):
     name = forms.RegexField(required=False,regex="^[A-Za-z0-9=,;!_ \'\.-]*$")
     camera_make = forms.CharField(required=False)
     camera_model = forms.CharField(required=False)
+    first_id = forms.IntegerField(required=False)
+    last_id = forms.IntegerField(required=False)
 
 class settings_form(forms.Form):
     photos_per_page = forms.IntegerField()
