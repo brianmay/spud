@@ -24,14 +24,6 @@ def timezone(name):
     else:
         return pytz.timezone(name)
 
-class photo_already_exists_error(Exception):
-        def __init__(self, value):
-                self.value = value
-
-        def __str__(self):
-                return repr(self.value)
-
-
 def set_album_list(photo, pk_list):
     pa_list = photo.photo_album_set.all()
     for pa in pa_list:
@@ -108,22 +100,10 @@ def import_photo(file,d,options):
     # determine the destination path
     path = "%04d/%02d/%02d"%(dt.year,dt.month,dt.day)
     name = os.path.basename(file)
+    path, name = models.photo.get_new_name(file, path, name)
     photo.path = path
     photo.name = name
     dst = photo.get_orig_path()
-
-    # check for conflicts or errors
-    (shortname, extension) = os.path.splitext(name)
-    dups = models.photo.objects.filter(path=path,name__startswith="%s."%(shortname))
-    count = dups.count()
-    if count > 1:
-        raise RuntimeError("Multiple DB entries exist for %s/%s.*"%(path,shortname))
-
-    if count > 0:
-        raise photo_already_exists_error("photo %d already exists at %s/%s as %s/%s"%(dups[0].pk,path,name,dups[0].path,dups[0].name))
-
-    if os.path.lexists(dst):
-        raise RuntimeError("file already exists at %s/%s but has no db entry"%(path,name))
 
     # don't do anything in dryrun mode
     if options.dryrun:
@@ -255,7 +235,7 @@ def main():
         for arg in args:
             try:
                 import_photo(arg,d,options)
-            except photo_already_exists_error, e:
+            except models.photo_already_exists_error, e:
                 warnings = warnings + 1
                 sys.stderr.write( "Skipping %s due to %s\n"%(arg,e))
 

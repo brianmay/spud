@@ -16,6 +16,7 @@ import os
 import datetime
 import pytz
 import shutil
+import filecmp
 
 from spud import media
 
@@ -34,6 +35,11 @@ PHOTO_ACTION = (
     ('180', 'rotate 180 degrees clockwise'),
     ('270', 'rotate 270 degrees clockwise'),
 )
+
+
+class photo_already_exists_error(Exception):
+    pass
+
 
 # db string to something that makes sense to the user
 def sex_to_string(sex):
@@ -577,6 +583,49 @@ class photo(base_model):
         return
     update_from_source.alters_data = True
 
+    @classmethod
+    def get_conflicts(cls, new_path, new_name):
+        # check for conflicts or errors
+        (shortname, extension) = os.path.splitext(new_name)
+        dups = photo.objects.filter(path=new_path,name__startswith="%s."%(shortname))
+        count = dups.count()
+        if count > 0:
+            return dups, count
+
+        p = photo()
+        p.path = new_path
+        p.name = new_name
+
+        full_path = p.get_orig_path()
+        if os.path.lexists(full_path):
+            raise RuntimeError("file already exists at %s but has no db entry"%full_path)
+
+        for size in settings.IMAGE_SIZES:
+            full_path = p.get_thumb_path(size)
+            if os.path.lexists(full_path):
+                raise RuntimeError("file already exists at %s but has no db entry"%full_path)
+
+        return [], 0
+
+    @classmethod
+    def get_new_name(cls, old_file, new_path, new_name):
+        append = [ '', 'a', 'b', 'c', 'd', ]
+
+        for a in append:
+            (shortname, extension) = os.path.splitext(new_name)
+            tmp_name = shortname + a + extension
+            dups, count = cls.get_conflicts(new_path, tmp_name)
+            if count == 0:
+                return new_path, tmp_name
+            elif count > 1:
+                raise RuntimeError("Multiple DB entries exist for %s/%s"%(new_path,tmp_name))
+
+            dupfile = dups[0].get_orig_path()
+            if filecmp.cmp(old_file, dupfile):
+                raise photo_already_exists_error("same photo %d already exists at %s/%s as %s/%s"%(dups[0].pk,new_path,new_name,dups[0].path,dups[0].name))
+
+        raise RuntimeError("Cannot get non-conflicting filename for %s/%s"%(new_path, new_name))
+
     def move(self,new_name=None):
         # Work out new path
         from_tz = pytz.utc
@@ -603,35 +652,21 @@ class photo(base_model):
             # nothing to do, good bye cruel world
             return
 
-        # Update the values so we get new paths
-        self.path = new_path
-        self.name = new_name
-
-        # Check to ensure no conflicts
-        (shortname, _) = os.path.splitext(self.name)
-        photos = photo.objects.filter(path=self.path,name__startswith="%s."%(shortname))
-        count = photos.count()
-        if count > 0:
-            raise RuntimeError("DB entries exist already for %s/%s.*"%(self.path,shortname))
+        new_path, new_name = photo.get_new_name(old_orig_path, new_path, new_name)
 
         # First pass, check for anything that could go wrong before doing anything
         for size in settings.IMAGE_SIZES:
             src = old_path[size]
-            dst = self.get_thumb_path(size)
-
-            if src != dst:
-                if not os.path.lexists(src):
-                    raise RuntimeError("Source '%s' not already exists"%(src))
-                if os.path.lexists(dst):
-                    raise RuntimeError("Destination '%s' already exists"%(dst))
-
-        src = old_orig_path
-        dst = self.get_orig_path()
-        if src != dst:
             if not os.path.lexists(src):
                 raise RuntimeError("Source '%s' not already exists"%(src))
-            if os.path.lexists(dst):
-                raise RuntimeError("Destination '%s' already exists"%(dst))
+
+        src = old_orig_path
+        if not os.path.lexists(src):
+            raise RuntimeError("Source '%s' not already exists"%(src))
+
+        # Update the values so we get new paths
+        self.path = new_path
+        self.name = new_name
 
         # Second pass. Nothing can go wrong go wrong go wrong go wrong go wrong
         for size in settings.IMAGE_SIZES:
