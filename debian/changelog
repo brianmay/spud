@@ -1,3 +1,11 @@
+spud (0.23-1) unstable; urgency=low
+
+  * Bugs fixed.
+  * Automatically change filename if it conflicts and photo is different.
+  * Search for photos based on id.
+
+ -- Brian May <bam@debian.org>  Sat, 05 May 2012 16:57:10 +1000
+
 spud (0.22-1) unstable; urgency=low
 
   * Bugs fixed.
