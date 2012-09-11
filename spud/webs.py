@@ -220,7 +220,7 @@ class photo_base_web(base_web):
         except (EmptyPage, InvalidPage):
             page_obj = paginator.page(paginator.num_pages)
 
-        if page_obj.object_list.count() <= 0:
+        if paginator.count <= 0:
             raise Http404("No photos were found")
 
         photo_object = page_obj.object_list[0]
@@ -234,6 +234,7 @@ class photo_base_web(base_web):
 
         return render_to_response(template, {
                                     'parent': instance,
+                                    'photo': photo_object,
                                     'object': thumb,
                                     'click_size': request.session.get('default_click_size',settings.DEFAULT_CLICK_SIZE),
                                     'web': self,
@@ -268,7 +269,7 @@ class photo_base_web(base_web):
         except (EmptyPage, InvalidPage):
             page_obj = paginator.page(paginator.num_pages)
 
-        if page_obj.object_list.count() <= 0:
+        if paginator.count <= 0:
             raise Http404("No photos were found")
 
         if request.method == 'POST':
@@ -284,33 +285,34 @@ class photo_base_web(base_web):
             # search result may have changed, value in form is
             # authoritive
             if form.is_valid() and update_form.is_valid():
-                form.save()
+                new_photo_object = form.save(commit=False)
+                form.save_m2m()
 
                 updates = update_form.cleaned_data['updates']
-                self.process_updates(photo_object, updates)
+                self.process_updates(new_photo_object, updates)
 
                 if 'update_action' in request.POST:
                     update_action = request.POST['update_action']
                     if update_action == "nop":
-                        photo_object.action = None
+                        new_photo_object.action = None
                     elif update_action == "delete":
-                        photo_object.action = "D"
+                        new_photo_object.action = "D"
                     elif update_action == "regenerate":
-                        photo_object.action = "R"
+                        new_photo_object.action = "R"
                     elif update_action == "move":
-                        photo_object.action = "M"
+                        new_photo_object.action = "M"
                     elif update_action == "rotate 90":
-                        photo_object.action = "90"
+                        new_photo_object.action = "90"
                     elif update_action == "rotate 180":
-                        photo_object.action = "180"
+                        new_photo_object.action = "180"
                     elif update_action == "rotate 270":
-                        photo_object.action = "270"
+                        new_photo_object.action = "270"
                     elif update_action == "rotate auto":
-                        photo_object.action = "auto"
+                        new_photo_object.action = "auto"
                     else:
-                        raise Http404("Action '%s' not implemented"%(photo_object.action))
+                        raise Http404("Action '%s' not implemented"%(new_photo_object.action))
 
-                photo_object.save()
+                new_photo_object.save()
 
 
                 if "goto" not in request.POST:
@@ -360,6 +362,7 @@ class photo_base_web(base_web):
 
         return render_to_response(template, {
                 'parent': instance,
+                'photo': photo_object,
                 'object': thumb,
                 'click_size': request.session.get('default_click_size',settings.DEFAULT_CLICK_SIZE),
                 'web': self,

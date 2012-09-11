@@ -4,8 +4,8 @@
 {% load webs %}
 {% load comments %}
 
-{% block title %}{{ object.photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
-{% block object_title %}{{ object.photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block title %}{{ photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
+{% block object_title %}{{ photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 
 {% block extrahead %}
 <script type="text/javascript">
@@ -13,13 +13,12 @@ var prev_photo_url="None"
 var next_photo_url="None"
 var prev_photo_thumb_url="None"
 var next_photo_thumb_url="None"
-var this_photo_thumb_url="{% get_thumb_url object %}"
+var this_photo_thumb_url="{% get_photo_thumb_url photo object.size %}"
 </script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js" />
+<script type="text/javascript" src="{{ MEDIA_URL }}js/mouse.js"></script>
 {% endblock %}
 
 {% block object %}
-{% with object.photo as photo %}
 <form method="post" action="{% photo_edit_url web parent page_obj.number object.size %}">{% csrf_token %}
 <input type="submit" name="update_action" value="nop"/>
 <input type="submit" name="update_action" value="delete"/>
@@ -39,7 +38,7 @@ var this_photo_thumb_url="{% get_thumb_url object %}"
 <div class='photo_container photo_detail {{photo.get_style}}'>
 <div class='photo_block photo_detail_photo'>
 
-<img id="photo" src="{% get_thumb_url object %}" alt="{{ photo.title }}" width="{{ object.width }}" height="{{ object.height }}"/>
+<img id="photo" src="{% get_photo_thumb_url photo object.size %}" alt="{{ photo.title }}" width="{{ object.width }}" height="{{ object.height }}"/>
 <script type="text/javascript">
 resize_photo(document.getElementById("photo"), {{ object.width }}, {{ object.height }})
 </script>
@@ -47,7 +46,7 @@ resize_photo(document.getElementById("photo"), {{ object.width }}, {{ object.hei
 <div class="title">{{ photo }}</div>
 <div class="search">Search {% get_description parent %} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
 {% if photo.photo_person_set.all %}
-{% for pp in photo.photo_person_set.all %}
+{% for pp in photo.photo_person_set.select_related.all %}
     <a href="{% get_view_url pp.person %}">{{pp.person}}</a> ({{pp.position}}){% if not forloop.last %}, {% endif %}
 {% endfor %}
 {% endif %}
@@ -70,12 +69,12 @@ resize_photo(document.getElementById("photo"), {{ object.width }}, {{ object.hei
 <dt>Location</dt><dd><a href="{% get_view_url photo.location %}">{{ photo.location }}</a></dd>
 {% endif %}
 <dt>Albums</dt><dd>
-  {% for pa in photo.photo_album_set.all %}
+  {% for pa in photo.photo_album_set.select_related.all %}
     <a href="{% get_view_url pa.album %}">{{pa.album}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
 <dt>Categories</dt><dd>
-  {% for pc in photo.photo_category_set.all %}
+  {% for pc in photo.photo_category_set.select_related.all %}
     <a href="{% get_view_url pc.category %}">{{pc.category}}</a>{% if not forloop.last %}; {% endif %}
   {% endfor %}
 </dd>
@@ -216,5 +215,4 @@ dt.onchange = function()
 
 </form>
 
-{% endwith %}
 {% endblock %}
