@@ -75,9 +75,6 @@ if len(sys.argv) > 1 and sys.argv[1] == 'bdist_wininst':
 
 scripts = [
     'bin/spud',
-    'bin/import_media',
-    'bin/spud_update_secret_key',
-    'bin/spud_process_actions',
 ]
 
 setup(

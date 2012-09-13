@@ -15,6 +15,7 @@ case "$1" in
         if [ ! -f /etc/spud/settings.py ]
         then
             cp /usr/share/doc/spud/examples/settings.py /etc/spud/settings.py
+            spud update_secret_key
         fi
 esac
 
@@ -22,7 +23,6 @@ esac
 
 case "$1" in
     (configure)
-        spud_update_secret_key
         su -s /usr/bin/spud www-data -- syncdb --migrate
     ;;
 esac
