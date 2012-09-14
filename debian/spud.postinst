@@ -11,18 +11,17 @@ case "$1" in
                 dpkg-statoverride --update --add root www-data 775 $i
             fi
         done
-
-        if [ ! -f /etc/spud/settings.py ]
-        then
-            cp /usr/share/doc/spud/examples/settings.py /etc/spud/settings.py
-            spud update_secret_key
-        fi
 esac
 
 #DEBHELPER#
 
 case "$1" in
     (configure)
+        if [ ! -f /etc/spud/settings.py ]
+        then
+            cp /usr/share/doc/spud/examples/settings.py /etc/spud/settings.py
+            spud update_secret_key
+        fi
         su -s /usr/bin/spud www-data -- syncdb --migrate
         spud collectstatic --noinput
     ;;
