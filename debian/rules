@@ -9,13 +9,3 @@ include /usr/share/cdbs/1/class/python-distutils.mk
 clean::
 	rm -rf build build-stamp configure-stamp build/ MANIFEST
 	dh_clean
-
-install/spud::
-	rm debian/spud/usr/lib/python2.7/site-packages/spud/static/js/jquery.js
-	ln -s /usr/share/javascript/jquery/jquery.js debian/spud/usr/lib/python2.7/site-packages/spud/static/js/jquery.js
-	rm debian/spud/usr/lib/python2.7/site-packages/spud/static/js/jquery-ui.js
-	ln -s /usr/share/javascript/jquery-ui/jquery-ui.js debian/spud/usr/lib/python2.7/site-packages/spud/static/js/jquery-ui.js
-	rm debian/spud/usr/lib/python2.7/site-packages/spud/static/css/jquery-ui.css
-	ln -s /usr/share/javascript/jquery-ui/css/smoothness/jquery-ui.css debian/spud/usr/lib/python2.7/site-packages/spud/static/css/jquery-ui.css
-	rm -r debian/spud/usr/lib/python2.7/site-packages/spud/static/css/images
-	ln -s /usr/share/javascript/jquery-ui/css/smoothness/images debian/spud//usr/lib/python2.7/site-packages/spud/static/css/images
