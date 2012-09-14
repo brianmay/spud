@@ -10,6 +10,7 @@ case "$1" in
                 dpkg-statoverride --remove $i
             fi
         done
+        rm -rf /usr/share/spud/static
         rm /etc/spud/settings.py*
         rm /var/lib/spud/spud.db*
     ;;
