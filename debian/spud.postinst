@@ -24,5 +24,6 @@ esac
 case "$1" in
     (configure)
         su -s /usr/bin/spud www-data -- syncdb --migrate
+        spud collectstatic --noinput
     ;;
 esac
