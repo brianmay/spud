@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # lintory - keep track of computers and licenses
 # Copyright (C) 2008-2009 Brian May
 #
