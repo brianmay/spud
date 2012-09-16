@@ -128,8 +128,8 @@ tr.alt { background:#f6f6f6; }
 thead th a:link, thead th a:visited { color:#666; display:block; }
 table thead th.sorted { background-position:bottom left !important; }
 table thead th.sorted a { padding-right:13px; }
-table thead th.ascending a { background:url(../img/admin/arrow-down.gif) right .4em no-repeat; }
-table thead th.descending a { background:url(../img/admin/arrow-up.gif) right .4em no-repeat; }
+table thead th.asc a { background:url(../img/admin/arrow-down.gif) right .4em no-repeat; padding-right:16px;}
+table thead th.desc a { background:url(../img/admin/arrow-up.gif) right .4em no-repeat; padding-right:16px;}
 
 /* ORDERABLE TABLES */
 table.orderable tbody tr td:hover { cursor:move; }
