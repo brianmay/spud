@@ -64,9 +64,10 @@ class Command(BaseCommand):
 
             io.dryrun = options['dryrun']
 
+            io.action = "R"
             if options['rotate']:
                 if options['rotate'] == "0":
-                    io.action = "0"
+                    io.action = "R"
                 elif options['rotate'] == "auto":
                     io.action = "auto"
                 elif options['rotate'] == "90":
