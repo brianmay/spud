@@ -43,8 +43,8 @@ class Command(BaseCommand):
                               help="Amount to rotate imported photos (auto,0,90,180,270)"),
             make_option("-a", "--album",action="append", dest="album",
                               help="Name of album to use when importing images"),
-            make_option("--parent", action="store", dest="parent",
-                              help="Name of parent album to use; if Album doesn't exist it will be created"),
+            make_option("--parse-name", action="store_true", dest="parse_name",default=False,
+                              help="Extract album names from file name"),
             make_option("-c", "--category",action="append", dest="category",
                               help="Name of category to use when importing images"),
             make_option("-s", "--source-timezone",action="store", dest="src_timezone",
@@ -93,14 +93,11 @@ class Command(BaseCommand):
             d.albums = []
             if options['album'] is None:
                 options['album'] = []
-            if options['parent'] is None:
-                for album in options['album']:
-                    d.albums.append(models.album.objects.get(album=album).pk)
-            else:
-                parent = models.album.objects.get(album=options['parent'])
-                for album in options['album']:
-                    album,c = models.album.objects.get_or_create(parent_album=parent,album=album)
-                    d.albums.append(album.pk)
+            for album in options['album']:
+                d.albums.append(models.album.objects.get(album=album))
+            d.parse_name = options['parse_name']
+            if options['parse_name'] and len(album) != 1:
+                 CommandError("Need exactly one album for parse_names option")
 
             d.categorys = []
             if options['category'] is None:
@@ -159,27 +156,13 @@ def timezone(name):
     else:
         return pytz.timezone(name)
 
-def set_album_list(photo, pk_list):
-    pa_list = photo.photo_album_set.all()
-    for pa in pa_list:
-        if pa.album.pk in pk_list:
-            pk_list.remove(pa.album.pk)
-        else:
-            pa.delete()
+def set_album_list(photo, album_list):
+    for album in album_list:
+        pa = models.photo_album.objects.create(photo=photo,album=album)
 
-    for pk in pk_list:
-        pa = models.photo_album.objects.create(photo=photo,album_id=pk)
-
-def set_category_list(photo, pk_list):
-    pa_list = photo.photo_category_set.all()
-    for pa in pa_list:
-        if pa.category.pk in pk_list:
-            pk_list.remove(pa.category.pk)
-        else:
-            pa.delete()
-
-    for pk in pk_list:
-        pa = models.photo_category.objects.create(photo=photo,category_id=pk)
+def set_category_list(photo, category_list):
+    for category in category_list:
+        pa = models.photo_category.objects.create(photo=photo,category=category)
 
 @transaction.commit_on_success
 def import_photo(file,d,options):
@@ -204,6 +187,24 @@ def import_photo(file,d,options):
     photo.timestamp =datetime.datetime.now()
 
     photo.update_from_source(media=m)
+
+    # get album
+    albums = d.albums
+    if d.parse_name:
+        assert len(albums)==1
+        album = albums[0]
+
+        # remove initial .. components
+        split = file.split("/")
+        while split[0] == "..":
+            split.pop(0)
+
+        # remove filename componenent
+        split.pop()
+
+        for i in split:
+            album,c = album.children.get_or_create(album=i)
+        albums = [ album ]
 
     # get time
     dt = m.get_datetime()
@@ -254,7 +255,7 @@ def import_photo(file,d,options):
     shutil.copyfile(file,dst)
 
     photo.save()
-    set_album_list(photo, d.albums)
+    set_album_list(photo, albums)
     set_category_list(photo, d.categorys)
 
     os.umask(umask)
