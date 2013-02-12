@@ -1,19 +1,16 @@
-{% extends "base_site.html" %}
+{% extends "main.html" %}
 {% load i18n %}
 {% load photo %}
+{% load url from future %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<div id="content-main">
 
-<ul class="menu">
-<li onclick='parent.location="{% url album_detail 1 %}"'><a href="{% url album_detail 1 %}">albums</a></li>
-<li onclick='parent.location="{% url category_detail 1 %}"'><a href="{% url category_detail 1 %}">categories</a></li>
-<li onclick='parent.location="{% url place_detail 1 %}"'><a href="{% url place_detail 1 %}">places</a></li>
-<li onclick='parent.location="{% url person_list %}"'><a href="{% url person_list %}">people</a></li>
-<li onclick='parent.location="{% url date_list %}"'><a href="{% url date_list %}">dates</a></li>
-<li onclick='parent.location="{% url photo_relation_list %}"'><a href="{% url photo_relation_list %}">relations</a></li>
-<li onclick='parent.location="{% url search_list %}"'><a href="{% url search_list %}">search</a></li>
-</ul>
+    <h1>Welcome {{ user.first_name }}</h1>
 
+    This is spud, a database of photos. Please enjoy your visit.
+
+</div>
 {% endblock %}

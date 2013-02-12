@@ -17,7 +17,6 @@
 import os
 import random
 import pytz
-import re
 import datetime
 
 from django.core.urlresolvers import reverse

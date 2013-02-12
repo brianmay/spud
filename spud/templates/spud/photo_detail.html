@@ -6,7 +6,7 @@
 
 {% block title %}{{ photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
 {% block object_title %}{{ photo }} page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endblock %}
-{% block tools %}{% show_photo_buttons user web parent page_obj.number photo object.size %}{% endblock %}
+{% block object-tools %}{% show_photo_buttons user web parent page_obj.number photo object.size %}{% endblock %}
 
 {% block extrahead %}
 <script type="text/javascript">

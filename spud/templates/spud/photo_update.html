@@ -1,10 +1,12 @@
-{% extends "base_site.html" %}
+{% extends "main.html" %}
 {% load i18n %}
 {% load photo %}
 
 {% block title %}Bulk Update of {{object}}{% endblock %}
 
 {% block content %}
+<div id="content-main">
+
 <h1>Bulk Update of {{object}}</h1>
 
 <form method="post">{% csrf_token %}
@@ -16,5 +18,6 @@ document.getElementById('id_updates').focus();
 </script>
 
 </form>
+</div>
 {% endblock %}
 

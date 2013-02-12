@@ -38,7 +38,7 @@ class action_table(web_table):
         return mark_safe(u"<a href='%s'>%s</a>"%(self.web.get_view_url(record),conditional_escape(u"%s"%(record))))
 
 class person_table(tables.Table):
-    cover_photo = tables.Column(sortable=False)
+    cover_photo = tables.Column(sortable=False, empty_values=())
     called = tables.Column()
     first_name = tables.Column()
     middle_name = tables.Column()
@@ -66,26 +66,18 @@ class person_table(tables.Table):
 
     def render_called(self, record):
         value = record.called
-        if not value:
-            value="-"
         return mark_safe(conditional_escape(value))
 
     def render_first_name(self, record):
         value = record.first_name
-        if not value:
-            value="-"
         return mark_safe(conditional_escape(value))
 
     def render_middle_name(self, record):
         value = record.middle_name
-        if not value:
-            value="-"
         return mark_safe(conditional_escape(value))
 
     def render_last_name(self, record):
         value = record.last_name
-        if not value:
-            value="-"
         return mark_safe(conditional_escape(value))
 
     def render_edit(self, record):
