@@ -1,6 +1,6 @@
 body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif; color:#333; background:#fff; }
 
-.ui-autocomplete-input { width:100%; }
+.ui-autocomplete-input { width:99%; }
 .ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; max-width:340px; }
 .ui-corner-all { padding-top:4px; padding-bottom:4px; }
 .ui-corner-all img { float:left; }
@@ -196,6 +196,29 @@ a.deletelink:hover { color:#993333; }
 /* OBJECT HISTORY */
 table#change-history { width:100%; }
 table#change-history tbody th { width:16em; }
+
+#content-main {
+    -webkit-transition: opacity .25s ease-in-out;
+       -moz-transition: opacity .25s ease-in-out;
+         -o-transition: opacity .25s ease-in-out;
+            transition:opacity .25s ease-in-out;
+}
+#content-main.inactive { opacity: 0.2; }
+
+#status {
+    position: absolute; top:200px; left:300px; z-index:1;
+    visibility:hidden;
+    opacity: 0;
+    -webkit-transition: visibility 0s linear;
+       -moz-transition: visibility 0s linear;
+         -o-transition: visibility 0s linear;
+            transition: visibility 0s linear;
+    -webkit-transition: opacity .25s ease-in-out;
+       -moz-transition: opacity .25s ease-in-out;
+         -o-transition: opacity .25s ease-in-out;
+            transition: opacity .25s ease-in-out;
+}
+#status.active { opacity:1; visibility:visible; display:block; }
 
 @media screen and (max-width: 700px) {
 .menu { padding:0 10px; margin:0; }

@@ -1,0 +1,970 @@
+# spud - keep track of computers and licenses
+# Copyright (C) 2008-2009 Brian May
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import json
+import spud.models
+import os.path
+import pytz
+import datetime
+
+import django.conf
+import django.contrib.auth
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, HttpResponseBadRequest
+#from django.core.urlresolvers import reverse
+from django.utils.http import urlquote
+from django.utils.encoding import iri_to_uri
+from django.db.models import Q
+from django.template import RequestContext, loader, TemplateDoesNotExist
+
+from django.views.decorators.csrf import csrf_exempt
+
+
+def _decode_int(string):
+    try:
+        return int(string)
+    except ValueError:
+        raise HttpBadRequest("Got non-integer")
+
+
+def _decode_boolean(string):
+    if string.lower() == "true":
+        return True
+    elif string.lower() == "false":
+        return False
+    else:
+        raise HttpBadRequest("Got non-boolean")
+
+
+def _decode_datetime(value, timezone):
+    try:
+        dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M")
+        except ValueError:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d")
+
+    dt = timezone.localize(dt)
+    return dt
+
+
+def _decode_array(value):
+    if value == "":
+        return []
+    return value.split(".")
+
+
+def _get_session(request):
+    is_authenticated = request.user.is_authenticated()
+
+    session = {
+        'is_authenticated': is_authenticated,
+    }
+
+    if is_authenticated:
+        session.update({
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+        })
+
+    return session
+
+
+def _get_photo_thumb(photo):
+    if photo is None:
+        return None
+
+    resp = {
+        'type': 'photo',
+#        'url': reverse("static_photo_detail", kwargs={'photo_id': photo.pk}),
+        'id': photo.photo_id,
+        'title': unicode(photo),
+#        'photographer': photo.photographer,
+#        'place': photo.location,
+        'view': photo.view,
+        'rating': photo.rating,
+        'description': photo.description,
+        'localtime': _get_datetime(photo.datetime, photo.utc_offset),
+        'utctime': _get_datetime(photo.datetime, 0),
+#        'camera_make': photo.camera_make,
+#        'camera_model': photo.camera_model,
+#        'flash_used': photo.flash_used,
+#        'focal_length': photo.focal_length,
+#        'exposure': photo.exposure,
+#        'compression': photo.compression,
+#        'aperture': photo.aperture,
+#        'level': photo.level,
+#        'iso_equiv': photo.iso_equiv,
+#        'metering_mode': photo.metering_mode,
+#        'focus_dist': photo.focus_dist,
+#        'ccd_width': photo.ccd_width,
+        'comment': photo.comment,
+        'action': photo.action,
+#        'timestamp': photo.timestamp,
+#        'albums': photo.albums,
+#        'categorys': photo.categorys,
+#        'persons': photo.persons,
+#        'relations': photo.relations,
+
+        'thumb': {},
+#        'orig': iri_to_uri(u"%sorig/%s/%s" % (
+#            django.conf.settings.IMAGE_URL, urlquote(photo.path), urlquote(photo.name)))
+    }
+
+    (shortname, _) = os.path.splitext(photo.name)
+
+    for pt in photo.photo_thumb_set.all():
+        d = {
+            'width': pt.width,
+            'height': pt.height,
+            'url': iri_to_uri(u"%sthumb/%s/%s/%s.jpg" % (
+                django.conf.settings.IMAGE_URL, urlquote(pt.size),
+                urlquote(photo.path), urlquote(shortname)))
+        }
+        resp['thumb'][pt.size] = d
+
+    return resp
+
+
+def _get_photo_detail(photo):
+    if photo is None:
+        return None
+
+    resp = {
+        'type': 'photo',
+#        'url': reverse("static_photo_detail", kwargs={'photo_id': photo.pk}),
+        'id': photo.photo_id,
+        'title': unicode(photo),
+        'name': photo.name,
+        'photographer': _get_person(photo.photographer),
+        'place': _get_place(photo.location),
+        'view': photo.view,
+        'rating': photo.rating,
+        'description': photo.description,
+        'localtime': _get_datetime(photo.datetime, photo.utc_offset),
+        'utctime': _get_datetime(photo.datetime, 0),
+        'camera_make': photo.camera_make,
+        'camera_model': photo.camera_model,
+        'flash_used': photo.flash_used,
+        'focal_length': photo.focal_length,
+        'exposure': photo.exposure,
+        'compression': photo.compression,
+        'aperture': photo.aperture,
+        'level': photo.level,
+        'iso_equiv': photo.iso_equiv,
+        'metering_mode': photo.metering_mode,
+        'focus_dist': photo.focus_dist,
+        'ccd_width': photo.ccd_width,
+        'comment': photo.comment,
+        'action': photo.action,
+#        'timestamp': photo.timestamp,
+        'albums': [_get_album(a) for a in photo.albums.all()],
+        'categorys': [_get_category(c) for c in photo.categorys.all()],
+        'persons': [_get_person(p) for p in photo.persons.all()],
+#        'relations': photo.relations,
+
+        'thumb': {},
+        'orig': iri_to_uri(u"%sorig/%s/%s" % (
+            django.conf.settings.IMAGE_URL, urlquote(photo.path), urlquote(photo.name))),
+
+        'related': [],
+    }
+
+    for pr in photo.relations_1.all():
+        resp['related'].append({
+            'title': pr.desc_2,
+            'photo': _get_photo_thumb(pr.photo_2),
+        })
+
+    for pr in photo.relations_2.all():
+        resp['related'].append({
+            'title': pr.desc_1,
+            'photo': _get_photo_thumb(pr.photo_1),
+        })
+
+    (shortname, _) = os.path.splitext(photo.name)
+
+    for pt in photo.photo_thumb_set.all():
+        d = {
+            'width': pt.width,
+            'height': pt.height,
+            'url': iri_to_uri(u"%sthumb/%s/%s/%s.jpg" % (
+                django.conf.settings.IMAGE_URL, urlquote(pt.size),
+                urlquote(photo.path), urlquote(shortname)))
+        }
+        resp['thumb'][pt.size] = d
+
+    return resp
+
+
+def _get_album(album):
+    if album is None:
+        return None
+
+    d = {
+        'type': 'album',
+#        'url': reverse("static_album_detail", kwargs={'album_id': album.pk}),
+        'id': album.album_id,
+#        'parent_album': album.parent_album,
+        'title': album.album,
+        'description': album.album_description,
+        'cover_photo': _get_photo_thumb(album.cover_photo),
+        'sortname': album.sortname,
+        'sortorder': album.sortorder,
+        'revised': unicode(album.revised),
+    }
+    return d
+
+
+def _get_album_detail(album):
+    if album is None:
+        return None
+
+    d = {
+        'type': 'album',
+#        'url': reverse("static_album_detail", kwargs={'album_id': album.pk}),
+        'id': album.album_id,
+#        'parent_album': _get_album(album.parent_album),
+        'title': album.album,
+        'description': album.album_description,
+        'cover_photo': _get_photo_thumb(album.cover_photo),
+        'sortname': album.sortname,
+        'sortorder': album.sortorder,
+        'revised': unicode(album.revised),
+        'parents': [],
+        'children': [],
+    }
+
+    parent = album.parent_album
+    seen = {}
+    while parent is not None and parent.pk not in seen:
+        d['parents'].insert(0, _get_album(parent))
+        seen[parent.pk] = True
+        parent = parent.parent_album
+
+    for child in album.children.all():
+        d['children'].append(_get_album(child))
+
+    return d
+
+
+def _get_category(category):
+    if category is None:
+        return None
+
+    d = {
+        'type': 'category',
+#        'url': reverse("category_detail", kwargs={'object_id': category.pk}),
+        'id': category.category_id,
+#        'parent_category': category.parent_category,
+        'title': category.category,
+        'description': category.category_description,
+        'cover_photo': _get_photo_thumb(category.cover_photo),
+        'sortname': category.sortname,
+        'sortorder': category.sortorder,
+    }
+    return d
+
+
+def _get_category_detail(category):
+    if category is None:
+        return None
+
+    d = {
+        'type': 'category',
+#        'url': reverse("category_detail", kwargs={'object_id': category.pk}),
+        'id': category.category_id,
+#        'parent_category': category.parent_category,
+        'title': category.category,
+        'description': category.category_description,
+        'cover_photo': _get_photo_thumb(category.cover_photo),
+        'sortname': category.sortname,
+        'sortorder': category.sortorder,
+        'parents': [],
+        'children': [],
+    }
+
+    parent = category.parent_category
+    seen = {}
+    while parent is not None and parent.pk not in seen:
+        d['parents'].insert(0, _get_category(parent))
+        seen[parent.pk] = True
+        parent = parent.parent_category
+
+    for child in category.children.all():
+        d['children'].append(_get_category(child))
+
+    return d
+
+
+def _get_place(place):
+    if place is None:
+        return None
+
+    d = {
+        'type': 'place',
+#        'url': reverse("place_detail", kwargs={'object_id': place.pk}),
+        'id': place.place_id,
+#        'parent_place': place.parent_place,
+        'title': place.title,
+        'address': place.address,
+        'address2': place.address2,
+        'city': place.city,
+        'state': place.state,
+        'zip': place.zip,
+        'country': place.country,
+        'url': place.url,
+        'urldesc': place.urldesc,
+        'cover_photo': _get_photo_thumb(place.cover_photo),
+        'notes': place.notes,
+    }
+    return d
+
+
+def _get_place_detail(place):
+    if place is None:
+        return None
+
+    d = {
+        'type': 'place',
+#        'url': reverse("place_detail", kwargs={'object_id': place.pk}),
+        'id': place.place_id,
+#        'parent_place': place.parent_place,
+        'title': place.title,
+        'address': place.address,
+        'address2': place.address2,
+        'city': place.city,
+        'state': place.state,
+        'zip': place.zip,
+        'country': place.country,
+        'url': place.url,
+        'urldesc': place.urldesc,
+        'cover_photo': _get_photo_thumb(place.cover_photo),
+        'notes': place.notes,
+        'parents': [],
+        'children': [],
+    }
+
+    parent = place.parent_place
+    seen = {}
+    while parent is not None and parent.pk not in seen:
+        d['parents'].insert(0, _get_place(parent))
+        seen[parent.pk] = True
+        parent = parent.parent_place
+
+    for child in place.children.all():
+        d['children'].append(_get_place(child))
+
+    return d
+
+
+def _get_person(person):
+    if person is None:
+        return None
+
+    d = {
+        'type': 'person',
+#        'url': reverse("person_detail", kwargs={'object_id': person.pk}),
+        'id': person.person_id,
+        'title': unicode(person),
+        'first_name': person.first_name,
+        'last_name': person.last_name,
+        'middle_name': person.middle_name,
+        'called': person.called,
+        'cover_photo': _get_photo_thumb(person.cover_photo),
+#        'gender': person.gender,
+#        'dob': unicode(person.dob),
+#        'dod': unicode(person.dod),
+#        'home': person.home,
+#        'work': person.work,
+#        'father': person.father,
+#        'mother': person.mother,
+#        'spouse': person.spouse,
+#        'notes': person.notes,
+#        'email': person.email,
+    }
+    return d
+
+
+def _get_person_detail(user, person):
+    if person is None:
+        return None
+
+    d = {
+        'type': 'person',
+#        'url': reverse("person_detail", kwargs={'object_id': person.pk}),
+        'id': person.person_id,
+        'title': unicode(person),
+        'first_name': person.first_name,
+        'last_name': person.last_name,
+        'middle_name': person.middle_name,
+        'called': person.called,
+        'cover_photo': _get_photo_thumb(person.cover_photo),
+    }
+
+    if user.is_staff:
+        d.update({
+            'gender': person.gender,
+            'dob': None,
+            'dod': None,
+            'home': _get_place(person.home),
+            'work': _get_place(person.work),
+            'father': _get_person(person.father),
+            'mother': _get_person(person.mother),
+            'spouses': [],
+            'grandparents': [_get_person(p) for p in person.grandparents()],
+            'uncles_aunts': [_get_person(p) for p in person.uncles_aunts()],
+            'parents': [_get_person(p) for p in person.parents()],
+            'siblings': [_get_person(p) for p in person.siblings()],
+            'cousins': [_get_person(p) for p in person.cousins()],
+            'children': [_get_person(p) for p in person.children()],
+            'nephews_nieces': [_get_person(p) for p in person.nephews_nieces()],
+            'grandchildren': [_get_person(p) for p in person.grandchildren()],
+            'notes': person.notes,
+            'email': person.email,
+        })
+
+        if person.dob:
+            d['dob'] = unicode(person.dob)
+
+        if person.dod:
+            d['dod'] = unicode(person.dod)
+
+        if person.spouse:
+            d['spouses'].append(_get_person(person.spouse))
+
+        for p in person.reverse_spouses.all():
+            if p.person_id != person.spouse.person_id:
+                d['spouses'].append(_get_person(p))
+
+    return d
+
+
+def _get_datetime(value, utc_offset):
+    from_tz = pytz.utc
+    to_tz = pytz.FixedOffset(utc_offset)
+    to_offset = datetime.timedelta(minutes=utc_offset)
+
+    local = from_tz.localize(value)
+    local = (local + to_offset).replace(tzinfo=to_tz)
+
+    if utc_offset < 0:
+        tz_string = "-%02d%02d" % (-utc_offset/60, -utc_offset % 60)
+        object_id = "%s-%02d%02d" % (local.date(),
+                                     -utc_offset/60, -utc_offset % 60)
+    else:
+        tz_string = "+%02d%02d" % (utc_offset/60, utc_offset % 60)
+        object_id = "%s+%02d%02d" % (local.date(),
+                                     utc_offset/60, utc_offset % 60)
+
+    return {
+        'type': 'datetime',
+#        'url': reverse("date_detail", kwargs={'object_id': object_id}),
+        'date': unicode(local.date()),
+        'time': unicode(local.time()),
+        'timezone': tz_string
+    }
+
+
+class HttpBadRequest(Exception):
+    pass
+
+
+def CheckBadRequest(func):
+    def wrapper(request, *args, **kwargs):
+        try:
+            return func(request, *args, **kwargs)
+        except HttpBadRequest, e:
+            try:
+                template = loader.get_template("400.html")
+            except TemplateDoesNotExist:
+                return HttpResponseBadRequest('<h1>Bad Request</h1>')
+            return HttpResponseBadRequest(
+                template.render(RequestContext(request, {
+                    'error': unicode(e)
+                })))
+    return wrapper
+
+
+@csrf_exempt
+@CheckBadRequest
+def login(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    if 'username' not in request.POST:
+        raise HttpBadRequest("username not supplied")
+    if 'password' not in request.POST:
+        raise HttpBadRequest("password not supplied")
+    username = request.POST['username']
+    password = request.POST['password']
+    user = django.contrib.auth.authenticate(
+        username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            django.contrib.auth.login(request, user)
+            resp = {'status': 'success'}
+        else:
+            resp = {'status': 'account_disabled'}
+    else:
+        resp = {'status': 'invalid_login'}
+    resp['session'] = _get_session(request)
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@csrf_exempt
+@CheckBadRequest
+def logout(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    django.contrib.auth.logout(request)
+    resp = {'status': 'success'}
+    resp['session'] = _get_session(request)
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def photo(request, photo_id):
+    object = get_object_or_404(spud.models.photo, pk=photo_id)
+    resp = {
+        'photo': _get_photo_detail(object),
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def album(request, album_id):
+    object = get_object_or_404(spud.models.album, pk=album_id)
+    resp = _get_album_detail(object)
+    resp = {
+        'album': _get_album_detail(object),
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def category(request, category_id):
+    object = get_object_or_404(spud.models.category, pk=category_id)
+    resp = {
+        'category': _get_category_detail(object),
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def place(request, place_id):
+    object = get_object_or_404(spud.models.place, pk=place_id)
+    resp = {
+        'place': _get_place_detail(object),
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@CheckBadRequest
+def person_search(request):
+    resp = {}
+
+    for key in request.GET:
+        value = request.GET[key]
+
+        if value == "" or key == "_":
+            continue
+        elif key == "q":
+            resp[key] = value
+        else:
+            raise HttpBadRequest("Unknown key %s" % (key))
+
+    resp['session'] = _get_session(request)
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@CheckBadRequest
+def person_search_results(request):
+    search_dict = request.GET.copy()
+
+    first = search_dict.pop("first", ["0"])[-1]
+    try:
+        first = int(first)
+    except ValueError:
+        raise HttpBadRequest("first is not an integer")
+    if first < 0:
+        raise HttpBadRequest("first is negative")
+
+    count = search_dict.pop("count", ["10"])[-1]
+    try:
+        count = int(count)
+    except ValueError:
+        raise HttpBadRequest("count is not an integer")
+    if count < 0:
+        raise HttpBadRequest("count is negative")
+
+    q = search_dict.pop("q", [""])[-1]
+
+    person_list = spud.models.person.objects.filter(
+        Q(first_name=q) | Q(last_name=q) |
+        Q(middle_name=q) | Q(called=q))
+    number_results = person_list.count()
+    person_list = person_list[first:first+count]
+    number_returned = len(person_list)
+
+    resp = {
+        'persons': [_get_person(p) for p in person_list],
+        'number_results': number_results,
+        'first': first,
+        'last': first + number_returned - 1,
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def person(request, person_id):
+    object = get_object_or_404(spud.models.person, pk=person_id)
+    resp = {
+        'person': _get_person_detail(request.user, object),
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def _get_search(search_dict):
+    criteria = []
+
+    search = Q()
+    photo_list = spud.models.photo.objects.all()
+
+    search_dict.pop("_", None)
+
+    ld = search_dict.pop("place_descendants", ["false"])[-1]
+    ld = _decode_boolean(ld)
+
+    ad = search_dict.pop("album_descendants", ["false"])[-1]
+    ad = _decode_boolean(ad)
+
+    cd = search_dict.pop("category_descendants", ["false"])[-1]
+    cd = _decode_boolean(cd)
+
+    timezone = django.conf.settings.TIME_ZONE
+    timezone = search_dict.pop("timezone", [timezone])[-1]
+
+    def add_criteria(key, condition, value, post_text=None):
+        criteria.append({
+            'key': key, 'condition': condition,
+            'value': value, 'post_text': post_text})
+
+    for key in search_dict:
+        value = search_dict[key]
+
+        if value == "" or key == "_":
+            continue
+        elif key == "timezone":
+            continue
+        elif key == "first_id":
+            add_criteria('id', 'is or greator then',
+                         {'type': "string", 'value': value})
+            search = search & Q(pk__gte=int(value))
+        elif key == "last_id":
+            add_criteria('id', 'less then',
+                         {'type': "string", 'value': value})
+            search = search & Q(pk__lt=int(value))
+        elif key == "first_date":
+            try:
+                timezone = pytz.timezone(timezone)
+                value = _decode_datetime(value, timezone)
+            except pytz.UnknownTimeZoneError:
+                raise HttpBadRequest("Invalid timezone")
+            except ValueError:
+                raise HttpBadRequest("Invalid date/time")
+            utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+            add_criteria(
+                'date/time', 'at or later then',
+                _get_datetime(utc_value, value.utcoffset().total_seconds() / 60))
+            search = search & Q(datetime__gte=utc_value)
+        elif key == "last_date":
+            try:
+                timezone = pytz.timezone(timezone)
+                value = _decode_datetime(value, timezone)
+            except pytz.UnknownTimeZoneError:
+                raise HttpBadRequest("Invalid timezone")
+            except ValueError:
+                raise HttpBadRequest("Invalid date/time")
+            utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+            add_criteria(
+                'date/time', 'earlier then',
+                _get_datetime(utc_value, value.utcoffset().total_seconds() / 60))
+            search = search & Q(datetime__lt=utc_value)
+        elif key == "lower_rating":
+            add_criteria('rating', 'higher then',
+                         {'type': "string", 'value': value})
+            search = search & Q(rating__gte=value)
+        elif key == "upper_rating":
+            add_criteria('rating', 'less then',
+                         {'type': "string", 'value': value})
+            search = search & Q(rating__lte=value)
+        elif key == "title":
+            add_criteria(key, 'contains',
+                         {'type': "string", 'value': value})
+            search = search & Q(title__icontains=value)
+        elif key == "camera_make":
+            add_criteria(key, 'contains',
+                         {'type': "string", 'value': value})
+            search = search & Q(camera_make__icontains=value)
+        elif key == "camera_model":
+            add_criteria(key, 'contains',
+                         {'type': "string", 'value': value})
+            search = search & Q(camera_model__icontains=value)
+        elif key == "photographer":
+            object = get_object_or_404(spud.models.person, pk=value)
+            add_criteria(key, 'is', _get_person(object))
+            search = search & Q(photographer=object)
+        elif key == "place":
+            object = get_object_or_404(spud.models.place, pk=value)
+            if ld:
+                add_criteria(key, 'is', _get_place(object),
+                             '(or descendants)')
+                descendants = object.get_descendants()
+                search = search & Q(location__in=descendants)
+            else:
+                add_criteria(key, 'is', _get_place(object))
+                search = search & Q(location=object)
+        elif key == "person":
+            values = _decode_array(value)
+            for value in values:
+                object = get_object_or_404(spud.models.person, pk=value)
+                add_criteria(key, 'is', _get_person(object))
+                photo_list = photo_list.filter(persons=object)
+        elif key == "album":
+            values = _decode_array(value)
+            for value in values:
+                object = get_object_or_404(spud.models.album, pk=value)
+                if ad:
+                    add_criteria(key, 'is', _get_album(object),
+                                 '(or descendants)')
+                    descendants = object.get_descendants()
+                    photo_list = photo_list.filter(albums__in=descendants)
+                else:
+                    add_criteria(key, 'is', _get_album(object))
+                    photo_list = photo_list.filter(albums=object)
+        elif key == "category":
+            values = _decode_array(value)
+            for value in values:
+                object = get_object_or_404(spud.models.category, pk=value)
+                if cd:
+                    add_criteria(key, 'is', _get_category(object),
+                                 '(or descendants)')
+                    descendants = object.get_descendants()
+                    photo_list = photo_list.filter(
+                        categorys__in=descendants)
+                else:
+                    add_criteria(key, 'is', _get_category(object))
+                    photo_list = photo_list.filter(categorys=object)
+        elif key == "place_none":
+            value = _decode_boolean(value)
+            if value:
+                add_criteria("location", 'is',
+                             {'type': "string", 'value': "None"})
+                search = search & Q(location=None)
+        elif key == "person_none":
+            value = _decode_boolean(value)
+            if value:
+                add_criteria("person", 'is',
+                             {'type': "string", 'value': "None"})
+                search = search & Q(persons=None)
+        elif key == "album_none":
+            value = _decode_boolean(value)
+            if value:
+                add_criteria("album", 'is',
+                             {'type': "string", 'value': "None"})
+                search = search & Q(albums=None)
+        elif key == "category_none":
+            value = _decode_boolean(value)
+            if value:
+                add_criteria("category", 'is',
+                             {'type': "string", 'value': "None"})
+                search = search & Q(categorys=None)
+        elif key == "action":
+            if value == "none":
+                search = search & Q(action__isnull=True)
+            else:
+                search = search & Q(action=value)
+            value = spud.models.action_to_string(value)
+            add_criteria(key, 'is', {'type': "string", 'value': value})
+        elif key == "path":
+            add_criteria(key, 'is', {'type': "string", 'value': value})
+            search = search & Q(path=value)
+        elif key == "name":
+            add_criteria(key, 'is', {'type': "string", 'value': value})
+            search = search & Q(name=value)
+        else:
+            raise HttpBadRequest("Unknown key %s" % (key))
+
+        photo_list = photo_list.filter(search)
+
+    return photo_list, criteria
+
+
+@CheckBadRequest
+def search(request):
+    resp = {}
+
+    for key in request.GET:
+        value = request.GET[key]
+
+        if value == "" or key == "_":
+            continue
+        elif key == "timezone":
+            resp[key] = value
+        elif key == "place_descendants":
+            resp[key] = value
+        elif key == "album_descendants":
+            resp[key] = value
+        elif key == "category_descendants":
+            resp[key] = value
+        elif key == "first_id":
+            resp[key] = value
+        elif key == "last_id":
+            resp[key] = value
+        elif key == "first_date":
+            resp[key] = value
+        elif key == "last_date":
+            resp[key] = value
+        elif key == "lower_rating":
+            resp[key] = value
+        elif key == "upper_rating":
+            resp[key] = value
+        elif key == "title":
+            resp[key] = value
+        elif key == "camera_make":
+            resp[key] = value
+        elif key == "camera_model":
+            resp[key] = value
+        elif key == "photographer":
+            value = _decode_int(value)
+            photographer = get_object_or_404(spud.models.person, pk=value)
+            resp['photographer'] = _get_person(photographer)
+        elif key == "place":
+            value = _decode_int(value)
+            place = get_object_or_404(spud.models.place, pk=value)
+            resp['place'] = _get_place(place)
+        elif key == "person":
+            values = _decode_array(value)
+            resp['person'] = []
+            for person_id in values:
+                person_id = _decode_int(person_id)
+                person = get_object_or_404(spud.models.person, pk=person_id)
+                resp['person'].append(_get_person(person))
+        elif key == "album":
+            values = _decode_array(value)
+            resp['album'] = []
+            for album_id in values:
+                album_id = _decode_int(album_id)
+                album = get_object_or_404(spud.models.album, pk=album_id)
+                resp['album'].append(_get_album(album))
+        elif key == "category":
+            values = _decode_array(request.GET['category'])
+            resp['category'] = []
+            for category_id in values:
+                category_id = _decode_int(category_id)
+                category = get_object_or_404(
+                    spud.models.category, pk=category_id)
+                resp['category'].append(_get_category(category))
+        elif key == "place_none":
+            resp[key] = value
+        elif key == "person_none":
+            resp[key] = value
+        elif key == "album_none":
+            resp[key] = value
+        elif key == "category_none":
+            resp[key] = value
+        elif key == "action":
+            resp[key] = value
+        elif key == "path":
+            resp[key] = value
+        elif key == "name":
+            resp[key] = value
+        else:
+            raise HttpBadRequest("Unknown key %s" % (key))
+
+    resp['session'] = _get_session(request)
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@CheckBadRequest
+def search_results(request):
+    search_dict = request.GET.copy()
+
+    first = search_dict.pop("first", ["0"])
+    try:
+        first = int(first[-1])
+    except ValueError:
+        raise HttpBadRequest("first is not an integer")
+    if first < 0:
+        raise HttpBadRequest("first is negative")
+
+    count = search_dict.pop("count", ["10"])
+    try:
+        count = int(count[-1])
+    except ValueError:
+        raise HttpBadRequest("count is not an integer")
+    if count < 0:
+        raise HttpBadRequest("count is negative")
+
+    photo_list, criteria = _get_search(search_dict)
+    number_results = photo_list.count()
+
+    photos = photo_list[first:first+count]
+    number_returned = len(photos)
+
+    resp = {
+        'criteria': criteria,
+        'photos': [_get_photo_thumb(p) for p in photos],
+        'number_results': number_results,
+        'first': first,
+        'last': first + number_returned - 1,
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def search_item(request, number):
+    search_dict = request.GET.copy()
+    number = int(number)
+
+    photo_list, criteria = _get_search(search_dict)
+    number_results = photo_list.count()
+
+    try:
+        photo = photo_list[number]
+    except IndexError:
+        raise HttpBadRequest("Result %d does not exist" % (number))
+
+    resp = {
+        'criteria': criteria,
+        'photo': _get_photo_detail(photo),
+        'number_results': number_results,
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def settings(request):
+    resp = {
+        'list_sizes': django.conf.settings.LIST_SIZES,
+        'view_sizes': django.conf.settings.VIEW_SIZES,
+        'click_sizes': django.conf.settings.CLICK_SIZES,
+        'session': _get_session(request),
+    }
+
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
