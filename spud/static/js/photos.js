@@ -1552,6 +1552,12 @@ function display_person_search(search, data) {
         onready[i]()
     }
 
+    append_jump("person", "person",
+        function(id) {
+            load_display_person(id, true)
+        }
+    )
+
     $(".breadcrumbs")
         .html("")
         .append(root_a())
