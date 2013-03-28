@@ -2271,51 +2271,6 @@ function settings_submit(form) {
 }
 
 
-
-function display_login(data) {
-    var cm = $("#content-main")
-    cm.html("")
-
-    document.title = "Settings | Spud"
-    cm.append("<h1>Settings</h1>")
-
-    var f = $("<form method='get' />")
-
-    var table = $("<table />")
-
-    var onready = []
-
-    settings = get_settings()
-
-    append_field(table, "username", "Username")
-        .append(get_input_element("username", "", "text"))
-
-    append_field(table, "password", "Password")
-        .append(get_input_element("password", "", "password"))
-
-
-    table.append("<tr><th>Status</th><td id='loginstatus'></td></tr>")
-
-    f.append(table)
-
-    $("<input type='button' name='button' value='Login' />")
-        .on("click", function() { login_submit(this.form) } )
-        .appendTo(f)
-
-    cm.append(f)
-
-    for (i in onready) {
-        onready[i]()
-    }
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append("Login")
-}
-
-
 function login_submit(form) {
     var status = $("#loginstatus")
     status.text("Logging in... Please wait.")
@@ -2326,7 +2281,11 @@ function login_submit(form) {
             function(data) {
                 if (data.status == 'success') {
                     status.text("Success")
-                    window.history.go(-1);
+                    if (window.history.state==null) {
+                        root(true)
+                    } else {
+                        window.history.go(0);
+                    }
                 } else if (data.status == 'account_disabled') {
                     status.text("Account it disabled")
                     alert("Account is disabled")
@@ -2363,11 +2322,33 @@ function root(push_history) {
 
 
 function login(push_history) {
-    replace_links()
-    update_history(push_history, login_url(), {
-        type: 'login',
-    });
-    display_login()
+    var cm = $("<div title='Login'></div>")
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    settings = get_settings()
+
+    append_field(table, "username", "Username")
+        .append(get_input_element("username", "", "text"))
+
+    append_field(table, "password", "Password")
+        .append(get_input_element("password", "", "password"))
+
+
+    table.append("<tr><th>Status</th><td id='loginstatus'></td></tr>")
+
+    f.append(table)
+
+    $("<input type='button' name='button' value='Login' />")
+        .on("click", function() { login_submit(this.form) } )
+        .appendTo(f)
+
+    cm
+        .append(f)
+        .appendTo("#content-main")
+        .dialog({ modal: true })
 }
 
 
@@ -2377,7 +2358,12 @@ function logout() {
     load_logout(
         function(data) {
         if (data.status == 'success') {
-            window.history.go(0);
+            hide_status()
+            if (window.history.state==null) {
+                root(true)
+            } else {
+                window.history.go(0);
+            }
         } else {
             display_error();
             alert("Unknown error")
