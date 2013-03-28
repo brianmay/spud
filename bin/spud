@@ -1,8 +1,7 @@
-#!/usr/bin/python
-from django.core.management import setup_environ
-from spud import settings
-setup_environ(settings)
+#!/usr/bin/env python
+import os
+from django.core import management
 
-from django.core.management import execute_manager
+os.environ['DJANGO_SETTINGS_MODULE'] = 'spud.settings'
 if __name__ == "__main__":
-    execute_manager(settings)
+    management.execute_from_command_line()
