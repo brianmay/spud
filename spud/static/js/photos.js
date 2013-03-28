@@ -623,42 +623,41 @@ function p(t){
 }
 
 
+$(document).ajaxStart(display_loading).ajaxStop(hide_status)
+
 function display_loading() {
-    var s = $("#status")
-        .html("")
+    var message = $("<div></div>")
 
     $("<img/>")
         .attr('src', media_url("img/ajax-loader.gif"))
-        .appendTo(s)
+        .appendTo(message)
 
-    s.addClass("active")
-    $("#content-main").addClass("inactive")
+    message.append("<br/>Loading. Please Wait.<br/>")
+
+    $.blockUI({ message: message })
 }
 
 
 function display_error() {
-    var s = $("#status")
-        .html("")
-
-    if (s.length == 0) {
-        s = $("<div class='status'/>")
-    } else {
-        s.html("")
-    }
+    var message = $("<div></div>")
 
     $("<img/>")
         .attr('src', media_url("img/error.png"))
-        .appendTo(s)
+        .appendTo(message)
 
-    s.addClass("active")
-    $("#content-main").addClass("inactive")
+    message.append("<br/>An error occured.<br/>")
+
+    $("<input type='button' value='Acknowledge' />")
+        .click(function() { $.unblockUI() })
+        .appendTo(message)
+
+    $.blockUI({ message: message })
 }
 
 
 function hide_status()
 {
-    $("#content-main").removeClass("inactive")
-    $("#status").removeClass("active")
+    $.unblockUI()
 }
 
 
@@ -2273,13 +2272,11 @@ function settings_submit(form) {
 
 function login_submit(dialog, form) {
     dialog.dialog("close")
-    display_loading()
 
     load_login(
             form.username.value,
             form.password.value,
             function(data) {
-                hide_status()
                 if (data.status == 'success') {
                     if (window.history.state==null) {
                         root(true)
@@ -2298,7 +2295,6 @@ function login_submit(dialog, form) {
                 }
             },
             function() {
-                hide_status()
                 alert("An error occured trying to login")
                 dialog.dialog("open")
             })
@@ -2351,12 +2347,9 @@ function login(push_history) {
 
 
 function logout() {
-    display_loading()
-
     load_logout(
         function(data) {
         if (data.status == 'success') {
-            hide_status()
             if (window.history.state==null) {
                 root(true)
             } else {
@@ -2375,10 +2368,7 @@ function logout() {
 
 
 function load_display_photo(photo_id, push_history) {
-    display_loading()
-
     load_photo(photo_id, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, photo_url(data.photo), {
@@ -2391,10 +2381,7 @@ function load_display_photo(photo_id, push_history) {
 
 
 function load_display_album(album_id, push_history) {
-    display_loading()
-
     load_album(album_id, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, album_url(data.album), {
@@ -2407,10 +2394,8 @@ function load_display_album(album_id, push_history) {
 
 
 function load_display_category(category_id, push_history) {
-    display_loading()
 
     load_category(category_id, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, category_url(data.category), {
@@ -2423,10 +2408,7 @@ function load_display_category(category_id, push_history) {
 
 
 function load_display_place(place_id, push_history) {
-    display_loading()
-
     load_place(place_id, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, place_url(data.place), {
@@ -2439,14 +2421,11 @@ function load_display_place(place_id, push_history) {
 
 
 function load_display_person_search(search, push_history) {
-    display_loading()
-
     if (search.params == null) {
         search.params = {}
     }
 
     load_person_search(search, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2460,13 +2439,10 @@ function load_display_person_search(search, push_history) {
 
 
 function load_display_person_search_results(search, page, push_history) {
-    display_loading()
-
     if (search.results_per_page == null)
         search.results_per_page = get_settings().persons_per_page
 
     load_person_search_results(search, page, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2481,10 +2457,7 @@ function load_display_person_search_results(search, page, push_history) {
 
 
 function load_display_person(person_id, push_history) {
-    display_loading()
-
     load_person(person_id, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, person_url(data.person), {
@@ -2497,14 +2470,11 @@ function load_display_person(person_id, push_history) {
 
 
 function load_display_search(search, push_history) {
-    display_loading()
-
     if (search.params == null) {
         search.params = {}
     }
 
     load_search(search, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2518,13 +2488,10 @@ function load_display_search(search, push_history) {
 
 
 function load_display_search_results(search, page, push_history) {
-    display_loading()
-
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
     load_search_results(search, page, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2539,10 +2506,7 @@ function load_display_search_results(search, page, push_history) {
 
 
 function load_display_search_photo(search, n, push_history) {
-    display_loading()
-
     load_search_photo(search, n, function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, search_photo_url(search, n, data.photo), {
@@ -2555,10 +2519,7 @@ function load_display_search_photo(search, n, push_history) {
 }
 
 function load_display_settings(push_history) {
-    display_loading()
-
     load_settings(function(data) {
-        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, settings_url(), {
