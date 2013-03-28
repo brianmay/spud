@@ -151,7 +151,7 @@ function photo_a(photo, title) {
     }
     var a = $('<a/>')
         .attr('href', photo_url(photo))
-        .delegate('click', function() { load_display_photo(photo.id, true); return false; })
+        .on('click', function() { load_display_photo(photo.id, true); return false; })
         .text(title)
     return a
 }
@@ -167,7 +167,7 @@ function photo_a(photo, title) {
     }
     var a = $('<a/>')
         .attr('href', photo_url(photo))
-        .delegate('click', function() { load_display_photo(photo.id, true); return false; })
+        .on('click', function() { load_display_photo(photo.id, true); return false; })
         .text(title)
     return a
 }
