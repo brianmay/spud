@@ -42,6 +42,7 @@ def root(request):
                         'breadcrumbs': breadcrumbs,
                         }, context_instance=RequestContext(request))
 
+
 def set_album_list(photo, pk_list):
     pa_list = photo.photo_album_set.all()
     for pa in pa_list:
