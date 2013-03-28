@@ -23,7 +23,8 @@ import datetime
 import django.conf
 import django.contrib.auth
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
 #from django.core.urlresolvers import reverse
 from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
@@ -516,7 +517,11 @@ class HttpBadRequest(Exception):
     pass
 
 
-def CheckBadRequest(func):
+class HttpForbidden(Exception):
+    pass
+
+
+def check_errors(func):
     def wrapper(request, *args, **kwargs):
         try:
             return func(request, *args, **kwargs)
@@ -529,11 +534,20 @@ def CheckBadRequest(func):
                 template.render(RequestContext(request, {
                     'error': unicode(e)
                 })))
+        except HttpForbidden, e:
+            try:
+                template = loader.get_template("403.html")
+            except TemplateDoesNotExist:
+                return HttpResponseForbidden('<h1>Forbidden</h1>')
+            return HttpResponseForbidden(
+                template.render(RequestContext(request, {
+                    'error': unicode(e)
+                })))
     return wrapper
 
 
 @csrf_exempt
-@CheckBadRequest
+@check_errors
 def login(request):
     if request.method != "POST":
         raise HttpBadRequest("Only POST is supported")
@@ -558,7 +572,7 @@ def login(request):
 
 
 @csrf_exempt
-@CheckBadRequest
+@check_errors
 def logout(request):
     if request.method != "POST":
         raise HttpBadRequest("Only POST is supported")
@@ -577,6 +591,7 @@ def photo(request, photo_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@check_errors
 def album(request, album_id):
     object = get_object_or_404(spud.models.album, pk=album_id)
     resp = _get_album_detail(request.user, object)
@@ -605,7 +620,7 @@ def place(request, place_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@CheckBadRequest
+@check_errors
 def person_search(request):
     resp = {}
 
@@ -624,7 +639,7 @@ def person_search(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@CheckBadRequest
+@check_errors
 def person_search_results(request):
     search_dict = request.GET.copy()
 
@@ -849,7 +864,7 @@ def _get_search(user, search_dict):
     return photo_list, criteria
 
 
-@CheckBadRequest
+@check_errors
 def search(request):
     resp = {}
 
@@ -935,7 +950,7 @@ def search(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@CheckBadRequest
+@check_errors
 def search_results(request):
     search_dict = request.GET.copy()
 
