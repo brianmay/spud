@@ -84,7 +84,7 @@ def _get_session(request):
     return session
 
 
-def _get_photo_thumb(photo):
+def _get_photo_thumb(user, photo):
     if photo is None:
         return None
 
@@ -123,6 +123,10 @@ def _get_photo_thumb(photo):
         'thumb': {},
 #        'orig': iri_to_uri(u"%sorig/%s/%s" % (
 #            django.conf.settings.IMAGE_URL, urlquote(photo.path), urlquote(photo.name)))
+
+        'can_add': user.has_perm('spud.add_photo'),
+        'can_change': user.has_perm('spud.change_photo'),
+        'can_delete': user.has_perm('spud.delete_photo'),
     }
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -140,7 +144,7 @@ def _get_photo_thumb(photo):
     return resp
 
 
-def _get_photo_detail(photo):
+def _get_photo_detail(user, photo):
     if photo is None:
         return None
 
@@ -150,8 +154,8 @@ def _get_photo_detail(photo):
         'id': photo.photo_id,
         'title': unicode(photo),
         'name': photo.name,
-        'photographer': _get_person(photo.photographer),
-        'place': _get_place(photo.location),
+        'photographer': _get_person(user, photo.photographer),
+        'place': _get_place(user, photo.location),
         'view': photo.view,
         'rating': photo.rating,
         'description': photo.description,
@@ -172,9 +176,9 @@ def _get_photo_detail(photo):
         'comment': photo.comment,
         'action': photo.action,
 #        'timestamp': photo.timestamp,
-        'albums': [_get_album(a) for a in photo.albums.all()],
-        'categorys': [_get_category(c) for c in photo.categorys.all()],
-        'persons': [_get_person(p) for p in photo.persons.all()],
+        'albums': [_get_album(user, a) for a in photo.albums.all()],
+        'categorys': [_get_category(user, c) for c in photo.categorys.all()],
+        'persons': [_get_person(user, p) for p in photo.persons.all()],
 #        'relations': photo.relations,
 
         'thumb': {},
@@ -182,18 +186,22 @@ def _get_photo_detail(photo):
             django.conf.settings.IMAGE_URL, urlquote(photo.path), urlquote(photo.name))),
 
         'related': [],
+
+        'can_add': user.has_perm('spud.add_photo'),
+        'can_change': user.has_perm('spud.change_photo'),
+        'can_delete': user.has_perm('spud.delete_photo'),
     }
 
     for pr in photo.relations_1.all():
         resp['related'].append({
             'title': pr.desc_2,
-            'photo': _get_photo_thumb(pr.photo_2),
+            'photo': _get_photo_thumb(user, pr.photo_2),
         })
 
     for pr in photo.relations_2.all():
         resp['related'].append({
             'title': pr.desc_1,
-            'photo': _get_photo_thumb(pr.photo_1),
+            'photo': _get_photo_thumb(user, pr.photo_1),
         })
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -211,7 +219,7 @@ def _get_photo_detail(photo):
     return resp
 
 
-def _get_album(album):
+def _get_album(user, album):
     if album is None:
         return None
 
@@ -222,15 +230,18 @@ def _get_album(album):
 #        'parent_album': album.parent_album,
         'title': album.album,
         'description': album.album_description,
-        'cover_photo': _get_photo_thumb(album.cover_photo),
+        'cover_photo': _get_photo_thumb(user, album.cover_photo),
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': unicode(album.revised),
+        'can_add': user.has_perm('spud.add_album'),
+        'can_change': user.has_perm('spud.change_album'),
+        'can_delete': user.has_perm('spud.delete_album'),
     }
     return d
 
 
-def _get_album_detail(album):
+def _get_album_detail(user, album):
     if album is None:
         return None
 
@@ -238,31 +249,34 @@ def _get_album_detail(album):
         'type': 'album',
 #        'url': reverse("static_album_detail", kwargs={'album_id': album.pk}),
         'id': album.album_id,
-#        'parent_album': _get_album(album.parent_album),
+#        'parent_album': _get_album(user, album.parent_album),
         'title': album.album,
         'description': album.album_description,
-        'cover_photo': _get_photo_thumb(album.cover_photo),
+        'cover_photo': _get_photo_thumb(user, album.cover_photo),
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': unicode(album.revised),
         'parents': [],
         'children': [],
+        'can_add': user.has_perm('spud.add_album'),
+        'can_change': user.has_perm('spud.change_album'),
+        'can_delete': user.has_perm('spud.delete_album'),
     }
 
     parent = album.parent_album
     seen = {}
     while parent is not None and parent.pk not in seen:
-        d['parents'].insert(0, _get_album(parent))
+        d['parents'].insert(0, _get_album(user, parent))
         seen[parent.pk] = True
         parent = parent.parent_album
 
     for child in album.children.all():
-        d['children'].append(_get_album(child))
+        d['children'].append(_get_album(user, child))
 
     return d
 
 
-def _get_category(category):
+def _get_category(user, category):
     if category is None:
         return None
 
@@ -273,14 +287,17 @@ def _get_category(category):
 #        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
-        'cover_photo': _get_photo_thumb(category.cover_photo),
+        'cover_photo': _get_photo_thumb(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
+        'can_add': user.has_perm('spud.add_category'),
+        'can_change': user.has_perm('spud.change_category'),
+        'can_delete': user.has_perm('spud.delete_category'),
     }
     return d
 
 
-def _get_category_detail(category):
+def _get_category_detail(user, category):
     if category is None:
         return None
 
@@ -291,27 +308,30 @@ def _get_category_detail(category):
 #        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
-        'cover_photo': _get_photo_thumb(category.cover_photo),
+        'cover_photo': _get_photo_thumb(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
         'parents': [],
         'children': [],
+        'can_add': user.has_perm('spud.add_category'),
+        'can_change': user.has_perm('spud.change_category'),
+        'can_delete': user.has_perm('spud.delete_category'),
     }
 
     parent = category.parent_category
     seen = {}
     while parent is not None and parent.pk not in seen:
-        d['parents'].insert(0, _get_category(parent))
+        d['parents'].insert(0, _get_category(user, parent))
         seen[parent.pk] = True
         parent = parent.parent_category
 
     for child in category.children.all():
-        d['children'].append(_get_category(child))
+        d['children'].append(_get_category(user, child))
 
     return d
 
 
-def _get_place(place):
+def _get_place(user, place):
     if place is None:
         return None
 
@@ -329,13 +349,16 @@ def _get_place(place):
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
-        'cover_photo': _get_photo_thumb(place.cover_photo),
+        'cover_photo': _get_photo_thumb(user, place.cover_photo),
         'notes': place.notes,
+        'can_add': user.has_perm('spud.add_place'),
+        'can_change': user.has_perm('spud.change_place'),
+        'can_delete': user.has_perm('spud.delete_place'),
     }
     return d
 
 
-def _get_place_detail(place):
+def _get_place_detail(user, place):
     if place is None:
         return None
 
@@ -353,26 +376,29 @@ def _get_place_detail(place):
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
-        'cover_photo': _get_photo_thumb(place.cover_photo),
+        'cover_photo': _get_photo_thumb(user, place.cover_photo),
         'notes': place.notes,
         'parents': [],
         'children': [],
+        'can_add': user.has_perm('spud.add_place'),
+        'can_change': user.has_perm('spud.change_place'),
+        'can_delete': user.has_perm('spud.delete_place'),
     }
 
     parent = place.parent_place
     seen = {}
     while parent is not None and parent.pk not in seen:
-        d['parents'].insert(0, _get_place(parent))
+        d['parents'].insert(0, _get_place(user, parent))
         seen[parent.pk] = True
         parent = parent.parent_place
 
     for child in place.children.all():
-        d['children'].append(_get_place(child))
+        d['children'].append(_get_place(user, child))
 
     return d
 
 
-def _get_person(person):
+def _get_person(user, person):
     if person is None:
         return None
 
@@ -385,7 +411,7 @@ def _get_person(person):
         'last_name': person.last_name,
         'middle_name': person.middle_name,
         'called': person.called,
-        'cover_photo': _get_photo_thumb(person.cover_photo),
+        'cover_photo': _get_photo_thumb(user, person.cover_photo),
 #        'gender': person.gender,
 #        'dob': unicode(person.dob),
 #        'dod': unicode(person.dod),
@@ -396,6 +422,9 @@ def _get_person(person):
 #        'spouse': person.spouse,
 #        'notes': person.notes,
 #        'email': person.email,
+        'can_add': user.has_perm('spud.add_person'),
+        'can_change': user.has_perm('spud.change_person'),
+        'can_delete': user.has_perm('spud.delete_person'),
     }
     return d
 
@@ -413,7 +442,10 @@ def _get_person_detail(user, person):
         'last_name': person.last_name,
         'middle_name': person.middle_name,
         'called': person.called,
-        'cover_photo': _get_photo_thumb(person.cover_photo),
+        'cover_photo': _get_photo_thumb(user, person.cover_photo),
+        'can_add': user.has_perm('spud.add_person'),
+        'can_change': user.has_perm('spud.change_person'),
+        'can_delete': user.has_perm('spud.delete_person'),
     }
 
     if user.is_staff:
@@ -421,19 +453,19 @@ def _get_person_detail(user, person):
             'gender': person.gender,
             'dob': None,
             'dod': None,
-            'home': _get_place(person.home),
-            'work': _get_place(person.work),
-            'father': _get_person(person.father),
-            'mother': _get_person(person.mother),
+            'home': _get_place(user, person.home),
+            'work': _get_place(user, person.work),
+            'father': _get_person(user, person.father),
+            'mother': _get_person(user, person.mother),
             'spouses': [],
-            'grandparents': [_get_person(p) for p in person.grandparents()],
-            'uncles_aunts': [_get_person(p) for p in person.uncles_aunts()],
-            'parents': [_get_person(p) for p in person.parents()],
-            'siblings': [_get_person(p) for p in person.siblings()],
-            'cousins': [_get_person(p) for p in person.cousins()],
-            'children': [_get_person(p) for p in person.children()],
-            'nephews_nieces': [_get_person(p) for p in person.nephews_nieces()],
-            'grandchildren': [_get_person(p) for p in person.grandchildren()],
+            'grandparents': [_get_person(user, p) for p in person.grandparents()],
+            'uncles_aunts': [_get_person(user, p) for p in person.uncles_aunts()],
+            'parents': [_get_person(user, p) for p in person.parents()],
+            'siblings': [_get_person(user, p) for p in person.siblings()],
+            'cousins': [_get_person(user, p) for p in person.cousins()],
+            'children': [_get_person(user, p) for p in person.children()],
+            'nephews_nieces': [_get_person(user, p) for p in person.nephews_nieces()],
+            'grandchildren': [_get_person(user, p) for p in person.grandchildren()],
             'notes': person.notes,
             'email': person.email,
         })
@@ -445,11 +477,11 @@ def _get_person_detail(user, person):
             d['dod'] = unicode(person.dod)
 
         if person.spouse:
-            d['spouses'].append(_get_person(person.spouse))
+            d['spouses'].append(_get_person(user, person.spouse))
 
         for p in person.reverse_spouses.all():
             if p.person_id != person.spouse.person_id:
-                d['spouses'].append(_get_person(p))
+                d['spouses'].append(_get_person(user, p))
 
     return d
 
@@ -539,7 +571,7 @@ def logout(request):
 def photo(request, photo_id):
     object = get_object_or_404(spud.models.photo, pk=photo_id)
     resp = {
-        'photo': _get_photo_detail(object),
+        'photo': _get_photo_detail(request.user, object),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -547,9 +579,9 @@ def photo(request, photo_id):
 
 def album(request, album_id):
     object = get_object_or_404(spud.models.album, pk=album_id)
-    resp = _get_album_detail(object)
+    resp = _get_album_detail(request.user, object)
     resp = {
-        'album': _get_album_detail(object),
+        'album': _get_album_detail(request.user, object),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -558,7 +590,7 @@ def album(request, album_id):
 def category(request, category_id):
     object = get_object_or_404(spud.models.category, pk=category_id)
     resp = {
-        'category': _get_category_detail(object),
+        'category': _get_category_detail(request.user, object),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -567,7 +599,7 @@ def category(request, category_id):
 def place(request, place_id):
     object = get_object_or_404(spud.models.place, pk=place_id)
     resp = {
-        'place': _get_place_detail(object),
+        'place': _get_place_detail(request.user, object),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -587,6 +619,7 @@ def person_search(request):
         else:
             raise HttpBadRequest("Unknown key %s" % (key))
 
+    resp['can_add'] = request.user.has_perm('spud.add_person')
     resp['session'] = _get_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -621,11 +654,12 @@ def person_search_results(request):
     number_returned = len(person_list)
 
     resp = {
-        'persons': [_get_person(p) for p in person_list],
+        'persons': [_get_person(request.user, p) for p in person_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
         'session': _get_session(request),
+        'can_add': request.user.has_perm('spud.add_person'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -639,7 +673,7 @@ def person(request, person_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def _get_search(search_dict):
+def _get_search(user, search_dict):
     criteria = []
 
     search = Q()
@@ -727,48 +761,48 @@ def _get_search(search_dict):
             search = search & Q(camera_model__icontains=value)
         elif key == "photographer":
             object = get_object_or_404(spud.models.person, pk=value)
-            add_criteria(key, 'is', _get_person(object))
+            add_criteria(key, 'is', _get_person(user, object))
             search = search & Q(photographer=object)
         elif key == "place":
             object = get_object_or_404(spud.models.place, pk=value)
             if ld:
-                add_criteria(key, 'is', _get_place(object),
+                add_criteria(key, 'is', _get_place(user, object),
                              '(or descendants)')
                 descendants = object.get_descendants()
                 search = search & Q(location__in=descendants)
             else:
-                add_criteria(key, 'is', _get_place(object))
+                add_criteria(key, 'is', _get_place(user, object))
                 search = search & Q(location=object)
         elif key == "person":
             values = _decode_array(value)
             for value in values:
                 object = get_object_or_404(spud.models.person, pk=value)
-                add_criteria(key, 'is', _get_person(object))
+                add_criteria(key, 'is', _get_person(user, object))
                 photo_list = photo_list.filter(persons=object)
         elif key == "album":
             values = _decode_array(value)
             for value in values:
                 object = get_object_or_404(spud.models.album, pk=value)
                 if ad:
-                    add_criteria(key, 'is', _get_album(object),
+                    add_criteria(key, 'is', _get_album(user, object),
                                  '(or descendants)')
                     descendants = object.get_descendants()
                     photo_list = photo_list.filter(albums__in=descendants)
                 else:
-                    add_criteria(key, 'is', _get_album(object))
+                    add_criteria(key, 'is', _get_album(user, object))
                     photo_list = photo_list.filter(albums=object)
         elif key == "category":
             values = _decode_array(value)
             for value in values:
                 object = get_object_or_404(spud.models.category, pk=value)
                 if cd:
-                    add_criteria(key, 'is', _get_category(object),
+                    add_criteria(key, 'is', _get_category(user, object),
                                  '(or descendants)')
                     descendants = object.get_descendants()
                     photo_list = photo_list.filter(
                         categorys__in=descendants)
                 else:
-                    add_criteria(key, 'is', _get_category(object))
+                    add_criteria(key, 'is', _get_category(user, object))
                     photo_list = photo_list.filter(categorys=object)
         elif key == "place_none":
             value = _decode_boolean(value)
@@ -853,25 +887,25 @@ def search(request):
         elif key == "photographer":
             value = _decode_int(value)
             photographer = get_object_or_404(spud.models.person, pk=value)
-            resp['photographer'] = _get_person(photographer)
+            resp['photographer'] = _get_person(request.user, photographer)
         elif key == "place":
             value = _decode_int(value)
             place = get_object_or_404(spud.models.place, pk=value)
-            resp['place'] = _get_place(place)
+            resp['place'] = _get_place(request.user, place)
         elif key == "person":
             values = _decode_array(value)
             resp['person'] = []
             for person_id in values:
                 person_id = _decode_int(person_id)
                 person = get_object_or_404(spud.models.person, pk=person_id)
-                resp['person'].append(_get_person(person))
+                resp['person'].append(_get_person(request.user, person))
         elif key == "album":
             values = _decode_array(value)
             resp['album'] = []
             for album_id in values:
                 album_id = _decode_int(album_id)
                 album = get_object_or_404(spud.models.album, pk=album_id)
-                resp['album'].append(_get_album(album))
+                resp['album'].append(_get_album(request.user, album))
         elif key == "category":
             values = _decode_array(request.GET['category'])
             resp['category'] = []
@@ -879,7 +913,7 @@ def search(request):
                 category_id = _decode_int(category_id)
                 category = get_object_or_404(
                     spud.models.category, pk=category_id)
-                resp['category'].append(_get_category(category))
+                resp['category'].append(_get_category(request.user, category))
         elif key == "place_none":
             resp[key] = value
         elif key == "person_none":
@@ -921,7 +955,7 @@ def search_results(request):
     if count < 0:
         raise HttpBadRequest("count is negative")
 
-    photo_list, criteria = _get_search(search_dict)
+    photo_list, criteria = _get_search(request.user, search_dict)
     number_results = photo_list.count()
 
     photos = photo_list[first:first+count]
@@ -929,11 +963,12 @@ def search_results(request):
 
     resp = {
         'criteria': criteria,
-        'photos': [_get_photo_thumb(p) for p in photos],
+        'photos': [_get_photo_thumb(request.user, p) for p in photos],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
         'session': _get_session(request),
+        'can_add': request.user.has_perm('spud.add_photo'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -942,7 +977,7 @@ def search_item(request, number):
     search_dict = request.GET.copy()
     number = int(number)
 
-    photo_list, criteria = _get_search(search_dict)
+    photo_list, criteria = _get_search(request.user, search_dict)
     number_results = photo_list.count()
 
     try:
@@ -952,7 +987,7 @@ def search_item(request, number):
 
     resp = {
         'criteria': criteria,
-        'photo': _get_photo_detail(photo),
+        'photo': _get_photo_detail(request.user, photo),
         'number_results': number_results,
         'session': _get_session(request),
     }
