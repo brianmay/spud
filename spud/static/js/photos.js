@@ -102,6 +102,181 @@ function settings_url(dt) {
 }
 
 
+// ****************
+// * AJAX LOADERS *
+// ****************
+
+function load_login(username, password, success, error) {
+    $.ajax({
+        url: '/a/login/',
+        type: "POST",
+        dataType : 'json',
+        cache: false,
+        data: {
+            username: username,
+            password: password,
+        },
+        success: success,
+        error: error,
+    })
+}
+
+function load_logout(success, error) {
+    $.ajax({
+        url: '/a/logout/',
+        type: "POST",
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+function load_photo(photo_id, success, error) {
+    $.ajax({
+        url: '/a/photo/'+photo_id+'/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+
+function load_album(album_id, success, error) {
+    $.ajax({
+        url: '/a/album/'+album_id+'/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+
+function load_category(category_id, success, error) {
+    $.ajax({
+        url: '/a/category/'+category_id+'/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+
+function load_place(place_id, success, error) {
+    $.ajax({
+        url: '/a/place/'+place_id+'/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+
+function load_person_search(search, success, error) {
+    $.ajax({
+        url: '/a/person/',
+        dataType : 'json',
+        cache: false,
+        data: search.params,
+        success: success,
+        error: error,
+    })
+    return
+}
+
+
+function load_person_search_results(search, page, success, error) {
+    var first = page * search.results_per_page
+
+    var add_params = {
+        count: search.results_per_page,
+        first: first,
+    }
+    var params = jQuery.extend({}, search.params, add_params)
+
+    $.ajax({
+        url: '/a/person/results/',
+        dataType : 'json',
+        cache: false,
+        data: params,
+        success: success,
+        error: error,
+    });
+}
+
+
+function load_person(place_id, success, error) {
+    $.ajax({
+        url: '/a/person/'+place_id+'/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+
+function load_search(search, success, error) {
+    $.ajax({
+        url: '/a/search/',
+        dataType : 'json',
+        cache: false,
+        data: search.params,
+        success: success,
+        error: error,
+    })
+    return
+}
+
+
+function load_search_results(search, page, success, error) {
+    var first = page * search.results_per_page
+
+    var add_params = {
+        count: search.results_per_page,
+        first: first,
+    }
+    var params = jQuery.extend({}, search.params, add_params)
+
+    $.ajax({
+        url: '/a/search/results/',
+        dataType : 'json',
+        cache: false,
+        data: params,
+        success: success,
+        error: error,
+    });
+}
+
+
+function load_search_photo(search, n, success, error) {
+    $.ajax({
+        url: '/a/search/'+n+'/',
+        dataType : 'json',
+        cache: false,
+        data: search.params,
+        success: success,
+        error: error,
+    })
+    return
+}
+
+
+function load_settings(success, error) {
+    $.ajax({
+        url: '/a/settings',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+
 // *********
 // * LINKS *
 // *********
@@ -2152,181 +2327,6 @@ function generic_paginator(page, last_page, html_page) {
     }
 
     return p
-}
-
-
-// ****************
-// * AJAX LOADERS *
-// ****************
-
-function load_login(username, password, success, error) {
-    $.ajax({
-        url: '/a/login/',
-        type: "POST",
-        dataType : 'json',
-        cache: false,
-        data: {
-            username: username,
-            password: password,
-        },
-        success: success,
-        error: error,
-    })
-}
-
-function load_logout(success, error) {
-    $.ajax({
-        url: '/a/logout/',
-        type: "POST",
-        dataType : 'json',
-        cache: false,
-        success: success,
-        error: error,
-    })
-}
-
-function load_photo(photo_id, success, error) {
-    $.ajax({
-        url: '/a/photo/'+photo_id+'/',
-        dataType : 'json',
-        cache: false,
-        success: success,
-        error: error,
-    })
-}
-
-
-function load_album(album_id, success, error) {
-    $.ajax({
-        url: '/a/album/'+album_id+'/',
-        dataType : 'json',
-        cache: false,
-        success: success,
-        error: error,
-    })
-}
-
-
-function load_category(category_id, success, error) {
-    $.ajax({
-        url: '/a/category/'+category_id+'/',
-        dataType : 'json',
-        cache: false,
-        success: success,
-        error: error,
-    })
-}
-
-
-function load_place(place_id, success, error) {
-    $.ajax({
-        url: '/a/place/'+place_id+'/',
-        dataType : 'json',
-        cache: false,
-        success: success,
-        error: error,
-    })
-}
-
-
-function load_person_search(search, success, error) {
-    $.ajax({
-        url: '/a/person/',
-        dataType : 'json',
-        cache: false,
-        data: search.params,
-        success: success,
-        error: error,
-    })
-    return
-}
-
-
-function load_person_search_results(search, page, success, error) {
-    var first = page * search.results_per_page
-
-    var add_params = {
-        count: search.results_per_page,
-        first: first,
-    }
-    var params = jQuery.extend({}, search.params, add_params)
-
-    $.ajax({
-        url: '/a/person/results/',
-        dataType : 'json',
-        cache: false,
-        data: params,
-        success: success,
-        error: error,
-    });
-}
-
-
-function load_person(place_id, success, error) {
-    $.ajax({
-        url: '/a/person/'+place_id+'/',
-        dataType : 'json',
-        cache: false,
-        success: success,
-        error: error,
-    })
-}
-
-
-function load_search(search, success, error) {
-    $.ajax({
-        url: '/a/search/',
-        dataType : 'json',
-        cache: false,
-        data: search.params,
-        success: success,
-        error: error,
-    })
-    return
-}
-
-
-function load_search_results(search, page, success, error) {
-    var first = page * search.results_per_page
-
-    var add_params = {
-        count: search.results_per_page,
-        first: first,
-    }
-    var params = jQuery.extend({}, search.params, add_params)
-
-    $.ajax({
-        url: '/a/search/results/',
-        dataType : 'json',
-        cache: false,
-        data: params,
-        success: success,
-        error: error,
-    });
-}
-
-
-function load_search_photo(search, n, success, error) {
-    $.ajax({
-        url: '/a/search/'+n+'/',
-        dataType : 'json',
-        cache: false,
-        data: search.params,
-        success: success,
-        error: error,
-    })
-    return
-}
-
-
-function load_settings(success, error) {
-    $.ajax({
-        url: '/a/settings',
-        dataType : 'json',
-        cache: false,
-        success: success,
-        error: error,
-    })
 }
 
 
