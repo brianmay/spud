@@ -1543,7 +1543,7 @@ function display_person_search(search, data) {
     f.append(table)
 
     $("<input type='button' name='button' value='Search' />")
-        .on("click", function() { person_search_form(this.form) } )
+        .on("click", function() { person_search_submit(this.form) } )
         .appendTo(f)
 
     cm.append(f)
@@ -1560,7 +1560,7 @@ function display_person_search(search, data) {
 }
 
 
-function person_search_form(form) {
+function person_search_submit(form) {
 
     var params = { }
 
@@ -1921,7 +1921,7 @@ function display_search(search, data) {
     f.append(table)
 
     $("<input type='button' name='button' value='Search' />")
-        .on("click", function() { search_form(this.form) } )
+        .on("click", function() { search_submit(this.form) } )
         .appendTo(f)
 
     cm.append(f)
@@ -1938,7 +1938,7 @@ function display_search(search, data) {
 }
 
 
-function search_form(form) {
+function search_submit(form) {
 
     var params = { }
 
@@ -2225,7 +2225,7 @@ function display_settings(data) {
     f.append(table)
 
     $("<input type='button' name='button' value='Save' />")
-        .on("click", function() { settings_form(this.form) } )
+        .on("click", function() { settings_submit(this.form) } )
         .appendTo(f)
 
     cm.append(f)
@@ -2242,7 +2242,7 @@ function display_settings(data) {
 }
 
 
-function settings_form(form) {
+function settings_submit(form) {
     settings = $(document).data('settings')
 
     if (form.photos_per_page.value) {
@@ -2293,7 +2293,7 @@ function display_login(data) {
     f.append(table)
 
     $("<input type='button' name='button' value='Login' />")
-        .on("click", function() { login_form(this.form) } )
+        .on("click", function() { login_submit(this.form) } )
         .appendTo(f)
 
     cm.append(f)
@@ -2310,7 +2310,7 @@ function display_login(data) {
 }
 
 
-function login_form(form) {
+function login_submit(form) {
     var status = $("#status")
     status.text("Logging in... Please wait.")
 
