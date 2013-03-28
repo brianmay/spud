@@ -608,10 +608,12 @@ function append_categorys(tag, categorys) {
 }
 
 function append_related(tag, related) {
-    ul = $("<ul/>")
-    for (var i in arg.context.related) {
-        r = arg.context.related[i]
-        ul.append(photo_a(r.photo.id, r.title))
+    var ul = $("<ul/>")
+    for (var i in related) {
+        var r = related[i]
+        $("<li/>")
+            .append(photo_a(r.photo.id, r.title))
+            .appendTo(ul)
     }
     tag.append(ul)
     return tag
