@@ -157,7 +157,6 @@ function photo_a(photo, title) {
 }
 
 
-
 function photo_a(photo, title) {
     if (photo == null) {
         return ""
