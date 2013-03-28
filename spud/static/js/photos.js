@@ -491,6 +491,22 @@ function datetime_a(dt) {
 // * HELPERS *
 // ***********
 
+function get_settings() {
+    settings = $(document).data('settings')
+    if (!settings) {
+        settings = {
+            photos_per_page: 10,
+            persons_per_page: 10,
+            list_size: "thumb",
+            view_size: "mid",
+            click_size: "large",
+        }
+        $(document).data('settings', settings)
+    }
+    return settings
+}
+
+
 function update_history(push_history, url, state) {
     if (push_history) {
         window.history.pushState(state, document.title, url);
@@ -499,26 +515,6 @@ function update_history(push_history, url, state) {
     }
 }
 
-
-// List of HTML entities for escaping.
-var htmlEscapes = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#x27;',
-  '/': '&#x2F;'
-};
-
-// Regex containing the keys listed immediately above.
-var htmlEscaper = /[&<>"'\/]/g;
-
-// Escape a string for HTML interpolation.
-function escapeHTML(string) {
-    return ('' + string).replace(htmlEscaper, function(match) {
-        return htmlEscapes[match];
-    });
-};
 
 function get_photo_style(data) {
     if (data.action==null)
@@ -532,6 +528,7 @@ function get_photo_style(data) {
         return "photo_R"
     return ""
 }
+
 
 function resize_photo(img, width, height) {
     width = width || img.naturalWidth
@@ -560,12 +557,6 @@ function resize_photo(img, width, height) {
 
     img.width = width
     img.height = height
-}
-
-
-function p(t){
-    t = t.trim();
-    return (t.length>0?'<p>'+t.replace(/[\r\n]+/,'</p><p>')+'</p>':null);
 }
 
 
@@ -601,9 +592,36 @@ window.onpopstate = function(event) {
     }
 };
 
-// *******************
-// * HTML generators *
-// *******************
+
+// ****************
+// * HTML helpers *
+// ****************
+
+// List of HTML entities for escaping.
+var htmlEscapes = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '/': '&#x2F;'
+};
+
+// Regex containing the keys listed immediately above.
+var htmlEscaper = /[&<>"'\/]/g;
+
+// Escape a string for HTML interpolation.
+function escapeHTML(string) {
+    return ('' + string).replace(htmlEscaper, function(match) {
+        return htmlEscapes[match];
+    });
+};
+
+function p(t){
+    t = t.trim();
+    return (t.length>0?'<p>'+t.replace(/[\r\n]+/,'</p><p>')+'</p>':null);
+}
+
 
 function display_loading() {
     var s = $("#status")
@@ -813,6 +831,264 @@ function dt_dd(dl, title, value) {
 }
 
 
+function photo_thumb(photo, title, sort, description, url, onclick) {
+    var style = ""
+    var image = null
+    if (photo != null) {
+        var size = get_settings().list_size
+        var style = get_photo_style(photo)
+        var image = photo.thumb[size]
+    }
+
+    li = $("<li />")
+    li.attr('class', "photo_list_item " + style)
+    li.on("click", onclick)
+
+    a = $("<a />")
+    a.attr("href", url)
+
+    if (image != null) {
+        $("<img />")
+        .attr("src", image.url)
+        .attr("alt", title)
+        .attr("width", image.width)
+        .attr("height", image.height)
+        .appendTo(a)
+    }
+
+    a.append("<div class='title'>" + escapeHTML(title) + "</div>")
+
+    if (sort) {
+        a.append("<div class='sort'>" + escapeHTML(sort) + "</div>")
+    }
+    if (description) {
+        a.append("<div class='desc'>" + escapeHTML(description) + "</div>")
+    }
+
+    li.append(a)
+
+    return li
+}
+
+
+function generic_paginator(page, last_page, html_page) {
+
+    var p = $("<p class='paginator'/>")
+
+    if (page > 0) {
+        p.append(html_page(page-1, '<', 'p'))
+    }
+    if (page < last_page) {
+        p.append(html_page(page+1, '>', 'n'))
+    }
+    var range = function(first, last) {
+        for (var i=first; i<=last; i++) {
+            if (i == page)
+                p.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
+            else
+                p.append(html_page(i, i+1, null))
+            p.append(" ")
+        }
+    }
+
+    var ON_EACH_SIDE = 3
+    var ON_ENDS = 2
+
+    // If there are 10 or fewer pages, display links to every page.
+    // Otherwise, do some fancy
+    if (last_page <= 10) {
+        range(0, last_page)
+    } else {
+        // Insert "smart" pagination links, so that there are always ON_ENDS
+        // links at either end of the list of pages, and there are always
+        // ON_EACH_SIDE links at either end of the "current page" link.
+        if (page > (ON_EACH_SIDE + ON_ENDS)) {
+            range(0, ON_ENDS-1)
+            p.append('<span class="dots">...</span>')
+            range(page - ON_EACH_SIDE, page-1)
+        } else {
+            range(0, page-1)
+        }
+
+        if (page < (last_page - ON_EACH_SIDE - ON_ENDS)) {
+            range(page, page + ON_EACH_SIDE)
+            p.append('<span class="dots">...</span>')
+            range(last_page - ON_ENDS + 1, last_page)
+        } else {
+            range(page, last_page)
+        }
+    }
+
+    return p
+}
+
+
+// *********************
+// * HTML form helpers *
+// *********************
+
+function append_field(table, id, title) {
+    var th = $("<th/>")
+
+    $("<label/>")
+        .attr("for", "id_" + id)
+        .html(escapeHTML(title + ":"))
+        .appendTo(th)
+
+    var td = $("<td/>")
+
+    $("<tr/>")
+        .append(th)
+        .append(td)
+        .appendTo(table)
+
+    return td
+}
+
+
+function get_input_element(id, value, type) {
+    if (value == null) {
+       value = ""
+    }
+
+    return $('<input />')
+        .attr('type', type)
+        .attr('name', id)
+        .attr('id', "id_" + id)
+        .attr('value', value)
+}
+
+
+function get_input_checkbox(id, value) {
+    cb = $('<input />')
+        .attr('type', 'checkbox')
+        .attr('name', id)
+        .attr('id', "id_" + id)
+
+    if (value) {
+        cb.attr('checked','checked')
+    }
+
+    return cb
+}
+
+
+function get_input_select(id, values, selected) {
+    select = $('<select />')
+        .attr('name', id)
+        .attr('id', "id_" + id)
+
+    for (i in values) {
+        var v = values[i]
+        var option = $('<option />')
+            .attr('value', v[0])
+            .text(v[1])
+            .appendTo(select)
+
+        if (v[0] == selected) {
+            option.attr('selected' ,'selected')
+        }
+    }
+
+    return select
+}
+
+
+function get_ajax_select(id, type, value, onready, onadded) {
+    var div = $("<div/>")
+
+    $("<input type='text' value='' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true' />")
+        .attr("name", id + "_text")
+        .attr("id", "id_" + id + "_text")
+        .appendTo(div)
+
+    var i = $("<input type='hidden' />")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .appendTo(div)
+
+    var rod = $("<div class='results_on_deck'></div>")
+        .attr("id", "id_" + id + "_on_deck")
+        .appendTo(div)
+
+    if (onadded != null) {
+        rod.on("added", function() {
+            onadded(i.val())
+        })
+    }
+
+    div.append("<br /><span class='helptext'>Enter text to search.</span>")
+
+    var params = {
+        "min_length": 1,
+        "source": "/ajax/ajax_lookup/" + type,
+    }
+
+    if (value != null) {
+        i.attr("value", value.id)
+        params.initial = [ value.title, value.id ]
+    }
+
+    onready.push(function() {
+        i.autocompleteselect(params)
+    })
+
+    return div
+}
+
+function get_ajax_multiple_select(id, type, value, onready, onadded) {
+    var value_str = "|"
+    var value_arr = []
+    for (var i in value) {
+        var v = value[i]
+        value_str += v.id + "|"
+        value_arr.push([v.title, v.id])
+    }
+
+    var div = $("<div/>")
+
+    $("<input type='text' value='' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true' />")
+        .attr("name", id + "_text")
+        .attr("id", "id_" + id + "_text")
+        .appendTo(div)
+
+    var i = $("<input type='hidden' />")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .attr("value", value_str)
+        .appendTo(div)
+
+    var rod = $("<div class='results_on_deck'></div>")
+        .attr("id", "id_" + id + "_on_deck")
+        .appendTo(div)
+
+    if (onadded != null) {
+        rod.on("added", function() {
+            onadded(i.val())
+        })
+    }
+
+    div.append("<br /><span class='helptext'>Enter text to search.</span>")
+
+    var params = {
+        "min_length": 1,
+        "source": "/ajax/ajax_lookup/" + type,
+        "initial": value_arr,
+    }
+
+    onready.push(function() {
+        i.autocompleteselectmultiple(params)
+    })
+
+    return div
+}
+
+
+
+// *******************
+// * HTML generators *
+// *******************
+
 function display_root() {
     $("#content-main")
         .html("")
@@ -922,32 +1198,6 @@ function display_photo(photo) {
         .append(escapeHTML(photo.title))
 
     return
-}
-
-
-function display_search_photo(search, results, n) {
-    display_photo(results.photo)
-    $("#content-main").append(photo_paginator(search, results, n))
-
-    var page = Math.floor(n / search.results_per_page)
-
-    var ul = $('<ul class="menu"/>')
-
-    $("<li/>")
-        .append(search_a(search, "Revise search"))
-        .appendTo(ul)
-
-    append_action_links(ul)
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append(search_a(search))
-        .append(" › ")
-        .append(search_results_a(search, page))
-        .append(" › ")
-        .append(escapeHTML(results.photo.title))
 }
 
 
@@ -1272,162 +1522,6 @@ function display_place(place) {
     bc.append(sep + escapeHTML(place.title))
 }
 
-
-function append_field(table, id, title) {
-    var th = $("<th/>")
-
-    $("<label/>")
-        .attr("for", "id_" + id)
-        .html(escapeHTML(title + ":"))
-        .appendTo(th)
-
-    var td = $("<td/>")
-
-    $("<tr/>")
-        .append(th)
-        .append(td)
-        .appendTo(table)
-
-    return td
-}
-
-
-function get_input_element(id, value, type) {
-    if (value == null) {
-       value = ""
-    }
-
-    return $('<input />')
-        .attr('type', type)
-        .attr('name', id)
-        .attr('id', "id_" + id)
-        .attr('value', value)
-}
-
-
-function get_input_checkbox(id, value) {
-    cb = $('<input />')
-        .attr('type', 'checkbox')
-        .attr('name', id)
-        .attr('id', "id_" + id)
-
-    if (value) {
-        cb.attr('checked','checked')
-    }
-
-    return cb
-}
-
-
-function get_input_select(id, values, selected) {
-    select = $('<select />')
-        .attr('name', id)
-        .attr('id', "id_" + id)
-
-    for (i in values) {
-        var v = values[i]
-        var option = $('<option />')
-            .attr('value', v[0])
-            .text(v[1])
-            .appendTo(select)
-
-        if (v[0] == selected) {
-            option.attr('selected' ,'selected')
-        }
-    }
-
-    return select
-}
-
-
-function get_ajax_select(id, type, value, onready, onadded) {
-    var div = $("<div/>")
-
-    $("<input type='text' value='' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true' />")
-        .attr("name", id + "_text")
-        .attr("id", "id_" + id + "_text")
-        .appendTo(div)
-
-    var i = $("<input type='hidden' />")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .appendTo(div)
-
-    var rod = $("<div class='results_on_deck'></div>")
-        .attr("id", "id_" + id + "_on_deck")
-        .appendTo(div)
-
-    if (onadded != null) {
-        rod.on("added", function() {
-            onadded(i.val())
-        })
-    }
-
-    div.append("<br /><span class='helptext'>Enter text to search.</span>")
-
-    var params = {
-        "min_length": 1,
-        "source": "/ajax/ajax_lookup/" + type,
-    }
-
-    if (value != null) {
-        i.attr("value", value.id)
-        params.initial = [ value.title, value.id ]
-    }
-
-    onready.push(function() {
-        i.autocompleteselect(params)
-    })
-
-    return div
-}
-
-function get_ajax_multiple_select(id, type, value, onready, onadded) {
-    var value_str = "|"
-    var value_arr = []
-    for (var i in value) {
-        var v = value[i]
-        value_str += v.id + "|"
-        value_arr.push([v.title, v.id])
-    }
-
-    var div = $("<div/>")
-
-    $("<input type='text' value='' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true' />")
-        .attr("name", id + "_text")
-        .attr("id", "id_" + id + "_text")
-        .appendTo(div)
-
-    var i = $("<input type='hidden' />")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .attr("value", value_str)
-        .appendTo(div)
-
-    var rod = $("<div class='results_on_deck'></div>")
-        .attr("id", "id_" + id + "_on_deck")
-        .appendTo(div)
-
-    if (onadded != null) {
-        rod.on("added", function() {
-            onadded(i.val())
-        })
-    }
-
-    div.append("<br /><span class='helptext'>Enter text to search.</span>")
-
-    var params = {
-        "min_length": 1,
-        "source": "/ajax/ajax_lookup/" + type,
-        "initial": value_arr,
-    }
-
-    onready.push(function() {
-        i.autocompleteselectmultiple(params)
-    })
-
-    return div
-}
 
 function display_person_search(search, data) {
     var cm = $("#content-main")
@@ -2048,19 +2142,53 @@ function search_photo_list(search, results) {
 }
 
 
-function get_settings() {
-    settings = $(document).data('settings')
-    if (!settings) {
-        settings = {
-            photos_per_page: 10,
-            persons_per_page: 10,
-            list_size: "thumb",
-            view_size: "mid",
-            click_size: "large",
-        }
-        $(document).data('settings', settings)
+function search_paginator(search, results) {
+    var page = Math.floor(results.first / search.results_per_page)
+    var last_page = Math.floor((results.number_results-1) / search.results_per_page)
+
+    var html_page = function(page, text, key) {
+        return search_results_a(search, page, text, key)
     }
-    return settings
+
+    return generic_paginator(page, last_page, html_page)
+}
+
+
+function display_search_photo(search, results, n) {
+    display_photo(results.photo)
+    $("#content-main").append(photo_paginator(search, results, n))
+
+    var page = Math.floor(n / search.results_per_page)
+
+    var ul = $('<ul class="menu"/>')
+
+    $("<li/>")
+        .append(search_a(search, "Revise search"))
+        .appendTo(ul)
+
+    append_action_links(ul)
+
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+        .append(search_a(search))
+        .append(" › ")
+        .append(search_results_a(search, page))
+        .append(" › ")
+        .append(escapeHTML(results.photo.title))
+}
+
+
+function photo_paginator(search, results, n) {
+    var page = n
+    var last_page = results.number_results-1
+
+    var html_page = function(page, text, key) {
+        return search_photo_a(search, page, null, text, key)
+    }
+
+    return generic_paginator(page, last_page, html_page)
 }
 
 
@@ -2212,122 +2340,6 @@ function login_form(form) {
     return false
 }
 
-
-
-function photo_thumb(photo, title, sort, description, url, onclick) {
-    var style = ""
-    var image = null
-    if (photo != null) {
-        var size = get_settings().list_size
-        var style = get_photo_style(photo)
-        var image = photo.thumb[size]
-    }
-
-    li = $("<li />")
-    li.attr('class', "photo_list_item " + style)
-    li.on("click", onclick)
-
-    a = $("<a />")
-    a.attr("href", url)
-
-    if (image != null) {
-        $("<img />")
-        .attr("src", image.url)
-        .attr("alt", title)
-        .attr("width", image.width)
-        .attr("height", image.height)
-        .appendTo(a)
-    }
-
-    a.append("<div class='title'>" + escapeHTML(title) + "</div>")
-
-    if (sort) {
-        a.append("<div class='sort'>" + escapeHTML(sort) + "</div>")
-    }
-    if (description) {
-        a.append("<div class='desc'>" + escapeHTML(description) + "</div>")
-    }
-
-    li.append(a)
-
-    return li
-}
-
-
-function photo_paginator(search, results, n) {
-    var page = n
-    var last_page = results.number_results-1
-
-    var html_page = function(page, text, key) {
-        return search_photo_a(search, page, null, text, key)
-    }
-
-    return generic_paginator(page, last_page, html_page)
-}
-
-
-function search_paginator(search, results) {
-    var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.floor((results.number_results-1) / search.results_per_page)
-
-    var html_page = function(page, text, key) {
-        return search_results_a(search, page, text, key)
-    }
-
-    return generic_paginator(page, last_page, html_page)
-}
-
-
-function generic_paginator(page, last_page, html_page) {
-
-    var p = $("<p class='paginator'/>")
-
-    if (page > 0) {
-        p.append(html_page(page-1, '<', 'p'))
-    }
-    if (page < last_page) {
-        p.append(html_page(page+1, '>', 'n'))
-    }
-    var range = function(first, last) {
-        for (var i=first; i<=last; i++) {
-            if (i == page)
-                p.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
-            else
-                p.append(html_page(i, i+1, null))
-            p.append(" ")
-        }
-    }
-
-    var ON_EACH_SIDE = 3
-    var ON_ENDS = 2
-
-    // If there are 10 or fewer pages, display links to every page.
-    // Otherwise, do some fancy
-    if (last_page <= 10) {
-        range(0, last_page)
-    } else {
-        // Insert "smart" pagination links, so that there are always ON_ENDS
-        // links at either end of the list of pages, and there are always
-        // ON_EACH_SIDE links at either end of the "current page" link.
-        if (page > (ON_EACH_SIDE + ON_ENDS)) {
-            range(0, ON_ENDS-1)
-            p.append('<span class="dots">...</span>')
-            range(page - ON_EACH_SIDE, page-1)
-        } else {
-            range(0, page-1)
-        }
-
-        if (page < (last_page - ON_EACH_SIDE - ON_ENDS)) {
-            range(page, page + ON_EACH_SIDE)
-            p.append('<span class="dots">...</span>')
-            range(last_page - ON_ENDS + 1, last_page)
-        } else {
-            range(page, last_page)
-        }
-    }
-
-    return p
-}
 
 
 // ********************
