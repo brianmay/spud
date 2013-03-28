@@ -2294,7 +2294,7 @@ function display_login(data) {
         .append(get_input_element("password", "", "password"))
 
 
-    table.append("<tr><th>Status</th><td id='status'></td></tr>")
+    table.append("<tr><th>Status</th><td id='loginstatus'></td></tr>")
 
     f.append(table)
 
@@ -2317,7 +2317,7 @@ function display_login(data) {
 
 
 function login_submit(form) {
-    var status = $("#status")
+    var status = $("#loginstatus")
     status.text("Logging in... Please wait.")
 
     load_login(
@@ -2372,16 +2372,19 @@ function login(push_history) {
 
 
 function logout() {
+    display_loading()
+
     load_logout(
         function(data) {
         if (data.status == 'success') {
             window.history.go(0);
         } else {
+            display_error();
             alert("Unknown error")
         }
     },
     function() {
-        status.text("An error occured trying to logout")
+        display_error();
         alert("An error occured trying to logout")
     })
 }
