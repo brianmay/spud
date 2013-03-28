@@ -35,7 +35,7 @@ SEX_CHOICES = (
 PHOTO_ACTION = (
     ('D', 'delete'),
     ('S', 'regenerate size'),
-    ('R', 'regenerate thumbnail'),
+    ('R', 'regenerate thumbnails'),
     ('M', 'move photo'),
     ('auto', 'rotate automatic'),
     ('90', 'rotate 90 degrees clockwise'),
