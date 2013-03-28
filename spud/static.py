@@ -20,6 +20,13 @@ from django.template import RequestContext
 import json
 
 
+def root(request):
+    return render_to_response('html/static.html', {
+        'title': 'Root',
+        'onload': "root()"
+    }, context_instance=RequestContext(request))
+
+
 def login(request):
     return render_to_response('html/static.html', {
         'title': 'Login',

@@ -38,6 +38,7 @@ urlpatterns = patterns('',
     url(r'^a/search/(?P<number>\d+)/$', 'spud.ajax.search_item', name='ajax_photo_search_item'),
     url(r'^a/settings/$', 'spud.ajax.settings', name='ajax_settings'),
 
+    url(r'^b/$', 'spud.static.root', name='static_root'),
     url(r'^b/login/$', 'spud.static.login', name='static_login'),
     url(r'^b/logout/$', 'spud.static.logout', name='static_logout'),
     url(r'^b/photo/(?P<photo_id>\d+)/$', 'spud.static.photo_detail', name='static_photo_detail'),

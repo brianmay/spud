@@ -6,6 +6,11 @@ function media_url(file) {
 }
 
 
+function root_url() {
+   return "/b/"
+}
+
+
 function login_url() {
    return "/b/login/"
 }
@@ -100,6 +105,18 @@ function settings_url(dt) {
 // *********
 // * LINKS *
 // *********
+
+function root_a(title) {
+    if (title == null) {
+        title = "Home"
+    }
+    var a = $('<a/>')
+        .attr('href', root_url())
+        .on('click', function() { root(true); return false; })
+        .text(title)
+    return a
+}
+
 
 function login_a(title) {
     if (title == null) {
@@ -635,6 +652,16 @@ function dt_dd(dl, title, value) {
 }
 
 
+function display_root() {
+    $("#content-main")
+        .html("")
+
+    $(".breadcrumbs")
+        .html("")
+        .append("Home")
+}
+
+
 function display_photo(photo) {
     var size = get_settings().view_size
     var style = get_photo_style(photo)
@@ -727,6 +754,12 @@ function display_photo(photo) {
 
     cm.append(pd)
 
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+        .append(escapeHTML(photo.title))
+
     return
 }
 
@@ -747,6 +780,8 @@ function display_search_photo(search, results, n) {
 
     $(".breadcrumbs")
         .html("")
+        .append(root_a())
+        .append(" › ")
         .append(search_a(search))
         .append(" › ")
         .append(search_results_a(search, page))
@@ -839,7 +874,10 @@ function display_album(album) {
     )
 
     bc = $(".breadcrumbs")
-    bc.html("")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+
     var sep = ""
     for (var i in album.parents) {
         var a = album.parents[i]
@@ -935,7 +973,10 @@ function display_category(category) {
     )
 
     bc = $(".breadcrumbs")
-    bc.html("")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+
     var sep = ""
     for (var i in category.parents) {
         var a = category.parents[i]
@@ -1056,7 +1097,10 @@ function display_place(place) {
     )
 
     bc = $(".breadcrumbs")
-    bc.html("")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+
     var sep = ""
     for (var i in place.parents) {
         var a = place.parents[i]
@@ -1255,7 +1299,9 @@ function display_person_search(search, data) {
 
     $(".breadcrumbs")
         .html("")
-        .append("Search")
+        .append(root_a())
+        .append(" › ")
+        .append("Person search")
 }
 
 
@@ -1357,6 +1403,8 @@ function display_person_search_results(search, results) {
 
     $(".breadcrumbs")
         .html("")
+        .append(root_a())
+        .append(" › ")
         .append(person_search_a(search))
         .append(" › Person List")
 }
@@ -1520,6 +1568,8 @@ function display_person(person) {
 
     bc = $(".breadcrumbs")
         .html("")
+        .append(root_a())
+        .append(" › ")
         .append(person_search_a({}))
         .append("  › " + escapeHTML(person.title))
 }
@@ -1627,6 +1677,8 @@ function display_search(search, data) {
 
     $(".breadcrumbs")
         .html("")
+        .append(root_a())
+        .append(" › ")
         .append("Search")
 }
 
@@ -1767,6 +1819,8 @@ function display_search_results(search, results) {
 
     $(".breadcrumbs")
         .html("")
+        .append(root_a())
+        .append(" › ")
         .append(search_a(search))
         .append(" › Photo List")
 }
@@ -1893,6 +1947,8 @@ function display_settings(data) {
 
     $(".breadcrumbs")
         .html("")
+        .append(root_a())
+        .append(" › ")
         .append("Search")
 }
 
@@ -1959,7 +2015,9 @@ function display_login(data) {
 
     $(".breadcrumbs")
         .html("")
-        .append("Search")
+        .append(root_a())
+        .append(" › ")
+        .append("Login")
 }
 
 
@@ -2289,6 +2347,16 @@ function load_settings(success, error) {
 // ********************
 // * LOAD AND DISPLAY *
 // ********************
+
+
+function root(push_history) {
+    replace_links()
+    update_history(push_history, root_url(), {
+        type: 'root',
+    });
+    display_root()
+}
+
 
 function login(push_history) {
     replace_links()
