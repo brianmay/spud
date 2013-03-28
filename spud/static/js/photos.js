@@ -157,21 +157,6 @@ function photo_a(photo, title) {
 }
 
 
-function photo_a(photo, title) {
-    if (photo == null) {
-        return ""
-    }
-    if (title == null) {
-        title = photo.title
-    }
-    var a = $('<a/>')
-        .attr('href', photo_url(photo))
-        .on('click', function() { load_display_photo(photo.id, true); return false; })
-        .text(title)
-    return a
-}
-
-
 function album_a(album, title) {
     if (album == null) {
         return ""
