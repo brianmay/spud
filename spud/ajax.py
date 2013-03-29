@@ -948,12 +948,12 @@ def search(request):
 def search_results(request):
     search_dict = request.GET.copy()
 
-    first = search_dict.pop("first", ["0"])
+    first = search_dict.pop("first", ["0"])[-1]
     first = _decode_int(first)
     if first < 0:
         raise HttpBadRequest("first is negative")
 
-    count = search_dict.pop("count", ["10"])
+    count = search_dict.pop("count", ["10"])[-1]
     count = _decode_int(count)
     if count < 0:
         raise HttpBadRequest("count is negative")
