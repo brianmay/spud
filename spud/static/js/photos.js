@@ -1898,16 +1898,16 @@ function display_search(search, data) {
     append_field(table, "title", "Title")
         .append(get_input_element("title", data.title, "text"))
 
-    append_field(table, "photographer", "Photographer")
+    append_field(table, "photographer_text", "Photographer")
         .append(get_ajax_select("photographer", 'person', data.photographer, onready))
 
-    append_field(table, "person", "Person")
+    append_field(table, "person_text", "Person")
         .append(get_ajax_multiple_select("person", 'person', data.person, onready))
 
     append_field(table, "person_none", "Person none")
         .append(get_input_checkbox("person_none", data.person_none))
 
-    append_field(table, "place", "Place")
+    append_field(table, "place_text", "Place")
         .append(get_ajax_select("place", 'place', data.place, onready))
 
     append_field(table, "place_descendants", "Place descendants")
@@ -1916,7 +1916,7 @@ function display_search(search, data) {
     append_field(table, "place_none", "Place none")
         .append(get_input_checkbox("place_none", data.place_none))
 
-    append_field(table, "album", "Album")
+    append_field(table, "album_text", "Album")
         .append(get_ajax_multiple_select("album", 'album', data.album, onready))
 
     append_field(table, "album_descendants", "Album descendants")
@@ -1925,7 +1925,7 @@ function display_search(search, data) {
     append_field(table, "album_none", "Album none")
         .append(get_input_checkbox("album_none", data.album_none))
 
-    append_field(table, "category", "Category")
+    append_field(table, "category_text", "Category")
         .append(get_ajax_multiple_select("category", 'category', data.category, onready))
 
     append_field(table, "category_descendants", "Category descendants")
