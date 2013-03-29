@@ -651,7 +651,7 @@ function p(t){
 }
 
 
-$(document).ajaxStart(display_loading).ajaxStop(hide_status)
+$(document).ajaxStart(display_loading)
 
 function display_loading() {
     var message = $("<div></div>")
@@ -2300,32 +2300,33 @@ function settings_submit(form) {
 
 
 function login_submit(dialog, form) {
-    dialog.dialog("close")
 
     load_login(
             form.username.value,
             form.password.value,
             function(data) {
                 if (data.status == 'success') {
+                    dialog.dialog("close")
+                    hide_status()
                     if (window.history.state==null) {
                         root(true)
                     } else {
                         window.history.go(0);
                     }
                 } else if (data.status == 'account_disabled') {
+                    hide_status()
                     alert("Account is disabled")
-                    dialog.dialog("open")
                 } else if (data.status == 'invalid_login') {
+                    hide_status()
                     alert("Invalid login")
-                    dialog.dialog("open")
                 } else {
+                    hide_status()
                     alert("Unknown error")
-                    dialog.dialog("open")
                 }
             },
             function() {
+                hide_status()
                 alert("An error occured trying to login")
-                dialog.dialog("open")
             })
 
     return false
@@ -2355,7 +2356,6 @@ function login(push_history) {
     }
 
     dialog = $("<div id='dialog'></div>")
-        .empty()
         .attr('title', "Login")
 
     var f = $("<form method='get' />")
@@ -2378,7 +2378,7 @@ function login(push_history) {
 
     dialog
         .append(f)
-        .appendTo("#content-main")
+//        .appendTo("#content-main")
         .dialog({ modal: true })
 }
 
@@ -2406,6 +2406,7 @@ function logout() {
 
 function load_display_photo(photo_id, push_history) {
     load_photo(photo_id, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, photo_url(data.photo), {
@@ -2419,6 +2420,7 @@ function load_display_photo(photo_id, push_history) {
 
 function load_display_album(album_id, push_history) {
     load_album(album_id, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, album_url(data.album), {
@@ -2433,6 +2435,7 @@ function load_display_album(album_id, push_history) {
 function load_display_category(category_id, push_history) {
 
     load_category(category_id, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, category_url(data.category), {
@@ -2446,6 +2449,7 @@ function load_display_category(category_id, push_history) {
 
 function load_display_place(place_id, push_history) {
     load_place(place_id, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, place_url(data.place), {
@@ -2463,6 +2467,7 @@ function load_display_person_search(search, push_history) {
     }
 
     load_person_search(search, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2480,6 +2485,7 @@ function load_display_person_search_results(search, page, push_history) {
         search.results_per_page = get_settings().persons_per_page
 
     load_person_search_results(search, page, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2495,6 +2501,7 @@ function load_display_person_search_results(search, page, push_history) {
 
 function load_display_person(person_id, push_history) {
     load_person(person_id, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, person_url(data.person), {
@@ -2512,6 +2519,7 @@ function load_display_search(search, push_history) {
     }
 
     load_search(search, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2529,6 +2537,7 @@ function load_display_search_results(search, page, push_history) {
         search.results_per_page = get_settings().photos_per_page
 
     load_search_results(search, page, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history,
@@ -2544,6 +2553,7 @@ function load_display_search_results(search, page, push_history) {
 
 function load_display_search_photo(search, n, push_history) {
     load_search_photo(search, n, function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, search_photo_url(search, n, data.photo), {
@@ -2557,6 +2567,7 @@ function load_display_search_photo(search, n, push_history) {
 
 function load_display_settings(push_history) {
     load_settings(function(data) {
+        hide_status()
         replace_links()
         update_session(data.session)
         update_history(push_history, settings_url(), {
