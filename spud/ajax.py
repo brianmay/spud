@@ -31,8 +31,6 @@ from django.utils.encoding import iri_to_uri
 from django.db.models import Q
 from django.template import RequestContext, loader, TemplateDoesNotExist
 
-from django.views.decorators.csrf import csrf_exempt
-
 
 def _decode_int(string):
     try:
@@ -546,7 +544,6 @@ def check_errors(func):
     return wrapper
 
 
-@csrf_exempt
 @check_errors
 def login(request):
     if request.method != "POST":
@@ -571,7 +568,6 @@ def login(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@csrf_exempt
 @check_errors
 def logout(request):
     if request.method != "POST":
@@ -591,7 +587,6 @@ def photo(request, photo_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@csrf_exempt
 @check_errors
 def album(request, album_id):
     if request.method == "POST":
@@ -601,7 +596,6 @@ def album(request, album_id):
     return album_finish(request, album)
 
 
-@csrf_exempt
 @check_errors
 def album_add(request):
     if request.method == "POST":
@@ -611,7 +605,6 @@ def album_add(request):
     return album_finish(request, album)
 
 
-@csrf_exempt
 @check_errors
 def album_delete(request, album_id):
     if request.method != "POST":
@@ -675,7 +668,6 @@ def album_finish(request, album):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@csrf_exempt
 @check_errors
 def category(request, category_id):
     if request.method == "POST":
@@ -685,7 +677,6 @@ def category(request, category_id):
     return category_finish(request, category)
 
 
-@csrf_exempt
 @check_errors
 def category_add(request):
     if request.method == "POST":
@@ -695,7 +686,6 @@ def category_add(request):
     return category_finish(request, category)
 
 
-@csrf_exempt
 @check_errors
 def category_delete(request, category_id):
     if request.method != "POST":
@@ -759,7 +749,6 @@ def category_finish(request, category):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@csrf_exempt
 @check_errors
 def place(request, place_id):
     if request.method == "POST":
@@ -769,7 +758,6 @@ def place(request, place_id):
     return place_finish(request, place)
 
 
-@csrf_exempt
 @check_errors
 def place_add(request):
     if request.method == "POST":
@@ -779,7 +767,6 @@ def place_add(request):
     return place_finish(request, place)
 
 
-@csrf_exempt
 @check_errors
 def place_delete(request, place_id):
     if request.method != "POST":
@@ -906,7 +893,6 @@ def person_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-@csrf_exempt
 @check_errors
 def person(request, person_id):
     if request.method == "POST":
@@ -916,7 +902,6 @@ def person(request, person_id):
     return person_finish(request, person)
 
 
-@csrf_exempt
 @check_errors
 def person_add(request):
     if request.method == "POST":
@@ -926,7 +911,6 @@ def person_add(request):
     return person_finish(request, person)
 
 
-@csrf_exempt
 @check_errors
 def person_delete(request, person_id):
     if request.method != "POST":
