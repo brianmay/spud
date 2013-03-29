@@ -2348,7 +2348,15 @@ function root(push_history) {
 
 
 function login(push_history) {
-    var dialog = $("<div title='Login'></div>")
+    var dialog = $("#dialog")
+    if (dialog.length > 0) {
+        dialog.dialog("destroy")
+        dialog.remove()
+    }
+
+    dialog = $("<div id='dialog'></div>")
+        .empty()
+        .attr('title', "Login")
 
     var f = $("<form method='get' />")
 
