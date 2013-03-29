@@ -752,7 +752,8 @@ function append_persons(tag, persons) {
     var sep = ""
     for (var i in persons) {
         var person = persons[i]
-        div.append(sep + "<a href='" + escapeHTML(person_url(person)) + "'>" + escapeHTML(person.title) + "</a>")
+        tag.append(sep)
+        tag.append(person_a(person))
         sep = ", "
     }
     tag.append(div)
