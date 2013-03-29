@@ -745,6 +745,8 @@ function display_loading() {
 
 
 function display_error() {
+    $("#content-main").html("")
+
     var message = $("<div></div>")
 
     $("<img/>")
