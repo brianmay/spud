@@ -331,30 +331,6 @@ function photo_a(photo, title) {
     return a
 }
 
-$(document)
-        .tooltip({
-            items: "a",
-            content: function() {
-                var photo = $(this).data('photo')
-                var image = null
-                if (photo != null) {
-                    var size = get_settings().list_size
-                    var style = get_photo_style(photo)
-                    var image = photo.thumb[size]
-                }
-                if (image != null) {
-                    return $("<img />")
-                        .attr("class", style)
-                        .attr("src", image.url)
-                        .attr("alt", photo.title)
-                        .attr("width", image.width)
-                        .attr("height", image.height)
-                }
-                return null
-            },
-        })
-
-
 function album_a(album, title) {
     if (album == null) {
         return ""
@@ -588,6 +564,10 @@ function resize_photo(img, width, height) {
 }
 
 
+// ***************
+// * EVENTS, ETC *
+// ***************
+
 window.onpopstate = function(event) {
     var state=event.state
     if (state != null) {
@@ -619,6 +599,30 @@ window.onpopstate = function(event) {
         }
     }
 };
+
+
+$(document)
+        .tooltip({
+            items: "a",
+            content: function() {
+                var photo = $(this).data('photo')
+                var image = null
+                if (photo != null) {
+                    var size = get_settings().list_size
+                    var style = get_photo_style(photo)
+                    var image = photo.thumb[size]
+                }
+                if (image != null) {
+                    return $("<img />")
+                        .attr("class", style)
+                        .attr("src", image.url)
+                        .attr("alt", photo.title)
+                        .attr("width", image.width)
+                        .attr("height", image.height)
+                }
+                return null
+            },
+        })
 
 
 // ****************
