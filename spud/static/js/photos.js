@@ -731,8 +731,6 @@ function p(t){
 }
 
 
-$(document).ajaxStart(display_loading)
-
 function display_loading() {
     var message = $("<div></div>")
 
@@ -1532,6 +1530,7 @@ function change_album_submit(album, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
+    display_loading()
     load_change_album(
             album.id,
             updates,
@@ -1591,6 +1590,7 @@ function display_delete_album(album) {
 
 
 function delete_album_submit(album, dialog) {
+    display_loading()
     load_delete_album(
             album.id,
             function(data) {
@@ -2597,7 +2597,7 @@ function settings_submit(form) {
 
 
 function login_submit(dialog, form) {
-
+    display_loading()
     load_login(
             form.username.value,
             form.password.value,
@@ -2681,6 +2681,7 @@ function login(push_history) {
 
 
 function logout() {
+    display_loading()
     load_logout(
         function(data) {
         if (data.status == 'success') {
@@ -2702,6 +2703,7 @@ function logout() {
 
 
 function load_display_photo(photo_id, push_history) {
+    display_loading()
     load_photo(photo_id, function(data) {
         hide_status()
         replace_links()
@@ -2716,6 +2718,7 @@ function load_display_photo(photo_id, push_history) {
 
 
 function load_display_album(album_id, push_history) {
+    display_loading()
     load_album(album_id, function(data) {
         hide_status()
         replace_links()
@@ -2730,6 +2733,7 @@ function load_display_album(album_id, push_history) {
 
 
 function load_display_change_album(album_id, push_history) {
+    display_loading()
     load_album(album_id, function(data) {
         hide_status()
         update_session(data.session)
@@ -2753,6 +2757,7 @@ function add_album(parent_album, push_history) {
 
 
 function load_display_delete_album(album_id, push_history) {
+    display_loading()
     load_album(album_id, function(data) {
         hide_status()
         replace_links()
@@ -2764,6 +2769,7 @@ function load_display_delete_album(album_id, push_history) {
 
 
 function load_display_category(category_id, push_history) {
+    display_loading()
     load_category(category_id, function(data) {
         hide_status()
         replace_links()
@@ -2778,6 +2784,7 @@ function load_display_category(category_id, push_history) {
 
 
 function load_display_place(place_id, push_history) {
+    display_loading()
     load_place(place_id, function(data) {
         hide_status()
         replace_links()
@@ -2796,6 +2803,7 @@ function load_display_person_search(search, push_history) {
         search.params = {}
     }
 
+    display_loading()
     load_person_search(search, function(data) {
         hide_status()
         replace_links()
@@ -2814,6 +2822,7 @@ function load_display_person_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().persons_per_page
 
+    display_loading()
     load_person_search_results(search, page, function(data) {
         hide_status()
         replace_links()
@@ -2830,6 +2839,7 @@ function load_display_person_search_results(search, page, push_history) {
 
 
 function load_display_person(person_id, push_history) {
+    display_loading()
     load_person(person_id, function(data) {
         hide_status()
         replace_links()
@@ -2848,6 +2858,7 @@ function load_display_search(search, push_history) {
         search.params = {}
     }
 
+    display_loading()
     load_search(search, function(data) {
         hide_status()
         replace_links()
@@ -2866,6 +2877,7 @@ function load_display_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
+    display_loading()
     load_search_results(search, page, function(data) {
         hide_status()
         replace_links()
@@ -2882,6 +2894,7 @@ function load_display_search_results(search, page, push_history) {
 
 
 function load_display_search_photo(search, n, push_history) {
+    display_loading()
     load_search_photo(search, n, function(data) {
         hide_status()
         replace_links()
@@ -2896,6 +2909,7 @@ function load_display_search_photo(search, n, push_history) {
 }
 
 function load_display_settings(push_history) {
+    display_loading()
     load_settings(function(data) {
         hide_status()
         replace_links()
