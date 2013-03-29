@@ -23,21 +23,21 @@ import json
 def root(request):
     return render_to_response('html/static.html', {
         'title': 'Root',
-        'onload': "root()"
+        'onload': "do_root()"
     }, context_instance=RequestContext(request))
 
 
 def login(request):
     return render_to_response('html/static.html', {
         'title': 'Login',
-        'onload': "login()"
+        'onload': "do_login()"
     }, context_instance=RequestContext(request))
 
 
 def logout(request):
     return render_to_response('html/static.html', {
         'title': 'Login',
-        'onload': "logout()"
+        'onload': "do_logout()"
     }, context_instance=RequestContext(request))
 
 
@@ -54,12 +54,12 @@ def photo_detail(request, photo_id):
         js = json.dumps({'params': query})
         return render_to_response('html/static.html', {
             'title': 'Photo detail',
-            'onload': "load_display_search_photo(%s, %d)" % (js, n),
+            'onload': "do_search_photo(%s, %d)" % (js, n),
         }, context_instance=RequestContext(request))
     else:
         return render_to_response('html/static.html', {
             'title': 'Photo detail',
-            'onload': "load_display_photo(%d)" % photo_id,
+            'onload': "do_photo(%d)" % photo_id,
         }, context_instance=RequestContext(request))
 
 
@@ -67,7 +67,7 @@ def album_detail(request, album_id):
     album_id = int(album_id)
     return render_to_response('html/static.html', {
         'title': 'Album detail',
-        'onload': "load_display_album(%d)" % album_id,
+        'onload': "do_album(%d)" % album_id,
     }, context_instance=RequestContext(request))
 
 
@@ -75,7 +75,7 @@ def category_detail(request, category_id):
     category_id = int(category_id)
     return render_to_response('html/static.html', {
         'title': 'Album detail',
-        'onload': "load_display_category(%d)" % category_id,
+        'onload': "do_category(%d)" % category_id,
     }, context_instance=RequestContext(request))
 
 
@@ -83,7 +83,7 @@ def place_detail(request, place_id):
     place_id = int(place_id)
     return render_to_response('html/static.html', {
         'title': 'Album detail',
-        'onload': "load_display_place(%d)" % place_id,
+        'onload': "do_place(%d)" % place_id,
     }, context_instance=RequestContext(request))
 
 
@@ -91,7 +91,7 @@ def person_search(request):
     js = json.dumps({'params': request.GET})
     return render_to_response('html/static.html', {
         'title': 'Person search results',
-        'onload': "load_display_person_search(%s)" % (js)
+        'onload': "do_person_search(%s)" % (js)
     }, context_instance=RequestContext(request))
 
 
@@ -106,7 +106,7 @@ def person_search_results(request):
     js = json.dumps({'params': query})
     return render_to_response('html/static.html', {
         'title': 'Person results',
-        'onload': "load_display_person_search_results(%s, %d)" % (js, page),
+        'onload': "do_person_search_results(%s, %d)" % (js, page),
     }, context_instance=RequestContext(request))
 
 
@@ -114,7 +114,7 @@ def person_detail(request, person_id):
     person_id = int(person_id)
     return render_to_response('html/static.html', {
         'title': 'Person detail',
-        'onload': "load_display_person(%d)" % person_id,
+        'onload': "do_person(%d)" % person_id,
     }, context_instance=RequestContext(request))
 
 
@@ -122,7 +122,7 @@ def search(request):
     js = json.dumps({'params': request.GET})
     return render_to_response('html/static.html', {
         'title': 'Search',
-        'onload': "load_display_search(%s)" % (js)
+        'onload': "do_search(%s)" % (js)
     }, context_instance=RequestContext(request))
 
 
@@ -137,12 +137,12 @@ def search_results(request):
     js = json.dumps({'params': query})
     return render_to_response('html/static.html', {
         'title': 'Search results',
-        'onload': "load_display_search_results(%s, %d)" % (js, page),
+        'onload': "do_search_results(%s, %d)" % (js, page),
     }, context_instance=RequestContext(request))
 
 
 def settings(request):
     return render_to_response('html/static.html', {
         'title': 'Settings',
-        'onload': "load_display_settings()"
+        'onload': "do_settings()"
     }, context_instance=RequestContext(request))
