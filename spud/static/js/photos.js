@@ -1519,7 +1519,7 @@ function display_change_album(album) {
 
 
 function change_album_submit(album, dialog, form) {
-    updates = {
+    var updates = {
         title: parse_form_string(form.title.value),
         description: parse_form_string(form.description.value),
         cover_photo: parse_form_string(form.cover_photo.value),
