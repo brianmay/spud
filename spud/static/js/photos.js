@@ -1443,13 +1443,7 @@ function display_album(album) {
 function display_change_album(album) {
     var onready = []
 
-    var dialog = $("#dialog")
-    if (dialog.length > 0) {
-        dialog.dialog("destroy")
-        dialog.remove()
-    }
-
-    dialog = $("<div id='dialog'></div>")
+    var dialog = $("<div id='dialog'></div>")
 
     if (album.id != null) {
         dialog.attr('title', "Change " + album.title)
@@ -1513,8 +1507,10 @@ function display_change_album(album) {
 
     dialog
         .append(f)
-//        .appendTo("#content-main")
-        .dialog({ modal: true })
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+        })
 
     for (i in onready) {
         onready[i]()
@@ -1569,16 +1565,11 @@ function change_album_submit(album, dialog, form) {
 
 
 function display_delete_album(album) {
-    var dialog = $("#dialog")
-    if (dialog.length > 0) {
-        dialog.dialog("destroy")
-        dialog.remove()
-    }
-
-    dialog = $("<div id='dialog'><p>Are you sure you want to delete this album?</p></div>")
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this album?</p></div>")
         .attr('title', "Delete " + album.title)
         .dialog({
             modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Delete: function() {
                     delete_album_submit(album, $(this))
@@ -2640,13 +2631,7 @@ function root(push_history) {
 
 
 function login(push_history) {
-    var dialog = $("#dialog")
-    if (dialog.length > 0) {
-        dialog.dialog("destroy")
-        dialog.remove()
-    }
-
-    dialog = $("<div id='dialog'></div>")
+    var dialog = $("<div id='dialog'></div>")
         .attr('title', "Login")
 
     var f = $("<form method='get' />")
@@ -2669,8 +2654,10 @@ function login(push_history) {
 
     dialog
         .append(f)
-//        .appendTo("#content-main")
-        .dialog({ modal: true })
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+        })
 }
 
 
