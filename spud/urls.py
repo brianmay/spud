@@ -33,10 +33,19 @@ urlpatterns = patterns('',
     url(r'^a/album/(?P<album_id>\d+)/delete/$', 'spud.ajax.album_delete', name='ajax_album_delete'),
 
     url(r'^a/category/(?P<category_id>\d+)/$', 'spud.ajax.category', name='ajax_category'),
+    url(r'^a/category/add/$', 'spud.ajax.category_add', name='ajax_category_add'),
+    url(r'^a/category/(?P<category_id>\d+)/delete/$', 'spud.ajax.category_delete', name='ajax_category_delete'),
+
     url(r'^a/place/(?P<place_id>\d+)/$', 'spud.ajax.place', name='ajax_place'),
+    url(r'^a/place/add/$', 'spud.ajax.place_add', name='ajax_place_add'),
+    url(r'^a/place/(?P<place_id>\d+)/delete/$', 'spud.ajax.place_delete', name='ajax_place_delete'),
+
     url(r'^a/person/$', 'spud.ajax.person_search', name='ajax_person_search'),
     url(r'^a/person/results/$', 'spud.ajax.person_search_results', name='ajax_person_search_results'),
     url(r'^a/person/(?P<person_id>\d+)/$', 'spud.ajax.person', name='ajax_person'),
+    url(r'^a/person/add/$', 'spud.ajax.person_add', name='ajax_person_add'),
+    url(r'^a/person/(?P<person_id>\d+)/delete/$', 'spud.ajax.person_delete', name='ajax_person_delete'),
+
     url(r'^a/search/$', 'spud.ajax.search', name='ajax_photo_search'),
     url(r'^a/search/results/$', 'spud.ajax.search_results', name='ajax_photo_search_results'),
     url(r'^a/search/(?P<number>\d+)/$', 'spud.ajax.search_item', name='ajax_photo_search_item'),

@@ -675,19 +675,179 @@ def album_finish(request, album):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@csrf_exempt
+@check_errors
 def category(request, category_id):
-    object = get_object_or_404(spud.models.category, pk=category_id)
+    if request.method == "POST":
+        if not request.user.has_perm('spud.change_category'):
+            raise HttpForbidden("No rights to change categorys")
+    category = get_object_or_404(spud.models.category, pk=category_id)
+    return category_finish(request, category)
+
+
+@csrf_exempt
+@check_errors
+def category_add(request):
+    if request.method == "POST":
+        if not request.user.has_perm('spud.add_category'):
+            raise HttpForbidden("No rights to add categorys")
+    category = spud.models.category()
+    return category_finish(request, category)
+
+
+@csrf_exempt
+@check_errors
+def category_delete(request, category_id):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    if not request.user.has_perm('spud.delete_category'):
+        raise HttpForbidden("No rights to delete categorys")
+    category = get_object_or_404(spud.models.category, pk=category_id)
+
+    errors = category.check_delete()
     resp = {
-        'category': _get_category_detail(request.user, object),
+        'errors': errors,
+        'session': _get_session(request),
+    }
+
+    if len(errors) == 0:
+        category.delete()
+        resp['status'] = 'success'
+    else:
+        resp['status'] = 'errors'
+
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def category_finish(request, category):
+    if request.method == "POST":
+        if 'title' in request.POST:
+            category.category = request.POST['title']
+        if 'description' in request.POST:
+            category.category_description = request.POST['description']
+        if 'cover_photo' in request.POST:
+            if request.POST['cover_photo'] == "":
+                category.cover_photo = None
+            else:
+                try:
+                    photo_id = _decode_int(request.POST['cover_photo'])
+                    cp = spud.models.photo.objects.get(pk=photo_id)
+                    category.cover_photo = cp
+                except spud.models.photo.DoesNotExist:
+                    raise HttpBadRequest("cover_photo does not exist")
+        if 'sortname' in request.POST:
+            category.sortname = request.POST['sortname']
+        if 'sortorder' in request.POST:
+            category.sortorder = request.POST['sortorder']
+        if 'parent' in request.POST:
+            if request.POST['parent'] == "":
+                category.parent_category = None
+            else:
+                try:
+                    parent_id = _decode_int(request.POST['parent'])
+                    p = spud.models.category.objects.get(pk=parent_id)
+                    category.parent_category = p
+                except spud.models.category.DoesNotExist:
+                    raise HttpBadRequest("cover_photo does not exist")
+        category.save()
+
+    resp = _get_category_detail(request.user, category)
+    resp = {
+        'category': _get_category_detail(request.user, category),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@csrf_exempt
+@check_errors
 def place(request, place_id):
-    object = get_object_or_404(spud.models.place, pk=place_id)
+    if request.method == "POST":
+        if not request.user.has_perm('spud.change_place'):
+            raise HttpForbidden("No rights to change places")
+    place = get_object_or_404(spud.models.place, pk=place_id)
+    return place_finish(request, place)
+
+
+@csrf_exempt
+@check_errors
+def place_add(request):
+    if request.method == "POST":
+        if not request.user.has_perm('spud.add_place'):
+            raise HttpForbidden("No rights to add places")
+    place = spud.models.place()
+    return place_finish(request, place)
+
+
+@csrf_exempt
+@check_errors
+def place_delete(request, place_id):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    if not request.user.has_perm('spud.delete_place'):
+        raise HttpForbidden("No rights to delete places")
+    place = get_object_or_404(spud.models.place, pk=place_id)
+
+    errors = place.check_delete()
     resp = {
-        'place': _get_place_detail(request.user, object),
+        'errors': errors,
+        'session': _get_session(request),
+    }
+
+    if len(errors) == 0:
+        place.delete()
+        resp['status'] = 'success'
+    else:
+        resp['status'] = 'errors'
+
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def place_finish(request, place):
+    if request.method == "POST":
+        if 'title' in request.POST:
+            place.title = request.POST['title']
+        if 'address' in request.POST:
+            place.address = request.POST['address']
+        if 'address2' in request.POST:
+            place.address2 = request.POST['address2']
+        if 'city' in request.POST:
+            place.city = request.POST['city']
+        if 'zip' in request.POST:
+            place.zip = request.POST['zip']
+        if 'country' in request.POST:
+            place.country = request.POST['country']
+        if 'url' in request.POST:
+            place.url = request.POST['url']
+        if 'urldesc' in request.POST:
+            place.urldesc = request.POST['urldesc']
+        if 'notes' in request.POST:
+            place.place_description = request.POST['notes']
+        if 'cover_photo' in request.POST:
+            if request.POST['cover_photo'] == "":
+                place.cover_photo = None
+            else:
+                try:
+                    photo_id = _decode_int(request.POST['cover_photo'])
+                    cp = spud.models.photo.objects.get(pk=photo_id)
+                    place.cover_photo = cp
+                except spud.models.photo.DoesNotExist:
+                    raise HttpBadRequest("cover_photo does not exist")
+        if 'parent' in request.POST:
+            if request.POST['parent'] == "":
+                place.parent_place = None
+            else:
+                try:
+                    parent_id = _decode_int(request.POST['parent'])
+                    p = spud.models.place.objects.get(pk=parent_id)
+                    place.parent_place = p
+                except spud.models.place.DoesNotExist:
+                    raise HttpBadRequest("cover_photo does not exist")
+        place.save()
+
+    resp = _get_place_detail(request.user, place)
+    resp = {
+        'place': _get_place_detail(request.user, place),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -746,10 +906,131 @@ def person_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@csrf_exempt
+@check_errors
 def person(request, person_id):
-    object = get_object_or_404(spud.models.person, pk=person_id)
+    if request.method == "POST":
+        if not request.user.has_perm('spud.change_person'):
+            raise HttpForbidden("No rights to change persons")
+    person = get_object_or_404(spud.models.person, pk=person_id)
+    return person_finish(request, person)
+
+
+@csrf_exempt
+@check_errors
+def person_add(request):
+    if request.method == "POST":
+        if not request.user.has_perm('spud.add_person'):
+            raise HttpForbidden("No rights to add persons")
+    person = spud.models.person()
+    return person_finish(request, person)
+
+
+@csrf_exempt
+@check_errors
+def person_delete(request, person_id):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    if not request.user.has_perm('spud.delete_person'):
+        raise HttpForbidden("No rights to delete persons")
+    person = get_object_or_404(spud.models.person, pk=person_id)
+
+    errors = person.check_delete()
     resp = {
-        'person': _get_person_detail(request.user, object),
+        'errors': errors,
+        'session': _get_session(request),
+    }
+
+    if len(errors) == 0:
+        person.delete()
+        resp['status'] = 'success'
+    else:
+        resp['status'] = 'errors'
+
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def person_finish(request, person):
+    if request.method == "POST":
+        if 'first_name' in request.POST:
+            person.first_name = request.POST['first_name']
+        if 'middle_name' in request.POST:
+            person.person_description = request.POST['middle_name']
+        if 'last_name' in request.POST:
+            person.person_description = request.POST['last_name']
+        if 'called' in request.POST:
+            person.person_description = request.POST['called']
+        if 'gender' in request.POST:
+            person.gender = request.POST['gender']
+        if 'notes' in request.POST:
+            person.person_description = request.POST['notes']
+        if 'email' in request.POST:
+            person.person_description = request.POST['email']
+        if 'cover_photo' in request.POST:
+            if request.POST['cover_photo'] == "":
+                person.cover_photo = None
+            else:
+                try:
+                    photo_id = _decode_int(request.POST['cover_photo'])
+                    cp = spud.models.photo.objects.get(pk=photo_id)
+                    person.cover_photo = cp
+                except spud.models.photo.DoesNotExist:
+                    raise HttpBadRequest("cover_photo does not exist")
+        if 'work' in request.POST:
+            if request.POST['work'] == "":
+                person.work = None
+            else:
+                try:
+                    place_id = _decode_int(request.POST['work'])
+                    p = spud.models.place.objects.get(pk=place_id)
+                    person.work = p
+                except spud.models.place.DoesNotExist:
+                    raise HttpBadRequest("work does not exist")
+        if 'home' in request.POST:
+            if request.POST['home'] == "":
+                person.home = None
+            else:
+                try:
+                    place_id = _decode_int(request.POST['home'])
+                    p = spud.models.place.objects.get(pk=place_id)
+                    person.home = p
+                except spud.models.place.DoesNotExist:
+                    raise HttpBadRequest("home does not exist")
+        if 'mother' in request.POST:
+            if request.POST['mother'] == "":
+                person.mother = None
+            else:
+                try:
+                    person_id = _decode_int(request.POST['mother'])
+                    p = spud.models.person.objects.get(pk=person_id)
+                    person.mother = p
+                except spud.models.person.DoesNotExist:
+                    raise HttpBadRequest("mother does not exist")
+        if 'father' in request.POST:
+            if request.POST['father'] == "":
+                person.father = None
+            else:
+                try:
+                    person_id = _decode_int(request.POST['father'])
+                    p = spud.models.person.objects.get(pk=person_id)
+                    person.father = p
+                except spud.models.person.DoesNotExist:
+                    raise HttpBadRequest("father does not exist")
+        if 'spouse' in request.POST:
+            if request.POST['spouse'] == "":
+                person.spouse = None
+            else:
+                try:
+                    person_id = _decode_int(request.POST['spouse'])
+                    p = spud.models.person.objects.get(pk=person_id)
+                    person.spouse = p
+                except spud.models.person.DoesNotExist:
+                    raise HttpBadRequest("spouse does not exist")
+        person.save()
+
+    resp = _get_person_detail(request.user, person)
+    resp = {
+        'person': _get_person_detail(request.user, person),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
