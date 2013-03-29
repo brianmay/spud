@@ -331,6 +331,29 @@ function photo_a(photo, title) {
     return a
 }
 
+$(document)
+        .tooltip({
+            items: "a",
+            content: function() {
+                var photo = $(this).data('photo')
+                var image = null
+                if (photo != null) {
+                    var size = get_settings().list_size
+                    var style = get_photo_style(photo)
+                    var image = photo.thumb[size]
+                }
+                if (image != null) {
+                    return $("<img />")
+                        .attr("class", style)
+                        .attr("src", image.url)
+                        .attr("alt", photo.title)
+                        .attr("width", image.width)
+                        .attr("height", image.height)
+                }
+                return null
+            },
+        })
+
 
 function album_a(album, title) {
     if (album == null) {
@@ -342,6 +365,7 @@ function album_a(album, title) {
     var a = $('<a/>')
         .attr('href', album_url(album))
         .on('click', function() { load_display_album(album.id, true); return false; })
+        .data('photo', album.cover_photo)
         .text(title)
     return a
 }
@@ -357,6 +381,7 @@ function category_a(category, title) {
     var a = $('<a/>')
         .attr('href', category_url(category))
         .on('click', function() { load_display_category(category.id, true); return false; })
+        .data('photo', category.cover_photo)
         .text(title)
     return a
 }
@@ -372,6 +397,7 @@ function place_a(place, title) {
     var a = $('<a/>')
         .attr('href', place_url(place))
         .on('click', function() { load_display_place(place.id, true); return false; })
+        .data('photo', place.cover_photo)
         .text(title)
     return a
 }
@@ -415,6 +441,7 @@ function person_a(person, title) {
     var a = $('<a/>')
         .attr('href', person_url(person))
         .on('click', function() { load_display_person(person.id, true); return false; })
+        .data('photo', person.cover_photo)
         .text(title)
     return a
 }
@@ -455,6 +482,7 @@ function search_photo_a(search, n, photo, title, accesskey) {
     var a = $('<a/>')
         .attr('href', search_photo_url(search, n, photo))
         .on('click', function() { load_display_search_photo(search, n, true); return false; })
+        .data('photo', photo)
         .text(title)
 
     if (accesskey != null) {
