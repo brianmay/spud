@@ -2585,6 +2585,41 @@ function settings_submit(form) {
 }
 
 
+function display_login(push_history) {
+    var dialog = $("<div id='dialog'></div>")
+        .attr('title', "Login")
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    settings = get_settings()
+
+    append_field(table, "username", "Username")
+        .append(get_input_element("username", "", "text"))
+
+    append_field(table, "password", "Password")
+        .append(get_input_element("password", "", "password"))
+
+    f.append(table)
+
+    dialog
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Login: function() {
+                    login_submit($( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
 function login_submit(dialog, form) {
     display_loading()
     load_login(
@@ -2634,38 +2669,8 @@ function root(push_history) {
 }
 
 
-function login(push_history) {
-    var dialog = $("<div id='dialog'></div>")
-        .attr('title', "Login")
-
-    var f = $("<form method='get' />")
-
-    var table = $("<table />")
-
-    settings = get_settings()
-
-    append_field(table, "username", "Username")
-        .append(get_input_element("username", "", "text"))
-
-    append_field(table, "password", "Password")
-        .append(get_input_element("password", "", "password"))
-
-    f.append(table)
-
-    dialog
-        .append(f)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            buttons: {
-                Login: function() {
-                    login_submit($( this ), f[0])
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
-        })
+function login() {
+    display_login()
 }
 
 
