@@ -154,6 +154,35 @@ function load_album(album_id, success, error) {
 }
 
 
+function load_change_album(album_id, updates, success, error) {
+    var url = '/a/album/add/'
+    if (album_id != null) {
+        url = '/a/album/'+album_id+'/'
+    }
+    $.ajax({
+        url: url,
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+        data: updates,
+    })
+}
+
+
+function load_delete_album(album_id, success, error) {
+    $.ajax({
+        url: '/a/album/'+album_id+'/delete/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+    })
+}
+
+
 function load_category(category_id, success, error) {
     $.ajax({
         url: '/a/category/'+category_id+'/',
@@ -341,6 +370,48 @@ function album_a(album, title) {
     var a = $('<a/>')
         .attr('href', album_url(album))
         .on('click', function() { load_display_album(album.id, true); return false; })
+        .data('photo', album.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function change_album_a(album, title) {
+    if (album == null) {
+        return ""
+    }
+    if (title == null) {
+        title = "Change album"
+    }
+    var a = $('<a/>')
+        .attr('href', album_url(album))
+        .on('click', function() { load_display_change_album(album.id, true); return false; })
+        .data('photo', album.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function add_album_a(parent, title) {
+    if (title == null) {
+        title = "Add album"
+    }
+    var a = $('<a/>')
+        .attr('href', album_url(parent))
+        .on('click', function() { add_album(parent, true); return false; })
+        .data('photo', parent.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function delete_album_a(album, title) {
+    if (title == null) {
+        title = "Delete album"
+    }
+    var a = $('<a/>')
+        .attr('href', album_url(album))
+        .on('click', function() { load_display_delete_album(album.id, true); return false; })
         .data('photo', album.cover_photo)
         .text(title)
     return a
@@ -561,6 +632,11 @@ function resize_photo(img, width, height) {
 
     img.width = width
     img.height = height
+}
+
+
+function parse_form_string(string) {
+    return jQuery.trim(string)
 }
 
 
@@ -979,15 +1055,29 @@ function append_field(table, id, title) {
 
 
 function get_input_element(id, value, type) {
-    if (value == null) {
-       value = ""
-    }
+//    if (value == null) {
+//       value = ""
+//    }
 
     return $('<input />')
         .attr('type', type)
         .attr('name', id)
         .attr('id', "id_" + id)
         .attr('value', value)
+}
+
+
+function get_input_textarea(id, rows, cols, value) {
+//    if (value == null) {
+//       value = ""
+//    }
+
+    return $('<textarea />')
+        .attr('name', id)
+        .attr('rows', rows)
+        .attr('cols', cols)
+        .attr('id', "id_" + id)
+        .text(value)
 }
 
 
@@ -1308,6 +1398,24 @@ function display_album(album) {
         .append(search_a(search, "Revise Search"))
         .appendTo(ul)
 
+    if (album.can_add) {
+        $("<li/>")
+            .append(add_album_a(album))
+            .appendTo(ul)
+    }
+
+    if (album.can_change) {
+        $("<li/>")
+            .append(change_album_a(album))
+            .appendTo(ul)
+    }
+
+    if (album.can_delete) {
+        $("<li/>")
+            .append(delete_album_a(album))
+            .appendTo(ul)
+    }
+
     append_action_links(ul)
 
     append_jump("album", "album",
@@ -1331,6 +1439,191 @@ function display_album(album) {
     bc.append(sep + escapeHTML(album.title))
 }
 
+
+function display_change_album(album) {
+    var onready = []
+
+    var dialog = $("#dialog")
+    if (dialog.length > 0) {
+        dialog.dialog("destroy")
+        dialog.remove()
+    }
+
+    dialog = $("<div id='dialog'></div>")
+
+    if (album.id != null) {
+        dialog.attr('title', "Change " + album.title)
+    } else {
+        dialog.attr('title', "Add album")
+    }
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    settings = get_settings()
+
+    append_field(table, "title", "Title")
+        .append(get_input_element("title", album.title, "text"))
+
+    append_field(table, "description", "Description")
+        .append(get_input_textarea("description", 10, 40, album.description))
+
+    var id=null
+    var img=$("<img/>")
+    var photo=album.cover_photo
+    if (photo != null) {
+        var size = get_settings().list_size
+        var style = get_photo_style(photo)
+        var image = photo.thumb[size]
+    }
+    if (image != null) {
+        img
+            .attr("class", style)
+            .attr("src", image.url)
+            .attr("alt", photo.title)
+            .attr("width", image.width)
+            .attr("height", image.height)
+    }
+    if (album.cover_photo!=null) {
+        id = album.cover_photo.id
+    }
+    append_field(table, "cover_photo", "Cover Photo")
+        .append(img)
+        .append(get_input_element("cover_photo", id, "hidden"))
+
+    append_field(table, "sortname", "Sort Name")
+        .append(get_input_element("sortname", album.sortname, "text"))
+
+    append_field(table, "sortorder", "Sort Order")
+        .append(get_input_element("sortorder", album.sortorder, "text"))
+
+    var parent = null
+    if (album.parents.length > 0) {
+        parent = album.parents[0]
+    }
+    append_field(table, "parent_text", "Parent")
+        .append(get_ajax_select("parent", 'album', parent, onready))
+
+    f.append(table)
+
+    $("<input type='button' name='button' value='Save' />")
+        .on("click", function() { change_album_submit(album, dialog, this.form) } )
+        .appendTo(f)
+
+    dialog
+        .append(f)
+//        .appendTo("#content-main")
+        .dialog({ modal: true })
+
+    for (i in onready) {
+        onready[i]()
+    }
+}
+
+
+function change_album_submit(album, dialog, form) {
+    updates = {
+        title: parse_form_string(form.title.value),
+        description: parse_form_string(form.description.value),
+        cover_photo: parse_form_string(form.cover_photo.value),
+        sortname: parse_form_string(form.sortname.value),
+        sortorder: parse_form_string(form.sortorder.value),
+        parent: parse_form_string(form.parent.value),
+    }
+
+    load_change_album(
+            album.id,
+            updates,
+            function(data) {
+                dialog.dialog("close")
+                hide_status()
+                replace_links()
+                update_session(data.session)
+                if (window.history.state==null) {
+                    display_album(data.album)
+                    update_history(false, album_url(data.album), {
+                        type: 'display_album',
+                        album_id: data.album.id,
+                    });
+                } else if (album.id==null) {
+                    display_album(data.album)
+                    update_history(true, album_url(data.album), {
+                        type: 'display_album',
+                        album_id: data.album.id,
+                    });
+                } else if (window.history.state.type=='display_album' && window.history.state.album_id==data.album.id) {
+                    display_album(data.album)
+                } else {
+                    window.history.go(0);
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to update the album")
+            })
+
+    return false
+}
+
+
+function display_delete_album(album) {
+    var dialog = $("#dialog")
+    if (dialog.length > 0) {
+        dialog.dialog("destroy")
+        dialog.remove()
+    }
+
+    dialog = $("<div id='dialog'><p>Are you sure you want to delete this album?</p></div>")
+        .attr('title', "Delete " + album.title)
+        .dialog({
+            modal: true,
+            buttons: {
+                Delete: function() {
+                    delete_album_submit(album, $(this))
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
+function delete_album_submit(album, dialog) {
+    load_delete_album(
+            album.id,
+            function(data) {
+                update_session(data.session)
+                if (data.status == 'success') {
+                    if (album.parent.length > 0) {
+                        display_album(album.parent[0])
+                        update_history(false, album_url(album.parent[0]), {
+                            type: 'display_album',
+                            album_id: album.parent[0].album.id,
+                        });
+                    } else {
+                        root()
+                    }
+                    dialog.dialog("close")
+                    hide_status()
+                } else if (data.status == 'errors') {
+                    for (var i in data.errors) {
+                        alert(data.errors[i])
+                    }
+                    dialog.dialog("close")
+                    hide_status()
+                } else {
+                    alert("Unknown error")
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to delete the album")
+            })
+
+    return false
+}
 
 function display_category(category) {
     var cm = $("#content-main")
@@ -2436,8 +2729,41 @@ function load_display_album(album_id, push_history) {
 }
 
 
-function load_display_category(category_id, push_history) {
+function load_display_change_album(album_id, push_history) {
+    load_album(album_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_album(data.album)
+        display_change_album(data.album)
+    }, display_error)
+}
 
+
+function add_album(parent_album, push_history) {
+    display_change_album({
+        id: null,
+        title: "",
+        description: "",
+        cover_photo: null,
+        sortname: "",
+        sortorder: "",
+        parents: [ parent_album ],
+    })
+}
+
+
+function load_display_delete_album(album_id, push_history) {
+    load_album(album_id, function(data) {
+        hide_status()
+        replace_links()
+        update_session(data.session)
+        display_album(data.album)
+        display_delete_album(data.album)
+    }, display_error)
+}
+
+
+function load_display_category(category_id, push_history) {
     load_category(category_id, function(data) {
         hide_status()
         replace_links()

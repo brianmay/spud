@@ -27,7 +27,11 @@ urlpatterns = patterns('',
     url(r'^a/login/$', 'spud.ajax.login', name='ajax_login'),
     url(r'^a/logout/$', 'spud.ajax.logout', name='ajax_logout'),
     url(r'^a/photo/(?P<photo_id>\d+)/$', 'spud.ajax.photo', name='ajax_photo'),
+
     url(r'^a/album/(?P<album_id>\d+)/$', 'spud.ajax.album', name='ajax_album'),
+    url(r'^a/album/add/$', 'spud.ajax.album_add', name='ajax_album_add'),
+    url(r'^a/album/(?P<album_id>\d+)/delete/$', 'spud.ajax.album_delete', name='ajax_album_delete'),
+
     url(r'^a/category/(?P<category_id>\d+)/$', 'spud.ajax.category', name='ajax_category'),
     url(r'^a/place/(?P<place_id>\d+)/$', 'spud.ajax.place', name='ajax_place'),
     url(r'^a/person/$', 'spud.ajax.person_search', name='ajax_person_search'),
