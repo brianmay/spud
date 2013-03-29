@@ -644,18 +644,12 @@ def person_search_results(request):
     search_dict = request.GET.copy()
 
     first = search_dict.pop("first", ["0"])[-1]
-    try:
-        first = int(first)
-    except ValueError:
-        raise HttpBadRequest("first is not an integer")
+    first = _decode_int(first)
     if first < 0:
         raise HttpBadRequest("first is negative")
 
     count = search_dict.pop("count", ["10"])[-1]
-    try:
-        count = int(count)
-    except ValueError:
-        raise HttpBadRequest("count is not an integer")
+    count = _decode_int(count)
     if count < 0:
         raise HttpBadRequest("count is negative")
 
@@ -723,11 +717,11 @@ def _get_search(user, search_dict):
         elif key == "first_id":
             add_criteria('id', 'is or greator then',
                          {'type': "string", 'value': value})
-            search = search & Q(pk__gte=int(value))
+            search = search & Q(pk__gte=_decode_int(value))
         elif key == "last_id":
             add_criteria('id', 'less then',
                          {'type': "string", 'value': value})
-            search = search & Q(pk__lt=int(value))
+            search = search & Q(pk__lt=_decode_int(value))
         elif key == "first_date":
             try:
                 timezone = pytz.timezone(timezone)
@@ -955,18 +949,12 @@ def search_results(request):
     search_dict = request.GET.copy()
 
     first = search_dict.pop("first", ["0"])
-    try:
-        first = int(first[-1])
-    except ValueError:
-        raise HttpBadRequest("first is not an integer")
+    first = _decode_int(first)
     if first < 0:
         raise HttpBadRequest("first is negative")
 
     count = search_dict.pop("count", ["10"])
-    try:
-        count = int(count[-1])
-    except ValueError:
-        raise HttpBadRequest("count is not an integer")
+    count = _decode_int(count)
     if count < 0:
         raise HttpBadRequest("count is negative")
 
@@ -990,7 +978,7 @@ def search_results(request):
 
 def search_item(request, number):
     search_dict = request.GET.copy()
-    number = int(number)
+    number = _decode_int(number)
 
     photo_list, criteria = _get_search(request.user, search_dict)
     number_results = photo_list.count()
