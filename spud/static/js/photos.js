@@ -1501,15 +1501,19 @@ function display_change_album(album) {
 
     f.append(table)
 
-    $("<input type='button' name='button' value='Save' />")
-        .on("click", function() { change_album_submit(album, dialog, this.form) } )
-        .appendTo(f)
-
     dialog
         .append(f)
         .dialog({
             modal: true,
             close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Save: function() {
+                    change_album_submit(album, $( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
         })
 
     for (i in onready) {
@@ -2648,15 +2652,19 @@ function login(push_history) {
 
     f.append(table)
 
-    $("<input type='button' name='button' value='Login' />")
-        .on("click", function() { login_submit(dialog, this.form) } )
-        .appendTo(f)
-
     dialog
         .append(f)
         .dialog({
             modal: true,
             close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Login: function() {
+                    login_submit($( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
         })
 }
 
