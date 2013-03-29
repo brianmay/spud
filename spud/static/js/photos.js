@@ -1596,15 +1596,7 @@ function delete_album_submit(album, dialog) {
             function(data) {
                 update_session(data.session)
                 if (data.status == 'success') {
-                    if (album.parent.length > 0) {
-                        display_album(album.parent[0])
-                        update_history(false, album_url(album.parent[0]), {
-                            type: 'display_album',
-                            album_id: album.parent[0].album.id,
-                        });
-                    } else {
-                        root()
-                    }
+                    window.history.go(-1)
                     dialog.dialog("close")
                     hide_status()
                 } else if (data.status == 'errors') {

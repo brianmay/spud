@@ -627,8 +627,7 @@ def album_delete(request, album_id):
     }
 
     if len(errors) == 0:
-        print "would delete"
-#        object.delete()
+        object.delete()
         resp['status'] = 'success'
     else:
         resp['status'] = 'errors'
@@ -641,7 +640,7 @@ def album_finish(request, object):
         if 'title' in request.POST:
             object.album = request.POST['title']
         if 'description' in request.POST:
-            object.description = request.POST['description']
+            object.album_description = request.POST['description']
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
                 object.cover_photo = None
@@ -658,15 +657,15 @@ def album_finish(request, object):
             object.sortorder = request.POST['sortorder']
         if 'parent' in request.POST:
             if request.POST['parent'] == "":
-                object.parent = None
+                object.parent_album = None
             else:
                 try:
                     parent_id = _decode_int(request.POST['parent'])
                     p = spud.models.album.objects.get(pk=parent_id)
-                    object.parent = p
+                    object.parent_album = p
                 except spud.models.album.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
-#        object.save()
+        object.save()
 
     resp = _get_album_detail(request.user, object)
     resp = {
