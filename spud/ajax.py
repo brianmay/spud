@@ -597,8 +597,8 @@ def album(request, album_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_album'):
             raise HttpForbidden("No rights to change albums")
-    object = get_object_or_404(spud.models.album, pk=album_id)
-    return album_finish(request, object)
+    album = get_object_or_404(spud.models.album, pk=album_id)
+    return album_finish(request, album)
 
 
 @csrf_exempt
@@ -607,8 +607,8 @@ def album_add(request):
     if request.method == "POST":
         if not request.user.has_perm('spud.add_album'):
             raise HttpForbidden("No rights to add albums")
-    object = spud.models.album()
-    return album_finish(request, object)
+    album = spud.models.album()
+    return album_finish(request, album)
 
 
 @csrf_exempt
@@ -618,16 +618,16 @@ def album_delete(request, album_id):
         raise HttpBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_album'):
         raise HttpForbidden("No rights to delete albums")
-    object = get_object_or_404(spud.models.album, pk=album_id)
+    album = get_object_or_404(spud.models.album, pk=album_id)
 
-    errors = object.check_delete()
+    errors = album.check_delete()
     resp = {
         'errors': errors,
         'session': _get_session(request),
     }
 
     if len(errors) == 0:
-        object.delete()
+        album.delete()
         resp['status'] = 'success'
     else:
         resp['status'] = 'errors'
@@ -635,41 +635,41 @@ def album_delete(request, album_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def album_finish(request, object):
+def album_finish(request, album):
     if request.method == "POST":
         if 'title' in request.POST:
-            object.album = request.POST['title']
+            album.album = request.POST['title']
         if 'description' in request.POST:
-            object.album_description = request.POST['description']
+            album.album_description = request.POST['description']
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
-                object.cover_photo = None
+                album.cover_photo = None
             else:
                 try:
                     photo_id = _decode_int(request.POST['cover_photo'])
                     cp = spud.models.photo.objects.get(pk=photo_id)
-                    object.cover_photo = cp
+                    album.cover_photo = cp
                 except spud.models.photo.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
         if 'sortname' in request.POST:
-            object.sortname = request.POST['sortname']
+            album.sortname = request.POST['sortname']
         if 'sortorder' in request.POST:
-            object.sortorder = request.POST['sortorder']
+            album.sortorder = request.POST['sortorder']
         if 'parent' in request.POST:
             if request.POST['parent'] == "":
-                object.parent_album = None
+                album.parent_album = None
             else:
                 try:
                     parent_id = _decode_int(request.POST['parent'])
                     p = spud.models.album.objects.get(pk=parent_id)
-                    object.parent_album = p
+                    album.parent_album = p
                 except spud.models.album.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
-        object.save()
+        album.save()
 
-    resp = _get_album_detail(request.user, object)
+    resp = _get_album_detail(request.user, album)
     resp = {
-        'album': _get_album_detail(request.user, object),
+        'album': _get_album_detail(request.user, album),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
