@@ -1098,7 +1098,9 @@ function replace_links() {
     update_selection()
 }
 
-function update_selection() {
+$(document).ready(update_selection)
+
+function update_selection(force_selectable) {
     selection = get_selection()
 
     var search = {
@@ -1119,6 +1121,30 @@ function update_selection() {
             .on("click", function() { set_selection([]); $(".ui-selected").removeClass("ui-selected"); return false; })
             .text("Clear")
             .appendTo(ul)
+
+    }
+
+    var selectable = $('.ui-selectable')
+    if (selectable.length > 0 || force_selectable) {
+        if (selectable.selectable( "option", "disabled" )) {
+            $("<li>")
+                .text("Select")
+                .on("click", function() {
+                    $(".ui-selectable").selectable( "enable" )
+                    update_selection()
+                    return false
+                })
+                .appendTo(ul)
+        } else {
+            $("<li>")
+                .text("View")
+                .on("click", function() {
+                    $(".ui-selectable").selectable( "disable" )
+                        update_selection()
+                    return false
+                })
+                .appendTo(ul)
+        }
     }
 
     $('#selection')
@@ -1274,9 +1300,9 @@ function photo_thumb(photo, title, sort, description, url, selectable, onclick) 
 
     li = $("<li />")
     li.attr('class', "photo_list_item " + style)
+    li.on("click", onclick)
     li.data('photo', photo)
     a = $("<a />")
-    a.on("click", onclick)
     a.attr("href", url)
 
     if (image != null) {
@@ -3409,11 +3435,13 @@ function search_photo_list(search, results) {
     }
     pl.selectable({
         filter: "li",
+        disabled: true,
         selected: function( event, ui ) {
             add_selection( $(ui.selected).data('photo') ); },
         unselected: function( event, ui ) {
             del_selection( $(ui.unselected).data('photo') ); },
     })
+    update_selection(true)
     return pl
 }
 
