@@ -194,6 +194,35 @@ function load_category(category_id, success, error) {
 }
 
 
+function load_change_category(category_id, updates, success, error) {
+    var url = '/a/category/add/'
+    if (category_id != null) {
+        url = '/a/category/'+category_id+'/'
+    }
+    $.ajax({
+        url: url,
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+        data: updates,
+    })
+}
+
+
+function load_delete_category(category_id, success, error) {
+    $.ajax({
+        url: '/a/category/'+category_id+'/delete/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+    })
+}
+
+
 function load_place(place_id, success, error) {
     $.ajax({
         url: '/a/place/'+place_id+'/',
@@ -201,6 +230,35 @@ function load_place(place_id, success, error) {
         cache: false,
         success: success,
         error: error,
+    })
+}
+
+
+function load_change_place(place_id, updates, success, error) {
+    var url = '/a/place/add/'
+    if (place_id != null) {
+        url = '/a/place/'+place_id+'/'
+    }
+    $.ajax({
+        url: url,
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+        data: updates,
+    })
+}
+
+
+function load_delete_place(place_id, success, error) {
+    $.ajax({
+        url: '/a/place/'+place_id+'/delete/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
     })
 }
 
@@ -245,6 +303,35 @@ function load_person(place_id, success, error) {
         cache: false,
         success: success,
         error: error,
+    })
+}
+
+
+function load_change_person(person_id, updates, success, error) {
+    var url = '/a/person/add/'
+    if (person_id != null) {
+        url = '/a/person/'+person_id+'/'
+    }
+    $.ajax({
+        url: url,
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+        data: updates,
+    })
+}
+
+
+function load_delete_person(person_id, success, error) {
+    $.ajax({
+        url: '/a/person/'+person_id+'/delete/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
     })
 }
 
@@ -434,6 +521,48 @@ function category_a(category, title) {
 }
 
 
+function change_category_a(category, title) {
+    if (category == null) {
+        return ""
+    }
+    if (title == null) {
+        title = "Change category"
+    }
+    var a = $('<a/>')
+        .attr('href', category_url(category))
+        .on('click', function() { do_change_category(category.id, true); return false; })
+        .data('photo', category.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function add_category_a(parent, title) {
+    if (title == null) {
+        title = "Add category"
+    }
+    var a = $('<a/>')
+        .attr('href', category_url(parent))
+        .on('click', function() { do_add_category(parent, true); return false; })
+        .data('photo', parent.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function delete_category_a(category, title) {
+    if (title == null) {
+        title = "Delete category"
+    }
+    var a = $('<a/>')
+        .attr('href', category_url(category))
+        .on('click', function() { do_delete_category(category.id, true); return false; })
+        .data('photo', category.cover_photo)
+        .text(title)
+    return a
+}
+
+
 function place_a(place, title) {
     if (place == null) {
         return ""
@@ -444,6 +573,48 @@ function place_a(place, title) {
     var a = $('<a/>')
         .attr('href', place_url(place))
         .on('click', function() { do_place(place.id, true); return false; })
+        .data('photo', place.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function change_place_a(place, title) {
+    if (place == null) {
+        return ""
+    }
+    if (title == null) {
+        title = "Change place"
+    }
+    var a = $('<a/>')
+        .attr('href', place_url(place))
+        .on('click', function() { do_change_place(place.id, true); return false; })
+        .data('photo', place.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function add_place_a(parent, title) {
+    if (title == null) {
+        title = "Add place"
+    }
+    var a = $('<a/>')
+        .attr('href', place_url(parent))
+        .on('click', function() { do_add_place(parent, true); return false; })
+        .data('photo', parent.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function delete_place_a(place, title) {
+    if (title == null) {
+        title = "Delete place"
+    }
+    var a = $('<a/>')
+        .attr('href', place_url(place))
+        .on('click', function() { do_delete_place(place.id, true); return false; })
         .data('photo', place.cover_photo)
         .text(title)
     return a
@@ -488,6 +659,47 @@ function person_a(person, title) {
     var a = $('<a/>')
         .attr('href', person_url(person))
         .on('click', function() { do_person(person.id, true); return false; })
+        .data('photo', person.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function change_person_a(person, title) {
+    if (person == null) {
+        return ""
+    }
+    if (title == null) {
+        title = "Change person"
+    }
+    var a = $('<a/>')
+        .attr('href', person_url(person))
+        .on('click', function() { do_change_person(person.id, true); return false; })
+        .data('photo', person.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function add_person_a(title) {
+    if (title == null) {
+        title = "Add person"
+    }
+    var a = $('<a/>')
+        .attr('href', '#')
+        .on('click', function() { do_add_person(true); return false; })
+        .text(title)
+    return a
+}
+
+
+function delete_person_a(person, title) {
+    if (title == null) {
+        title = "Delete person"
+    }
+    var a = $('<a/>')
+        .attr('href', person_url(person))
+        .on('click', function() { do_delete_person(person.id, true); return false; })
         .data('photo', person.cover_photo)
         .text(title)
     return a
@@ -1727,6 +1939,24 @@ function display_category(category) {
         .append(search_a(search))
         .appendTo(ul)
 
+    if (category.can_add) {
+        $("<li/>")
+            .append(add_category_a(category))
+            .appendTo(ul)
+    }
+
+    if (category.can_change) {
+        $("<li/>")
+            .append(change_category_a(category))
+            .appendTo(ul)
+    }
+
+    if (category.can_delete) {
+        $("<li/>")
+            .append(delete_category_a(category))
+            .appendTo(ul)
+    }
+
     append_action_links(ul)
 
     append_jump("category", "category",
@@ -1748,6 +1978,162 @@ function display_category(category) {
         sep = " › "
     }
     bc.append(sep + escapeHTML(category.title))
+}
+
+
+function display_change_category(category) {
+    var onready = []
+
+    var dialog = $("<div id='dialog'></div>")
+
+    if (category.id != null) {
+        dialog.attr('title', "Change " + category.title)
+    } else {
+        dialog.attr('title', "Add category")
+    }
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    settings = get_settings()
+
+    append_field(table, "title", "Title")
+        .append(get_input_element("title", category.title, "text"))
+
+    append_field(table, "description", "Description")
+        .append(get_input_textarea("description", 10, 40, category.description))
+
+    append_field(table, "cover_photo", "Cover Photo")
+        .append(get_input_photo("cover_photo", category.cover_photo))
+
+    append_field(table, "sortname", "Sort Name")
+        .append(get_input_element("sortname", category.sortname, "text"))
+
+    append_field(table, "sortorder", "Sort Order")
+        .append(get_input_element("sortorder", category.sortorder, "text"))
+
+    var parent = null
+    if (category.parents.length > 0) {
+        parent = category.parents[0]
+    }
+    append_field(table, "parent_text", "Parent")
+        .append(get_ajax_select("parent", 'category', parent, onready))
+
+    f.append(table)
+
+    dialog
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            width: 400,
+            buttons: {
+                Save: function() {
+                    submit_change_category(category, $( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+
+    for (i in onready) {
+        onready[i]()
+    }
+}
+
+
+function submit_change_category(category, dialog, form) {
+    var updates = {
+        title: parse_form_string(form.title.value),
+        description: parse_form_string(form.description.value),
+        cover_photo: parse_form_string(form.cover_photo.value),
+        sortname: parse_form_string(form.sortname.value),
+        sortorder: parse_form_string(form.sortorder.value),
+        parent: parse_form_string(form.parent.value),
+    }
+
+    display_loading()
+    load_change_category(
+            category.id,
+            updates,
+            function(data) {
+                dialog.dialog("close")
+                hide_status()
+                replace_links()
+                update_session(data.session)
+                if (window.history.state==null) {
+                    display_category(data.category)
+                    update_history(false, category_url(data.category), {
+                        type: 'display_category',
+                        category_id: data.category.id,
+                    });
+                } else if (category.id==null) {
+                    display_category(data.category)
+                    update_history(true, category_url(data.category), {
+                        type: 'display_category',
+                        category_id: data.category.id,
+                    });
+                } else if (window.history.state.type=='display_category' && window.history.state.category_id==data.category.id) {
+                    display_category(data.category)
+                } else {
+                    window.history.go(0);
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to update the category")
+            })
+
+    return false
+}
+
+
+function display_delete_category(category) {
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this category?</p></div>")
+        .attr('title', "Delete " + category.title)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Delete: function() {
+                    submit_delete_category(category, $(this))
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
+function submit_delete_category(category, dialog) {
+    display_loading()
+    load_delete_category(
+            category.id,
+            function(data) {
+                update_session(data.session)
+                if (data.status == 'success') {
+                    window.history.go(-1)
+                    dialog.dialog("close")
+                    hide_status()
+                } else if (data.status == 'errors') {
+                    for (var i in data.errors) {
+                        alert(data.errors[i])
+                    }
+                    dialog.dialog("close")
+                    hide_status()
+                } else {
+                    alert("Unknown error")
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to delete the category")
+            })
+
+    return false
 }
 
 
@@ -1851,6 +2237,24 @@ function display_place(place) {
         .append(search_a(search))
         .appendTo(ul)
 
+    if (place.can_add) {
+        $("<li/>")
+            .append(add_place_a(place))
+            .appendTo(ul)
+    }
+
+    if (place.can_change) {
+        $("<li/>")
+            .append(change_place_a(place))
+            .appendTo(ul)
+    }
+
+    if (place.can_delete) {
+        $("<li/>")
+            .append(delete_place_a(place))
+            .appendTo(ul)
+    }
+
     append_action_links(ul)
 
     append_jump("place", "place",
@@ -1874,6 +2278,185 @@ function display_place(place) {
     bc.append(sep + escapeHTML(place.title))
 }
 
+
+function display_change_place(place) {
+    var onready = []
+
+    var dialog = $("<div id='dialog'></div>")
+
+    if (place.id != null) {
+        dialog.attr('title', "Change " + place.title)
+    } else {
+        dialog.attr('title', "Add place")
+    }
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    settings = get_settings()
+
+    append_field(table, "title", "Title")
+        .append(get_input_element("title", place.title, "text"))
+
+    append_field(table, "address", "Address")
+        .append(get_input_element("address", place.address, "address"))
+
+    append_field(table, "address2", "Address (ctd)")
+        .append(get_input_element("address2", place.address2, "address2"))
+
+    append_field(table, "city", "City")
+        .append(get_input_element("city", place.city, "city"))
+
+    append_field(table, "state", "State")
+        .append(get_input_element("state", place.state, "text"))
+
+    append_field(table, "zip", "Zip")
+        .append(get_input_element("zip", place.zip, "text"))
+
+    append_field(table, "country", "Country")
+        .append(get_input_element("country", place.country, "text"))
+
+    append_field(table, "url", "URL")
+        .append(get_input_element("url", place.url, "text"))
+
+    append_field(table, "urldesc", "URL Title")
+        .append(get_input_element("urldesc", place.urldesc, "text"))
+
+    append_field(table, "notes", "Notes")
+        .append(get_input_textarea("notes", 10, 40, place.notes))
+
+    append_field(table, "cover_photo", "Cover Photo")
+        .append(get_input_photo("cover_photo", place.cover_photo))
+
+    var parent = null
+    if (place.parents.length > 0) {
+        parent = place.parents[0]
+    }
+    append_field(table, "parent_text", "Parent")
+        .append(get_ajax_select("parent", 'place', parent, onready))
+
+    f.append(table)
+
+    dialog
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            width: 400,
+            buttons: {
+                Save: function() {
+                    submit_change_place(place, $( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+
+    for (i in onready) {
+        onready[i]()
+    }
+}
+
+
+function submit_change_place(place, dialog, form) {
+    var updates = {
+        title: parse_form_string(form.title.value),
+        address: parse_form_string(form.address.value),
+        address2: parse_form_string(form.address2.value),
+        city: parse_form_string(form.city.value),
+        state: parse_form_string(form.state.value),
+        zip: parse_form_string(form.zip.value),
+        country: parse_form_string(form.country.value),
+        url: parse_form_string(form.url.value),
+        urldesc: parse_form_string(form.urldesc.value),
+        notes: parse_form_string(form.notes.value),
+        cover_photo: parse_form_string(form.cover_photo.value),
+        parent: parse_form_string(form.parent.value),
+    }
+
+    display_loading()
+    load_change_place(
+            place.id,
+            updates,
+            function(data) {
+                dialog.dialog("close")
+                hide_status()
+                replace_links()
+                update_session(data.session)
+                if (window.history.state==null) {
+                    display_place(data.place)
+                    update_history(false, place_url(data.place), {
+                        type: 'display_place',
+                        place_id: data.place.id,
+                    });
+                } else if (place.id==null) {
+                    display_place(data.place)
+                    update_history(true, place_url(data.place), {
+                        type: 'display_place',
+                        place_id: data.place.id,
+                    });
+                } else if (window.history.state.type=='display_place' && window.history.state.place_id==data.place.id) {
+                    display_place(data.place)
+                } else {
+                    window.history.go(0);
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to update the place")
+            })
+
+    return false
+}
+
+
+function display_delete_place(place) {
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this place?</p></div>")
+        .attr('title', "Delete " + place.title)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Delete: function() {
+                    submit_delete_place(place, $(this))
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
+function submit_delete_place(place, dialog) {
+    display_loading()
+    load_delete_place(
+            place.id,
+            function(data) {
+                update_session(data.session)
+                if (data.status == 'success') {
+                    window.history.go(-1)
+                    dialog.dialog("close")
+                    hide_status()
+                } else if (data.status == 'errors') {
+                    for (var i in data.errors) {
+                        alert(data.errors[i])
+                    }
+                    dialog.dialog("close")
+                    hide_status()
+                } else {
+                    alert("Unknown error")
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to delete the place")
+            })
+
+    return false
+}
 
 function display_person_search(search, data) {
     var dialog = $("<div id='dialog'></div>")
@@ -2001,6 +2584,12 @@ function display_person_search_results(search, results) {
     $("<li/>")
         .append(person_search_a(search))
         .appendTo(ul)
+
+    if (person.can_add) {
+        $("<li/>")
+            .append(add_person_a())
+            .appendTo(ul)
+    }
 
     append_action_links(ul)
 
@@ -2171,6 +2760,24 @@ function display_person(person) {
         .append(person_search_a(search))
         .appendTo(ul)
 
+    if (person.can_add) {
+        $("<li/>")
+            .append(add_person_a())
+            .appendTo(ul)
+    }
+
+    if (person.can_change) {
+        $("<li/>")
+            .append(change_person_a(person))
+            .appendTo(ul)
+    }
+
+    if (person.can_delete) {
+        $("<li/>")
+            .append(delete_person_a(person))
+            .appendTo(ul)
+    }
+
     append_action_links(ul)
 
     bc = $(".breadcrumbs")
@@ -2181,6 +2788,190 @@ function display_person(person) {
         .append("  › " + escapeHTML(person.title))
 }
 
+
+function display_change_person(person) {
+    var onready = []
+
+    var dialog = $("<div id='dialog'></div>")
+
+    if (person.id != null) {
+        dialog.attr('title', "Change " + person.title)
+    } else {
+        dialog.attr('title', "Add person")
+    }
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    settings = get_settings()
+
+    append_field(table, "title", "Title")
+        .append(get_input_element("title", person.title, "text"))
+
+    append_field(table, "first_name", "First name")
+        .append(get_input_element("first_name", person.first_name, "text"))
+
+    append_field(table, "middle_name", "Middle name")
+        .append(get_input_element("middle_name", person.middle_name, "text"))
+
+    append_field(table, "last_name", "Last name")
+        .append(get_input_element("last_name", person.last_name, "text"))
+
+    append_field(table, "called", "Called")
+        .append(get_input_element("called", person.called, "text"))
+
+    append_field(table, "gender", "Gender")
+        .append(get_input_select("gender", [ ['1', 'Male'], ['2', 'Female'] ], person.gender))
+
+    append_field(table, "email", "E-Mail")
+        .append(get_input_element("email", person.called, "email"))
+
+    append_field(table, "notes", "Notes")
+        .append(get_input_textarea("notes", 10, 40, person.notes))
+
+    append_field(table, "cover_photo", "Cover Photo")
+        .append(get_input_photo("cover_photo", person.cover_photo))
+
+    append_field(table, "work_text", "Work")
+        .append(get_ajax_select("work", 'place', person.work, onready))
+
+    append_field(table, "home_text", "Home")
+        .append(get_ajax_select("home", 'place', person.home, onready))
+
+    append_field(table, "mother_text", "Mother")
+        .append(get_ajax_select("mother", 'person', person.mother, onready))
+
+    append_field(table, "father_text", "Father")
+        .append(get_ajax_select("father", 'person', person.father, onready))
+
+    append_field(table, "spouse_text", "Spouse")
+        .append(get_ajax_select("spouse", 'person', person.spouse, onready))
+
+    f.append(table)
+
+    dialog
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            width: 400,
+            buttons: {
+                Save: function() {
+                    submit_change_person(person, $( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+
+    for (i in onready) {
+        onready[i]()
+    }
+}
+
+
+function submit_change_person(person, dialog, form) {
+    var updates = {
+        first_name: parse_form_string(form.first_name.value),
+        middle_name: parse_form_string(form.middle_name.value),
+        last_name: parse_form_string(form.last_name.value),
+        called: parse_form_string(form.called.value),
+        gender: parse_form_string(form.gender.value),
+        email: parse_form_string(form.email.value),
+        notes: parse_form_string(form.notes.value),
+        cover_photo: parse_form_string(form.cover_photo.value),
+        work: parse_form_string(form.work.value),
+        home: parse_form_string(form.home.value),
+        mother: parse_form_string(form.mother.value),
+        father: parse_form_string(form.father.value),
+        spouse: parse_form_string(form.spouse.value),
+    }
+    alert( JSON.stringify(updates))
+    return
+
+    display_loading()
+    load_change_person(
+            person.id,
+            updates,
+            function(data) {
+                dialog.dialog("close")
+                hide_status()
+                replace_links()
+                update_session(data.session)
+                if (window.history.state==null) {
+                    display_person(data.person)
+                    update_history(false, person_url(data.person), {
+                        type: 'display_person',
+                        person_id: data.person.id,
+                    });
+                } else if (person.id==null) {
+                    display_person(data.person)
+                    update_history(true, person_url(data.person), {
+                        type: 'display_person',
+                        person_id: data.person.id,
+                    });
+                } else if (window.history.state.type=='display_person' && window.history.state.person_id==data.person.id) {
+                    display_person(data.person)
+                } else {
+                    window.history.go(0);
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to update the person")
+            })
+
+    return false
+}
+
+
+function display_delete_person(person) {
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this person?</p></div>")
+        .attr('title', "Delete " + person.title)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Delete: function() {
+                    submit_delete_person(person, $(this))
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
+function submit_delete_person(person, dialog) {
+    display_loading()
+    load_delete_person(
+            person.id,
+            function(data) {
+                update_session(data.session)
+                if (data.status == 'success') {
+                    window.history.go(-1)
+                    dialog.dialog("close")
+                    hide_status()
+                } else if (data.status == 'errors') {
+                    for (var i in data.errors) {
+                        alert(data.errors[i])
+                    }
+                    dialog.dialog("close")
+                    hide_status()
+                } else {
+                    alert("Unknown error")
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to delete the person")
+            })
+
+    return false
+}
 
 
 function display_search(search, data) {
@@ -2794,12 +3585,14 @@ function do_change_album(album_id, push_history) {
 function do_add_album(parent_album, push_history) {
     display_change_album({
         id: null,
+        type: "album",
         title: "",
         description: "",
         cover_photo: null,
         sortname: "",
         sortorder: "",
         parents: [ parent_album ],
+        children: [],
     })
 }
 
@@ -2830,6 +3623,43 @@ function do_category(category_id, push_history) {
 }
 
 
+function do_change_category(category_id, push_history) {
+    display_loading()
+    load_category(category_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_category(data.category)
+        display_change_category(data.category)
+    }, display_error)
+}
+
+
+function do_add_category(parent_category, push_history) {
+    display_change_category({
+        id: null,
+        type: "category",
+        title: "",
+        description: "",
+        cover_photo: null,
+        sortname: "",
+        sortorder: "",
+        parents: [ parent_category ],
+        children: [],
+    })
+}
+
+
+function do_delete_category(category_id, push_history) {
+    display_loading()
+    load_category(category_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_category(data.category)
+        display_delete_category(data.category)
+    }, display_error)
+}
+
+
 function do_place(place_id, push_history) {
     display_loading()
     load_place(place_id, function(data) {
@@ -2841,6 +3671,47 @@ function do_place(place_id, push_history) {
             place_id: data.place.id,
         });
         display_place(data.place)
+    }, display_error)
+}
+
+
+function do_change_place(place_id, push_history) {
+    display_loading()
+    load_place(place_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_place(data.place)
+        display_change_place(data.place)
+    }, display_error)
+}
+
+
+function do_add_place(parent_place, push_history) {
+    display_change_place({
+        id: null,
+        type: "place",
+        title: "",
+        address: "",
+        address2: "",
+        city: "",
+        zip: "",
+        country: "",
+        url: "",
+        urldesc: "",
+        notes: "",
+        parents: [ parent_place ],
+        children: [],
+    })
+}
+
+
+function do_delete_place(place_id, push_history) {
+    display_loading()
+    load_place(place_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_place(data.place)
+        display_delete_place(data.place)
     }, display_error)
 }
 
@@ -2890,6 +3761,60 @@ function do_person(person_id, push_history) {
             person_id: data.person.id,
         });
         display_person(data.person)
+    }, display_error)
+}
+
+
+function do_change_person(person_id, push_history) {
+    display_loading()
+    load_person(person_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_person(data.person)
+        display_change_person(data.person)
+    }, display_error)
+}
+
+
+function do_add_person(push_history) {
+    display_change_person({
+        id: null,
+        type: "person",
+        title: "",
+        first_name: "",
+        last_name: "",
+        middle_name: "",
+        called: "",
+        cover_photo: null,
+        gender: null,
+        dob: "",
+        dod: "",
+        home: null,
+        work: null,
+        father: null,
+        mother: null,
+        spouses: [],
+        grandparents: [],
+        uncles_aunts: [],
+        parents: [],
+        siblings: [],
+        cousins: [],
+        children: [],
+        nephews_nieces: [],
+        grandchildren: [],
+        notes: "",
+        email: "",
+    })
+}
+
+
+function do_delete_album(album_id, push_history) {
+    display_loading()
+    load_album(album_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_album(data.album)
+        display_delete_album(data.album)
     }, display_error)
 }
 
