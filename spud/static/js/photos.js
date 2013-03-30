@@ -1098,9 +1098,7 @@ function replace_links() {
     update_selection()
 }
 
-$(document).ready(update_selection)
-
-function update_selection(force_selectable) {
+function update_selection() {
     selection = get_selection()
 
     var search = {
@@ -1121,30 +1119,6 @@ function update_selection(force_selectable) {
             .on("click", function() { set_selection([]); $(".ui-selected").removeClass("ui-selected"); return false; })
             .text("Clear")
             .appendTo(ul)
-
-    }
-
-    var selectable = $('.ui-selectable')
-    if (selectable.length > 0 || force_selectable) {
-        if (selectable.selectable( "option", "disabled" )) {
-            $("<li>")
-                .text("Select")
-                .on("click", function() {
-                    $(".ui-selectable").selectable( "enable" )
-                    update_selection()
-                    return false
-                })
-                .appendTo(ul)
-        } else {
-            $("<li>")
-                .text("View")
-                .on("click", function() {
-                    $(".ui-selectable").selectable( "disable" )
-                        update_selection()
-                    return false
-                })
-                .appendTo(ul)
-        }
     }
 
     $('#selection')
@@ -3435,13 +3409,12 @@ function search_photo_list(search, results) {
     }
     pl.selectable({
         filter: "li",
-        disabled: true,
         selected: function( event, ui ) {
             add_selection( $(ui.selected).data('photo') ); },
         unselected: function( event, ui ) {
             del_selection( $(ui.unselected).data('photo') ); },
     })
-    update_selection(true)
+    update_selection()
     return pl
 }
 

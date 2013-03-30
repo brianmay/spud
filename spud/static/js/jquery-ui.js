@@ -3284,6 +3284,9 @@ $.widget("ui.selectable", $.ui.mouse, {
 
 		this.opos = [event.pageX, event.pageY];
 
+                if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                        return;
+                }
 		if (this.options.disabled) {
 			return;
 		}
@@ -3568,7 +3571,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		if ( key === "disabled" ) {
 			this.options[ key ] = value;
 
-//			this.widget().toggleClass( "ui-sortable-disabled", !!value );
+			this.widget().toggleClass( "ui-sortable-disabled", !!value );
 		} else {
 			// Don't call widget base _setOption for disable as it adds ui-state-disabled class
 			$.Widget.prototype._setOption.apply(this, arguments);
