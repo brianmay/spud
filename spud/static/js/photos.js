@@ -1214,6 +1214,7 @@ function get_ajax_select(id, type, value, onready, onadded) {
     return div
 }
 
+
 function get_ajax_multiple_select(id, type, value, onready, onadded) {
     var value_str = "|"
     var value_arr = []
