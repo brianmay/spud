@@ -1117,7 +1117,7 @@ function update_selection() {
 
         $("<li>")
             .on("click", function() { set_selection([]); $(".ui-selected").removeClass("ui-selected"); return false; })
-            .text("Clear")
+            .html("<a href='#'>Clear</a>")
             .appendTo(ul)
     }
 
