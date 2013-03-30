@@ -567,8 +567,9 @@ function datetime_a(dt) {
 // ***********
 
 function get_settings() {
-    settings = $(document).data('settings')
-    if (!settings) {
+    a = localStorage.settings.split(",")
+
+    if (a.length < 5) {
         settings = {
             photos_per_page: 10,
             persons_per_page: 10,
@@ -576,11 +577,28 @@ function get_settings() {
             view_size: "mid",
             click_size: "large",
         }
-        $(document).data('settings', settings)
+    } else {
+        settings = {
+            photos_per_page: Number(a[0]),
+            persons_per_page: Number(a[1]),
+            list_size: a[2],
+            view_size: a[3],
+            click_size: a[4],
+        }
     }
     return settings
 }
 
+function put_settings(settings) {
+    a = [
+        settings.photos_per_page,
+        settings.persons_per_page,
+        settings.list_size,
+        settings.view_size,
+        settings.click_size,
+    ]
+    localStorage.settings = a.join(",")
+}
 
 function update_history(push_history, url, state) {
     if (push_history) {
@@ -2589,7 +2607,7 @@ function display_settings(data) {
 
 
 function submit_settings(dialog, form) {
-    settings = $(document).data('settings')
+    settings = get_settings()
 
     if (form.photos_per_page.value) {
         settings.photos_per_page = Number(form.photos_per_page.value)
@@ -2603,7 +2621,7 @@ function submit_settings(dialog, form) {
     settings.view_size = form.view_size.value
     settings.click_size = form.click_size.value
 
-    $(document).data('settings', settings)
+    put_settings(settings)
 
     dialog.dialog( "close" )
 
