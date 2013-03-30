@@ -943,17 +943,20 @@ def person_finish(request, person):
         if 'first_name' in request.POST:
             person.first_name = request.POST['first_name']
         if 'middle_name' in request.POST:
-            person.person_description = request.POST['middle_name']
+            person.middle_name = request.POST['middle_name']
         if 'last_name' in request.POST:
-            person.person_description = request.POST['last_name']
+            person.last_name = request.POST['last_name']
         if 'called' in request.POST:
-            person.person_description = request.POST['called']
+            person.called = request.POST['called']
         if 'gender' in request.POST:
-            person.gender = request.POST['gender']
+            gender = _decode_int(request.POST['gender'])
+            if gender < 1 or gender > 2:
+                raise HttpBadRequest("Unknown gender")
+            person.gender = gender
         if 'notes' in request.POST:
-            person.person_description = request.POST['notes']
+            person.notes = request.POST['notes']
         if 'email' in request.POST:
-            person.person_description = request.POST['email']
+            person.email = request.POST['email']
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
                 person.cover_photo = None

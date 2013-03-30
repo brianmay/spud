@@ -1819,7 +1819,7 @@ function submit_change_album(album, dialog, form) {
 
 
 function display_delete_album(album) {
-    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this album?</p></div>")
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete album '"+escapeHTML(album.title)+"'?</p></div>")
         .attr('title', "Delete " + album.title)
         .dialog({
             modal: true,
@@ -2091,7 +2091,7 @@ function submit_change_category(category, dialog, form) {
 
 
 function display_delete_category(category) {
-    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this category?</p></div>")
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete category '"+escapeHTML(category.title)+"'?</p></div>")
         .attr('title', "Delete " + category.title)
         .dialog({
             modal: true,
@@ -2413,7 +2413,7 @@ function submit_change_place(place, dialog, form) {
 
 
 function display_delete_place(place) {
-    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this place?</p></div>")
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete place '"+escapeHTML(place.title)+"'?</p></div>")
         .attr('title', "Delete " + place.title)
         .dialog({
             modal: true,
@@ -2757,7 +2757,7 @@ function display_person(person) {
         .appendTo(ul)
 
     $("<li/>")
-        .append(person_search_a(search))
+        .append(person_search_a({}))
         .appendTo(ul)
 
     if (person.can_add) {
@@ -2806,9 +2806,6 @@ function display_change_person(person) {
 
     settings = get_settings()
 
-    append_field(table, "title", "Title")
-        .append(get_input_element("title", person.title, "text"))
-
     append_field(table, "first_name", "First name")
         .append(get_input_element("first_name", person.first_name, "text"))
 
@@ -2845,8 +2842,12 @@ function display_change_person(person) {
     append_field(table, "father_text", "Father")
         .append(get_ajax_select("father", 'person', person.father, onready))
 
+    var spouse = null
+    if (person.spouses.length > 0) {
+        spouse = person.spouses[0]
+    }
     append_field(table, "spouse_text", "Spouse")
-        .append(get_ajax_select("spouse", 'person', person.spouse, onready))
+        .append(get_ajax_select("spouse", 'person', spouse, onready))
 
     f.append(table)
 
@@ -2888,8 +2889,6 @@ function submit_change_person(person, dialog, form) {
         father: parse_form_string(form.father.value),
         spouse: parse_form_string(form.spouse.value),
     }
-    alert( JSON.stringify(updates))
-    return
 
     display_loading()
     load_change_person(
@@ -2928,7 +2927,7 @@ function submit_change_person(person, dialog, form) {
 
 
 function display_delete_person(person) {
-    var dialog = $("<div id='dialog'><p>Are you sure you want to delete this person?</p></div>")
+    var dialog = $("<div id='dialog'><p>Are you sure you want to delete person '"+escapeHTML(person.title)+"'?</p></div>")
         .attr('title', "Delete " + person.title)
         .dialog({
             modal: true,
