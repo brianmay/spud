@@ -87,14 +87,6 @@ def place_detail(request, place_id):
     }, context_instance=RequestContext(request))
 
 
-def person_search(request):
-    js = json.dumps({'params': request.GET})
-    return render_to_response('html/static.html', {
-        'title': 'Person search results',
-        'onload': "do_person_search(%s)" % (js)
-    }, context_instance=RequestContext(request))
-
-
 def person_search_results(request):
     query = request.GET.copy()
     page = query.pop('page', [0])[-1]
@@ -118,14 +110,6 @@ def person_detail(request, person_id):
     }, context_instance=RequestContext(request))
 
 
-def search(request):
-    js = json.dumps({'params': request.GET})
-    return render_to_response('html/static.html', {
-        'title': 'Search',
-        'onload': "do_search(%s)" % (js)
-    }, context_instance=RequestContext(request))
-
-
 def search_results(request):
     query = request.GET.copy()
     page = query.pop('page', [0])[-1]
@@ -138,11 +122,4 @@ def search_results(request):
     return render_to_response('html/static.html', {
         'title': 'Search results',
         'onload': "do_search_results(%s, %d)" % (js, page),
-    }, context_instance=RequestContext(request))
-
-
-def settings(request):
-    return render_to_response('html/static.html', {
-        'title': 'Settings',
-        'onload': "do_settings()"
     }, context_instance=RequestContext(request))

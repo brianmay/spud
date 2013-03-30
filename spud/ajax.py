@@ -873,11 +873,14 @@ def person_search_results(request):
     if count < 0:
         raise HttpBadRequest("count is negative")
 
-    q = search_dict.pop("q", [""])[-1]
+    person_list = spud.models.person.objects.all()
 
-    person_list = spud.models.person.objects.filter(
-        Q(first_name=q) | Q(last_name=q) |
-        Q(middle_name=q) | Q(called=q))
+    q = search_dict.pop("q", [None])[-1]
+    if q is not None:
+        person_list = spud.models.person.objects.filter(
+            Q(first_name=q) | Q(last_name=q) |
+            Q(middle_name=q) | Q(called=q))
+
     number_results = person_list.count()
     person_list = person_list[first:first+count]
     number_returned = len(person_list)
@@ -889,6 +892,7 @@ def person_search_results(request):
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_person'),
+        'q': q,
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 

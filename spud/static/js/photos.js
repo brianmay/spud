@@ -54,7 +54,7 @@ function person_search_results_url(search, page) {
     var params = jQuery.extend({}, search.params, {
         page: page
     })
-    return "/b/person/results/?" + jQuery.param(params)
+    return "/b/person/?" + jQuery.param(params)
 }
 
 
@@ -81,7 +81,7 @@ function search_results_url(search, page) {
     var params = jQuery.extend({}, search.params, {
         page: page
     })
-    return "/b/search/results/?" + jQuery.param(params)
+    return "/b/search/?" + jQuery.param(params)
 }
 
 
@@ -98,7 +98,7 @@ function search_photo_url(search, n, photo) {
 
 
 function settings_url(dt) {
-   return "/b/settings/"
+   return "#"
 }
 
 
@@ -464,7 +464,7 @@ function person_search_a(search, title) {
 
 function person_search_results_a(search, page, title, accesskey) {
     if (title == null) {
-        title = "Person list"
+        title = "People"
     }
     var a = $('<a/>')
         .attr('href', person_search_results_url(search, page))
@@ -508,7 +508,7 @@ function search_a(search, title) {
 
 function search_results_a(search, page, title, accesskey) {
     if (title == null) {
-        title = "Photo list"
+        title = "Photos"
     }
     var a = $('<a/>')
         .attr('href', search_results_url(search, page))
@@ -524,7 +524,7 @@ function search_results_a(search, page, title, accesskey) {
 
 function search_photo_a(search, n, photo, title, accesskey) {
     if (title == null) {
-        title = "Photo List"
+        title = "Photo "+n
     }
     var a = $('<a/>')
         .attr('href', search_photo_url(search, n, photo))
@@ -658,16 +658,12 @@ window.onpopstate = function(event) {
             do_category(state.category_id, false)
         } else if (state.type == 'display_place') {
             do_place(state.place_id, false)
-        } else if (state.type == 'display_person_search') {
-            do_person_search(state.search)
         } else if (state.type == 'display_person_search_results') {
             do_person_search_results(state.search, state.page, false)
         } else if (state.type == 'display_person') {
             do_person(state.person_id, false)
         } else if (state.type == 'display_search_photo') {
             do_search_photo(state.search, state.n, false)
-        } else if (state.type == 'display_search') {
-            do_search(state.search)
         } else if (state.type == 'display_search_results') {
             do_search_results(state.search, state.page, false)
         } else if (state.type == 'settings') {
@@ -807,12 +803,12 @@ function replace_links() {
 
     $("<li>")
         .on("click", function() { load_person_search({}, true); return false; })
-        .append(person_search_a({}, "People"))
+        .append(person_search_results_a({}, 0))
         .appendTo(ul)
 
     $("<li>")
         .on("click", function() { do_search({}, true); return false; })
-        .append(search_a({}, "Search"))
+        .append(search_results_a({}, 0))
         .appendTo(ul)
 
     module.append(ul)
@@ -1408,7 +1404,7 @@ function display_album(album) {
         .appendTo(ul)
 
     $("<li/>")
-        .append(search_a(search, "Revise Search"))
+        .append(search_a(search))
         .appendTo(ul)
 
     if (album.can_add) {
@@ -1699,7 +1695,7 @@ function display_category(category) {
         .appendTo(ul)
 
     $("<li/>")
-        .append(search_a(search, "Revise Search"))
+        .append(search_a(search))
         .appendTo(ul)
 
     append_action_links(ul)
@@ -1823,7 +1819,7 @@ function display_place(place) {
         .appendTo(ul)
 
     $("<li/>")
-        .append(search_a(search, "Revise Search"))
+        .append(search_a(search))
         .appendTo(ul)
 
     append_action_links(ul)
@@ -1851,13 +1847,9 @@ function display_place(place) {
 
 
 function display_person_search(search, data) {
-    var cm = $("#content-main")
-    cm.html("")
+    var dialog = $("<div id='dialog'></div>")
+        .attr('title', "Search people")
 
-    var params = search.params
-
-    document.title = "Search | Person | Spud"
-    cm.append("<h1>Search</h1>")
 
     var f = $("<form method='get' />")
 
@@ -1869,31 +1861,24 @@ function display_person_search(search, data) {
         .append(get_input_element("q", data.q, "text"))
     f.append(table)
 
-    $("<input type='button' name='button' value='Search' />")
-        .on("click", function() { submit_person_search(this.form) } )
-        .appendTo(f)
-
-    cm.append(f)
-
-    for (i in onready) {
-        onready[i]()
-    }
-
-    append_jump("person", "person",
-        function(id) {
-            do_person(id, true)
-        }
-    )
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append("Person search")
+    dialog
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Search: function() {
+                    submit_person_search($( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
 }
 
 
-function submit_person_search(form) {
+function submit_person_search(dialog, form) {
 
     var params = { }
 
@@ -1905,6 +1890,7 @@ function submit_person_search(form) {
     }
     do_person_search_results(search, 0, true)
 
+    dialog.dialog( "close" )
     return false
 }
 
@@ -1919,15 +1905,15 @@ function display_person_search_results(search, results) {
     document.title = "Person List " + (page+1) + "/" + (last_page+1) + " | Photos | Spud"
     cm.append("<h1>Person List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
 
-    var dl = $("<dl/>")
 
-    if (search.params.q) {
-        dt_dd(dl, "Search text", search.params.q)
+    if (results.q) {
+        var dl = $("<dl/>")
+        dt_dd(dl, "Search text", results.q)
+        $("<div class='infobox'/>")
+            .append(dl)
+            .appendTo(cm)
     }
 
-    $("<div class='infobox'/>")
-        .append(dl)
-        .appendTo(cm)
 
     table = $("<table/>")
 
@@ -1984,17 +1970,21 @@ function display_person_search_results(search, results) {
     var ul = $('<ul class="menu"/>')
 
     $("<li/>")
-        .append(search_a(search, "Revise search"))
+        .append(person_search_a(search))
         .appendTo(ul)
 
     append_action_links(ul)
 
+    append_jump("person", "person",
+        function(id) {
+            do_person(id, true)
+        }
+    )
+
     $(".breadcrumbs")
         .html("")
         .append(root_a())
-        .append(" › ")
-        .append(person_search_a(search))
-        .append(" › Person List")
+        .append(" › People")
 }
 
 
@@ -2149,7 +2139,7 @@ function display_person(person) {
         .appendTo(ul)
 
     $("<li/>")
-        .append(person_search_a(search, "Revise Search"))
+        .append(person_search_a(search))
         .appendTo(ul)
 
     append_action_links(ul)
@@ -2165,19 +2155,24 @@ function display_person(person) {
 
 
 function display_search(search, data) {
-    var cm = $("#content-main")
-    cm.html("")
-
     var params = search.params
 
-    document.title = "Search | Photos | Spud"
-    cm.append("<h1>Search</h1>")
+    var dialog = $("<div id='dialog'></div>")
+        .attr('title', "Search photos")
 
     var f = $("<form method='get' />")
 
-    var table = $("<table />")
-
     var onready = []
+
+    var tabs = $("<div></div>")
+
+    $("<ul></ul>")
+        .append("<li><a href='#photo'>Photo</a></li>")
+        .append("<li><a href='#connections'>Connections</a></li>")
+        .append("<li><a href='#camera'>Camera</a></li>")
+        .appendTo(tabs)
+
+    var table = $("<table />")
 
     append_field(table, "first_date", "First Date")
         .append(get_input_element("first_date", data.first_date, "text"))
@@ -2199,6 +2194,24 @@ function display_search(search, data) {
 
     append_field(table, "photographer_text", "Photographer")
         .append(get_ajax_select("photographer", 'person', data.photographer, onready))
+
+    append_field(table, "path", "Path")
+        .append(get_input_element("path", data.path, "text"))
+
+    append_field(table, "name", "Name")
+        .append(get_input_element("name", data.name, "text"))
+
+    append_field(table, "first_id", "First id")
+        .append(get_input_element("first_id", data.first_id, "text"))
+
+    append_field(table, "last_id", "Last id")
+        .append(get_input_element("last_id", data.last_id, "text"))
+
+    $("<div id='photo'></div>")
+        .append(table)
+        .appendTo(tabs)
+
+    var table = $("<table />")
 
     append_field(table, "person_text", "Person")
         .append(get_ajax_multiple_select("person", 'person', data.person, onready))
@@ -2233,11 +2246,11 @@ function display_search(search, data) {
     append_field(table, "category_none", "Category none")
         .append(get_input_checkbox("category_none", data.category_none))
 
-    append_field(table, "path", "Path")
-        .append(get_input_element("path", data.path, "text"))
+    $("<div id='connections'></div>")
+        .append(table)
+        .appendTo(tabs)
 
-    append_field(table, "name", "Name")
-        .append(get_input_element("name", data.name, "text"))
+    var table = $("<table />")
 
     append_field(table, "camera_make", "Camera Make")
         .append(get_input_element("camera_make", data.camera_make, "text"))
@@ -2245,33 +2258,36 @@ function display_search(search, data) {
     append_field(table, "camera_model", "Camera Model")
         .append(get_input_element("camera_model", data.camera_model, "text"))
 
-    append_field(table, "first_id", "First id")
-        .append(get_input_element("first_id", data.first_id, "text"))
+    $("<div id='camera'></div>")
+        .append(table)
+        .appendTo(tabs)
 
-    append_field(table, "last_id", "Last id")
-        .append(get_input_element("last_id", data.last_id, "text"))
+    tabs.tabs()
 
-    f.append(table)
+    f.append(tabs)
 
-    $("<input type='button' name='button' value='Search' />")
-        .on("click", function() { submit_search(this.form) } )
-        .appendTo(f)
-
-    cm.append(f)
+    dialog
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Search: function() {
+                    submit_search($( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
 
     for (i in onready) {
         onready[i]()
     }
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append("Search")
 }
 
 
-function submit_search(form) {
+function submit_search(dialog, form) {
 
     var params = { }
 
@@ -2377,7 +2393,10 @@ function submit_search(form) {
     var search = {
         params: params,
     }
+
     do_search_results(search, 0, true)
+
+    dialog.dialog( "close" )
 
     return false
 }
@@ -2400,7 +2419,7 @@ function display_search_results(search, results) {
     var ul = $('<ul class="menu"/>')
 
     $("<li/>")
-        .append(search_a(search, "Revise search"))
+        .append(search_a(search))
         .appendTo(ul)
 
     append_action_links(ul)
@@ -2408,9 +2427,7 @@ function display_search_results(search, results) {
     $(".breadcrumbs")
         .html("")
         .append(root_a())
-        .append(" › ")
-        .append(search_a(search))
-        .append(" › Photo List")
+        .append(" › Photos")
 }
 
 
@@ -2496,7 +2513,7 @@ function display_search_photo(search, results, n) {
     var ul = $('<ul class="menu"/>')
 
     $("<li/>")
-        .append(search_a(search, "Revise search"))
+        .append(search_a(search))
         .appendTo(ul)
 
     append_action_links(ul)
@@ -2526,11 +2543,8 @@ function photo_paginator(search, results, n) {
 
 
 function display_settings(data) {
-    var cm = $("#content-main")
-    cm.html("")
-
-    document.title = "Settings | Spud"
-    cm.append("<h1>Settings</h1>")
+    var dialog = $("<div id='dialog'></div>")
+        .attr('title', "Login")
 
     var f = $("<form method='get' />")
 
@@ -2557,25 +2571,24 @@ function display_settings(data) {
 
     f.append(table)
 
-    $("<input type='button' name='button' value='Save' />")
-        .on("click", function() { submit_settings(this.form) } )
-        .appendTo(f)
-
-    cm.append(f)
-
-    for (i in onready) {
-        onready[i]()
-    }
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append("Search")
+    dialog
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Save: function() {
+                    submit_settings($( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
 }
 
 
-function submit_settings(form) {
+function submit_settings(dialog, form) {
     settings = $(document).data('settings')
 
     if (form.photos_per_page.value) {
@@ -2592,8 +2605,9 @@ function submit_settings(form) {
 
     $(document).data('settings', settings)
 
-    window.history.back();
+    dialog.dialog( "close" )
 
+    window.history.go(0);
     return false
 }
 
@@ -2605,8 +2619,6 @@ function display_login(push_history) {
     var f = $("<form method='get' />")
 
     var table = $("<table />")
-
-    settings = get_settings()
 
     append_field(table, "username", "Username")
         .append(get_input_element("username", "", "text"))
@@ -2767,7 +2779,6 @@ function do_delete_album(album_id, push_history) {
     display_loading()
     load_album(album_id, function(data) {
         hide_status()
-        replace_links()
         update_session(data.session)
         display_album(data.album)
         display_delete_album(data.album)
@@ -2813,13 +2824,7 @@ function do_person_search(search, push_history) {
     display_loading()
     load_person_search(search, function(data) {
         hide_status()
-        replace_links()
         update_session(data.session)
-        update_history(push_history,
-            person_search_url(search), {
-                type: 'display_person_search',
-                search: search,
-            }, display_error);
         display_person_search(search, data)
     }, display_error)
 }
@@ -2868,13 +2873,7 @@ function do_search(search, push_history) {
     display_loading()
     load_search(search, function(data) {
         hide_status()
-        replace_links()
         update_session(data.session)
-        update_history(push_history,
-            search_url(search), {
-                type: 'display_search',
-                search: search,
-            }, display_error);
         display_search(search, data)
     }, display_error)
 }
@@ -2919,11 +2918,7 @@ function do_settings(push_history) {
     display_loading()
     load_settings(function(data) {
         hide_status()
-        replace_links()
         update_session(data.session)
-        update_history(push_history, settings_url(), {
-            type: 'display_settings',
-        });
         display_settings(data)
     }, display_error)
 }
