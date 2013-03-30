@@ -443,6 +443,7 @@ function photo_a(photo, title) {
     var a = $('<a/>')
         .attr('href', photo_url(photo))
         .on('click', function() { do_photo(photo.id, true); return false; })
+        .data('photo', photo)
         .text(title)
     return a
 }
