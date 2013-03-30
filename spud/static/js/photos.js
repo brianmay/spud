@@ -774,13 +774,18 @@ function datetime_a(dt) {
     return a
 }
 
+
 // ***********
 // * HELPERS *
 // ***********
 
 function get_settings() {
-    a = localStorage.settings.split(",")
+    var a = []
+    if (localStorage.settings != null)
+        if (localStorage.settings != "")
+            a = localStorage.settings.split(",")
 
+    var settings
     if (a.length < 5) {
         settings = {
             photos_per_page: 10,
@@ -801,8 +806,9 @@ function get_settings() {
     return settings
 }
 
-function put_settings(settings) {
-    a = [
+
+function set_settings(settings) {
+    var a = [
         settings.photos_per_page,
         settings.persons_per_page,
         settings.list_size,
@@ -811,6 +817,49 @@ function put_settings(settings) {
     ]
     localStorage.settings = a.join(",")
 }
+
+
+function get_selection() {
+    var selection = []
+    if (localStorage.selection != null)
+        if (localStorage.selection != "")
+            selection = localStorage.selection.split(",")
+    selection = $.map(selection, function(n){ return Number(n) });
+    return selection
+}
+
+
+function set_selection(selection) {
+    localStorage.selection = selection.join(",")
+    update_selection()
+}
+
+
+function add_selection(photo) {
+    var selection = get_selection()
+    if (selection.indexOf(photo.id) == -1) {
+        selection.push(photo.id)
+    }
+    set_selection(selection)
+}
+
+
+function del_selection(photo) {
+    var selection = get_selection()
+    var index = selection.indexOf(photo.id)
+    if (index != -1) {
+        selection.splice(index, 1);
+    }
+    set_selection(selection)
+}
+
+
+function is_photo_selected(photo) {
+    var selection = get_selection()
+    var index = selection.indexOf(photo.id)
+    return index != -1
+}
+
 
 function update_history(push_history, url, state) {
     if (push_history) {
@@ -1009,10 +1058,7 @@ function hide_status()
 
 
 function replace_links() {
-    var module = $('<div class="module"/>')
-
-    $("<h2>Quick links</h2>")
-        .appendTo(module)
+    $("#content-related").html("")
 
     var ul = $('<ul class="menu"/>')
 
@@ -1041,11 +1087,45 @@ function replace_links() {
         .append(search_results_a({}, 0))
         .appendTo(ul)
 
-    module.append(ul)
+    $('<div class="module"/>')
+        .append("<h2>Quick links</h2>")
+        .append(ul)
+        .appendTo("#content-related")
 
-    $("#content-related").html(module)
+    $('<div id="selection" class="module"/>')
+        .appendTo("#content-related")
+    update_selection()
 }
 
+function update_selection() {
+    selection = get_selection()
+
+    var search = {
+        params: {
+            photo: selection.join(".")
+        }
+    }
+
+    var ul = $('<ul class="menu"/>')
+
+    if (selection.length > 0) {
+        $("<li>")
+            .on("click", function() { do_search_results(search, true); return false; })
+            .append(search_results_a(search, 0, "Show"))
+            .appendTo(ul)
+
+        $("<li>")
+            .on("click", function() { set_selection([]); $(".ui-selected").removeClass("ui-selected"); return false; })
+            .text("Clear")
+            .appendTo(ul)
+    }
+
+    $('#selection')
+        .empty()
+        .append("<h2>Selection</h2>")
+        .append(escapeHTML(selection.length + " photos selected"))
+        .append(ul)
+}
 
 function append_action_links(ul) {
     $('<div class="module"/>')
@@ -1178,7 +1258,7 @@ function dt_dd(dl, title, value) {
 }
 
 
-function photo_thumb(photo, title, sort, description, url, onclick) {
+function photo_thumb(photo, title, sort, description, url, selectable, onclick) {
     var style = ""
     var image = null
     if (photo != null) {
@@ -1187,11 +1267,15 @@ function photo_thumb(photo, title, sort, description, url, onclick) {
         var image = photo.thumb[size]
     }
 
+    if (selectable && is_photo_selected(photo)) {
+        style = style + " ui-selected"
+    }
+
     li = $("<li />")
     li.attr('class', "photo_list_item " + style)
-    li.on("click", onclick)
-
+    li.data('photo', photo)
     a = $("<a />")
+    a.on("click", onclick)
     a.attr("href", url)
 
     if (image != null) {
@@ -1640,6 +1724,7 @@ function display_album(album) {
 
             var li = photo_thumb(photo, child.title, sort, child.description,
                 album_url(album),
+                false,
                 function(album) {
                     return function() {
                         do_album(album.id, true)
@@ -1912,6 +1997,7 @@ function display_category(category) {
 
             li = photo_thumb(photo, child.title, sort, child.description,
                 category_url(category),
+                false,
                 function(category) {
                     return function() {
                         do_category(category.id, true)
@@ -2210,6 +2296,7 @@ function display_place(place) {
 
             li = photo_thumb(photo, child.title, sort, child.description,
                 place_url(place),
+                false,
                 function(place) {
                     return function() {
                         do_place(place.id, true)
@@ -2981,6 +3068,9 @@ function display_search(search, data) {
 
     var f = $("<form method='get' />")
 
+    photo_ids = $.map(data.photo, function(photo){ return photo.id });
+    f.append(get_input_element("photo", "|" + photo_ids.join("|") + "|", "hidden"))
+
     var onready = []
 
     var tabs = $("<div></div>")
@@ -3109,6 +3199,11 @@ function display_search(search, data) {
 function submit_search(dialog, form) {
 
     var params = { }
+
+    if (form.photo.value) {
+        var photo = form.photo.value.slice(1,-1).split("|")
+        params['photo'] = photo.join(".")
+    }
 
     if (form.first_date.value) {
         params['first_date'] = form.first_date.value
@@ -3274,6 +3369,9 @@ function search_infobox(search, results) {
             dd.append(person_a(c.value))
         } else if (type == 'datetime') {
             dd.append(datetime_a(c.value))
+        } else if (type == 'photos') {
+            var sep=""
+            $.each(c.value.value, function(j, photo){ dd.append(sep); dd.append(photo_a(photo, photo.id)); sep=", " });
         } else {
             dd.append(escapeHTML(c.value.value))
         }
@@ -3299,14 +3397,22 @@ function search_photo_list(search, results) {
 
         li = photo_thumb(photo, photo.title, photo.localtime.date + " " + photo.localtime.time, photo.description,
             search_photo_url(search, n, photo),
+            true,
             function(photo, n) {
                 return function() {
                     do_search_photo(search, n, true)
                     return false
                 }
-        }(photo, n))
+            }(photo, n))
         pl.append(li)
     }
+    pl.selectable({
+        filter: "li",
+        selected: function( event, ui ) {
+            add_selection( $(ui.selected).data('photo') ); },
+        unselected: function( event, ui ) {
+            del_selection( $(ui.unselected).data('photo') ); },
+    })
     return pl
 }
 

@@ -1130,12 +1130,14 @@ def _get_search(user, search_dict):
         elif key == "person":
             values = _decode_array(value)
             for value in values:
+                value = _decode_int(value)
                 object = get_object_or_404(spud.models.person, pk=value)
                 add_criteria(key, 'is', _get_person(user, object))
                 photo_list = photo_list.filter(persons=object)
         elif key == "album":
             values = _decode_array(value)
             for value in values:
+                value = _decode_int(value)
                 object = get_object_or_404(spud.models.album, pk=value)
                 if ad:
                     add_criteria(key, 'is', _get_album(user, object),
@@ -1148,6 +1150,7 @@ def _get_search(user, search_dict):
         elif key == "category":
             values = _decode_array(value)
             for value in values:
+                value = _decode_int(value)
                 object = get_object_or_404(spud.models.category, pk=value)
                 if cd:
                     add_criteria(key, 'is', _get_category(user, object),
@@ -1158,6 +1161,17 @@ def _get_search(user, search_dict):
                 else:
                     add_criteria(key, 'is', _get_category(user, object))
                     photo_list = photo_list.filter(categorys=object)
+        elif key == "photo":
+            values = _decode_array(value)
+            a = []
+            q = Q()
+            for value in values:
+                value = _decode_int(value)
+                object = get_object_or_404(spud.models.photo, pk=value)
+                a.append(_get_photo_thumb(user, object))
+                q = q | Q(pk=object.pk)
+            add_criteria(key, 'is', {'type': "photos", 'value': a})
+            photo_list = photo_list.filter(q)
         elif key == "place_none":
             value = _decode_boolean(value)
             if value:
@@ -1268,6 +1282,14 @@ def search(request):
                 category = get_object_or_404(
                     spud.models.category, pk=category_id)
                 resp['category'].append(_get_category(request.user, category))
+        elif key == "photo":
+            values = _decode_array(request.GET['photo'])
+            resp['photo'] = []
+            for photo_id in values:
+                photo_id = _decode_int(photo_id)
+                photo = get_object_or_404(
+                    spud.models.photo, pk=photo_id)
+                resp['photo'].append(_get_photo_thumb(request.user, photo))
         elif key == "place_none":
             resp[key] = value
         elif key == "person_none":
