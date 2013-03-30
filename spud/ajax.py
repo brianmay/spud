@@ -40,9 +40,9 @@ def _decode_int(string):
 
 
 def _decode_boolean(string):
-    if string.lower() == "True":
+    if string.lower() == "true":
         return True
-    elif string.lower() == "False":
+    elif string.lower() == "false":
         return False
     else:
         raise HttpBadRequest("Got non-boolean")
