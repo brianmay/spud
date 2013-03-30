@@ -3080,8 +3080,10 @@ function display_search(search, data) {
 
     var f = $("<form method='get' />")
 
-    photo_ids = $.map(data.photo, function(photo){ return photo.id });
-    f.append(get_input_element("photo", "|" + photo_ids.join("|") + "|", "hidden"))
+    if (data.photo != null) {
+        photo_ids = $.map(data.photo, function(photo){ return photo.id });
+        f.append(get_input_element("photo", "|" + photo_ids.join("|") + "|", "hidden"))
+    }
 
     var onready = []
 
