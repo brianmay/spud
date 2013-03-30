@@ -40,9 +40,9 @@ def _decode_int(string):
 
 
 def _decode_boolean(string):
-    if string.lower() == "true":
+    if string.lower() == "True":
         return True
-    elif string.lower() == "false":
+    elif string.lower() == "False":
         return False
     else:
         raise HttpBadRequest("Got non-boolean")
@@ -635,10 +635,13 @@ def album_delete(request, album_id):
 
 def album_finish(request, album):
     if request.method == "POST":
+        updated = False
         if 'title' in request.POST:
             album.album = request.POST['title']
+            updated = True
         if 'description' in request.POST:
             album.album_description = request.POST['description']
+            updated = True
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
                 album.cover_photo = None
@@ -649,10 +652,13 @@ def album_finish(request, album):
                     album.cover_photo = cp
                 except spud.models.photo.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
+            updated = True
         if 'sortname' in request.POST:
             album.sortname = request.POST['sortname']
+            updated = True
         if 'sortorder' in request.POST:
             album.sortorder = request.POST['sortorder']
+            updated = True
         if 'parent' in request.POST:
             if request.POST['parent'] == "":
                 album.parent_album = None
@@ -663,7 +669,9 @@ def album_finish(request, album):
                     album.parent_album = p
                 except spud.models.album.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
-        album.save()
+            updated = True
+        if updated:
+            album.save()
 
     resp = _get_album_detail(request.user, album)
     resp = {
@@ -718,10 +726,13 @@ def category_delete(request, category_id):
 
 def category_finish(request, category):
     if request.method == "POST":
+        updated = False
         if 'title' in request.POST:
             category.category = request.POST['title']
+            updated = True
         if 'description' in request.POST:
             category.category_description = request.POST['description']
+            updated = True
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
                 category.cover_photo = None
@@ -732,10 +743,13 @@ def category_finish(request, category):
                     category.cover_photo = cp
                 except spud.models.photo.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
+            updated = True
         if 'sortname' in request.POST:
             category.sortname = request.POST['sortname']
+            updated = True
         if 'sortorder' in request.POST:
             category.sortorder = request.POST['sortorder']
+            updated = True
         if 'parent' in request.POST:
             if request.POST['parent'] == "":
                 category.parent_category = None
@@ -746,7 +760,9 @@ def category_finish(request, category):
                     category.parent_category = p
                 except spud.models.category.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
-        category.save()
+            updated = True
+        if updated:
+            category.save()
 
     resp = _get_category_detail(request.user, category)
     resp = {
@@ -801,24 +817,34 @@ def place_delete(request, place_id):
 
 def place_finish(request, place):
     if request.method == "POST":
+        updated = False
         if 'title' in request.POST:
             place.title = request.POST['title']
+            updated = True
         if 'address' in request.POST:
             place.address = request.POST['address']
+            updated = True
         if 'address2' in request.POST:
             place.address2 = request.POST['address2']
+            updated = True
         if 'city' in request.POST:
             place.city = request.POST['city']
+            updated = True
         if 'zip' in request.POST:
             place.zip = request.POST['zip']
+            updated = True
         if 'country' in request.POST:
             place.country = request.POST['country']
+            updated = True
         if 'url' in request.POST:
             place.url = request.POST['url']
+            updated = True
         if 'urldesc' in request.POST:
             place.urldesc = request.POST['urldesc']
+            updated = True
         if 'notes' in request.POST:
             place.place_description = request.POST['notes']
+            updated = True
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
                 place.cover_photo = None
@@ -829,6 +855,7 @@ def place_finish(request, place):
                     place.cover_photo = cp
                 except spud.models.photo.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
+            updated = True
         if 'parent' in request.POST:
             if request.POST['parent'] == "":
                 place.parent_place = None
@@ -839,7 +866,9 @@ def place_finish(request, place):
                     place.parent_place = p
                 except spud.models.place.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
-        place.save()
+            updated = True
+        if updated:
+            place.save()
 
     resp = _get_place_detail(request.user, place)
     resp = {
@@ -951,23 +980,31 @@ def person_delete(request, person_id):
 
 def person_finish(request, person):
     if request.method == "POST":
+        updated = False
         if 'first_name' in request.POST:
             person.first_name = request.POST['first_name']
+            updated = True
         if 'middle_name' in request.POST:
             person.middle_name = request.POST['middle_name']
+            updated = True
         if 'last_name' in request.POST:
             person.last_name = request.POST['last_name']
+            updated = True
         if 'called' in request.POST:
             person.called = request.POST['called']
+            updated = True
         if 'gender' in request.POST:
             gender = _decode_int(request.POST['gender'])
             if gender < 1 or gender > 2:
                 raise HttpBadRequest("Unknown gender")
             person.gender = gender
+            updated = True
         if 'notes' in request.POST:
             person.notes = request.POST['notes']
+            updated = True
         if 'email' in request.POST:
             person.email = request.POST['email']
+            updated = True
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
                 person.cover_photo = None
@@ -978,6 +1015,7 @@ def person_finish(request, person):
                     person.cover_photo = cp
                 except spud.models.photo.DoesNotExist:
                     raise HttpBadRequest("cover_photo does not exist")
+            updated = True
         if 'work' in request.POST:
             if request.POST['work'] == "":
                 person.work = None
@@ -988,6 +1026,7 @@ def person_finish(request, person):
                     person.work = p
                 except spud.models.place.DoesNotExist:
                     raise HttpBadRequest("work does not exist")
+            updated = True
         if 'home' in request.POST:
             if request.POST['home'] == "":
                 person.home = None
@@ -998,6 +1037,7 @@ def person_finish(request, person):
                     person.home = p
                 except spud.models.place.DoesNotExist:
                     raise HttpBadRequest("home does not exist")
+            updated = True
         if 'mother' in request.POST:
             if request.POST['mother'] == "":
                 person.mother = None
@@ -1008,6 +1048,7 @@ def person_finish(request, person):
                     person.mother = p
                 except spud.models.person.DoesNotExist:
                     raise HttpBadRequest("mother does not exist")
+            updated = True
         if 'father' in request.POST:
             if request.POST['father'] == "":
                 person.father = None
@@ -1018,6 +1059,7 @@ def person_finish(request, person):
                     person.father = p
                 except spud.models.person.DoesNotExist:
                     raise HttpBadRequest("father does not exist")
+            updated = True
         if 'spouse' in request.POST:
             if request.POST['spouse'] == "":
                 person.spouse = None
@@ -1028,7 +1070,9 @@ def person_finish(request, person):
                     person.spouse = p
                 except spud.models.person.DoesNotExist:
                     raise HttpBadRequest("spouse does not exist")
-        person.save()
+            updated = True
+        if updated:
+            person.save()
 
     resp = _get_person_detail(request.user, person)
     resp = {
