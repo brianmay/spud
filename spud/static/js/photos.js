@@ -1533,6 +1533,7 @@ function display_change_album(album) {
         .dialog({
             modal: true,
             close: function( event, ui ) { $(this).dialog("destroy") },
+            width: 400,
             buttons: {
                 Save: function() {
                     submit_change_album(album, $( this ), f[0])
