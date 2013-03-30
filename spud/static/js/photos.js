@@ -2563,10 +2563,10 @@ function display_person_search_results(search, results) {
 
         tr = $("<tr/>")
             .append(img)
-            .append("<td>" + escape(person.called) + "</td>")
-            .append("<td>" + escape(person.first_name) + "</td>")
-            .append("<td>" + escape(person.middle_name) + "</td>")
-            .append("<td>" + escape(person.last_name) + "</td>")
+            .append("<td>" + escapeHTML(person.called) + "</td>")
+            .append("<td>" + escapeHTML(person.first_name) + "</td>")
+            .append("<td>" + escapeHTML(person.middle_name) + "</td>")
+            .append("<td>" + escapeHTML(person.last_name) + "</td>")
             .append(links)
             .appendTo(table)
     }
@@ -3808,13 +3808,13 @@ function do_add_person(push_history) {
 }
 
 
-function do_delete_album(album_id, push_history) {
+function do_delete_person(person_id, push_history) {
     display_loading()
-    load_album(album_id, function(data) {
+    load_person(person_id, function(data) {
         hide_status()
         update_session(data.session)
-        display_album(data.album)
-        display_delete_album(data.album)
+        display_person(data.person)
+        display_delete_person(data.person)
     }, display_error)
 }
 
