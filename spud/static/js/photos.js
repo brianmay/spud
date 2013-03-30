@@ -1143,6 +1143,35 @@ function get_input_select(id, values, selected) {
 }
 
 
+function get_input_photo(id, photo) {
+
+    var photo_id=null
+    if (photo != null) {
+        var size = get_settings().list_size
+        var style = get_photo_style(photo)
+        var image = photo.thumb[size]
+        photo_id = photo.id
+    }
+
+    var img=$("<img/>")
+    if (image != null) {
+        img
+            .attr("id", "id_" + id + "_img")
+            .attr("class", style)
+            .attr("src", image.url)
+            .attr("alt", photo.title)
+            .attr("width", image.width)
+            .attr("height", image.height)
+    }
+
+    var div = $("<div></div>")
+        .append(img)
+        .append(get_input_element("cover_photo", photo_id, "hidden"))
+
+    return div
+}
+
+
 function get_ajax_select(id, type, value, onready, onadded) {
     var div = $("<div/>")
 
@@ -1490,28 +1519,8 @@ function display_change_album(album) {
     append_field(table, "description", "Description")
         .append(get_input_textarea("description", 10, 40, album.description))
 
-    var id=null
-    var img=$("<img/>")
-    var photo=album.cover_photo
-    if (photo != null) {
-        var size = get_settings().list_size
-        var style = get_photo_style(photo)
-        var image = photo.thumb[size]
-    }
-    if (image != null) {
-        img
-            .attr("class", style)
-            .attr("src", image.url)
-            .attr("alt", photo.title)
-            .attr("width", image.width)
-            .attr("height", image.height)
-    }
-    if (album.cover_photo!=null) {
-        id = album.cover_photo.id
-    }
     append_field(table, "cover_photo", "Cover Photo")
-        .append(img)
-        .append(get_input_element("cover_photo", id, "hidden"))
+        .append(get_input_photo("cover_photo", album.cover_photo))
 
     append_field(table, "sortname", "Sort Name")
         .append(get_input_element("sortname", album.sortname, "text"))
