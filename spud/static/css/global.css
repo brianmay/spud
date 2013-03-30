@@ -8,9 +8,10 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .ui-corner-all .desc { margin-left:140px; }
 
 .photo_ { }
-.photo_D { background:#EEDDDD; color:#333333; }
-.photo_R { background:#DDDDEE; color:#333333; }
-.photo_K { background:#DDEEDD; color:#333333; }
+.photo-D { background:#EEDDDD; color:#333333; }
+.photo-R { background:#DDDDEE; color:#333333; }
+.photo-K { background:#DDEEDD; color:#333333; }
+.photo-selected { background: #DDDDDD; }
 
 .photo_list_item { border:1px solid #dddddd; }
 

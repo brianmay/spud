@@ -875,12 +875,12 @@ function get_photo_style(data) {
     if (data.action==null)
         return ""
     elif (data.action=="D")
-        return "photo_D"
+        return "photo-D"
     elif (data.action=="R"
             || data.action=="M"
             || data.action=="auto"
             || data.action=="90" || data.action=="180" || data.action=="270")
-        return "photo_R"
+        return "photo-R"
     return ""
 }
 
@@ -1058,6 +1058,11 @@ function hide_status()
 }
 
 
+function reload_page()
+{
+    window.onpopstate({state: window.history.state})
+}
+
 function replace_links() {
     $("#content-related").html("")
 
@@ -1116,7 +1121,7 @@ function update_selection() {
             .appendTo(ul)
 
         $("<li>")
-            .on("click", function() { set_selection([]); $(".ui-selected").removeClass("ui-selected"); return false; })
+            .on("click", function() { set_selection([]); reload_page(); return false; })
             .html("<a href='#'>Clear</a>")
             .appendTo(ul)
     }
@@ -1268,14 +1273,17 @@ function photo_thumb(photo, title, sort, description, url, selectable, onclick) 
         var image = photo.thumb[size]
     }
 
+    li = $("<li />")
+        .attr('class', "photo_list_item")
+        .on("click", onclick)
+        .data('photo', photo)
+
+    li.addClass(style)
     if (selectable && is_photo_selected(photo)) {
-        style = style + " ui-selected"
+        li.addClass("ui-selected")
     }
 
-    li = $("<li />")
-    li.attr('class', "photo_list_item " + style)
-    li.on("click", onclick)
-    li.data('photo', photo)
+
     a = $("<a />")
     a.attr("href", url)
 
@@ -1587,6 +1595,9 @@ function display_photo(photo) {
     cm.append("<h1>" + escapeHTML(photo.title) +  "</h1>")
 
     pd = $("<div class='photo_container photo_detail " + escapeHTML(style) + "' />")
+    if (is_photo_selected(photo)) {
+        pd.addClass("photo-selected")
+    }
 
     pdp = $("<div class='photo_block photo_detail_photo' />")
 
@@ -1892,7 +1903,7 @@ function submit_change_album(album, dialog, form) {
                 } else if (window.history.state.type=='display_album' && window.history.state.album_id==data.album.id) {
                     display_album(data.album)
                 } else {
-                    window.history.go(0);
+                    reload_page()
                 }
             },
             function() {
@@ -2165,7 +2176,7 @@ function submit_change_category(category, dialog, form) {
                 } else if (window.history.state.type=='display_category' && window.history.state.category_id==data.category.id) {
                     display_category(data.category)
                 } else {
-                    window.history.go(0);
+                    reload_page()
                 }
             },
             function() {
@@ -2488,7 +2499,7 @@ function submit_change_place(place, dialog, form) {
                 } else if (window.history.state.type=='display_place' && window.history.state.place_id==data.place.id) {
                     display_place(data.place)
                 } else {
-                    window.history.go(0);
+                    reload_page()
                 }
             },
             function() {
@@ -3002,7 +3013,7 @@ function submit_change_person(person, dialog, form) {
                 } else if (window.history.state.type=='display_person' && window.history.state.person_id==data.person.id) {
                     display_person(data.person)
                 } else {
-                    window.history.go(0);
+                    reload_page()
                 }
             },
             function() {
@@ -3443,6 +3454,28 @@ function display_search_photo(search, results, n) {
         .append(search_a(search))
         .appendTo(ul)
 
+    if (is_photo_selected(results.photo)) {
+        $("<li>")
+            .on("click", function() {
+                del_selection(results.photo)
+                replace_links()
+                display_search_photo(search, results, n)
+                return false;
+            })
+            .html("<a href='#'>Unselect</a>")
+            .appendTo(ul)
+    } else {
+        $("<li>")
+            .on("click", function() {
+                add_selection(results.photo);
+                replace_links()
+                display_search_photo(search, results, n);
+                return false;
+            })
+            .html("<a href='#'>Select</a>")
+            .appendTo(ul)
+    }
+
     append_action_links(ul)
 
     $(".breadcrumbs")
@@ -3530,11 +3563,11 @@ function submit_settings(dialog, form) {
     settings.view_size = form.view_size.value
     settings.click_size = form.click_size.value
 
-    put_settings(settings)
+    set_settings(settings)
 
     dialog.dialog( "close" )
 
-    window.history.go(0);
+    reload_page()
     return false
 }
 
@@ -3584,7 +3617,7 @@ function submit_login(dialog, form) {
                     if (window.history.state==null) {
                         do_root(false)
                     } else {
-                        window.history.go(0);
+                        reload_page()
                     }
                 } else if (data.status == 'account_disabled') {
                     hide_status()
@@ -3634,7 +3667,7 @@ function do_logout() {
             if (window.history.state==null) {
                 do_root(false)
             } else {
-                window.history.go(0);
+                reload_page()
             }
         } else {
             display_error();
