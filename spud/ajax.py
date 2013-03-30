@@ -601,6 +601,8 @@ def album(request, album_id):
 
 @check_errors
 def album_add(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_album'):
             raise HttpForbidden("No rights to add albums")
@@ -682,6 +684,8 @@ def category(request, category_id):
 
 @check_errors
 def category_add(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_category'):
             raise HttpForbidden("No rights to add categorys")
@@ -763,6 +767,8 @@ def place(request, place_id):
 
 @check_errors
 def place_add(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_place'):
             raise HttpForbidden("No rights to add places")
@@ -911,6 +917,8 @@ def person(request, person_id):
 
 @check_errors
 def person_add(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_person'):
             raise HttpForbidden("No rights to add persons")
