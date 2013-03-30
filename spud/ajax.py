@@ -181,8 +181,6 @@ def _get_photo_detail(user, photo):
 #        'relations': photo.relations,
 
         'thumb': {},
-        'orig': iri_to_uri(u"%sorig/%s/%s" % (
-            django.conf.settings.IMAGE_URL, urlquote(photo.path), urlquote(photo.name))),
 
         'related': [],
 
@@ -214,6 +212,11 @@ def _get_photo_detail(user, photo):
                 urlquote(photo.path), urlquote(shortname)))
         }
         resp['thumb'][pt.size] = d
+
+    if user.is_staff:
+        resp['orig'] = iri_to_uri(u"%sorig/%s/%s" % (
+            django.conf.settings.IMAGE_URL,
+            urlquote(photo.path), urlquote(photo.name)))
 
     return resp
 
