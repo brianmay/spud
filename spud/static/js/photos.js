@@ -1848,6 +1848,11 @@ function display_change_album(album) {
     f.append(table)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_change_album(album, $( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
@@ -2121,6 +2126,11 @@ function display_change_category(category) {
     f.append(table)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_change_category(category, $( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
@@ -2438,6 +2448,11 @@ function display_change_place(place) {
     f.append(table)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_change_place(place, $( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
@@ -2573,6 +2588,11 @@ function display_person_search(search, data) {
     f.append(table)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_person_search($( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
@@ -2951,6 +2971,11 @@ function display_change_person(person) {
     f.append(table)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_change_person(person, $( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
@@ -3190,6 +3215,11 @@ function display_search(search, data) {
     f.append(tabs)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_search($( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
@@ -3534,6 +3564,11 @@ function display_settings(data) {
     f.append(table)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_settings($( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
@@ -3591,6 +3626,11 @@ function display_login(push_history) {
     f.append(table)
 
     dialog
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_login($( this ), f[0])
+            }
+        })
         .append(f)
         .dialog({
             modal: true,
