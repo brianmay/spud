@@ -3105,10 +3105,13 @@ function display_search(search, data) {
 
     var f = $("<form method='get' />")
 
+    photo_ids = "|"
     if (data.photo != null) {
         photo_ids = $.map(data.photo, function(photo){ return photo.id });
-        f.append(get_input_element("photo", "|" + photo_ids.join("|") + "|", "hidden"))
+        photo_ids = "|" + photo_ids.join("|") + "|"
     }
+    f.append(get_input_element("photo", photo_ids, "hidden"))
+    photo_ids = null
 
     var onready = []
 
@@ -3244,7 +3247,7 @@ function submit_search(dialog, form) {
 
     var params = { }
 
-    if (form.photo.value) {
+    if (form.photo.value != "|") {
         var photo = form.photo.value.slice(1,-1).split("|")
         params['photo'] = photo.join(".")
     }
