@@ -3131,9 +3131,6 @@ function display_search(search, data) {
     append_field(table, "last_date", "Last Date")
         .append(get_input_element("last_date", data.last_date, "text"))
 
-    append_field(table, "timezone", "Timezone")
-        .append(get_input_element("timezone", data.timezone, "text"))
-
     append_field(table, "lower_rating", "Lower Rating")
         .append(get_input_element("lower_rating", data.lower_rating, "text"))
 
@@ -3258,10 +3255,6 @@ function submit_search(dialog, form) {
 
     if (form.last_date.value) {
         params['last_date'] = form.last_date.value
-    }
-
-    if (form.timezone.value) {
-        params['timezone'] = form.timezone.value
     }
 
     if (form.lower_rating.value) {

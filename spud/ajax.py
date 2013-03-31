@@ -49,13 +49,51 @@ def _decode_boolean(string):
 
 
 def _decode_datetime(value, timezone):
+    index = value.find(" +")
+    if index == -1:
+        index = value.find(" -")
+    if index != -1:
+        value, sign, offset = (
+            value[0:index].strip(),
+            value[index+1:index+2],
+            value[index+2:]
+        )
+        if len(offset) == 2:
+            offset = _decode_int(offset) * 60
+        elif len(offset) == 4:
+            offset = _decode_int(offset[0:2]) * 60 + _decode_int(offset[2:4])
+        else:
+            raise HttpBadRequest("Can't parse timezone")
+        if sign == '-':
+            offset = -offset
+        timezone = pytz.FixedOffset(offset)
+        offset = None
+    index = None
+
+    value = value.split(" ")
+    new_value = []
+    for v in value:
+        index = v.find("/")
+        if index == -1:
+            new_value.append(v)
+        else:
+            try:
+                timezone = pytz.timezone(v)
+            except pytz.UnknownTimeZoneError:
+                raise HttpBadRequest("Unknown timezone")
+    value = " ".join(new_value)
+    new_value = None
+
     try:
         dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
     except ValueError:
         try:
             dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M")
         except ValueError:
-            dt = datetime.datetime.strptime(value, "%Y-%m-%d")
+            try:
+                dt = datetime.datetime.strptime(value, "%Y-%m-%d")
+            except ValueError:
+                raise HttpBadRequest("Can't parse date/time")
 
     dt = timezone.localize(dt)
     return dt
@@ -1101,7 +1139,6 @@ def _get_search(user, search_dict):
     cd = _decode_boolean(cd)
 
     timezone = django.conf.settings.TIME_ZONE
-    timezone = search_dict.pop("timezone", [timezone])[-1]
 
     def add_criteria(key, condition, value, post_text=None):
         criteria.append({
@@ -1282,8 +1319,6 @@ def search(request):
 
         if value == "" or key == "_":
             continue
-        elif key == "timezone":
-            resp[key] = value
         elif key == "place_descendants":
             resp[key] = value
         elif key == "album_descendants":
