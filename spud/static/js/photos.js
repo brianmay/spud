@@ -369,6 +369,21 @@ function load_search_results(search, page, success, error) {
 }
 
 
+function change_search(search, updates, success, error) {
+    var params = jQuery.extend({}, search.params, updates)
+
+    $.ajax({
+        url: '/a/search/change/',
+        dataType : 'json',
+        cache: false,
+        data: params,
+        success: success,
+        error: error,
+        type: "POST",
+    });
+}
+
+
 function load_search_photo(search, n, success, error) {
     $.ajax({
         url: '/a/search/'+n+'/',
@@ -861,6 +876,18 @@ function is_photo_selected(photo) {
     return index != -1
 }
 
+
+function set_edit_mode() {
+    $(document).data("mode", "edit")
+}
+
+function set_normal_mode() {
+    $(document).data("mode", null)
+}
+
+function is_edit_mode() {
+    return ($(document).data("mode") == "edit")
+}
 
 function update_history(push_history, url, state) {
     if (push_history) {
@@ -1477,7 +1504,7 @@ function get_input_photo(id, photo) {
 }
 
 
-function get_ajax_select(id, type, value, onready, onadded) {
+function get_ajax_select(id, type, value, onready, onadded, onkilled) {
     var div = $("<div/>")
 
     $("<input type='text' value='' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true' />")
@@ -1495,8 +1522,14 @@ function get_ajax_select(id, type, value, onready, onadded) {
         .appendTo(div)
 
     if (onadded != null) {
-        rod.on("added", function() {
-            onadded(i.val())
+        rod.on("added", function(ev, pk, repr) {
+            onadded(pk, repr)
+        })
+    }
+
+    if (onkilled != null) {
+        rod.on("killed", function(ev, pk, repr) {
+            onkilled(pk, repr)
         })
     }
 
@@ -1520,7 +1553,7 @@ function get_ajax_select(id, type, value, onready, onadded) {
 }
 
 
-function get_ajax_multiple_select(id, type, value, onready, onadded) {
+function get_ajax_multiple_select(id, type, value, onready, onadded, onkilled) {
     var value_str = "|"
     var value_arr = []
     for (var i in value) {
@@ -1547,10 +1580,17 @@ function get_ajax_multiple_select(id, type, value, onready, onadded) {
         .appendTo(div)
 
     if (onadded != null) {
-        rod.on("added", function() {
-            onadded(i.val())
+        rod.on("added", function(ev, pk, repr) {
+            onadded(pk, repr)
         })
     }
+
+    if (onkilled != null) {
+        rod.on("killed", function(ev, pk, repr) {
+            onkilled(pk, repr)
+        })
+    }
+
 
     div.append("<br /><span class='helptext'>Enter text to search.</span>")
 
@@ -1591,8 +1631,12 @@ function display_photo(photo) {
     var cm = $("#content-main")
     cm.html("")
 
-    document.title = photo.title + " | Album | Spud"
-    cm.append("<h1>" + escapeHTML(photo.title) +  "</h1>")
+    prefix = ""
+    if (photo.can_change && is_edit_mode()) {
+        prefix = "Edit "
+    }
+    document.title = prefix + photo.title + " | Album | Spud"
+    cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
     pd = $("<div class='photo_container photo_detail " + escapeHTML(style) + "' />")
     if (is_photo_selected(photo)) {
@@ -1620,12 +1664,28 @@ function display_photo(photo) {
     pdd = $("<div class='photo_block photo_detail_photo_detail' />")
     pdd.append("<h2>Photo Details</h2>")
 
+    var search_params = {
+        photo: photo.id,
+    }
+
+    var results = {
+        number_results: 1,
+        photos: [ photo ],
+    }
+
     dl = $("<dl\>")
     if (image) {
         dt_dd(dl, "Title", photo.title + " (" + image.width + "x" + image.height + ")")
     } else {
         dt_dd(dl, "Title", photo.title)
     }
+
+    dt_dd(dl, "Description", photo.description)
+
+    dt_dd(dl, "View", photo.view)
+
+    dt_dd(dl, "Comments", photo.comment)
+
     dt_dd(dl, "File", photo.name)
     dt_dd(dl, "Place", "")
         .html(place_a(photo.place))
@@ -1640,6 +1700,7 @@ function display_photo(photo) {
         .append(datetime_a(photo.utctime))
         .append("<br />")
         .append(datetime_a(photo.localtime))
+
     dt_dd(dl, "Photographer", "")
         .html(person_a(photo.photographer))
 
@@ -1678,6 +1739,10 @@ function display_photo(photo) {
 
     cm.append(pd)
 
+    if (photo.can_change && is_edit_mode()) {
+        photo_change_events(photo, { photo: photo.id }, { number_results: 1, photos: [ photo ] })
+    }
+
     $(".breadcrumbs")
         .html("")
         .append(root_a())
@@ -1687,6 +1752,408 @@ function display_photo(photo) {
     return
 }
 
+
+function photo_change_events(photo, search_params, results) {
+    $(document).keydown(function(ev) {
+        var key = String.fromCharCode(ev.which)
+        if ($("#dialog").length == 0) {
+            if (key == 'T') {
+                display_change_photo_title(photo.title, search_params, results)
+                return false
+            } else if (key == 'D') {
+                display_change_photo_description(photo.description, search_params, results)
+                return false
+            } else if (key == 'V') {
+                display_change_photo_view(photo.view, search_params, results)
+                return false
+            } else if (key == 'C') {
+                display_change_photo_comments(photo.view, search_params, results)
+                return false
+            } else if (key == 'W') {
+                display_change_photo_datetime(photo.datetime, search_params, results)
+                return false
+//            } else if (key == 'A') {
+//                display_change_photo_action(photo.action, search_params, results)
+                return false
+//            } else if (key == 'P') {
+//                display_change_photo_photographer(photo.photographer, search_params, results)
+ //               return false
+            } else if (key == 'L') {
+                display_change_photo_place(photo.place, search_params, results)
+                return false
+            } else if (key == 'A') {
+                display_change_photo_album(photo.albums, search_params, results)
+                return false
+            } else if (key == 'C') {
+                display_change_photo_category(photo.categorys, search_params, results)
+                return false
+            } else if (key == 'P') {
+                display_change_photo_person(photo.persons, search_params, results)
+                return false
+            }
+        }
+        return true
+   })
+}
+
+
+function display_change_photo_title(title, search_params, results) {
+    var table = $("<table />")
+    append_field(table, "title", "Title")
+        .append(get_input_element("title", title, "text"))
+    var get_updates = function(form) {
+        return {
+            set_title: form.title.value,
+        }
+    }
+    display_change_photo_attribute("title", table, get_updates, search_params, results)
+}
+
+
+function display_change_photo_description(description, search_params, results) {
+    var table = $("<table />")
+    append_field(table, "description", "Description")
+        .append(get_input_textarea("description", 10, 40, description))
+    var get_updates = function(form) {
+        return {
+            set_description: form.description.value,
+        }
+    }
+    display_change_photo_attribute("description", table, get_updates, search_params, results, { width: 400, })
+}
+
+
+function display_change_photo_view(view, search_params, results) {
+    var table = $("<table />")
+    append_field(table, "view", "View")
+        .append(get_input_textarea("view", 10, 40, view))
+    var get_updates = function(form) {
+        return {
+            set_view: form.view.value,
+        }
+    }
+    display_change_photo_attribute("view", table, get_updates, search_params, results, { width: 400, })
+}
+
+
+function display_change_photo_comments(comments, search_params, results) {
+    var table = $("<table />")
+    append_field(table, "comments", "Comments")
+        .append(get_input_textarea("comments", 10, 40, comments))
+    var get_updates = function(form) {
+        return {
+            set_comments: form.comments.value,
+        }
+    }
+    display_change_photo_attribute("comments", table, get_updates, search_params, results, { width: 400, } )
+}
+
+
+function display_change_photo_datetime(datetime, search_params, results) {
+    var table = $("<table />")
+    append_field(table, "datetime", "Date/Time")
+        .append(get_input_element("datetime", datetime, "text"))
+    var get_updates = function(form) {
+        return {
+            set_datetime: form.datetime.value,
+        }
+    }
+    display_change_photo_attribute("datetime", table, get_updates, search_params, results, { } )
+}
+
+
+function display_change_photo_action(action, search_params, results) {
+    var table = $("<table />")
+    append_field(table, "action", "Action")
+        .append(get_input_select("action", [
+            ['', 'no action'],
+            ['D', 'delete'],
+            ['S', 'regenerate size'],
+            ['R', 'regenerate thumbnails'],
+            ['M', 'move photo'],
+            ['auto', 'rotate automatic'],
+            ['90', 'rotate 90 degrees clockwise'],
+            ['180', 'rotate 180 degrees clockwise'],
+            ['270', 'rotate 270 degrees clockwise'],
+            ], action))
+    var get_updates = function(form) {
+        return {
+            set_action: form.action.value,
+        }
+    }
+    display_change_photo_attribute("action", table, get_updates, search_params, results, { width: 400, } )
+}
+
+
+function display_change_photo_photographer(photographer, search_params, results) {
+    var onready = []
+    var table = $("<table />")
+    append_field(table, "photographer_text", "Photographer")
+        .append(get_ajax_select("photographer", 'person', photographer, onready))
+    var get_updates = function(form) {
+        return {
+            set_photographer: form.photographer.value,
+        }
+    }
+    display_change_photo_attribute("photographer", table, get_updates, search_params, results, { onready: onready } )
+}
+
+
+function display_change_photo_place(place, search_params, results) {
+    var onready = []
+    var table = $("<table />")
+    append_field(table, "place_text", "Place")
+        .append(get_ajax_select("place", 'place', place, onready))
+    var get_updates = function(form) {
+        return {
+            set_place: form.place.value,
+        }
+    }
+    display_change_photo_attribute("place", table, get_updates, search_params, results, { onready: onready } )
+}
+
+
+function display_change_photo_album(albums, search_params, results) {
+    var onready = []
+    var table = $("<table />")
+
+    if (albums != null) {
+        ul = $("<ul></ul>")
+        for (var i in albums) {
+            $("<li></li>")
+                .attr("id", "#id_album_"+albums[i].id)
+                .text(albums[i].title)
+                .appendTo(ul)
+        }
+        append_field(table, "albums", "Current Albums")
+            .append(ul)
+    }
+    append_field(table, "add_album_text", "Add Album")
+        .append(get_ajax_multiple_select("add_album", 'album', [], onready,
+            function(pk, repr) {
+                $("<li></li>")
+                    .attr("id", "id_album_"+pk)
+                    .text(repr)
+                    .appendTo(ul)
+            },
+            function(pk, repr) {
+                $("#id_album_"+pk).remove()
+            }
+            ))
+    append_field(table, "del_album_text", "Delete Album")
+        .append(get_ajax_multiple_select("del_album", 'album', [], onready,
+            function(pk, repr) {
+                $("#id_album_"+pk).remove()
+            },
+            function(pk, repr) {
+                $("<li></li>")
+                    .attr("id", "id_album_"+pk)
+                    .text(repr)
+                    .appendTo(ul)
+            }
+            ))
+    var get_updates = function(form) {
+        var add = []
+        if (form.add_album.value != "|") {
+            add = form.add_album.value.slice(1,-1).split("|")
+            add = $.map(add, function(id){ return "+"+id });
+        }
+        var del = []
+        if (form.del_album.value != "|") {
+            del = form.del_album.value.slice(1,-1).split("|")
+            del = $.map(del, function(id){ return "-"+id });
+        }
+        return {
+            set_album: add.concat(del).join(".")
+        }
+    }
+    display_change_photo_attribute("album", table, get_updates, search_params, results, { onready: onready } )
+}
+
+
+function display_change_photo_category(categorys, search_params, results) {
+    var onready = []
+    var table = $("<table />")
+
+    if (categorys != null) {
+        ul = $("<ul></ul>")
+        for (var i in categorys) {
+            $("<li></li>")
+                .attr("id", "#id_category_"+categorys[i].id)
+                .text(categorys[i].title)
+                .appendTo(ul)
+        }
+        append_field(table, "categorys", "Current Categorys")
+            .append(ul)
+    }
+    append_field(table, "add_category_text", "Add Category")
+        .append(get_ajax_multiple_select("add_category", 'category', [], onready,
+            function(pk, repr) {
+                $("<li></li>")
+                    .attr("id", "id_category_"+pk)
+                    .text(repr)
+                    .appendTo(ul)
+            },
+            function(pk, repr) {
+                $("#id_category_"+pk).remove()
+            }
+            ))
+    append_field(table, "del_category_text", "Delete Category")
+        .append(get_ajax_multiple_select("del_category", 'category', [], onready,
+            function(pk, repr) {
+                $("#id_category_"+pk).remove()
+            },
+            function(pk, repr) {
+                $("<li></li>")
+                    .attr("id", "id_category_"+pk)
+                    .text(repr)
+                    .appendTo(ul)
+            }
+            ))
+    var get_updates = function(form) {
+        var add = []
+        if (form.add_category.value != "|") {
+            add = form.add_category.value.slice(1,-1).split("|")
+            add = $.map(add, function(id){ return "+"+id });
+        }
+        var del = []
+        if (form.del_category.value != "|") {
+            del = form.del_category.value.slice(1,-1).split("|")
+            del = $.map(del, function(id){ return "-"+id });
+        }
+        return {
+            set_category: add.concat(del).join(".")
+        }
+    }
+    display_change_photo_attribute("category", table, get_updates, search_params, results, { onready: onready } )
+}
+
+
+function display_change_photo_person(persons, search_params, results) {
+    var onready = []
+    var table = $("<table />")
+
+    if (persons != null) {
+        ul = $("<ul></ul>")
+            .sortable()
+            .disableSelection()
+        for (var i in persons) {
+            $("<li></li>")
+                .attr("id", "#id_person_"+persons[i].id)
+                .text(persons[i].title)
+                .appendTo(ul)
+        }
+        append_field(table, "persons", "Current Persons")
+            .append(ul)
+    }
+    append_field(table, "add_person_text", "Add Person")
+        .append(get_ajax_multiple_select("add_person", 'person', [], onready,
+            function(pk, repr) {
+                $("<li></li>")
+                    .attr("id", "id_person_"+pk)
+                    .text(repr)
+                    .appendTo(ul)
+            },
+            function(pk, repr) {
+                $("#id_person_"+pk).remove()
+            }
+            ))
+    append_field(table, "del_person_text", "Delete Person")
+        .append(get_ajax_multiple_select("del_person", 'person', [], onready,
+            function(pk, repr) {
+                $("#id_person_"+pk).remove()
+            },
+            function(pk, repr) {
+                $("<li></li>")
+                    .attr("id", "id_person_"+pk)
+                    .text(repr)
+                    .appendTo(ul)
+            }
+            ))
+    var get_updates = function(form) {
+        var add = []
+        if (form.add_person.value != "|") {
+            add = form.add_person.value.slice(1,-1).split("|")
+            add = $.map(add, function(id){ return "+"+id });
+        }
+        var del = []
+        if (form.del_person.value != "|") {
+            del = form.del_person.value.slice(1,-1).split("|")
+            del = $.map(del, function(id){ return "-"+id });
+        }
+
+        var order = ul.sortable( "toArray" )
+        order = $.map(order, function(id) {
+            return id.match(/(.+)[\-=_](.+)/)[2]
+        })
+
+        return {
+            set_person: add.concat(del).join("."),
+            set_person_order: order.join("."),
+        }
+    }
+    display_change_photo_attribute("person", table, get_updates, search_params, results, { onready: onready } )
+}
+
+
+function display_change_photo_attribute(title, table, get_updates, search_params, results, options) {
+    var dialog = $("<div id='dialog'></div>")
+        .attr('title', "Change photo " + title)
+
+    var f = $("<form method='get' />")
+        .append(table)
+
+    dialog
+        .append("<p>" + escapeHTML(results.number_results) + " photos will be changed.</p>")
+        .append(f)
+        .keydown(function(ev) {
+            if (ev.which == 13) {
+                submit_change_photo_attribute(search_params, get_updates(f[0]), $( this ))
+            }
+        })
+        .dialog(jQuery.extend(options, {
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Save: function() {
+                    submit_change_photo_attribute(search_params, get_updates(f[0]), $( this ))
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        }))
+
+    if (options.onready) {
+        for (i in options.onready) {
+            options.onready[i]()
+        }
+    }
+
+}
+
+
+function submit_change_photo_attribute(search_params, updates, dialog) {
+    var search = {
+        params: search_params
+    }
+
+    display_loading()
+    change_search(
+            search,
+            updates,
+            function(data) {
+                dialog.dialog("close")
+                hide_status()
+                reload_page()
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to update the photos")
+            })
+
+    return false
+}
 
 function display_album(album) {
     var cm = $("#content-main")
@@ -2940,8 +3407,14 @@ function display_change_person(person) {
     append_field(table, "gender", "Gender")
         .append(get_input_select("gender", [ ['1', 'Male'], ['2', 'Female'] ], person.gender))
 
+    append_field(table, "dob", "Date of birth")
+        .append(get_input_element("dob", person.dob, "text"))
+
+    append_field(table, "dod", "Date of death")
+        .append(get_input_element("dod", person.dod, "text"))
+
     append_field(table, "email", "E-Mail")
-        .append(get_input_element("email", person.called, "email"))
+        .append(get_input_element("email", person.called, "text"))
 
     append_field(table, "notes", "Notes")
         .append(get_input_textarea("notes", 10, 40, person.notes))
@@ -3004,6 +3477,8 @@ function submit_change_person(person, dialog, form) {
         last_name: parse_form_string(form.last_name.value),
         called: parse_form_string(form.called.value),
         gender: parse_form_string(form.gender.value),
+        dob: parse_form_string(form.dob.value),
+        dod: parse_form_string(form.dod.value),
         email: parse_form_string(form.email.value),
         notes: parse_form_string(form.notes.value),
         cover_photo: parse_form_string(form.cover_photo.value),
@@ -3382,6 +3857,33 @@ function display_search_results(search, results) {
         .html("")
         .append(root_a())
         .append(" › Photos")
+
+    if (results.number_results > 0 && results.photos[0].can_change) {
+        if (is_edit_mode()) {
+            $("<li>")
+                .on("click", function() {
+                    set_normal_mode()
+                    reload_page()
+                    return false;
+                })
+                .html("<a href='#'>View</a>")
+                .appendTo(ul)
+        } else {
+            $("<li>")
+                .on("click", function() {
+                    set_edit_mode()
+                    reload_page()
+                    return false;
+                })
+                .html("<a href='#'>Edit</a>")
+                .appendTo(ul)
+        }
+    }
+
+    if (photo.can_change && is_edit_mode()) {
+        photo_change_events({}, search.params, results)
+    }
+
 }
 
 
@@ -3481,6 +3983,28 @@ function display_search_photo(search, results, n) {
     $("<li/>")
         .append(search_a(search))
         .appendTo(ul)
+
+    if (results.photo.can_change) {
+        if (is_edit_mode()) {
+            $("<li>")
+                .on("click", function() {
+                    set_normal_mode()
+                    reload_page()
+                    return false;
+                })
+                .html("<a href='#'>View</a>")
+                .appendTo(ul)
+        } else {
+            $("<li>")
+                .on("click", function() {
+                    set_edit_mode()
+                    reload_page()
+                    return false;
+                })
+                .html("<a href='#'>Edit</a>")
+                .appendTo(ul)
+        }
+    }
 
     if (is_photo_selected(results.photo)) {
         $("<li>")

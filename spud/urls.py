@@ -48,6 +48,7 @@ urlpatterns = patterns('',
 
     url(r'^a/search/$', 'spud.ajax.search', name='ajax_photo_search'),
     url(r'^a/search/results/$', 'spud.ajax.search_results', name='ajax_photo_search_results'),
+    url(r'^a/search/change/$', 'spud.ajax.search_change', name='ajax_photo_search_change'),
     url(r'^a/search/(?P<number>\d+)/$', 'spud.ajax.search_item', name='ajax_photo_search_item'),
     url(r'^a/settings/$', 'spud.ajax.settings', name='ajax_settings'),
 

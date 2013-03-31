@@ -1033,16 +1033,32 @@ def person_finish(request, person):
             person.called = request.POST['called']
             updated = True
         if 'gender' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change gender")
             gender = _decode_int(request.POST['gender'])
             if gender < 1 or gender > 2:
                 raise HttpBadRequest("Unknown gender")
             person.gender = gender
             updated = True
         if 'notes' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change notes")
             person.notes = request.POST['notes']
             updated = True
         if 'email' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change email")
             person.email = request.POST['email']
+            updated = True
+        if 'dob' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change dob")
+            person.dob = request.POST['dob']
+            updated = True
+        if 'dod' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change dod")
+            person.email = request.POST['dod']
             updated = True
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
@@ -1056,6 +1072,8 @@ def person_finish(request, person):
                     raise HttpBadRequest("cover_photo does not exist")
             updated = True
         if 'work' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change work")
             if request.POST['work'] == "":
                 person.work = None
             else:
@@ -1067,6 +1085,8 @@ def person_finish(request, person):
                     raise HttpBadRequest("work does not exist")
             updated = True
         if 'home' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change home")
             if request.POST['home'] == "":
                 person.home = None
             else:
@@ -1078,6 +1098,8 @@ def person_finish(request, person):
                     raise HttpBadRequest("home does not exist")
             updated = True
         if 'mother' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change mother")
             if request.POST['mother'] == "":
                 person.mother = None
             else:
@@ -1089,6 +1111,8 @@ def person_finish(request, person):
                     raise HttpBadRequest("mother does not exist")
             updated = True
         if 'father' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change father")
             if request.POST['father'] == "":
                 person.father = None
             else:
@@ -1100,6 +1124,8 @@ def person_finish(request, person):
                     raise HttpBadRequest("father does not exist")
             updated = True
         if 'spouse' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change spouse")
             if request.POST['spouse'] == "":
                 person.spouse = None
             else:
@@ -1302,8 +1328,8 @@ def _get_search(user, search_dict):
         elif key == "name":
             add_criteria(key, 'is', {'type': "string", 'value': value})
             search = search & Q(name=value)
-        else:
-            raise HttpBadRequest("Unknown key %s" % (key))
+#        else:
+#            raise HttpBadRequest("Unknown key %s" % (key))
 
         photo_list = photo_list.filter(search)
 
@@ -1395,8 +1421,8 @@ def search(request):
             resp[key] = value
         elif key == "name":
             resp[key] = value
-        else:
-            raise HttpBadRequest("Unknown key %s" % (key))
+#        else:
+#            raise HttpBadRequest("Unknown key %s" % (key))
 
     resp['session'] = _get_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1428,6 +1454,156 @@ def search_results(request):
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
+        'session': _get_session(request),
+        'can_add': request.user.has_perm('spud.add_photo'),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
+def search_change(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    if request.method == "POST":
+        if not request.user.has_perm('spud.change_photo'):
+            raise HttpForbidden("No rights to change photos")
+
+    search_dict = request.POST.copy()
+
+    timezone = django.conf.settings.TIME_ZONE
+
+    photo_list, criteria = _get_search(request.user, search_dict)
+    number_results = photo_list.count()
+
+    print len(photo_list)
+    print "dddd"
+    print request.POST
+    if request.method == "POST" and False:
+        if 'set_title' in request.POST:
+            photo_list.update(title=request.POST['set_title'])
+        if 'set_description' in request.POST:
+            photo_list.update(description=request.POST['set_description'])
+        if 'set_view' in request.POST:
+            photo_list.update(view=request.POST['set_view'])
+        if 'set_comment' in request.POST:
+            if not request.user.is_staff:
+                raise HttpForbidden("No rights to change comment")
+            photo_list.update(view=request.POST['set_comment'])
+        if 'set_datetime' in request.POST:
+            dt = _decode_datetime(request.POST['set_datetime'], timezone)
+            utc_offset = dt.utcoffset().total_seconds() / 60
+            dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
+            photo_list.update(action="M",
+                              utc_offset=utc_offset, datetime=dt)
+            utc_offset = None
+            dt = None
+        if 'set_action' in request.POST:
+            action = request.POST['set_action']
+            found = False
+            for a in spud.models.PHOTO_ACTION:
+                if a[0] == action:
+                    found = True
+            if not found:
+                raise HttpBadRequest("Unknown action")
+            photo_list.update(action=action)
+            action = None
+            found = None
+        if 'set_photographer' in request.POST:
+            if request.POST['set_photographer'] == "":
+                photographer = None
+            else:
+                try:
+                    person_id = _decode_int(request.POST['set_photographer'])
+                    photographer = spud.models.person.objects.get(pk=person_id)
+                    person_id = None
+                except spud.models.person.DoesNotExist:
+                    raise HttpBadRequest("photographer does not exist")
+            photo_list.update(photographer=photographer)
+            photographer = None
+        if 'set_place' in request.POST:
+            if request.POST['set_place'] == "":
+                place = None
+            else:
+                try:
+                    place_id = _decode_int(request.POST['set_place'])
+                    place = spud.models.place.objects.get(pk=place_id)
+                    place_id = None
+                except spud.models.place.DoesNotExist:
+                    raise HttpBadRequest("place does not exist")
+            photo_list.update(location=place)
+            place = None
+        if 'set_album' in request.POST:
+            values = _decode_array(request.POST['set_album'])
+            for value in values:
+                if value[0] != '+' and value[0] != '-':
+                    raise HttpBadRequest("Prefix of + or - not found")
+                op, album_id = value[0:1], _decode_int(value[1:])
+                value = None
+                try:
+                    album = spud.models.album.objects.get(pk=album_id)
+                    album_id = None
+                except spud.models.album.DoesNotExist:
+                    raise HttpBadRequest("album does not exist")
+                for photo in photo_list:
+                    if op == '+':
+                        spud.models.photo_album.objects.create(
+                            photo=photo, album=album
+                        )
+                    elif op == '-':
+                        spud.models.photo_album.objects.filter(
+                            photo=photo, album=album
+                        ).delete()
+                album = None
+
+        if 'set_category' in request.POST:
+            values = _decode_array(request.POST['set_category'])
+            for value in values:
+                if value[0] != '+' and value[0] != '-':
+                    raise HttpBadRequest("Prefix of + or - not found")
+                op, category_id = value[0:1], _decode_int(value[1:])
+                value = None
+                try:
+                    category = spud.models.category.objects.get(pk=category_id)
+                    category_id = None
+                except spud.models.category.DoesNotExist:
+                    raise HttpBadRequest("category does not exist")
+                for photo in photo_list:
+                    if op == '+':
+                        spud.models.photo_category.objects.create(
+                            photo=photo, category=category
+                        )
+                    elif op == '-':
+                        spud.models.photo_category.objects.filter(
+                            photo=photo, category=category
+                        ).delete()
+                category = None
+
+        if 'set_person' in request.POST:
+            values = _decode_array(request.POST['set_person'])
+            for value in values:
+                if value[0] != '+' and value[0] != '-':
+                    raise HttpBadRequest("Prefix of + or - not found")
+                op, person_id = value[0:1], _decode_int(value[1:])
+                value = None
+                try:
+                    person = spud.models.person.objects.get(pk=person_id)
+                    person_id = None
+                except spud.models.person.DoesNotExist:
+                    raise HttpBadRequest("person does not exist")
+                for photo in photo_list:
+                    if op == '+':
+                        spud.models.photo_person.objects.create(
+                            photo=photo, person=person
+                        )
+                    elif op == '-':
+                        spud.models.photo_person.objects.filter(
+                            photo=photo, person=person
+                        ).delete()
+                person = None
+
+    resp = {
+        'criteria': criteria,
+        'number_results': number_results,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_photo'),
     }
