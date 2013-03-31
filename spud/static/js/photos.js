@@ -3490,8 +3490,7 @@ function display_search_photo(search, results, n) {
         $("<li>")
             .on("click", function() {
                 del_selection(results.photo)
-                replace_links()
-                display_search_photo(search, results, n)
+                reload_page()
                 return false;
             })
             .html("<a href='#'>Unselect</a>")
@@ -3500,8 +3499,7 @@ function display_search_photo(search, results, n) {
         $("<li>")
             .on("click", function() {
                 add_selection(results.photo);
-                replace_links()
-                display_search_photo(search, results, n);
+                reload_page()
                 return false;
             })
             .html("<a href='#'>Select</a>")
