@@ -111,7 +111,7 @@ def _get_photo_thumb(user, photo):
 #        'metering_mode': photo.metering_mode,
 #        'focus_dist': photo.focus_dist,
 #        'ccd_width': photo.ccd_width,
-        'comment': photo.comment,
+#        'comment': photo.comment,
         'action': photo.action,
 #        'timestamp': photo.timestamp,
 #        'albums': photo.albums,
@@ -172,7 +172,7 @@ def _get_photo_detail(user, photo):
         'metering_mode': photo.metering_mode,
         'focus_dist': photo.focus_dist,
         'ccd_width': photo.ccd_width,
-        'comment': photo.comment,
+#        'comment': photo.comment,
         'action': photo.action,
 #        'timestamp': photo.timestamp,
         'albums': [_get_album(user, a) for a in photo.albums.all()],
@@ -217,6 +217,7 @@ def _get_photo_detail(user, photo):
         resp['orig'] = iri_to_uri(u"%sorig/%s/%s" % (
             django.conf.settings.IMAGE_URL,
             urlquote(photo.path), urlquote(photo.name)))
+        resp['comment'] = photo.comment
 
     return resp
 
