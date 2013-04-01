@@ -2,6 +2,8 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 
 .ui-autocomplete-input { width:99%; }
 .ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; max-width:340px; }
+ul.ui-autocomplete { z-index: 200; }
+
 .ui-corner-all { padding-top:4px; padding-bottom:4px; }
 .ui-corner-all img { float:left; }
 .ui-corner-all .title { margin-left:140px; font-weight:bold; }

@@ -3284,9 +3284,6 @@ $.widget("ui.selectable", $.ui.mouse, {
 
 		this.opos = [event.pageX, event.pageY];
 
-                if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
-                        return;
-                }
 		if (this.options.disabled) {
 			return;
 		}

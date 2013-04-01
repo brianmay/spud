@@ -1,3 +1,11 @@
+$.widget('ui.myselectable', $.ui.selectable, {
+    _mouseStart: function(event) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey) {
+            this._super( event );
+        }
+    },
+});
+
 // ********
 // * URLS *
 // ********
@@ -1169,19 +1177,13 @@ function append_action_links(ul) {
 
 
 function append_jump(id, type, onadded) {
-    var onready = []
-
     var f = $("<form method='get' />")
-        .append(get_ajax_select(id, type, [], onready, onadded))
+        .append(get_ajax_select(id, type, null, onadded))
 
     var module = $('<div class="module"/>')
         .append("<h2>Jump</h2>")
         .append(f)
         .appendTo("#content-related")
-
-    for (i in onready) {
-        onready[i]()
-    }
 }
 
 
@@ -1504,36 +1506,7 @@ function get_input_photo(id, photo) {
 }
 
 
-function get_ajax_select(id, type, value, onready, onadded, onkilled) {
-    var div = $("<div/>")
-
-    $("<input type='text' value='' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true' />")
-        .attr("name", id + "_text")
-        .attr("id", "id_" + id + "_text")
-        .appendTo(div)
-
-    var i = $("<input type='hidden' />")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .appendTo(div)
-
-    var rod = $("<div class='results_on_deck'></div>")
-        .attr("id", "id_" + id + "_on_deck")
-        .appendTo(div)
-
-    if (onadded != null) {
-        rod.on("added", function(ev, pk, repr) {
-            onadded(pk, repr)
-        })
-    }
-
-    if (onkilled != null) {
-        rod.on("killed", function(ev, pk, repr) {
-            onkilled(pk, repr)
-        })
-    }
-
-    div.append("<br /><span class='helptext'>Enter text to search.</span>")
+function get_ajax_select(id, type, value, onadded, onkilled) {
 
     var params = {
         "min_length": 1,
@@ -1541,58 +1514,37 @@ function get_ajax_select(id, type, value, onready, onadded, onkilled) {
     }
 
     if (value != null) {
-        i.attr("value", value.id)
         params.initial = [ value.title, value.id ]
     }
 
-    onready.push(function() {
-        i.autocompleteselect(params)
-    })
-
-    return div
-}
-
-
-function get_ajax_multiple_select(id, type, value, onready, onadded, onkilled) {
-    var value_str = "|"
-    var value_arr = []
-    for (var i in value) {
-        var v = value[i]
-        value_str += v.id + "|"
-        value_arr.push([v.title, v.id])
-    }
-
-    var div = $("<div/>")
-
-    $("<input type='text' value='' class='ui-autocomplete-input' autocomplete='off' role='textbox' aria-autocomplete='list' aria-haspopup='true' />")
-        .attr("name", id + "_text")
-        .attr("id", "id_" + id + "_text")
-        .appendTo(div)
-
-    var i = $("<input type='hidden' />")
+    var ac = $("<div/>")
         .attr("name", id)
         .attr("id", "id_" + id)
-        .attr("value", value_str)
-        .appendTo(div)
-
-    var rod = $("<div class='results_on_deck'></div>")
-        .attr("id", "id_" + id + "_on_deck")
-        .appendTo(div)
+        .autocompleteselect(params)
+        .append("<p class='help'>Enter text to search.</p>")
 
     if (onadded != null) {
-        rod.on("added", function(ev, pk, repr) {
+        ac.on("added", function(ev, pk, repr) {
             onadded(pk, repr)
         })
     }
 
     if (onkilled != null) {
-        rod.on("killed", function(ev, pk, repr) {
+        ac.on("killed", function(ev, pk, repr) {
             onkilled(pk, repr)
         })
     }
 
+    return ac
+}
 
-    div.append("<br /><span class='helptext'>Enter text to search.</span>")
+
+function get_ajax_multiple_select(id, type, value, onadded, onkilled) {
+    var value_arr = []
+    for (var i in value) {
+        var v = value[i]
+        value_arr.push([v.title, v.id])
+    }
 
     var params = {
         "min_length": 1,
@@ -1600,11 +1552,25 @@ function get_ajax_multiple_select(id, type, value, onready, onadded, onkilled) {
         "initial": value_arr,
     }
 
-    onready.push(function() {
-        i.autocompleteselectmultiple(params)
-    })
+    var ac = $("<div/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .autocompleteselectmultiple(params)
+        .append("<p class='help'>Enter text to search.</p>")
 
-    return div
+    if (onadded != null) {
+        ac.on("added", function(ev, pk, repr) {
+            onadded(pk, repr)
+        })
+    }
+
+    if (onkilled != null) {
+        ac.on("killed", function(ev, pk, repr) {
+            onkilled(pk, repr)
+        })
+    }
+
+    return ac
 }
 
 
@@ -1886,35 +1852,32 @@ function display_change_photo_action(action, search_params, results) {
 
 
 function display_change_photo_photographer(photographer, search_params, results) {
-    var onready = []
     var table = $("<table />")
     append_field(table, "photographer_text", "Photographer")
-        .append(get_ajax_select("photographer", 'person', photographer, onready))
+        .append(get_ajax_select("photographer", 'person', photographer))
     var get_updates = function(form) {
         return {
             set_photographer: form.photographer.value,
         }
     }
-    display_change_photo_attribute("photographer", table, get_updates, search_params, results, { onready: onready } )
+    display_change_photo_attribute("photographer", table, get_updates, search_params, results, { } )
 }
 
 
 function display_change_photo_place(place, search_params, results) {
-    var onready = []
     var table = $("<table />")
     append_field(table, "place_text", "Place")
-        .append(get_ajax_select("place", 'place', place, onready))
+        .append(get_ajax_select("place", 'place', place))
     var get_updates = function(form) {
         return {
             set_place: form.place.value,
         }
     }
-    display_change_photo_attribute("place", table, get_updates, search_params, results, { onready: onready } )
+    display_change_photo_attribute("place", table, get_updates, search_params, results, { } )
 }
 
 
 function display_change_photo_album(albums, search_params, results) {
-    var onready = []
     var table = $("<table />")
 
     if (albums != null) {
@@ -1929,7 +1892,7 @@ function display_change_photo_album(albums, search_params, results) {
             .append(ul)
     }
     append_field(table, "add_album_text", "Add Album")
-        .append(get_ajax_multiple_select("add_album", 'album', [], onready,
+        .append(get_ajax_multiple_select("add_album", 'album', [],
             function(pk, repr) {
                 $("<li></li>")
                     .attr("id", "id_album_"+pk)
@@ -1941,7 +1904,7 @@ function display_change_photo_album(albums, search_params, results) {
             }
             ))
     append_field(table, "del_album_text", "Delete Album")
-        .append(get_ajax_multiple_select("del_album", 'album', [], onready,
+        .append(get_ajax_multiple_select("del_album", 'album', [],
             function(pk, repr) {
                 $("#id_album_"+pk).remove()
             },
@@ -1967,12 +1930,11 @@ function display_change_photo_album(albums, search_params, results) {
             set_album: add.concat(del).join(".")
         }
     }
-    display_change_photo_attribute("album", table, get_updates, search_params, results, { onready: onready } )
+    display_change_photo_attribute("album", table, get_updates, search_params, results, { } )
 }
 
 
 function display_change_photo_category(categorys, search_params, results) {
-    var onready = []
     var table = $("<table />")
 
     if (categorys != null) {
@@ -1987,7 +1949,7 @@ function display_change_photo_category(categorys, search_params, results) {
             .append(ul)
     }
     append_field(table, "add_category_text", "Add Category")
-        .append(get_ajax_multiple_select("add_category", 'category', [], onready,
+        .append(get_ajax_multiple_select("add_category", 'category', [],
             function(pk, repr) {
                 $("<li></li>")
                     .attr("id", "id_category_"+pk)
@@ -1999,7 +1961,7 @@ function display_change_photo_category(categorys, search_params, results) {
             }
             ))
     append_field(table, "del_category_text", "Delete Category")
-        .append(get_ajax_multiple_select("del_category", 'category', [], onready,
+        .append(get_ajax_multiple_select("del_category", 'category', [],
             function(pk, repr) {
                 $("#id_category_"+pk).remove()
             },
@@ -2025,12 +1987,11 @@ function display_change_photo_category(categorys, search_params, results) {
             set_category: add.concat(del).join(".")
         }
     }
-    display_change_photo_attribute("category", table, get_updates, search_params, results, { onready: onready } )
+    display_change_photo_attribute("category", table, get_updates, search_params, results, { } )
 }
 
 
 function display_change_photo_person(persons, search_params, results) {
-    var onready = []
     var table = $("<table />")
 
     if (persons != null) {
@@ -2047,7 +2008,7 @@ function display_change_photo_person(persons, search_params, results) {
             .append(ul)
     }
     append_field(table, "add_person_text", "Add Person")
-        .append(get_ajax_multiple_select("add_person", 'person', [], onready,
+        .append(get_ajax_multiple_select("add_person", 'person', [],
             function(pk, repr) {
                 $("<li></li>")
                     .attr("id", "id_person_"+pk)
@@ -2059,7 +2020,7 @@ function display_change_photo_person(persons, search_params, results) {
             }
             ))
     append_field(table, "del_person_text", "Delete Person")
-        .append(get_ajax_multiple_select("del_person", 'person', [], onready,
+        .append(get_ajax_multiple_select("del_person", 'person', [],
             function(pk, repr) {
                 $("#id_person_"+pk).remove()
             },
@@ -2092,7 +2053,7 @@ function display_change_photo_person(persons, search_params, results) {
             set_person_order: order.join("."),
         }
     }
-    display_change_photo_attribute("person", table, get_updates, search_params, results, { onready: onready } )
+    display_change_photo_attribute("person", table, get_updates, search_params, results, { } )
 }
 
 
@@ -2123,13 +2084,6 @@ function display_change_photo_attribute(title, table, get_updates, search_params
                 },
             },
         }))
-
-    if (options.onready) {
-        for (i in options.onready) {
-            options.onready[i]()
-        }
-    }
-
 }
 
 
@@ -2274,8 +2228,6 @@ function display_album(album) {
 
 
 function display_change_album(album) {
-    var onready = []
-
     var dialog = $("<div id='dialog'></div>")
 
     if (album.id != null) {
@@ -2310,7 +2262,7 @@ function display_change_album(album) {
         parent = album.parents[0]
     }
     append_field(table, "parent_text", "Parent")
-        .append(get_ajax_select("parent", 'album', parent, onready))
+        .append(get_ajax_select("parent", 'album', parent))
 
     f.append(table)
 
@@ -2334,10 +2286,6 @@ function display_change_album(album) {
                 },
             },
         })
-
-    for (i in onready) {
-        onready[i]()
-    }
 }
 
 
@@ -2552,8 +2500,6 @@ function display_category(category) {
 
 
 function display_change_category(category) {
-    var onready = []
-
     var dialog = $("<div id='dialog'></div>")
 
     if (category.id != null) {
@@ -2588,7 +2534,7 @@ function display_change_category(category) {
         parent = category.parents[0]
     }
     append_field(table, "parent_text", "Parent")
-        .append(get_ajax_select("parent", 'category', parent, onready))
+        .append(get_ajax_select("parent", 'category', parent))
 
     f.append(table)
 
@@ -2612,10 +2558,6 @@ function display_change_category(category) {
                 },
             },
         })
-
-    for (i in onready) {
-        onready[i]()
-    }
 }
 
 
@@ -2856,8 +2798,6 @@ function display_place(place) {
 
 
 function display_change_place(place) {
-    var onready = []
-
     var dialog = $("<div id='dialog'></div>")
 
     if (place.id != null) {
@@ -2910,7 +2850,7 @@ function display_change_place(place) {
         parent = place.parents[0]
     }
     append_field(table, "parent_text", "Parent")
-        .append(get_ajax_select("parent", 'place', parent, onready))
+        .append(get_ajax_select("parent", 'place', parent))
 
     f.append(table)
 
@@ -2934,10 +2874,6 @@ function display_change_place(place) {
                 },
             },
         })
-
-    for (i in onready) {
-        onready[i]()
-    }
 }
 
 
@@ -3047,8 +2983,6 @@ function display_person_search(search, data) {
     var f = $("<form method='get' />")
 
     var table = $("<table />")
-
-    var onready = []
 
     append_field(table, "q", "Search for")
         .append(get_input_element("q", data.q, "text"))
@@ -3376,8 +3310,6 @@ function display_person(person) {
 
 
 function display_change_person(person) {
-    var onready = []
-
     var dialog = $("<div id='dialog'></div>")
 
     if (person.id != null) {
@@ -3423,23 +3355,23 @@ function display_change_person(person) {
         .append(get_input_photo("cover_photo", person.cover_photo))
 
     append_field(table, "work_text", "Work")
-        .append(get_ajax_select("work", 'place', person.work, onready))
+        .append(get_ajax_select("work", 'place', person.work))
 
     append_field(table, "home_text", "Home")
-        .append(get_ajax_select("home", 'place', person.home, onready))
+        .append(get_ajax_select("home", 'place', person.home))
 
     append_field(table, "mother_text", "Mother")
-        .append(get_ajax_select("mother", 'person', person.mother, onready))
+        .append(get_ajax_select("mother", 'person', person.mother))
 
     append_field(table, "father_text", "Father")
-        .append(get_ajax_select("father", 'person', person.father, onready))
+        .append(get_ajax_select("father", 'person', person.father))
 
     var spouse = null
     if (person.spouses.length > 0) {
         spouse = person.spouses[0]
     }
     append_field(table, "spouse_text", "Spouse")
-        .append(get_ajax_select("spouse", 'person', spouse, onready))
+        .append(get_ajax_select("spouse", 'person', spouse))
 
     f.append(table)
 
@@ -3463,10 +3395,6 @@ function display_change_person(person) {
                 },
             },
         })
-
-    for (i in onready) {
-        onready[i]()
-    }
 }
 
 
@@ -3588,8 +3516,6 @@ function display_search(search, data) {
     f.append(get_input_element("photo", photo_ids, "hidden"))
     photo_ids = null
 
-    var onready = []
-
     var tabs = $("<div></div>")
 
     $("<ul></ul>")
@@ -3616,7 +3542,7 @@ function display_search(search, data) {
         .append(get_input_element("title", data.title, "text"))
 
     append_field(table, "photographer_text", "Photographer")
-        .append(get_ajax_select("photographer", 'person', data.photographer, onready))
+        .append(get_ajax_select("photographer", 'person', data.photographer))
 
     append_field(table, "path", "Path")
         .append(get_input_element("path", data.path, "text"))
@@ -3637,13 +3563,13 @@ function display_search(search, data) {
     var table = $("<table />")
 
     append_field(table, "person_text", "Person")
-        .append(get_ajax_multiple_select("person", 'person', data.person, onready))
+        .append(get_ajax_multiple_select("person", 'person', data.person))
 
     append_field(table, "person_none", "Person none")
         .append(get_input_checkbox("person_none", data.person_none))
 
     append_field(table, "place_text", "Place")
-        .append(get_ajax_select("place", 'place', data.place, onready))
+        .append(get_ajax_select("place", 'place', data.place))
 
     append_field(table, "place_descendants", "Place descendants")
         .append(get_input_checkbox("place_descendants", data.place_none))
@@ -3652,7 +3578,7 @@ function display_search(search, data) {
         .append(get_input_checkbox("place_none", data.place_none))
 
     append_field(table, "album_text", "Album")
-        .append(get_ajax_multiple_select("album", 'album', data.album, onready))
+        .append(get_ajax_multiple_select("album", 'album', data.album))
 
     append_field(table, "album_descendants", "Album descendants")
         .append(get_input_checkbox("album_descendants", data.album_descendants))
@@ -3661,7 +3587,7 @@ function display_search(search, data) {
         .append(get_input_checkbox("album_none", data.album_none))
 
     append_field(table, "category_text", "Category")
-        .append(get_ajax_multiple_select("category", 'category', data.category, onready))
+        .append(get_ajax_multiple_select("category", 'category', data.category))
 
     append_field(table, "category_descendants", "Category descendants")
         .append(get_input_checkbox("category_descendants", data.category_none))
@@ -3708,10 +3634,6 @@ function display_search(search, data) {
                 },
             },
         })
-
-    for (i in onready) {
-        onready[i]()
-    }
 }
 
 
@@ -3868,6 +3790,7 @@ function display_search_results(search, results) {
                 })
                 .html("<a href='#'>View</a>")
                 .appendTo(ul)
+            photo_change_events({}, search.params, results)
         } else {
             $("<li>")
                 .on("click", function() {
@@ -3879,11 +3802,6 @@ function display_search_results(search, results) {
                 .appendTo(ul)
         }
     }
-
-    if (photo.can_change && is_edit_mode()) {
-        photo_change_events({}, search.params, results)
-    }
-
 }
 
 
@@ -3948,7 +3866,7 @@ function search_photo_list(search, results) {
             }(photo, n))
         pl.append(li)
     }
-    pl.selectable({
+    pl.myselectable({
         filter: "li",
         selected: function( event, ui ) {
             add_selection( $(ui.selected).data('photo') ); },
@@ -4059,8 +3977,6 @@ function display_settings(data) {
     var f = $("<form method='get' />")
 
     var table = $("<table />")
-
-    var onready = []
 
     settings = get_settings()
 
