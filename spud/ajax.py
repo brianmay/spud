@@ -1532,73 +1532,132 @@ def search_change(request):
                     raise HttpBadRequest("place does not exist")
             photo_list.update(location=place)
             place = None
-        if 'set_album' in request.POST:
-            values = _decode_array(request.POST['set_album'])
+
+        if 'set_albums' in request.POST:
+            values = _decode_array(request.POST['set_albums'])
+            values = [_decode_int(i) for i in values]
+            for photo in photo_list:
+                pa_list = list(photo.photo_album_set.all())
+                for pa in pa_list:
+                    if pa.album.pk in values:
+                        values.remove(pa.album.pk)
+                    else:
+                        pa.delete()
+                for pk in values:
+                    pa = spud.models.photo_album.objects.create(
+                        photo=photo, album_id=pk)
+        if 'add_albums' in request.POST:
+            values = _decode_array(request.POST['add_albums'])
             for value in values:
-                if value[0] != '+' and value[0] != '-':
-                    raise HttpBadRequest("Prefix of + or - not found")
-                op, album_id = value[0:1], _decode_int(value[1:])
-                value = None
+                album_id = _decode_int(value)
                 try:
                     album = spud.models.album.objects.get(pk=album_id)
-                    album_id = None
                 except spud.models.album.DoesNotExist:
                     raise HttpBadRequest("album does not exist")
                 for photo in photo_list:
-                    if op == '+':
-                        spud.models.photo_album.objects.create(
-                            photo=photo, album=album
-                        )
-                    elif op == '-':
-                        spud.models.photo_album.objects.filter(
-                            photo=photo, album=album
-                        ).delete()
+                    spud.models.photo_album.objects.create(
+                        photo=photo, album=album
+                    )
+                album_id = None
                 album = None
-
-        if 'set_category' in request.POST:
-            values = _decode_array(request.POST['set_category'])
+        if 'del_albums' in request.POST:
+            values = _decode_array(request.POST['del_albums'])
             for value in values:
-                if value[0] != '+' and value[0] != '-':
-                    raise HttpBadRequest("Prefix of + or - not found")
-                op, category_id = value[0:1], _decode_int(value[1:])
+                album_id = _decode_int(value)
                 value = None
                 try:
+                    album = spud.models.album.objects.get(pk=album_id)
+                except spud.models.album.DoesNotExist:
+                    raise HttpBadRequest("album does not exist")
+                for photo in photo_list:
+                    spud.models.photo_album.objects.filter(
+                        photo=photo, album=album
+                    ).delete()
+                album_id = None
+                album = None
+
+        if 'set_categorys' in request.POST:
+            values = _decode_array(request.POST['set_albums'])
+            values = [_decode_int(i) for i in values]
+            pa_list = list(photo.photo_category_set.all())
+            for photo in photo_list:
+                for pa in pa_list:
+                    if pa.category.pk in values:
+                        values.remove(pa.category.pk)
+                    else:
+                        pa.delete()
+                for pk in values:
+                    pa = spud.models.photo_category.objects.create(
+                        photo=photo, category_id=pk)
+        if 'add_categorys' in request.POST:
+            values = _decode_array(request.POST['add_categorys'])
+            for value in values:
+                category_id = _decode_int(value)
+                try:
                     category = spud.models.category.objects.get(pk=category_id)
-                    category_id = None
                 except spud.models.category.DoesNotExist:
                     raise HttpBadRequest("category does not exist")
                 for photo in photo_list:
-                    if op == '+':
-                        spud.models.photo_category.objects.create(
-                            photo=photo, category=category
-                        )
-                    elif op == '-':
-                        spud.models.photo_category.objects.filter(
-                            photo=photo, category=category
-                        ).delete()
+                    spud.models.photo_category.objects.create(
+                        photo=photo, category=category
+                    )
+                category_id = None
+                category = None
+        if 'del_categorys' in request.POST:
+            values = _decode_array(request.POST['del_categorys'])
+            for value in values:
+                category_id = _decode_int(value)
+                try:
+                    category = spud.models.category.objects.get(pk=category_id)
+                except spud.models.category.DoesNotExist:
+                    raise HttpBadRequest("category does not exist")
+                for photo in photo_list:
+                    spud.models.photo_category.objects.filter(
+                        photo=photo, category=category
+                    ).delete()
+                category_id = None
                 category = None
 
-        if 'set_person' in request.POST:
-            values = _decode_array(request.POST['set_person'])
+        if 'set_persons' in request.POST:
+            values = _decode_array(request.POST['set_albums'])
+            values = [_decode_int(i) for i in values]
+            pa_list = list(photo.photo_person_set.all())
+            for photo in photo_list:
+                for pa in pa_list:
+                    if pa.person.pk in values:
+                        values.remove(pa.person.pk)
+                    else:
+                        pa.delete()
+                for pk in values:
+                    pa = spud.models.photo_person.objects.create(
+                        photo=photo, person_id=pk)
+        if 'add_persons' in request.POST:
+            values = _decode_array(request.POST['add_persons'])
             for value in values:
-                if value[0] != '+' and value[0] != '-':
-                    raise HttpBadRequest("Prefix of + or - not found")
-                op, person_id = value[0:1], _decode_int(value[1:])
-                value = None
+                person_id = _decode_int(value)
                 try:
                     person = spud.models.person.objects.get(pk=person_id)
-                    person_id = None
                 except spud.models.person.DoesNotExist:
                     raise HttpBadRequest("person does not exist")
                 for photo in photo_list:
-                    if op == '+':
-                        spud.models.photo_person.objects.create(
-                            photo=photo, person=person
-                        )
-                    elif op == '-':
-                        spud.models.photo_person.objects.filter(
-                            photo=photo, person=person
-                        ).delete()
+                    spud.models.photo_person.objects.create(
+                        photo=photo, person=person
+                    )
+                person_id = None
+                person = None
+        if 'del_persons' in request.POST:
+            values = _decode_array(request.POST['del_persons'])
+            for value in values:
+                person_id = _decode_int(value)
+                try:
+                    person = spud.models.person.objects.get(pk=person_id)
+                except spud.models.person.DoesNotExist:
+                    raise HttpBadRequest("person does not exist")
+                for photo in photo_list:
+                    spud.models.photo_person.objects.filter(
+                        photo=photo, person=person
+                    ).delete()
+                person_id = None
                 person = None
 
     resp = {
