@@ -215,7 +215,7 @@ def _get_photo_detail(user, photo):
 #        'timestamp': photo.timestamp,
         'albums': [_get_album(user, a) for a in photo.albums.all()],
         'categorys': [_get_category(user, c) for c in photo.categorys.all()],
-        'persons': [_get_person(user, p) for p in photo.persons.all()],
+        'persons': [_get_person(user, p) for p in photo.persons.order_by("photo_person__position").all()],
 #        'relations': photo.relations,
 
         'thumb': {},
