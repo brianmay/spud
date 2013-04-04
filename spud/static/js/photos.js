@@ -495,6 +495,21 @@ function photo_a(photo, title) {
     return a
 }
 
+
+function photo_change_a(photo, fn, title) {
+    if (photo == null) {
+        return ""
+    }
+    if (title == null) {
+        title = "Change "+photo.title
+    }
+    var a = $('<a/>')
+        .attr('href', photo_url(photo))
+        .on('click', function() { fn(photo, { photo: photo.id }, 1); return false; })
+        .text(title)
+    return a
+}
+
 function album_a(album, title) {
     if (album == null) {
         return ""
@@ -1418,6 +1433,14 @@ function generic_paginator(page, last_page, html_page) {
 }
 
 
+$.fn.conditional_append = function(condition, content) {
+    if (condition) {
+        this.append(content)
+    }
+    return this
+}
+
+
 // *********************
 // * HTML form helpers *
 // *********************
@@ -1623,19 +1646,21 @@ function display_photo(photo) {
     var cm = $("#content-main")
     cm.html("")
 
-    prefix = ""
+    var prefix = ""
+    var can_change = false
     if (photo.can_change && is_edit_mode()) {
         prefix = "Edit "
+        can_change = true
     }
     document.title = prefix + photo.title + " | Album | Spud"
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
-    pd = $("<div class='photo_container photo_detail " + escapeHTML(style) + "' />")
+    var pd = $("<div class='photo_container photo_detail " + escapeHTML(style) + "' />")
     if (is_photo_selected(photo)) {
         pd.addClass("photo-selected")
     }
 
-    pdp = $("<div class='photo_block photo_detail_photo' />")
+    var pdp = $("<div class='photo_block photo_detail_photo' />")
 
     if (image) {
         $("<img id='photo' />")
@@ -1646,76 +1671,92 @@ function display_photo(photo) {
             .appendTo(pdp)
     }
 
-    pdp.append("<div class='title'>" + escapeHTML(photo.title) + "</div>")
-    append_persons(pdp, photo.persons)
+    $("<div class='title'></div>")
+        .text(photo.title)
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit]"))
+        .appendTo(pdp)
+
+    var tag = $("<div class='persons'></div>")
+    append_persons(tag, photo.persons)
+    tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
+    tag.appendTo(pdp)
+
     if (photo.description) {
-        pdp.append("<div class='description'>" + p(escapeHTML(photo.description)) + "</div>")
+        $("<div class='description'></div>")
+            .html(p(escapeHTML(photo.description)))
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
+            .appendTo(pdp)
     }
     pd.append(pdp)
 
-    pdd = $("<div class='photo_block photo_detail_photo_detail' />")
+    var pdd = $("<div class='photo_block photo_detail_photo_detail' />")
     pdd.append("<h2>Photo Details</h2>")
 
     var search_params = {
         photo: photo.id,
     }
 
-    var results = {
-        number_results: 1,
-        photos: [ photo ],
-    }
+    var dl = $("<dl\>")
+    var title = dt_dd(dl, "Title", photo.title)
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit]"))
 
-    dl = $("<dl\>")
     if (image) {
-        dt_dd(dl, "Title", photo.title + " (" + image.width + "x" + image.height + ")")
-    } else {
-        dt_dd(dl, "Title", photo.title)
+        title.append(escapeHTML(" (" + image.width + "x" + image.height + ")"))
     }
 
     dt_dd(dl, "Description", photo.description)
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
 
     dt_dd(dl, "View", photo.view)
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_view, "[edit]"))
 
     dt_dd(dl, "Comments", photo.comment)
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_comments, "[edit]"))
 
     dt_dd(dl, "File", photo.name)
     dt_dd(dl, "Place", "")
         .html(place_a(photo.place))
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_place, "[edit]"))
 
-    tag = dt_dd(dl, "Albums", "")
+    var tag = dt_dd(dl, "Albums", "")
     append_albums(tag, photo.albums)
+    tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_albums, "[edit]"))
 
-    tag = dt_dd(dl, "Categories", "")
+    var tag = dt_dd(dl, "Categories", "")
     append_categorys(tag, photo.categorys)
+    tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]"))
 
     dt_dd(dl, "Date & time", "")
         .append(datetime_a(photo.utctime))
         .append("<br />")
         .append(datetime_a(photo.localtime))
+       .conditional_append(can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]"))
 
     dt_dd(dl, "Photographer", "")
         .html(person_a(photo.photographer))
+       .conditional_append(can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]"))
 
     if (photo.rating) {
         dt_dd(dl, "Rating", photo.rating)
     }
 
     if (photo.related.length > 0) {
-        tag = dt_dd(dl, "Related photos", "")
+        var tag = dt_dd(dl, "Related photos", "")
         append_related(tag, photo.related)
     }
 
-    tag = dt_dd(dl, "Action", "")
+    dt_dd(dl, "Action", "")
         .append(get_photo_action(photo.action))
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_action, "[edit]"))
 
     pdd.append(dl)
 
     pd.append(pdd)
 
-    pdc = $("<div class='photo_block photo_detail_camera_detail' />")
+    var pdc = $("<div class='photo_block photo_detail_camera_detail' />")
     pdc.append("<h2>Camera Details</h2>")
 
-    dl = $("<dl\>")
+    var dl = $("<dl\>")
 
     tag = dt_dd(dl, "Camera", photo.camera_make + " " + photo.camera_model)
     tag = dt_dd(dl, "Flash", photo.flash_used)
