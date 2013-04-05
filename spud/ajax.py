@@ -121,7 +121,7 @@ def _get_session(request):
     return session
 
 
-def _get_photo_thumb(user, photo):
+def _get_photo(user, photo):
     if photo is None:
         return None
 
@@ -229,14 +229,16 @@ def _get_photo_detail(user, photo):
 
     for pr in photo.relations_1.all():
         resp['related'].append({
+            'id': pr.pk,
             'title': pr.desc_2,
-            'photo': _get_photo_thumb(user, pr.photo_2),
+            'photo': _get_photo(user, pr.photo_2),
         })
 
     for pr in photo.relations_2.all():
         resp['related'].append({
+            'id': pr.pk,
             'title': pr.desc_1,
-            'photo': _get_photo_thumb(user, pr.photo_1),
+            'photo': _get_photo(user, pr.photo_1),
         })
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -271,7 +273,7 @@ def _get_album(user, album):
 #        'parent_album': album.parent_album,
         'title': album.album,
         'description': album.album_description,
-        'cover_photo': _get_photo_thumb(user, album.cover_photo),
+        'cover_photo': _get_photo(user, album.cover_photo),
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': unicode(album.revised),
@@ -293,7 +295,7 @@ def _get_album_detail(user, album):
 #        'parent_album': _get_album(user, album.parent_album),
         'title': album.album,
         'description': album.album_description,
-        'cover_photo': _get_photo_thumb(user, album.cover_photo),
+        'cover_photo': _get_photo(user, album.cover_photo),
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': unicode(album.revised),
@@ -328,7 +330,7 @@ def _get_category(user, category):
 #        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
-        'cover_photo': _get_photo_thumb(user, category.cover_photo),
+        'cover_photo': _get_photo(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
         'can_add': user.has_perm('spud.add_category'),
@@ -349,7 +351,7 @@ def _get_category_detail(user, category):
 #        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
-        'cover_photo': _get_photo_thumb(user, category.cover_photo),
+        'cover_photo': _get_photo(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
         'parents': [],
@@ -390,7 +392,7 @@ def _get_place(user, place):
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
-        'cover_photo': _get_photo_thumb(user, place.cover_photo),
+        'cover_photo': _get_photo(user, place.cover_photo),
         'notes': place.notes,
         'can_add': user.has_perm('spud.add_place'),
         'can_change': user.has_perm('spud.change_place'),
@@ -417,7 +419,7 @@ def _get_place_detail(user, place):
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
-        'cover_photo': _get_photo_thumb(user, place.cover_photo),
+        'cover_photo': _get_photo(user, place.cover_photo),
         'notes': place.notes,
         'parents': [],
         'children': [],
@@ -452,7 +454,7 @@ def _get_person(user, person):
         'last_name': person.last_name,
         'middle_name': person.middle_name,
         'called': person.called,
-        'cover_photo': _get_photo_thumb(user, person.cover_photo),
+        'cover_photo': _get_photo(user, person.cover_photo),
 #        'gender': person.gender,
 #        'dob': unicode(person.dob),
 #        'dod': unicode(person.dod),
@@ -483,7 +485,7 @@ def _get_person_detail(user, person):
         'last_name': person.last_name,
         'middle_name': person.middle_name,
         'called': person.called,
-        'cover_photo': _get_photo_thumb(user, person.cover_photo),
+        'cover_photo': _get_photo(user, person.cover_photo),
         'can_add': user.has_perm('spud.add_person'),
         'can_change': user.has_perm('spud.change_person'),
         'can_delete': user.has_perm('spud.delete_person'),
@@ -524,6 +526,21 @@ def _get_person_detail(user, person):
             if p.person_id != person.spouse.person_id:
                 d['spouses'].append(_get_person(user, p))
 
+    return d
+
+
+def _get_photo_relation_detail(user, photo_relation):
+    if photo_relation is None:
+        return None
+
+    d = {
+        'type': 'photo_relation',
+        'id': photo_relation.pk,
+        'photo_1': _get_photo(user, photo_relation.photo_1),
+        'desc_1': photo_relation.desc_1,
+        'photo_2': _get_photo(user, photo_relation.photo_2),
+        'desc_2': photo_relation.desc_2,
+    }
     return d
 
 
@@ -712,7 +729,6 @@ def album_finish(request, album):
         if updated:
             album.save()
 
-    resp = _get_album_detail(request.user, album)
     resp = {
         'album': _get_album_detail(request.user, album),
         'session': _get_session(request),
@@ -803,7 +819,6 @@ def category_finish(request, category):
         if updated:
             category.save()
 
-    resp = _get_category_detail(request.user, category)
     resp = {
         'category': _get_category_detail(request.user, category),
         'session': _get_session(request),
@@ -909,7 +924,6 @@ def place_finish(request, place):
         if updated:
             place.save()
 
-    resp = _get_place_detail(request.user, place)
     resp = {
         'place': _get_place_detail(request.user, place),
         'session': _get_session(request),
@@ -1139,9 +1153,104 @@ def person_finish(request, person):
         if updated:
             person.save()
 
-    resp = _get_person_detail(request.user, person)
     resp = {
         'person': _get_person_detail(request.user, person),
+        'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
+def photo_relation(request, photo_relation_id):
+    if request.method == "POST":
+        if not request.user.has_perm('spud.change_relation'):
+            raise HttpForbidden("No rights to change photo_relations")
+    photo_relation = get_object_or_404(spud.models.photo_relation, pk=photo_relation_id)
+    return photo_relation_finish(request, photo_relation)
+
+
+@check_errors
+def photo_relation_add(request):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    if request.method == "POST":
+        if not request.user.has_perm('spud.add_relation'):
+            raise HttpForbidden("No rights to add photo_relations")
+
+    if 'photo_1' not in request.POST:
+        raise HttpBadRequest("photo_1 must be given")
+    if 'photo_2' not in request.POST:
+        raise HttpBadRequest("photo_2 must be given")
+    if 'desc_1' not in request.POST:
+        raise HttpBadRequest("desc_1 must be given")
+    if 'desc_2' not in request.POST:
+        raise HttpBadRequest("desc_2 must be given")
+
+    photo_relation = spud.models.photo_relation()
+    return photo_relation_finish(request, photo_relation)
+
+
+@check_errors
+def photo_relation_delete(request, photo_relation_id):
+    if request.method != "POST":
+        raise HttpBadRequest("Only POST is supported")
+    if not request.user.has_perm('spud.delete_relation'):
+        raise HttpForbidden("No rights to delete photo_relations")
+    photo_relation = get_object_or_404(spud.models.photo_relation, pk=photo_relation_id)
+
+    errors = photo_relation.check_delete()
+    resp = {
+        'errors': errors,
+        'session': _get_session(request),
+    }
+
+    if len(errors) == 0:
+        photo_relation.delete()
+        resp['status'] = 'success'
+    else:
+        resp['status'] = 'errors'
+
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def photo_relation_finish(request, photo_relation):
+    if request.method == "POST":
+        updated = False
+        if 'desc_1' in request.POST:
+            if request.POST['desc_1'] == "":
+                raise HttpBadRequest("desc_1 must be non-empty")
+            photo_relation.desc_1 = request.POST['desc_1']
+            updated = True
+        if 'desc_2' in request.POST:
+            if request.POST['desc_2'] == "":
+                raise HttpBadRequest("desc_2 must be non-empty")
+            photo_relation.desc_2 = request.POST['desc_2']
+            updated = True
+        if 'photo_1' in request.POST:
+            if request.POST['photo_1'] == "":
+                raise HttpBadRequest("photo_1 must be non-empty")
+            try:
+                photo_id = _decode_int(request.POST['photo_1'])
+                cp = spud.models.photo.objects.get(pk=photo_id)
+                photo_relation.photo_1 = cp
+            except spud.models.photo.DoesNotExist:
+                raise HttpBadRequest("photo_1 does not exist")
+            updated = True
+        if 'photo_2' in request.POST:
+            if request.POST['photo_2'] == "":
+                raise HttpBadRequest("photo_2 must be non-empty")
+            try:
+                photo_id = _decode_int(request.POST['photo_2'])
+                cp = spud.models.photo.objects.get(pk=photo_id)
+                photo_relation.photo_2 = cp
+            except spud.models.photo.DoesNotExist:
+                raise HttpBadRequest("photo_2 does not exist")
+            updated = True
+        if updated:
+            photo_relation.save()
+
+    resp = {
+        'photo_relation': _get_photo_relation_detail(request.user, photo_relation),
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1287,7 +1396,7 @@ def _get_search(user, search_dict):
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.photo, pk=value)
-                a.append(_get_photo_thumb(user, object))
+                a.append(_get_photo(user, object))
                 q = q | Q(pk=object.pk)
             add_criteria(key, 'is', {'type': "photos", 'value': a})
             photo_list = photo_list.filter(q)
@@ -1406,7 +1515,7 @@ def search(request):
                 photo_id = _decode_int(photo_id)
                 photo = get_object_or_404(
                     spud.models.photo, pk=photo_id)
-                resp['photo'].append(_get_photo_thumb(request.user, photo))
+                resp['photo'].append(_get_photo(request.user, photo))
         elif key == "place_none":
             resp[key] = value
         elif key == "person_none":
@@ -1450,7 +1559,7 @@ def search_results(request):
 
     resp = {
         'criteria': criteria,
-        'photos': [_get_photo_thumb(request.user, p) for p in photos],
+        'photos': [_get_photo(request.user, p) for p in photos],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
@@ -1495,8 +1604,8 @@ def search_change(request):
             dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
             photo_list.update(action="M",
                               utc_offset=utc_offset, datetime=dt)
-            utc_offset = None
-            dt = None
+            del utc_offset
+            del dt
         if 'set_action' in request.POST:
             action = request.POST['set_action']
             found = False
@@ -1506,8 +1615,9 @@ def search_change(request):
             if not found:
                 raise HttpBadRequest("Unknown action")
             photo_list.update(action=action)
-            action = None
-            found = None
+            del a
+            del action
+            del found
         if 'set_photographer' in request.POST:
             if request.POST['set_photographer'] == "":
                 photographer = None
@@ -1515,11 +1625,11 @@ def search_change(request):
                 try:
                     person_id = _decode_int(request.POST['set_photographer'])
                     photographer = spud.models.person.objects.get(pk=person_id)
-                    person_id = None
+                    del person_id
                 except spud.models.person.DoesNotExist:
                     raise HttpBadRequest("photographer does not exist")
             photo_list.update(photographer=photographer)
-            photographer = None
+            del photographer
         if 'set_place' in request.POST:
             if request.POST['set_place'] == "":
                 place = None
@@ -1527,11 +1637,11 @@ def search_change(request):
                 try:
                     place_id = _decode_int(request.POST['set_place'])
                     place = spud.models.place.objects.get(pk=place_id)
-                    place_id = None
+                    del place_id
                 except spud.models.place.DoesNotExist:
                     raise HttpBadRequest("place does not exist")
             photo_list.update(location=place)
-            place = None
+            del place
 
         if 'set_albums' in request.POST:
             values = _decode_array(request.POST['set_albums'])
@@ -1543,9 +1653,18 @@ def search_change(request):
                         values.remove(pa.album.pk)
                     else:
                         pa.delete()
-                for pk in values:
-                    pa = spud.models.photo_album.objects.create(
-                        photo=photo, album_id=pk)
+                for album_id in values:
+                    try:
+                        album = spud.models.album.objects.get(pk=album_id)
+                    except spud.models.album.DoesNotExist:
+                        raise HttpBadRequest("album does not exist")
+                    spud.models.photo_album.objects.create(
+                        photo=photo, album=album)
+                del pa_list
+                del album_id
+                del album
+            del values
+            del i
         if 'add_albums' in request.POST:
             values = _decode_array(request.POST['add_albums'])
             for value in values:
@@ -1555,11 +1674,13 @@ def search_change(request):
                 except spud.models.album.DoesNotExist:
                     raise HttpBadRequest("album does not exist")
                 for photo in photo_list:
-                    spud.models.photo_album.objects.create(
+                    spud.models.photo_album.objects.get_or_create(
                         photo=photo, album=album
                     )
-                album_id = None
-                album = None
+                del album_id
+                del album
+            del value
+            del values
         if 'del_albums' in request.POST:
             values = _decode_array(request.POST['del_albums'])
             for value in values:
@@ -1573,8 +1694,10 @@ def search_change(request):
                     spud.models.photo_album.objects.filter(
                         photo=photo, album=album
                     ).delete()
-                album_id = None
-                album = None
+                del album_id
+                del album
+            del value
+            del values
 
         if 'set_categorys' in request.POST:
             values = _decode_array(request.POST['set_albums'])
@@ -1586,9 +1709,18 @@ def search_change(request):
                         values.remove(pa.category.pk)
                     else:
                         pa.delete()
-                for pk in values:
-                    pa = spud.models.photo_category.objects.create(
-                        photo=photo, category_id=pk)
+                for category_id in values:
+                    try:
+                        category = spud.models.category.objects.get(pk=category_id)
+                    except spud.models.category.DoesNotExist:
+                        raise HttpBadRequest("category does not exist")
+                    spud.models.photo_category.objects.create(
+                        photo=photo, category=category)
+                del pa_list
+                del category_id
+                del category
+            del values
+            del i
         if 'add_categorys' in request.POST:
             values = _decode_array(request.POST['add_categorys'])
             for value in values:
@@ -1598,11 +1730,13 @@ def search_change(request):
                 except spud.models.category.DoesNotExist:
                     raise HttpBadRequest("category does not exist")
                 for photo in photo_list:
-                    spud.models.photo_category.objects.create(
+                    spud.models.photo_category.objects.get_or_create(
                         photo=photo, category=category
                     )
-                category_id = None
-                category = None
+                del category_id
+                del category
+            del value
+            del values
         if 'del_categorys' in request.POST:
             values = _decode_array(request.POST['del_categorys'])
             for value in values:
@@ -1615,22 +1749,48 @@ def search_change(request):
                     spud.models.photo_category.objects.filter(
                         photo=photo, category=category
                     ).delete()
-                category_id = None
-                category = None
+                del category_id
+                del category
+            del value
+            del values
 
         if 'set_persons' in request.POST:
             values = _decode_array(request.POST['set_albums'])
             values = [_decode_int(i) for i in values]
             pa_list = list(photo.photo_person_set.all())
             for photo in photo_list:
-                for pa in pa_list:
-                    if pa.person.pk in values:
-                        values.remove(pa.person.pk)
-                    else:
-                        pa.delete()
-                for pk in values:
-                    pa = spud.models.photo_person.objects.create(
-                        photo=photo, person_id=pk)
+                position = 1
+                for pa, person in zip(pa_list, values):
+                    if pa.position != position or pa.person != person:
+                        pa.position = position
+                        pa.person = person
+                        pa.save()
+                    position = position + 1
+                del pa
+                del person
+
+                # for every value not already in pa_list
+                for i in xrange(len(pa_list), len(values)):
+                    person_id = values[i]
+                    try:
+                        person = spud.models.person.objects.get(pk=person_id)
+                    except spud.models.person.DoesNotExist:
+                        raise HttpBadRequest("person does not exist")
+                    spud.models.photo_person.objects.create(
+                        photo=photo, person=person, position=position)
+                    position = position + 1
+                del i
+                del person_id
+                del person
+                del position
+
+                # for every pa that was not included in values list
+                for i in xrange(len(values), len(pa_list)):
+                    pa_list[i].delete()
+                del i
+            del pa_list
+            del values
+            del photo
         if 'add_persons' in request.POST:
             values = _decode_array(request.POST['add_persons'])
             for value in values:
@@ -1640,11 +1800,13 @@ def search_change(request):
                 except spud.models.person.DoesNotExist:
                     raise HttpBadRequest("person does not exist")
                 for photo in photo_list:
-                    spud.models.photo_person.objects.create(
+                    spud.models.photo_person.objects.get_or_create(
                         photo=photo, person=person
                     )
-                person_id = None
-                person = None
+                del person_id
+                del person
+            del value
+            del values
         if 'del_persons' in request.POST:
             values = _decode_array(request.POST['del_persons'])
             for value in values:
@@ -1657,8 +1819,10 @@ def search_change(request):
                     spud.models.photo_person.objects.filter(
                         photo=photo, person=person
                     ).delete()
-                person_id = None
-                person = None
+                del person_id
+                del person
+            del value
+            del values
 
     resp = {
         'criteria': criteria,

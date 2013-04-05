@@ -368,6 +368,46 @@ function load_delete_person(person_id, success, error) {
 }
 
 
+function load_photo_relation(place_id, success, error) {
+    $.ajax({
+        url: '/a/relation/'+place_id+'/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+    })
+}
+
+
+function load_change_photo_relation(photo_relation_id, updates, success, error) {
+    var url = '/a/relation/add/'
+    if (photo_relation_id != null) {
+        url = '/a/relation/'+photo_relation_id+'/'
+    }
+    $.ajax({
+        url: url,
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+        data: updates,
+    })
+}
+
+
+function load_delete_photo_relation(photo_relation_id, success, error) {
+    $.ajax({
+        url: '/a/relation/'+photo_relation_id+'/delete/',
+        dataType : 'json',
+        cache: false,
+        success: success,
+        error: error,
+        type: "POST",
+    })
+}
+
+
 function load_search(search, success, error) {
     $.ajax({
         url: '/a/search/',
@@ -769,6 +809,47 @@ function delete_person_a(person, title) {
 }
 
 
+function change_photo_relation_a(photo_relation, title) {
+    if (photo_relation == null) {
+        return ""
+    }
+    if (title == null) {
+        title = "Change photo_relation"
+    }
+    var a = $('<a/>')
+        .attr('href', '#')
+        .on('click', function() { do_change_photo_relation(photo_relation.id, true); return false; })
+        .data('photo', photo_relation.cover_photo)
+        .text(title)
+    return a
+}
+
+
+function add_photo_relation_a(photo, title) {
+    if (title == null) {
+        title = "Add photo_relation"
+    }
+    var a = $('<a/>')
+        .attr('href', '#')
+        .on('click', function() { do_add_photo_relation(photo, true); return false; })
+        .text(title)
+    return a
+}
+
+
+function delete_photo_relation_a(photo_relation, title) {
+    if (title == null) {
+        title = "Delete photo_relation"
+    }
+    var a = $('<a/>')
+        .attr('href', '#')
+        .on('click', function() { do_delete_photo_relation(photo_relation.id, true); return false; })
+        .data('photo', photo_relation.cover_photo)
+        .text(title)
+    return a
+}
+
+
 function search_a(search, title) {
     if (title == null) {
         title = "Photo search"
@@ -803,7 +884,7 @@ function search_photo_a(search, n, photo, title, accesskey) {
     }
     var a = $('<a/>')
         .attr('href', search_photo_url(search, n, photo))
-        .on('click', function() { do_search_photo(search, n, true); return false; })
+        .on('click', function() { do_search_photo(search, n, photo.id, true); return false; })
         .data('photo', photo)
         .text(title)
 
@@ -1017,7 +1098,7 @@ window.onpopstate = function(event) {
         } else if (state.type == 'display_person') {
             do_person(state.person_id, false)
         } else if (state.type == 'display_search_photo') {
-            do_search_photo(state.search, state.n, false)
+            do_search_photo(state.search, state.n, state.photo_id, false)
         } else if (state.type == 'display_search_results') {
             do_search_results(state.search, state.page, false)
         } else if (state.type == 'settings') {
@@ -1265,35 +1346,48 @@ function append_persons(tag, persons) {
 
 
 function append_albums(tag, albums) {
-    var sep = ""
+    if (albums.length == 0) {
+        return tag
+    }
+    var ul = $("<ul/>")
     for (var i in albums) {
         var a = albums[i]
-        tag.append(sep)
-        tag.append(album_a(a))
-        sep = ", "
+        $("<li/>")
+            .append(album_a(a))
+            .appendTo(ul)
     }
+    tag.append(ul)
     return tag
 }
 
 
 function append_categorys(tag, categorys) {
-    var sep = ""
+    if (categorys.length == 0) {
+        return tag
+    }
+    var ul = $("<ul/>")
     for (var i in categorys) {
         var a = categorys[i]
-        tag.append(sep)
-        tag.append(category_a(a))
-        sep = ", "
+        $("<li/>")
+            .append(category_a(a))
+            .appendTo(ul)
     }
+    tag.append(ul)
     return tag
 }
 
-function append_related(tag, related) {
+function append_related(tag, related, can_change) {
+    if (related.length == 0) {
+        return tag
+    }
     var ul = $("<ul/>")
     for (var i in related) {
         var r = related[i]
         $("<li/>")
-            .append(photo_a(r.photo.id, r.title))
+            .append(photo_a(r.photo, r.title))
             .appendTo(ul)
+            .conditional_append(can_change, change_photo_relation_a({ id: r.id }, "[edit]"))
+            .conditional_append(can_change, delete_photo_relation_a({ id: r.id }, "[del]"))
     }
     tag.append(ul)
     return tag
@@ -1536,20 +1630,71 @@ function get_input_photo(id, photo) {
         photo_id = photo.id
     }
 
+    var div = get_ajax_select(id, "photo", photo,
+
+        // onadded
+        function(id, repr) {
+            img
+                .removeAttr("class")
+                .removeAttr("alt")
+                .removeAttr("width")
+                .removeAttr("height")
+                .attr("src", media_url("img/none.jpg"))
+
+            load_photo(id,
+                // onsuccess
+                function(data) {
+                    var photo = data.photo
+                    if (photo != null) {
+                        var size = get_settings().list_size
+                        var style = get_photo_style(photo)
+                        var image = photo.thumb[size]
+                        photo_id = photo.id
+                    }
+                    if (image != null) {
+                        img
+                            .attr("class", style)
+                            .attr("src", image.url)
+                            .attr("alt", photo.title)
+                            .attr("width", image.width)
+                            .attr("height", image.height)
+                    } else {
+                        img.attr("src", media_url("img/error.png"))
+                    }
+
+                },
+
+                // onerror
+                function() {
+                    img.attr("src", media_url("img/error.png"))
+                })
+        },
+
+        // onkilled
+        function(id, repr) {
+            img
+                .removeAttr("class")
+                .removeAttr("src")
+                .removeAttr("alt")
+                .removeAttr("width")
+                .removeAttr("height")
+                .attr("src", media_url("img/none.jpg"))
+        }
+    )
+
     var img=$("<img/>")
+        .prependTo(div)
+
     if (image != null) {
         img
-            .attr("id", "id_" + id + "_img")
             .attr("class", style)
             .attr("src", image.url)
             .attr("alt", photo.title)
             .attr("width", image.width)
             .attr("height", image.height)
+    } else {
+        img.attr("src", media_url("img/none.jpg"))
     }
-
-    var div = $("<div></div>")
-        .append(img)
-        .append(get_input_element("cover_photo", photo_id, "hidden"))
 
     return div
 }
@@ -1671,20 +1816,24 @@ function display_photo(photo) {
             .appendTo(pdp)
     }
 
-    $("<div class='title'></div>")
-        .text(photo.title)
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit]"))
-        .appendTo(pdp)
+    if (photo.title || can_change) {
+        $("<div class='title'></div>")
+            .text(photo.title)
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
+            .appendTo(pdp)
+    }
 
-    var tag = $("<div class='persons'></div>")
-    append_persons(tag, photo.persons)
-    tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
-    tag.appendTo(pdp)
+    if (photo.persons.length > 0 || can_change) {
+        var tag = $("<div class='persons'></div>")
+        append_persons(tag, photo.persons)
+        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
+        tag.appendTo(pdp)
+    }
 
-    if (photo.description) {
+    if (photo.description || can_change) {
         $("<div class='description'></div>")
             .html(p(escapeHTML(photo.description)))
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit description]"))
             .appendTo(pdp)
     }
     pd.append(pdp)
@@ -1704,50 +1853,65 @@ function display_photo(photo) {
         title.append(escapeHTML(" (" + image.width + "x" + image.height + ")"))
     }
 
-    dt_dd(dl, "Description", photo.description)
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
+    if (photo.description || can_change) {
+        dt_dd(dl, "Description", photo.description)
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
+    }
 
-    dt_dd(dl, "View", photo.view)
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_view, "[edit]"))
+    if (photo.view || can_change) {
+        dt_dd(dl, "View", photo.view)
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_view, "[edit]"))
+    }
 
-    dt_dd(dl, "Comments", photo.comment)
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_comments, "[edit]"))
+    if (photo.comments || can_change) {
+        dt_dd(dl, "Comments", photo.comment)
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_comments, "[edit]"))
+    }
 
     dt_dd(dl, "File", photo.name)
     dt_dd(dl, "Place", "")
         .html(place_a(photo.place))
         .conditional_append(can_change, photo_change_a(photo, display_change_photo_place, "[edit]"))
 
-    var tag = dt_dd(dl, "Albums", "")
-    append_albums(tag, photo.albums)
-    tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_albums, "[edit]"))
+    if (photo.albums.length > 0 || can_change) {
+        var tag = dt_dd(dl, "Albums", "")
+        append_albums(tag, photo.albums)
+        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_albums, "[edit]"))
+    }
 
-    var tag = dt_dd(dl, "Categories", "")
-    append_categorys(tag, photo.categorys)
-    tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]"))
+    if (photo.categorys.length > 0 || can_change) {
+        var tag = dt_dd(dl, "Categories", "")
+        append_categorys(tag, photo.categorys)
+        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]"))
+    }
 
     dt_dd(dl, "Date & time", "")
         .append(datetime_a(photo.utctime))
         .append("<br />")
         .append(datetime_a(photo.localtime))
-       .conditional_append(can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]"))
+        .conditional_append(can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]"))
 
-    dt_dd(dl, "Photographer", "")
-        .html(person_a(photo.photographer))
-       .conditional_append(can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]"))
+    if (photo.photographer > 0 || can_change) {
+        dt_dd(dl, "Photographer", "")
+            .html(person_a(photo.photographer))
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]"))
+    }
 
     if (photo.rating) {
         dt_dd(dl, "Rating", photo.rating)
     }
 
-    if (photo.related.length > 0) {
+    if (photo.related.length > 0 || can_change) {
         var tag = dt_dd(dl, "Related photos", "")
-        append_related(tag, photo.related)
+        append_related(tag, photo.related, can_change)
+        tag.conditional_append(can_change, add_photo_relation_a(photo, "[add]"))
     }
 
-    dt_dd(dl, "Action", "")
-        .append(get_photo_action(photo.action))
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_action, "[edit]"))
+    if (photo.action || can_change) {
+        dt_dd(dl, "Action", "")
+            .append(get_photo_action(photo.action))
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_action, "[edit]"))
+    }
 
     pdd.append(dl)
 
@@ -2282,8 +2446,8 @@ function submit_change_photo_attribute(search_params, updates, dialog) {
             search,
             updates,
             function(data) {
-                dialog.dialog("close")
                 hide_status()
+                dialog.dialog("close")
                 reload_page()
             },
             function() {
@@ -2489,8 +2653,8 @@ function submit_change_album(album, dialog, form) {
             album.id,
             updates,
             function(data) {
-                dialog.dialog("close")
                 hide_status()
+                dialog.dialog("close")
                 replace_links()
                 update_session(data.session)
                 if (window.history.state==null) {
@@ -2545,15 +2709,15 @@ function submit_delete_album(album, dialog) {
             function(data) {
                 update_session(data.session)
                 if (data.status == 'success') {
-                    window.history.go(-1)
-                    dialog.dialog("close")
                     hide_status()
+                    dialog.dialog("close")
+                    window.history.go(-1)
                 } else if (data.status == 'errors') {
+                    hide_status()
+                    dialog.dialog("close")
                     for (var i in data.errors) {
                         alert(data.errors[i])
                     }
-                    dialog.dialog("close")
-                    hide_status()
                 } else {
                     alert("Unknown error")
                 }
@@ -2761,8 +2925,8 @@ function submit_change_category(category, dialog, form) {
             category.id,
             updates,
             function(data) {
-                dialog.dialog("close")
                 hide_status()
+                dialog.dialog("close")
                 replace_links()
                 update_session(data.session)
                 if (window.history.state==null) {
@@ -2817,15 +2981,15 @@ function submit_delete_category(category, dialog) {
             function(data) {
                 update_session(data.session)
                 if (data.status == 'success') {
-                    window.history.go(-1)
-                    dialog.dialog("close")
                     hide_status()
+                    dialog.dialog("close")
+                    window.history.go(-1)
                 } else if (data.status == 'errors') {
                     for (var i in data.errors) {
                         alert(data.errors[i])
                     }
-                    dialog.dialog("close")
                     hide_status()
+                    dialog.dialog("close")
                 } else {
                     alert("Unknown error")
                 }
@@ -3083,8 +3247,8 @@ function submit_change_place(place, dialog, form) {
             place.id,
             updates,
             function(data) {
-                dialog.dialog("close")
                 hide_status()
+                dialog.dialog("close")
                 replace_links()
                 update_session(data.session)
                 if (window.history.state==null) {
@@ -3139,15 +3303,15 @@ function submit_delete_place(place, dialog) {
             function(data) {
                 update_session(data.session)
                 if (data.status == 'success') {
-                    window.history.go(-1)
-                    dialog.dialog("close")
                     hide_status()
+                    dialog.dialog("close")
+                    window.history.go(-1)
                 } else if (data.status == 'errors') {
                     for (var i in data.errors) {
                         alert(data.errors[i])
                     }
-                    dialog.dialog("close")
                     hide_status()
+                    dialog.dialog("close")
                 } else {
                     alert("Unknown error")
                 }
@@ -3607,8 +3771,8 @@ function submit_change_person(person, dialog, form) {
             person.id,
             updates,
             function(data) {
-                dialog.dialog("close")
                 hide_status()
+                dialog.dialog("close")
                 replace_links()
                 update_session(data.session)
                 if (window.history.state==null) {
@@ -3663,9 +3827,137 @@ function submit_delete_person(person, dialog) {
             function(data) {
                 update_session(data.session)
                 if (data.status == 'success') {
-                    window.history.go(-1)
-                    dialog.dialog("close")
                     hide_status()
+                    dialog.dialog("close")
+                    window.history.go(-1)
+                } else if (data.status == 'errors') {
+                    for (var i in data.errors) {
+                        alert(data.errors[i])
+                    }
+                    hide_status()
+                    dialog.dialog("close")
+                } else {
+                    alert("Unknown error")
+                }
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to delete the person")
+            })
+
+    return false
+}
+
+
+function display_change_photo_relation(photo_relation) {
+    var dialog = $("<div id='dialog'></div>")
+
+    if (photo_relation.id != null) {
+        dialog.attr('title', "Change " + photo_relation.photo_1.title + "/" + photo_relation.photo_2.title + " relationship")
+    } else {
+        dialog.attr('title', "Add photo_relation")
+    }
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    settings = get_settings()
+
+    append_field(table, "photo_1", "Photo")
+        .append(get_input_photo("photo_1", photo_relation.photo_1))
+
+    append_field(table, "desc_1", "Description")
+        .append(get_input_element("desc_1", photo_relation.desc_1, "desc_1"))
+
+    append_field(table, "photo_2", "Photo")
+        .append(get_input_photo("photo_2", photo_relation.photo_2))
+
+    append_field(table, "desc_2", "Description")
+        .append(get_input_element("desc_2", photo_relation.desc_2, "desc_2"))
+
+    f.append(table)
+
+    dialog
+        .keypress(function(ev) {
+            if (ev.which == 13) {
+                submit_change_photo_relation(photo_relation, $( this ), f[0])
+            }
+        })
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            width: 400,
+            buttons: {
+                Save: function() {
+                    submit_change_photo_relation(photo_relation, $( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
+function submit_change_photo_relation(photo_relation, dialog, form) {
+    var updates = {
+        desc_1: parse_form_string(form.desc_1.value),
+        desc_2: parse_form_string(form.desc_2.value),
+        photo_1: parse_form_string(form.photo_1.value),
+        photo_2: parse_form_string(form.photo_2.value),
+    }
+
+    display_loading()
+    load_change_photo_relation(
+            photo_relation.id,
+            updates,
+            function(data) {
+                hide_status()
+                dialog.dialog("close")
+                reload_page()
+            },
+            function() {
+                hide_status()
+                alert("An error occured trying to update the photo_relation")
+            })
+
+    return false
+}
+
+
+function display_delete_photo_relation(photo_relation) {
+    var p = $("<p></p>").text("Are you sure you want to delete the photo relation between "
+            + photo_relation.photo_1.title + " and " + photo_relation.photo_2.title + "?")
+    var dialog = $("<div id='dialog'></div>")
+        .append(p)
+        .attr('title', "Delete " + photo_relation.title)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Delete: function() {
+                    submit_delete_photo_relation(photo_relation, $(this))
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
+function submit_delete_photo_relation(photo_relation, dialog) {
+    display_loading()
+    load_delete_photo_relation(
+            photo_relation.id,
+            function(data) {
+                update_session(data.session)
+                if (data.status == 'success') {
+                    hide_status()
+                    dialog.dialog("close")
+                    window.history.go(-1)
                 } else if (data.status == 'errors') {
                     for (var i in data.errors) {
                         alert(data.errors[i])
@@ -3678,7 +3970,7 @@ function submit_delete_person(person, dialog) {
             },
             function() {
                 hide_status()
-                alert("An error occured trying to delete the person")
+                alert("An error occured trying to delete the photo_relation")
             })
 
     return false
@@ -4045,7 +4337,7 @@ function search_photo_list(search, results) {
             true,
             function(photo, n) {
                 return function() {
-                    do_search_photo(search, n, true)
+                    do_search_photo(search, n, null, true)
                     return false
                 }
             }(photo, n))
@@ -4273,8 +4565,8 @@ function submit_login(dialog, form) {
             form.password.value,
             function(data) {
                 if (data.status == 'success') {
-                    dialog.dialog("close")
                     hide_status()
+                    dialog.dialog("close")
                     if (window.history.state==null) {
                         do_root(false)
                     } else {
@@ -4620,6 +4912,38 @@ function do_delete_person(person_id, push_history) {
 }
 
 
+function do_change_photo_relation(photo_relation_id, push_history) {
+    display_loading()
+    load_photo_relation(photo_relation_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_change_photo_relation(data.photo_relation)
+    }, display_error)
+}
+
+
+function do_add_photo_relation(photo, push_history) {
+    display_change_photo_relation({
+        id: null,
+        type: "photo_relation",
+        photo_1: photo,
+        photo_2: null,
+        desc_1: photo.title,
+        desc_2: "",
+    })
+}
+
+
+function do_delete_photo_relation(photo_relation_id, push_history) {
+    display_loading()
+    load_photo_relation(photo_relation_id, function(data) {
+        hide_status()
+        update_session(data.session)
+        display_delete_photo_relation(data.photo_relation)
+    }, display_error)
+}
+
+
 function do_search(search, push_history) {
     if (search.params == null) {
         search.params = {}
@@ -4654,18 +4978,23 @@ function do_search_results(search, page, push_history) {
 }
 
 
-function do_search_photo(search, n, push_history) {
+function do_search_photo(search, n, photo_id, push_history) {
     display_loading()
     load_search_photo(search, n, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history, search_photo_url(search, n, data.photo), {
-            type: 'display_search_photo',
-            search: search,
-            n: n,
-        });
-        display_search_photo(search, data, n)
+        if (photo_id == null || photo_id == 0 || data.photo.id == photo_id) {
+            hide_status()
+            replace_links()
+            update_session(data.session)
+            update_history(push_history, search_photo_url(search, n, data.photo), {
+                type: 'display_search_photo',
+                search: search,
+                n: n,
+                photo_id: photo_id,
+            });
+            display_search_photo(search, data, n)
+        } else {
+            do_photo(photo_id, push_history)
+        }
     }, display_error)
 }
 

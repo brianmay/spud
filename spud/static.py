@@ -54,7 +54,7 @@ def photo_detail(request, photo_id):
         js = json.dumps({'params': query})
         return render_to_response('html/static.html', {
             'title': 'Photo detail',
-            'onload': "do_search_photo(%s, %d)" % (js, n),
+            'onload': "do_search_photo(%s, %d, %d)" % (js, n, photo_id),
         }, context_instance=RequestContext(request))
     else:
         return render_to_response('html/static.html', {

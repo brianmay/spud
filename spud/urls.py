@@ -46,6 +46,10 @@ urlpatterns = patterns('',
     url(r'^a/person/add/$', 'spud.ajax.person_add', name='ajax_person_add'),
     url(r'^a/person/(?P<person_id>\d+)/delete/$', 'spud.ajax.person_delete', name='ajax_person_delete'),
 
+    url(r'^a/relation/(?P<photo_relation_id>\d+)/$', 'spud.ajax.photo_relation', name='ajax_photo_relation'),
+    url(r'^a/relation/add/$', 'spud.ajax.photo_relation_add', name='ajax_photo_relation_add'),
+    url(r'^a/relation/(?P<photo_relation_id>\d+)/delete/$', 'spud.ajax.photo_relation_delete', name='ajax_photo_relation_delete'),
+
     url(r'^a/search/$', 'spud.ajax.search', name='ajax_photo_search'),
     url(r'^a/search/results/$', 'spud.ajax.search_results', name='ajax_photo_search_results'),
     url(r'^a/search/change/$', 'spud.ajax.search_change', name='ajax_photo_search_change'),
