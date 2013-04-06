@@ -1802,15 +1802,15 @@ function get_input_photo(id, photo) {
     var div = get_ajax_select(id, "photo", photo,
 
         // onadded
-        function(id, repr) {
+        function(item) {
             img
                 .removeAttr("class")
                 .removeAttr("alt")
                 .removeAttr("width")
                 .removeAttr("height")
-                .attr("src", media_url("img/none.jpg"))
+                .attr("src", media_url("img/ajax-loader.gif"))
 
-            load_photo(id,
+            load_photo(item.pk,
                 // onsuccess
                 function(data) {
                     var photo = data.photo
@@ -1888,13 +1888,13 @@ function get_ajax_select(id, type, value, onadded, onkilled) {
         .ajaxautocomplete(params)
 
     if (onadded != null) {
-        ac.on("added", function(ev, pk, repr) {
+        ac.on("ajaxautocompleteadded", function(ev, pk, repr) {
             onadded(pk, repr)
         })
     }
 
     if (onkilled != null) {
-        ac.on("killed", function(ev, pk, repr) {
+        ac.on("ajaxautocompletekilled", function(ev, pk, repr) {
             onkilled(pk, repr)
         })
     }
