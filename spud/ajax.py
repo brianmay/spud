@@ -971,8 +971,8 @@ def person_search_results(request):
     q = search_dict.pop("q", [None])[-1]
     if q is not None:
         person_list = spud.models.person.objects.filter(
-            Q(first_name=q) | Q(last_name=q) |
-            Q(middle_name=q) | Q(called=q))
+            Q(first_name__icontains=q) | Q(last_name__icontains=q) |
+            Q(middle_name__icontains=q) | Q(called__icontains=q))
 
     number_results = person_list.count()
     person_list = person_list[first:first+count]
