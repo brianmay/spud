@@ -523,7 +523,9 @@ def _get_person_detail(user, person):
             d['spouses'].append(_get_person(user, person.spouse))
 
         for p in person.reverse_spouses.all():
-            if p.person_id != person.spouse.person_id:
+            if person.spouse is None:
+                d['spouses'].append(_get_person(user, p))
+            elif p.person_id != person.spouse.person_id:
                 d['spouses'].append(_get_person(user, p))
 
     return d
