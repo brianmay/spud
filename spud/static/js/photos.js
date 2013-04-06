@@ -3627,7 +3627,7 @@ function display_person_search_results(search, results) {
         .append(person_search_a(search))
         .appendTo(ul)
 
-    if (person.can_add) {
+    if (results.can_add) {
         $("<li/>")
             .append(add_person_a())
             .appendTo(ul)
