@@ -1584,7 +1584,7 @@ def search_change(request):
     photo_list, criteria = _get_search(request.user, search_dict)
     number_results = photo_list.count()
 
-    print len(photo_list)
+    print photo_list.count()
     print "dddd"
     print request.POST
     if request.method == "POST" and False:
