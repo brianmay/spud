@@ -2769,7 +2769,7 @@ function display_change_album(album) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_change_album(album, $( this ), f[0])
             }
         })
@@ -3041,7 +3041,7 @@ function display_change_category(category) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_change_category(category, $( this ), f[0])
             }
         })
@@ -3357,7 +3357,7 @@ function display_change_place(place) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_change_place(place, $( this ), f[0])
             }
         })
@@ -3491,7 +3491,7 @@ function display_person_search(search, data) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_person_search($( this ), f[0])
             }
         })
@@ -3878,7 +3878,7 @@ function display_change_person(person) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_change_person(person, $( this ), f[0])
             }
         })
@@ -4032,7 +4032,7 @@ function display_change_photo_relation(photo_relation) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_change_photo_relation(photo_relation, $( this ), f[0])
             }
         })
@@ -4246,7 +4246,7 @@ function display_search(search, data) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_search($( this ), f[0])
             }
         })
@@ -4628,7 +4628,7 @@ function display_settings(data) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_settings($( this ), f[0])
             }
         })
@@ -4690,7 +4690,7 @@ function display_login(push_history) {
 
     dialog
         .keypress(function(ev) {
-            if (ev.which == 13) {
+            if (ev.which == 13 && !ev.shiftKey) {
                 submit_login($( this ), f[0])
             }
         })
