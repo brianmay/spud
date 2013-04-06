@@ -56,8 +56,8 @@ ul.ui-autocomplete { z-index: 200; }
 
 /* Children list */
 .infobox { border:1px solid #dddddd; padding:10px; margin-bottom:10px; }
-.infobox dl { display:inline-block; vertical-align:top; width: 200px; margin-top: 0; margin-right: 10px; }
-.infobox dt { margin-top: 0; }
+.infobox dl { margin-right: 10px; }
+.infobox dt { margin-top: 10px; }
 .infobox dd { padding-left: 10px; }
 
 .children { padding-left:50px; border:1px solid #f00; }

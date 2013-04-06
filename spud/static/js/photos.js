@@ -1317,9 +1317,15 @@ function escapeHTML(string) {
     });
 };
 
-function p(t){
-    t = t.trim();
-    return (t.length>0?'<p>'+t.replace(/[\r\n]+/,'</p><p>')+'</p>':null);
+function p(text){
+    var lines = text.split(/\n\n/);
+    var htmls = [];
+    for (var i = 0 ; i < lines.length ; i++) {
+        var p = $("<p></p>")
+            .html(escapeHTML(lines[i]).replace(/[\r\n]+/, "<br/>"))
+        htmls.push(p)
+    }
+    return htmls;
 }
 
 
@@ -1612,13 +1618,19 @@ function photo_thumb(photo, title, sort, description, url, selectable, onclick) 
         .appendTo(a)
     }
 
-    a.append("<div class='title'>" + escapeHTML(title) + "</div>")
+    $("<div class='title'></div>")
+        .text(title)
+        .appendTo(a)
 
     if (sort) {
-        a.append("<div class='sort'>" + escapeHTML(sort) + "</div>")
+        $("<div class='sort'></div>")
+            .text(sort)
+            .appendTo(a)
     }
     if (description) {
-        a.append("<div class='desc'>" + escapeHTML(description) + "</div>")
+        $("<div class='desc'></div>")
+            .append(p(description))
+            .appendTo(a)
     }
 
     li.append(a)
@@ -1984,7 +1996,7 @@ function display_photo(photo) {
 
     if (photo.description || can_change) {
         $("<div class='description'></div>")
-            .html(p(escapeHTML(photo.description)))
+            .html(p(photo.description))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit description]"))
             .appendTo(pdp)
     }
@@ -2006,7 +2018,8 @@ function display_photo(photo) {
     }
 
     if (photo.description || can_change) {
-        dt_dd(dl, "Description", photo.description)
+        dt_dd(dl, "Description", "")
+            .append(p(photo.description))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
     }
 
@@ -2638,7 +2651,8 @@ function display_album(album) {
         dt_dd(dl, "Sort", album.sortname + " " + album.sortorder)
     }
     if (album.description) {
-        dt_dd(dl, "Description", album.description)
+        dt_dd(dl, "Description", "")
+            .append(p(album.description))
     }
 
     $("<div class='infobox'/>")
@@ -2910,7 +2924,8 @@ function display_category(category) {
         dt_dd(dl, "Sort", category.sortname + " " + category.sortorder)
     }
     if (category.description) {
-        dt_dd(dl, "Description", category.description)
+        dt_dd(dl, "Description", "")
+            .append(p(category.description))
     }
 
     $("<div class='infobox'/>")
@@ -3208,7 +3223,8 @@ function display_place(place) {
     }
 
     if (place.notes) {
-        dt_dd(dl, "Notes", place.notes)
+        dt_dd(dl, "Notes", "")
+            .append(p(place.notes))
     }
 
     $("<div class='infobox'/>")
