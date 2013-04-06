@@ -897,7 +897,7 @@ def place_finish(request, place):
             place.urldesc = request.POST['urldesc']
             updated = True
         if 'notes' in request.POST:
-            place.place_description = request.POST['notes']
+            place.notes = request.POST['notes']
             updated = True
         if 'cover_photo' in request.POST:
             if request.POST['cover_photo'] == "":
