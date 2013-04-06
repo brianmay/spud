@@ -2780,7 +2780,7 @@ function display_change_album(album) {
 
     var parent = null
     if (album.parents.length > 0) {
-        parent = album.parents[0]
+        parent = album.parents.slice(-1)[0]
     }
     append_field(table, "parent_text", "Parent")
         .append(get_ajax_select("parent", 'album', parent))
@@ -3054,7 +3054,7 @@ function display_change_category(category) {
 
     var parent = null
     if (category.parents.length > 0) {
-        parent = category.parents[0]
+        parent = category.parents.slice(-1)[0]
     }
     append_field(table, "parent_text", "Parent")
         .append(get_ajax_select("parent", 'category', parent))
@@ -3372,7 +3372,7 @@ function display_change_place(place) {
 
     var parent = null
     if (place.parents.length > 0) {
-        parent = place.parents[0]
+        parent = place.parents.slice(-1)[0]
     }
     append_field(table, "parent_text", "Parent")
         .append(get_ajax_select("parent", 'place', parent))
