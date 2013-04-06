@@ -9,8 +9,8 @@ $.widget('ui.myselectable', $.ui.selectable, {
 $.widget('ui.quickautocomplete', $.ui.autocomplete, {
     _renderItem: function( ul, item ) {
         return $( "<li>" )
-        .append( "<a>" + item.label + "<br/>" + item.desc + "</a>" )
-        .appendTo( ul );
+            .append( "<a>" + item.label + "<br/>" + item.desc + "</a>" )
+            .appendTo( ul );
     },
     _suggest: function( items ) {
         if (items.length != 1) {
@@ -18,17 +18,163 @@ $.widget('ui.quickautocomplete', $.ui.autocomplete, {
             return
         }
         var item = items[0]
-        if ( false !== this._trigger( "select", event, { item: item } ) ) {
+        if ( false !== this._trigger( "select", null, { item: item } ) ) {
             this._value( item.value );
         }
         // reset the term after the select event
         // this allows custom select handling to work properly
         this.term = this._value();
 
-        this.close( event );
+        this.close();
         this.selectedItem = item;
     }
 });
+
+$.widget('ui.autocompletehtml', $.ui.autocomplete, {
+    _create: function(){
+        this._super();
+        this.sizeul = true
+    },
+
+    _renderItem: function(ul, item) {
+        if (this.sizeul) {
+            if(ul.css('max-width')=='none') ul.css('max-width',this.outerWidth());
+            this.sizeul = false
+        }
+        return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + item.match + "</a>")
+            .appendTo(ul);
+    },
+});
+
+$.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
+    options: {
+    },
+
+    _create: function(){
+        this.id = this.element.id
+        var name = this.element.attr("name")
+
+        this.input = $('<input type="hidden"/>')
+            .attr("name", name)
+
+        this.deck = $('<div class="results_on_deck"></div>')
+
+        this.text = this.element
+            .addClass("ui-autocomplete-input")
+            .removeAttr("name")
+            .attr("type", "text")
+            .attr("autocomplete", "off")
+            .attr("role", "textbox")
+            .attr("aria-autocomplete", "list")
+            .attr("aria-haspopup", "true")
+            .wrap("<span></span>")
+
+        this.uidiv = this.text
+            .parent()
+            .append(this.input)
+            .append(this.deck)
+            .append("<p class='help'>Enter text to search.</p>")
+
+        this._setInitial()
+
+        var options = this.options
+        if (options.type != null) {
+            options.source =  "/ajax/ajax_lookup/" + options.type
+            delete options.type
+        }
+        this.element.on(
+            this.widgetEventPrefix + "select",
+            $.proxy(this._receiveResult, this)
+        )
+        this._super();
+    },
+
+    _setInitial: function() {
+        var options = this.options
+        if (options.item != null) {
+            options.initial = [ options.item.repr, options.item.pk ]
+            this.input.attr("value", options.item.pk)
+            this._addKiller(options.item)
+            delete options.item
+        }
+    },
+
+    _receiveResult: function(ev, ui) {
+        if (this.input.val()) {
+            this._kill();
+        }
+        this.input.val(ui.item.pk);
+        this.text.val('');
+        this._addKiller(ui.item);
+        this._trigger("added", ev, ui.item);
+        return false;
+    },
+
+    _addKiller: function(item) {
+        var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
+        var div = $("<div></div>")
+            .attr("id", this.id+'_on_deck_'+item.pk)
+            .append(killButton)
+            .append(item.repr)
+            .appendTo(this.deck)
+        killButton.on("click", $.proxy(
+            function(ev) {
+                this._kill(item, div);
+                return this._trigger("killed", ev, item)
+            },
+            this))
+    },
+
+    _kill: function(item, div) {
+        this.input.val('');
+        this.deck.children().fadeOut(1.0).remove();
+    },
+
+    widget: function() {
+        return this.uidiv
+    },
+})
+
+$.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
+    _setInitial: function() {
+        var options = this.options
+        if (options.items != null) {
+            if (options.items.length > 0) {
+                var value = $.map(options.items, function(v){ return v.pk });
+                this.input.val("|" + value.join("|") + "|")
+            } else {
+                this.input.val("|")
+            }
+            var mythis = this
+            $.each(options.items, function(i, v) {
+                mythis._addKiller(v)
+            });
+        } else {
+            this.input.attr("value", "|")
+        }
+        delete options.items
+    },
+
+    _receiveResult: function(ev, ui) {
+        prev = this.input.val();
+
+        if (prev.indexOf("|"+ui.item.pk+"|") == -1) {
+                this.input.val((prev ? prev : "|") + ui.item.pk + "|");
+                this.text.val('');
+                this._addKiller(ui.item);
+                this._trigger("added",  ev, ui.item);
+        }
+
+        return false;
+    },
+
+    _kill: function(item, div) {
+        this.input.val(this.input.val().replace("|" + item.pk + "|", "|"));
+        div.fadeOut().remove();
+    },
+})
 
 // ********
 // * URLS *
@@ -1300,7 +1446,13 @@ function append_action_links(ul) {
 
 function append_jump(id, type, onadded) {
     var f = $("<form method='get' />")
-        .append(get_ajax_select(id, type, null, onadded))
+
+    var ac = $("<input/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .appendTo(f)
+        .ajaxautocomplete({ type: type })
+        .on('ajaxautocompleteadded', onadded)
 
     var module = $('<div class="module"/>')
         .append("<h2>Jump</h2>")
@@ -1703,19 +1855,20 @@ function get_input_photo(id, photo) {
 function get_ajax_select(id, type, value, onadded, onkilled) {
 
     var params = {
-        "min_length": 1,
-        "source": "/ajax/ajax_lookup/" + type,
+        "type": type,
     }
 
     if (value != null) {
-        params.initial = [ value.title, value.id ]
+        params.item = {
+            pk: value.id,
+            repr: value.title,
+        }
     }
 
-    var ac = $("<div/>")
+    var ac = $("<input/>")
         .attr("name", id)
         .attr("id", "id_" + id)
-        .autocompleteselect(params)
-        .append("<p class='help'>Enter text to search.</p>")
+        .ajaxautocomplete(params)
 
     if (onadded != null) {
         ac.on("added", function(ev, pk, repr) {
@@ -1729,28 +1882,27 @@ function get_ajax_select(id, type, value, onadded, onkilled) {
         })
     }
 
-    return ac
+    return ac.ajaxautocomplete('widget')
 }
 
 
-function get_ajax_multiple_select(id, type, value, onadded, onkilled) {
+function get_ajax_multiple_select(id, type, values, onadded, onkilled) {
     var value_arr = []
-    for (var i in value) {
-        var v = value[i]
-        value_arr.push([v.title, v.id])
+    if (values != null) {
+        var value_arr = $.map(values,
+            function(value){ return { pk: value.id, repr: value.title, } }
+        );
     }
 
     var params = {
-        "min_length": 1,
-        "source": "/ajax/ajax_lookup/" + type,
-        "initial": value_arr,
+        "type": type,
+        "items": value_arr,
     }
 
-    var ac = $("<div/>")
+    var ac = $("<input/>")
         .attr("name", id)
         .attr("id", "id_" + id)
-        .autocompleteselectmultiple(params)
-        .append("<p class='help'>Enter text to search.</p>")
+        .ajaxautocompletemultiple(params)
 
     if (onadded != null) {
         ac.on("added", function(ev, pk, repr) {
@@ -1764,7 +1916,7 @@ function get_ajax_multiple_select(id, type, value, onadded, onkilled) {
         })
     }
 
-    return ac
+    return ac.ajaxautocompletemultiple('widget')
 }
 
 
@@ -2555,8 +2707,8 @@ function display_album(album) {
     append_action_links(ul)
 
     append_jump("album", "album",
-        function(id) {
-            do_album(id, true)
+        function(ev, item) {
+            do_album(item.pk, true)
         }
     )
 
@@ -2827,8 +2979,8 @@ function display_category(category) {
     append_action_links(ul)
 
     append_jump("category", "category",
-        function(id) {
-            do_category(id, true)
+        function(ev, item) {
+            do_category(item.pk, true)
         }
     )
 
@@ -3125,8 +3277,8 @@ function display_place(place) {
     append_action_links(ul)
 
     append_jump("place", "place",
-        function(id) {
-            do_place(id, true)
+        function(ev, item) {
+            do_place(item.pk, true)
         }
     )
 
@@ -3463,8 +3615,8 @@ function display_person_search_results(search, results) {
     append_action_links(ul)
 
     append_jump("person", "person",
-        function(id) {
-            do_person(id, true)
+        function(ev, item) {
+            do_person(item.pk, true)
         }
     )
 
