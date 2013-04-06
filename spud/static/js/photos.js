@@ -1255,6 +1255,8 @@ window.onpopstate = function(event) {
             do_search_results(state.search, state.page, false)
         } else if (state.type == 'settings') {
             do_settings(false)
+        } else {
+            alert("We don't understand our state")
         }
     }
 };
