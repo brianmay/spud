@@ -1028,9 +1028,14 @@ function search_photo_a(search, n, photo, title, accesskey) {
     if (title == null) {
         title = "Photo "+n
     }
+    var id = null
+    if (photo != null) {
+        id = photo.id
+    }
+
     var a = $('<a/>')
         .attr('href', search_photo_url(search, n, photo))
-        .on('click', function() { do_search_photo(search, n, photo.id, true); return false; })
+        .on('click', function() { do_search_photo(search, n, id, true); return false; })
         .data('photo', photo)
         .text(title)
 
