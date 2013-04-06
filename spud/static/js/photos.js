@@ -3691,7 +3691,8 @@ function display_person(person) {
     }
 
     if (person.notes) {
-        dt_dd(dl, "Notes", person.notes)
+        dt_dd(dl, "Notes", "")
+            .append(p(person.notes))
     }
 
     if (person.gender) {
@@ -3774,10 +3775,6 @@ function display_person(person) {
     if (person.grandchildren && person.grandchildren.length > 0) {
         var dd = dt_dd(dl, "Grand children", "")
         append_persons(dd, person.grandchildren)
-    }
-
-    if (person.notes) {
-        dt_dd(dl, "Notes", person.notes)
     }
 
     if (person.email) {
