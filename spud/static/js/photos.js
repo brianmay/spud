@@ -1232,6 +1232,7 @@ function parse_form_string(string) {
 
 window.onpopstate = function(event) {
     var state=event.state
+    $("#dialog").dialog("close")
     if (state != null) {
 //        alert("location: " + document.location + ", state: " + JSON.stringify(event.state));
         if (state.type == 'root') {
