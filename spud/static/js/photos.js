@@ -3542,9 +3542,8 @@ function submit_person_search(dialog, form) {
     var search = {
         params: params,
     }
-    do_person_search_results(search, 0, true)
-
     dialog.dialog( "close" )
+    do_person_search_results(search, 0, true)
     return false
 }
 
