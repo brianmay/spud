@@ -4851,7 +4851,6 @@ function do_change_album(album_id, push_history) {
     load_album(album_id, function(data) {
         hide_status()
         update_session(data.session)
-        display_album(data.album)
         display_change_album(data.album)
     }, display_error)
 }
@@ -4877,7 +4876,6 @@ function do_delete_album(album_id, push_history) {
     load_album(album_id, function(data) {
         hide_status()
         update_session(data.session)
-        display_album(data.album)
         display_delete_album(data.album)
     }, display_error)
 }
@@ -4903,7 +4901,6 @@ function do_change_category(category_id, push_history) {
     load_category(category_id, function(data) {
         hide_status()
         update_session(data.session)
-        display_category(data.category)
         display_change_category(data.category)
     }, display_error)
 }
@@ -4955,7 +4952,6 @@ function do_change_place(place_id, push_history) {
     load_place(place_id, function(data) {
         hide_status()
         update_session(data.session)
-        display_place(data.place)
         display_change_place(data.place)
     }, display_error)
 }
@@ -5045,7 +5041,6 @@ function do_change_person(person_id, push_history) {
     load_person(person_id, function(data) {
         hide_status()
         update_session(data.session)
-        display_person(data.person)
         display_change_person(data.person)
     }, display_error)
 }
