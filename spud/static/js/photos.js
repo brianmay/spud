@@ -1153,6 +1153,18 @@ function is_edit_mode() {
     return ($(document).data("mode") == "edit")
 }
 
+function set_slideshow_mode() {
+    $(document).data("display", "slideshow")
+}
+
+function set_detail_mode() {
+    $(document).data("display", "detail")
+}
+
+function is_slideshow_mode() {
+    return ($(document).data("display") == "slideshow")
+}
+
 function update_history(push_history, url, state) {
     if (push_history) {
         window.history.pushState(state, document.title, url);
@@ -1176,33 +1188,35 @@ function get_photo_style(data) {
 }
 
 
-function resize_photo(img, width, height) {
-    width = width || img.naturalWidth
-    height = height || img.naturalHeight
+function resize_photo(img, width, height, enlarge) {
     var aspect = width/height
 
-    var subWidth = 80
-    if (window.innerWidth <= 700) {
-        subWidth = 0
-    }
-    if (width > window.innerWidth-subWidth) {
-        width = window.innerWidth-subWidth
+    var innerWidth = window.innerWidth
+    var innerHeight = window.innerHeight
+
+    if (enlarge) {
+        width = innerWidth
         height = width / aspect
     }
 
-    if (height > window.innerHeight) {
-        height = window.innerHeight
+    if (width > innerWidth) {
+        width = innerWidth
+        height = width / aspect
+    }
+
+    if (height > innerHeight) {
+        height = innerHeight
         width = height * aspect
     }
 
-    if (window.innerWidth <= 700) {
-        img.style.marginLeft = ((window.innerWidth-width)/2) + "px"
-    } else {
-        img.style.marginLeft = "0px"
+    if (enlarge) {
+        img.css("padding-top", (window.innerHeight-height)/2 + "px")
+        img.css("padding-bottom", (window.innerHeight-height)/2 + "px")
+        img.css("padding-left", (window.innerWidth-width)/2 + "px")
+        img.css("padding-right", (window.innerWidth-width)/2 + "px")
     }
-
-    img.width = width
-    img.height = height
+    img.attr('width', width)
+    img.attr('height', height)
 }
 
 
@@ -1947,6 +1961,11 @@ function get_ajax_multiple_select(id, type, values, sorted, onadded, onkilled) {
 // * HTML generators *
 // *******************
 
+function reset_display() {
+    $("#content-related").removeClass("overlapped")
+    $("body").css("overflow", "auto");
+}
+
 function display_root() {
     $("#content-main")
         .html("")
@@ -1957,7 +1976,17 @@ function display_root() {
 }
 
 
-function display_photo(photo) {
+function display_photo(photo, search, number_results, n) {
+    reset_display()
+    if (is_slideshow_mode()) {
+        display_slideshow_photo(photo, search, number_results, n)
+    } else {
+        display_detail_photo(photo, search, number_results, n)
+    }
+}
+
+
+function display_detail_photo(photo, search, number_results, n) {
     var size = get_settings().view_size
     var style = get_photo_style(photo)
     var image = photo.thumb[size]
@@ -1982,12 +2011,14 @@ function display_photo(photo) {
     var pdp = $("<div class='photo_block photo_detail_photo' />")
 
     if (image) {
-        $("<img id='photo' />")
+        var img = $("<img id='photo' />")
+            .attr('id', photo)
             .attr('src', image.url)
             .attr('width', image.width)
             .attr('height', image.height)
             .attr('alt', photo.title)
             .appendTo(pdp)
+        resize_photo(img, image.width, image.height, false)
     }
 
     if (photo.title || can_change) {
@@ -2121,7 +2152,197 @@ function display_photo(photo) {
         .append(" › ")
         .append(escapeHTML(photo.title))
 
+    if (search != null) {
+        $("#content-main").append(photo_paginator(search, number_results, n))
+
+        if (n > 1) {
+            $("<a class='prevslide'></a>")
+                .on("click", function() { do_search_photo(search, n-1, null, true); return false; })
+                .appendTo(pd)
+        }
+
+        if (n < number_results-1) {
+            $("<a class='nextslide'></a>")
+                .on("click", function() { do_search_photo(search, n+1, null, true); return false; })
+                .appendTo(pd)
+        }
+    }
+
+    display_common_photo(photo, search, number_results, n)
+}
+
+
+function display_slideshow_photo(photo, search, number_results, n) {
+    var div = $("<div class='slideshow'></div>")
+
+    var can_change = false
+    if (photo.can_change && is_edit_mode()) {
+        prefix = "Edit "
+        can_change = true
+    }
+
+    var image = null
+    var size = get_settings().click_size
+    var style = get_photo_style(photo)
+    var image = photo.thumb[size]
+    if (image != null) {
+        var photodiv = $("<div class='photo'></div>")
+
+        var img = $("<img />")
+            .attr("class", style)
+            .attr("src", image.url)
+            .attr("alt", photo.title)
+            .attr("width", image.width)
+            .attr("height", image.height)
+            .appendTo(photodiv)
+        resize_photo(img, image.width, image.height, true)
+        div.append(photodiv)
+    }
+
+    if (search != null) {
+        if (n > 1) {
+            $("<a class='prevslide'></a>")
+                .on("click", function() { do_search_photo(search, n-1, null, true); return false; })
+                .appendTo(div)
+        }
+
+        if (n < number_results-1) {
+            $("<a class='nextslide'></a>")
+                .on("click", function() { do_search_photo(search, n+1, null, true); return false; })
+                .appendTo(div)
+        }
+    }
+
+    $("#content-main").html(div)
+
+    display_common_photo(photo, search, number_results, n)
+
+    pdp = $('<div class="module"/>')
+        .append("<h2>Photo Details</h2>")
+
+    if (photo.title || can_change) {
+        $("<div class='title'></div>")
+            .text(photo.title)
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
+            .appendTo(pdp)
+    }
+
+    if (photo.persons.length > 0 || can_change) {
+        var tag = $("<div class='persons'></div>")
+        append_persons(tag, photo.persons)
+        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
+        tag.appendTo(pdp)
+    }
+
+    if (photo.description || can_change) {
+        $("<div class='description'></div>")
+            .html(p(photo.description))
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit description]"))
+            .appendTo(pdp)
+    }
+
+    $("#content-related")
+        .append(pdp)
+        .addClass("overlapped")
+
+    $("body").css("overflow", "hidden");
+
+//    $(".module")
+//        .addClass("overlapped")
+}
+
+
+function display_common_photo(photo, search, number_results, n) {
+    var ul = $('<ul class="menu"/>')
+
+    if (is_slideshow_mode()) {
+        $("<li>")
+            .on("click", function() {
+                set_detail_mode()
+                reload_page()
+                return false;
+            })
+            .html("<a href='#'>Details</a>")
+            .appendTo(ul)
+    } else {
+        $("<li>")
+            .on("click", function() {
+                set_slideshow_mode()
+                reload_page()
+                return false;
+            })
+            .html("<a href='#'>Slideshow</a>")
+            .appendTo(ul)
+    }
+
+    if (search != null) {
+        $("<li/>")
+            .append(search_a(search))
+            .appendTo(ul)
+    }
+
+    if (photo.can_change) {
+        if (is_edit_mode()) {
+            $("<li>")
+                .on("click", function() {
+                    set_normal_mode()
+                    reload_page()
+                    return false;
+                })
+                .html("<a href='#'>View</a>")
+                .appendTo(ul)
+        } else {
+            $("<li>")
+                .on("click", function() {
+                    set_edit_mode()
+                    reload_page()
+                    return false;
+                })
+                .html("<a href='#'>Edit</a>")
+                .appendTo(ul)
+        }
+    }
+
+    if (is_photo_selected(photo)) {
+        $("<li>")
+            .on("click", function() {
+                del_selection(photo)
+                reload_page()
+                return false;
+            })
+            .html("<a href='#'>Unselect</a>")
+            .appendTo(ul)
+    } else {
+        $("<li>")
+            .on("click", function() {
+                add_selection(photo);
+                reload_page()
+                return false;
+            })
+            .html("<a href='#'>Select</a>")
+            .appendTo(ul)
+    }
+
+    append_action_links(ul)
+
     return
+}
+
+
+function display_search_photo(search, results, n) {
+    display_photo(results.photo, search, results.number_results, n)
+
+    var page = Math.floor(n / search.results_per_page)
+
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+        .append(search_a(search))
+        .append(" › ")
+        .append(search_results_a(search, page))
+        .append(" › ")
+        .append(escapeHTML(results.photo.title))
 }
 
 
@@ -2569,6 +2790,7 @@ function submit_change_photo_attribute(search_params, updates, number_results, d
 }
 
 function display_album(album) {
+    reset_display()
     var cm = $("#content-main")
     cm.html("")
 
@@ -2825,6 +3047,7 @@ function submit_delete_album(album, dialog) {
 }
 
 function display_category(category) {
+    reset_display()
     var cm = $("#content-main")
     cm.html("")
 
@@ -3082,6 +3305,7 @@ function submit_delete_category(category, dialog) {
 
 
 function display_place(place) {
+    reset_display()
     var cm = $("#content-main")
     cm.html("")
 
@@ -3440,6 +3664,7 @@ function submit_person_search(dialog, form) {
 
 
 function display_person_search_results(search, results) {
+    reset_display()
     var cm = $("#content-main")
     cm.html("")
 
@@ -3539,6 +3764,7 @@ function display_person_search_results(search, results) {
 
 
 function display_person(person) {
+    reset_display()
     var cm = $("#content-main")
     cm.html("")
 
@@ -4259,6 +4485,7 @@ function submit_search(dialog, form) {
 
 
 function display_search_results(search, results) {
+    reset_display()
     var cm = $("#content-main")
     cm.html("")
 
@@ -4395,77 +4622,9 @@ function search_paginator(search, results) {
 }
 
 
-function display_search_photo(search, results, n) {
-    display_photo(results.photo)
-    $("#content-main").append(photo_paginator(search, results, n))
-
-    var page = Math.floor(n / search.results_per_page)
-
-    var ul = $('<ul class="menu"/>')
-
-    $("<li/>")
-        .append(search_a(search))
-        .appendTo(ul)
-
-    if (results.photo.can_change) {
-        if (is_edit_mode()) {
-            $("<li>")
-                .on("click", function() {
-                    set_normal_mode()
-                    reload_page()
-                    return false;
-                })
-                .html("<a href='#'>View</a>")
-                .appendTo(ul)
-        } else {
-            $("<li>")
-                .on("click", function() {
-                    set_edit_mode()
-                    reload_page()
-                    return false;
-                })
-                .html("<a href='#'>Edit</a>")
-                .appendTo(ul)
-        }
-    }
-
-    if (is_photo_selected(results.photo)) {
-        $("<li>")
-            .on("click", function() {
-                del_selection(results.photo)
-                reload_page()
-                return false;
-            })
-            .html("<a href='#'>Unselect</a>")
-            .appendTo(ul)
-    } else {
-        $("<li>")
-            .on("click", function() {
-                add_selection(results.photo);
-                reload_page()
-                return false;
-            })
-            .html("<a href='#'>Select</a>")
-            .appendTo(ul)
-    }
-
-    append_action_links(ul)
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append(search_a(search))
-        .append(" › ")
-        .append(search_results_a(search, page))
-        .append(" › ")
-        .append(escapeHTML(results.photo.title))
-}
-
-
-function photo_paginator(search, results, n) {
+function photo_paginator(search, number_results, n) {
     var page = n
-    var last_page = results.number_results-1
+    var last_page = number_results-1
 
     var html_page = function(page, text, key) {
         return search_photo_a(search, page, null, text, key)
