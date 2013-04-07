@@ -408,7 +408,6 @@ function load_category(category_id, success) {
     ajax({
         url: '/a/category/'+category_id+'/',
         success: success,
-        error: error,
     })
 }
 
@@ -431,7 +430,6 @@ function load_delete_category(category_id, success) {
     ajax({
         url: '/a/category/'+category_id+'/delete/',
         success: success,
-        error: error,
         type: "POST",
     })
 }
