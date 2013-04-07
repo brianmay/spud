@@ -1590,7 +1590,13 @@ def search_change(request):
     photo_list, criteria = _get_search(request.user, search_dict)
     number_results = photo_list.count()
 
-    print photo_list.count()
+    expected_results = _decode_int(request.POST['number_results'])
+    if number_results != expected_results:
+        raise HttpBadRequest(
+            "We expected %d changed but would have made %d" %
+            (expected_results, number_results))
+
+    print number_results
     print "dddd"
     print request.POST
     if request.method == "POST" and False:

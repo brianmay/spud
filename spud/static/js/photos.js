@@ -583,8 +583,8 @@ function load_search_results(search, page, success) {
 }
 
 
-function change_search(search, updates, success) {
-    var params = jQuery.extend({}, search.params, updates)
+function change_search(search, updates, number_results, success) {
+    var params = jQuery.extend({}, search.params, updates, { number_results: number_results })
 
     ajax({
         url: '/a/search/change/',
@@ -2533,7 +2533,7 @@ function display_change_photo_attribute(title, table, get_updates, search_params
         .append(f)
         .keypress(function(ev) {
             if (ev.which == 13 && !ev.shiftKey) {
-                submit_change_photo_attribute(search_params, get_updates(f[0]), $( this ))
+                submit_change_photo_attribute(search_params, get_updates(f[0]), number_results, $( this ))
                 return false
             }
         })
@@ -2542,7 +2542,7 @@ function display_change_photo_attribute(title, table, get_updates, search_params
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Save: function() {
-                    submit_change_photo_attribute(search_params, get_updates(f[0]), $( this ))
+                    submit_change_photo_attribute(search_params, get_updates(f[0]), number_results, $( this ))
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -2552,7 +2552,7 @@ function display_change_photo_attribute(title, table, get_updates, search_params
 }
 
 
-function submit_change_photo_attribute(search_params, updates, dialog) {
+function submit_change_photo_attribute(search_params, updates, number_results, dialog) {
     var search = {
         params: search_params
     }
@@ -2560,6 +2560,7 @@ function submit_change_photo_attribute(search_params, updates, dialog) {
     change_search(
         search,
         updates,
+        number_results,
         function(data) {
             dialog.dialog("close")
             reload_page()
