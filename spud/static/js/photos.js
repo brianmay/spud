@@ -171,6 +171,28 @@ $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
     },
 })
 
+$.widget('ui.ajaxautocompletesorted',  $.ui.ajaxautocompletemultiple, {
+    _create: function(){
+        this._super()
+        this.deck
+            .sortable()
+            .on("sortstop", $.proxy(
+                function() {
+                    var value = this.deck.sortable( "toArray" )
+                    value = $.map(value, function(id) {
+                        return id.match(/(.+)[\-=_](.+)/)[2]
+                    })
+                    if (value.length > 0) {
+                        this.input.val("|" + value.join("|") + "|")
+                    } else {
+                        this.input.val("|")
+                    }
+                },
+                this)
+            )
+    }
+})
+
 // ********
 // * URLS *
 // ********
@@ -1880,7 +1902,7 @@ function get_ajax_select(id, type, value, onadded, onkilled) {
 }
 
 
-function get_ajax_multiple_select(id, type, values, onadded, onkilled) {
+function get_ajax_multiple_select(id, type, values, sorted, onadded, onkilled) {
     var value_arr = []
     if (values != null) {
         var value_arr = $.map(values,
@@ -1896,7 +1918,15 @@ function get_ajax_multiple_select(id, type, values, onadded, onkilled) {
     var ac = $("<input/>")
         .attr("name", id)
         .attr("id", "id_" + id)
-        .ajaxautocompletemultiple(params)
+
+    var widget
+    if (sorted) {
+        ac.ajaxautocompletesorted(params)
+        widget = ac.ajaxautocompletesorted('widget')
+    } else {
+        ac.ajaxautocompletemultiple(params)
+        widget = ac.ajaxautocompletemultiple('widget')
+    }
 
     if (onadded != null) {
         ac.on("added", function(ev, pk, repr) {
@@ -1910,7 +1940,7 @@ function get_ajax_multiple_select(id, type, values, onadded, onkilled) {
         })
     }
 
-    return ac.ajaxautocompletemultiple('widget')
+    return widget
 }
 
 
@@ -2377,7 +2407,7 @@ function display_change_photo_albums(photo, search_params, number_results) {
     if (photo != null) {
         var table = $("<table />")
         append_field(table, "albums_text", "Albums")
-            .append(get_ajax_multiple_select("albums", 'album', photo.albums))
+            .append(get_ajax_multiple_select("albums", 'album', photo.albums, false))
         var get_updates = function(form) {
             var set = []
             if (form.albums.value != "|") {
@@ -2389,9 +2419,9 @@ function display_change_photo_albums(photo, search_params, number_results) {
         }
     } else {
         append_field(table, "add_album_text", "Add Album")
-            .append(get_ajax_multiple_select("add_album", 'album', []))
+            .append(get_ajax_multiple_select("add_album", 'album', [], false))
         append_field(table, "del_album_text", "Delete Album")
-            .append(get_ajax_multiple_select("del_album", 'album', []))
+            .append(get_ajax_multiple_select("del_album", 'album', [], false))
         var get_updates = function(form) {
             var add = []
             if (form.add_album.value != "|") {
@@ -2417,7 +2447,7 @@ function display_change_photo_categorys(photo, search_params, number_results) {
     if (photo != null) {
         var table = $("<table />")
         append_field(table, "categorys_text", "Categories")
-            .append(get_ajax_multiple_select("categorys", 'category', photo.categorys))
+            .append(get_ajax_multiple_select("categorys", 'category', photo.categorys, false))
         var get_updates = function(form) {
             var set = []
             if (form.categorys.value != "|") {
@@ -2429,9 +2459,9 @@ function display_change_photo_categorys(photo, search_params, number_results) {
         }
     } else {
         append_field(table, "add_category_text", "Add Category")
-            .append(get_ajax_multiple_select("add_category", 'category', []))
+            .append(get_ajax_multiple_select("add_category", 'category', [], false))
         append_field(table, "del_category_text", "Delete Category")
-            .append(get_ajax_multiple_select("del_category", 'category', []))
+            .append(get_ajax_multiple_select("del_category", 'category', [], false))
         var get_updates = function(form) {
             var add = []
             if (form.add_category.value != "|") {
@@ -2457,7 +2487,7 @@ function display_change_photo_persons(photo, search_params, number_results) {
     if (photo != null) {
         var table = $("<table />")
         append_field(table, "persons_text", "Persons")
-            .append(get_ajax_multiple_select("persons", 'person', photo.persons))
+            .append(get_ajax_multiple_select("persons", 'person', photo.persons, true))
         var get_updates = function(form) {
             var set = []
             if (form.persons.value != "|") {
@@ -2469,9 +2499,9 @@ function display_change_photo_persons(photo, search_params, number_results) {
         }
     } else {
         append_field(table, "add_person_text", "Add Person")
-            .append(get_ajax_multiple_select("add_person", 'person', []))
+            .append(get_ajax_multiple_select("add_person", 'person', [], false))
         append_field(table, "del_person_text", "Delete Person")
-            .append(get_ajax_multiple_select("del_person", 'person', []))
+            .append(get_ajax_multiple_select("del_person", 'person', [], false))
         var get_updates = function(form) {
             var add = []
             if (form.add_person.value != "|") {
@@ -4109,7 +4139,7 @@ function display_search(search, data) {
     var table = $("<table />")
 
     append_field(table, "person_text", "Person")
-        .append(get_ajax_multiple_select("person", 'person', data.person))
+        .append(get_ajax_multiple_select("person", 'person', data.person, false))
 
     append_field(table, "person_none", "Person none")
         .append(get_input_checkbox("person_none", data.person_none))
@@ -4124,7 +4154,7 @@ function display_search(search, data) {
         .append(get_input_checkbox("place_none", data.place_none))
 
     append_field(table, "album_text", "Album")
-        .append(get_ajax_multiple_select("album", 'album', data.album))
+        .append(get_ajax_multiple_select("album", 'album', data.album, false))
 
     append_field(table, "album_descendants", "Album descendants")
         .append(get_input_checkbox("album_descendants", data.album_descendants))
@@ -4133,7 +4163,7 @@ function display_search(search, data) {
         .append(get_input_checkbox("album_none", data.album_none))
 
     append_field(table, "category_text", "Category")
-        .append(get_ajax_multiple_select("category", 'category', data.category))
+        .append(get_ajax_multiple_select("category", 'category', data.category, false))
 
     append_field(table, "category_descendants", "Category descendants")
         .append(get_input_checkbox("category_descendants", data.category_none))
