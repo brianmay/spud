@@ -24,12 +24,10 @@ import django.conf
 import django.contrib.auth
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
 #from django.core.urlresolvers import reverse
 from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
 from django.db.models import Q
-from django.template import RequestContext, loader, TemplateDoesNotExist
 
 
 def _decode_int(string):
@@ -585,23 +583,19 @@ def check_errors(func):
         try:
             return func(request, *args, **kwargs)
         except HttpBadRequest, e:
-            try:
-                template = loader.get_template("400.html")
-            except TemplateDoesNotExist:
-                return HttpResponseBadRequest('<h1>Bad Request</h1>')
-            return HttpResponseBadRequest(
-                template.render(RequestContext(request, {
-                    'error': unicode(e)
-                })))
+            resp = {
+                'type': 'error',
+                'message': "Bad request: " + unicode(e),
+                'session': _get_session(request),
+            }
+            return HttpResponse(json.dumps(resp), mimetype="application/json")
         except HttpForbidden, e:
-            try:
-                template = loader.get_template("403.html")
-            except TemplateDoesNotExist:
-                return HttpResponseForbidden('<h1>Forbidden</h1>')
-            return HttpResponseForbidden(
-                template.render(RequestContext(request, {
-                    'error': unicode(e)
-                })))
+            resp = {
+                'type': 'error',
+                'message': "Access Forbidden: " + unicode(e),
+                'session': _get_session(request),
+            }
+            return HttpResponse(json.dumps(resp), mimetype="application/json")
     return wrapper
 
 
@@ -620,11 +614,11 @@ def login(request):
     if user is not None:
         if user.is_active:
             django.contrib.auth.login(request, user)
-            resp = {'status': 'success'}
+            resp = {'type': 'login'}
         else:
-            resp = {'status': 'account_disabled'}
+            raise HttpForbidden("Account is disabled")
     else:
-        resp = {'status': 'invalid_login'}
+        raise HttpBadRequest("Invalid login")
     resp['session'] = _get_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -634,7 +628,7 @@ def logout(request):
     if request.method != "POST":
         raise HttpBadRequest("Only POST is supported")
     django.contrib.auth.logout(request)
-    resp = {'status': 'success'}
+    resp = {'type': 'logout'}
     resp['session'] = _get_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -642,6 +636,7 @@ def logout(request):
 def photo(request, photo_id):
     object = get_object_or_404(spud.models.photo, pk=photo_id)
     resp = {
+        'type': 'photo_get',
         'photo': _get_photo_detail(request.user, object),
         'session': _get_session(request),
     }
@@ -684,9 +679,9 @@ def album_delete(request, album_id):
 
     if len(errors) == 0:
         album.delete()
-        resp['status'] = 'success'
+        resp['type'] = 'album_delete'
     else:
-        resp['status'] = 'errors'
+        resp['type'] = 'errors'
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -732,6 +727,7 @@ def album_finish(request, album):
             album.save()
 
     resp = {
+        'type': 'album_get',
         'album': _get_album_detail(request.user, album),
         'session': _get_session(request),
     }
@@ -774,9 +770,9 @@ def category_delete(request, category_id):
 
     if len(errors) == 0:
         category.delete()
-        resp['status'] = 'success'
+        resp['type'] = 'category_delete'
     else:
-        resp['status'] = 'errors'
+        resp['type'] = 'errors'
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -822,6 +818,7 @@ def category_finish(request, category):
             category.save()
 
     resp = {
+        'type': 'category_get',
         'category': _get_category_detail(request.user, category),
         'session': _get_session(request),
     }
@@ -864,9 +861,9 @@ def place_delete(request, place_id):
 
     if len(errors) == 0:
         place.delete()
-        resp['status'] = 'success'
+        resp['type'] = 'place_delete'
     else:
-        resp['status'] = 'errors'
+        resp['type'] = 'errors'
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -927,6 +924,7 @@ def place_finish(request, place):
             place.save()
 
     resp = {
+        'type': 'place_get',
         'place': _get_place_detail(request.user, place),
         'session': _get_session(request),
     }
@@ -947,6 +945,7 @@ def person_search(request):
         else:
             raise HttpBadRequest("Unknown key %s" % (key))
 
+    resp['type'] = 'person_search'
     resp['can_add'] = request.user.has_perm('spud.add_person')
     resp['session'] = _get_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -979,6 +978,7 @@ def person_search_results(request):
     number_returned = len(person_list)
 
     resp = {
+        'type': 'person_search_results',
         'persons': [_get_person(request.user, p) for p in person_list],
         'number_results': number_results,
         'first': first,
@@ -1026,9 +1026,9 @@ def person_delete(request, person_id):
 
     if len(errors) == 0:
         person.delete()
-        resp['status'] = 'success'
+        resp['type'] = 'person_delete'
     else:
-        resp['status'] = 'errors'
+        resp['type'] = 'errors'
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1156,6 +1156,7 @@ def person_finish(request, person):
             person.save()
 
     resp = {
+        'type': 'person_get',
         'person': _get_person_detail(request.user, person),
         'session': _get_session(request),
     }
@@ -1208,9 +1209,9 @@ def photo_relation_delete(request, photo_relation_id):
 
     if len(errors) == 0:
         photo_relation.delete()
-        resp['status'] = 'success'
+        resp['type'] = 'photo_relation_delete'
     else:
-        resp['status'] = 'errors'
+        resp['type'] = 'errors'
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1252,6 +1253,7 @@ def photo_relation_finish(request, photo_relation):
             photo_relation.save()
 
     resp = {
+        'type': 'photo_relation_get',
         'photo_relation': _get_photo_relation_detail(request.user, photo_relation),
         'session': _get_session(request),
     }
@@ -1535,6 +1537,7 @@ def search(request):
 #        else:
 #            raise HttpBadRequest("Unknown key %s" % (key))
 
+    resp['type'] = 'search'
     resp['session'] = _get_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1560,6 +1563,7 @@ def search_results(request):
     number_returned = len(photos)
 
     resp = {
+        'type': 'search_results',
         'criteria': criteria,
         'photos': [_get_photo(request.user, p) for p in photos],
         'number_results': number_results,
@@ -1827,6 +1831,7 @@ def search_change(request):
             del values
 
     resp = {
+        'type': 'search_change',
         'criteria': criteria,
         'number_results': number_results,
         'session': _get_session(request),
@@ -1848,6 +1853,7 @@ def search_item(request, number):
         raise HttpBadRequest("Result %d does not exist" % (number))
 
     resp = {
+        'type': 'search_item',
         'criteria': criteria,
         'photo': _get_photo_detail(request.user, photo),
         'number_results': number_results,
@@ -1858,6 +1864,7 @@ def search_item(request, number):
 
 def settings(request):
     resp = {
+        'type': 'settings',
         'list_sizes': django.conf.settings.LIST_SIZES,
         'view_sizes': django.conf.settings.VIEW_SIZES,
         'click_sizes': django.conf.settings.CLICK_SIZES,

@@ -1,6 +1,6 @@
 $.widget('ui.myselectable', $.ui.selectable, {
     _mouseStart: function(event) {
-        if (event.metaKey || event.ctrlKey || event.shiftKey) {
+        if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
             this._super( event );
         }
     },
@@ -284,116 +284,135 @@ function settings_url(dt) {
 // * AJAX LOADERS *
 // ****************
 
-function load_login(username, password, success, error) {
-    $.ajax({
-        url: '/a/login/',
-        type: "POST",
+function ajax(settings, success) {
+    display_loading()
+
+    settings = jQuery.extend({
         dataType : 'json',
         cache: false,
+    }, settings)
+
+    success = settings.success
+    delete settings.success
+
+    $.ajax(settings)
+        .done(
+            function(data, textStatus, jqXHR) {
+                update_session(data.session)
+                hide_loading()
+                if (data.type == "error") {
+                    display_error(data)
+                } else {
+                    success(data)
+                }
+            }
+        )
+        .fail(
+            function(jqXHR, textStatus, errorThrown) {
+                hide_loading()
+                display_error(textStatus + " " + textStatus)
+            }
+        )
+}
+
+
+$.ajaxSetup({
+    crossDomain: false, // obviates need for sameOrigin test
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type)) {
+            xhr.setRequestHeader("X-CSRFToken", $.jCookie("csrftoken"));
+        }
+    }
+});
+
+
+function load_login(username, password, success) {
+    ajax({
+        url: '/a/login/',
+        type: "POST",
+        success: success,
         data: {
             username: username,
             password: password,
         },
-        success: success,
-        error: error,
     })
 }
 
-function load_logout(success, error) {
-    $.ajax({
+function load_logout(success) {
+    ajax({
         url: '/a/logout/',
         type: "POST",
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
     })
 }
 
-function load_photo(photo_id, success, error) {
-    $.ajax({
+function load_photo(photo_id, success) {
+    ajax({
         url: '/a/photo/'+photo_id+'/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
     })
 }
 
 
-function load_album(album_id, success, error) {
-    $.ajax({
+function load_album(album_id, success) {
+    ajax({
         url: '/a/album/'+album_id+'/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
     })
 }
 
 
-function load_change_album(album_id, updates, success, error) {
+function load_change_album(album_id, updates, success) {
     var url = '/a/album/add/'
     if (album_id != null) {
         url = '/a/album/'+album_id+'/'
     }
-    $.ajax({
+    ajax({
         url: url,
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_delete_album(album_id, success, error) {
-    $.ajax({
+function load_delete_album(album_id, success) {
+    ajax({
         url: '/a/album/'+album_id+'/delete/',
         dataType : 'json',
         cache: false,
         success: success,
-        error: error,
         type: "POST",
     })
 }
 
 
-function load_category(category_id, success, error) {
-    $.ajax({
+function load_category(category_id, success) {
+    ajax({
         url: '/a/category/'+category_id+'/',
-        dataType : 'json',
-        cache: false,
         success: success,
         error: error,
     })
 }
 
 
-function load_change_category(category_id, updates, success, error) {
+function load_change_category(category_id, updates, success) {
     var url = '/a/category/add/'
     if (category_id != null) {
         url = '/a/category/'+category_id+'/'
     }
-    $.ajax({
+    ajax({
         url: url,
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_delete_category(category_id, success, error) {
-    $.ajax({
+function load_delete_category(category_id, success) {
+    ajax({
         url: '/a/category/'+category_id+'/delete/',
-        dataType : 'json',
-        cache: false,
         success: success,
         error: error,
         type: "POST",
@@ -401,60 +420,47 @@ function load_delete_category(category_id, success, error) {
 }
 
 
-function load_place(place_id, success, error) {
-    $.ajax({
+function load_place(place_id, success) {
+    ajax({
         url: '/a/place/'+place_id+'/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
     })
 }
 
 
-function load_change_place(place_id, updates, success, error) {
+function load_change_place(place_id, updates, success) {
     var url = '/a/place/add/'
     if (place_id != null) {
         url = '/a/place/'+place_id+'/'
     }
-    $.ajax({
+    ajax({
         url: url,
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_delete_place(place_id, success, error) {
-    $.ajax({
+function load_delete_place(place_id, success) {
+    ajax({
         url: '/a/place/'+place_id+'/delete/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
     })
 }
 
 
-function load_person_search(search, success, error) {
-    $.ajax({
+function load_person_search(search, success) {
+    ajax({
         url: '/a/person/',
-        dataType : 'json',
-        cache: false,
         data: search.params,
         success: success,
-        error: error,
     })
-    return
 }
 
 
-function load_person_search_results(search, page, success, error) {
+function load_person_search_results(search, page, success) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -463,111 +469,87 @@ function load_person_search_results(search, page, success, error) {
     }
     var params = jQuery.extend({}, search.params, add_params)
 
-    $.ajax({
+    ajax({
         url: '/a/person/results/',
-        dataType : 'json',
-        cache: false,
         data: params,
         success: success,
-        error: error,
     });
 }
 
 
-function load_person(place_id, success, error) {
-    $.ajax({
+function load_person(place_id, success) {
+    ajax({
         url: '/a/person/'+place_id+'/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
     })
 }
 
 
-function load_change_person(person_id, updates, success, error) {
+function load_change_person(person_id, updates, success) {
     var url = '/a/person/add/'
     if (person_id != null) {
         url = '/a/person/'+person_id+'/'
     }
-    $.ajax({
+    ajax({
         url: url,
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_delete_person(person_id, success, error) {
-    $.ajax({
+function load_delete_person(person_id, success) {
+    ajax({
         url: '/a/person/'+person_id+'/delete/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
     })
 }
 
 
-function load_photo_relation(place_id, success, error) {
-    $.ajax({
+function load_photo_relation(place_id, success) {
+    ajax({
         url: '/a/relation/'+place_id+'/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
     })
 }
 
 
-function load_change_photo_relation(photo_relation_id, updates, success, error) {
+function load_change_photo_relation(photo_relation_id, updates, success) {
     var url = '/a/relation/add/'
     if (photo_relation_id != null) {
         url = '/a/relation/'+photo_relation_id+'/'
     }
-    $.ajax({
+    ajax({
         url: url,
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_delete_photo_relation(photo_relation_id, success, error) {
-    $.ajax({
+function load_delete_photo_relation(photo_relation_id, success) {
+    ajax({
         url: '/a/relation/'+photo_relation_id+'/delete/',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
         type: "POST",
     })
 }
 
 
-function load_search(search, success, error) {
-    $.ajax({
+function load_search(search, success) {
+    ajax({
         url: '/a/search/',
-        dataType : 'json',
-        cache: false,
         data: search.params,
         success: success,
-        error: error,
     })
     return
 }
 
 
-function load_search_results(search, page, success, error) {
+function load_search_results(search, page, success) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -576,52 +558,40 @@ function load_search_results(search, page, success, error) {
     }
     var params = jQuery.extend({}, search.params, add_params)
 
-    $.ajax({
+    ajax({
         url: '/a/search/results/',
-        dataType : 'json',
-        cache: false,
         data: params,
         success: success,
-        error: error,
     });
 }
 
 
-function change_search(search, updates, success, error) {
+function change_search(search, updates, success) {
     var params = jQuery.extend({}, search.params, updates)
 
-    $.ajax({
+    ajax({
         url: '/a/search/change/',
-        dataType : 'json',
-        cache: false,
         data: params,
         success: success,
-        error: error,
         type: "POST",
     });
 }
 
 
-function load_search_photo(search, n, success, error) {
-    $.ajax({
+function load_search_photo(search, n, success) {
+    ajax({
         url: '/a/search/'+n+'/',
-        dataType : 'json',
-        cache: false,
         data: search.params,
         success: success,
-        error: error,
     })
     return
 }
 
 
-function load_settings(success, error) {
-    $.ajax({
+function load_settings(success) {
+    ajax({
         url: '/a/settings',
-        dataType : 'json',
-        cache: false,
         success: success,
-        error: error,
     })
 }
 
@@ -1256,7 +1226,7 @@ window.onpopstate = function(event) {
         } else if (state.type == 'settings') {
             do_settings(false)
         } else {
-            alert("We don't understand our state")
+            display_error("We don't understand our state")
         }
     }
 };
@@ -1290,16 +1260,6 @@ function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
-
-$.ajaxSetup({
-    crossDomain: false, // obviates need for sameOrigin test
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type)) {
-            xhr.setRequestHeader("X-CSRFToken", $.jCookie("csrftoken"));
-        }
-    }
-});
-
 
 // ****************
 // * HTML helpers *
@@ -1352,14 +1312,28 @@ function display_loading() {
 }
 
 
-function display_error() {
+function display_error(data) {
     var message = $("<div></div>")
 
     $("<img/>")
         .attr('src', media_url("img/error.png"))
         .appendTo(message)
 
-    message.append("<br/>An error occured.<br/>")
+    if (typeof(data) === 'string' || data instanceof String) {
+        $("<p></p>")
+            .text(data)
+            .appendTo(message)
+    } else if (data instanceof Array) {
+        $.each(data, function(j, msg) {
+            $("<p></p>")
+                .text(msg)
+                .appendTo(message)
+        });
+    } else {
+        $("<p></p>")
+            .text(data.message)
+            .appendTo(message)
+    }
 
     $("<input type='button' value='Acknowledge' />")
         .click(function() { $.unblockUI() })
@@ -1369,7 +1343,7 @@ function display_error() {
 }
 
 
-function hide_status()
+function hide_loading()
 {
     $.unblockUI()
 }
@@ -1401,7 +1375,7 @@ function replace_links() {
         .appendTo(ul)
 
     $("<li>")
-        .on("click", function() { load_person_search({}, true); return false; })
+        .on("click", function() { do_person_search({}, true); return false; })
         .append(person_search_results_a({}, 0))
         .appendTo(ul)
 
@@ -1482,13 +1456,18 @@ function update_session(session) {
     ut.append("Welcome, ")
 
     if (session.is_authenticated) {
-        ut.append("<strong>" + escapeHTML(session.first_name + " " + session.last_name) + "</strong> ")
+        $("<strong></strong")
+            .text(session.first_name + " " + session.last_name)
+            .appendTo(ut)
+
+        ut.append(" / ")
         ut.append(logout_a())
     } else {
-        ut.append("<strong>" + escapeHTML("guest") + "</strong> ")
+        ut.append("<strong>guest</strong>")
+        ut.append(" / ")
         ut.append(login_a())
     }
-    ut.append(" ")
+    ut.append(" / ")
     ut.append(settings_a())
 }
 
@@ -2206,39 +2185,48 @@ function photo_change_keyboard(photo, search_params, number_results) {
 
 function photo_change_keyboard_event(ev, photo, search_params, number_results) {
     var key = String.fromCharCode(ev.which)
-    if ($("#dialog").length == 0) {
-        var dialog = $("<div id='dialog'></div>")
-            .attr('title', "Choose operation")
 
-        var ac = $('<input id="project" />')
-            .quickautocomplete({
-          minLength: 0,
-          source: operations,
-          select: function( event, ui ) {
-            dialog.dialog( "close" )
-            ui.item.fn(photo, search_params, number_results)
-            return false;
-          }
-        })
+    if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey)
+        return true
+
+    if (key <'A' || key > 'Z')
+        return true
+
+    if ($("#dialog").length > 0)
+       return true
 
 
-        var f = $("<form method='get' />")
-            .append(ac)
+    var dialog = $("<div id='dialog'></div>")
+        .attr('title', "Choose operation")
 
-        dialog
-            .append("<p>" + escapeHTML(number_results) + " photos will be changed.</p>")
-            .append(f)
-            .dialog({
-                modal: true,
-                close: function( event, ui ) { $(this).dialog("destroy") },
-                buttons: {
-                    Cancel: function() {
-                        $( this ).dialog( "close" )
-                    },
+    var ac = $('<input id="project" />')
+        .quickautocomplete({
+      minLength: 0,
+      source: operations,
+      select: function( event, ui ) {
+        dialog.dialog( "close" )
+        ui.item.fn(photo, search_params, number_results)
+        return false;
+      }
+    })
+
+
+    var f = $("<form method='get' />")
+        .append(ac)
+
+    dialog
+        .append("<p>" + escapeHTML(number_results) + " photos will be changed.</p>")
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Cancel: function() {
+                    $( this ).dialog( "close" )
                 },
-            })
-    }
-    return true
+            },
+        })
+    return false
 }
 
 
@@ -2615,19 +2603,14 @@ function submit_change_photo_attribute(search_params, updates, dialog) {
         params: search_params
     }
 
-    display_loading()
     change_search(
-            search,
-            updates,
-            function(data) {
-                hide_status()
-                dialog.dialog("close")
-                reload_page()
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to update the photos")
-            })
+        search,
+        updates,
+        function(data) {
+            dialog.dialog("close")
+            reload_page()
+        }
+    )
 
     return false
 }
@@ -2824,37 +2807,31 @@ function submit_change_album(album, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
-    display_loading()
     load_change_album(
-            album.id,
-            updates,
-            function(data) {
-                hide_status()
-                dialog.dialog("close")
-                replace_links()
-                update_session(data.session)
-                if (window.history.state==null) {
-                    display_album(data.album)
-                    update_history(false, album_url(data.album), {
-                        type: 'display_album',
-                        album_id: data.album.id,
-                    });
-                } else if (album.id==null) {
-                    display_album(data.album)
-                    update_history(true, album_url(data.album), {
-                        type: 'display_album',
-                        album_id: data.album.id,
-                    });
-                } else if (window.history.state.type=='display_album' && window.history.state.album_id==data.album.id) {
-                    display_album(data.album)
-                } else {
-                    reload_page()
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to update the album")
-            })
+        album.id,
+        updates,
+        function(data) {
+            dialog.dialog("close")
+            replace_links()
+            if (window.history.state==null) {
+                display_album(data.album)
+                update_history(false, album_url(data.album), {
+                    type: 'display_album',
+                    album_id: data.album.id,
+                });
+            } else if (album.id==null) {
+                display_album(data.album)
+                update_history(true, album_url(data.album), {
+                    type: 'display_album',
+                    album_id: data.album.id,
+                });
+            } else if (window.history.state.type=='display_album' && window.history.state.album_id==data.album.id) {
+                display_album(data.album)
+            } else {
+                reload_page()
+            }
+        }
+    )
 
     return false
 }
@@ -2879,29 +2856,17 @@ function display_delete_album(album) {
 
 
 function submit_delete_album(album, dialog) {
-    display_loading()
+    dialog.dialog("close")
     load_delete_album(
-            album.id,
-            function(data) {
-                update_session(data.session)
-                if (data.status == 'success') {
-                    hide_status()
-                    dialog.dialog("close")
-                    window.history.go(-1)
-                } else if (data.status == 'errors') {
-                    hide_status()
-                    dialog.dialog("close")
-                    for (var i in data.errors) {
-                        alert(data.errors[i])
-                    }
-                } else {
-                    alert("Unknown error")
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to delete the album")
-            })
+        album.id,
+        function(data) {
+            if (data.type == 'errors') {
+                display_error(data.errors)
+            } else {
+                window.history.go(-1)
+            }
+        }
+    )
 
     return false
 }
@@ -3098,37 +3063,31 @@ function submit_change_category(category, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
-    display_loading()
     load_change_category(
-            category.id,
-            updates,
-            function(data) {
-                hide_status()
-                dialog.dialog("close")
-                replace_links()
-                update_session(data.session)
-                if (window.history.state==null) {
-                    display_category(data.category)
-                    update_history(false, category_url(data.category), {
-                        type: 'display_category',
-                        category_id: data.category.id,
-                    });
-                } else if (category.id==null) {
-                    display_category(data.category)
-                    update_history(true, category_url(data.category), {
-                        type: 'display_category',
-                        category_id: data.category.id,
-                    });
-                } else if (window.history.state.type=='display_category' && window.history.state.category_id==data.category.id) {
-                    display_category(data.category)
-                } else {
-                    reload_page()
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to update the category")
-            })
+        category.id,
+        updates,
+        function(data) {
+            dialog.dialog("close")
+            replace_links()
+            if (window.history.state==null) {
+                display_category(data.category)
+                update_history(false, category_url(data.category), {
+                    type: 'display_category',
+                    category_id: data.category.id,
+                });
+            } else if (category.id==null) {
+                display_category(data.category)
+                update_history(true, category_url(data.category), {
+                    type: 'display_category',
+                    category_id: data.category.id,
+                });
+            } else if (window.history.state.type=='display_category' && window.history.state.category_id==data.category.id) {
+                display_category(data.category)
+            } else {
+                reload_page()
+            }
+        }
+    )
 
     return false
 }
@@ -3153,29 +3112,17 @@ function display_delete_category(category) {
 
 
 function submit_delete_category(category, dialog) {
-    display_loading()
+    dialog.dialog("close")
     load_delete_category(
-            category.id,
-            function(data) {
-                update_session(data.session)
-                if (data.status == 'success') {
-                    hide_status()
-                    dialog.dialog("close")
-                    window.history.go(-1)
-                } else if (data.status == 'errors') {
-                    for (var i in data.errors) {
-                        alert(data.errors[i])
-                    }
-                    hide_status()
-                    dialog.dialog("close")
-                } else {
-                    alert("Unknown error")
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to delete the category")
-            })
+        category.id,
+        function(data) {
+            if (data.type == 'errors') {
+                display_error(data.errors)
+            } else {
+                window.history.go(-1)
+            }
+        }
+    )
 
     return false
 }
@@ -3422,37 +3369,31 @@ function submit_change_place(place, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
-    display_loading()
     load_change_place(
-            place.id,
-            updates,
-            function(data) {
-                hide_status()
-                dialog.dialog("close")
-                replace_links()
-                update_session(data.session)
-                if (window.history.state==null) {
-                    display_place(data.place)
-                    update_history(false, place_url(data.place), {
-                        type: 'display_place',
-                        place_id: data.place.id,
-                    });
-                } else if (place.id==null) {
-                    display_place(data.place)
-                    update_history(true, place_url(data.place), {
-                        type: 'display_place',
-                        place_id: data.place.id,
-                    });
-                } else if (window.history.state.type=='display_place' && window.history.state.place_id==data.place.id) {
-                    display_place(data.place)
-                } else {
-                    reload_page()
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to update the place")
-            })
+        place.id,
+        updates,
+        function(data) {
+            dialog.dialog("close")
+            replace_links()
+            if (window.history.state==null) {
+                display_place(data.place)
+                update_history(false, place_url(data.place), {
+                    type: 'display_place',
+                    place_id: data.place.id,
+                });
+            } else if (place.id==null) {
+                display_place(data.place)
+                update_history(true, place_url(data.place), {
+                    type: 'display_place',
+                    place_id: data.place.id,
+                });
+            } else if (window.history.state.type=='display_place' && window.history.state.place_id==data.place.id) {
+                display_place(data.place)
+            } else {
+                reload_page()
+            }
+        }
+    )
 
     return false
 }
@@ -3477,29 +3418,18 @@ function display_delete_place(place) {
 
 
 function submit_delete_place(place, dialog) {
-    display_loading()
+    dialog.dialog("close")
+
     load_delete_place(
-            place.id,
-            function(data) {
-                update_session(data.session)
-                if (data.status == 'success') {
-                    hide_status()
-                    dialog.dialog("close")
-                    window.history.go(-1)
-                } else if (data.status == 'errors') {
-                    for (var i in data.errors) {
-                        alert(data.errors[i])
-                    }
-                    hide_status()
-                    dialog.dialog("close")
-                } else {
-                    alert("Unknown error")
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to delete the place")
-            })
+        place.id,
+        function(data) {
+            if (data.type == 'errors') {
+                display_error(data.errors)
+            } else {
+                window.history.go(-1)
+            }
+        }
+    )
 
     return false
 }
@@ -3944,37 +3874,31 @@ function submit_change_person(person, dialog, form) {
         spouse: parse_form_string(form.spouse.value),
     }
 
-    display_loading()
     load_change_person(
-            person.id,
-            updates,
-            function(data) {
-                hide_status()
-                dialog.dialog("close")
-                replace_links()
-                update_session(data.session)
-                if (window.history.state==null) {
-                    display_person(data.person)
-                    update_history(false, person_url(data.person), {
-                        type: 'display_person',
-                        person_id: data.person.id,
-                    });
-                } else if (person.id==null) {
-                    display_person(data.person)
-                    update_history(true, person_url(data.person), {
-                        type: 'display_person',
-                        person_id: data.person.id,
-                    });
-                } else if (window.history.state.type=='display_person' && window.history.state.person_id==data.person.id) {
-                    display_person(data.person)
-                } else {
-                    reload_page()
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to update the person")
-            })
+        person.id,
+        updates,
+        function(data) {
+            dialog.dialog("close")
+            replace_links()
+            if (window.history.state==null) {
+                display_person(data.person)
+                update_history(false, person_url(data.person), {
+                    type: 'display_person',
+                    person_id: data.person.id,
+                });
+            } else if (person.id==null) {
+                display_person(data.person)
+                update_history(true, person_url(data.person), {
+                    type: 'display_person',
+                    person_id: data.person.id,
+                });
+            } else if (window.history.state.type=='display_person' && window.history.state.person_id==data.person.id) {
+                display_person(data.person)
+            } else {
+                reload_page()
+            }
+        }
+    )
 
     return false
 }
@@ -3999,29 +3923,17 @@ function display_delete_person(person) {
 
 
 function submit_delete_person(person, dialog) {
-    display_loading()
+    dialog.dialog("close")
     load_delete_person(
-            person.id,
-            function(data) {
-                update_session(data.session)
-                if (data.status == 'success') {
-                    hide_status()
-                    dialog.dialog("close")
-                    window.history.go(-1)
-                } else if (data.status == 'errors') {
-                    for (var i in data.errors) {
-                        alert(data.errors[i])
-                    }
-                    hide_status()
-                    dialog.dialog("close")
-                } else {
-                    alert("Unknown error")
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to delete the person")
-            })
+        person.id,
+        function(data) {
+            if (data.type == 'errors') {
+                display_error(data.errors)
+            } else {
+                window.history.go(-1)
+            }
+        }
+    )
 
     return false
 }
@@ -4088,19 +4000,14 @@ function submit_change_photo_relation(photo_relation, dialog, form) {
         photo_2: parse_form_string(form.photo_2.value),
     }
 
-    display_loading()
     load_change_photo_relation(
-            photo_relation.id,
-            updates,
-            function(data) {
-                hide_status()
-                dialog.dialog("close")
-                reload_page()
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to update the photo_relation")
-            })
+        photo_relation.id,
+        updates,
+        function(data) {
+            dialog.dialog("close")
+            reload_page()
+        }
+    )
 
     return false
 }
@@ -4128,29 +4035,17 @@ function display_delete_photo_relation(photo_relation) {
 
 
 function submit_delete_photo_relation(photo_relation, dialog) {
-    display_loading()
+    dialog.dialog("close")
     load_delete_photo_relation(
-            photo_relation.id,
-            function(data) {
-                update_session(data.session)
-                if (data.status == 'success') {
-                    hide_status()
-                    dialog.dialog("close")
-                    window.history.go(-1)
-                } else if (data.status == 'errors') {
-                    for (var i in data.errors) {
-                        alert(data.errors[i])
-                    }
-                    dialog.dialog("close")
-                    hide_status()
-                } else {
-                    alert("Unknown error")
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to delete the photo_relation")
-            })
+        photo_relation.id,
+        function(data) {
+            if (data.type == 'errors') {
+                display_error(data.errors)
+            } else {
+                window.history.go(-1)
+            }
+        }
+    )
 
     return false
 }
@@ -4741,34 +4636,18 @@ function display_login(push_history) {
 
 
 function submit_login(dialog, form) {
-    display_loading()
     load_login(
-            form.username.value,
-            form.password.value,
-            function(data) {
-                if (data.status == 'success') {
-                    hide_status()
-                    dialog.dialog("close")
-                    if (window.history.state==null) {
-                        do_root(false)
-                    } else {
-                        reload_page()
-                    }
-                } else if (data.status == 'account_disabled') {
-                    hide_status()
-                    alert("Account is disabled")
-                } else if (data.status == 'invalid_login') {
-                    hide_status()
-                    alert("Invalid login")
-                } else {
-                    hide_status()
-                    alert("Unknown error")
-                }
-            },
-            function() {
-                hide_status()
-                alert("An error occured trying to login")
-            })
+        form.username.value,
+        form.password.value,
+        function(data) {
+            dialog.dialog("close")
+            if (window.history.state==null) {
+                do_root(false)
+            } else {
+                reload_page()
+            }
+        }
+    )
 
     return false
 }
@@ -4795,64 +4674,52 @@ function do_login() {
 
 
 function do_logout() {
-    display_loading()
     load_logout(
         function(data) {
-        if (data.status == 'success') {
             if (window.history.state==null) {
                 do_root(false)
             } else {
                 reload_page()
             }
-        } else {
-            display_error();
-            alert("Unknown error")
         }
-    },
-    function() {
-        display_error();
-        alert("An error occured trying to do_logout")
-    })
+    )
 }
 
 
 function do_photo(photo_id, push_history) {
-    display_loading()
-    load_photo(photo_id, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history, photo_url(data.photo), {
-            type: 'display_photo',
-            photo_id: data.photo.id,
-        });
-        display_photo(data.photo)
-    }, display_error)
+    load_photo(photo_id,
+        function(data) {
+            replace_links()
+            update_history(push_history, photo_url(data.photo), {
+                type: 'display_photo',
+                photo_id: data.photo.id,
+            });
+            display_photo(data.photo)
+        }
+    )
 }
 
 
 function do_album(album_id, push_history) {
-    display_loading()
-    load_album(album_id, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history, album_url(data.album), {
-            type: 'display_album',
-            album_id: data.album.id,
-        });
-        display_album(data.album)
-    }, display_error)
+    load_album(album_id,
+        function(data) {
+            replace_links()
+            update_history(push_history, album_url(data.album), {
+                type: 'display_album',
+                album_id: data.album.id,
+            });
+            display_album(data.album)
+        }
+    )
 }
 
 
 function do_change_album(album_id, push_history) {
-    display_loading()
-    load_album(album_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_change_album(data.album)
-    }, display_error)
+    load_album(album_id,
+        function(data) {
+            display_change_album(data.album)
+        }
+    )
 }
 
 
@@ -4872,37 +4739,34 @@ function do_add_album(parent_album, push_history) {
 
 
 function do_delete_album(album_id, push_history) {
-    display_loading()
-    load_album(album_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_delete_album(data.album)
-    }, display_error)
+    load_album(album_id,
+        function(data) {
+            display_delete_album(data.album)
+        }
+    )
 }
 
 
 function do_category(category_id, push_history) {
-    display_loading()
-    load_category(category_id, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history, category_url(data.category), {
-            type: 'display_category',
-            category_id: data.category.id,
-        });
-        display_category(data.category)
-    }, display_error)
+    load_category(category_id,
+        function(data) {
+            replace_links()
+            update_history(push_history, category_url(data.category), {
+                type: 'display_category',
+                category_id: data.category.id,
+            });
+            display_category(data.category)
+        }
+    )
 }
 
 
 function do_change_category(category_id, push_history) {
-    display_loading()
-    load_category(category_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_change_category(data.category)
-    }, display_error)
+    load_category(category_id,
+        function(data) {
+            display_change_category(data.category)
+        }
+    )
 }
 
 
@@ -4922,38 +4786,34 @@ function do_add_category(parent_category, push_history) {
 
 
 function do_delete_category(category_id, push_history) {
-    display_loading()
-    load_category(category_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_category(data.category)
-        display_delete_category(data.category)
-    }, display_error)
+    load_category(category_id,
+        function(data) {
+            display_delete_category(data.category)
+        }
+    )
 }
 
 
 function do_place(place_id, push_history) {
-    display_loading()
-    load_place(place_id, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history, place_url(data.place), {
-            type: 'display_place',
-            place_id: data.place.id,
-        });
-        display_place(data.place)
-    }, display_error)
+    load_place(place_id,
+        function(data) {
+            replace_links()
+            update_history(push_history, place_url(data.place), {
+                type: 'display_place',
+                place_id: data.place.id,
+            });
+            display_place(data.place)
+        }
+    )
 }
 
 
 function do_change_place(place_id, push_history) {
-    display_loading()
-    load_place(place_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_change_place(data.place)
-    }, display_error)
+    load_place(place_id,
+        function(data) {
+            display_change_place(data.place)
+        }
+    )
 }
 
 
@@ -4977,13 +4837,11 @@ function do_add_place(parent_place, push_history) {
 
 
 function do_delete_place(place_id, push_history) {
-    display_loading()
-    load_place(place_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_place(data.place)
-        display_delete_place(data.place)
-    }, display_error)
+    load_place(place_id,
+        function(data) {
+            display_delete_place(data.place)
+        }
+    )
 }
 
 
@@ -4992,12 +4850,11 @@ function do_person_search(search, push_history) {
         search.params = {}
     }
 
-    display_loading()
-    load_person_search(search, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_person_search(search, data)
-    }, display_error)
+    load_person_search(search,
+        function(data) {
+            display_person_search(search, data)
+        }
+    )
 }
 
 
@@ -5005,44 +4862,41 @@ function do_person_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().persons_per_page
 
-    display_loading()
-    load_person_search_results(search, page, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history,
-            person_search_results_url(search, page), {
-                type: 'display_person_search_results',
-                search: search,
-                page: page,
-            });
-        display_person_search_results(search, data)
-    }, display_error)
+    load_person_search_results(search, page,
+        function(data) {
+            replace_links()
+            update_history(push_history,
+                person_search_results_url(search, page), {
+                    type: 'display_person_search_results',
+                    search: search,
+                    page: page,
+                });
+            display_person_search_results(search, data)
+        }
+    )
 }
 
 
 function do_person(person_id, push_history) {
-    display_loading()
-    load_person(person_id, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history, person_url(data.person), {
-            type: 'display_person',
-            person_id: data.person.id,
-        });
-        display_person(data.person)
-    }, display_error)
+    load_person(person_id,
+        function(data) {
+            replace_links()
+            update_history(push_history, person_url(data.person), {
+                type: 'display_person',
+                person_id: data.person.id,
+            });
+            display_person(data.person)
+        }
+    )
 }
 
 
 function do_change_person(person_id, push_history) {
-    display_loading()
-    load_person(person_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_change_person(data.person)
-    }, display_error)
+    load_person(person_id,
+        function(data) {
+            display_change_person(data.person)
+        }
+    )
 }
 
 
@@ -5079,23 +4933,20 @@ function do_add_person(push_history) {
 
 
 function do_delete_person(person_id, push_history) {
-    display_loading()
-    load_person(person_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_person(data.person)
-        display_delete_person(data.person)
-    }, display_error)
+    load_person(person_id,
+        function(data) {
+            display_delete_person(data.person)
+        }
+    )
 }
 
 
 function do_change_photo_relation(photo_relation_id, push_history) {
-    display_loading()
-    load_photo_relation(photo_relation_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_change_photo_relation(data.photo_relation)
-    }, display_error)
+    load_photo_relation(photo_relation_id,
+        function(data) {
+            display_change_photo_relation(data.photo_relation)
+        }
+    )
 }
 
 
@@ -5112,12 +4963,11 @@ function do_add_photo_relation(photo, push_history) {
 
 
 function do_delete_photo_relation(photo_relation_id, push_history) {
-    display_loading()
-    load_photo_relation(photo_relation_id, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_delete_photo_relation(data.photo_relation)
-    }, display_error)
+    load_photo_relation(photo_relation_id,
+        function(data) {
+            display_delete_photo_relation(data.photo_relation)
+        }
+    )
 }
 
 
@@ -5126,12 +4976,11 @@ function do_search(search, push_history) {
         search.params = {}
     }
 
-    display_loading()
-    load_search(search, function(data) {
-        hide_status()
-        update_session(data.session)
-        display_search(search, data)
-    }, display_error)
+    load_search(search,
+        function(data) {
+            display_search(search, data)
+        }
+    )
 }
 
 
@@ -5139,47 +4988,44 @@ function do_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
-    display_loading()
-    load_search_results(search, page, function(data) {
-        hide_status()
-        replace_links()
-        update_session(data.session)
-        update_history(push_history,
-            search_results_url(search, page), {
-                type: 'display_search_results',
-                search: search,
-                page: page,
-            });
-        display_search_results(search, data)
-    }, display_error)
+    load_search_results(search, page,
+        function(data) {
+            replace_links()
+            update_history(push_history,
+                search_results_url(search, page), {
+                    type: 'display_search_results',
+                    search: search,
+                    page: page,
+                });
+            display_search_results(search, data)
+        }
+    )
 }
 
 
 function do_search_photo(search, n, photo_id, push_history) {
-    display_loading()
-    load_search_photo(search, n, function(data) {
-        if (photo_id == null || photo_id == 0 || data.photo.id == photo_id) {
-            hide_status()
-            replace_links()
-            update_session(data.session)
-            update_history(push_history, search_photo_url(search, n, data.photo), {
-                type: 'display_search_photo',
-                search: search,
-                n: n,
-                photo_id: photo_id,
-            });
-            display_search_photo(search, data, n)
-        } else {
-            do_photo(photo_id, push_history)
+    load_search_photo(search, n,
+        function(data) {
+            if (photo_id == null || photo_id == 0 || data.photo.id == photo_id) {
+                replace_links()
+                update_history(push_history, search_photo_url(search, n, data.photo), {
+                    type: 'display_search_photo',
+                    search: search,
+                    n: n,
+                    photo_id: photo_id,
+                });
+                display_search_photo(search, data, n)
+            } else {
+                do_photo(photo_id, push_history)
+            }
         }
-    }, display_error)
+    )
 }
 
 function do_settings(push_history) {
-    display_loading()
-    load_settings(function(data) {
-        hide_status()
-        update_session(data.session)
-        display_settings(data)
-    }, display_error)
+    load_settings(
+        function(data) {
+            display_settings(data)
+        }
+    )
 }
