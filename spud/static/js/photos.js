@@ -1964,6 +1964,7 @@ function get_ajax_multiple_select(id, type, values, sorted, onadded, onkilled) {
 function reset_display() {
     $("#content-related").removeClass("overlapped")
     $("body").css("overflow", "auto");
+    $(window).off("resize")
 }
 
 function display_root() {
@@ -2019,6 +2020,7 @@ function display_detail_photo(photo, search, number_results, n) {
             .attr('alt', photo.title)
             .appendTo(pdp)
         resize_photo(img, image.width, image.height, false)
+        $(window).on("resize", function() { resize_photo(img, image.width, image.height, false) })
     }
 
     if (photo.title || can_change) {
@@ -2196,18 +2198,20 @@ function display_slideshow_photo(photo, search, number_results, n) {
             .attr("height", image.height)
             .appendTo(photodiv)
         resize_photo(img, image.width, image.height, true)
+        $(window).on("resize", function() {
+            resize_photo(img, image.width, image.height, true) })
         div.append(photodiv)
     }
 
     if (search != null) {
         if (n > 1) {
-            $("<a class='prevslide'></a>")
+            $("<a class='prevslide' accesskey='p'></a>")
                 .on("click", function() { do_search_photo(search, n-1, null, true); return false; })
                 .appendTo(div)
         }
 
         if (n < number_results-1) {
-            $("<a class='nextslide'></a>")
+            $("<a class='nextslide' accesskey='n'></a>")
                 .on("click", function() { do_search_photo(search, n+1, null, true); return false; })
                 .appendTo(div)
         }
