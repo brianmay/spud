@@ -4959,6 +4959,9 @@ function do_search_results(search, page, push_history) {
 
 
 function do_search_photo(search, n, photo_id, push_history) {
+    if (search.results_per_page == null)
+        search.results_per_page = get_settings().photos_per_page
+
     load_search_photo(search, n,
         function(data) {
             if (photo_id == null || photo_id == 0 || data.photo.id == photo_id) {
