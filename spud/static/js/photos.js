@@ -53,7 +53,7 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
     },
 
     _create: function(){
-        this.id = this.element.id
+        this.id = this.element.attr("id")
         var name = this.element.attr("name")
 
         this.input = $('<input type="hidden"/>')
