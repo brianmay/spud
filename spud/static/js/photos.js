@@ -62,13 +62,8 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
         this.deck = $('<div class="results_on_deck"></div>')
 
         this.text = this.element
-            .addClass("ui-autocomplete-input")
             .removeAttr("name")
             .attr("type", "text")
-            .attr("autocomplete", "off")
-            .attr("role", "textbox")
-            .attr("aria-autocomplete", "list")
-            .attr("aria-haspopup", "true")
             .wrap("<span></span>")
 
         this.uidiv = this.text
