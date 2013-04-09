@@ -1339,7 +1339,7 @@ function display_slideshow_photo(photo, search, number_results, n) {
 
     var photodiv = $("<div class='photo'></div>")
 
-    $("<img />")
+    var img = $("<img />")
         .image({ photo: photo, size: get_settings().click_size })
         .image('resize', true)
         .appendTo(photodiv)
