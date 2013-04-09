@@ -321,14 +321,14 @@ $.widget('ui.spud_menu', {
             .on("click", function(ev) { a.trigger('click'); })
             .appendTo(this.element)
         return this
-    }
+    },
 })
 
 $.widget('ui.main_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         this.load()
-    }
+    },
 
     load: function() {
         this.element.empty()
@@ -337,14 +337,14 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
         this.add_item(place_a({id: 1}, "Places"))
         this.add_item(person_search_results_a({}, 0))
         this.add_item(search_results_a({}, 0))
-    }
+    },
 })
 
 $.widget('ui.selection_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
-        this.load(options.selection)
-    }
+        this.load(this.options.selection)
+    },
 
     load: function(selection) {
         this.element.empty()
