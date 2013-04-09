@@ -1337,25 +1337,16 @@ function display_slideshow_photo(photo, search, number_results, n) {
         can_change = true
     }
 
-    var image = null
-    var size = get_settings().click_size
-    var style = get_photo_style(photo)
-    var image = photo.thumb[size]
-    if (image != null) {
-        var photodiv = $("<div class='photo'></div>")
+    var photodiv = $("<div class='photo'></div>")
 
-        var img = $("<img />")
-            .attr("class", style)
-            .attr("src", image.url)
-            .attr("alt", photo.title)
-            .attr("width", image.width)
-            .attr("height", image.height)
-            .appendTo(photodiv)
-        resize_photo(img, image.width, image.height, true)
-        $(window).on("resize", function() {
-            resize_photo(img, image.width, image.height, true) })
-        div.append(photodiv)
-    }
+    $("<img />")
+        .image({ photo: photo, size: get_settings().click_size })
+        .image('resize', true)
+        .appendTo(photodiv)
+
+    $(window).off("resize")
+    $(window).on("resize", function() { img.image('resize', true) })
+    div.append(photodiv)
 
     if (search != null) {
         if (n > 1) {

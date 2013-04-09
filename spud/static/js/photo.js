@@ -38,11 +38,6 @@ function get_photo_style(data) {
 }
 
 
-function resize_photo(img, width, height, enlarge) {
-    // delete me
-}
-
-
 $.widget('ui.image', {
     _create: function() {
         this.load(this.options.photo, this.options.size)
