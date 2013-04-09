@@ -828,55 +828,6 @@ function append_persons(tag, persons) {
 }
 
 
-function append_albums(tag, albums) {
-    if (albums.length == 0) {
-        return tag
-    }
-    var ul = $("<ul/>")
-    for (var i in albums) {
-        var a = albums[i]
-        $("<li/>")
-            .append(album_a(a))
-            .appendTo(ul)
-    }
-    tag.append(ul)
-    return tag
-}
-
-
-function append_categorys(tag, categorys) {
-    if (categorys.length == 0) {
-        return tag
-    }
-    var ul = $("<ul/>")
-    for (var i in categorys) {
-        var a = categorys[i]
-        $("<li/>")
-            .append(category_a(a))
-            .appendTo(ul)
-    }
-    tag.append(ul)
-    return tag
-}
-
-function append_related(tag, related, can_change) {
-    if (related.length == 0) {
-        return tag
-    }
-    var ul = $("<ul/>")
-    for (var i in related) {
-        var r = related[i]
-        $("<li/>")
-            .append(photo_a(r.photo, r.title))
-            .appendTo(ul)
-            .conditional_append(can_change, change_photo_relation_a({ id: r.id }, "[edit]"))
-            .conditional_append(can_change, delete_photo_relation_a({ id: r.id }, "[del]"))
-    }
-    tag.append(ul)
-    return tag
-}
-
-
 function dt_dd(dl, title, value) {
     dl.append($("<dt/>").html(escapeHTML(title)))
     dd = $("<dd/>").html(escapeHTML(value))
