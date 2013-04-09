@@ -189,6 +189,7 @@ $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
     },
 })
 
+
 $.widget('ui.ajaxautocompletesorted',  $.ui.ajaxautocompletemultiple, {
     _create: function(){
         this._super()
