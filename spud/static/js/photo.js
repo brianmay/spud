@@ -39,36 +39,79 @@ function get_photo_style(data) {
 
 
 function resize_photo(img, width, height, enlarge) {
-    var aspect = width/height
-
-    var innerWidth = window.innerWidth
-    var innerHeight = window.innerHeight
-
-    if (enlarge) {
-        width = innerWidth
-        height = width / aspect
-    }
-
-    if (width > innerWidth) {
-        width = innerWidth
-        height = width / aspect
-    }
-
-    if (height > innerHeight) {
-        height = innerHeight
-        width = height * aspect
-    }
-
-    if (enlarge) {
-        img.css("padding-top", (window.innerHeight-height)/2 + "px")
-        img.css("padding-bottom", (window.innerHeight-height)/2 + "px")
-        img.css("padding-left", (window.innerWidth-width)/2 + "px")
-        img.css("padding-right", (window.innerWidth-width)/2 + "px")
-    }
-    img.attr('width', width)
-    img.attr('height', height)
+    // delete me
 }
 
+
+$.widget('ui.image', {
+    _create: function() {
+        this.load(this.options.photo, this.options.size)
+    },
+
+    load: function(photo, size) {
+        var image = null
+        if (photo != null) {
+            var style = get_photo_style(photo)
+            var image = photo.thumb[size]
+        }
+
+        if (image != null) {
+            this.element
+                .attr('id', photo)
+                .attr('src', image.url)
+                .attr('width', image.width)
+                .attr('height', image.height)
+                .attr('alt', photo.title)
+            this.width = image.width
+            this.height = image.height
+        } else {
+            this.element
+                .removeAttr("class")
+                .removeAttr("src")
+                .removeAttr("alt")
+                .removeAttr("width")
+                .removeAttr("height")
+                .attr("src", media_url("img/none.jpg"))
+            this.width = null
+            this.height = null
+        }
+   },
+
+   resize: function(enlarge) {
+        var width = this.width
+        var height = this.height
+
+        var img = this.element
+        var aspect = width/height
+
+        var innerWidth = window.innerWidth
+        var innerHeight = window.innerHeight
+
+        if (enlarge) {
+            width = innerWidth
+            height = width / aspect
+        }
+
+        if (width > innerWidth) {
+            width = innerWidth
+            height = width / aspect
+        }
+
+        if (height > innerHeight) {
+            height = innerHeight
+            width = height * aspect
+        }
+
+        if (enlarge) {
+            img.css("padding-top", (window.innerHeight-height)/2 + "px")
+            img.css("padding-bottom", (window.innerHeight-height)/2 + "px")
+            img.css("padding-left", (window.innerWidth-width)/2 + "px")
+            img.css("padding-right", (window.innerWidth-width)/2 + "px")
+        }
+        img.attr('width', width)
+        img.attr('height', height)
+    },
+})
 
 $.widget('ui.photo_image',  {
     _create: function() {
@@ -78,7 +121,7 @@ $.widget('ui.photo_image',  {
         this._super();
 
         this.img = $("<img id='photo' />")
-            .attr("src", media_url("img/none.jpg"))
+            .image()
             .appendTo(this.element)
 
         this.title = $("<div class='title'></div>")
@@ -96,29 +139,13 @@ $.widget('ui.photo_image',  {
     },
 
     load: function(photo, can_change) {
-        var size = get_settings().view_size
-        var style = get_photo_style(photo)
-        var image = photo.thumb[size]
+        var img = this.img
 
-        if (image) {
-            this.img
-                .attr('id', photo)
-                .attr('src', image.url)
-                .attr('width', image.width)
-                .attr('height', image.height)
-                .attr('alt', photo.title)
-            resize_photo(this.img, image.width, image.height, false)
-            $(window).on("resize", function() { resize_photo(img, image.width, image.height, false) })
-        } else {
-            this.img
-                .removeAttr("class")
-                .removeAttr("src")
-                .removeAttr("alt")
-                .removeAttr("width")
-                .removeAttr("height")
-                .attr("src", media_url("img/none.jpg"))
-            $(window).off("resize")
-        }
+        img.image("load", photo, get_settings().view_size)
+        img.resize(false)
+
+        $(window).off("resize")
+        $(window).on("resize", function() { img.resize(false) })
 
         this.title
             .empty()
