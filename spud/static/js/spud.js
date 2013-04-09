@@ -724,35 +724,12 @@ function reload_page()
     window.onpopstate({state: window.history.state})
 }
 
+
 function replace_links() {
     $("#content-related").html("")
 
     var ul = $('<ul class="menu"/>')
-
-    $("<li>")
-        .on("click", function() { do_album(1, true); return false; })
-        .append(album_a({id: 1}, "Albums"))
-        .appendTo(ul)
-
-    $("<li>")
-        .on("click", function() { do_category(1, true); return false; })
-        .append(category_a({id: 1}, "Categories"))
-        .appendTo(ul)
-
-    $("<li>")
-        .on("click", function() { do_place(1, true); return false; })
-        .append(place_a({id: 1}, "Places"))
-        .appendTo(ul)
-
-    $("<li>")
-        .on("click", function() { do_person_search({}, true); return false; })
-        .append(person_search_results_a({}, 0))
-        .appendTo(ul)
-
-    $("<li>")
-        .on("click", function() { do_search({}, true); return false; })
-        .append(search_results_a({}, 0))
-        .appendTo(ul)
+        .main_menu()
 
     $('<div class="module"/>')
         .append("<h2>Quick links</h2>")
@@ -764,6 +741,7 @@ function replace_links() {
     update_selection()
 }
 
+
 function update_selection() {
     selection = get_selection()
 
@@ -774,18 +752,7 @@ function update_selection() {
     }
 
     var ul = $('<ul class="menu"/>')
-
-    if (selection.length > 0) {
-        $("<li>")
-            .on("click", function() { do_search_results(search, true); return false; })
-            .append(search_results_a(search, 0, "Show"))
-            .appendTo(ul)
-
-        $("<li>")
-            .on("click", function() { set_selection([]); reload_page(); return false; })
-            .html("<a href='#'>Clear</a>")
-            .appendTo(ul)
-    }
+        .selection_menu({ selection: selection })
 
     $('#selection')
         .empty()
@@ -793,6 +760,7 @@ function update_selection() {
         .append(escapeHTML(selection.length + " photos selected"))
         .append(ul)
 }
+
 
 function append_action_links(ul) {
     $('<div class="module"/>')

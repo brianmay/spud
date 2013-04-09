@@ -297,3 +297,63 @@ $.widget('ui.infobox', {
         return dd
     }
 })
+
+
+$.widget('ui.spud_menu', {
+    _create: function(){
+
+        this.element
+            .addClass("menu")
+
+        this._super()
+    },
+
+    _destroy: function() {
+        this.element
+            .empty()
+            .removeClass("menu")
+        this._super()
+    },
+
+    add_item: function(a) {
+        var li = $("<li/>")
+            .html(a)
+            .on("click", function(ev) { a.trigger('click'); })
+            .appendTo(this.element)
+        return this
+    }
+})
+
+$.widget('ui.main_menu', $.ui.spud_menu, {
+    _create: function(){
+        this._super()
+        this.load()
+    }
+
+    load: function() {
+        this.element.empty()
+        this.add_item(album_a({id: 1}, "Albums"))
+        this.add_item(category_a({id: 1}, "Categories"))
+        this.add_item(place_a({id: 1}, "Places"))
+        this.add_item(person_search_results_a({}, 0))
+        this.add_item(search_results_a({}, 0))
+    }
+})
+
+$.widget('ui.selection_menu', $.ui.spud_menu, {
+    _create: function(){
+        this._super()
+        this.load(options.selection)
+    }
+
+    load: function(selection) {
+        this.element.empty()
+        if (selection.length > 0) {
+            this.add_item(search_results_a(search, 0, "Show"))
+            this.add_item(
+                $("<a href='#'>Clear</a>")
+                .on("click", function() { set_selection([]); reload_page(); return false; })
+            )
+        }
+    }
+})
