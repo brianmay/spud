@@ -373,7 +373,7 @@ function search_a(search, title) {
         title = "Photo search"
     }
     var a = $('<a/>')
-        .attr('href', search_url(search))
+        .attr('href', "#")
         .on('click', function() { do_search(search, true); return false; })
         .text(title)
     return a
@@ -1344,14 +1344,14 @@ function display_detail_photo(photo, search, number_results, n) {
         $("#content-main").append(photo_paginator(search, number_results, n))
 
         if (n > 1) {
-            $("<a class='prevslide'></a>")
-                .on("click", function() { do_search_photo(search, n-1, null, true); return false; })
+            search_photo_a(search, n-1, null, "", null)
+                .addClass("prevslide")
                 .appendTo(pd)
         }
 
         if (n < number_results-1) {
-            $("<a class='nextslide'></a>")
-                .on("click", function() { do_search_photo(search, n+1, null, true); return false; })
+            search_photo_a(search, n+1, null, "", null)
+                .addClass("nextslide")
                 .appendTo(pd)
         }
     }
@@ -1391,14 +1391,14 @@ function display_slideshow_photo(photo, search, number_results, n) {
 
     if (search != null) {
         if (n > 1) {
-            $("<a class='prevslide' accesskey='p'></a>")
-                .on("click", function() { do_search_photo(search, n-1, null, true); return false; })
+            search_photo_a(search, n-1, null, "", "p")
+                .addClass("prevslide")
                 .appendTo(div)
         }
 
         if (n < number_results-1) {
-            $("<a class='nextslide' accesskey='n'></a>")
-                .on("click", function() { do_search_photo(search, n+1, null, true); return false; })
+            search_photo_a(search, n+1, null, "", "n")
+                .addClass("nextslide")
                 .appendTo(div)
         }
     }
@@ -1527,8 +1527,6 @@ function display_search_photo(search, results, n) {
     $(".breadcrumbs")
         .html("")
         .append(root_a())
-        .append(" › ")
-        .append(search_a(search))
         .append(" › ")
         .append(search_results_a(search, page))
         .append(" › ")
@@ -4311,7 +4309,7 @@ function do_search_photo(search, n, photo_id, push_history) {
 
     load_search_photo(search, n,
         function(data) {
-            if (photo_id == null || photo_id == 0 || data.photo.id == photo_id) {
+            if (photo_id == null || data.photo.id == photo_id) {
                 replace_links()
                 update_history(push_history, search_photo_url(search, n, data.photo), {
                     type: 'display_search_photo',

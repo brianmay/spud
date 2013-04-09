@@ -68,15 +68,6 @@ function date_url(dt) {
 }
 
 
-function search_url(search) {
-    params = {}
-    if (search.params != null) {
-        params = search.params
-    }
-    return "/b/search/?" + jQuery.param(params)
-}
-
-
 function search_results_url(search, page) {
     var params = jQuery.extend({}, search.params, {
         page: page
@@ -89,11 +80,11 @@ function search_photo_url(search, n, photo) {
     var params = jQuery.extend({}, search.params, {
         n: n
     })
-    id = 0
     if (photo != null) {
-        id = photo.id
+        return "/b/photo/" + photo.id + "/?" + jQuery.param(params)
+    } else {
+        return "/b/search/?" + jQuery.param(params)
     }
-    return "/b/photo/" + id + "/?" + jQuery.param(params)
 }
 
 

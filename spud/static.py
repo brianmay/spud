@@ -111,15 +111,29 @@ def person_detail(request, person_id):
 
 
 def search_results(request):
-    query = request.GET.copy()
-    page = query.pop('page', [0])[-1]
-    try:
-        page = int(page)
-    except ValueError:
-        page = 0
+    if 'n' in request.GET:
+        query = request.GET.copy()
+        n = query.pop('n', [0])[-1]
+        try:
+            n = int(n)
+        except ValueError:
+            n = 0
 
-    js = json.dumps({'params': query})
-    return render_to_response('html/static.html', {
-        'title': 'Search results',
-        'onload': "do_search_results(%s, %d)" % (js, page),
-    }, context_instance=RequestContext(request))
+        js = json.dumps({'params': query})
+        return render_to_response('html/static.html', {
+            'title': 'Photo detail',
+            'onload': "do_search_photo(%s, %d, %s)" % (js, n, "null"),
+        }, context_instance=RequestContext(request))
+    else:
+        query = request.GET.copy()
+        page = query.pop('page', [0])[-1]
+        try:
+            page = int(page)
+        except ValueError:
+            page = 0
+
+        js = json.dumps({'params': query})
+        return render_to_response('html/static.html', {
+            'title': 'Search results',
+            'onload': "do_search_results(%s, %d)" % (js, page),
+        }, context_instance=RequestContext(request))
