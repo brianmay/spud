@@ -142,10 +142,10 @@ $.widget('ui.photo_image',  {
         var img = this.img
 
         img.image("load", photo, get_settings().view_size)
-        img.resize(false)
+        img.image("resize", false)
 
         $(window).off("resize")
-        $(window).on("resize", function() { img.resize(false) })
+        $(window).on("resize", function() { img.image("resize", false) })
 
         this.title
             .empty()
