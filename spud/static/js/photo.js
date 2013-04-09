@@ -248,7 +248,7 @@ $.widget('ui.camera_details',  $.ui.infobox, {
     _create: function() {
         this.element
             .addClass("camera_details_block")
-        this.options.title = "Camaera details"
+        this.options.title = "Camera details"
 
         this._super();
 
