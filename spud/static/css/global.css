@@ -28,11 +28,9 @@ ul.ui-autocomplete { z-index: 200; }
 .photo_block textarea { width:192px; }
 .photo_block select { width:100%; }
 
-.photo_detail_photo { width:auto; }
-.photo_detail_summary { max-width:400px; }
-.photo_detail_summary .title { font-weight:bold; }
+.photo_image_block { width:auto; }
+.photo_image_block .title { font-weight:bold; }
 
-.photo_edit .photo_block { min-height:200px; } 
 /* Photo list */
 
 .photo_list { padding-left:0; }

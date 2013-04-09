@@ -561,52 +561,6 @@ function update_history(push_history, url, state) {
 }
 
 
-function get_photo_style(data) {
-    if (data.action==null)
-        return ""
-    elif (data.action=="D")
-        return "photo-D"
-    elif (data.action=="R"
-            || data.action=="M"
-            || data.action=="auto"
-            || data.action=="90" || data.action=="180" || data.action=="270")
-        return "photo-R"
-    return ""
-}
-
-
-function resize_photo(img, width, height, enlarge) {
-    var aspect = width/height
-
-    var innerWidth = window.innerWidth
-    var innerHeight = window.innerHeight
-
-    if (enlarge) {
-        width = innerWidth
-        height = width / aspect
-    }
-
-    if (width > innerWidth) {
-        width = innerWidth
-        height = width / aspect
-    }
-
-    if (height > innerHeight) {
-        height = innerHeight
-        width = height * aspect
-    }
-
-    if (enlarge) {
-        img.css("padding-top", (window.innerHeight-height)/2 + "px")
-        img.css("padding-bottom", (window.innerHeight-height)/2 + "px")
-        img.css("padding-left", (window.innerWidth-width)/2 + "px")
-        img.css("padding-right", (window.innerWidth-width)/2 + "px")
-    }
-    img.attr('width', width)
-    img.attr('height', height)
-}
-
-
 function parse_form_string(string) {
     return jQuery.trim(string)
 }
@@ -955,32 +909,6 @@ function append_related(tag, related, can_change) {
 }
 
 
-function get_photo_action(action) {
-    if (action == null)
-        r = "None"
-    else if (action == 'D')
-        r = 'delete'
-    else if (action == 'S')
-        r = 'regenerate size'
-    else if (action == 'R')
-        r = 'regenerate thumbnails'
-    else if (action == 'M')
-        r = 'move photo'
-    else if (action == 'auto')
-        r = 'rotate automatic'
-    else if (action == '90')
-        r = 'rotate 90 degrees clockwise'
-    else if (action == '180')
-        r = 'rotate 180 degrees clockwise'
-    else if (action == '270')
-        r = 'rotate 270 degrees clockwise'
-    else
-        r = 'unknown'
-
-    return r
-}
-
-
 function dt_dd(dl, title, value) {
     dl.append($("<dt/>").html(escapeHTML(title)))
     dd = $("<dd/>").html(escapeHTML(value))
@@ -1091,14 +1019,6 @@ function generic_paginator(page, last_page, html_page) {
     }
 
     return p
-}
-
-
-$.fn.conditional_append = function(condition, content) {
-    if (condition) {
-        this.append(content)
-    }
-    return this
 }
 
 
@@ -1396,138 +1316,17 @@ function display_detail_photo(photo, search, number_results, n) {
         pd.addClass("photo-selected")
     }
 
-    var pdp = $("<div class='photo_block photo_detail_photo' />")
+    $("<div class='photo_block' />")
+        .photo_image({ photo: photo, can_change: can_change })
+        .appendTo(pd)
 
-    if (image) {
-        var img = $("<img id='photo' />")
-            .attr('id', photo)
-            .attr('src', image.url)
-            .attr('width', image.width)
-            .attr('height', image.height)
-            .attr('alt', photo.title)
-            .appendTo(pdp)
-        resize_photo(img, image.width, image.height, false)
-        $(window).on("resize", function() { resize_photo(img, image.width, image.height, false) })
-    }
+    $("<div class='photo_block' />")
+        .photo_details({ photo: photo, can_change: can_change })
+        .appendTo(pd)
 
-    if (photo.title || can_change) {
-        $("<div class='title'></div>")
-            .text(photo.title)
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
-            .appendTo(pdp)
-    }
-
-    if (photo.persons.length > 0 || can_change) {
-        var tag = $("<div class='persons'></div>")
-        append_persons(tag, photo.persons)
-        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
-        tag.appendTo(pdp)
-    }
-
-    if (photo.description || can_change) {
-        $("<div class='description'></div>")
-            .html(p(photo.description))
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit description]"))
-            .appendTo(pdp)
-    }
-    pd.append(pdp)
-
-    var pdd = $("<div class='photo_block photo_detail_photo_detail' />")
-    pdd.append("<h2>Photo Details</h2>")
-
-    var search_params = {
-        photo: photo.id,
-    }
-
-    var dl = $("<dl\>")
-    var title = dt_dd(dl, "Title", photo.title)
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit]"))
-
-    if (image) {
-        title.append(escapeHTML(" (" + image.width + "x" + image.height + ")"))
-    }
-
-    if (photo.description || can_change) {
-        dt_dd(dl, "Description", "")
-            .append(p(photo.description))
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
-    }
-
-    if (photo.view || can_change) {
-        dt_dd(dl, "View", photo.view)
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_view, "[edit]"))
-    }
-
-    if (photo.comments || can_change) {
-        dt_dd(dl, "Comments", photo.comment)
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_comments, "[edit]"))
-    }
-
-    dt_dd(dl, "File", photo.name)
-    dt_dd(dl, "Place", "")
-        .html(place_a(photo.place))
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_place, "[edit]"))
-
-    if (photo.albums.length > 0 || can_change) {
-        var tag = dt_dd(dl, "Albums", "")
-        append_albums(tag, photo.albums)
-        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_albums, "[edit]"))
-    }
-
-    if (photo.categorys.length > 0 || can_change) {
-        var tag = dt_dd(dl, "Categories", "")
-        append_categorys(tag, photo.categorys)
-        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]"))
-    }
-
-    dt_dd(dl, "Date & time", "")
-        .append(datetime_a(photo.utctime))
-        .append("<br />")
-        .append(datetime_a(photo.localtime))
-        .conditional_append(can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]"))
-
-    if (photo.photographer > 0 || can_change) {
-        dt_dd(dl, "Photographer", "")
-            .html(person_a(photo.photographer))
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]"))
-    }
-
-    if (photo.rating) {
-        dt_dd(dl, "Rating", photo.rating)
-    }
-
-    if (photo.related.length > 0 || can_change) {
-        var tag = dt_dd(dl, "Related photos", "")
-        append_related(tag, photo.related, can_change)
-        tag.conditional_append(can_change, add_photo_relation_a(photo, "[add]"))
-    }
-
-    if (photo.action || can_change) {
-        dt_dd(dl, "Action", "")
-            .append(get_photo_action(photo.action))
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_action, "[edit]"))
-    }
-
-    pdd.append(dl)
-
-    pd.append(pdd)
-
-    var pdc = $("<div class='photo_block photo_detail_camera_detail' />")
-    pdc.append("<h2>Camera Details</h2>")
-
-    var dl = $("<dl\>")
-
-    tag = dt_dd(dl, "Camera", photo.camera_make + " " + photo.camera_model)
-    tag = dt_dd(dl, "Flash", photo.flash_used)
-    tag = dt_dd(dl, "Focal Length", photo.focal_length)
-    tag = dt_dd(dl, "Exposure", photo.exposure)
-    tag = dt_dd(dl, "Aperture", photo.aperture)
-    tag = dt_dd(dl, "ISO", photo.iso_equiv)
-    tag = dt_dd(dl, "Metering Mode", photo.metering_mode)
-
-    pdc.append(dl)
-
-    pd.append(pdc)
+    $("<div class='photo_block' />")
+        .camera_details({ photo: photo, can_change: can_change })
+        .appendTo(pd)
 
     cm.append(pd)
 
@@ -1760,7 +1559,7 @@ var operations = [
         value: "comments",
         label: "Change comments",
         desc: "Change the photo's comments",
-        fn: display_change_photo_comments,
+        fn: display_change_photo_comment,
     },
     {
         value: "datetime",
@@ -1916,10 +1715,10 @@ function display_change_photo_view(photo, search_params, number_results) {
 }
 
 
-function display_change_photo_comments(photo, search_params, number_results) {
+function display_change_photo_comment(photo, search_params, number_results) {
     var comments=""
     if (photo != null) {
-        comments = photo.comments
+        comments = photo.comment
     }
     var table = $("<table />")
     append_field(table, "comments", "Comments")

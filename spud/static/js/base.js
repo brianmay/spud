@@ -1,4 +1,59 @@
 // ****************
+// * COMMON STUFF *
+// ****************
+
+$.fn.conditional_append = function(condition, content) {
+    if (condition) {
+        this.append(content)
+    }
+    return this
+}
+
+
+$.fn.p = function(text){
+    var converter = new Showdown.converter()
+    var text = converter.makeHtml(text)
+    this.append(text)
+    return this
+}
+
+
+$.fn.append_list = function(list){
+    if (list.length == 0) {
+        return this
+    }
+
+    var ul = $("<ul></ul>")
+
+    $.each(list, function(i, item){
+        $("<li></li>")
+            .append(item)
+            .appendTo(ul)
+    })
+
+    ul.appendTo(this)
+    return this
+}
+
+
+$.fn.append_csv = function(list){
+    if (list.length == 0) {
+        return this
+    }
+
+    var sep = ""
+    var mythis = this
+    $.each(list, function(i, item){
+        mythis.append(sep)
+        mythis.append(item)
+        sep = ", "
+    })
+
+    return this
+}
+
+
+// ****************
 // * BASE WIDGETS *
 // ****************
 
@@ -213,4 +268,32 @@ $.widget('ui.ajaxautocompletesorted',  $.ui.ajaxautocompletemultiple, {
 })
 
 
+$.widget('ui.infobox', {
+    _create: function(){
+        $("<h2></h2")
+            .text(this.options.title)
+            .appendTo(this.element)
 
+        this.dl = $("<dl></dl>")
+            .appendTo(this.element)
+
+        this.fields = {}
+
+        this._super()
+    },
+
+    _destroy: function() {
+        this.element.empty()
+        this._super()
+    },
+
+    add_field: function(id, title) {
+        var dt = $("<dt/>")
+            .text(title)
+            .appendTo(this.dl)
+        var dd = $("<dd/>")
+            .appendTo(this.dl)
+        this.fields[id] = dd
+        return dd
+    }
+})
