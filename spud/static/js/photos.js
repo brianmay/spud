@@ -54,10 +54,10 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
 
     _create: function(){
         this.id = this.element.attr("id")
-        var name = this.element.attr("name")
+        this.name = this.element.attr("name")
 
         this.input = $('<input type="hidden"/>')
-            .attr("name", name)
+            .attr("name", this.name)
 
         this.deck = $('<div class="results_on_deck"></div>')
 
@@ -83,6 +83,16 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
             this.widgetEventPrefix + "select",
             $.proxy(this._receiveResult, this)
         )
+        this._super();
+    },
+
+    _destroy: function() {
+        var input = this.text
+            .attr("name", this.name)
+            .removeAttr("type")
+            .detach()
+        this.uidiv
+            .replaceWith(input)
         this._super();
     },
 
