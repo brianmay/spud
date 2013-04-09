@@ -300,7 +300,7 @@ $.widget('ui.infobox', {
 
 
 $.widget('ui.spud_menu', {
-    _create: function(){
+    _create: function() {
 
         this.element
             .addClass("menu")
@@ -325,7 +325,7 @@ $.widget('ui.spud_menu', {
 })
 
 $.widget('ui.main_menu', $.ui.spud_menu, {
-    _create: function(){
+    _create: function() {
         this._super()
         this.load()
     }
@@ -341,7 +341,7 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
 })
 
 $.widget('ui.selection_menu', $.ui.spud_menu, {
-    _create: function(){
+    _create: function() {
         this._super()
         this.load(options.selection)
     }
@@ -355,5 +355,5 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
                 .on("click", function() { set_selection([]); reload_page(); return false; })
             )
         }
-    }
+    },
 })
