@@ -1306,8 +1306,11 @@ function display_photo_slideshow(photo, search, results, n) {
 }
 
 
-    var ul = $('<ul class="menu"/>')
 function display_common_photo(photo, search) {
+    var ul = $('<ul/>')
+        .photo_menu({ photo: photo, search: search, change_mode: is_edit_mode(), })
+    append_action_links(ul)
+    return
 
     if (is_slideshow_mode()) {
         $("<li>")

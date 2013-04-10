@@ -466,3 +466,81 @@ $.widget('ui.photo_slideshow',  {
     },
 })
 
+
+$.widget('ui.photo_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.photo != null) {
+            this.load(this.options.photo, this.options.seach, this.options.change_mode)
+        }
+    },
+
+    load: function(photo, search, change_mode) {
+        this.element.empty()
+
+        var photo_mode = get_photo_mode()
+        if (photo_mode != "slideshow") {
+            this.add_item(
+                $("<a href='#'>Slideshow</a>")
+                .on("click", function() {
+                    set_slideshow_mode()
+                    reload_page()
+                    return false;
+                }))
+        }
+
+        if (photo_mode != "article") {
+            this.add_item(
+                $("<a href='#'>Article</a>")
+                .on("click", function() {
+                    set_article_mode()
+                    reload_page()
+                    return false;
+                }))
+        }
+
+        if (photo.can_change) {
+            if (change_mode) {
+                this.add_item(
+                    $("<a href='#'>View</a>")
+                    .on("click", function() {
+                        set_normal_mode()
+                        reload_page()
+                        return false;
+                    }))
+            } else {
+                this.add_item(
+                    $("<a href='#'>Edit</a>")
+                    .on("click", function() {
+                        set_edit_mode()
+                        reload_page()
+                        return false;
+                    }))
+            }
+        }
+
+        if (is_photo_selected(photo)) {
+            this.add_item(
+                $("<a href='#'>Unselect</a>")
+                .on("click", function() {
+                    del_selection(photo)
+                    reload_page()
+                    return false;
+                }))
+        } else {
+            this.add_item(
+                $("<a href='#'>Select</a>")
+                .on("click", function() {
+                    add_selection(photo)
+                    reload_page()
+                    return false;
+                }))
+        }
+
+        if (search == null) {
+            search = {}
+        }
+
+        this.add_item(search_a(search))
+    },
+})
