@@ -158,6 +158,7 @@ $.widget('ui.photo_image',  {
     },
 
     _destroy: function() {
+        this.img.image("destroy")
         $(window).off("resize")
         this._super();
     },
