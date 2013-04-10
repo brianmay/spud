@@ -1866,10 +1866,8 @@ def search_item(request, number):
         'session': _get_session(request),
     }
 
-    try:
+    if number > 1:
         resp['prev_photo'] = _get_photo(request.user, photo_list[number-1])
-    except IndexError:
-        pass
 
     try:
         resp['next_photo'] = _get_photo(request.user, photo_list[number+1])
