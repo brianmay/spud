@@ -1214,10 +1214,6 @@ function display_photo(photo, search, number_results, n) {
 
 
 function display_detail_photo(photo, search, number_results, n) {
-    var size = get_settings().view_size
-    var style = get_photo_style(photo)
-    var image = photo.thumb[size]
-
     var cm = $("#content-main")
     cm.html("")
 
@@ -1230,7 +1226,9 @@ function display_detail_photo(photo, search, number_results, n) {
     document.title = prefix + photo.title + " | Album | Spud"
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
-    var pd = $("<div class='photo_container photo_detail " + escapeHTML(style) + "' />")
+    var style = get_photo_style(photo)
+    var pd = $("<div class='photo_container photo_detail' />")
+        .addClass(style)
     if (is_photo_selected(photo)) {
         pd.addClass("photo-selected")
     }
@@ -1288,7 +1286,9 @@ function display_slideshow_photo(photo, search, number_results, n) {
         can_change = true
     }
 
+    var style = get_photo_style(photo)
     var photodiv = $("<div class='photo'></div>")
+        .addClass(style)
 
     var img = $("<img />")
         .image({ photo: photo, size: get_settings().click_size })

@@ -43,10 +43,15 @@ $.widget('ui.image', {
         this.load(this.options.photo, this.options.size)
     },
 
+    _destroy: function() {
+        this.element.parent()
+            .removeClass("photo-D")
+            .removeClass("photo-R")
+    },
+
     load: function(photo, size) {
         var image = null
         if (photo != null) {
-            var style = get_photo_style(photo)
             var image = photo.thumb[size]
         }
 
@@ -62,7 +67,6 @@ $.widget('ui.image', {
         } else {
             this.element
                 .removeAttr("class")
-                .removeAttr("src")
                 .removeAttr("alt")
                 .removeAttr("width")
                 .removeAttr("height")
@@ -135,9 +139,14 @@ $.widget('ui.photo_image',  {
 
     load: function(photo, can_change) {
         var img = this.img
+        var style = photo.style
 
-        img.image("load", photo, get_settings().view_size)
-        img.image("resize", false)
+        img
+            .image("load", photo, get_settings().view_size)
+            .image("resize", false)
+            .removeClass("photo-D")
+            .removeClass("photo-R")
+            .addClass(style)
 
         $(window).off("resize")
         $(window).on("resize", function() { img.image("resize", false) })
