@@ -21,11 +21,6 @@ function logout_url() {
 }
 
 
-function photo_url(photo) {
-   return "/b/photo/"+photo.id+"/"
-}
-
-
 function album_url(album) {
    return "/b/album/"+album.id+"/"
 }
@@ -73,6 +68,11 @@ function search_results_url(search, page) {
         page: page
     })
     return "/b/search/?" + jQuery.param(params)
+}
+
+
+function photo_url(photo) {
+   return "/b/photo/"+photo.id+"/"
 }
 
 
@@ -158,14 +158,6 @@ function load_logout(success) {
         success: success,
     })
 }
-
-function load_photo(photo_id, success) {
-    ajax({
-        url: '/a/photo/'+photo_id+'/',
-        success: success,
-    })
-}
-
 
 function load_album(album_id, success) {
     ajax({
@@ -374,6 +366,14 @@ function load_search_results(search, page, success) {
         data: params,
         success: success,
     });
+}
+
+
+function load_photo(photo_id, success) {
+    ajax({
+        url: '/a/photo/'+photo_id+'/',
+        success: success,
+    })
 }
 
 

@@ -633,16 +633,6 @@ def logout(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def photo(request, photo_id):
-    object = get_object_or_404(spud.models.photo, pk=photo_id)
-    resp = {
-        'type': 'photo_get',
-        'photo': _get_photo_detail(request.user, object),
-        'session': _get_session(request),
-    }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
-
-
 @check_errors
 def album(request, album_id):
     if request.method == "POST":
@@ -1571,6 +1561,16 @@ def search_results(request):
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_photo'),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def photo(request, photo_id):
+    object = get_object_or_404(spud.models.photo, pk=photo_id)
+    resp = {
+        'type': 'photo_get',
+        'photo': _get_photo_detail(request.user, object),
+        'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
