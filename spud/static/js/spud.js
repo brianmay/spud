@@ -1266,7 +1266,7 @@ function display_photo_article(photo, search, results, n) {
         }
     }
 
-    display_common_photo(photo, search, n)
+    display_common_photo(photo, search)
 }
 
 
@@ -1289,7 +1289,7 @@ function display_photo_slideshow(photo, search, results, n) {
         }
     }
 
-    display_common_photo(photo, search, n)
+    display_common_photo(photo, search)
 
     pdp = $('<div class="module"/>')
         .append("<h2>Photo Details</h2>")
@@ -1306,8 +1306,8 @@ function display_photo_slideshow(photo, search, results, n) {
 }
 
 
-function display_common_photo(photo, search, n) {
     var ul = $('<ul class="menu"/>')
+function display_common_photo(photo, search) {
 
     if (is_slideshow_mode()) {
         $("<li>")
