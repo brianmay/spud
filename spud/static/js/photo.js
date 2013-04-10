@@ -44,9 +44,15 @@ $.widget('ui.image', {
     },
 
     _destroy: function() {
-        this.element.parent()
+        this.element
             .removeClass("photo-D")
             .removeClass("photo-R")
+            .removeAttr("id")
+            .removeAttr("class")
+            .removeAttr("alt")
+            .removeAttr("width")
+            .removeAttr("height")
+            .attr("src", media_url("img/none.jpg"))
     },
 
     load: function(photo, size) {
@@ -66,6 +72,7 @@ $.widget('ui.image', {
             this.height = image.height
         } else {
             this.element
+                .removeAttr("id")
                 .removeAttr("class")
                 .removeAttr("alt")
                 .removeAttr("width")
@@ -461,7 +468,9 @@ $.widget('ui.photo_slideshow',  {
     _destroy: function() {
         $(window).off("resize")
         this.img.image("destroy")
-        this.element.empty()
+        this.element
+            .removeAttr("slideshow")
+            .empty()
         this._super()
     },
 })
