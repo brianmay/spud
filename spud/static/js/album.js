@@ -52,6 +52,27 @@ $.widget('ui.album_details',  $.ui.infobox, {
 })
 
 
+$.widget('ui.album_child_list', $.ui.photo_list, {
+    _create: function() {
+        this._super()
+        if (this.options.album != null) {
+            this.load(this.options.album, this.options.change_mode)
+        }
+    },
+
+    load: function(album, change_mode) {
+        var mythis = this
+        $.each(album.children, function(j, child) {
+            var photo = child.cover_photo
+            var sort=""
+            if  (child.sortorder || child.sortname) {
+                sort = child.sortname + " " + child.sortorder
+            }
+            mythis.append_photo(photo, child.title, sort, child.description, album_a(child, null), false)
+        })
+    }
+})
+
 $.widget('ui.album_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()

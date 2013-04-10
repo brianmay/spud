@@ -1783,22 +1783,13 @@ function display_album(album) {
     cm.append("<h1>" + escapeHTML(album.title) +  "</h1>")
 
     $("<div/>")
-        .album_details({ album: album, change_mode: false })
+        .album_details({ album: album, change_mode: true })
         .appendTo(cm)
 
     if (album.children.length > 0) {
-        var pl = $("<div class='children'/>")
-            .photo_list()
+        $("<div class='children'/>")
+            .album_child_list({ album: album, change_mode: true })
             .appendTo(cm)
-
-        $.each(album.children, function(j, child) {
-            var photo = child.cover_photo
-            var sort=""
-            if  (child.sortorder || child.sortname) {
-                sort = child.sortname + " " + child.sortorder
-            }
-            pl.photo_list("append_photo", photo, child.title, sort, child.description, album_a(child, null), false)
-        })
     }
 
 
