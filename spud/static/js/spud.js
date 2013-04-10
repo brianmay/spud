@@ -1782,33 +1782,8 @@ function display_album(album) {
     document.title = album.title + " | Album | Spud"
     cm.append("<h1>" + escapeHTML(album.title) +  "</h1>")
 
-    var dl = $("<dl/>")
-    dt_dd(dl, "Title", album.title)
-
-    if (album.cover_photo != null) {
-        var size = get_settings().view_size
-        var photo = album.cover_photo
-        var image = photo.thumb[size]
-        if (image) {
-            var img = $("<img />")
-            .attr("src", image.url)
-            .attr("alt", photo.title)
-            .attr("width", image.width)
-            .attr("height", image.height)
-            dt_dd(dl, "Photo", "")
-                .append(img)
-        }
-    }
-    if (album.sortname || album.sortorder) {
-        dt_dd(dl, "Sort", album.sortname + " " + album.sortorder)
-    }
-    if (album.description) {
-        dt_dd(dl, "Description", "")
-            .append(p(album.description))
-    }
-
-    $("<div class='infobox'/>")
-        .append(dl)
+    $("<div/>")
+        .album_details({ album: album, change_mode: false })
         .appendTo(cm)
 
     if (album.children.length > 0) {
