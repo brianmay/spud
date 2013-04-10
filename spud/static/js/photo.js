@@ -206,62 +206,63 @@ $.widget('ui.photo_details',  $.ui.infobox, {
     load: function(photo, change_mode) {
         var can_change = change_mode && photo.can_change
 
-        this.fields.title
+        this.get_field("title")
             .empty()
             .text(photo.title)
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit]"))
 
-        this.fields.description
+        this.get_field("description")
             .empty()
             .p(photo.description)
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit]"))
 
-        this.fields.view
+        this.get_field("view")
             .empty()
             .text(photo.view)
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_view, "[edit]"))
 
-        this.fields.comment
+        this.toggle_field("comment", photo.comment != null)
+        this.get_field("comment")
             .empty()
             .p(photo.comment)
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_comment, "[edit]"))
 
-        this.fields.name
+        this.get_field("name")
             .empty()
             .text(photo.name)
 
-        this.fields.place
+        this.get_field("place")
             .empty()
             .html(place_a(photo.place))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_place, "[edit]"))
 
-        this.fields.albums
+        this.get_field("albums")
             .empty()
             .append_list($.map(photo.albums, function(album) { return album_a(album); } ))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_albums, "[edit]"))
 
-        this.fields.categorys
+        this.get_field("categorys")
             .empty()
             .append_list($.map(photo.categorys, function(category) { return category_a(category); } ))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]"))
 
-        this.fields.datetime
+        this.get_field("datetime")
             .empty()
             .append(datetime_a(photo.utctime))
             .append("<br />")
             .append(datetime_a(photo.localtime))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]"))
 
-        this.fields.photographer
+        this.get_field("photographer")
             .empty()
             .html(person_a(photo.photographer))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]"))
 
-        this.fields.rating
+        this.get_field("rating")
             .empty()
             .text(photo.rating ? photo.rating : "None")
 
-        this.fields.related
+        this.get_field("related")
             .empty()
             .append_list($.map(photo.related, function(r) {
                 return [[
@@ -272,7 +273,7 @@ $.widget('ui.photo_details',  $.ui.infobox, {
              }))
             .conditional_append(can_change, add_photo_relation_a(photo, "[add]"))
 
-        this.fields.action
+        this.get_field("action")
             .empty()
             .append(get_photo_action(photo.action))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_action, "[edit]"))
@@ -305,28 +306,28 @@ $.widget('ui.camera_details',  $.ui.infobox, {
     load: function(photo, change_mode) {
         var can_change = change_mode && photo.can_change
 
-        this.fields.camera_make
+        this.get_field("camera_make")
             .empty()
             .text(photo.camera_make)
-        this.fields.camera_model
+        this.get_field("camera_model")
             .empty()
             .text(photo.camera_model)
-        this.fields.flash_used
+        this.get_field("flash_used")
             .empty()
             .text(photo.flash_used)
-        this.fields.focal_length
+        this.get_field("focal_length")
             .empty()
             .text(photo.focal_length)
-        this.fields.exposure
+        this.get_field("exposure")
             .empty()
             .text(photo.exposure)
-        this.fields.aperture
+        this.get_field("aperture")
             .empty()
             .text(photo.aperture)
-        this.fields.iso_equiv
+        this.get_field("iso_equiv")
             .empty()
             .text(photo.iso_equiv)
-        this.fields.metering_mode
+        this.get_field("metering_mode")
             .empty()
             .text(photo.metering_mode)
         return this

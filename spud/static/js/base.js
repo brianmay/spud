@@ -11,6 +11,9 @@ $.fn.conditional_append = function(condition, content) {
 
 
 $.fn.p = function(text){
+    if (!text) {
+        return this
+    }
     var converter = new Showdown.converter()
     var text = converter.makeHtml(text)
     this.append(text)
@@ -276,7 +279,8 @@ $.widget('ui.infobox', {
         this.dl = $("<dl></dl>")
             .appendTo(this.element)
 
-        this.fields = {}
+        this.dt = {}
+        this.dd = {}
 
         this._super()
     },
@@ -292,9 +296,19 @@ $.widget('ui.infobox', {
             .appendTo(this.dl)
         var dd = $("<dd/>")
             .appendTo(this.dl)
-        this.fields[id] = dd
+        this.dt[id] = dt
+        this.dd[id] = dd
         return dd
-    }
+    },
+
+    get_field: function(id) {
+        return this.dd[id]
+    },
+
+    toggle_field: function(id, showOrHide) {
+        this.dt[id].toggle(showOrHide)
+        this.dd[id].toggle(showOrHide)
+    },
 })
 
 
