@@ -544,7 +544,7 @@ function set_slideshow_mode() {
     $(document).data("display", "slideshow")
 }
 
-function set_detail_mode() {
+function set_article_mode() {
     $(document).data("display", "detail")
 }
 
@@ -1204,14 +1204,14 @@ function display_root() {
 function display_photo(photo, search, number_results, n) {
     reset_display()
     if (is_slideshow_mode()) {
-        display_slideshow_photo(photo, search, number_results, n)
+        display_photo_slideshow(photo, search, number_results, n)
     } else {
-        display_detail_photo(photo, search, number_results, n)
+        display_photo_article(photo, search, number_results, n)
     }
 }
 
 
-function display_detail_photo(photo, search, number_results, n) {
+function display_photo_article(photo, search, number_results, n) {
     var cm = $("#content-main")
     cm.html("")
 
@@ -1273,7 +1273,7 @@ function display_detail_photo(photo, search, number_results, n) {
 }
 
 
-function display_slideshow_photo(photo, search, number_results, n) {
+function display_photo_slideshow(photo, search, number_results, n) {
     var div = $("<div class='slideshow'></div>")
 
     var can_change = false
@@ -1354,11 +1354,11 @@ function display_common_photo(photo, search, number_results, n) {
     if (is_slideshow_mode()) {
         $("<li>")
             .on("click", function() {
-                set_detail_mode()
+                set_article_mode()
                 reload_page()
                 return false;
             })
-            .html("<a href='#'>Details</a>")
+            .html("<a href='#'>Article</a>")
             .appendTo(ul)
     } else {
         $("<li>")
