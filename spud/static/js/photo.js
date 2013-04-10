@@ -112,6 +112,7 @@ $.widget('ui.image', {
     },
 })
 
+
 $.widget('ui.photo_image',  {
     _create: function() {
         this.element
@@ -283,7 +284,7 @@ $.widget('ui.camera_details',  $.ui.infobox, {
             .addClass("camera_details_block")
         this.options.title = "Camera details"
 
-        this._super();
+        this._super()
 
         this.add_field("camera_make", "Camera make")
         this.add_field("camera_model", "Camera model")
@@ -330,6 +331,7 @@ $.widget('ui.camera_details',  $.ui.infobox, {
     },
 })
 
+
 $.widget('ui.photo_article',  {
     _create: function() {
         this.element
@@ -373,7 +375,7 @@ $.widget('ui.photo_article',  {
         this.pi.photo_image("destroy")
         this.pd.photo_details("destroy")
         this.cd.camera_details("destroy")
-        this._super();
+        this.empty()
     },
 })
 
