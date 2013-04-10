@@ -1216,10 +1216,8 @@ function display_detail_photo(photo, search, number_results, n) {
     cm.html("")
 
     var prefix = ""
-    var can_change = false
     if (photo.can_change && is_edit_mode()) {
         prefix = "Edit "
-        can_change = true
     }
     document.title = prefix + photo.title + " | Album | Spud"
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
@@ -1232,15 +1230,15 @@ function display_detail_photo(photo, search, number_results, n) {
     }
 
     $("<div class='photo_block' />")
-        .photo_image({ photo: photo, can_change: can_change })
+        .photo_image({ photo: photo, change_mode: is_edit_mode(), })
         .appendTo(pd)
 
     $("<div class='photo_block' />")
-        .photo_details({ photo: photo, can_change: can_change })
+        .photo_details({ photo: photo, change_mode: is_edit_mode(), })
         .appendTo(pd)
 
     $("<div class='photo_block' />")
-        .camera_details({ photo: photo, can_change: can_change })
+        .camera_details({ photo: photo, change_mode: is_edit_mode(), })
         .appendTo(pd)
 
     cm.append(pd)

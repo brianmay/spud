@@ -133,13 +133,15 @@ $.widget('ui.photo_image',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.can_change)
+            this.load(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, can_change) {
+    load: function(photo, change_mode) {
         var img = this.img
         var style = photo.style
+
+        var can_change = change_mode && photo.can_change
 
         img
             .image("load", photo, get_settings().view_size)
@@ -197,11 +199,13 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         this.add_field("action", "Action")
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.can_change)
+            this.load(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, can_change) {
+    load: function(photo, change_mode) {
+        var can_change = change_mode && photo.can_change
+
         this.fields.title
             .empty()
             .text(photo.title)
@@ -294,11 +298,13 @@ $.widget('ui.camera_details',  $.ui.infobox, {
         this.add_field("metering_mode", "Metering mode")
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.can_change)
+            this.load(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, can_change) {
+    load: function(photo, change_mode) {
+        var can_change = change_mode && photo.can_change
+
         this.fields.camera_make
             .empty()
             .text(photo.camera_make)
