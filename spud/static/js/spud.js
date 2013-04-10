@@ -773,7 +773,7 @@ function append_action_links(ul) {
 function append_jump(id, type, onadded) {
     var f = $("<form method='get' />")
 
-    var ac = $("<input/>")
+    var ac = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .appendTo(f)
@@ -1119,7 +1119,7 @@ function get_ajax_select(id, type, value, onadded, onkilled) {
         }
     }
 
-    var ac = $("<input/>")
+    var ac = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .ajaxautocomplete(params)
@@ -1136,7 +1136,7 @@ function get_ajax_select(id, type, value, onadded, onkilled) {
         })
     }
 
-    return ac.ajaxautocomplete('widget')
+    return ac
 }
 
 
@@ -1153,17 +1153,15 @@ function get_ajax_multiple_select(id, type, values, sorted, onadded, onkilled) {
         "items": value_arr,
     }
 
-    var ac = $("<input/>")
+    var ac = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
 
     var widget
     if (sorted) {
         ac.ajaxautocompletesorted(params)
-        widget = ac.ajaxautocompletesorted('widget')
     } else {
         ac.ajaxautocompletemultiple(params)
-        widget = ac.ajaxautocompletemultiple('widget')
     }
 
     if (onadded != null) {
@@ -1178,7 +1176,7 @@ function get_ajax_multiple_select(id, type, values, sorted, onadded, onkilled) {
         })
     }
 
-    return widget
+    return ac
 }
 
 

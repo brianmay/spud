@@ -118,21 +118,25 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
         this.id = this.element.attr("id")
         this.name = this.element.attr("name")
 
+        this.text = $('<input/>')
+            .attr("id", this.id)
+            .attr("type", "text")
+
         this.input = $('<input type="hidden"/>')
             .attr("name", this.name)
 
         this.deck = $('<div class="results_on_deck"></div>')
 
-        this.text = this.element
+        this.element
+            .removeAttr("id")
             .removeAttr("name")
-            .attr("type", "text")
-            .wrap("<span></span>")
-
-        this.uidiv = this.text
-            .parent()
+            .append(this.text)
             .append(this.input)
             .append(this.deck)
             .append("<p class='help'>Enter text to search.</p>")
+
+        this.uidiv = this.element
+        this.element = this.text
 
         this._setInitial()
 
@@ -149,12 +153,7 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
     },
 
     _destroy: function() {
-        var input = this.text
-            .attr("name", this.name)
-            .removeAttr("type")
-            .detach()
-        this.uidiv
-            .replaceWith(input)
+        this.element.empty()
         this._super();
     },
 
