@@ -541,15 +541,19 @@ function is_edit_mode() {
 }
 
 function set_slideshow_mode() {
-    $(document).data("display", "slideshow")
+    $(document).data("photo_mode", "slideshow")
 }
 
 function set_article_mode() {
-    $(document).data("display", "detail")
+    $(document).data("photo_mode", "article")
 }
 
-function is_slideshow_mode() {
-    return ($(document).data("display") == "slideshow")
+function get_photo_mode() {
+    if ($(document).data("photo_mode") == null) {
+        return "article"
+    } else {
+        return $(document).data("photo_mode")
+    }
 }
 
 function update_history(push_history, url, state) {
@@ -1197,9 +1201,11 @@ function display_root() {
 
 function display_photo(photo, search, results, n) {
     reset_display()
-    if (is_slideshow_mode()) {
+    var mode = get_photo_mode()
+
+    if (mode == "slideshow") {
         display_photo_slideshow(photo, search, results, n)
-    } else {
+    } else if (mode == "article") {
         display_photo_article(photo, search, results, n)
     }
 }
