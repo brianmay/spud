@@ -17,7 +17,7 @@ ul.ui-autocomplete { z-index: 200; }
 
 .photo_list_item { border:1px solid #dddddd; }
 
-.photo_container { border:1px solid #dddddd; }
+.photo_article { border:1px solid #dddddd; }
 
 .photo_block { display:inline-block; vertical-align:top; padding:10px; width:200px; min-height:420px; } 
 .photo_block { border:1px solid #777777; margin:5px; }

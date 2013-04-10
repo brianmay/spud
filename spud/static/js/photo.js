@@ -346,8 +346,6 @@ $.widget('ui.camera_details',  $.ui.infobox, {
 $.widget('ui.photo_article',  {
     _create: function() {
         this.element
-                .addClass("photo_container")
-                .addClass("photo_detail")
                 .addClass("photo_article")
 
         this.pi = $("<div class='photo_block' />")
