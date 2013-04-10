@@ -166,9 +166,10 @@ $.widget('ui.photo_image',  {
     },
 
     _destroy: function() {
-        this.img.image("destroy")
         $(window).off("resize")
-        this._super();
+        this.img.image("destroy")
+        this.empty()
+        this._super()
     },
 })
 
@@ -274,7 +275,12 @@ $.widget('ui.photo_details',  $.ui.infobox, {
             .empty()
             .append(get_photo_action(photo.action))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_action, "[edit]"))
-    }
+    },
+
+    _destroy: function() {
+        this.empty()
+        this._super()
+    },
 })
 
 
@@ -329,6 +335,11 @@ $.widget('ui.camera_details',  $.ui.infobox, {
             .text(photo.metering_mode)
         return this
     },
+
+    _destroy: function() {
+        this.empty()
+        this._super()
+    },
 })
 
 
@@ -376,6 +387,7 @@ $.widget('ui.photo_article',  {
         this.pd.photo_details("destroy")
         this.cd.camera_details("destroy")
         this.empty()
+        this._super()
     },
 })
 
