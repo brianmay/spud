@@ -1788,7 +1788,7 @@ function display_album(album) {
 
     if (album.children.length > 0) {
         $("<div class='children'/>")
-            .album_child_list({ album: album, change_mode: true })
+            .album_list({ albums: album.children, change_mode: true })
             .appendTo(cm)
     }
 

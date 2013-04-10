@@ -52,23 +52,23 @@ $.widget('ui.album_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.album_child_list', $.ui.photo_list, {
+$.widget('ui.album_list', $.ui.photo_list, {
     _create: function() {
         this._super()
-        if (this.options.album != null) {
-            this.load(this.options.album, this.options.change_mode)
+        if (this.options.albums != null) {
+            this.load(this.options.albums, this.options.change_mode)
         }
     },
 
-    load: function(album, change_mode) {
+    load: function(albums, change_mode) {
         var mythis = this
-        $.each(album.children, function(j, child) {
-            var photo = child.cover_photo
+        $.each(albums, function(j, album) {
+            var photo = album.cover_photo
             var sort=""
-            if  (child.sortorder || child.sortname) {
-                sort = child.sortname + " " + child.sortorder
+            if  (album.sortorder || album.sortname) {
+                sort = album.sortname + " " + album.sortorder
             }
-            mythis.append_photo(photo, child.title, sort, child.description, album_a(child, null), false)
+            mythis.append_photo(photo, album.title, sort, album.description, album_a(album, null), false)
         })
     }
 })
