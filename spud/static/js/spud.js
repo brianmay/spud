@@ -1787,33 +1787,20 @@ function display_album(album) {
         .appendTo(cm)
 
     if (album.children.length > 0) {
-        pl = $("<ul class='photo_list' />")
-        for (var i in album.children) {
-            var child = album.children[i]
-            var photo = child.cover_photo
+        var pl = $("<div class='children'/>")
+            .photo_list()
+            .appendTo(cm)
 
-            var sort=null
+        $.each(album.children, function(j, child) {
+            var photo = child.cover_photo
+            var sort=""
             if  (child.sortorder || child.sortname) {
                 sort = child.sortname + " " + child.sortorder
             }
-
-            var li = photo_thumb(photo, child.title, sort, child.description,
-                album_url(album),
-                false,
-                function(album) {
-                    return function() {
-                        do_album(album.id, true)
-                        return false
-                    }
-            }(child))
-            pl.append(li)
-        }
-
-        c = $("<div class='children' />")
-        c.append(pl)
-
-        cm.append(c)
+            pl.photo_list("append_photo", photo, child.title, sort, child.description, album_a(child, null), false)
+        })
     }
+
 
     var search = { params: { album: album.id }}
 

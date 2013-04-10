@@ -553,3 +553,62 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
         this.add_item(search_a(search))
     },
 })
+
+
+$.widget('ui.photo_list',  {
+    _create: function() {
+        this.element
+                .addClass("photo_list")
+    },
+
+    append_photo: function(photo, title, sort, description, a, selectable) {
+        a
+                .data("photo", null)
+                .empty()
+
+        if (photo != null) {
+            var style = get_photo_style(photo)
+            $("<img />")
+                .image({ photo: photo, size: get_settings().list_size })
+                .appendTo(a)
+        }
+
+        $("<div class='title'></div>")
+            .text(title)
+            .appendTo(a)
+
+        if (sort) {
+            $("<div class='sort'></div>")
+                .text(sort)
+                .appendTo(a)
+        }
+        if (description) {
+            $("<div class='desc'></div>")
+                .p(description)
+                .appendTo(a)
+        }
+
+        li = $("<li />")
+            .attr('class', "photo_list_item")
+            .addClass(style)
+            .append(a)
+            .on("click", function(ev) { a.trigger('click'); })
+            .toggleClass("ui-selected", selectable && is_photo_selected(photo))
+            .appendTo(this.element)
+
+        return li
+    },
+
+    _destroy: function() {
+        this.element.find("img")
+            .image("destroy")
+
+        this.element
+            .removeAttr("photo_list")
+            .empty()
+
+        this._super()
+    },
+})
+
+
