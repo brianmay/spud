@@ -139,16 +139,12 @@ $.widget('ui.photo_image',  {
 
     load: function(photo, change_mode) {
         var img = this.img
-        var style = photo.style
 
         var can_change = change_mode && photo.can_change
 
         img
             .image("load", photo, get_settings().view_size)
             .image("resize", false)
-            .removeClass("photo-D")
-            .removeClass("photo-R")
-            .addClass(style)
 
         $(window).off("resize")
         $(window).on("resize", function() { img.image("resize", false) })
@@ -331,6 +327,53 @@ $.widget('ui.camera_details',  $.ui.infobox, {
             .empty()
             .text(photo.metering_mode)
         return this
+    },
+})
+
+$.widget('ui.photo_article',  {
+    _create: function() {
+        this.element
+                .addClass("photo_container")
+                .addClass("photo_detail")
+                .addClass("photo_article")
+
+        this.pi = $("<div class='photo_block' />")
+            .photo_image()
+            .appendTo(this.element)
+
+        this.pd = $("<div class='photo_block' />")
+            .photo_details()
+            .appendTo(this.element)
+
+        this.cd = $("<div class='photo_block' />")
+            .camera_details()
+            .appendTo(this.element)
+
+        if (this.options.photo != null) {
+            this.load(this.options.photo, this.options.change_mode)
+        }
+    },
+
+    load: function(photo, change_mode) {
+        var style = get_photo_style(photo)
+
+        this.element
+            .removeClass("photo-D")
+            .removeClass("photo-R")
+            .addClass(style)
+            .toggleClass("photo-selected", is_photo_selected(photo))
+
+        this.pi.photo_image("load", photo, change_mode)
+        this.pd.photo_details("load", photo, change_mode)
+        this.cd.camera_details("load", photo, change_mode)
+
+    },
+
+    _destroy: function() {
+        this.pi.photo_image("destroy")
+        this.pd.photo_details("destroy")
+        this.cd.camera_details("destroy")
+        this._super();
     },
 })
 
