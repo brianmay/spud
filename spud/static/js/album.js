@@ -31,10 +31,14 @@ $.widget('ui.album_details',  $.ui.infobox, {
             .empty()
             .text(album.title)
 
+        this.toggle_field("photo", album.photo != null)
+
+        this.toggle_field("sort", album.sortname != "" && album.sortorder != "")
         this.get_field("sort")
             .empty()
             .text(album.sortname + " " + album.sortorder)
 
+        this.toggle_field("description", album.description != "")
         this.get_field("description")
             .empty()
             .text(album.description)
