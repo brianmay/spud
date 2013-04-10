@@ -356,7 +356,9 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
 $.widget('ui.selection_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
-        this.load(this.options.selection)
+        if (this.options.selection != null) {
+            this.load(this.options.selection)
+        }
     },
 
     load: function(selection) {
