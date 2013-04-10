@@ -1266,7 +1266,9 @@ function display_photo_article(photo, search, results, n) {
         }
     }
 
-    display_common_photo(photo, search)
+    var ul = $('<ul/>')
+        .photo_menu({ photo: photo, search: search, change_mode: is_edit_mode(), })
+    append_action_links(ul)
 }
 
 
@@ -1289,7 +1291,15 @@ function display_photo_slideshow(photo, search, results, n) {
         }
     }
 
-    display_common_photo(photo, search)
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+        .append(escapeHTML(photo.title))
+
+    var ul = $('<ul/>')
+        .photo_menu({ photo: photo, search: search, change_mode: is_edit_mode(), })
+    append_action_links(ul)
 
     pdp = $('<div class="module"/>')
         .append("<h2>Photo Details</h2>")
@@ -1303,86 +1313,6 @@ function display_photo_slideshow(photo, search, results, n) {
         .addClass("overlapped")
 
     $("body").css("overflow", "hidden");
-}
-
-
-function display_common_photo(photo, search) {
-    var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, change_mode: is_edit_mode(), })
-    append_action_links(ul)
-    return
-
-    if (is_slideshow_mode()) {
-        $("<li>")
-            .on("click", function() {
-                set_article_mode()
-                reload_page()
-                return false;
-            })
-            .html("<a href='#'>Article</a>")
-            .appendTo(ul)
-    } else {
-        $("<li>")
-            .on("click", function() {
-                set_slideshow_mode()
-                reload_page()
-                return false;
-            })
-            .html("<a href='#'>Slideshow</a>")
-            .appendTo(ul)
-    }
-
-    if (search != null) {
-        $("<li/>")
-            .append(search_a(search))
-            .appendTo(ul)
-    }
-
-    if (photo.can_change) {
-        if (is_edit_mode()) {
-            $("<li>")
-                .on("click", function() {
-                    set_normal_mode()
-                    reload_page()
-                    return false;
-                })
-                .html("<a href='#'>View</a>")
-                .appendTo(ul)
-        } else {
-            $("<li>")
-                .on("click", function() {
-                    set_edit_mode()
-                    reload_page()
-                    return false;
-                })
-                .html("<a href='#'>Edit</a>")
-                .appendTo(ul)
-        }
-    }
-
-    if (is_photo_selected(photo)) {
-        $("<li>")
-            .on("click", function() {
-                del_selection(photo)
-                reload_page()
-                return false;
-            })
-            .html("<a href='#'>Unselect</a>")
-            .appendTo(ul)
-    } else {
-        $("<li>")
-            .on("click", function() {
-                add_selection(photo);
-                reload_page()
-                return false;
-            })
-            .html("<a href='#'>Select</a>")
-            .appendTo(ul)
-    }
-
-    append_action_links(ul)
-
-    return
 }
 
 
