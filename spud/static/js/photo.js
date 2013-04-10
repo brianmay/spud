@@ -168,7 +168,7 @@ $.widget('ui.photo_image',  {
     _destroy: function() {
         $(window).off("resize")
         this.img.image("destroy")
-        this.empty()
+        this.element.empty()
         this._super()
     },
 })
@@ -278,7 +278,7 @@ $.widget('ui.photo_details',  $.ui.infobox, {
     },
 
     _destroy: function() {
-        this.empty()
+        this.element.empty()
         this._super()
     },
 })
@@ -337,7 +337,7 @@ $.widget('ui.camera_details',  $.ui.infobox, {
     },
 
     _destroy: function() {
-        this.empty()
+        this.element.empty()
         this._super()
     },
 })
@@ -386,7 +386,7 @@ $.widget('ui.photo_article',  {
         this.pi.photo_image("destroy")
         this.pd.photo_details("destroy")
         this.cd.camera_details("destroy")
-        this.empty()
+        this.element.empty()
         this._super()
     },
 })
@@ -430,7 +430,7 @@ $.widget('ui.photo_slideshow',  {
     _destroy: function() {
         $(window).off("resize")
         this.img.image("destroy")
-        this.empty()
+        this.element.empty()
         this._super()
     },
 })
