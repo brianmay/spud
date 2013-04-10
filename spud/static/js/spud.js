@@ -1805,32 +1805,7 @@ function display_album(album) {
     var search = { params: { album: album.id }}
 
     var ul = $('<ul class="menu"/>')
-
-    $("<li/>")
-        .append(search_results_a(search, 0, "Show Photos"))
-        .appendTo(ul)
-
-    $("<li/>")
-        .append(search_a(search))
-        .appendTo(ul)
-
-    if (album.can_add) {
-        $("<li/>")
-            .append(add_album_a(album))
-            .appendTo(ul)
-    }
-
-    if (album.can_change) {
-        $("<li/>")
-            .append(change_album_a(album))
-            .appendTo(ul)
-    }
-
-    if (album.can_delete) {
-        $("<li/>")
-            .append(delete_album_a(album))
-            .appendTo(ul)
-    }
+        .album_menu({ album: album, change_mode: true })
 
     append_action_links(ul)
 

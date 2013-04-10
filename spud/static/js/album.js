@@ -48,3 +48,37 @@ $.widget('ui.album_details',  $.ui.infobox, {
 })
 
 
+$.widget('ui.album_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.album != null) {
+            this.load(this.options.album, this.options.change_mode)
+        }
+    },
+
+    load: function(album, change_mode) {
+        this.element.empty()
+
+        var search = { params: { album: album.id }}
+
+        this.add_item(search_results_a(search, 0, "Show Photos"))
+        this.add_item(search_a(search))
+
+        if (change_mode) {
+            if (album.can_add) {
+                this.add_item(add_album_a(album))
+            }
+
+            if (album.can_change) {
+                this.add_item(change_album_a(album))
+            }
+
+            if (album.can_delete) {
+                this.add_item(delete_album_a(album))
+            }
+        }
+    },
+})
+
+
+
