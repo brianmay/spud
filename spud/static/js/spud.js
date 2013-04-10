@@ -1272,7 +1272,7 @@ function display_photo_article(photo, search, results, n) {
 
 function display_photo_slideshow(photo, search, results, n) {
     $("<div></div>")
-        .photo_slideshow({ photo: photo, size: get_settings().click_size })
+        .photo_slideshow({ photo: photo, change_mode: is_edit_mode(), })
         .appendTo("#content-main")
 
     if (search != null) {
