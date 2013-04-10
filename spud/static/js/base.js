@@ -362,6 +362,12 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
     load: function(selection) {
         this.element.empty()
         if (selection.length > 0) {
+            var search = {
+                params: {
+                    photo: selection.join(".")
+                }
+            }
+
             this.add_item(search_results_a(search, 0, "Show"))
             this.add_item(
                 $("<a href='#'>Clear</a>")

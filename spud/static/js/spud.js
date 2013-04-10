@@ -745,12 +745,6 @@ function replace_links() {
 function update_selection() {
     selection = get_selection()
 
-    var search = {
-        params: {
-            photo: selection.join(".")
-        }
-    }
-
     var ul = $('<ul class="menu"/>')
         .selection_menu({ selection: selection })
 
