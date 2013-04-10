@@ -1201,17 +1201,17 @@ function display_root() {
 }
 
 
-function display_photo(photo, search, number_results, n) {
+function display_photo(photo, search, results, n) {
     reset_display()
     if (is_slideshow_mode()) {
-        display_photo_slideshow(photo, search, number_results, n)
+        display_photo_slideshow(photo, search, results, n)
     } else {
-        display_photo_article(photo, search, number_results, n)
+        display_photo_article(photo, search, results, n)
     }
 }
 
 
-function display_photo_article(photo, search, number_results, n) {
+function display_photo_article(photo, search, results, n) {
     var cm = $("#content-main")
     cm.html("")
 
@@ -1237,68 +1237,64 @@ function display_photo_article(photo, search, number_results, n) {
         .append(escapeHTML(photo.title))
 
     if (search != null) {
-        $("#content-main").append(photo_paginator(search, number_results, n))
+        var last_page = results.number_results-1
+
+        var html_page = function(page, text, key) {
+            var photo = null
+            if (page == n-1) {
+                photo = results.prev_photo
+            } else if (page == n) {
+                photo = results.photo
+            } else if (page == n+1) {
+                photo = results.next_photo
+            }
+            return search_photo_a(search, page, photo, text, key)
+        }
+
+        $("#content-main").append(generic_paginator(n, last_page, html_page))
 
         if (n > 1) {
-            search_photo_a(search, n-1, null, "", null)
+            search_photo_a(search, n-1, results.prev_photo, "", null)
                 .addClass("prevslide")
                 .appendTo(cm)
         }
 
-        if (n < number_results-1) {
-            search_photo_a(search, n+1, null, "", null)
+        if (n < results.number_results-1) {
+            search_photo_a(search, n+1, results.next_photo, "", null)
                 .addClass("nextslide")
                 .appendTo(cm)
         }
     }
 
-    display_common_photo(photo, search, number_results, n)
+    display_common_photo(photo, search, n)
 }
 
 
-function display_photo_slideshow(photo, search, number_results, n) {
-    var div = $("<div class='slideshow'></div>")
-
-    var can_change = false
-    if (photo.can_change && is_edit_mode()) {
-        prefix = "Edit "
-        can_change = true
-    }
-
-    var style = get_photo_style(photo)
-    var photodiv = $("<div class='photo'></div>")
-        .addClass(style)
-
-    var img = $("<img />")
-        .image({ photo: photo, size: get_settings().click_size })
-        .image('resize', true)
-        .appendTo(photodiv)
-
-    $(window).off("resize")
-    $(window).on("resize", function() { img.image('resize', true) })
-    div.append(photodiv)
+function display_photo_slideshow(photo, search, results, n) {
+    $("<div></div>")
+        .photo_slideshow({ photo: photo, size: get_settings().click_size })
+        .appendTo("#content-main")
 
     if (search != null) {
         if (n > 1) {
-            search_photo_a(search, n-1, null, "", "p")
+            search_photo_a(search, n-1, results.prev_photo, "", "p")
                 .addClass("prevslide")
-                .appendTo(div)
+                .appendTo("#content-main")
         }
 
-        if (n < number_results-1) {
-            search_photo_a(search, n+1, null, "", "n")
+        if (n < results.number_results-1) {
+            search_photo_a(search, n+1, results.next_photo, "", "n")
                 .addClass("nextslide")
-                .appendTo(div)
+                .appendTo("#content-main")
         }
     }
 
-    $("#content-main").html(div)
-
-    display_common_photo(photo, search, number_results, n)
+    display_common_photo(photo, search, n)
 
     pdp = $('<div class="module"/>')
         .append("<h2>Photo Details</h2>")
 
+    var can_change = false
     if (photo.title || can_change) {
         $("<div class='title'></div>")
             .text(photo.title)
@@ -1331,7 +1327,7 @@ function display_photo_slideshow(photo, search, number_results, n) {
 }
 
 
-function display_common_photo(photo, search, number_results, n) {
+function display_common_photo(photo, search, n) {
     var ul = $('<ul class="menu"/>')
 
     if (is_slideshow_mode()) {
@@ -1409,7 +1405,7 @@ function display_common_photo(photo, search, number_results, n) {
 
 
 function display_search_photo(search, results, n) {
-    display_photo(results.photo, search, results.number_results, n)
+    display_photo(results.photo, search, results, n)
 
     var page = Math.floor(n / search.results_per_page)
 
@@ -3693,18 +3689,6 @@ function search_paginator(search, results) {
 
     var html_page = function(page, text, key) {
         return search_results_a(search, page, text, key)
-    }
-
-    return generic_paginator(page, last_page, html_page)
-}
-
-
-function photo_paginator(search, number_results, n) {
-    var page = n
-    var last_page = number_results-1
-
-    var html_page = function(page, text, key) {
-        return search_photo_a(search, page, null, text, key)
     }
 
     return generic_paginator(page, last_page, html_page)

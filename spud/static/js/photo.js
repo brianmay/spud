@@ -391,3 +391,47 @@ $.widget('ui.photo_article',  {
     },
 })
 
+
+$.widget('ui.photo_slideshow',  {
+    _create: function() {
+        this.element
+                .addClass("slideshow")
+
+        this.pd = $("<div class='photo'></div>")
+            .appendTo(this.element)
+
+        this.img = $("<img />")
+            .image()
+            .appendTo(this.pd)
+
+        if (this.options.photo != null) {
+            this.load(this.options.photo, this.options.change_mode)
+        }
+    },
+
+    load: function(photo, change_mode) {
+        var style = get_photo_style(photo)
+
+        this.pd
+            .removeClass("photo-D")
+            .removeClass("photo-R")
+            .addClass(style)
+            .toggleClass("photo-selected", is_photo_selected(photo))
+
+        var img = this.img
+        img
+            .image("load", photo, get_settings().click_size)
+            .image("resize", true)
+
+        $(window).off("resize")
+        $(window).on("resize", function() { img.image("resize", true) })
+    },
+
+    _destroy: function() {
+        $(window).off("resize")
+        this.img.image("destroy")
+        this.empty()
+        this._super()
+    },
+})
+

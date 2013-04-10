@@ -1865,6 +1865,17 @@ def search_item(request, number):
         'number_results': number_results,
         'session': _get_session(request),
     }
+
+    try:
+        resp['prev_photo'] = _get_photo(request.user, photo_list[number-1])
+    except IndexError:
+        pass
+
+    try:
+        resp['next_photo'] = _get_photo(request.user, photo_list[number+1])
+    except IndexError:
+        pass
+
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
