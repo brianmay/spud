@@ -1294,36 +1294,15 @@ function display_photo_slideshow(photo, search, results, n) {
     pdp = $('<div class="module"/>')
         .append("<h2>Photo Details</h2>")
 
-    var can_change = false
-    if (photo.title || can_change) {
-        $("<div class='title'></div>")
-            .text(photo.title)
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
-            .appendTo(pdp)
-    }
-
-    if (photo.persons.length > 0 || can_change) {
-        var tag = $("<div class='persons'></div>")
-        append_persons(tag, photo.persons)
-        tag.conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
-        tag.appendTo(pdp)
-    }
-
-    if (photo.description || can_change) {
-        $("<div class='description'></div>")
-            .html(p(photo.description))
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit description]"))
-            .appendTo(pdp)
-    }
+    $("<div></div>")
+        .photo_summary({ photo: photo, change_mode: is_edit_mode(), })
+        .appendTo(pdp)
 
     $("#content-related")
         .append(pdp)
         .addClass("overlapped")
 
     $("body").css("overflow", "hidden");
-
-//    $(".module")
-//        .addClass("overlapped")
 }
 
 

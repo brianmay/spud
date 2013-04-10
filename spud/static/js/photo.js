@@ -113,6 +113,54 @@ $.widget('ui.image', {
 })
 
 
+$.widget('ui.photo_summary',  {
+    _create: function() {
+        this.element
+            .addClass("photo_summary")
+
+        this._super();
+
+        this.title = $("<div class='title'></div>")
+            .appendTo(this.element)
+
+        this.persons = $("<div class='persons'></div>")
+            .appendTo(this.element)
+
+        this.description = $("<div class='description'></div>")
+            .appendTo(this.element)
+
+        if (this.options.photo != null) {
+            this.load(this.options.photo, this.options.change_mode)
+        }
+    },
+
+    load: function(photo, change_mode) {
+        var can_change = change_mode && photo.can_change
+
+        this.title
+            .empty()
+            .text(photo.title)
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
+
+        this.persons
+            .append_csv($.map(photo.persons, function(person) { return person_a(person); } ))
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
+
+        this.description
+            .empty()
+            .p(photo.description)
+            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit description]"))
+    },
+
+    _destroy: function() {
+        this.element
+            .removeClass("photo_summary")
+            .empty()
+        this._super()
+    },
+})
+
+
 $.widget('ui.photo_image',  {
     _create: function() {
         this.element
@@ -124,13 +172,8 @@ $.widget('ui.photo_image',  {
             .image()
             .appendTo(this.element)
 
-        this.title = $("<div class='title'></div>")
-            .appendTo(this.element)
-
-        this.persons = $("<div class='persons'></div>")
-            .appendTo(this.element)
-
-        this.description = $("<div class='description'></div>")
+        this.summary = $("<div></div>")
+            .photo_summary()
             .appendTo(this.element)
 
         if (this.options.photo != null) {
@@ -150,24 +193,14 @@ $.widget('ui.photo_image',  {
         $(window).off("resize")
         $(window).on("resize", function() { img.image("resize", false) })
 
-        this.title
-            .empty()
-            .text(photo.title)
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
-
-        this.persons
-            .append_csv($.map(photo.persons, function(person) { return person_a(person); } ))
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
-
-        this.description
-            .empty()
-            .p(photo.description)
-            .conditional_append(can_change, photo_change_a(photo, display_change_photo_description, "[edit description]"))
+        this.summary
+            .photo_summary("load", photo, change_mode)
     },
 
     _destroy: function() {
         $(window).off("resize")
         this.img.image("destroy")
+        this.summary.image("destroy")
         this.element.empty()
         this._super()
     },
