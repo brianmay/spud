@@ -36,15 +36,6 @@ function place_url(place) {
 }
 
 
-function person_search_url(search) {
-    params = {}
-    if (search.params != null) {
-        params = search.params
-    }
-    return "/b/person/?" + jQuery.param(params)
-}
-
-
 function person_search_results_url(search, page) {
     var params = jQuery.extend({}, search.params, {
         page: page
@@ -254,9 +245,9 @@ function load_delete_place(place_id, success) {
 }
 
 
-function load_person_search(search, success) {
+function load_person_search_form(search, success) {
     ajax({
-        url: '/a/person/',
+        url: '/a/person/form/',
         data: search.params,
         success: success,
     })

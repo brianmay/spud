@@ -247,8 +247,8 @@ function person_search_a(search, title) {
         title = "Person search"
     }
     var a = $('<a/>')
-        .attr('href', person_search_url(search))
-        .on('click', function() { do_person_search(search, true); return false; })
+        .attr('href', "#")
+        .on('click', function() { do_person_search_form(search, true); return false; })
         .text(title)
     return a
 }
@@ -2524,7 +2524,7 @@ function submit_delete_place(place, dialog) {
     return false
 }
 
-function display_person_search(search, data) {
+function display_person_search_form(search, data) {
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Search people")
 
@@ -2540,7 +2540,7 @@ function display_person_search(search, data) {
     dialog
         .keypress(function(ev) {
             if (ev.which == 13 && !ev.shiftKey) {
-                submit_person_search($( this ), f[0])
+                submit_person_search_form($( this ), f[0])
                 return false
             }
         })
@@ -2550,7 +2550,7 @@ function display_person_search(search, data) {
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Search: function() {
-                    submit_person_search($( this ), f[0])
+                    submit_person_search_form($( this ), f[0])
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -2560,7 +2560,7 @@ function display_person_search(search, data) {
 }
 
 
-function submit_person_search(dialog, form) {
+function submit_person_search_form(dialog, form) {
 
     var params = { }
 
@@ -3858,14 +3858,14 @@ function do_delete_place(place_id, push_history) {
 }
 
 
-function do_person_search(search, push_history) {
+function do_person_search_form(search, push_history) {
     if (search.params == null) {
         search.params = {}
     }
 
-    load_person_search(search,
+    load_person_search_form(search,
         function(data) {
-            display_person_search(search, data)
+            display_person_search_form(search, data)
         }
     )
 }

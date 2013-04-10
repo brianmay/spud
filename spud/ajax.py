@@ -922,7 +922,7 @@ def place_finish(request, place):
 
 
 @check_errors
-def person_search(request):
+def person_search_form(request):
     resp = {}
 
     for key in request.GET:
@@ -935,7 +935,7 @@ def person_search(request):
         else:
             raise HttpBadRequest("Unknown key %s" % (key))
 
-    resp['type'] = 'person_search'
+    resp['type'] = 'person_search_form'
     resp['can_add'] = request.user.has_perm('spud.add_person')
     resp['session'] = _get_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")

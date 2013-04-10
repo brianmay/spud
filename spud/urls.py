@@ -39,7 +39,7 @@ urlpatterns = patterns('',
     url(r'^a/place/add/$', 'spud.ajax.place_add', name='ajax_place_add'),
     url(r'^a/place/(?P<place_id>\d+)/delete/$', 'spud.ajax.place_delete', name='ajax_place_delete'),
 
-    url(r'^a/person/$', 'spud.ajax.person_search', name='ajax_person_search'),
+    url(r'^a/person/form/$', 'spud.ajax.person_search_form', name='ajax_person_search_form'),
     url(r'^a/person/results/$', 'spud.ajax.person_search_results', name='ajax_person_search_results'),
     url(r'^a/person/(?P<person_id>\d+)/$', 'spud.ajax.person', name='ajax_person'),
     url(r'^a/person/add/$', 'spud.ajax.person_add', name='ajax_person_add'),
