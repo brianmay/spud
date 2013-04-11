@@ -18,7 +18,7 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
     _submit: function() {
         search = {
             params: {
-                q: this.get_input_field("q")
+                q: this.get_field("q")
             }
         }
         do_album_search_results(search, 0, true)
@@ -119,6 +119,7 @@ $.widget('ui.album_list', $.ui.photo_list, {
         })
     }
 })
+
 
 $.widget('ui.album_menu', $.ui.spud_menu, {
     _create: function() {

@@ -473,7 +473,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         this.input[id].val(value)
     },
 
-    get_input_field: function(id) {
+    get_field: function(id) {
         return this.input[id].val()
     },
 })
