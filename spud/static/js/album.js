@@ -86,8 +86,8 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 
         var search = { params: { album: album.id }}
 
-        this.add_item(search_results_a(search, 0, "Show Photos"))
-        this.add_item(search_a(search))
+        this.add_item(photo_search_results_a(search, 0, "Show Photos"))
+        this.add_item(photo_search_form_a(search))
 
         if (change_mode) {
             if (album.can_add) {
