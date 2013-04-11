@@ -2,6 +2,7 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
     _create: function() {
         this.options.title = "Album search"
         this.options.description = "Please search for an album."
+        this.options.button = "Search"
         this._super();
 
         this.add_input_field("q", "Search for", "text")

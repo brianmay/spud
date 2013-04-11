@@ -395,19 +395,24 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
             delete options.description
         }
 
+        var submit = "Continue"
+        if (options.button != null) {
+            submit = options.button
+            delete options.button
+        }
+
         this.f = $("<form method='get' />")
             .appendTo(this.element)
 
         this.table = $("<table />")
             .appendTo(this.f)
 
-        options.buttons = {
-            Submit: function() {
-                mythis._submit()
-            },
-            Cancel: function() {
-                mythis.close()
-            },
+        options.buttons = {}
+        options.buttons[submit] = function() {
+            mythis._submit()
+        }
+        options.buttons['Cancel'] = function() {
+            mythis.close()
         }
 
         this.input = {}
