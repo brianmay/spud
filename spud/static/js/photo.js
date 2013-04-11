@@ -305,11 +305,11 @@ $.widget('ui.photo_details',  $.ui.infobox, {
             .append_list($.map(photo.related, function(r) {
                 return [[
                     photo_a(r.photo, r.title),
-                    can_change ? change_photo_relation_a({ id: r.id }, "[edit]") : null,
-                    can_change ? delete_photo_relation_a({ id: r.id }, "[del]") : null,
+                    can_change ? photo_relation_change_a({ id: r.id }, "[edit]") : null,
+                    can_change ? photo_relation_delete_a({ id: r.id }, "[del]") : null,
                 ]]
              }))
-            .conditional_append(can_change, add_photo_relation_a(photo, "[add]"))
+            .conditional_append(can_change, photo_relation_add_a(photo, "[add]"))
 
         this.get_field("action")
             .empty()

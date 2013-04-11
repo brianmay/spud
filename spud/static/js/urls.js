@@ -158,7 +158,7 @@ function load_album(album_id, success) {
 }
 
 
-function load_change_album(album_id, updates, success) {
+function load_album_change(album_id, updates, success) {
     var url = '/a/album/add/'
     if (album_id != null) {
         url = '/a/album/'+album_id+'/'
@@ -172,7 +172,7 @@ function load_change_album(album_id, updates, success) {
 }
 
 
-function load_delete_album(album_id, success) {
+function load_album_delete(album_id, success) {
     ajax({
         url: '/a/album/'+album_id+'/delete/',
         dataType : 'json',
@@ -191,7 +191,7 @@ function load_category(category_id, success) {
 }
 
 
-function load_change_category(category_id, updates, success) {
+function load_category_change(category_id, updates, success) {
     var url = '/a/category/add/'
     if (category_id != null) {
         url = '/a/category/'+category_id+'/'
@@ -205,7 +205,7 @@ function load_change_category(category_id, updates, success) {
 }
 
 
-function load_delete_category(category_id, success) {
+function load_category_delete(category_id, success) {
     ajax({
         url: '/a/category/'+category_id+'/delete/',
         success: success,
@@ -222,7 +222,7 @@ function load_place(place_id, success) {
 }
 
 
-function load_change_place(place_id, updates, success) {
+function load_place_change(place_id, updates, success) {
     var url = '/a/place/add/'
     if (place_id != null) {
         url = '/a/place/'+place_id+'/'
@@ -236,7 +236,7 @@ function load_change_place(place_id, updates, success) {
 }
 
 
-function load_delete_place(place_id, success) {
+function load_place_delete(place_id, success) {
     ajax({
         url: '/a/place/'+place_id+'/delete/',
         success: success,
@@ -279,7 +279,7 @@ function load_person(place_id, success) {
 }
 
 
-function load_change_person(person_id, updates, success) {
+function load_person_change(person_id, updates, success) {
     var url = '/a/person/add/'
     if (person_id != null) {
         url = '/a/person/'+person_id+'/'
@@ -293,7 +293,7 @@ function load_change_person(person_id, updates, success) {
 }
 
 
-function load_delete_person(person_id, success) {
+function load_person_delete(person_id, success) {
     ajax({
         url: '/a/person/'+person_id+'/delete/',
         success: success,
@@ -310,7 +310,7 @@ function load_photo_relation(place_id, success) {
 }
 
 
-function load_change_photo_relation(photo_relation_id, updates, success) {
+function load_photo_relation_change(photo_relation_id, updates, success) {
     var url = '/a/relation/add/'
     if (photo_relation_id != null) {
         url = '/a/relation/'+photo_relation_id+'/'
@@ -324,7 +324,7 @@ function load_change_photo_relation(photo_relation_id, updates, success) {
 }
 
 
-function load_delete_photo_relation(photo_relation_id, success) {
+function load_photo_relation_delete(photo_relation_id, success) {
     ajax({
         url: '/a/relation/'+photo_relation_id+'/delete/',
         success: success,

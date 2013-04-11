@@ -84,7 +84,7 @@ function album_a(album, title) {
 }
 
 
-function change_album_a(album, title) {
+function album_change_a(album, title) {
     if (album == null) {
         return ""
     }
@@ -100,26 +100,26 @@ function change_album_a(album, title) {
 }
 
 
-function add_album_a(parent, title) {
+function album_add_a(parent, title) {
     if (title == null) {
         title = "Add album"
     }
     var a = $('<a/>')
         .attr('href', album_url(parent))
-        .on('click', function() { do_add_album(parent, true); return false; })
+        .on('click', function() { do_album_add(parent, true); return false; })
         .data('photo', parent.cover_photo)
         .text(title)
     return a
 }
 
 
-function delete_album_a(album, title) {
+function album_delete_a(album, title) {
     if (title == null) {
         title = "Delete album"
     }
     var a = $('<a/>')
         .attr('href', album_url(album))
-        .on('click', function() { do_delete_album(album.id, true); return false; })
+        .on('click', function() { do_album_delete(album.id, true); return false; })
         .data('photo', album.cover_photo)
         .text(title)
     return a
@@ -142,7 +142,7 @@ function category_a(category, title) {
 }
 
 
-function change_category_a(category, title) {
+function category_change_a(category, title) {
     if (category == null) {
         return ""
     }
@@ -158,26 +158,26 @@ function change_category_a(category, title) {
 }
 
 
-function add_category_a(parent, title) {
+function category_add_a(parent, title) {
     if (title == null) {
         title = "Add category"
     }
     var a = $('<a/>')
         .attr('href', category_url(parent))
-        .on('click', function() { do_add_category(parent, true); return false; })
+        .on('click', function() { do_category_add(parent, true); return false; })
         .data('photo', parent.cover_photo)
         .text(title)
     return a
 }
 
 
-function delete_category_a(category, title) {
+function category_delete_a(category, title) {
     if (title == null) {
         title = "Delete category"
     }
     var a = $('<a/>')
         .attr('href', category_url(category))
-        .on('click', function() { do_delete_category(category.id, true); return false; })
+        .on('click', function() { do_category_delete(category.id, true); return false; })
         .data('photo', category.cover_photo)
         .text(title)
     return a
@@ -200,7 +200,7 @@ function place_a(place, title) {
 }
 
 
-function change_place_a(place, title) {
+function place_change_a(place, title) {
     if (place == null) {
         return ""
     }
@@ -216,26 +216,26 @@ function change_place_a(place, title) {
 }
 
 
-function add_place_a(parent, title) {
+function place_add_a(parent, title) {
     if (title == null) {
         title = "Add place"
     }
     var a = $('<a/>')
         .attr('href', place_url(parent))
-        .on('click', function() { do_add_place(parent, true); return false; })
+        .on('click', function() { do_place_add(parent, true); return false; })
         .data('photo', parent.cover_photo)
         .text(title)
     return a
 }
 
 
-function delete_place_a(place, title) {
+function place_delete_a(place, title) {
     if (title == null) {
         title = "Delete place"
     }
     var a = $('<a/>')
         .attr('href', place_url(place))
-        .on('click', function() { do_delete_place(place.id, true); return false; })
+        .on('click', function() { do_place_delete(place.id, true); return false; })
         .data('photo', place.cover_photo)
         .text(title)
     return a
@@ -286,7 +286,7 @@ function person_a(person, title) {
 }
 
 
-function change_person_a(person, title) {
+function person_change_a(person, title) {
     if (person == null) {
         return ""
     }
@@ -302,32 +302,32 @@ function change_person_a(person, title) {
 }
 
 
-function add_person_a(title) {
+function person_add_a(title) {
     if (title == null) {
         title = "Add person"
     }
     var a = $('<a/>')
         .attr('href', '#')
-        .on('click', function() { do_add_person(true); return false; })
+        .on('click', function() { do_person_add(true); return false; })
         .text(title)
     return a
 }
 
 
-function delete_person_a(person, title) {
+function person_delete_a(person, title) {
     if (title == null) {
         title = "Delete person"
     }
     var a = $('<a/>')
         .attr('href', person_url(person))
-        .on('click', function() { do_delete_person(person.id, true); return false; })
+        .on('click', function() { do_person_delete(person.id, true); return false; })
         .data('photo', person.cover_photo)
         .text(title)
     return a
 }
 
 
-function change_photo_relation_a(photo_relation, title) {
+function photo_relation_change_a(photo_relation, title) {
     if (photo_relation == null) {
         return ""
     }
@@ -343,25 +343,25 @@ function change_photo_relation_a(photo_relation, title) {
 }
 
 
-function add_photo_relation_a(photo, title) {
+function photo_relation_add_a(photo, title) {
     if (title == null) {
         title = "Add photo_relation"
     }
     var a = $('<a/>')
         .attr('href', '#')
-        .on('click', function() { do_add_photo_relation(photo, true); return false; })
+        .on('click', function() { do_photo_relation_add(photo, true); return false; })
         .text(title)
     return a
 }
 
 
-function delete_photo_relation_a(photo_relation, title) {
+function photo_relation_delete_a(photo_relation, title) {
     if (title == null) {
         title = "Delete photo_relation"
     }
     var a = $('<a/>')
         .attr('href', '#')
-        .on('click', function() { do_delete_photo_relation(photo_relation.id, true); return false; })
+        .on('click', function() { do_photo_relation_delete(photo_relation.id, true); return false; })
         .data('photo', photo_relation.cover_photo)
         .text(title)
     return a
@@ -1896,7 +1896,7 @@ function submit_change_album(album, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
-    load_change_album(
+    load_album_change(
         album.id,
         updates,
         function(data) {
@@ -1926,7 +1926,7 @@ function submit_change_album(album, dialog, form) {
 }
 
 
-function display_delete_album(album) {
+function display_album_delete(album) {
     var dialog = $("<div id='dialog'><p>Are you sure you want to delete album '"+escapeHTML(album.title)+"'?</p></div>")
         .attr('title', "Delete " + album.title)
         .dialog({
@@ -1934,7 +1934,7 @@ function display_delete_album(album) {
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Delete: function() {
-                    submit_delete_album(album, $(this))
+                    submit_album_delete(album, $(this))
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -1944,9 +1944,9 @@ function display_delete_album(album) {
 }
 
 
-function submit_delete_album(album, dialog) {
+function submit_album_delete(album, dialog) {
     dialog.dialog("close")
-    load_delete_album(
+    load_album_delete(
         album.id,
         function(data) {
             if (data.type == 'errors') {
@@ -2040,19 +2040,19 @@ function display_category(category) {
 
     if (category.can_add) {
         $("<li/>")
-            .append(add_category_a(category))
+            .append(category_add_a(category))
             .appendTo(ul)
     }
 
     if (category.can_change) {
         $("<li/>")
-            .append(change_category_a(category))
+            .append(category_change_a(category))
             .appendTo(ul)
     }
 
     if (category.can_delete) {
         $("<li/>")
-            .append(delete_category_a(category))
+            .append(category_delete_a(category))
             .appendTo(ul)
     }
 
@@ -2153,7 +2153,7 @@ function submit_change_category(category, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
-    load_change_category(
+    load_category_change(
         category.id,
         updates,
         function(data) {
@@ -2183,7 +2183,7 @@ function submit_change_category(category, dialog, form) {
 }
 
 
-function display_delete_category(category) {
+function display_category_delete(category) {
     var dialog = $("<div id='dialog'><p>Are you sure you want to delete category '"+escapeHTML(category.title)+"'?</p></div>")
         .attr('title', "Delete " + category.title)
         .dialog({
@@ -2191,7 +2191,7 @@ function display_delete_category(category) {
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Delete: function() {
-                    submit_delete_category(category, $(this))
+                    submit_category_delete(category, $(this))
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -2201,9 +2201,9 @@ function display_delete_category(category) {
 }
 
 
-function submit_delete_category(category, dialog) {
+function submit_category_delete(category, dialog) {
     dialog.dialog("close")
-    load_delete_category(
+    load_category_delete(
         category.id,
         function(data) {
             if (data.type == 'errors') {
@@ -2323,19 +2323,19 @@ function display_place(place) {
 
     if (place.can_add) {
         $("<li/>")
-            .append(add_place_a(place))
+            .append(place_add_a(place))
             .appendTo(ul)
     }
 
     if (place.can_change) {
         $("<li/>")
-            .append(change_place_a(place))
+            .append(place_change_a(place))
             .appendTo(ul)
     }
 
     if (place.can_delete) {
         $("<li/>")
-            .append(delete_place_a(place))
+            .append(place_delete_a(place))
             .appendTo(ul)
     }
 
@@ -2460,7 +2460,7 @@ function submit_change_place(place, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
-    load_change_place(
+    load_place_change(
         place.id,
         updates,
         function(data) {
@@ -2490,7 +2490,7 @@ function submit_change_place(place, dialog, form) {
 }
 
 
-function display_delete_place(place) {
+function display_place_delete(place) {
     var dialog = $("<div id='dialog'><p>Are you sure you want to delete place '"+escapeHTML(place.title)+"'?</p></div>")
         .attr('title', "Delete " + place.title)
         .dialog({
@@ -2498,7 +2498,7 @@ function display_delete_place(place) {
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Delete: function() {
-                    submit_delete_place(place, $(this))
+                    submit_place_delete(place, $(this))
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -2508,10 +2508,10 @@ function display_delete_place(place) {
 }
 
 
-function submit_delete_place(place, dialog) {
+function submit_place_delete(place, dialog) {
     dialog.dialog("close")
 
-    load_delete_place(
+    load_place_delete(
         place.id,
         function(data) {
             if (data.type == 'errors') {
@@ -2658,7 +2658,7 @@ function display_person_search_results(search, results) {
 
     if (results.can_add) {
         $("<li/>")
-            .append(add_person_a())
+            .append(person_add_a())
             .appendTo(ul)
     }
 
@@ -2831,19 +2831,19 @@ function display_person(person) {
 
     if (person.can_add) {
         $("<li/>")
-            .append(add_person_a())
+            .append(person_add_a())
             .appendTo(ul)
     }
 
     if (person.can_change) {
         $("<li/>")
-            .append(change_person_a(person))
+            .append(person_change_a(person))
             .appendTo(ul)
     }
 
     if (person.can_delete) {
         $("<li/>")
-            .append(delete_person_a(person))
+            .append(person_delete_a(person))
             .appendTo(ul)
     }
 
@@ -2967,7 +2967,7 @@ function submit_change_person(person, dialog, form) {
         spouse: parse_form_string(form.spouse.value),
     }
 
-    load_change_person(
+    load_person_change(
         person.id,
         updates,
         function(data) {
@@ -2997,7 +2997,7 @@ function submit_change_person(person, dialog, form) {
 }
 
 
-function display_delete_person(person) {
+function display_person_delete(person) {
     var dialog = $("<div id='dialog'><p>Are you sure you want to delete person '"+escapeHTML(person.title)+"'?</p></div>")
         .attr('title', "Delete " + person.title)
         .dialog({
@@ -3005,7 +3005,7 @@ function display_delete_person(person) {
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Delete: function() {
-                    submit_delete_person(person, $(this))
+                    submit_person_delete(person, $(this))
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -3015,9 +3015,9 @@ function display_delete_person(person) {
 }
 
 
-function submit_delete_person(person, dialog) {
+function submit_person_delete(person, dialog) {
     dialog.dialog("close")
-    load_delete_person(
+    load_person_delete(
         person.id,
         function(data) {
             if (data.type == 'errors') {
@@ -3093,7 +3093,7 @@ function submit_change_photo_relation(photo_relation, dialog, form) {
         photo_2: parse_form_string(form.photo_2.value),
     }
 
-    load_change_photo_relation(
+    load_photo_relation_change(
         photo_relation.id,
         updates,
         function(data) {
@@ -3106,7 +3106,7 @@ function submit_change_photo_relation(photo_relation, dialog, form) {
 }
 
 
-function display_delete_photo_relation(photo_relation) {
+function display_photo_relation_delete(photo_relation) {
     var p = $("<p></p>").text("Are you sure you want to delete the photo relation between "
             + photo_relation.photo_1.title + " and " + photo_relation.photo_2.title + "?")
     var dialog = $("<div id='dialog'></div>")
@@ -3117,7 +3117,7 @@ function display_delete_photo_relation(photo_relation) {
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Delete: function() {
-                    submit_delete_photo_relation(photo_relation, $(this))
+                    submit_photo_relation_delete(photo_relation, $(this))
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -3127,9 +3127,9 @@ function display_delete_photo_relation(photo_relation) {
 }
 
 
-function submit_delete_photo_relation(photo_relation, dialog) {
+function submit_photo_relation_delete(photo_relation, dialog) {
     dialog.dialog("close")
-    load_delete_photo_relation(
+    load_photo_relation_delete(
         photo_relation.id,
         function(data) {
             if (data.type == 'errors') {
@@ -3737,7 +3737,7 @@ function do_change_album(album_id, push_history) {
 }
 
 
-function do_add_album(parent_album, push_history) {
+function do_album_add(parent_album, push_history) {
     display_change_album({
         id: null,
         type: "album",
@@ -3752,10 +3752,10 @@ function do_add_album(parent_album, push_history) {
 }
 
 
-function do_delete_album(album_id, push_history) {
+function do_album_delete(album_id, push_history) {
     load_album(album_id,
         function(data) {
-            display_delete_album(data.album)
+            display_album_delete(data.album)
         }
     )
 }
@@ -3784,7 +3784,7 @@ function do_change_category(category_id, push_history) {
 }
 
 
-function do_add_category(parent_category, push_history) {
+function do_category_add(parent_category, push_history) {
     display_change_category({
         id: null,
         type: "category",
@@ -3799,10 +3799,10 @@ function do_add_category(parent_category, push_history) {
 }
 
 
-function do_delete_category(category_id, push_history) {
+function do_category_delete(category_id, push_history) {
     load_category(category_id,
         function(data) {
-            display_delete_category(data.category)
+            display_category_delete(data.category)
         }
     )
 }
@@ -3831,7 +3831,7 @@ function do_change_place(place_id, push_history) {
 }
 
 
-function do_add_place(parent_place, push_history) {
+function do_place_add(parent_place, push_history) {
     display_change_place({
         id: null,
         type: "place",
@@ -3850,10 +3850,10 @@ function do_add_place(parent_place, push_history) {
 }
 
 
-function do_delete_place(place_id, push_history) {
+function do_place_delete(place_id, push_history) {
     load_place(place_id,
         function(data) {
-            display_delete_place(data.place)
+            display_place_delete(data.place)
         }
     )
 }
@@ -3914,7 +3914,7 @@ function do_change_person(person_id, push_history) {
 }
 
 
-function do_add_person(push_history) {
+function do_person_add(push_history) {
     display_change_person({
         id: null,
         type: "person",
@@ -3946,10 +3946,10 @@ function do_add_person(push_history) {
 }
 
 
-function do_delete_person(person_id, push_history) {
+function do_person_delete(person_id, push_history) {
     load_person(person_id,
         function(data) {
-            display_delete_person(data.person)
+            display_person_delete(data.person)
         }
     )
 }
@@ -3964,7 +3964,7 @@ function do_change_photo_relation(photo_relation_id, push_history) {
 }
 
 
-function do_add_photo_relation(photo, push_history) {
+function do_photo_relation_add(photo, push_history) {
     display_change_photo_relation({
         id: null,
         type: "photo_relation",
@@ -3976,10 +3976,10 @@ function do_add_photo_relation(photo, push_history) {
 }
 
 
-function do_delete_photo_relation(photo_relation_id, push_history) {
+function do_photo_relation_delete(photo_relation_id, push_history) {
     load_photo_relation(photo_relation_id,
         function(data) {
-            display_delete_photo_relation(data.photo_relation)
+            display_photo_relation_delete(data.photo_relation)
         }
     )
 }

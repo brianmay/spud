@@ -91,15 +91,15 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 
         if (change_mode) {
             if (album.can_add) {
-                this.add_item(add_album_a(album))
+                this.add_item(album_add_a(album))
             }
 
             if (album.can_change) {
-                this.add_item(change_album_a(album))
+                this.add_item(album_change_a(album))
             }
 
             if (album.can_delete) {
-                this.add_item(delete_album_a(album))
+                this.add_item(album_delete_a(album))
             }
         }
     },
