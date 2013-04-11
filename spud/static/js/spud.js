@@ -434,12 +434,13 @@ function datetime_a(dt) {
     if (dt == null) {
         return null
     }
-    // FIXME
-    var a = $('<a/>')
-        .attr('href', date_url(dt))
-        .on('click', function() { do_photo_search(search, true); return false; })
-        .text(dt.date + " " + dt.time + " " + dt.timezone)
-    return a
+    var search = {
+        params: {
+            first_date: dt.date + " 00:00 " + dt.timezone,
+            last_date: dt.date + " nextday " + dt.timezone,
+        }
+    }
+    return photo_search_results_a(search, 0, dt.date + " " + dt.time + " " + dt.timezone)
 }
 
 

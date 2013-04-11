@@ -49,11 +49,6 @@ function person_url(person) {
 }
 
 
-function date_url(dt) {
-   return "/b/date/"+dt.date+dt.timezone+"/"
-}
-
-
 function photo_search_results_url(search, page) {
     var params = jQuery.extend({}, search.params, {
         page: page

@@ -82,16 +82,32 @@ def _decode_datetime(value, timezone):
     value = " ".join(new_value)
     new_value = None
 
-    try:
-        dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
+    dt = None
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d nextday")
+            dt = dt + datetime.timedelta(days=1)
+        except ValueError:
+            pass
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            pass
+
+    if dt is None:
         try:
             dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M")
         except ValueError:
-            try:
-                dt = datetime.datetime.strptime(value, "%Y-%m-%d")
-            except ValueError:
-                raise HttpBadRequest("Can't parse date/time")
+            pass
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d")
+        except ValueError:
+            raise HttpBadRequest("Can't parse date/time")
 
     dt = timezone.localize(dt)
     return dt
@@ -1291,10 +1307,7 @@ def _get_search(user, search_dict):
             search = search & Q(pk__lt=_decode_int(value))
         elif key == "first_date":
             try:
-                timezone = pytz.timezone(timezone)
                 value = _decode_datetime(value, timezone)
-            except pytz.UnknownTimeZoneError:
-                raise HttpBadRequest("Invalid timezone")
             except ValueError:
                 raise HttpBadRequest("Invalid date/time")
             utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
@@ -1304,10 +1317,7 @@ def _get_search(user, search_dict):
             search = search & Q(datetime__gte=utc_value)
         elif key == "last_date":
             try:
-                timezone = pytz.timezone(timezone)
                 value = _decode_datetime(value, timezone)
-            except pytz.UnknownTimeZoneError:
-                raise HttpBadRequest("Invalid timezone")
             except ValueError:
                 raise HttpBadRequest("Invalid date/time")
             utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
