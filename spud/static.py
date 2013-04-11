@@ -63,6 +63,21 @@ def photo_detail(request, photo_id):
         }, context_instance=RequestContext(request))
 
 
+def album_search_results(request):
+    query = request.GET.copy()
+    page = query.pop('page', [0])[-1]
+    try:
+        page = int(page)
+    except ValueError:
+        page = 0
+
+    js = json.dumps({'params': query})
+    return render_to_response('html/static.html', {
+        'title': 'Person results',
+        'onload': "do_album_search_results(%s, %d)" % (js, page),
+    }, context_instance=RequestContext(request))
+
+
 def album_detail(request, album_id):
     album_id = int(album_id)
     return render_to_response('html/static.html', {
@@ -71,11 +86,41 @@ def album_detail(request, album_id):
     }, context_instance=RequestContext(request))
 
 
+def category_search_results(request):
+    query = request.GET.copy()
+    page = query.pop('page', [0])[-1]
+    try:
+        page = int(page)
+    except ValueError:
+        page = 0
+
+    js = json.dumps({'params': query})
+    return render_to_response('html/static.html', {
+        'title': 'Person results',
+        'onload': "do_category_search_results(%s, %d)" % (js, page),
+    }, context_instance=RequestContext(request))
+
+
 def category_detail(request, category_id):
     category_id = int(category_id)
     return render_to_response('html/static.html', {
         'title': 'Album detail',
         'onload': "do_category(%d)" % category_id,
+    }, context_instance=RequestContext(request))
+
+
+def place_search_results(request):
+    query = request.GET.copy()
+    page = query.pop('page', [0])[-1]
+    try:
+        page = int(page)
+    except ValueError:
+        page = 0
+
+    js = json.dumps({'params': query})
+    return render_to_response('html/static.html', {
+        'title': 'Person results',
+        'onload': "do_place_search_results(%s, %d)" % (js, page),
     }, context_instance=RequestContext(request))
 
 

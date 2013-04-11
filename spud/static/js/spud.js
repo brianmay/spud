@@ -68,6 +68,34 @@ function photo_change_a(photo, fn, title) {
     return a
 }
 
+function album_search_form_a(search, title) {
+    if (title == null) {
+        title = "Album search"
+    }
+    var a = $('<a/>')
+        .attr('href', "#")
+        .on('click', function() { do_album_search_form(search, true); return false; })
+        .text(title)
+    return a
+}
+
+
+function album_search_results_a(search, page, title, accesskey) {
+    if (title == null) {
+        title = "Albums"
+    }
+    var a = $('<a/>')
+        .attr('href', album_search_results_url(search, page))
+        .on('click', function() { do_album_search_results(search, page, true); return false; })
+        .text(title)
+
+    if (accesskey != null) {
+        a.attr('accesskey', accesskey)
+    }
+    return a
+}
+
+
 function album_a(album, title) {
     if (album == null) {
         return ""
@@ -122,6 +150,34 @@ function album_delete_a(album, title) {
         .on('click', function() { do_album_delete(album.id, true); return false; })
         .data('photo', album.cover_photo)
         .text(title)
+    return a
+}
+
+
+function category_search_form_a(search, title) {
+    if (title == null) {
+        title = "Category search"
+    }
+    var a = $('<a/>')
+        .attr('href', "#")
+        .on('click', function() { do_category_search_form(search, true); return false; })
+        .text(title)
+    return a
+}
+
+
+function category_search_results_a(search, page, title, accesskey) {
+    if (title == null) {
+        title = "Categories"
+    }
+    var a = $('<a/>')
+        .attr('href', category_search_results_url(search, page))
+        .on('click', function() { do_category_search_results(search, page, true); return false; })
+        .text(title)
+
+    if (accesskey != null) {
+        a.attr('accesskey', accesskey)
+    }
     return a
 }
 
@@ -184,6 +240,34 @@ function category_delete_a(category, title) {
 }
 
 
+function place_search_form_a(search, title) {
+    if (title == null) {
+        title = "Place search"
+    }
+    var a = $('<a/>')
+        .attr('href', "#")
+        .on('click', function() { do_place_search_form(search, true); return false; })
+        .text(title)
+    return a
+}
+
+
+function place_search_results_a(search, page, title, accesskey) {
+    if (title == null) {
+        title = "Places"
+    }
+    var a = $('<a/>')
+        .attr('href', place_search_results_url(search, page))
+        .on('click', function() { do_place_search_results(search, page, true); return false; })
+        .text(title)
+
+    if (accesskey != null) {
+        a.attr('accesskey', accesskey)
+    }
+    return a
+}
+
+
 function place_a(place, title) {
     if (place == null) {
         return ""
@@ -242,7 +326,7 @@ function place_delete_a(place, title) {
 }
 
 
-function person_search_a(search, title) {
+function person_search_form_a(search, title) {
     if (title == null) {
         title = "Person search"
     }
@@ -458,7 +542,7 @@ function get_settings() {
     if (a.length < 5) {
         settings = {
             photos_per_page: 10,
-            persons_per_page: 10,
+            items_per_page: 10,
             list_size: "thumb",
             view_size: "mid",
             click_size: "large",
@@ -466,7 +550,7 @@ function get_settings() {
     } else {
         settings = {
             photos_per_page: Number(a[0]),
-            persons_per_page: Number(a[1]),
+            items_per_page: Number(a[1]),
             list_size: a[2],
             view_size: a[3],
             click_size: a[4],
@@ -479,7 +563,7 @@ function get_settings() {
 function set_settings(settings) {
     var a = [
         settings.photos_per_page,
-        settings.persons_per_page,
+        settings.items_per_page,
         settings.list_size,
         settings.view_size,
         settings.click_size,
@@ -585,10 +669,16 @@ window.onpopstate = function(event) {
             do_root(false)
         } else if (state.type == 'display_photo') {
             do_photo(state.photo_id, false)
+        } else if (state.type == 'display_album_search_results') {
+            do_album_search_results(state.search, state.page, false)
         } else if (state.type == 'display_album') {
             do_album(state.album_id, false)
+        } else if (state.type == 'display_category_search_results') {
+            do_category_search_results(state.search, state.page, false)
         } else if (state.type == 'display_category') {
             do_category(state.category_id, false)
+        } else if (state.type == 'display_place_search_results') {
+            do_place_search_results(state.search, state.page, false)
         } else if (state.type == 'display_place') {
             do_place(state.place_id, false)
         } else if (state.type == 'display_person_search_results') {
@@ -1776,6 +1866,106 @@ function submit_change_photo_attribute(search_params, updates, number_results, d
     return false
 }
 
+function display_album_search_form(search) {
+    var dialog = $("<div id='dialog'></div>")
+        .attr('title', "Search people")
+
+
+    var f = $("<form method='get' />")
+
+    var table = $("<table />")
+
+    append_field(table, "q", "Search for")
+        .append(get_input_element("q", search.params.q, "text"))
+    f.append(table)
+
+    dialog
+        .keypress(function(ev) {
+            if (ev.which == 13 && !ev.shiftKey) {
+                submit_album_search_form($( this ), f[0])
+                return false
+            }
+        })
+        .append(f)
+        .dialog({
+            modal: true,
+            close: function( event, ui ) { $(this).dialog("destroy") },
+            buttons: {
+                Search: function() {
+                    submit_album_search_form($( this ), f[0])
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" )
+                },
+            },
+        })
+}
+
+
+function submit_album_search_form(dialog, form) {
+
+    var params = { }
+
+    if (form.q.value) {
+        params['q'] = form.q.value
+    }
+    var search = {
+        params: params,
+    }
+    dialog.dialog( "close" )
+    do_album_search_results(search, 0, true)
+    return false
+}
+
+
+function display_album_search_results(search, results) {
+    reset_display()
+    var cm = $("#content-main")
+    cm.html("")
+
+    var page = Math.floor(results.first / search.results_per_page)
+    var last_page = Math.floor(results.number_results / search.results_per_page)
+
+    document.title = "Album List " + (page+1) + "/" + (last_page+1) + " | Album | Spud"
+    cm.append("<h1>Album List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
+
+
+    if (results.q) {
+        var dl = $("<dl/>")
+        dt_dd(dl, "Search text", results.q)
+        $("<div class='infobox'/>")
+            .append(dl)
+            .appendTo(cm)
+    }
+
+    $("<div/>")
+        .album_list({ albums: results.albums, change_mode: true })
+        .appendTo(cm)
+
+    var ul = $('<ul class="menu"/>')
+        .album_list_menu({ change_mode: true })
+
+    append_action_links(ul)
+
+    append_jump("album", "album",
+        function(ev, item) {
+            do_album(item.pk, true)
+        }
+    )
+
+    var html_page = function(page, text, key) {
+        return album_search_results_a(search, page, text, key)
+    }
+
+    cm.append(generic_paginator(page, last_page, html_page))
+
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+        .append(" › Albums")
+}
+
+
 function display_album(album) {
     reset_display()
     var cm = $("#content-main")
@@ -1811,6 +2001,8 @@ function display_album(album) {
     bc = $(".breadcrumbs")
         .html("")
         .append(root_a())
+        .append(" › ")
+        .append(album_search_results_a({}, 0, null, null))
         .append(" › ")
 
     var sep = ""
@@ -2654,7 +2846,7 @@ function display_person_search_results(search, results) {
     var ul = $('<ul class="menu"/>')
 
     $("<li/>")
-        .append(person_search_a(search))
+        .append(person_search_form_a(search))
         .appendTo(ul)
 
     if (results.can_add) {
@@ -2827,7 +3019,7 @@ function display_person(person) {
         .appendTo(ul)
 
     $("<li/>")
-        .append(person_search_a({}))
+        .append(person_search_form_a({}))
         .appendTo(ul)
 
     if (person.can_add) {
@@ -2854,7 +3046,7 @@ function display_person(person) {
         .html("")
         .append(root_a())
         .append(" › ")
-        .append(person_search_a({}))
+        .append(person_search_form_a({}))
         .append("  › " + escapeHTML(person.title))
 }
 
@@ -3550,8 +3742,8 @@ function display_settings(data) {
     append_field(table, "photos_per_page", "Photos per page")
         .append(get_input_element("photos_per_page", settings.photos_per_page, "text"))
 
-    append_field(table, "persons_per_page", "Persons per page")
-        .append(get_input_element("persons_per_page", settings.persons_per_page, "text"))
+    append_field(table, "items_per_page", "Persons per page")
+        .append(get_input_element("items_per_page", settings.items_per_page, "text"))
 
     append_field(table, "list_size", "List size")
         .append(get_input_select("list_size", data.list_sizes, settings.list_size))
@@ -3594,8 +3786,8 @@ function submit_settings(dialog, form) {
         settings.photos_per_page = Number(form.photos_per_page.value)
     }
 
-    if (form.persons_per_page.value) {
-        settings.persons_per_page = Number(form.persons_per_page.value)
+    if (form.items_per_page.value) {
+        settings.items_per_page = Number(form.items_per_page.value)
     }
 
     settings.list_size = form.list_size.value
@@ -3715,6 +3907,34 @@ function do_photo(photo_id, push_history) {
 }
 
 
+function do_album_search_form(search, push_history) {
+    if (search.params == null) {
+        search.params = {}
+    }
+
+    display_album_search_form(search)
+}
+
+
+function do_album_search_results(search, page, push_history) {
+    if (search.results_per_page == null)
+        search.results_per_page = get_settings().items_per_page
+
+    load_album_search_results(search, page,
+        function(data) {
+            replace_links()
+            update_history(push_history,
+                album_search_results_url(search, page), {
+                    type: 'display_album_search_results',
+                    search: search,
+                    page: page,
+                });
+            display_album_search_results(search, data)
+        }
+    )
+}
+
+
 function do_album(album_id, push_history) {
     load_album(album_id,
         function(data) {
@@ -3762,6 +3982,34 @@ function do_album_delete(album_id, push_history) {
 }
 
 
+function do_category_search_form(search, push_history) {
+    if (search.params == null) {
+        search.params = {}
+    }
+
+    display_category_search_form(search)
+}
+
+
+function do_category_search_results(search, page, push_history) {
+    if (search.results_per_page == null)
+        search.results_per_page = get_settings().items_per_page
+
+    load_category_search_results(search, page,
+        function(data) {
+            replace_links()
+            update_history(push_history,
+                category_search_results_url(search, page), {
+                    type: 'display_category_search_results',
+                    search: search,
+                    page: page,
+                });
+            display_category_search_results(search, data)
+        }
+    )
+}
+
+
 function do_category(category_id, push_history) {
     load_category(category_id,
         function(data) {
@@ -3804,6 +4052,34 @@ function do_category_delete(category_id, push_history) {
     load_category(category_id,
         function(data) {
             display_category_delete(data.category)
+        }
+    )
+}
+
+
+function do_place_search_form(search, push_history) {
+    if (search.params == null) {
+        search.params = {}
+    }
+
+    display_place_search_form(search)
+}
+
+
+function do_place_search_results(search, page, push_history) {
+    if (search.results_per_page == null)
+        search.results_per_page = get_settings().items_per_page
+
+    load_place_search_results(search, page,
+        function(data) {
+            replace_links()
+            update_history(push_history,
+                place_search_results_url(search, page), {
+                    type: 'display_place_search_results',
+                    search: search,
+                    page: page,
+                });
+            display_place_search_results(search, data)
         }
     )
 }
@@ -3875,7 +4151,7 @@ function do_person_search_form(search, push_history) {
 
 function do_person_search_results(search, page, push_history) {
     if (search.results_per_page == null)
-        search.results_per_page = get_settings().persons_per_page
+        search.results_per_page = get_settings().items_per_page
 
     load_person_search_results(search, page,
         function(data) {

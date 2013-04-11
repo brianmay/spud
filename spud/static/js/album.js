@@ -106,4 +106,16 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 })
 
 
+$.widget('ui.album_list_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.change_mode != null) {
+            this.load(this.options.change_mode)
+        }
+    },
 
+    load: function(change_mode) {
+        this.element.empty()
+        this.add_item(album_search_form_a({}))
+    },
+})

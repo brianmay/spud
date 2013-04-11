@@ -21,13 +21,37 @@ function logout_url() {
 }
 
 
+function album_search_results_url(search, page) {
+    var params = jQuery.extend({}, search.params, {
+        page: page
+    })
+    return "/b/album/?" + jQuery.param(params)
+}
+
+
 function album_url(album) {
    return "/b/album/"+album.id+"/"
 }
 
 
+function category_search_results_url(search, page) {
+    var params = jQuery.extend({}, search.params, {
+        page: page
+    })
+    return "/b/category/?" + jQuery.param(params)
+}
+
+
 function category_url(category) {
    return "/b/category/"+category.id+"/"
+}
+
+
+function place_search_results_url(search, page) {
+    var params = jQuery.extend({}, search.params, {
+        page: page
+    })
+    return "/b/place/?" + jQuery.param(params)
 }
 
 
@@ -145,6 +169,23 @@ function load_logout(success) {
     })
 }
 
+function load_album_search_results(search, page, success) {
+    var first = page * search.results_per_page
+
+    var add_params = {
+        count: search.results_per_page,
+        first: first,
+    }
+    var params = jQuery.extend({}, search.params, add_params)
+
+    ajax({
+        url: '/a/album/results/',
+        data: params,
+        success: success,
+    });
+}
+
+
 function load_album(album_id, success) {
     ajax({
         url: '/a/album/'+album_id+'/',
@@ -178,6 +219,23 @@ function load_album_delete(album_id, success) {
 }
 
 
+function load_category_search_results(search, page, success) {
+    var first = page * search.results_per_page
+
+    var add_params = {
+        count: search.results_per_page,
+        first: first,
+    }
+    var params = jQuery.extend({}, search.params, add_params)
+
+    ajax({
+        url: '/a/category/results/',
+        data: params,
+        success: success,
+    });
+}
+
+
 function load_category(category_id, success) {
     ajax({
         url: '/a/category/'+category_id+'/',
@@ -206,6 +264,23 @@ function load_category_delete(category_id, success) {
         success: success,
         type: "POST",
     })
+}
+
+
+function load_place_search_results(search, page, success) {
+    var first = page * search.results_per_page
+
+    var add_params = {
+        count: search.results_per_page,
+        first: first,
+    }
+    var params = jQuery.extend({}, search.params, add_params)
+
+    ajax({
+        url: '/a/place/results/',
+        data: params,
+        success: success,
+    });
 }
 
 

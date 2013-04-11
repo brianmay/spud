@@ -650,6 +650,44 @@ def logout(request):
 
 
 @check_errors
+def album_search_results(request):
+    search_dict = request.GET.copy()
+
+    first = search_dict.pop("first", ["0"])[-1]
+    first = _decode_int(first)
+    if first < 0:
+        raise HttpBadRequest("first is negative")
+
+    count = search_dict.pop("count", ["10"])[-1]
+    count = _decode_int(count)
+    if count < 0:
+        raise HttpBadRequest("count is negative")
+
+    album_list = spud.models.album.objects.all()
+
+    q = search_dict.pop("q", [None])[-1]
+    if q is not None:
+        album_list = spud.models.album.objects.filter(
+            Q(album__icontains=q) | Q(album_description__icontains=q))
+
+    number_results = album_list.count()
+    album_list = album_list[first:first+count]
+    number_returned = len(album_list)
+
+    resp = {
+        'type': 'album_search_results',
+        'albums': [_get_album(request.user, p) for p in album_list],
+        'number_results': number_results,
+        'first': first,
+        'last': first + number_returned - 1,
+        'session': _get_session(request),
+        'can_add': request.user.has_perm('spud.add_album'),
+        'q': q,
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
 def album(request, album_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_album'):
@@ -736,6 +774,44 @@ def album_finish(request, album):
         'type': 'album_get',
         'album': _get_album_detail(request.user, album),
         'session': _get_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
+def category_search_results(request):
+    search_dict = request.GET.copy()
+
+    first = search_dict.pop("first", ["0"])[-1]
+    first = _decode_int(first)
+    if first < 0:
+        raise HttpBadRequest("first is negative")
+
+    count = search_dict.pop("count", ["10"])[-1]
+    count = _decode_int(count)
+    if count < 0:
+        raise HttpBadRequest("count is negative")
+
+    category_list = spud.models.category.objects.all()
+
+    q = search_dict.pop("q", [None])[-1]
+    if q is not None:
+        category_list = spud.models.category.objects.filter(
+            Q(category__icontains=q) | Q(category_description__icontains=q))
+
+    number_results = category_list.count()
+    category_list = category_list[first:first+count]
+    number_returned = len(category_list)
+
+    resp = {
+        'type': 'category_search_results',
+        'categorys': [_get_category(request.user, p) for p in category_list],
+        'number_results': number_results,
+        'first': first,
+        'last': first + number_returned - 1,
+        'session': _get_session(request),
+        'can_add': request.user.has_perm('spud.add_category'),
+        'q': q,
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -849,6 +925,44 @@ def place_add(request):
             raise HttpForbidden("No rights to add places")
     place = spud.models.place()
     return place_finish(request, place)
+
+
+@check_errors
+def place_search_results(request):
+    search_dict = request.GET.copy()
+
+    first = search_dict.pop("first", ["0"])[-1]
+    first = _decode_int(first)
+    if first < 0:
+        raise HttpBadRequest("first is negative")
+
+    count = search_dict.pop("count", ["10"])[-1]
+    count = _decode_int(count)
+    if count < 0:
+        raise HttpBadRequest("count is negative")
+
+    place_list = spud.models.place.objects.all()
+
+    q = search_dict.pop("q", [None])[-1]
+    if q is not None:
+        place_list = spud.models.place.objects.filter(
+            Q(title__icontains=q) | Q(address__icontains=q))
+
+    number_results = place_list.count()
+    place_list = place_list[first:first+count]
+    number_returned = len(place_list)
+
+    resp = {
+        'type': 'place_search_results',
+        'places': [_get_place(request.user, p) for p in place_list],
+        'number_results': number_results,
+        'first': first,
+        'last': first + number_returned - 1,
+        'session': _get_session(request),
+        'can_add': request.user.has_perm('spud.add_place'),
+        'q': q,
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
 @check_errors
