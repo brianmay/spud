@@ -54,7 +54,7 @@ def photo_detail(request, photo_id):
         js = json.dumps({'params': query})
         return render_to_response('html/static.html', {
             'title': 'Photo detail',
-            'onload': "do_search_photo(%s, %d, %d)" % (js, n, photo_id),
+            'onload': "do_photo_search_item(%s, %d, %d)" % (js, n, photo_id),
         }, context_instance=RequestContext(request))
     else:
         return render_to_response('html/static.html', {
@@ -110,7 +110,7 @@ def person_detail(request, person_id):
     }, context_instance=RequestContext(request))
 
 
-def search_results(request):
+def photo_search_results(request):
     if 'n' in request.GET:
         query = request.GET.copy()
         n = query.pop('n', [0])[-1]
@@ -122,7 +122,7 @@ def search_results(request):
         js = json.dumps({'params': query})
         return render_to_response('html/static.html', {
             'title': 'Photo detail',
-            'onload': "do_search_photo(%s, %d, %s)" % (js, n, "null"),
+            'onload': "do_photo_search_item(%s, %d, %s)" % (js, n, "null"),
         }, context_instance=RequestContext(request))
     else:
         query = request.GET.copy()
@@ -134,6 +134,6 @@ def search_results(request):
 
         js = json.dumps({'params': query})
         return render_to_response('html/static.html', {
-            'title': 'Search results',
-            'onload': "do_search_results(%s, %d)" % (js, page),
+            'title': 'Photo search results',
+            'onload': "do_photo_search_results(%s, %d)" % (js, page),
         }, context_instance=RequestContext(request))

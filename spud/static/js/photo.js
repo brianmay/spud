@@ -550,7 +550,7 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
             search = {}
         }
 
-        this.add_item(search_a(search))
+        this.add_item(photo_search_form_a(search))
     },
 })
 

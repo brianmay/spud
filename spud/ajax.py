@@ -1440,7 +1440,7 @@ def _get_search(user, search_dict):
 
 
 @check_errors
-def search(request):
+def photo_search_form(request):
     resp = {}
 
     for key in request.GET:
@@ -1533,7 +1533,10 @@ def search(request):
 
 
 @check_errors
-def search_results(request):
+def photo_search_results(request):
+    if 'number' in request.GET:
+        return photo_search_item(request, request.GET['number'])
+
     search_dict = request.GET.copy()
 
     first = search_dict.pop("first", ["0"])[-1]
@@ -1553,7 +1556,7 @@ def search_results(request):
     number_returned = len(photos)
 
     resp = {
-        'type': 'search_results',
+        'type': 'photo_search_results',
         'criteria': criteria,
         'photos': [_get_photo(request.user, p) for p in photos],
         'number_results': number_results,
@@ -1565,18 +1568,39 @@ def search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def photo(request, photo_id):
-    object = get_object_or_404(spud.models.photo, pk=photo_id)
+def photo_search_item(request, number):
+    search_dict = request.GET.copy()
+    number = _decode_int(number)
+
+    photo_list, criteria = _get_search(request.user, search_dict)
+    number_results = photo_list.count()
+
+    try:
+        photo = photo_list[number]
+    except IndexError:
+        raise HttpBadRequest("Result %d does not exist" % (number))
+
     resp = {
-        'type': 'photo_get',
-        'photo': _get_photo_detail(request.user, object),
+        'type': 'photo_search_item',
+        'criteria': criteria,
+        'photo': _get_photo_detail(request.user, photo),
+        'number_results': number_results,
         'session': _get_session(request),
     }
+
+    if number > 1:
+        resp['prev_photo'] = _get_photo(request.user, photo_list[number-1])
+
+    try:
+        resp['next_photo'] = _get_photo(request.user, photo_list[number+1])
+    except IndexError:
+        pass
+
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
 @check_errors
-def search_change(request):
+def photo_search_change(request):
     if request.method != "POST":
         raise HttpBadRequest("Only POST is supported")
     if request.method == "POST":
@@ -1837,7 +1861,7 @@ def search_change(request):
             del values
 
     resp = {
-        'type': 'search_change',
+        'type': 'photo_search_change',
         'criteria': criteria,
         'number_results': number_results,
         'session': _get_session(request),
@@ -1846,34 +1870,13 @@ def search_change(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def search_item(request, number):
-    search_dict = request.GET.copy()
-    number = _decode_int(number)
-
-    photo_list, criteria = _get_search(request.user, search_dict)
-    number_results = photo_list.count()
-
-    try:
-        photo = photo_list[number]
-    except IndexError:
-        raise HttpBadRequest("Result %d does not exist" % (number))
-
+def photo(request, photo_id):
+    object = get_object_or_404(spud.models.photo, pk=photo_id)
     resp = {
-        'type': 'search_item',
-        'criteria': criteria,
-        'photo': _get_photo_detail(request.user, photo),
-        'number_results': number_results,
+        'type': 'photo_get',
+        'photo': _get_photo_detail(request.user, object),
         'session': _get_session(request),
     }
-
-    if number > 1:
-        resp['prev_photo'] = _get_photo(request.user, photo_list[number-1])
-
-    try:
-        resp['next_photo'] = _get_photo(request.user, photo_list[number+1])
-    except IndexError:
-        pass
-
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 

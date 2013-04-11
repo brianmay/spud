@@ -368,25 +368,25 @@ function delete_photo_relation_a(photo_relation, title) {
 }
 
 
-function search_a(search, title) {
+function photo_search_form_a(search, title) {
     if (title == null) {
         title = "Photo search"
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { do_search(search, true); return false; })
+        .on('click', function() { do_photo_search_form(search, true); return false; })
         .text(title)
     return a
 }
 
 
-function search_results_a(search, page, title, accesskey) {
+function photo_search_results_a(search, page, title, accesskey) {
     if (title == null) {
         title = "Photos"
     }
     var a = $('<a/>')
-        .attr('href', search_results_url(search, page))
-        .on('click', function() { do_search_results(search, page, true); return false; })
+        .attr('href', photo_search_results_url(search, page))
+        .on('click', function() { do_photo_search_results(search, page, true); return false; })
         .text(title)
 
     if (accesskey != null) {
@@ -396,7 +396,7 @@ function search_results_a(search, page, title, accesskey) {
 }
 
 
-function search_photo_a(search, n, photo, title, accesskey) {
+function photo_search_item_a(search, n, photo, title, accesskey) {
     if (title == null) {
         title = "Photo "+n
     }
@@ -406,8 +406,8 @@ function search_photo_a(search, n, photo, title, accesskey) {
     }
 
     var a = $('<a/>')
-        .attr('href', search_photo_url(search, n, photo))
-        .on('click', function() { do_search_photo(search, n, id, true); return false; })
+        .attr('href', photo_search_item_url(search, n, photo))
+        .on('click', function() { do_photo_search_item(search, n, id, true); return false; })
         .data('photo', photo)
         .text(title)
 
@@ -434,9 +434,10 @@ function datetime_a(dt) {
     if (dt == null) {
         return null
     }
+    // FIXME
     var a = $('<a/>')
         .attr('href', date_url(dt))
-        .on('click', function() { do_search(search, true); return false; })
+        .on('click', function() { do_photo_search(search, true); return false; })
         .text(dt.date + " " + dt.time + " " + dt.timezone)
     return a
 }
@@ -593,10 +594,10 @@ window.onpopstate = function(event) {
             do_person_search_results(state.search, state.page, false)
         } else if (state.type == 'display_person') {
             do_person(state.person_id, false)
-        } else if (state.type == 'display_search_photo') {
-            do_search_photo(state.search, state.n, state.photo_id, false)
-        } else if (state.type == 'display_search_results') {
-            do_search_results(state.search, state.page, false)
+        } else if (state.type == 'display_photo_search_item') {
+            do_photo_search_item(state.search, state.n, state.photo_id, false)
+        } else if (state.type == 'display_photo_search_results') {
+            do_photo_search_results(state.search, state.page, false)
         } else if (state.type == 'settings') {
             do_settings(false)
         } else {
@@ -1248,19 +1249,19 @@ function display_photo_article(photo, search, results, n) {
             } else if (page == n+1) {
                 photo = results.next_photo
             }
-            return search_photo_a(search, page, photo, text, key)
+            return photo_search_item_a(search, page, photo, text, key)
         }
 
         $("#content-main").append(generic_paginator(n, last_page, html_page))
 
         if (n > 1) {
-            search_photo_a(search, n-1, results.prev_photo, "", null)
+            photo_search_item_a(search, n-1, results.prev_photo, "", null)
                 .addClass("prevslide")
                 .appendTo(cm)
         }
 
         if (n < results.number_results-1) {
-            search_photo_a(search, n+1, results.next_photo, "", null)
+            photo_search_item_a(search, n+1, results.next_photo, "", null)
                 .addClass("nextslide")
                 .appendTo(cm)
         }
@@ -1279,13 +1280,13 @@ function display_photo_slideshow(photo, search, results, n) {
 
     if (search != null) {
         if (n > 1) {
-            search_photo_a(search, n-1, results.prev_photo, "", "p")
+            photo_search_item_a(search, n-1, results.prev_photo, "", "p")
                 .addClass("prevslide")
                 .appendTo("#content-main")
         }
 
         if (n < results.number_results-1) {
-            search_photo_a(search, n+1, results.next_photo, "", "n")
+            photo_search_item_a(search, n+1, results.next_photo, "", "n")
                 .addClass("nextslide")
                 .appendTo("#content-main")
         }
@@ -1316,7 +1317,7 @@ function display_photo_slideshow(photo, search, results, n) {
 }
 
 
-function display_search_photo(search, results, n) {
+function display_photo_search_item(search, results, n) {
     display_photo(results.photo, search, results, n)
 
     var page = Math.floor(n / search.results_per_page)
@@ -1325,7 +1326,7 @@ function display_search_photo(search, results, n) {
         .html("")
         .append(root_a())
         .append(" › ")
-        .append(search_results_a(search, page))
+        .append(photo_search_results_a(search, page))
         .append(" › ")
         .append(escapeHTML(results.photo.title))
 }
@@ -1761,7 +1762,7 @@ function submit_change_photo_attribute(search_params, updates, number_results, d
         params: search_params
     }
 
-    change_search(
+    load_photo_search_change(
         search,
         updates,
         number_results,
@@ -2629,7 +2630,7 @@ function display_person_search_results(search, results) {
         links = $("<td/>")
             .append(person_a(person, "Person"))
             .append(", ")
-            .append(search_results_a({ params: { person: person.id } }, 0, "Photos"))
+            .append(photo_search_results_a({ params: { person: person.id } }, 0, "Photos"))
 
         tr = $("<tr/>")
             .append(img)
@@ -3143,7 +3144,7 @@ function submit_delete_photo_relation(photo_relation, dialog) {
 }
 
 
-function display_search(search, data) {
+function display_photo_search_form(search, data) {
     var params = search.params
 
     var dialog = $("<div id='dialog'></div>")
@@ -3261,7 +3262,7 @@ function display_search(search, data) {
     dialog
         .keypress(function(ev) {
             if (ev.which == 13 && !ev.shiftKey) {
-                submit_search($( this ), f[0])
+                submit_photo_search_form($( this ), f[0])
                 return false
             }
         })
@@ -3271,7 +3272,7 @@ function display_search(search, data) {
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Search: function() {
-                    submit_search($( this ), f[0])
+                    submit_photo_search_form($( this ), f[0])
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -3281,7 +3282,7 @@ function display_search(search, data) {
 }
 
 
-function submit_search(dialog, form) {
+function submit_photo_search_form(dialog, form) {
 
     var params = { }
 
@@ -3389,7 +3390,7 @@ function submit_search(dialog, form) {
         params: params,
     }
 
-    do_search_results(search, 0, true)
+    do_photo_search_results(search, 0, true)
 
     dialog.dialog( "close" )
 
@@ -3397,7 +3398,7 @@ function submit_search(dialog, form) {
 }
 
 
-function display_search_results(search, results) {
+function display_photo_search_results(search, results) {
     reset_display()
     var cm = $("#content-main")
     cm.html("")
@@ -3408,14 +3409,14 @@ function display_search_results(search, results) {
     document.title = "Photo List " + (page+1) + "/" + (last_page+1) + " | Photos | Spud"
     cm.append("<h1>Photo List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
 
-    cm.append(search_infobox(search, results))
-    cm.append(search_photo_list(search, results))
-    cm.append(search_paginator(search, results))
+    cm.append(photo_search_infobox(search, results))
+    cm.append(photo_search_photo_list(search, results))
+    cm.append(photo_search_paginator(search, results))
 
     var ul = $('<ul class="menu"/>')
 
     $("<li/>")
-        .append(search_a(search))
+        .append(photo_search_form_a(search))
         .appendTo(ul)
 
     append_action_links(ul)
@@ -3450,7 +3451,7 @@ function display_search_results(search, results) {
 }
 
 
-function search_infobox(search, results) {
+function photo_search_infobox(search, results) {
     var dl = $("<dl/>")
 
     for (var i in results.criteria) {
@@ -3493,7 +3494,7 @@ function search_infobox(search, results) {
 }
 
 
-function search_photo_list(search, results) {
+function photo_search_photo_list(search, results) {
     var pl = $("<ul class='photo_list'/>")
 
     for (var i in results.photos) {
@@ -3501,11 +3502,11 @@ function search_photo_list(search, results) {
         n = results.first + Number(i)
 
         li = photo_thumb(photo, photo.title, photo.localtime.date + " " + photo.localtime.time, photo.description,
-            search_photo_url(search, n, photo),
+            photo_search_item_url(search, n, photo),
             true,
             function(photo, n) {
                 return function() {
-                    do_search_photo(search, n, null, true)
+                    do_photo_search_item(search, n, null, true)
                     return false
                 }
             }(photo, n))
@@ -3523,12 +3524,12 @@ function search_photo_list(search, results) {
 }
 
 
-function search_paginator(search, results) {
+function photo_search_paginator(search, results) {
     var page = Math.floor(results.first / search.results_per_page)
     var last_page = Math.floor((results.number_results-1) / search.results_per_page)
 
     var html_page = function(page, text, key) {
-        return search_results_a(search, page, text, key)
+        return photo_search_results_a(search, page, text, key)
     }
 
     return generic_paginator(page, last_page, html_page)
@@ -3984,53 +3985,56 @@ function do_delete_photo_relation(photo_relation_id, push_history) {
 }
 
 
-function do_search(search, push_history) {
+function do_photo_search_form(search, push_history) {
     if (search.params == null) {
         search.params = {}
     }
 
-    load_search(search,
+    load_photo_search_form(search,
         function(data) {
-            display_search(search, data)
+            display_photo_search_form(search, data)
         }
     )
 }
 
 
-function do_search_results(search, page, push_history) {
+function do_photo_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
-    load_search_results(search, page,
+    load_photo_search_results(search, page,
         function(data) {
             replace_links()
             update_history(push_history,
-                search_results_url(search, page), {
-                    type: 'display_search_results',
+                photo_search_results_url(search, page), {
+                    type: 'display_photo_search_results',
                     search: search,
                     page: page,
-                });
-            display_search_results(search, data)
+                }
+            );
+            display_photo_search_results(search, data)
         }
     )
 }
 
 
-function do_search_photo(search, n, photo_id, push_history) {
+function do_photo_search_item(search, n, photo_id, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
-    load_search_photo(search, n,
+    load_photo_search_item(search, n,
         function(data) {
             if (photo_id == null || data.photo.id == photo_id) {
                 replace_links()
-                update_history(push_history, search_photo_url(search, n, data.photo), {
-                    type: 'display_search_photo',
-                    search: search,
-                    n: n,
-                    photo_id: photo_id,
-                });
-                display_search_photo(search, data, n)
+                update_history(push_history,
+                    photo_search_item_url(search, n, data.photo), {
+                        type: 'display_photo_search_item',
+                        search: search,
+                        n: n,
+                        photo_id: photo_id,
+                    }
+                );
+                display_photo_search_item(search, data, n)
             } else {
                 do_photo(photo_id, push_history)
             }

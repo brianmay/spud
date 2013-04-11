@@ -349,7 +349,7 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
         this.add_item(category_a({id: 1}, "Categories"))
         this.add_item(place_a({id: 1}, "Places"))
         this.add_item(person_search_results_a({}, 0))
-        this.add_item(search_results_a({}, 0))
+        this.add_item(photo_search_results_a({}, 0))
     },
 })
 
@@ -370,7 +370,7 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
                 }
             }
 
-            this.add_item(search_results_a(search, 0, "Show"))
+            this.add_item(photo_search_results_a(search, 0, "Show"))
             this.add_item(
                 $("<a href='#'>Clear</a>")
                 .on("click", function() { set_selection([]); reload_page(); return false; })

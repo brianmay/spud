@@ -54,28 +54,28 @@ function date_url(dt) {
 }
 
 
-function search_results_url(search, page) {
+function photo_search_results_url(search, page) {
     var params = jQuery.extend({}, search.params, {
         page: page
     })
-    return "/b/search/?" + jQuery.param(params)
+    return "/b/photo/?" + jQuery.param(params)
 }
 
 
-function photo_url(photo) {
-   return "/b/photo/"+photo.id+"/"
-}
-
-
-function search_photo_url(search, n, photo) {
+function photo_search_item_url(search, n, photo) {
     var params = jQuery.extend({}, search.params, {
         n: n
     })
     if (photo != null) {
         return "/b/photo/" + photo.id + "/?" + jQuery.param(params)
     } else {
-        return "/b/search/?" + jQuery.param(params)
+        return "/b/photo/?" + jQuery.param(params)
     }
+}
+
+
+function photo_url(photo) {
+   return "/b/photo/"+photo.id+"/"
 }
 
 
@@ -333,9 +333,9 @@ function load_delete_photo_relation(photo_relation_id, success) {
 }
 
 
-function load_search(search, success) {
+function load_photo_search_form(search, success) {
     ajax({
-        url: '/a/search/',
+        url: '/a/photo/form/',
         data: search.params,
         success: success,
     })
@@ -343,7 +343,7 @@ function load_search(search, success) {
 }
 
 
-function load_search_results(search, page, success) {
+function load_photo_search_results(search, page, success) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -353,9 +353,32 @@ function load_search_results(search, page, success) {
     var params = jQuery.extend({}, search.params, add_params)
 
     ajax({
-        url: '/a/search/results/',
+        url: '/a/photo/results/',
         data: params,
         success: success,
+    });
+}
+
+
+function load_photo_search_item(search, n, success) {
+    var params = jQuery.extend({}, search.params, { number: n })
+    ajax({
+        url: '/a/photo/results/',
+        data: params,
+        success: success,
+    })
+    return
+}
+
+
+function load_photo_search_change(search, updates, number_results, success) {
+    var params = jQuery.extend({}, search.params, updates, { number_results: number_results })
+
+    ajax({
+        url: '/a/photo/change/',
+        data: params,
+        success: success,
+        type: "POST",
     });
 }
 
@@ -365,28 +388,6 @@ function load_photo(photo_id, success) {
         url: '/a/photo/'+photo_id+'/',
         success: success,
     })
-}
-
-
-function change_search(search, updates, number_results, success) {
-    var params = jQuery.extend({}, search.params, updates, { number_results: number_results })
-
-    ajax({
-        url: '/a/search/change/',
-        data: params,
-        success: success,
-        type: "POST",
-    });
-}
-
-
-function load_search_photo(search, n, success) {
-    ajax({
-        url: '/a/search/'+n+'/',
-        data: search.params,
-        success: success,
-    })
-    return
 }
 
 
