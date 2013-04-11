@@ -1866,55 +1866,10 @@ function submit_change_photo_attribute(search_params, updates, number_results, d
     return false
 }
 
+
 function display_album_search_form(search) {
     var dialog = $("<div id='dialog'></div>")
-        .attr('title', "Search people")
-
-
-    var f = $("<form method='get' />")
-
-    var table = $("<table />")
-
-    append_field(table, "q", "Search for")
-        .append(get_input_element("q", search.params.q, "text"))
-    f.append(table)
-
-    dialog
-        .keypress(function(ev) {
-            if (ev.which == 13 && !ev.shiftKey) {
-                submit_album_search_form($( this ), f[0])
-                return false
-            }
-        })
-        .append(f)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            buttons: {
-                Search: function() {
-                    submit_album_search_form($( this ), f[0])
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
-        })
-}
-
-
-function submit_album_search_form(dialog, form) {
-
-    var params = { }
-
-    if (form.q.value) {
-        params['q'] = form.q.value
-    }
-    var search = {
-        params: params,
-    }
-    dialog.dialog( "close" )
-    do_album_search_results(search, 0, true)
-    return false
+        .album_search_dialog({ params: search.params })
 }
 
 
@@ -1943,7 +1898,7 @@ function display_album_search_results(search, results) {
         .appendTo(cm)
 
     var ul = $('<ul class="menu"/>')
-        .album_list_menu({ change_mode: true })
+        .album_list_menu({ search: search, change_mode: true })
 
     append_action_links(ul)
 

@@ -1,3 +1,31 @@
+$.widget('ui.album_search_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.title = "Album search"
+        this.options.description = "Please search for an album."
+        this._super();
+
+        this.add_input_field("q", "Search for", "text")
+
+        if (this.options.params != null) {
+            this.load(this.options.params)
+        }
+    },
+
+    load: function(params) {
+        this.set_input_field("q", params.q)
+    },
+
+    _submit: function() {
+        search = {
+            params: {
+                q: this.get_input_field("q")
+            }
+        }
+        do_album_search_results(search, 0, true)
+        this.close()
+    },
+})
+
 $.widget('ui.album_details',  $.ui.infobox, {
     _create: function() {
         this.element.addClass("infobox")
@@ -109,13 +137,13 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 $.widget('ui.album_list_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
-        if (this.options.change_mode != null) {
-            this.load(this.options.change_mode)
+        if (this.options.search != null) {
+            this.load(this.options.search, this.options.change_mode)
         }
     },
 
-    load: function(change_mode) {
+    load: function(search, change_mode) {
         this.element.empty()
-        this.add_item(album_search_form_a({}))
+        this.add_item(album_search_form_a(search))
     },
 })

@@ -337,6 +337,7 @@ $.widget('ui.spud_menu', {
     },
 })
 
+
 $.widget('ui.main_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
@@ -352,6 +353,7 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
         this.add_item(photo_search_results_a({}, 0))
     },
 })
+
 
 $.widget('ui.selection_menu', $.ui.spud_menu, {
     _create: function() {
@@ -376,5 +378,100 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
                 .on("click", function() { set_selection([]); reload_page(); return false; })
             )
         }
+    },
+})
+
+$.widget('ui.form_dialog',  $.ui.dialog, {
+    _create: function() {
+        var mythis = this
+        var options = this.options
+
+        if (options.description != null) {
+            $("<p/>")
+                .text(options.description)
+                .appendTo(this.element)
+            delete options.description
+        }
+
+        this.f = $("<form method='get' />")
+            .appendTo(this.element)
+
+        this.table = $("<table />")
+            .appendTo(this.f)
+
+        options.buttons = {
+            Submit: function() {
+                mythis._submit()
+            },
+            Cancel: function() {
+                mythis.close()
+            },
+        }
+
+        this.input = {}
+
+        this._super()
+
+        this.element.on(
+            "keypress",
+            function(ev) {
+                if (ev.which == 13 && !ev.shiftKey) {
+                    mythis._submit()
+                    return false
+                    }
+            }
+        )
+        this.element.on(
+            this.widgetEventPrefix + "close",
+            function( ev, ui ) {
+                mythis.destroy()
+            }
+        )
+    },
+
+    _submit: function() {
+    },
+
+    _destroy: function() {
+        this.element
+            .empty()
+            .removeClass("menu")
+        this._super()
+    },
+
+    _add_field: function(id, title) {
+        var th = $("<th/>")
+
+        $("<label/>")
+            .attr("for", "id_" + id)
+            .html(escapeHTML(title + ":"))
+            .appendTo(th)
+
+
+        var td = $("<td/>")
+
+        $("<tr/>")
+            .append(th)
+            .append(td)
+            .appendTo(this.table)
+
+        return td
+    },
+
+    add_input_field: function(id, title, type) {
+        this.input[id] = $('<input />')
+            .attr('type', type)
+            .attr('name', id)
+            .attr('id', "id_" + id)
+        this._add_field(id, title)
+            .append(this.input[id])
+    },
+
+    set_input_field: function(id, value) {
+        this.input[id].val(value)
+    },
+
+    get_input_field: function(id) {
+        return this.input[id].val()
     },
 })
