@@ -1885,13 +1885,9 @@ function display_album_search_results(search, results) {
     cm.append("<h1>Album List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
 
 
-    if (results.q) {
-        var dl = $("<dl/>")
-        dt_dd(dl, "Search text", results.q)
-        $("<div class='infobox'/>")
-            .append(dl)
-            .appendTo(cm)
-    }
+    $("<div/>")
+        .album_search_details({ params: search.params })
+        .appendTo(cm)
 
     $("<div/>")
         .album_list({ albums: results.albums, change_mode: true })

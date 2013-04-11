@@ -272,9 +272,11 @@ $.widget('ui.ajaxautocompletesorted',  $.ui.ajaxautocompletemultiple, {
 
 $.widget('ui.infobox', {
     _create: function(){
-        $("<h2></h2")
-            .text(this.options.title)
-            .appendTo(this.element)
+        if (this.options.title != null) {
+            $("<h2></h2")
+                .text(this.options.title)
+                .appendTo(this.element)
+        }
 
         this.dl = $("<dl></dl>")
             .appendTo(this.element)

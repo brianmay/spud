@@ -26,12 +26,31 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
     },
 })
 
+
+$.widget('ui.album_search_details',  $.ui.infobox, {
+    _create: function() {
+        this.element.addClass("infobox")
+        this._super();
+
+        this.add_field("q", "Search for")
+
+        if (this.options.params != null) {
+            this.load(this.options.params)
+        }
+    },
+
+    load: function(params) {
+        this.get_field("q")
+            .empty()
+            .text(params.q)
+    },
+})
+
+
+
 $.widget('ui.album_details',  $.ui.infobox, {
     _create: function() {
         this.element.addClass("infobox")
-
-        this.options.title = "Album details"
-
         this._super();
 
         this.img = $("<img/>")
