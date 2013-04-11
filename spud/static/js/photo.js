@@ -317,10 +317,6 @@ $.widget('ui.photo_details',  $.ui.infobox, {
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_action, "[edit]"))
     },
 
-    _destroy: function() {
-        this.element.empty()
-        this._super()
-    },
 })
 
 
@@ -376,10 +372,6 @@ $.widget('ui.camera_details',  $.ui.infobox, {
         return this
     },
 
-    _destroy: function() {
-        this.element.empty()
-        this._super()
-    },
 })
 
 
