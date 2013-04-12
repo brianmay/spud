@@ -516,116 +516,6 @@ function datetime_a(dt) {
 // * HELPERS *
 // ***********
 
-function get_settings() {
-    var a = []
-    if (localStorage.settings != null)
-        if (localStorage.settings != "")
-            a = localStorage.settings.split(",")
-
-    var settings
-    if (a.length < 5) {
-        settings = {
-            photos_per_page: 10,
-            items_per_page: 10,
-            list_size: "thumb",
-            view_size: "mid",
-            click_size: "large",
-        }
-    } else {
-        settings = {
-            photos_per_page: Number(a[0]),
-            items_per_page: Number(a[1]),
-            list_size: a[2],
-            view_size: a[3],
-            click_size: a[4],
-        }
-    }
-    return settings
-}
-
-
-function set_settings(settings) {
-    var a = [
-        settings.photos_per_page,
-        settings.items_per_page,
-        settings.list_size,
-        settings.view_size,
-        settings.click_size,
-    ]
-    localStorage.settings = a.join(",")
-}
-
-
-function get_selection() {
-    var selection = []
-    if (localStorage.selection != null)
-        if (localStorage.selection != "")
-            selection = localStorage.selection.split(",")
-    selection = $.map(selection, function(n){ return Number(n) });
-    return selection
-}
-
-
-function set_selection(selection) {
-    localStorage.selection = selection.join(",")
-    update_selection()
-}
-
-
-function add_selection(photo) {
-    var selection = get_selection()
-    if (selection.indexOf(photo.id) == -1) {
-        selection.push(photo.id)
-    }
-    set_selection(selection)
-}
-
-
-function del_selection(photo) {
-    var selection = get_selection()
-    var index = selection.indexOf(photo.id)
-    if (index != -1) {
-        selection.splice(index, 1);
-    }
-    set_selection(selection)
-}
-
-
-function is_photo_selected(photo) {
-    var selection = get_selection()
-    var index = selection.indexOf(photo.id)
-    return index != -1
-}
-
-
-function set_edit_mode() {
-    $(document).data("mode", "edit")
-}
-
-function set_normal_mode() {
-    $(document).data("mode", null)
-}
-
-function is_edit_mode() {
-    return ($(document).data("mode") == "edit")
-}
-
-function set_slideshow_mode() {
-    $(document).data("photo_mode", "slideshow")
-}
-
-function set_article_mode() {
-    $(document).data("photo_mode", "article")
-}
-
-function get_photo_mode() {
-    if ($(document).data("photo_mode") == null) {
-        return "article"
-    } else {
-        return $(document).data("photo_mode")
-    }
-}
-
 function update_history(push_history, url, state) {
     if (push_history) {
         window.history.pushState(state, document.title, url);
@@ -1872,16 +1762,8 @@ function display_album(album) {
     cm.append("<h1>" + escapeHTML(album.title) +  "</h1>")
 
     $("<div/>")
-        .album_details({ album: album, change_mode: true })
+        .album_details({ album: album })
         .appendTo(cm)
-
-/*
-    if (album.children.length > 0) {
-        $("<div class='children'/>")
-            .album_list({ albums: album.children, change_mode: true })
-            .appendTo(cm)
-    }
-*/
 
     var al = $("<div class='children' />")
     al
@@ -1890,7 +1772,7 @@ function display_album(album) {
                 return $("<a/>")
                     .text(text)
                     .attr("href", "#")
-                    .on("click", function() { display_album_children(al, album, page); })
+                    .on("click", function() { display_album_children(al, album, page); return false; })
             }
         })
         .appendTo(cm)
@@ -1904,7 +1786,7 @@ function display_album(album) {
                 return $("<a/>")
                     .text(text)
                     .attr("href", "#")
-                    .on("click", function() { display_album_photos(pl, album, page); })
+                    .on("click", function() { display_album_photos(pl, album, page); return false; })
             }
         })
         .appendTo(cm)

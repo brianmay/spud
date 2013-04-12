@@ -1,4 +1,118 @@
 // ****************
+// * STATE SAVING *
+// ****************
+
+function get_settings() {
+    var a = []
+    if (localStorage.settings != null)
+        if (localStorage.settings != "")
+            a = localStorage.settings.split(",")
+
+    var settings
+    if (a.length < 5) {
+        settings = {
+            photos_per_page: 10,
+            items_per_page: 10,
+            list_size: "thumb",
+            view_size: "mid",
+            click_size: "large",
+        }
+    } else {
+        settings = {
+            photos_per_page: Number(a[0]),
+            items_per_page: Number(a[1]),
+            list_size: a[2],
+            view_size: a[3],
+            click_size: a[4],
+        }
+    }
+    return settings
+}
+
+
+function set_settings(settings) {
+    var a = [
+        settings.photos_per_page,
+        settings.items_per_page,
+        settings.list_size,
+        settings.view_size,
+        settings.click_size,
+    ]
+    localStorage.settings = a.join(",")
+}
+
+
+function get_selection() {
+    var selection = []
+    if (localStorage.selection != null)
+        if (localStorage.selection != "")
+            selection = localStorage.selection.split(",")
+    selection = $.map(selection, function(n){ return Number(n) });
+    return selection
+}
+
+
+function set_selection(selection) {
+    localStorage.selection = selection.join(",")
+    update_selection()
+}
+
+
+function add_selection(photo) {
+    var selection = get_selection()
+    if (selection.indexOf(photo.id) == -1) {
+        selection.push(photo.id)
+    }
+    set_selection(selection)
+}
+
+
+function del_selection(photo) {
+    var selection = get_selection()
+    var index = selection.indexOf(photo.id)
+    if (index != -1) {
+        selection.splice(index, 1);
+    }
+    set_selection(selection)
+}
+
+
+function is_photo_selected(photo) {
+    var selection = get_selection()
+    var index = selection.indexOf(photo.id)
+    return index != -1
+}
+
+
+function set_edit_mode() {
+    $(document).data("mode", "edit")
+}
+
+function set_normal_mode() {
+    $(document).data("mode", null)
+}
+
+function is_edit_mode() {
+    return ($(document).data("mode") == "edit")
+}
+
+function set_slideshow_mode() {
+    $(document).data("photo_mode", "slideshow")
+}
+
+function set_article_mode() {
+    $(document).data("photo_mode", "article")
+}
+
+function get_photo_mode() {
+    if ($(document).data("photo_mode") == null) {
+        return "article"
+    } else {
+        return $(document).data("photo_mode")
+    }
+}
+
+// ****************
 // * COMMON STUFF *
 // ****************
 
@@ -20,7 +134,7 @@ $.fn.p = function(text){
     return this
 }
 
-
+// FIXME - is this still used???
 $.fn.append_list = function(list){
     if (list.length == 0) {
         return this
@@ -173,6 +287,10 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
         }
     },
 
+    get: function() {
+        return this.input.val()
+    },
+
     _receiveResult: function(ev, ui) {
         if (this.input.val()) {
             this._kill();
@@ -267,50 +385,6 @@ $.widget('ui.ajaxautocompletesorted',  $.ui.ajaxautocompletemultiple, {
 })
 
 
-$.widget('ui.infobox', {
-    _create: function(){
-        if (this.options.title != null) {
-            $("<h2></h2")
-                .text(this.options.title)
-                .appendTo(this.element)
-        }
-
-        this.dl = $("<dl></dl>")
-            .appendTo(this.element)
-
-        this.dt = {}
-        this.dd = {}
-
-        this._super()
-    },
-
-    _destroy: function() {
-        this.element.empty()
-        this._super()
-    },
-
-    add_field: function(id, title) {
-        var dt = $("<dt/>")
-            .text(title)
-            .appendTo(this.dl)
-        var dd = $("<dd/>")
-            .appendTo(this.dl)
-        this.dt[id] = dt
-        this.dd[id] = dd
-        return dd
-    },
-
-    get_field: function(id) {
-        return this.dd[id]
-    },
-
-    toggle_field: function(id, showOrHide) {
-        this.dt[id].toggle(showOrHide)
-        this.dd[id].toggle(showOrHide)
-    },
-})
-
-
 $.widget('ui.spud_menu', {
     _create: function() {
 
@@ -379,143 +453,6 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
         }
     },
 })
-
-$.widget('ui.form_dialog',  $.ui.dialog, {
-    _create: function() {
-        var mythis = this
-        var options = this.options
-
-        if (options.description != null) {
-            $("<p/>")
-                .text(options.description)
-                .appendTo(this.element)
-            delete options.description
-        }
-
-        var submit = "Continue"
-        if (options.button != null) {
-            submit = options.button
-            delete options.button
-        }
-
-        this.f = $("<form method='get' />")
-            .appendTo(this.element)
-
-        this.table = $("<table />")
-            .appendTo(this.f)
-
-        options.buttons = {}
-        options.buttons[submit] = function() {
-            mythis._submit()
-        }
-        options.buttons['Cancel'] = function() {
-            mythis.close()
-        }
-
-        this.input = {}
-
-        this._super()
-
-        this.element.on(
-            "keypress",
-            function(ev) {
-                if (ev.which == 13 && !ev.shiftKey) {
-                    mythis._submit()
-                    return false
-                    }
-            }
-        )
-        this.element.on(
-            this.widgetEventPrefix + "close",
-            function( ev, ui ) {
-                mythis.destroy()
-            }
-        )
-    },
-
-    _submit: function() {
-    },
-
-    _destroy: function() {
-        this.element
-            .empty()
-            .removeClass("menu")
-        this._super()
-    },
-
-    _add_field: function(id, title) {
-        var th = $("<th/>")
-
-        $("<label/>")
-            .attr("for", "id_" + id)
-            .html(escapeHTML(title + ":"))
-            .appendTo(th)
-
-
-        var td = $("<td/>")
-
-        $("<tr/>")
-            .append(th)
-            .append(td)
-            .appendTo(this.table)
-
-        return td
-    },
-
-    _add_ajax_select_field: function(id, title, type) {
-        var params = {
-            "type": type,
-        }
-
-        this.input[id] = $("<span/>")
-            .attr("name", id)
-            .attr("id", "id_" + id)
-            .ajaxautocomplete(params)
-
-        this._add_field(id, title)
-            .append(this.input[id])
-    },
-
-    _set_ajax_select_field: function(id, value) {
-        var item = null
-        if (value != null) {
-            item = {
-                pk: value.id,
-                repr: value.title,
-            }
-        }
-        this.input[id].ajaxautocomplete("load", item)
-    },
-
-    add_text_field: function(id, title, required) {
-        this.input[id] = $('<input />')
-            .attr('type', "text")
-            .attr('name', id)
-            .attr('id', "id_" + id)
-        this._add_field(id, title)
-            .append(this.input[id])
-    },
-
-    add_album_field: function(id, title, required) {
-        this._add_ajax_select_field(id, title, "album")
-    },
-
-    set_album_field: function(id, value) {
-        this._set_ajax_select_field(id, value)
-    },
-
-    set_text_field: function(id, value) {
-        this.input[id].val(value)
-    },
-
-
-
-    get_field: function(id) {
-        var form = this.f[0]
-        return form[id].value.trim()
-    },
-})
-
 
 $.widget('ui.paginator', {
     _create: function() {
@@ -586,4 +523,349 @@ $.widget('ui.paginator', {
         }
     },
 })
+
+
+// **************
+// * INFO BOXES *
+// **************
+
+// define output_field
+function output_field(title) {
+    this.title = title
+}
+
+output_field.prototype.show = function(value) {
+    return Boolean(value)
+}
+
+output_field.prototype.create = function(id) {
+    return $('<div />')
+}
+
+output_field.prototype.destroy = function(output) {
+}
+
+
+// define text_output_field
+function text_output_field(title) {
+    output_field.call(this, title)
+}
+
+text_output_field.prototype = new output_field()
+text_output_field.constructor = text_output_field
+
+text_output_field.prototype.set = function(output, value) {
+    output.text(value)
+}
+
+// define p_output_field
+function p_output_field(title) {
+    output_field.call(this, title)
+}
+
+p_output_field.prototype = new output_field()
+p_output_field.constructor = p_output_field
+
+p_output_field.prototype.set = function(output, value) {
+    output.p(value)
+}
+
+// define html_output_field
+function html_output_field(title) {
+    output_field.call(this, title)
+}
+
+html_output_field.prototype = new output_field()
+html_output_field.constructor = html_output_field
+
+html_output_field.prototype.set = function(output, value) {
+    output.html(value)
+}
+
+// define html_list_output_field
+function html_list_output_field(title) {
+    output_field.call(this, title)
+}
+
+
+html_list_output_field.prototype = new output_field()
+html_list_output_field.constructor = html_list_output_field
+
+html_list_output_field.prototype.create = function(id) {
+    return $('<ul />')
+}
+
+html_list_output_field.prototype.set = function(output, value) {
+    output.empty()
+
+    $.each(value, function(i, item){
+        $("<li></li>")
+            .append(item)
+            .appendTo(output)
+    })
+}
+
+// define photo_output_field
+function photo_output_field(title) {
+    output_field.call(this, title)
+}
+
+photo_output_field.prototype = new output_field()
+photo_output_field.constructor = photo_output_field
+
+photo_output_field.prototype.create = function(id, size) {
+    return $('<img />').image({ size: size })
+}
+
+photo_output_field.prototype.set = function(output, value) {
+    output.image('load', value)
+}
+
+photo_output_field.prototype.destroy = function(output) {
+    output.image('destroy')
+}
+
+$.widget('ui.infobox', {
+    _create: function(){
+        if (this.options.title != null) {
+            $("<h2></h2")
+                .text(this.options.title)
+                .appendTo(this.element)
+        }
+
+        this.dl = $("<dl></dl>")
+            .appendTo(this.element)
+
+        this.dt = {}
+        this.dd = {}
+        this.output = {}
+
+        var mythis = this
+        this.input = {}
+        $.each(this.fields, function(id, field){
+            mythis.add_field(id, field)
+        })
+
+        this._super()
+    },
+
+    _destroy: function() {
+        var mythis = this
+        $.each(this.fields, function(id, field) {
+            var output = mythis.output[id]
+            field.destroy(output)
+        })
+        this.element.empty()
+        this._super()
+    },
+
+    add_field: function(id, field) {
+        var output = field.create(id)
+
+        var dt = $("<dt/>")
+            .text(field.title)
+            .appendTo(this.dl)
+        var dd = $("<dd/>")
+            .append(output)
+            .appendTo(this.dl)
+
+        this.dt[id] = dt
+        this.dd[id] = dd
+        this.output[id] = output
+        this.fields[id] = field
+        return dd
+    },
+
+    set_field: function(id, value) {
+        var output = this.output[id]
+        this.dt[id].toggle(this.fields[id].show(value))
+        this.dd[id].toggle(this.fields[id].show(value))
+        this.fields[id].set(output, value)
+    },
+
+    set_edit_field: function(id, value, can_change, a) {
+        this.set_field(id, value)
+        if (can_change) {
+            this.dt[id].show()
+            this.dd[id].show()
+            this.dd[id].append(" ")
+            this.dd[id].append(a)
+        }
+    },
+})
+
+
+// define input_field
+function input_field(title, required) {
+    this.title = title
+    this.required = required
+}
+
+input_field.prototype.get = function(input, id) {
+    return input.val().trim()
+}
+
+// ****************
+// * DIALOG BOXES *
+// ****************
+
+// define text_input_field
+function text_input_field(title, required) {
+    input_field.call(this, title, required)
+}
+
+text_input_field.prototype = new input_field()
+text_input_field.constructor = text_input_field
+text_input_field.prototype.create = function(id) {
+    return $('<input />')
+        .attr('type', "text")
+        .attr('name', id)
+        .attr('id', "id_" + id)
+}
+
+text_input_field.prototype.destroy = function(input) {
+}
+
+text_input_field.prototype.set = function(input, value) {
+    input.val(value)
+}
+
+
+// define ajax_select_field
+function ajax_select_field(title, type, required) {
+    input_field.call(this, title, required)
+    this.type = type
+}
+
+ajax_select_field.prototype = new input_field()
+ajax_select_field.constructor = ajax_select_field
+ajax_select_field.prototype.create = function(id) {
+    return ac = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .ajaxautocomplete({type: this.type})
+}
+
+ajax_select_field.prototype.destroy = function(input) {
+    input.ajaxautocomplete("destroy")
+}
+
+ajax_select_field.prototype.set = function(input, value) {
+    var item = null
+    if (value != null) {
+        item = {
+            pk: value.id,
+            repr: value.title,
+        }
+    }
+    input.ajaxautocomplete("load", item)
+}
+
+ajax_select_field.prototype.get = function(input) {
+    return input.ajaxautocomplete("get")
+}
+
+$.widget('ui.form_dialog',  $.ui.dialog, {
+    _create: function() {
+        var mythis = this
+        var options = this.options
+
+        if (options.description != null) {
+            $("<p/>")
+                .text(options.description)
+                .appendTo(this.element)
+            delete options.description
+        }
+
+        var submit = "Continue"
+        if (options.button != null) {
+            submit = options.button
+            delete options.button
+        }
+
+        this.f = $("<form method='get' />")
+            .appendTo(this.element)
+
+        this.table = $("<table />")
+            .appendTo(this.f)
+
+        options.buttons = {}
+        options.buttons[submit] = function() {
+            mythis._submit()
+        }
+        options.buttons['Cancel'] = function() {
+            mythis.close()
+        }
+
+        var mythis = this
+        this.input = {}
+        $.each(this.fields, function(id, field){
+            mythis.add_field(id, field)
+        })
+
+        this._super()
+
+        this.element.on(
+            "keypress",
+            function(ev) {
+                if (ev.which == 13 && !ev.shiftKey) {
+                    mythis._submit()
+                    return false
+                    }
+            }
+        )
+        this.element.on(
+            this.widgetEventPrefix + "close",
+            function( ev, ui ) {
+                mythis.destroy()
+            }
+        )
+    },
+
+    _submit: function() {
+    },
+
+    _destroy: function() {
+        var mythis = this
+        $.each(this.fields, function(id, field) {
+            var input = mythis.input[id]
+            field.destroy(input)
+        })
+        this.element
+            .empty()
+        this._super()
+    },
+
+    add_field: function(id, field) {
+        var input = field.create(id)
+
+        var th = $("<th/>")
+        $("<label/>")
+            .attr("for", "id_" + id)
+            .html(escapeHTML(field.title + ":"))
+            .appendTo(th)
+
+        var td = $("<td/>")
+            .append(input)
+
+        $("<tr/>")
+            .append(th)
+            .append(td)
+            .appendTo(this.table)
+
+        this.fields[id] = field
+        this.input[id] = input
+    },
+
+    set_field: function(id, value) {
+        var input = this.input[id]
+        this.fields[id].set(input, value)
+    },
+
+    get_field: function(id) {
+        var input = this.input[id]
+        return this.fields[id].get(input)
+    },
+})
+
 
