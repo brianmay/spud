@@ -492,7 +492,7 @@ function settings_a(title) {
     }
     var a = $('<a/>')
         .attr('href', settings_url())
-        .on('click', function() { do_settings(true); return false; })
+        .on('click', function() { do_settings_form(true); return false; })
         .text(title)
     return a
 }
@@ -673,8 +673,6 @@ window.onpopstate = function(event) {
             do_photo_search_item(state.search, state.n, state.photo_id, false)
         } else if (state.type == 'display_photo_search_results') {
             do_photo_search_results(state.search, state.page, false)
-        } else if (state.type == 'settings') {
-            do_settings(false)
         } else {
             display_error("We don't understand our state")
         }
@@ -4296,7 +4294,7 @@ function do_photo_search_item(search, n, photo_id, push_history) {
     )
 }
 
-function do_settings(push_history) {
+function do_settings_form(push_history) {
     load_settings(
         function(data) {
             display_settings(data)
