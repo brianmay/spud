@@ -650,8 +650,37 @@ def logout(request):
 
 
 @check_errors
+def album_search_form(request):
+    resp = {}
+    search_dict = request.GET.copy()
+    search_dict.pop("_", None)
+
+    q = search_dict.pop("q", [None])[-1]
+    if q:
+        resp['q'] = q
+
+    parent = search_dict.pop("parent", [None])[-1]
+    if parent:
+        try:
+            parent = _decode_int(parent)
+            parent = spud.models.album.objects.get(pk=parent)
+        except spud.models.album.DoesNotExist:
+            raise HttpBadRequest("parent does not exist")
+        resp['parent'] = _get_album(request.user, parent)
+
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
+
+    resp['type'] = 'album_search_form'
+    resp['can_add'] = request.user.has_perm('spud.add_album')
+    resp['session'] = _get_session(request)
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
 def album_search_results(request):
     search_dict = request.GET.copy()
+    search_dict.pop("_", None)
 
     first = search_dict.pop("first", ["0"])[-1]
     first = _decode_int(first)
@@ -664,17 +693,32 @@ def album_search_results(request):
         raise HttpBadRequest("count is negative")
 
     album_list = spud.models.album.objects.all()
+    resp = {}
 
     q = search_dict.pop("q", [None])[-1]
-    if q is not None:
-        album_list = spud.models.album.objects.filter(
+    if q:
+        album_list = album_list.filter(
             Q(album__icontains=q) | Q(album_description__icontains=q))
+        resp['q'] = q
+
+    parent = search_dict.pop("parent", [None])[-1]
+    if parent:
+        try:
+            parent = _decode_int(parent)
+            parent = spud.models.album.objects.get(pk=parent)
+        except spud.models.album.DoesNotExist:
+            raise HttpBadRequest("parent does not exist")
+        album_list = album_list.filter(parent_album=parent)
+        resp['parent'] = _get_album(request.user, parent)
+
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
 
     number_results = album_list.count()
     album_list = album_list[first:first+count]
     number_returned = len(album_list)
 
-    resp = {
+    resp.update({
         'type': 'album_search_results',
         'albums': [_get_album(request.user, p) for p in album_list],
         'number_results': number_results,
@@ -682,8 +726,7 @@ def album_search_results(request):
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_album'),
-        'q': q,
-    }
+    })
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -779,8 +822,37 @@ def album_finish(request, album):
 
 
 @check_errors
+def category_search_form(request):
+    resp = {}
+    search_dict = request.GET.copy()
+    search_dict.pop("_", None)
+
+    q = search_dict.pop("q", [None])[-1]
+    if q:
+        resp['q'] = q
+
+    parent = search_dict.pop("parent", [None])[-1]
+    if parent:
+        try:
+            parent = _decode_int(parent)
+            parent = spud.models.category.objects.get(pk=parent)
+        except spud.models.category.DoesNotExist:
+            raise HttpBadRequest("parent does not exist")
+        resp['parent'] = _get_category(request.user, parent)
+
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
+
+    resp['type'] = 'category_search_form'
+    resp['can_add'] = request.user.has_perm('spud.add_category')
+    resp['session'] = _get_session(request)
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
 def category_search_results(request):
     search_dict = request.GET.copy()
+    search_dict.pop("_", None)
 
     first = search_dict.pop("first", ["0"])[-1]
     first = _decode_int(first)
@@ -793,17 +865,32 @@ def category_search_results(request):
         raise HttpBadRequest("count is negative")
 
     category_list = spud.models.category.objects.all()
+    resp = {}
 
     q = search_dict.pop("q", [None])[-1]
-    if q is not None:
-        category_list = spud.models.category.objects.filter(
+    if q:
+        category_list = category_list.filter(
             Q(category__icontains=q) | Q(category_description__icontains=q))
+        resp['q'] = q
+
+    parent = search_dict.pop("parent", [None])[-1]
+    if parent:
+        try:
+            parent = _decode_int(parent)
+            parent = spud.models.category.objects.get(pk=parent)
+        except spud.models.category.DoesNotExist:
+            raise HttpBadRequest("parent does not exist")
+        category_list = category_list.filter(parent_category=parent)
+        resp['parent'] = _get_category(request.user, parent)
+
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
 
     number_results = category_list.count()
     category_list = category_list[first:first+count]
     number_returned = len(category_list)
 
-    resp = {
+    resp.update({
         'type': 'category_search_results',
         'categorys': [_get_category(request.user, p) for p in category_list],
         'number_results': number_results,
@@ -811,8 +898,7 @@ def category_search_results(request):
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_category'),
-        'q': q,
-    }
+    })
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -908,6 +994,87 @@ def category_finish(request, category):
 
 
 @check_errors
+def place_search_form(request):
+    resp = {}
+    search_dict = request.GET.copy()
+    search_dict.pop("_", None)
+
+    q = search_dict.pop("q", [None])[-1]
+    if q:
+        resp['q'] = q
+
+    parent = search_dict.pop("parent", [None])[-1]
+    if parent:
+        try:
+            parent = _decode_int(parent)
+            parent = spud.models.place.objects.get(pk=parent)
+        except spud.models.place.DoesNotExist:
+            raise HttpBadRequest("parent does not exist")
+        resp['parent'] = _get_place(request.user, parent)
+
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
+
+    resp['type'] = 'place_search_form'
+    resp['can_add'] = request.user.has_perm('spud.add_place')
+    resp['session'] = _get_session(request)
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
+def place_search_results(request):
+    search_dict = request.GET.copy()
+    search_dict.pop("_", None)
+
+    first = search_dict.pop("first", ["0"])[-1]
+    first = _decode_int(first)
+    if first < 0:
+        raise HttpBadRequest("first is negative")
+
+    count = search_dict.pop("count", ["10"])[-1]
+    count = _decode_int(count)
+    if count < 0:
+        raise HttpBadRequest("count is negative")
+
+    place_list = spud.models.place.objects.all()
+    resp = {}
+
+    q = search_dict.pop("q", [None])[-1]
+    if q:
+        place_list = place_list.filter(
+            Q(title__icontains=q) | Q(address__icontains=q))
+        resp['q'] = q
+
+    parent = search_dict.pop("parent", [None])[-1]
+    if parent:
+        try:
+            parent = _decode_int(parent)
+            parent = spud.models.place.objects.get(pk=parent)
+        except spud.models.place.DoesNotExist:
+            raise HttpBadRequest("parent does not exist")
+        place_list = place_list.filter(parent_place=parent)
+        resp['parent'] = _get_place(request.user, parent)
+
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
+
+    number_results = place_list.count()
+    place_list = place_list[first:first+count]
+    number_returned = len(place_list)
+
+    resp.update({
+        'type': 'place_search_results',
+        'places': [_get_place(request.user, p) for p in place_list],
+        'number_results': number_results,
+        'first': first,
+        'last': first + number_returned - 1,
+        'session': _get_session(request),
+        'can_add': request.user.has_perm('spud.add_place'),
+    })
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
 def place(request, place_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_place'):
@@ -925,44 +1092,6 @@ def place_add(request):
             raise HttpForbidden("No rights to add places")
     place = spud.models.place()
     return place_finish(request, place)
-
-
-@check_errors
-def place_search_results(request):
-    search_dict = request.GET.copy()
-
-    first = search_dict.pop("first", ["0"])[-1]
-    first = _decode_int(first)
-    if first < 0:
-        raise HttpBadRequest("first is negative")
-
-    count = search_dict.pop("count", ["10"])[-1]
-    count = _decode_int(count)
-    if count < 0:
-        raise HttpBadRequest("count is negative")
-
-    place_list = spud.models.place.objects.all()
-
-    q = search_dict.pop("q", [None])[-1]
-    if q is not None:
-        place_list = spud.models.place.objects.filter(
-            Q(title__icontains=q) | Q(address__icontains=q))
-
-    number_results = place_list.count()
-    place_list = place_list[first:first+count]
-    number_returned = len(place_list)
-
-    resp = {
-        'type': 'place_search_results',
-        'places': [_get_place(request.user, p) for p in place_list],
-        'number_results': number_results,
-        'first': first,
-        'last': first + number_returned - 1,
-        'session': _get_session(request),
-        'can_add': request.user.has_perm('spud.add_place'),
-        'q': q,
-    }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
 @check_errors
@@ -1054,16 +1183,15 @@ def place_finish(request, place):
 @check_errors
 def person_search_form(request):
     resp = {}
+    search_dict = request.GET.copy()
+    search_dict.pop("_", None)
 
-    for key in request.GET:
-        value = request.GET[key]
+    q = search_dict.pop("q", [None])[-1]
+    if q:
+        resp['q'] = q
 
-        if value == "" or key == "_":
-            continue
-        elif key == "q":
-            resp[key] = value
-        else:
-            raise HttpBadRequest("Unknown key %s" % (key))
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
 
     resp['type'] = 'person_search_form'
     resp['can_add'] = request.user.has_perm('spud.add_person')
@@ -1074,6 +1202,7 @@ def person_search_form(request):
 @check_errors
 def person_search_results(request):
     search_dict = request.GET.copy()
+    search_dict.pop("_", None)
 
     first = search_dict.pop("first", ["0"])[-1]
     first = _decode_int(first)
@@ -1086,18 +1215,23 @@ def person_search_results(request):
         raise HttpBadRequest("count is negative")
 
     person_list = spud.models.person.objects.all()
+    resp = {}
 
     q = search_dict.pop("q", [None])[-1]
-    if q is not None:
-        person_list = spud.models.person.objects.filter(
+    if q:
+        person_list = person_list.filter(
             Q(first_name__icontains=q) | Q(last_name__icontains=q) |
             Q(middle_name__icontains=q) | Q(called__icontains=q))
+        resp['q'] = q
+
+    if len(search_dict) > 0:
+        raise HttpBadRequest("Unknown parameters")
 
     number_results = person_list.count()
     person_list = person_list[first:first+count]
     number_returned = len(person_list)
 
-    resp = {
+    resp.update({
         'type': 'person_search_results',
         'persons': [_get_person(request.user, p) for p in person_list],
         'number_results': number_results,
@@ -1105,8 +1239,7 @@ def person_search_results(request):
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_person'),
-        'q': q,
-    }
+    })
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1407,7 +1540,7 @@ def _get_search(user, search_dict):
     for key in search_dict:
         value = search_dict[key]
 
-        if value == "" or key == "_":
+        if value == "":
             continue
         elif key == "timezone":
             continue
@@ -1555,8 +1688,8 @@ def _get_search(user, search_dict):
         elif key == "name":
             add_criteria(key, 'is', {'type': "string", 'value': value})
             search = search & Q(name=value)
-#        else:
-#            raise HttpBadRequest("Unknown key %s" % (key))
+        else:
+            raise HttpBadRequest("Unknown key %s" % (key))
 
         photo_list = photo_list.filter(search)
 
@@ -1570,7 +1703,7 @@ def photo_search_form(request):
     for key in request.GET:
         value = request.GET[key]
 
-        if value == "" or key == "_":
+        if value == "":
             continue
         elif key == "place_descendants":
             resp[key] = value
@@ -1648,8 +1781,8 @@ def photo_search_form(request):
             resp[key] = value
         elif key == "name":
             resp[key] = value
-#        else:
-#            raise HttpBadRequest("Unknown key %s" % (key))
+        else:
+            raise HttpBadRequest("Unknown key %s" % (key))
 
     resp['type'] = 'search'
     resp['session'] = _get_session(request)
@@ -1658,10 +1791,13 @@ def photo_search_form(request):
 
 @check_errors
 def photo_search_results(request):
-    if 'number' in request.GET:
-        return photo_search_item(request, request.GET['number'])
-
     search_dict = request.GET.copy()
+
+    if 'number' in search_dict:
+        number = search_dict.pop("number")[-1]
+        number = _decode_int(number)
+        return photo_search_item(request, search_dict, number)
+
 
     first = search_dict.pop("first", ["0"])[-1]
     first = _decode_int(first)
@@ -1692,10 +1828,7 @@ def photo_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def photo_search_item(request, number):
-    search_dict = request.GET.copy()
-    number = _decode_int(number)
-
+def photo_search_item(request, search_dict, number):
     photo_list, criteria = _get_search(request.user, search_dict)
     number_results = photo_list.count()
 
@@ -1732,6 +1865,7 @@ def photo_search_change(request):
             raise HttpForbidden("No rights to change photos")
 
     search_dict = request.POST.copy()
+    search_dict.pop("_", None)
 
     timezone = django.conf.settings.TIME_ZONE
 

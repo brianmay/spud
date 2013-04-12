@@ -80,7 +80,7 @@ function album_search_form_a(search, title) {
 }
 
 
-function album_search_results_a(search, page, title, accesskey) {
+function album_search_results_a(search, page, title) {
     if (title == null) {
         title = "Albums"
     }
@@ -88,10 +88,6 @@ function album_search_results_a(search, page, title, accesskey) {
         .attr('href', album_search_results_url(search, page))
         .on('click', function() { do_album_search_results(search, page, true); return false; })
         .text(title)
-
-    if (accesskey != null) {
-        a.attr('accesskey', accesskey)
-    }
     return a
 }
 
@@ -166,7 +162,7 @@ function category_search_form_a(search, title) {
 }
 
 
-function category_search_results_a(search, page, title, accesskey) {
+function category_search_results_a(search, page, title) {
     if (title == null) {
         title = "Categories"
     }
@@ -174,10 +170,6 @@ function category_search_results_a(search, page, title, accesskey) {
         .attr('href', category_search_results_url(search, page))
         .on('click', function() { do_category_search_results(search, page, true); return false; })
         .text(title)
-
-    if (accesskey != null) {
-        a.attr('accesskey', accesskey)
-    }
     return a
 }
 
@@ -338,7 +330,7 @@ function person_search_form_a(search, title) {
 }
 
 
-function person_search_results_a(search, page, title, accesskey) {
+function person_search_results_a(search, page, title) {
     if (title == null) {
         title = "People"
     }
@@ -346,10 +338,6 @@ function person_search_results_a(search, page, title, accesskey) {
         .attr('href', person_search_results_url(search, page))
         .on('click', function() { do_person_search_results(search, page, true); return false; })
         .text(title)
-
-    if (accesskey != null) {
-        a.attr('accesskey', accesskey)
-    }
     return a
 }
 
@@ -464,7 +452,7 @@ function photo_search_form_a(search, title) {
 }
 
 
-function photo_search_results_a(search, page, title, accesskey) {
+function photo_search_results_a(search, page, title) {
     if (title == null) {
         title = "Photos"
     }
@@ -472,10 +460,6 @@ function photo_search_results_a(search, page, title, accesskey) {
         .attr('href', photo_search_results_url(search, page))
         .on('click', function() { do_photo_search_results(search, page, true); return false; })
         .text(title)
-
-    if (accesskey != null) {
-        a.attr('accesskey', accesskey)
-    }
     return a
 }
 
@@ -979,58 +963,6 @@ function photo_thumb(photo, title, sort, description, url, selectable, onclick) 
 }
 
 
-function generic_paginator(page, last_page, html_page) {
-
-    var p = $("<p class='paginator'/>")
-
-    if (page > 0) {
-        p.append(html_page(page-1, '<', 'p'))
-    }
-    if (page < last_page) {
-        p.append(html_page(page+1, '>', 'n'))
-    }
-    var range = function(first, last) {
-        for (var i=first; i<=last; i++) {
-            if (i == page)
-                p.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
-            else
-                p.append(html_page(i, i+1, null))
-            p.append(" ")
-        }
-    }
-
-    var ON_EACH_SIDE = 3
-    var ON_ENDS = 2
-
-    // If there are 10 or fewer pages, display links to every page.
-    // Otherwise, do some fancy
-    if (last_page <= 10) {
-        range(0, last_page)
-    } else {
-        // Insert "smart" pagination links, so that there are always ON_ENDS
-        // links at either end of the list of pages, and there are always
-        // ON_EACH_SIDE links at either end of the "current page" link.
-        if (page > (ON_EACH_SIDE + ON_ENDS)) {
-            range(0, ON_ENDS-1)
-            p.append('<span class="dots">...</span>')
-            range(page - ON_EACH_SIDE, page-1)
-        } else {
-            range(0, page-1)
-        }
-
-        if (page < (last_page - ON_EACH_SIDE - ON_ENDS)) {
-            range(page, page + ON_EACH_SIDE)
-            p.append('<span class="dots">...</span>')
-            range(last_page - ON_ENDS + 1, last_page)
-        } else {
-            range(page, last_page)
-        }
-    }
-
-    return p
-}
-
-
 // *********************
 // * HTML form helpers *
 // *********************
@@ -1203,7 +1135,7 @@ function get_ajax_select(id, type, value, onadded, onkilled) {
     }
 
     if (value != null) {
-        params.item = {
+        params.initial = {
             pk: value.id,
             repr: value.title,
         }
@@ -1240,7 +1172,7 @@ function get_ajax_multiple_select(id, type, values, sorted, onadded, onkilled) {
 
     var params = {
         "type": type,
-        "items": value_arr,
+        "initial": value_arr,
     }
 
     var ac = $("<span/>")
@@ -1331,7 +1263,7 @@ function display_photo_article(photo, search, results, n) {
     if (search != null) {
         var last_page = results.number_results-1
 
-        var html_page = function(page, text, key) {
+        var html_page = function(page, text) {
             var photo = null
             if (page == n-1) {
                 photo = results.prev_photo
@@ -1340,10 +1272,16 @@ function display_photo_article(photo, search, results, n) {
             } else if (page == n+1) {
                 photo = results.next_photo
             }
-            return photo_search_item_a(search, page, photo, text, key)
+            return photo_search_item_a(search, page, photo, text)
         }
 
-        $("#content-main").append(generic_paginator(n, last_page, html_page))
+        $("<p></p>")
+            .paginator({
+                page: n,
+                last_page: last_page,
+                html_page: html_page,
+            })
+            .appendTo("#content-main")
 
         if (n > 1) {
             photo_search_item_a(search, n-1, results.prev_photo, "", null)
@@ -1417,7 +1355,7 @@ function display_photo_search_item(search, results, n) {
         .html("")
         .append(root_a())
         .append(" › ")
-        .append(photo_search_results_a(search, page))
+        .append(photo_search_results_a(search, page, null))
         .append(" › ")
         .append(escapeHTML(results.photo.title))
 }
@@ -1867,9 +1805,9 @@ function submit_change_photo_attribute(search_params, updates, number_results, d
 }
 
 
-function display_album_search_form(search) {
+function display_album_search_form(search, results) {
     var dialog = $("<div id='dialog'></div>")
-        .album_search_dialog({ params: search.params })
+        .album_search_dialog({ results: results })
 }
 
 
@@ -1885,16 +1823,32 @@ function display_album_search_results(search, results) {
     cm.append("<h1>Album List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
 
 
+    var html_page = function(page, text) {
+        return album_search_results_a(search, page, text)
+    }
+
     $("<div/>")
-        .album_search_details({ params: search.params })
+        .album_search_details({
+            search: search,
+            results: results,
+        })
         .appendTo(cm)
 
     $("<div/>")
-        .album_list({ albums: results.albums, change_mode: true })
+        .album_list({
+            albums: results.albums,
+            change_mode: true,
+            page: page,
+            last_page: last_page,
+            html_page: html_page,
+        })
         .appendTo(cm)
 
     var ul = $('<ul class="menu"/>')
-        .album_list_menu({ search: search, change_mode: true })
+        .album_list_menu({
+            search: search,
+            change_mode: true
+        })
 
     append_action_links(ul)
 
@@ -1903,12 +1857,6 @@ function display_album_search_results(search, results) {
             do_album(item.pk, true)
         }
     )
-
-    var html_page = function(page, text, key) {
-        return album_search_results_a(search, page, text, key)
-    }
-
-    cm.append(generic_paginator(page, last_page, html_page))
 
     $(".breadcrumbs")
         .html("")
@@ -1929,12 +1877,40 @@ function display_album(album) {
         .album_details({ album: album, change_mode: true })
         .appendTo(cm)
 
+/*
     if (album.children.length > 0) {
         $("<div class='children'/>")
             .album_list({ albums: album.children, change_mode: true })
             .appendTo(cm)
     }
+*/
 
+    var al = $("<div class='children' />")
+    al
+        .album_list({ html_page:
+            function(page, text) {
+                return $("<a/>")
+                    .text(text)
+                    .attr("href", "#")
+                    .on("click", function() { display_album_children(al, album, page); })
+            }
+        })
+        .appendTo(cm)
+     display_album_children(al, album, 0);
+
+
+    var pl = $("<div/>")
+    pl
+        .photo_list({ html_page:
+            function(page, text) {
+                return $("<a/>")
+                    .text(text)
+                    .attr("href", "#")
+                    .on("click", function() { display_album_photos(pl, album, page); })
+            }
+        })
+        .appendTo(cm)
+     display_album_photos(pl, album, 0);
 
     var search = { params: { album: album.id }}
 
@@ -1953,7 +1929,7 @@ function display_album(album) {
         .html("")
         .append(root_a())
         .append(" › ")
-        .append(album_search_results_a({}, 0, null, null))
+        .append(album_search_results_a({}, 0, null))
         .append(" › ")
 
     var sep = ""
@@ -1966,6 +1942,31 @@ function display_album(album) {
     bc.append(sep + escapeHTML(album.title))
 }
 
+
+function display_album_children(album_list, album, page) {
+    var search = {
+        results_per_page: get_settings().items_per_page,
+        params: { parent: album.id },
+    }
+    load_album_search_results(search, page, function(data) {
+        var last_page = Math.floor(data.number_results / search.results_per_page)
+        album_list.album_list("load", data.albums)
+        album_list.album_list("load_paginator", page, last_page)
+    })
+}
+
+
+function display_album_photos(photo_list, album, page) {
+    var search = {
+        results_per_page: get_settings().items_per_page,
+        params: { album: album.id },
+    }
+    load_photo_search_results(search, page, function(data) {
+        var last_page = Math.floor(data.number_results / search.results_per_page)
+        photo_list.photo_list("load", search, data)
+        photo_list.photo_list("load_paginator", page, last_page)
+    })
+}
 
 function display_change_album(album) {
     var dialog = $("<div id='dialog'></div>")
@@ -2788,11 +2789,17 @@ function display_person_search_results(search, results) {
 
     cm.append(table)
 
-    var html_page = function(page, text, key) {
-        return person_search_results_a(search, page, text, key)
+    var html_page = function(page, text) {
+        return person_search_results_a(search, page, text)
     }
 
-    cm.append(generic_paginator(page, last_page, html_page))
+    $("<p></p>")
+        .paginator({
+            page: page,
+            last_page: last_page,
+            html_page: html_page
+        })
+        .appendTo(cm)
 
     var ul = $('<ul class="menu"/>')
 
@@ -3672,11 +3679,18 @@ function photo_search_paginator(search, results) {
     var page = Math.floor(results.first / search.results_per_page)
     var last_page = Math.floor((results.number_results-1) / search.results_per_page)
 
-    var html_page = function(page, text, key) {
-        return photo_search_results_a(search, page, text, key)
+    var html_page = function(page, text) {
+        return photo_search_results_a(search, page, text)
     }
 
-    return generic_paginator(page, last_page, html_page)
+    var paginator = $("<p></p>")
+        .paginator({
+            page: page,
+            last_page: last_page,
+            html_page: html_page
+        })
+
+    return paginator
 }
 
 
@@ -3863,7 +3877,11 @@ function do_album_search_form(search, push_history) {
         search.params = {}
     }
 
-    display_album_search_form(search)
+    load_album_search_form(search,
+        function(data) {
+            display_album_search_form(search, data)
+        }
+    )
 }
 
 
@@ -3938,7 +3956,11 @@ function do_category_search_form(search, push_history) {
         search.params = {}
     }
 
-    display_category_search_form(search)
+    load_category_search_form(search,
+        function(data) {
+            display_category_search_form(search, data)
+        }
+    )
 }
 
 
@@ -4013,7 +4035,11 @@ function do_place_search_form(search, push_history) {
         search.params = {}
     }
 
-    display_place_search_form(search)
+    load_place_search_form(search,
+        function(data) {
+            display_place_search_form(search, data)
+        }
+    )
 }
 
 

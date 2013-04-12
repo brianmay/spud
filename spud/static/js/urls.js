@@ -110,12 +110,12 @@ function settings_url(dt) {
 function ajax(settings, success) {
     display_loading()
 
-    settings = jQuery.extend({
+    var settings = jQuery.extend({
         dataType : 'json',
         cache: false,
     }, settings)
 
-    success = settings.success
+    var success = settings.success
     delete settings.success
 
     $.ajax(settings)
@@ -169,6 +169,15 @@ function load_logout(success) {
     })
 }
 
+function load_album_search_form(search, success) {
+    ajax({
+        url: '/a/album/form/',
+        data: search.params,
+        success: success,
+    })
+}
+
+
 function load_album_search_results(search, page, success) {
     var first = page * search.results_per_page
 
@@ -219,6 +228,15 @@ function load_album_delete(album_id, success) {
 }
 
 
+function load_category_search_form(search, success) {
+    ajax({
+        url: '/a/category/form/',
+        data: search.params,
+        success: success,
+    })
+}
+
+
 function load_category_search_results(search, page, success) {
     var first = page * search.results_per_page
 
@@ -263,6 +281,15 @@ function load_category_delete(category_id, success) {
         url: '/a/category/'+category_id+'/delete/',
         success: success,
         type: "POST",
+    })
+}
+
+
+function load_place_search_form(search, success) {
+    ajax({
+        url: '/a/place/form/',
+        data: search.params,
+        success: success,
     })
 }
 

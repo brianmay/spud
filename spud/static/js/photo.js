@@ -547,10 +547,31 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.photo_list',  {
+$.widget('ui.photo_list_base',  {
     _create: function() {
         this.element
-                .addClass("photo_list")
+            .addClass("photo_list")
+
+        this.ul = $("<ul></ul")
+            .appendTo(this.element)
+
+        this.p = $("<p></p>")
+            .paginator({
+                html_page: this.options.html_page
+            })
+            .appendTo(this.element)
+
+        if (this.options.page != null) {
+            this.load_paginator(this.options.page, this.options.last_page)
+        }
+    },
+
+    load_paginator: function(page, last_page) {
+        this.p.paginator("load", page, last_page)
+    },
+
+    empty: function() {
+        this.ul.empty()
     },
 
     append_photo: function(photo, title, sort, description, a, selectable) {
@@ -586,12 +607,15 @@ $.widget('ui.photo_list',  {
             .append(a)
             .on("click", function(ev) { a.trigger('click'); })
             .toggleClass("ui-selected", selectable && is_photo_selected(photo))
-            .appendTo(this.element)
+            .appendTo(this.ul)
 
         return li
     },
 
     _destroy: function() {
+        this.p
+            .paginator("destroy")
+
         this.element.find("img")
             .image("destroy")
 
@@ -601,6 +625,40 @@ $.widget('ui.photo_list',  {
 
         this._super()
     },
+})
+
+
+$.widget('ui.photo_list', $.ui.photo_list_base, {
+    _create: function() {
+        this._super()
+        this.ul.myselectable({
+            filter: "li",
+            selected: function( event, ui ) {
+                add_selection( $(ui.selected).data('photo') ); },
+            unselected: function( event, ui ) {
+                del_selection( $(ui.unselected).data('photo') ); },
+        })
+        if (this.options.search != null && this.options.results != null) {
+            this.load(this.options.search, this.options.results, this.options.change_mode)
+        }
+    },
+
+    _destroy: function() {
+        this.ul
+            .myselectable("destroy")
+        this._super()
+    },
+
+    load: function(search, results, change_mode) {
+        var mythis = this
+        this.empty()
+        $.each(results.photos, function(j, photo) {
+            n = results.first + Number(j)
+            mythis.append_photo(
+                photo, photo.title, photo.localtime.date + " " + photo.localtime.time,
+                photo.description, photo_search_item_a(search, n, photo), true)
+        })
+    }
 })
 
 

@@ -33,7 +33,7 @@ ul.ui-autocomplete { z-index: 200; }
 
 /* Photo list */
 
-.photo_list { padding-left:0; }
+.photo_list {  padding-left:50px; border:1px solid #333; margin-bottom: 10px; }
 .photo_list .title { font-weight:bold; }
 .photo_list li { display:inline-block; vertical-align:top; height:150px; margin:10px; padding-top:10px; text-align: center; width:170px; }
 .photo_list li .desc { float:left; display:none; }

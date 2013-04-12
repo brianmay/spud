@@ -141,13 +141,17 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
         this.uidiv = this.element
         this.element = this.text
 
-        this._setInitial()
-
         var options = this.options
+        if (options.initial != null) {
+            this.load(options.initial)
+            delete options.initial
+        }
+
         if (options.type != null) {
             options.source =  "/ajax/ajax_lookup/" + options.type
             delete options.type
         }
+
         this.element.on(
             this.widgetEventPrefix + "select",
             $.proxy(this._receiveResult, this)
@@ -160,13 +164,12 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
         this._super();
     },
 
-    _setInitial: function() {
-        var options = this.options
-        if (options.item != null) {
-            options.initial = [ options.item.repr, options.item.pk ]
-            this.input.attr("value", options.item.pk)
-            this._addKiller(options.item)
-            delete options.item
+    load: function(item) {
+        if (item != null) {
+            this.input.val(item.pk)
+            this._addKiller(item)
+        } else {
+            this._kill();
         }
     },
 
@@ -208,23 +211,17 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
 
 
 $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
-    _setInitial: function() {
-        var options = this.options
-        if (options.items != null) {
-            if (options.items.length > 0) {
-                var value = $.map(options.items, function(v){ return v.pk });
-                this.input.val("|" + value.join("|") + "|")
-            } else {
-                this.input.val("|")
-            }
-            var mythis = this
-            $.each(options.items, function(i, v) {
-                mythis._addKiller(v)
-            });
+    load: function(initial) {
+        if (initial.length > 0) {
+            var value = $.map(initial, function(v){ return v.pk });
+            this.input.val("|" + value.join("|") + "|")
         } else {
-            this.input.attr("value", "|")
+            this.input.val("|")
         }
-        delete options.items
+        var mythis = this
+        $.each(initial, function(i, v) {
+            mythis._addKiller(v)
+        });
     },
 
     _receiveResult: function(ev, ui) {
@@ -465,20 +462,128 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         return td
     },
 
-    add_input_field: function(id, title, type) {
+    _add_ajax_select_field: function(id, title, type) {
+        var params = {
+            "type": type,
+        }
+
+        this.input[id] = $("<span/>")
+            .attr("name", id)
+            .attr("id", "id_" + id)
+            .ajaxautocomplete(params)
+
+        this._add_field(id, title)
+            .append(this.input[id])
+    },
+
+    _set_ajax_select_field: function(id, value) {
+        var item = null
+        if (value != null) {
+            item = {
+                pk: value.id,
+                repr: value.title,
+            }
+        }
+        this.input[id].ajaxautocomplete("load", item)
+    },
+
+    add_text_field: function(id, title, required) {
         this.input[id] = $('<input />')
-            .attr('type', type)
+            .attr('type', "text")
             .attr('name', id)
             .attr('id', "id_" + id)
         this._add_field(id, title)
             .append(this.input[id])
     },
 
-    set_input_field: function(id, value) {
+    add_album_field: function(id, title, required) {
+        this._add_ajax_select_field(id, title, "album")
+    },
+
+    set_album_field: function(id, value) {
+        this._set_ajax_select_field(id, value)
+    },
+
+    set_text_field: function(id, value) {
         this.input[id].val(value)
     },
 
+
+
     get_field: function(id) {
-        return this.input[id].val()
+        var form = this.f[0]
+        return form[id].value.trim()
     },
 })
+
+
+$.widget('ui.paginator', {
+    _create: function() {
+        this.element
+            .addClass("paginator")
+
+        if (this.options.page != null) {
+            this.load(this.options.page, this.options.last_page)
+        }
+    },
+
+    _destroy: function() {
+        this.element
+            .empty()
+            .removeClass("paginator")
+        this._super()
+    },
+
+     _range: function(page, first, last) {
+        var html_page = this.options.html_page
+        for (var i=first; i<=last; i++) {
+            if (i == page)
+                this.element.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
+            else
+                this.element.append(html_page(i, i+1))
+            this.element.append(" ")
+        }
+    },
+
+    load: function(page, last_page) {
+        var html_page = this.options.html_page
+
+        this.element.empty()
+
+        if (page > 0) {
+            this.element.append(html_page(page-1, '<').attr("accesskey", "p"))
+        }
+        if (page < last_page) {
+            this.element.append(html_page(page+1, '>').attr("accesskey", "n"))
+        }
+
+        var ON_EACH_SIDE = 3
+        var ON_ENDS = 2
+
+        // If there are 10 or fewer pages, display links to every page.
+        // Otherwise, do some fancy
+        if (last_page <= 10) {
+            this._range(page, 0, last_page)
+        } else {
+            // Insert "smart" pagination links, so that there are always ON_ENDS
+            // links at either end of the list of pages, and there are always
+            // ON_EACH_SIDE links at either end of the "current page" link.
+            if (page > (ON_EACH_SIDE + ON_ENDS)) {
+                range(0, ON_ENDS-1)
+                this.element.append('<span class="dots">...</span>')
+                this._range(page, page - ON_EACH_SIDE, page-1)
+            } else {
+                this._range(page, 0, page-1)
+            }
+
+            if (page < (last_page - ON_EACH_SIDE - ON_ENDS)) {
+                this._range(page, page, page + ON_EACH_SIDE)
+                this.element.append('<span class="dots">...</span>')
+                this._range(page, last_page - ON_ENDS + 1, last_page)
+            } else {
+                this._range(page, page, last_page)
+            }
+        }
+    },
+})
+
