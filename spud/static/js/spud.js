@@ -3881,7 +3881,6 @@ function do_change_album(album_id, push_history) {
 
 
 function do_album_add(parent_album, push_history) {
-    display_loading()
     display_change_album({
         id: null,
         type: "album",
