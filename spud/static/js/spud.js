@@ -1709,7 +1709,7 @@ function display_album_search_results(search, results) {
     cm.html("")
 
     var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.floor(results.number_results / search.results_per_page)
+    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
 
     document.title = "Album List " + (page+1) + "/" + (last_page+1) + " | Album | Spud"
     cm.append("<h1>Album List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
@@ -1834,7 +1834,7 @@ function display_album_children(album_list, album, page) {
     }
     load_album_search_results(search, page,
         function(data) {
-            var last_page = Math.floor(data.number_results / search.results_per_page)
+            var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
             album_list.album_list("set", data.albums)
             album_list.album_list("set_paginator", page, last_page)
         },
@@ -1852,7 +1852,7 @@ function display_album_photos(photo_list, album, page) {
     }
     load_photo_search_results(search, page,
         function(data) {
-            var last_page = Math.floor(data.number_results / search.results_per_page)
+            var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
             photo_list.photo_list("set", search, data)
             photo_list.photo_list("set_paginator", page, last_page)
         },
@@ -2642,7 +2642,7 @@ function display_person_search_results(search, results) {
     cm.html("")
 
     var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.floor(results.number_results / search.results_per_page)
+    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
 
     document.title = "Person List " + (page+1) + "/" + (last_page+1) + " | Photos | Spud"
     cm.append("<h1>Person List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
@@ -3481,7 +3481,7 @@ function display_photo_search_results(search, results) {
     cm.html("")
 
     var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.floor(results.number_results / search.results_per_page)
+    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
 
     document.title = "Photo List " + (page+1) + "/" + (last_page+1) + " | Photos | Spud"
     cm.append("<h1>Photo List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
@@ -3603,7 +3603,7 @@ function photo_search_photo_list(search, results) {
 
 function photo_search_paginator(search, results) {
     var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.floor((results.number_results-1) / search.results_per_page)
+    var last_page = Math.ceil((results.number_results-1) / search.results_per_page) - 1
 
     var html_page = function(page, text) {
         return photo_search_results_a(search, page, text)
