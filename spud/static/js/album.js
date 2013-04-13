@@ -15,19 +15,13 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
         }
     },
 
-    set: function(results) {
-        this.set_field("q", results.q)
-        this.set_field("parent", results.parent)
-        return this
-    },
-
-    _submit: function() {
+    _submit_values: function(values) {
         params = {}
 
-        var v = this.get_field("q")
+        var v = values.q
         if (v) { params.q = v }
 
-        var v = this.get_field("parent")
+        var v = values.parent
         if (v) { params.parent = v }
 
         var search = {
@@ -43,7 +37,7 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
 $.widget('ui.album_search_details',  $.ui.infobox, {
     fields: {
         'q': new text_output_field("Search for"),
-        'parent': new html_output_field("Album parent"),
+        'parent': new link_output_field("Album parent"),
     },
 
     _create: function() {
@@ -54,12 +48,6 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
             this.set(this.options.results)
         }
     },
-
-    set: function(results) {
-        this.set_field("q", results.q)
-        this.set_field("parent", album_a(results.parent))
-        return this
-    },
 })
 
 
@@ -67,9 +55,10 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
 $.widget('ui.album_details',  $.ui.infobox, {
     fields: {
         'title': new text_output_field("Title"),
-        'photo': new photo_output_field("Photo", get_settings().view_size),
-        'sort': new text_output_field("Sort"),
-        'description': new text_output_field("Description"),
+        'cover_photo': new photo_output_field("Photo", get_settings().view_size),
+        'sortname': new text_output_field("Sort Name"),
+        'sortorder': new text_output_field("Sort Order"),
+        'description': new p_output_field("Description"),
     },
 
     _create: function() {
@@ -79,14 +68,6 @@ $.widget('ui.album_details',  $.ui.infobox, {
         if (this.options.album != null) {
             this.set(this.options.album)
         }
-    },
-
-    set: function(album) {
-        this.set_field("title", album.title)
-        this.set_field("photo", album.cover_photo)
-        this.set_field("sort", album.sortname + " " + album.sortorder)
-        this.set_field("description", album.description)
-        return this
     },
 
     _destroy: function() {
@@ -114,7 +95,7 @@ $.widget('ui.album_list', $.ui.photo_list_base, {
             if  (album.sortorder || album.sortname) {
                 sort = album.sortname + " " + album.sortorder
             }
-            mythis.append_photo(photo, album.title, sort, album.description, album_a(album, null), false)
+            mythis.append_photo(photo, album.title, sort, album.description, album_a(album, null))
         })
         return this
     }
@@ -193,25 +174,27 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
     },
 
     set: function(album) {
+        this.album_id = album.id
         if (album.id != null) {
             this.set_description("Change " + album.title)
         } else {
             this.set_description("Add new album")
         }
-        this.set_field("title", album.title)
-        this.set_field("description", album.description)
-        this.set_field("cover_photo", album.cover_photo)
-        this.set_field("sortname", album.sortname)
-        this.set_field("sortorder", album.sortorder)
-        var parent = null
-        if (album.parents.length > 0) {
-            parent = album.parents.slice(-1)[0]
-        }
-        this.set_field("parent", parent)
-        return this
+        return this._super(album);
     },
 
-    _submit: function() {
+    _submit_values: function(values) {
+        display_loading()
+        load_album_change(
+            this.album_id,
+            values,
+            function(data) {
+                hide_loading()
+                this.close()
+                reload_page()
+            },
+            display_error
+        )
         this.close()
     },
 })

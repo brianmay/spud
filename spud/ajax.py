@@ -313,19 +313,21 @@ def _get_album_detail(user, album):
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': unicode(album.revised),
-        'parents': [],
+        'parent': _get_album(user, album.parent_album),
+        'ancestors': [],
         'children': [],
         'can_add': user.has_perm('spud.add_album'),
         'can_change': user.has_perm('spud.change_album'),
         'can_delete': user.has_perm('spud.delete_album'),
     }
 
-    parent = album.parent_album
-    seen = {}
-    while parent is not None and parent.pk not in seen:
-        d['parents'].insert(0, _get_album(user, parent))
-        seen[parent.pk] = True
-        parent = parent.parent_album
+    if album.parent_album is not None:
+        parent = album.parent_album.parent_album
+        seen = {}
+        while parent is not None and parent.pk not in seen:
+            d['ancestors'].insert(0, _get_album(user, parent))
+            seen[parent.pk] = True
+            parent = parent.parent_album
 
     for child in album.children.all():
         d['children'].append(_get_album(user, child))
@@ -368,19 +370,21 @@ def _get_category_detail(user, category):
         'cover_photo': _get_photo(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
-        'parents': [],
+        'parent': _get_category(user, category.parent_category),
+        'ancestors': [],
         'children': [],
         'can_add': user.has_perm('spud.add_category'),
         'can_change': user.has_perm('spud.change_category'),
         'can_delete': user.has_perm('spud.delete_category'),
     }
 
-    parent = category.parent_category
-    seen = {}
-    while parent is not None and parent.pk not in seen:
-        d['parents'].insert(0, _get_category(user, parent))
-        seen[parent.pk] = True
-        parent = parent.parent_category
+    if category.parent_category is not None:
+        parent = category.parent_category.parent_category
+        seen = {}
+        while parent is not None and parent.pk not in seen:
+            d['parents'].insert(0, _get_category(user, parent))
+            seen[parent.pk] = True
+            parent = parent.parent_category
 
     for child in category.children.all():
         d['children'].append(_get_category(user, child))
@@ -396,7 +400,7 @@ def _get_place(user, place):
         'type': 'place',
 #        'url': reverse("place_detail", kwargs={'object_id': place.pk}),
         'id': place.place_id,
-#        'parent_place': place.parent_place,
+#        'parent': place.parent_place,
         'title': place.title,
         'address': place.address,
         'address2': place.address2,
@@ -423,7 +427,8 @@ def _get_place_detail(user, place):
         'type': 'place',
 #        'url': reverse("place_detail", kwargs={'object_id': place.pk}),
         'id': place.place_id,
-#        'parent_place': place.parent_place,
+        'parent': _get_place(place.parent_place),
+        'ancestors': [],
         'title': place.title,
         'address': place.address,
         'address2': place.address2,
@@ -442,12 +447,13 @@ def _get_place_detail(user, place):
         'can_delete': user.has_perm('spud.delete_place'),
     }
 
-    parent = place.parent_place
-    seen = {}
-    while parent is not None and parent.pk not in seen:
-        d['parents'].insert(0, _get_place(user, parent))
-        seen[parent.pk] = True
-        parent = parent.parent_place
+    if place.parent_place is not None:
+        parent = place.parent_place.parent_place
+        seen = {}
+        while parent is not None and parent.pk not in seen:
+            seen[parent.pk] = True
+            parent = parent.parent_place
+            d['ancestors'].insert(0, _get_place(user, parent))
 
     for child in place.children.all():
         d['children'].append(_get_place(user, child))
@@ -759,17 +765,15 @@ def album_delete(request, album_id):
     album = get_object_or_404(spud.models.album, pk=album_id)
 
     errors = album.check_delete()
+    if len(errors) > 0:
+        raise HttpBadRequest(errors.join(", "))
+
+    album.delete()
+
     resp = {
-        'errors': errors,
+        'type': 'album_delete',
         'session': _get_session(request),
     }
-
-    if len(errors) == 0:
-        album.delete()
-        resp['type'] = 'album_delete'
-    else:
-        resp['type'] = 'errors'
-
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -931,16 +935,15 @@ def category_delete(request, category_id):
     category = get_object_or_404(spud.models.category, pk=category_id)
 
     errors = category.check_delete()
+    if len(errors) > 0:
+        raise HttpBadRequest(errors.join(", "))
+
+    category.delete()
+
     resp = {
-        'errors': errors,
+        'type': 'category_delete',
         'session': _get_session(request),
     }
-
-    if len(errors) == 0:
-        category.delete()
-        resp['type'] = 'category_delete'
-    else:
-        resp['type'] = 'errors'
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1103,17 +1106,15 @@ def place_delete(request, place_id):
     place = get_object_or_404(spud.models.place, pk=place_id)
 
     errors = place.check_delete()
+    if len(errors) > 0:
+        raise HttpBadRequest(errors.join(", "))
+
+    place.delete()
+
     resp = {
-        'errors': errors,
+        'type': 'place_delete',
         'session': _get_session(request),
     }
-
-    if len(errors) == 0:
-        place.delete()
-        resp['type'] = 'place_delete'
-    else:
-        resp['type'] = 'errors'
-
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1272,17 +1273,15 @@ def person_delete(request, person_id):
     person = get_object_or_404(spud.models.person, pk=person_id)
 
     errors = person.check_delete()
+    if len(errors) > 0:
+        raise HttpBadRequest(errors.join(", "))
+
+    person.delete()
+
     resp = {
-        'errors': errors,
+        'type': 'person_delete',
         'session': _get_session(request),
     }
-
-    if len(errors) == 0:
-        person.delete()
-        resp['type'] = 'person_delete'
-    else:
-        resp['type'] = 'errors'
-
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1455,16 +1454,15 @@ def photo_relation_delete(request, photo_relation_id):
     photo_relation = get_object_or_404(spud.models.photo_relation, pk=photo_relation_id)
 
     errors = photo_relation.check_delete()
+    if len(errors) > 0:
+        raise HttpBadRequest(errors.join(", "))
+
+    photo_relation.delete()
+
     resp = {
-        'errors': errors,
+        'type': 'photo_relation_delete',
         'session': _get_session(request),
     }
-
-    if len(errors) == 0:
-        photo_relation.delete()
-        resp['type'] = 'photo_relation_delete'
-    else:
-        resp['type'] = 'errors'
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 

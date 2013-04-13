@@ -584,7 +584,7 @@ output_field.prototype.show = function(value) {
 }
 
 output_field.prototype.create = function(id) {
-    return $('<div />')
+    return $('<span />')
 }
 
 output_field.prototype.destroy = function(output) {
@@ -613,6 +613,28 @@ p_output_field.constructor = p_output_field
 
 p_output_field.prototype.set = function(output, value) {
     output.p(value)
+}
+
+// define link_output_field
+function link_output_field(title) {
+    output_field.call(this, title)
+}
+
+link_output_field.prototype = new output_field()
+link_output_field.constructor = link_output_field
+
+link_output_field.prototype.set = function(output, value) {
+    if (value.type == "album") {
+        output.html(album_a(value))
+    } else if (value.type == "category") {
+        output.html(category_a(value))
+    } else if (value.type == "place") {
+        output.html(place_a(value))
+    } else if (value.type == "person") {
+        output.html(person_a(value))
+    } else {
+        output.text(value.title)
+    }
 }
 
 // define html_output_field
@@ -703,6 +725,13 @@ $.widget('ui.infobox', {
         })
         this.element.empty()
         this._super()
+    },
+
+    set: function(values) {
+        var mythis = this
+        $.each(mythis.fields, function(id, field){
+            values[id] = mythis.set_field(id, values[id])
+        })
     },
 
     add_field: function(id, field) {
@@ -987,6 +1016,22 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
     },
 
     _submit: function() {
+        var mythis = this
+        var values = {}
+        $.each(mythis.fields, function(id, field){
+            values[id] = mythis.get_field(id)
+        })
+        this._submit_values(values)
+    },
+
+    _submit_values: function(values) {
+    },
+
+    set: function(values) {
+        var mythis = this
+        $.each(mythis.fields, function(id, field){
+            values[id] = mythis.set_field(id, values[id])
+        })
     },
 
     _destroy: function() {

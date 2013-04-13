@@ -657,21 +657,9 @@ function display_error(data) {
         .attr('src', media_url("img/error.png"))
         .appendTo(message)
 
-    if (typeof(data) === 'string' || data instanceof String) {
-        $("<p></p>")
-            .text(data)
-            .appendTo(message)
-    } else if (data instanceof Array) {
-        $.each(data, function(j, msg) {
-            $("<p></p>")
-                .text(msg)
-                .appendTo(message)
-        });
-    } else {
-        $("<p></p>")
-            .text(data.message)
-            .appendTo(message)
-    }
+    $("<p></p>")
+        .text(data)
+        .appendTo(message)
 
     $("<input type='button' value='Acknowledge' />")
         .click(function() { $.unblockUI() })
@@ -1809,21 +1797,23 @@ function display_album(album) {
         }
     )
 
-    bc = $(".breadcrumbs")
+    var bc = $(".breadcrumbs")
         .html("")
         .append(root_a())
         .append(" › ")
         .append(album_search_results_a({}, 0, null))
-        .append(" › ")
 
-    var sep = ""
-    for (var i in album.parents) {
-        var a = album.parents[i]
-        bc.append(sep)
+    for (var i in album.ancestors) {
+        var a = album.ancestors[i]
+        bc.append(" › ")
         bc.append(album_a(a))
-        sep = " › "
     }
-    bc.append(sep + escapeHTML(album.title))
+    if (album.parent) {
+        bc.append(" › ")
+        bc.append(album_a(album.parent))
+    }
+    bc.append(" › ")
+    bc.append(escapeHTML(album.title))
 }
 
 
@@ -1865,128 +1855,7 @@ function display_album_photos(photo_list, album, page) {
 function display_change_album(album) {
     var dialog = $("<div id='dialog'></div>")
         .album_change_dialog({ album: album })
-    return
-
-    if (album.id != null) {
-        dialog.attr('title', "Change " + album.title)
-    } else {
-        dialog.attr('title', "Add album")
-    }
-
-    var f = $("<form method='get' />")
-
-    var table = $("<table />")
-
-    settings = get_settings()
-
-    append_field(table, "title", "Title")
-        .append(get_input_element("title", album.title, "text"))
-
-    append_field(table, "description", "Description")
-        .append(get_input_textarea("description", 10, 40, album.description))
-
-    append_field(table, "cover_photo", "Cover Photo")
-        .append(get_input_photo("cover_photo", album.cover_photo))
-
-    append_field(table, "sortname", "Sort Name")
-        .append(get_input_element("sortname", album.sortname, "text"))
-
-    append_field(table, "sortorder", "Sort Order")
-        .append(get_input_element("sortorder", album.sortorder, "text"))
-
-    var parent = null
-    if (album.parents.length > 0) {
-        parent = album.parents.slice(-1)[0]
-    }
-    append_field(table, "parent_text", "Parent")
-        .append(get_ajax_select("parent", 'album', parent))
-
-    f.append(table)
-
-    dialog
-        .keypress(function(ev) {
-            if (ev.which == 13 && !ev.shiftKey) {
-                submit_change_album(album, $( this ), f[0])
-                return false
-            }
-        })
-        .append(f)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            width: 400,
-            buttons: {
-                Save: function() {
-                    submit_change_album(album, $( this ), f[0])
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
-        })
 }
-
-
-function submit_change_album(album, dialog, form) {
-    var updates = {
-        title: parse_form_string(form.title.value),
-        description: parse_form_string(form.description.value),
-        cover_photo: parse_form_string(form.cover_photo.value),
-        sortname: parse_form_string(form.sortname.value),
-        sortorder: parse_form_string(form.sortorder.value),
-        parent: parse_form_string(form.parent.value),
-    }
-
-    display_loading()
-    load_album_change(
-        album.id,
-        updates,
-        function(data) {
-            hide_loading()
-            dialog.dialog("close")
-            replace_links()
-            if (window.history.state==null) {
-                display_album(data.album)
-                update_history(false, album_url(data.album), {
-                    type: 'display_album',
-                    album_id: data.album.id,
-                });
-            } else if (album.id==null) {
-                display_album(data.album)
-                update_history(true, album_url(data.album), {
-                    type: 'display_album',
-                    album_id: data.album.id,
-                });
-            } else if (window.history.state.type=='display_album' && window.history.state.album_id==data.album.id) {
-                display_album(data.album)
-            } else {
-                reload_page()
-            }
-        },
-        display_error
-    )
-
-    return false
-}
-
-
-function display_album_delete(album) {
-    var dialog = $("<div id='dialog'><p>Are you sure you want to delete album '"+escapeHTML(album.title)+"'?</p></div>")
-        .attr('title', "Delete " + album.title)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            buttons: {
-                Delete: function() {
-                    submit_album_delete(album, $(this))
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
-        })
-}
-
 
 function submit_album_delete(album, dialog) {
     dialog.dialog("close")
@@ -1995,11 +1864,7 @@ function submit_album_delete(album, dialog) {
         album.id,
         function(data) {
             hide_loading()
-            if (data.type == 'errors') {
-                display_error(data.errors)
-            } else {
-                window.history.go(-1)
-            }
+            window.history.go(-1)
         },
         display_error
     )
@@ -2117,8 +1982,8 @@ function display_category(category) {
         .append(" › ")
 
     var sep = ""
-    for (var i in category.parents) {
-        var a = category.parents[i]
+    for (var i in category.ancestors) {
+        var a = category.ancestors[i]
         bc.append(sep)
         bc.append(category_a(a))
         sep = " › "
@@ -2157,12 +2022,8 @@ function display_change_category(category) {
     append_field(table, "sortorder", "Sort Order")
         .append(get_input_element("sortorder", category.sortorder, "text"))
 
-    var parent = null
-    if (category.parents.length > 0) {
-        parent = category.parents.slice(-1)[0]
-    }
     append_field(table, "parent_text", "Parent")
-        .append(get_ajax_select("parent", 'category', parent))
+        .append(get_ajax_select("parent", 'category', category.parent))
 
     f.append(table)
 
@@ -2258,11 +2119,7 @@ function submit_category_delete(category, dialog) {
         category.id,
         function(data) {
             hide_loading()
-            if (data.type == 'errors') {
-                display_error(data.errors)
-            } else {
-                window.history.go(-1)
-            }
+            window.history.go(-1)
         },
         display_error()
     )
@@ -2406,8 +2263,8 @@ function display_place(place) {
         .append(" › ")
 
     var sep = ""
-    for (var i in place.parents) {
-        var a = place.parents[i]
+    for (var i in place.ancestors) {
+        var a = place.ancestors[i]
         bc.append(sep)
         bc.append(place_a(a))
         sep = " › "
@@ -2464,12 +2321,8 @@ function display_change_place(place) {
     append_field(table, "cover_photo", "Cover Photo")
         .append(get_input_photo("cover_photo", place.cover_photo))
 
-    var parent = null
-    if (place.parents.length > 0) {
-        parent = place.parents.slice(-1)[0]
-    }
     append_field(table, "parent_text", "Parent")
-        .append(get_ajax_select("parent", 'place', parent))
+        .append(get_ajax_select("parent", 'place', place.parent))
 
     f.append(table)
 
@@ -2572,11 +2425,7 @@ function submit_place_delete(place, dialog) {
         place.id,
         function(data) {
             hide_loading()
-            if (data.type == 'errors') {
-                display_error(data.errors)
-            } else {
-                window.history.go(-1)
-            }
+            window.history.go(-1)
         },
         display_error
     )
@@ -3090,11 +2939,7 @@ function submit_person_delete(person, dialog) {
         person.id,
         function(data) {
             hide_loading()
-            if (data.type == 'errors') {
-                display_error(data.errors)
-            } else {
-                window.history.go(-1)
-            }
+            window.history.go(-1)
         },
         display_error
     )
@@ -3208,11 +3053,7 @@ function submit_photo_relation_delete(photo_relation, dialog) {
         photo_relation.id,
         function(data) {
             hide_loading()
-            if (data.type == 'errors') {
-                display_error(data.errors)
-            } else {
-                window.history.go(-1)
-            }
+            window.history.go(-1)
         },
         display_error
     )
@@ -3889,7 +3730,7 @@ function do_album_add(parent_album, push_history) {
         cover_photo: null,
         sortname: "",
         sortorder: "",
-        parents: [ parent_album ],
+        parent: parent_album,
         children: [],
     })
 }
@@ -3989,7 +3830,7 @@ function do_category_add(parent_category, push_history) {
         cover_photo: null,
         sortname: "",
         sortorder: "",
-        parents: [ parent_category ],
+        parent: parent_category,
         children: [],
     })
 }
@@ -4090,7 +3931,7 @@ function do_place_add(parent_place, push_history) {
         url: "",
         urldesc: "",
         notes: "",
-        parents: [ parent_place ],
+        parent: parent_place,
         children: [],
     })
 }

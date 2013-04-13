@@ -349,21 +349,6 @@ $.widget('ui.camera_details',  $.ui.infobox, {
             this.set(this.options.photo, this.options.change_mode)
         }
     },
-
-    set: function(photo, change_mode) {
-        var can_change = change_mode && photo.can_change
-
-        this.set_field("camera_make", photo.camera_make)
-        this.set_field("camera_model", photo.camera_model)
-        this.set_field("flash_used", photo.flash_used)
-        this.set_field("focal_length", photo.focal_length)
-        this.set_field("exposure", photo.exposure)
-        this.set_field("aperture", photo.aperture)
-        this.set_field("iso_equiv", photo.iso_equiv)
-        this.set_field("metering_mode", photo.metering_mode)
-        return this
-    },
-
 })
 
 
@@ -568,7 +553,7 @@ $.widget('ui.photo_list_base',  {
         this.ul.empty()
     },
 
-    append_photo: function(photo, title, sort, description, a, selectable) {
+    append_photo: function(photo, title, sort, description, a) {
         a
                 .data("photo", null)
                 .empty()
@@ -600,7 +585,6 @@ $.widget('ui.photo_list_base',  {
             .addClass(style)
             .append(a)
             .on("click", function(ev) { a.trigger('click'); })
-            .toggleClass("ui-selected", selectable && is_photo_selected(photo))
             .appendTo(this.ul)
 
         return li
@@ -647,10 +631,12 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
         var mythis = this
         this.empty()
         $.each(results.photos, function(j, photo) {
-            n = results.first + Number(j)
+            var n = results.first + Number(j)
             mythis.append_photo(
                 photo, photo.title, photo.localtime.date + " " + photo.localtime.time,
-                photo.description, photo_search_item_a(search, n, photo), true)
+                photo.description, photo_search_item_a(search, n, photo))
+                .data("photo", photo)
+                .toggleClass("ui-selected", is_photo_selected(photo))
         })
         return this
     }
