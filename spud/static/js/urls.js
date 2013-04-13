@@ -107,9 +107,7 @@ function settings_url(dt) {
 // * AJAX LOADERS *
 // ****************
 
-function ajax(settings, success) {
-    display_loading()
-
+function ajax(settings) {
     var settings = jQuery.extend({
         dataType : 'json',
         cache: false,
@@ -118,13 +116,23 @@ function ajax(settings, success) {
     var success = settings.success
     delete settings.success
 
+    var error = settings.error
+    delete settings.error
+
+    if (success==null) {
+        bark_loudly_like_a_dog()
+    }
+
+    if (error==null) {
+        bark_loudly_like_a_dog()
+    }
+
     $.ajax(settings)
         .done(
             function(data, textStatus, jqXHR) {
                 update_session(data.session)
-                hide_loading()
                 if (data.type == "error") {
-                    display_error(data)
+                    error(data.message)
                 } else {
                     success(data)
                 }
@@ -132,8 +140,7 @@ function ajax(settings, success) {
         )
         .fail(
             function(jqXHR, textStatus, errorThrown) {
-                hide_loading()
-                display_error(textStatus + " " + textStatus)
+                error(textStatus + " " + textStatus)
             }
         )
 }
@@ -149,11 +156,12 @@ $.ajaxSetup({
 });
 
 
-function load_login(username, password, success) {
+function load_login(username, password, success, error) {
     ajax({
         url: '/a/login/',
         type: "POST",
         success: success,
+        error: error,
         data: {
             username: username,
             password: password,
@@ -161,24 +169,26 @@ function load_login(username, password, success) {
     })
 }
 
-function load_logout(success) {
+function load_logout(success, error) {
     ajax({
         url: '/a/logout/',
         type: "POST",
         success: success,
+        error: error,
     })
 }
 
-function load_album_search_form(search, success) {
+function load_album_search_form(search, success, error) {
     ajax({
         url: '/a/album/form/',
         data: search.params,
         success: success,
+        error: error,
     })
 }
 
 
-function load_album_search_results(search, page, success) {
+function load_album_search_results(search, page, success, error) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -191,19 +201,21 @@ function load_album_search_results(search, page, success) {
         url: '/a/album/results/',
         data: params,
         success: success,
+        error: error,
     });
 }
 
 
-function load_album(album_id, success) {
+function load_album(album_id, success, error) {
     ajax({
         url: '/a/album/'+album_id+'/',
         success: success,
+        error: error,
     })
 }
 
 
-function load_album_change(album_id, updates, success) {
+function load_album_change(album_id, updates, success, error) {
     var url = '/a/album/add/'
     if (album_id != null) {
         url = '/a/album/'+album_id+'/'
@@ -211,33 +223,34 @@ function load_album_change(album_id, updates, success) {
     ajax({
         url: url,
         success: success,
+        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_album_delete(album_id, success) {
+function load_album_delete(album_id, success, error) {
     ajax({
         url: '/a/album/'+album_id+'/delete/',
-        dataType : 'json',
-        cache: false,
         success: success,
+        error: error,
         type: "POST",
     })
 }
 
 
-function load_category_search_form(search, success) {
+function load_category_search_form(search, success, error) {
     ajax({
         url: '/a/category/form/',
         data: search.params,
         success: success,
+        error: error,
     })
 }
 
 
-function load_category_search_results(search, page, success) {
+function load_category_search_results(search, page, success, error) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -250,19 +263,21 @@ function load_category_search_results(search, page, success) {
         url: '/a/category/results/',
         data: params,
         success: success,
+        error: error,
     });
 }
 
 
-function load_category(category_id, success) {
+function load_category(category_id, success, error) {
     ajax({
         url: '/a/category/'+category_id+'/',
         success: success,
+        error: error,
     })
 }
 
 
-function load_category_change(category_id, updates, success) {
+function load_category_change(category_id, updates, success, error) {
     var url = '/a/category/add/'
     if (category_id != null) {
         url = '/a/category/'+category_id+'/'
@@ -272,29 +287,32 @@ function load_category_change(category_id, updates, success) {
         success: success,
         type: "POST",
         data: updates,
+        error: error,
     })
 }
 
 
-function load_category_delete(category_id, success) {
+function load_category_delete(category_id, success, error) {
     ajax({
         url: '/a/category/'+category_id+'/delete/',
         success: success,
         type: "POST",
+        error: error,
     })
 }
 
 
-function load_place_search_form(search, success) {
+function load_place_search_form(search, success, error) {
     ajax({
         url: '/a/place/form/',
         data: search.params,
         success: success,
+        error: error,
     })
 }
 
 
-function load_place_search_results(search, page, success) {
+function load_place_search_results(search, page, success, error) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -307,19 +325,21 @@ function load_place_search_results(search, page, success) {
         url: '/a/place/results/',
         data: params,
         success: success,
+        error: error,
     });
 }
 
 
-function load_place(place_id, success) {
+function load_place(place_id, success, error) {
     ajax({
         url: '/a/place/'+place_id+'/',
         success: success,
+        error: error,
     })
 }
 
 
-function load_place_change(place_id, updates, success) {
+function load_place_change(place_id, updates, success, error) {
     var url = '/a/place/add/'
     if (place_id != null) {
         url = '/a/place/'+place_id+'/'
@@ -329,29 +349,32 @@ function load_place_change(place_id, updates, success) {
         success: success,
         type: "POST",
         data: updates,
+        error: error,
     })
 }
 
 
-function load_place_delete(place_id, success) {
+function load_place_delete(place_id, success, error) {
     ajax({
         url: '/a/place/'+place_id+'/delete/',
         success: success,
         type: "POST",
+        error: error,
     })
 }
 
 
-function load_person_search_form(search, success) {
+function load_person_search_form(search, success, error) {
     ajax({
         url: '/a/person/form/',
         data: search.params,
         success: success,
+        error: error,
     })
 }
 
 
-function load_person_search_results(search, page, success) {
+function load_person_search_results(search, page, success, error) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -364,19 +387,21 @@ function load_person_search_results(search, page, success) {
         url: '/a/person/results/',
         data: params,
         success: success,
+        error: error,
     });
 }
 
 
-function load_person(place_id, success) {
+function load_person(place_id, success, error) {
     ajax({
         url: '/a/person/'+place_id+'/',
         success: success,
+        error: error,
     })
 }
 
 
-function load_person_change(person_id, updates, success) {
+function load_person_change(person_id, updates, success, error) {
     var url = '/a/person/add/'
     if (person_id != null) {
         url = '/a/person/'+person_id+'/'
@@ -384,30 +409,33 @@ function load_person_change(person_id, updates, success) {
     ajax({
         url: url,
         success: success,
+        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_person_delete(person_id, success) {
+function load_person_delete(person_id, success, error) {
     ajax({
         url: '/a/person/'+person_id+'/delete/',
         success: success,
+        error: error,
         type: "POST",
     })
 }
 
 
-function load_photo_relation(place_id, success) {
+function load_photo_relation(place_id, success, error) {
     ajax({
         url: '/a/relation/'+place_id+'/',
         success: success,
+        error: error,
     })
 }
 
 
-function load_photo_relation_change(photo_relation_id, updates, success) {
+function load_photo_relation_change(photo_relation_id, updates, success, error) {
     var url = '/a/relation/add/'
     if (photo_relation_id != null) {
         url = '/a/relation/'+photo_relation_id+'/'
@@ -415,32 +443,35 @@ function load_photo_relation_change(photo_relation_id, updates, success) {
     ajax({
         url: url,
         success: success,
+        error: error,
         type: "POST",
         data: updates,
     })
 }
 
 
-function load_photo_relation_delete(photo_relation_id, success) {
+function load_photo_relation_delete(photo_relation_id, success, error) {
     ajax({
         url: '/a/relation/'+photo_relation_id+'/delete/',
         success: success,
+        error: error,
         type: "POST",
     })
 }
 
 
-function load_photo_search_form(search, success) {
+function load_photo_search_form(search, success, error) {
     ajax({
         url: '/a/photo/form/',
         data: search.params,
         success: success,
+        error: error,
     })
     return
 }
 
 
-function load_photo_search_results(search, page, success) {
+function load_photo_search_results(search, page, success, error) {
     var first = page * search.results_per_page
 
     var add_params = {
@@ -453,44 +484,49 @@ function load_photo_search_results(search, page, success) {
         url: '/a/photo/results/',
         data: params,
         success: success,
+        error: error,
     });
 }
 
 
-function load_photo_search_item(search, n, success) {
+function load_photo_search_item(search, n, success, error) {
     var params = jQuery.extend({}, search.params, { number: n })
     ajax({
         url: '/a/photo/results/',
         data: params,
         success: success,
+        error: error,
     })
     return
 }
 
 
-function load_photo_search_change(search, updates, number_results, success) {
+function load_photo_search_change(search, updates, number_results, success, error) {
     var params = jQuery.extend({}, search.params, updates, { number_results: number_results })
 
     ajax({
         url: '/a/photo/change/',
         data: params,
         success: success,
+        error: error,
         type: "POST",
     });
 }
 
 
-function load_photo(photo_id, success) {
+function load_photo(photo_id, success, error) {
     ajax({
         url: '/a/photo/'+photo_id+'/',
         success: success,
+        error: error,
     })
 }
 
 
-function load_settings(success) {
+function load_settings(success, error) {
     ajax({
         url: '/a/settings',
         success: success,
+        error: error,
     })
 }

@@ -1679,14 +1679,18 @@ function submit_change_photo_attribute(search_params, updates, number_results, d
         params: search_params
     }
 
+    display_loading()
     load_photo_search_change(
         search,
         updates,
         number_results,
         function(data) {
+            hide_loading()
             dialog.dialog("close")
             reload_page()
-        }
+        },
+
+        display_error
     )
 
     return false
@@ -1828,11 +1832,16 @@ function display_album_children(album_list, album, page) {
         results_per_page: get_settings().items_per_page,
         params: { parent: album.id },
     }
-    load_album_search_results(search, page, function(data) {
-        var last_page = Math.floor(data.number_results / search.results_per_page)
-        album_list.album_list("set", data.albums)
-        album_list.album_list("set_paginator", page, last_page)
-    })
+    load_album_search_results(search, page,
+        function(data) {
+            var last_page = Math.floor(data.number_results / search.results_per_page)
+            album_list.album_list("set", data.albums)
+            album_list.album_list("set_paginator", page, last_page)
+        },
+        function(message) {
+            // FIXME
+        }
+    )
 }
 
 
@@ -1841,11 +1850,16 @@ function display_album_photos(photo_list, album, page) {
         results_per_page: get_settings().items_per_page,
         params: { album: album.id },
     }
-    load_photo_search_results(search, page, function(data) {
-        var last_page = Math.floor(data.number_results / search.results_per_page)
-        photo_list.photo_list("set", search, data)
-        photo_list.photo_list("set_paginator", page, last_page)
-    })
+    load_photo_search_results(search, page,
+        function(data) {
+            var last_page = Math.floor(data.number_results / search.results_per_page)
+            photo_list.photo_list("set", search, data)
+            photo_list.photo_list("set_paginator", page, last_page)
+        },
+        function(message) {
+            // FIXME
+        }
+    )
 }
 
 function display_change_album(album) {
@@ -1923,10 +1937,12 @@ function submit_change_album(album, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
+    display_loading()
     load_album_change(
         album.id,
         updates,
         function(data) {
+            hide_loading()
             dialog.dialog("close")
             replace_links()
             if (window.history.state==null) {
@@ -1946,7 +1962,8 @@ function submit_change_album(album, dialog, form) {
             } else {
                 reload_page()
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -1973,15 +1990,18 @@ function display_album_delete(album) {
 
 function submit_album_delete(album, dialog) {
     dialog.dialog("close")
+    display_loading
     load_album_delete(
         album.id,
         function(data) {
+            hide_loading()
             if (data.type == 'errors') {
                 display_error(data.errors)
             } else {
                 window.history.go(-1)
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -2180,10 +2200,12 @@ function submit_change_category(category, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
+    display_loading()
     load_category_change(
         category.id,
         updates,
         function(data) {
+            hide_loading()
             dialog.dialog("close")
             replace_links()
             if (window.history.state==null) {
@@ -2203,7 +2225,8 @@ function submit_change_category(category, dialog, form) {
             } else {
                 reload_page()
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -2230,15 +2253,18 @@ function display_category_delete(category) {
 
 function submit_category_delete(category, dialog) {
     dialog.dialog("close")
+    display_loading()
     load_category_delete(
         category.id,
         function(data) {
+            hide_loading()
             if (data.type == 'errors') {
                 display_error(data.errors)
             } else {
                 window.history.go(-1)
             }
-        }
+        },
+        display_error()
     )
 
     return false
@@ -2487,10 +2513,12 @@ function submit_change_place(place, dialog, form) {
         parent: parse_form_string(form.parent.value),
     }
 
+    display_loading()
     load_place_change(
         place.id,
         updates,
         function(data) {
+            hide_loading()
             dialog.dialog("close")
             replace_links()
             if (window.history.state==null) {
@@ -2510,7 +2538,8 @@ function submit_change_place(place, dialog, form) {
             } else {
                 reload_page()
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -2538,15 +2567,18 @@ function display_place_delete(place) {
 function submit_place_delete(place, dialog) {
     dialog.dialog("close")
 
+    display_loading()
     load_place_delete(
         place.id,
         function(data) {
+            hide_loading()
             if (data.type == 'errors') {
                 display_error(data.errors)
             } else {
                 window.history.go(-1)
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -3000,10 +3032,12 @@ function submit_change_person(person, dialog, form) {
         spouse: parse_form_string(form.spouse.value),
     }
 
+    display_loading()
     load_person_change(
         person.id,
         updates,
         function(data) {
+            hide_loading()
             dialog.dialog("close")
             replace_links()
             if (window.history.state==null) {
@@ -3023,7 +3057,8 @@ function submit_change_person(person, dialog, form) {
             } else {
                 reload_page()
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -3050,15 +3085,18 @@ function display_person_delete(person) {
 
 function submit_person_delete(person, dialog) {
     dialog.dialog("close")
+    display_loading()
     load_person_delete(
         person.id,
         function(data) {
+            hide_loading()
             if (data.type == 'errors') {
                 display_error(data.errors)
             } else {
                 window.history.go(-1)
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -3126,13 +3164,16 @@ function submit_change_photo_relation(photo_relation, dialog, form) {
         photo_2: parse_form_string(form.photo_2.value),
     }
 
+    display_loading()
     load_photo_relation_change(
         photo_relation.id,
         updates,
         function(data) {
+            hide_loading()
             dialog.dialog("close")
             reload_page()
-        }
+        },
+        display_error
     )
 
     return false
@@ -3162,15 +3203,18 @@ function display_photo_relation_delete(photo_relation) {
 
 function submit_photo_relation_delete(photo_relation, dialog) {
     dialog.dialog("close")
+    display_loading()
     load_photo_relation_delete(
         photo_relation.id,
         function(data) {
+            hide_loading()
             if (data.type == 'errors') {
                 display_error(data.errors)
             } else {
                 window.history.go(-1)
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -3690,17 +3734,20 @@ function display_login(push_history) {
 
 
 function submit_login(dialog, form) {
+    display_loading()
     load_login(
         form.username.value,
         form.password.value,
         function(data) {
+            hide_loading()
             dialog.dialog("close")
             if (window.history.state==null) {
                 do_root(false)
             } else {
                 reload_page()
             }
-        }
+        },
+        display_error
     )
 
     return false
@@ -3728,28 +3775,36 @@ function do_login() {
 
 
 function do_logout() {
+    display_loading()
     load_logout(
         function(data) {
+            hide_loading()
             if (window.history.state==null) {
                 do_root(false)
             } else {
                 reload_page()
             }
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_photo(photo_id, push_history) {
+    display_loading()
     load_photo(photo_id,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history, photo_url(data.photo), {
                 type: 'display_photo',
                 photo_id: data.photo.id,
             });
             display_photo(data.photo)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -3759,10 +3814,14 @@ function do_album_search_form(search, push_history) {
         search.params = {}
     }
 
+    display_loading()
     load_album_search_form(search,
         function(data) {
+            hide_loading()
             display_album_search_form(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -3771,8 +3830,10 @@ function do_album_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().items_per_page
 
+    display_loading()
     load_album_search_results(search, page,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history,
                 album_search_results_url(search, page), {
@@ -3781,35 +3842,46 @@ function do_album_search_results(search, page, push_history) {
                     page: page,
                 });
             display_album_search_results(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_album(album_id, push_history) {
+    display_loading()
     load_album(album_id,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history, album_url(data.album), {
                 type: 'display_album',
                 album_id: data.album.id,
             });
             display_album(data.album)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_change_album(album_id, push_history) {
+    display_loading()
     load_album(album_id,
         function(data) {
+            hide_loading()
             display_change_album(data.album)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_album_add(parent_album, push_history) {
+    display_loading()
     display_change_album({
         id: null,
         type: "album",
@@ -3825,10 +3897,14 @@ function do_album_add(parent_album, push_history) {
 
 
 function do_album_delete(album_id, push_history) {
+    display_loading()
     load_album(album_id,
         function(data) {
+            hide_loading()
             display_album_delete(data.album)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -3838,10 +3914,14 @@ function do_category_search_form(search, push_history) {
         search.params = {}
     }
 
+    display_loading()
     load_category_search_form(search,
         function(data) {
+            hide_loading()
             display_category_search_form(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -3850,8 +3930,10 @@ function do_category_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().items_per_page
 
+    display_loading()
     load_category_search_results(search, page,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history,
                 category_search_results_url(search, page), {
@@ -3860,35 +3942,46 @@ function do_category_search_results(search, page, push_history) {
                     page: page,
                 });
             display_category_search_results(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_category(category_id, push_history) {
+    display_loading()
     load_category(category_id,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history, category_url(data.category), {
                 type: 'display_category',
                 category_id: data.category.id,
             });
             display_category(data.category)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_change_category(category_id, push_history) {
+    display_loading()
     load_category(category_id,
         function(data) {
+            hide_loading()
             display_change_category(data.category)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_category_add(parent_category, push_history) {
+    display_loading()
     display_change_category({
         id: null,
         type: "category",
@@ -3904,10 +3997,14 @@ function do_category_add(parent_category, push_history) {
 
 
 function do_category_delete(category_id, push_history) {
+    display_loading()
     load_category(category_id,
         function(data) {
+            hide_loading()
             display_category_delete(data.category)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -3917,8 +4014,10 @@ function do_place_search_form(search, push_history) {
         search.params = {}
     }
 
+    display_loading()
     load_place_search_form(search,
         function(data) {
+            hide_loading()
             display_place_search_form(search, data)
         }
     )
@@ -3929,8 +4028,10 @@ function do_place_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().items_per_page
 
+    display_loading()
     load_place_search_results(search, page,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history,
                 place_search_results_url(search, page), {
@@ -3939,30 +4040,40 @@ function do_place_search_results(search, page, push_history) {
                     page: page,
                 });
             display_place_search_results(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_place(place_id, push_history) {
+    display_loading()
     load_place(place_id,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history, place_url(data.place), {
                 type: 'display_place',
                 place_id: data.place.id,
             });
             display_place(data.place)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_change_place(place_id, push_history) {
+    display_loading()
     load_place(place_id,
         function(data) {
+            hide_loading()
             display_change_place(data.place)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -3987,10 +4098,14 @@ function do_place_add(parent_place, push_history) {
 
 
 function do_place_delete(place_id, push_history) {
+    display_loading()
     load_place(place_id,
         function(data) {
+            hide_loading()
             display_place_delete(data.place)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -4000,10 +4115,14 @@ function do_person_search_form(search, push_history) {
         search.params = {}
     }
 
+    display_loading()
     load_person_search_form(search,
         function(data) {
+            hide_loading()
             display_person_search_form(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -4012,8 +4131,10 @@ function do_person_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().items_per_page
 
+    display_loading()
     load_person_search_results(search, page,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history,
                 person_search_results_url(search, page), {
@@ -4022,30 +4143,40 @@ function do_person_search_results(search, page, push_history) {
                     page: page,
                 });
             display_person_search_results(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_person(person_id, push_history) {
+    display_loading()
     load_person(person_id,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history, person_url(data.person), {
                 type: 'display_person',
                 person_id: data.person.id,
             });
             display_person(data.person)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_change_person(person_id, push_history) {
+    display_loading()
     load_person(person_id,
         function(data) {
+            hide_loading()
             display_change_person(data.person)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -4083,19 +4214,26 @@ function do_person_add(push_history) {
 
 
 function do_person_delete(person_id, push_history) {
+    display_loading()
     load_person(person_id,
         function(data) {
+            hide_loading()
             display_person_delete(data.person)
-        }
+        },
+
+        display_error
     )
 }
 
 
 function do_change_photo_relation(photo_relation_id, push_history) {
+    display_loading()
     load_photo_relation(photo_relation_id,
         function(data) {
             display_change_photo_relation(data.photo_relation)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -4113,10 +4251,14 @@ function do_photo_relation_add(photo, push_history) {
 
 
 function do_photo_relation_delete(photo_relation_id, push_history) {
+    display_loading()
     load_photo_relation(photo_relation_id,
         function(data) {
+            hide_loading()
             display_photo_relation_delete(data.photo_relation)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -4126,10 +4268,14 @@ function do_photo_search_form(search, push_history) {
         search.params = {}
     }
 
+    display_loading()
     load_photo_search_form(search,
         function(data) {
+            hide_loading()
             display_photo_search_form(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -4138,8 +4284,10 @@ function do_photo_search_results(search, page, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
+    display_loading()
     load_photo_search_results(search, page,
         function(data) {
+            hide_loading()
             replace_links()
             update_history(push_history,
                 photo_search_results_url(search, page), {
@@ -4149,7 +4297,9 @@ function do_photo_search_results(search, page, push_history) {
                 }
             );
             display_photo_search_results(search, data)
-        }
+        },
+
+        display_error
     )
 }
 
@@ -4158,8 +4308,10 @@ function do_photo_search_item(search, n, photo_id, push_history) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
+    display_loading()
     load_photo_search_item(search, n,
         function(data) {
+            hide_loading()
             if (photo_id == null || data.photo.id == photo_id) {
                 replace_links()
                 update_history(push_history,
@@ -4174,14 +4326,20 @@ function do_photo_search_item(search, n, photo_id, push_history) {
             } else {
                 do_photo(photo_id, push_history)
             }
-        }
+        },
+
+        display_error
     )
 }
 
 function do_settings_form(push_history) {
+    display_loading()
     load_settings(
         function(data) {
+            hide_loading()
             display_settings(data)
-        }
+        },
+
+        display_error
     )
 }

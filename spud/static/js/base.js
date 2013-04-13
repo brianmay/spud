@@ -393,10 +393,15 @@ $.widget('ui.photo_select',  $.ui.ajaxautocomplete, {
     _receiveResult: function(ev, ui) {
         this._super(ev, ui);
         var mythis = this
+        this.img.image("set_loading")
         load_photo(ui.item.pk,
             function(data) {
                 mythis.img.image("set", data.photo)
-            })
+            },
+            function(message) {
+                mythis.img.image("set_error")
+            }
+        )
         return false
     }
 })
