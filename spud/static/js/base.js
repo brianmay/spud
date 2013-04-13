@@ -279,11 +279,10 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
     },
 
     set: function(item) {
+        this.deck.children().remove();
         if (item != null) {
             this.input.val(item.pk)
             this._addKiller(item)
-        } else {
-            this._kill();
         }
     },
 
@@ -336,10 +335,15 @@ $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
         } else {
             this.input.val("|")
         }
+        this.deck.children().remove();
         var mythis = this
         $.each(initial, function(i, v) {
             mythis._addKiller(v)
         });
+    },
+
+    get: function() {
+        return this.input.val().slice(1,-1).split("|")
     },
 
     _receiveResult: function(ev, ui) {
@@ -359,6 +363,42 @@ $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
         this.input.val(this.input.val().replace("|" + item.pk + "|", "|"));
         div.fadeOut().remove();
     },
+})
+
+
+$.widget('ui.photo_select',  $.ui.ajaxautocomplete, {
+    _create: function(){
+        this.img = $("<img></img>")
+            .image({size: get_settings().list_size})
+            .appendTo(this.element)
+
+        this.options.type = "photo"
+        this._super();
+    },
+
+    _destroy: function() {
+        this.img.image("destroy")
+        this._super();
+    },
+
+    set: function(photo) {
+        this.img.image("set", photo)
+        item = null
+        if (photo != null) {
+            var item = { pk: photo.id, repr: photo.title }
+        }
+        this._super(item);
+    },
+
+    _receiveResult: function(ev, ui) {
+        this._super(ev, ui);
+        var mythis = this
+        load_photo(ui.item.pk,
+            function(data) {
+                mythis.img.image("set", data.photo)
+            })
+        return false
+    }
 })
 
 
@@ -695,6 +735,10 @@ $.widget('ui.infobox', {
 })
 
 
+// ****************
+// * DIALOG BOXES *
+// ****************
+
 // define input_field
 function input_field(title, required) {
     this.title = title
@@ -705,9 +749,9 @@ input_field.prototype.get = function(input, id) {
     return input.val().trim()
 }
 
-// ****************
-// * DIALOG BOXES *
-// ****************
+input_field.prototype.destroy = function(input) {
+}
+
 
 // define text_input_field
 function text_input_field(title, required) {
@@ -723,13 +767,25 @@ text_input_field.prototype.create = function(id) {
         .attr('id', "id_" + id)
 }
 
-text_input_field.prototype.destroy = function(input) {
-}
-
 text_input_field.prototype.set = function(input, value) {
     input.val(value)
 }
 
+
+// define p_input_field
+function p_input_field(title, required) {
+    text_input_field.call(this, title, required)
+}
+
+p_input_field.prototype = new text_input_field()
+p_input_field.constructor = p_input_field
+p_input_field.prototype.create = function(id) {
+    return $('<textarea />')
+        .attr('rows', 10)
+        .attr('cols', 40)
+        .attr('name', id)
+        .attr('id', "id_" + id)
+}
 
 // define ajax_select_field
 function ajax_select_field(title, type, required) {
@@ -765,15 +821,115 @@ ajax_select_field.prototype.get = function(input) {
     return input.ajaxautocomplete("get")
 }
 
+
+// define ajax_select_multiple_field
+function ajax_select_multiple_field(title, type, required) {
+    input_field.call(this, title, required)
+    this.type = type
+}
+
+ajax_select_multiple_field.prototype = new input_field()
+ajax_select_multiple_field.constructor = ajax_select_multiple_field
+ajax_select_multiple_field.prototype.create = function(id) {
+    return ac = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .ajaxautocompletemultiple({type: this.type})
+}
+
+ajax_select_multiple_field.prototype.destroy = function(input) {
+    input.ajaxautocompletemultiple("destroy")
+}
+
+ajax_select_multiple_field.prototype.set = function(input, value) {
+    var value_arr = []
+    if (value != null) {
+        var value_arr = $.map(value,
+            function(value){ return { pk: value.id, repr: value.title, } }
+        );
+    }
+    input.ajaxautocompletemultiple("set", value_arr)
+}
+
+ajax_select_multiple_field.prototype.get = function(input) {
+    return input.ajaxautocompletemultiple("get")
+}
+
+
+// define ajax_select_sorted_field
+function ajax_select_sorted_field(title, type, required) {
+    input_field.call(this, title, required)
+    this.type = type
+}
+
+ajax_select_sorted_field.prototype = new input_field()
+ajax_select_sorted_field.constructor = ajax_select_sorted_field
+ajax_select_sorted_field.prototype.create = function(id) {
+    return ac = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .ajaxautocompletesorted({type: this.type})
+}
+
+ajax_select_sorted_field.prototype.destroy = function(input) {
+    input.ajaxautocompletesorted("destroy")
+}
+
+ajax_select_sorted_field.prototype.set = function(input, value) {
+    var value_arr = []
+    if (value != null) {
+        var value_arr = $.map(value,
+            function(value){ return { pk: value.id, repr: value.title, } }
+        );
+    }
+    input.ajaxautocompletesorted("set", value_arr)
+}
+
+ajax_select_sorted_field.prototype.get = function(input) {
+    return input.ajaxautocompletesorted("get")
+}
+
+
+// define photo_select_field
+function photo_select_field(title, type, required) {
+    input_field.call(this, title, required)
+    this.type = type
+}
+
+photo_select_field.prototype = new input_field()
+photo_select_field.constructor = photo_select_field
+photo_select_field.prototype.create = function(id) {
+    return ac = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .photo_select()
+}
+
+photo_select_field.prototype.destroy = function(input) {
+    input.photo_select("destroy")
+}
+
+photo_select_field.prototype.set = function(input, value) {
+    input.photo_select("set", value)
+}
+
+photo_select_field.prototype.get = function(input) {
+    return input.photo_select("get")
+}
+
+
+// define dialog
 $.widget('ui.form_dialog',  $.ui.dialog, {
     _create: function() {
         var mythis = this
         var options = this.options
 
+        this.description = $("<p/>")
+            .appendTo(this.element)
+
         if (options.description != null) {
-            $("<p/>")
+            this.description
                 .text(options.description)
-                .appendTo(this.element)
             delete options.description
         }
 
@@ -802,6 +958,8 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         $.each(this.fields, function(id, field){
             mythis.add_field(id, field)
         })
+
+        options.width = 400
 
         this._super()
 
@@ -834,6 +992,10 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         this.element
             .empty()
         this._super()
+    },
+
+    set_description: function(id, description) {
+        this.description.text(description)
     },
 
     add_field: function(id, field) {

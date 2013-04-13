@@ -45,7 +45,7 @@ $.widget('ui.image', {
         }
     },
 
-    _destroy: function() {
+    _clear: function() {
         this.element
             .removeClass("photo-D")
             .removeClass("photo-R")
@@ -54,7 +54,10 @@ $.widget('ui.image', {
             .removeAttr("alt")
             .removeAttr("width")
             .removeAttr("height")
-            .attr("src", media_url("img/none.jpg"))
+    },
+
+    _destroy: function() {
+        this._clear()
     },
 
     set: function(photo) {
@@ -73,19 +76,24 @@ $.widget('ui.image', {
             this.width = image.width
             this.height = image.height
         } else {
-            this.element
-                .removeAttr("id")
-                .removeAttr("class")
-                .removeAttr("alt")
-                .removeAttr("width")
-                .removeAttr("height")
-                .attr("src", media_url("img/none.jpg"))
+            this._clear()
+            this.element.attr("src", media_url("img/none.jpg"))
             this.width = null
             this.height = null
         }
-   },
+    },
 
-   resize: function(enlarge) {
+    set_error: function() {
+        this._clear()
+        this.element.attr("src", media_url("img/error.png"))
+    },
+
+    set_loading: function() {
+        this._clear()
+        this.element.attr("src", media_url("img/ajax-seter.gif"))
+    },
+
+    resize: function(enlarge) {
         var width = this.width
         var height = this.height
 

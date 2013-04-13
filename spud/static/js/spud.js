@@ -1850,6 +1850,8 @@ function display_album_photos(photo_list, album, page) {
 
 function display_change_album(album) {
     var dialog = $("<div id='dialog'></div>")
+        .album_change_dialog({ album: album })
+    return
 
     if (album.id != null) {
         dialog.attr('title', "Change " + album.title)

@@ -170,3 +170,50 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
         return this
     },
 })
+
+
+$.widget('ui.album_change_dialog',  $.ui.form_dialog, {
+    fields: {
+        title: new text_input_field("Title", true),
+        description: new p_input_field("Description", false),
+        cover_photo: new photo_select_field("Cover Photo", false),
+        sortname: new text_input_field("Sort Name", false),
+        sortorder: new text_input_field("Sort Order", false),
+        parent: new ajax_select_field("Parent", "album", false),
+    },
+
+    _create: function() {
+        this.options.title = "Album change"
+        this.options.button = "Save"
+        this._super();
+
+        if (this.options.album != null) {
+            this.set(this.options.album)
+        }
+    },
+
+    set: function(album) {
+        if (album.id != null) {
+            this.set_description("Change " + album.title)
+        } else {
+            this.set_description("Add new album")
+        }
+        this.set_field("title", album.title)
+        this.set_field("description", album.description)
+        this.set_field("cover_photo", album.cover_photo)
+        this.set_field("sortname", album.sortname)
+        this.set_field("sortorder", album.sortorder)
+        var parent = null
+        if (album.parents.length > 0) {
+            parent = album.parents.slice(-1)[0]
+        }
+        this.set_field("parent", parent)
+        return this
+    },
+
+    _submit: function() {
+        this.close()
+    },
+})
+
+
