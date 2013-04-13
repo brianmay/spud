@@ -651,15 +651,16 @@ html_list_output_field.prototype.set = function(output, value) {
 }
 
 // define photo_output_field
-function photo_output_field(title) {
+function photo_output_field(title, size) {
+    this.size = size
     output_field.call(this, title)
 }
 
 photo_output_field.prototype = new output_field()
 photo_output_field.constructor = photo_output_field
 
-photo_output_field.prototype.create = function(id, size) {
-    return $('<img />').image({ size: size })
+photo_output_field.prototype.create = function(id) {
+    return $('<img />').image({ size: this.size })
 }
 
 photo_output_field.prototype.set = function(output, value) {
