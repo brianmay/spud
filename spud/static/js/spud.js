@@ -1852,25 +1852,18 @@ function display_album_photos(photo_list, album, page) {
     )
 }
 
+
 function display_change_album(album) {
     var dialog = $("<div id='dialog'></div>")
         .album_change_dialog({ album: album })
 }
 
-function submit_album_delete(album, dialog) {
-    dialog.dialog("close")
-    display_loading
-    load_album_delete(
-        album.id,
-        function(data) {
-            hide_loading()
-            window.history.go(-1)
-        },
-        display_error
-    )
 
-    return false
+function display_album_delete(album, dialog) {
+    var dialog = $("<div id='dialog'></div>")
+        .album_delete_dialog({ album: album })
 }
+
 
 function display_category(category) {
     reset_display()

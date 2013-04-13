@@ -195,7 +195,41 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
             },
             display_error
         )
+    },
+})
+
+
+$.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
+    fields: {
+    },
+
+    _create: function() {
+        this.options.title = "Album delete"
+        this.options.button = "Delete"
+        this._super();
+
+        if (this.options.album != null) {
+            this.set(this.options.album)
+        }
+    },
+
+    set: function(album) {
+        this.album_id = album.id
+        this.set_description("Are you absolutely positively sure you really want to delete "
+            + album.title + "? Go ahead join the dark side. There are cookies.")
+    },
+
+    _submit_values: function(values) {
         this.close()
+        display_loading()
+        load_album_delete(
+            this.album_id,
+            function(data) {
+                hide_loading()
+                reload_page()
+            },
+            display_error
+        )
     },
 })
 

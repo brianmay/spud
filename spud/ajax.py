@@ -766,7 +766,7 @@ def album_delete(request, album_id):
 
     errors = album.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(errors.join(", "))
+        raise HttpBadRequest(", ".join(errors))
 
     album.delete()
 
@@ -936,7 +936,7 @@ def category_delete(request, category_id):
 
     errors = category.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(errors.join(", "))
+        raise HttpBadRequest(", ".join(errors))
 
     category.delete()
 
@@ -1107,7 +1107,7 @@ def place_delete(request, place_id):
 
     errors = place.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(errors.join(", "))
+        raise HttpBadRequest(", ".join(errors))
 
     place.delete()
 
@@ -1274,7 +1274,7 @@ def person_delete(request, person_id):
 
     errors = person.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(errors.join(", "))
+        raise HttpBadRequest(", ".join(errors))
 
     person.delete()
 
@@ -1455,7 +1455,7 @@ def photo_relation_delete(request, photo_relation_id):
 
     errors = photo_relation.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(errors.join(", "))
+        raise HttpBadRequest(", ".join(errors))
 
     photo_relation.delete()
 
