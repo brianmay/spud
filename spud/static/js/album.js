@@ -11,11 +11,11 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
         this._super();
 
         if (this.options.results != null) {
-            this.load(this.options.results)
+            this.set(this.options.results)
         }
     },
 
-    load: function(results) {
+    set: function(results) {
         this.set_field("q", results.q)
         this.set_field("parent", results.parent)
         return this
@@ -51,11 +51,11 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
         this._super();
 
         if (this.options.results != null) {
-            this.load(this.options.results)
+            this.set(this.options.results)
         }
     },
 
-    load: function(results) {
+    set: function(results) {
         this.set_field("q", results.q)
         this.set_field("parent", album_a(results.parent))
         return this
@@ -77,11 +77,11 @@ $.widget('ui.album_details',  $.ui.infobox, {
         this._super();
 
         if (this.options.album != null) {
-            this.load(this.options.album)
+            this.set(this.options.album)
         }
     },
 
-    load: function(album) {
+    set: function(album) {
         this.set_field("title", album.title)
         this.set_field("photo", album.cover_photo)
         this.set_field("sort", album.sortname + " " + album.sortorder)
@@ -101,11 +101,11 @@ $.widget('ui.album_list', $.ui.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.albums != null) {
-            this.load(this.options.albums, this.options.change_mode)
+            this.set(this.options.albums, this.options.change_mode)
         }
     },
 
-    load: function(albums, change_mode) {
+    set: function(albums, change_mode) {
         var mythis = this
         this.empty()
         $.each(albums, function(j, album) {
@@ -125,11 +125,11 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.album != null) {
-            this.load(this.options.album, this.options.change_mode)
+            this.set(this.options.album, this.options.change_mode)
         }
     },
 
-    load: function(album, change_mode) {
+    set: function(album, change_mode) {
         this.element.empty()
 
         var search = { params: { album: album.id }}
@@ -160,11 +160,11 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.load(this.options.search, this.options.change_mode)
+            this.set(this.options.search, this.options.change_mode)
         }
     },
 
-    load: function(search, change_mode) {
+    set: function(search, change_mode) {
         this.element.empty()
         this.add_item(album_search_form_a(search))
         return this

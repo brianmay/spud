@@ -41,7 +41,7 @@ function get_photo_style(data) {
 $.widget('ui.image', {
     _create: function() {
         if (this.options.photo != null) {
-            this.load(this.options.photo)
+            this.set(this.options.photo)
         }
     },
 
@@ -57,7 +57,7 @@ $.widget('ui.image', {
             .attr("src", media_url("img/none.jpg"))
     },
 
-    load: function(photo) {
+    set: function(photo) {
         var image = null
         if (photo != null) {
             var image = photo.thumb[this.options.size]
@@ -139,11 +139,11 @@ $.widget('ui.photo_summary',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, change_mode) {
+    set: function(photo, change_mode) {
         var can_change = change_mode && photo.can_change
 
         this.title
@@ -186,24 +186,24 @@ $.widget('ui.photo_image',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, change_mode) {
+    set: function(photo, change_mode) {
         var img = this.img
 
         var can_change = change_mode && photo.can_change
 
         img
-            .image("load", photo)
+            .image("set", photo)
             .image("resize", false)
 
         $(window).off("resize")
         $(window).on("resize", function() { img.image("resize", false) })
 
         this.summary
-            .photo_summary("load", photo, change_mode)
+            .photo_summary("set", photo, change_mode)
     },
 
     _destroy: function() {
@@ -241,11 +241,11 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         this._super();
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, change_mode) {
+    set: function(photo, change_mode) {
         var can_change = change_mode && photo.can_change
 
         this.set_edit_field(
@@ -338,11 +338,11 @@ $.widget('ui.camera_details',  $.ui.infobox, {
         this._super()
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, change_mode) {
+    set: function(photo, change_mode) {
         var can_change = change_mode && photo.can_change
 
         this.set_field("camera_make", photo.camera_make)
@@ -377,11 +377,11 @@ $.widget('ui.photo_article',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, change_mode) {
+    set: function(photo, change_mode) {
         var style = get_photo_style(photo)
 
         this.element
@@ -390,9 +390,9 @@ $.widget('ui.photo_article',  {
             .addClass(style)
             .toggleClass("photo-selected", is_photo_selected(photo))
 
-        this.pi.photo_image("load", photo, change_mode)
-        this.pd.photo_details("load", photo, change_mode)
-        this.cd.camera_details("load", photo, change_mode)
+        this.pi.photo_image("set", photo, change_mode)
+        this.pd.photo_details("set", photo, change_mode)
+        this.cd.camera_details("set", photo, change_mode)
         return this
     },
 
@@ -419,11 +419,11 @@ $.widget('ui.photo_slideshow',  {
             .appendTo(this.pd)
 
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo, this.options.change_mode)
         }
     },
 
-    load: function(photo, change_mode) {
+    set: function(photo, change_mode) {
         var style = get_photo_style(photo)
 
         this.pd
@@ -434,7 +434,7 @@ $.widget('ui.photo_slideshow',  {
 
         var img = this.img
         img
-            .image("load", photo, get_settings().click_size)
+            .image("set", photo, get_settings().click_size)
             .image("resize", true)
 
         $(window).off("resize")
@@ -457,11 +457,11 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.photo != null) {
-            this.load(this.options.photo, this.options.seach, this.options.change_mode)
+            this.set(this.options.photo, this.options.seach, this.options.change_mode)
         }
     },
 
-    load: function(photo, search, change_mode) {
+    set: function(photo, search, change_mode) {
         this.element.empty()
 
         var photo_mode = get_photo_mode()
@@ -548,12 +548,12 @@ $.widget('ui.photo_list_base',  {
             .appendTo(this.element)
 
         if (this.options.page != null) {
-            this.load_paginator(this.options.page, this.options.last_page)
+            this.set_paginator(this.options.page, this.options.last_page)
         }
     },
 
-    load_paginator: function(page, last_page) {
-        this.p.paginator("load", page, last_page)
+    set_paginator: function(page, last_page) {
+        this.p.paginator("set", page, last_page)
     },
 
     empty: function() {
@@ -625,7 +625,7 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
                 del_selection( $(ui.unselected).data('photo') ); },
         })
         if (this.options.search != null && this.options.results != null) {
-            this.load(this.options.search, this.options.results, this.options.change_mode)
+            this.set(this.options.search, this.options.results, this.options.change_mode)
         }
     },
 
@@ -635,7 +635,7 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
         this._super()
     },
 
-    load: function(search, results, change_mode) {
+    set: function(search, results, change_mode) {
         var mythis = this
         this.empty()
         $.each(results.photos, function(j, photo) {

@@ -257,7 +257,7 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
 
         var options = this.options
         if (options.initial != null) {
-            this.load(options.initial)
+            this.set(options.initial)
             delete options.initial
         }
 
@@ -278,7 +278,7 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
         this._super();
     },
 
-    load: function(item) {
+    set: function(item) {
         if (item != null) {
             this.input.val(item.pk)
             this._addKiller(item)
@@ -329,7 +329,7 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
 
 
 $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
-    load: function(initial) {
+    set: function(initial) {
         if (initial.length > 0) {
             var value = $.map(initial, function(v){ return v.pk });
             this.input.val("|" + value.join("|") + "|")
@@ -414,10 +414,10 @@ $.widget('ui.spud_menu', {
 $.widget('ui.main_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
-        this.load()
+        this.set()
     },
 
-    load: function() {
+    set: function() {
         this.element.empty()
         this.add_item(album_a({id: 1}, "Albums"))
         this.add_item(category_a({id: 1}, "Categories"))
@@ -432,11 +432,11 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.selection != null) {
-            this.load(this.options.selection)
+            this.set(this.options.selection)
         }
     },
 
-    load: function(selection) {
+    set: function(selection) {
         this.element.empty()
         if (selection.length > 0) {
             var search = {
@@ -460,7 +460,7 @@ $.widget('ui.paginator', {
             .addClass("paginator")
 
         if (this.options.page != null) {
-            this.load(this.options.page, this.options.last_page)
+            this.set(this.options.page, this.options.last_page)
         }
     },
 
@@ -482,7 +482,7 @@ $.widget('ui.paginator', {
         }
     },
 
-    load: function(page, last_page) {
+    set: function(page, last_page) {
         var html_page = this.options.html_page
 
         this.element.empty()
@@ -618,7 +618,7 @@ photo_output_field.prototype.create = function(id, size) {
 }
 
 photo_output_field.prototype.set = function(output, value) {
-    output.image('load', value)
+    output.image('set', value)
 }
 
 photo_output_field.prototype.destroy = function(output) {
@@ -758,7 +758,7 @@ ajax_select_field.prototype.set = function(input, value) {
             repr: value.title,
         }
     }
-    input.ajaxautocomplete("load", item)
+    input.ajaxautocomplete("set", item)
 }
 
 ajax_select_field.prototype.get = function(input) {

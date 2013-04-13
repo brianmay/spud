@@ -1830,8 +1830,8 @@ function display_album_children(album_list, album, page) {
     }
     load_album_search_results(search, page, function(data) {
         var last_page = Math.floor(data.number_results / search.results_per_page)
-        album_list.album_list("load", data.albums)
-        album_list.album_list("load_paginator", page, last_page)
+        album_list.album_list("set", data.albums)
+        album_list.album_list("set_paginator", page, last_page)
     })
 }
 
@@ -1843,8 +1843,8 @@ function display_album_photos(photo_list, album, page) {
     }
     load_photo_search_results(search, page, function(data) {
         var last_page = Math.floor(data.number_results / search.results_per_page)
-        photo_list.photo_list("load", search, data)
-        photo_list.photo_list("load_paginator", page, last_page)
+        photo_list.photo_list("set", search, data)
+        photo_list.photo_list("set_paginator", page, last_page)
     })
 }
 
