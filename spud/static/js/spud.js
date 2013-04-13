@@ -3633,7 +3633,7 @@ function display_settings(data) {
     append_field(table, "photos_per_page", "Photos per page")
         .append(get_input_element("photos_per_page", settings.photos_per_page, "text"))
 
-    append_field(table, "items_per_page", "Persons per page")
+    append_field(table, "items_per_page", "Items per page")
         .append(get_input_element("items_per_page", settings.items_per_page, "text"))
 
     append_field(table, "list_size", "List size")
