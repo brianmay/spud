@@ -999,7 +999,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         this._super()
     },
 
-    set_description: function(id, description) {
+    set_description: function(description) {
         this.description.text(description)
     },
 
