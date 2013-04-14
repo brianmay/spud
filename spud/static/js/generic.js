@@ -281,10 +281,6 @@ generic_doer.prototype.display = function(object) {
             bc.append(" › ")
             bc.append(this.a(a))
         }
-        if (object.parent) {
-            bc.append(" › ")
-            bc.append(this.a(object.parent))
-        }
     }
 
     bc.append(" › ")

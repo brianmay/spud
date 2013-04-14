@@ -321,13 +321,12 @@ def _get_album_detail(user, album):
         'can_delete': user.has_perm('spud.delete_album'),
     }
 
-    if album.parent_album is not None:
-        parent = album.parent_album.parent_album
-        seen = {}
-        while parent is not None and parent.pk not in seen:
-            d['ancestors'].insert(0, _get_album(user, parent))
-            seen[parent.pk] = True
-            parent = parent.parent_album
+    parent = album.parent_album
+    seen = {}
+    while parent is not None and parent.pk not in seen:
+        d['ancestors'].insert(0, _get_album(user, parent))
+        seen[parent.pk] = True
+        parent = parent.parent_album
 
     for child in album.children.all():
         d['children'].append(_get_album(user, child))
@@ -378,13 +377,12 @@ def _get_category_detail(user, category):
         'can_delete': user.has_perm('spud.delete_category'),
     }
 
-    if category.parent_category is not None:
-        parent = category.parent_category.parent_category
-        seen = {}
-        while parent is not None and parent.pk not in seen:
-            d['parents'].insert(0, _get_category(user, parent))
-            seen[parent.pk] = True
-            parent = parent.parent_category
+    parent = category.parent_category
+    seen = {}
+    while parent is not None and parent.pk not in seen:
+        d['parents'].insert(0, _get_category(user, parent))
+        seen[parent.pk] = True
+        parent = parent.parent_category
 
     for child in category.children.all():
         d['children'].append(_get_category(user, child))
@@ -447,13 +445,12 @@ def _get_place_detail(user, place):
         'can_delete': user.has_perm('spud.delete_place'),
     }
 
-    if place.parent_place is not None:
-        parent = place.parent_place.parent_place
-        seen = {}
-        while parent is not None and parent.pk not in seen:
-            seen[parent.pk] = True
-            parent = parent.parent_place
-            d['ancestors'].insert(0, _get_place(user, parent))
+    parent = place.parent_place
+    seen = {}
+    while parent is not None and parent.pk not in seen:
+        seen[parent.pk] = True
+        parent = parent.parent_place
+        d['ancestors'].insert(0, _get_place(user, parent))
 
     for child in place.children.all():
         d['children'].append(_get_place(user, child))
