@@ -81,7 +81,7 @@ generic_doer.prototype.load_delete = function(object_id, success, error) {
 generic_doer.prototype.search_form_a = function(criteria, title) {
     var mythis = this
     if (title == null) {
-        title = this.display_type + " search"
+        title = "Search "+this.display_plural
     }
     var a = $('<a/>')
         .attr('href', "#")
@@ -124,7 +124,7 @@ generic_doer.prototype.change_a = function(object, title) {
         return ""
     }
     if (title == null) {
-        title = this.display_type + " change"
+        title = "Change " + this.display_type
     }
     var a = $('<a/>')
         .attr('href', "#")
@@ -137,7 +137,7 @@ generic_doer.prototype.change_a = function(object, title) {
 generic_doer.prototype.add_a = function(parent, title) {
     var mythis = this
     if (title == null) {
-        title = this.display_type + " add"
+        title = "Add " + this.display_type
     }
     var a = $('<a/>')
         .attr('href', "#")
@@ -150,7 +150,7 @@ generic_doer.prototype.add_a = function(parent, title) {
 generic_doer.prototype.delete_a = function(object, title) {
     var mythis = this
     if (title == null) {
-        title = this.display_type + " delete"
+        title = "Delete " + this.display_type
     }
     var a = $('<a/>')
         .attr('href', "#")

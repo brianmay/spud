@@ -5,7 +5,7 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
     },
 
     _create: function() {
-        this.options.title = "Album search"
+        this.options.title = "Search albums"
         this.options.description = "Please search for an album."
         this.options.button = "Search"
         this._super();
@@ -115,7 +115,7 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 
         var criteria = { album: album.id }
 
-        this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show Photos"))
+        this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
         this.add_item(photo_search_form_a(criteria))
         this.add_item(albums.search_form_a({}))
 
@@ -163,7 +163,7 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
     },
 
     _create: function() {
-        this.options.title = "Album change"
+        this.options.title = "Change Album"
         this.options.button = "Save"
         this._super();
 
@@ -183,13 +183,14 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
     },
 
     _submit_values: function(values) {
+        var mythis = this
         display_loading()
         albums.load_change(
             this.album_id,
             values,
             function(data) {
                 hide_loading()
-                this.close()
+                mythis.close()
                 reload_page()
             },
             display_error
@@ -203,7 +204,7 @@ $.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
     },
 
     _create: function() {
-        this.options.title = "Album delete"
+        this.options.title = "Delete album"
         this.options.button = "Delete"
         this._super();
 
@@ -235,8 +236,8 @@ $.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
 
 function album_doer() {
     this.type = "album"
-    this.display_type = "Album"
-    this.display_plural = "Albums"
+    this.display_type = "album"
+    this.display_plural = "albums"
     this.list_type = "album_list"
     this.has_children = true
     generic_doer.call(this)
