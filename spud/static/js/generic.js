@@ -253,8 +253,6 @@ generic_doer.prototype.display = function(object) {
         .appendTo(cm)
      this.display_photos(pl, object, 0);
 
-    var search = this.get_search(object)
-
     var ul = $('<ul class="menu"/>')
 
     this.menu(object, ul)
