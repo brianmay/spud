@@ -777,7 +777,7 @@ function display_photo_article(photo, search, results, n) {
             })
             .appendTo("#content-main")
 
-        if (n > 1) {
+        if (n > 0) {
             photo_search_item_a(search, n-1, results.prev_photo, "", null)
                 .addClass("prevslide")
                 .appendTo(cm)
@@ -802,7 +802,7 @@ function display_photo_slideshow(photo, search, results, n) {
         .appendTo("#content-main")
 
     if (search != null) {
-        if (n > 1) {
+        if (n > 0) {
             photo_search_item_a(search, n-1, results.prev_photo, "", "p")
                 .addClass("prevslide")
                 .appendTo("#content-main")
