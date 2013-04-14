@@ -1267,7 +1267,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
     },
 
     set_title: function(title) {
-        // FIXME
+        this.element.parent().find(".ui-dialog-title").html(title)
     },
 
     set_description: function(description) {
