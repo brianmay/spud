@@ -319,17 +319,6 @@ function escapeHTML(string) {
     });
 };
 
-function p(text){
-    var lines = text.split(/\n\n/);
-    var htmls = [];
-    for (var i = 0 ; i < lines.length ; i++) {
-        var p = $("<p></p>")
-            .html(escapeHTML(lines[i]).replace(/[\r\n]+/, "<br/>"))
-        htmls.push(p)
-    }
-    return htmls;
-}
-
 
 function display_loading() {
     cancel_keyboard()
