@@ -1,6 +1,6 @@
 #!/usr/bin/python
-# spud - keep track of computers and licenses
-# Copyright (C) 2008-2009 Brian May
+# spud - keep track of photos
+# Copyright (C) 2008-2013 Brian May
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
