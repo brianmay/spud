@@ -747,6 +747,8 @@ $.widget('ui.photo_list_base',  {
 function object_a(object) {
     if (object == null) {
         return $("<span>None</span>")
+    } else if (object.type == "photo") {
+        return photo_a(object)
     } else if (object.type == "album") {
         return albums.a(object)
     } else if (object.type == "category") {
@@ -757,7 +759,7 @@ function object_a(object) {
         return persons.a(object)
     } else {
         return $("<span></span>")
-            .text(object.title + "(unknown)")
+            .text(object.title + " (" + object.type + ")")
     }
 }
 
