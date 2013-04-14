@@ -435,7 +435,7 @@ generic_doer.prototype.do_delete = function(object_id, push_history) {
     this.load(object_id,
         function(data) {
             hide_loading()
-            this.display_delete(get_object(data))
+            mythis.display_delete(mythis.get_object(data))
         },
 
         display_error
