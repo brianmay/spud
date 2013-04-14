@@ -1,5 +1,5 @@
 /*
-spud - keep track of computers and licenses
+spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
 
 This program is free software: you can redistribute it and/or modify
