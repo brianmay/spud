@@ -199,7 +199,7 @@ generic_doer.prototype.display_search_results = function(search, results) {
 
     append_jump(this.type, this.type,
         function(ev, item) {
-            mythis.do_object(item.pk, true)
+            mythis.do(item.pk, true)
         }
     )
 
