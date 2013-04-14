@@ -16,16 +16,16 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
     },
 
     _submit_values: function(values) {
-        params = {}
+        criteria = {}
 
         var v = values.q
-        if (v) { params.q = v }
+        if (v) { criteria.q = v }
 
         var v = values.parent
-        if (v) { params.parent = v }
+        if (v) { criteria.parent = v }
 
         var search = {
-            params: params
+            criteria: criteria
         }
 
         albums.do_search_results(search, 0, true)
@@ -113,7 +113,7 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
     set: function(album, change_mode) {
         this.element.empty()
 
-        var search = { params: { album: album.id }}
+        var search = { criteria: { album: album.id }}
 
         this.add_item(photo_search_results_a(search, 0, "Show Photos"))
         this.add_item(photo_search_form_a(search))
@@ -249,7 +249,7 @@ album_doer.constructor = album_doer
 album_doer.prototype.get_search = function(album) {
     return {
         results_per_page: get_settings().items_per_page,
-        params: { album: album.id },
+        criteria: { album: album.id },
     }
 }
 

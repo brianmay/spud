@@ -10,7 +10,7 @@ input_field.prototype.destroy = function(input) {
 
 
 generic_doer.prototype.search_results_url = function(search, page) {
-    var params = jQuery.extend({}, search.params, {
+    var params = jQuery.extend({}, search.criteria, {
         page: page
     })
     return "/b/"+ this.type + "/?" + jQuery.param(params)
@@ -24,7 +24,7 @@ generic_doer.prototype.url = function(object) {
 generic_doer.prototype.load_search_form = function(search, success, error) {
     ajax({
         url: "/a/" + this.type + "/form/",
-        data: search.params,
+        data: search.criteria,
         success: success,
         error: error,
     })
@@ -33,11 +33,10 @@ generic_doer.prototype.load_search_form = function(search, success, error) {
 generic_doer.prototype.load_search_results = function(search, page, success, error) {
     var first = page * search.results_per_page
 
-    var add_params = {
+    var params = jQuery.extend({}, search.criteria, {
         count: search.results_per_page,
         first: first,
-    }
-    var params = jQuery.extend({}, search.params, add_params)
+    })
 
     ajax({
         url: "/a/" + this.type + "/results/",
@@ -291,7 +290,7 @@ generic_doer.prototype.display = function(object) {
 generic_doer.prototype.display_children = function(element, object, page) {
     var search = {
         results_per_page: get_settings().items_per_page,
-        params: { parent: object.id },
+        criteria: { parent: object.id },
     }
     var mythis = this
     this.load_search_results(search, page,
@@ -335,8 +334,8 @@ generic_doer.prototype.display_delete = function(object, dialog) {
 
 
 generic_doer.prototype.do_search_form = function(search, push_history) {
-    if (search.params == null) {
-        search.params = {}
+    if (search.criteria == null) {
+        search.criteria = {}
     }
 
     var mythis = this

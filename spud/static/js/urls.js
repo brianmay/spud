@@ -22,7 +22,7 @@ function logout_url() {
 
 
 function photo_search_results_url(search, page) {
-    var params = jQuery.extend({}, search.params, {
+    var params = jQuery.extend({}, search.criteria, {
         page: page
     })
     return "/b/photo/?" + jQuery.param(params)
@@ -30,7 +30,7 @@ function photo_search_results_url(search, page) {
 
 
 function photo_search_item_url(search, n, photo) {
-    var params = jQuery.extend({}, search.params, {
+    var params = jQuery.extend({}, search.criteria, {
         n: n
     })
     if (photo != null) {
@@ -165,7 +165,7 @@ function load_photo_relation_delete(photo_relation_id, success, error) {
 function load_photo_search_form(search, success, error) {
     ajax({
         url: '/a/photo/form/',
-        data: search.params,
+        data: search.criteria,
         success: success,
         error: error,
     })
@@ -176,11 +176,10 @@ function load_photo_search_form(search, success, error) {
 function load_photo_search_results(search, page, success, error) {
     var first = page * search.results_per_page
 
-    var add_params = {
+    var params = jQuery.extend({}, search.criteria, {
         count: search.results_per_page,
         first: first,
-    }
-    var params = jQuery.extend({}, search.params, add_params)
+    })
 
     ajax({
         url: '/a/photo/results/',
@@ -192,7 +191,7 @@ function load_photo_search_results(search, page, success, error) {
 
 
 function load_photo_search_item(search, n, success, error) {
-    var params = jQuery.extend({}, search.params, { number: n })
+    var params = jQuery.extend({}, search.criteria, { number: n })
     ajax({
         url: '/a/photo/results/',
         data: params,
@@ -204,7 +203,7 @@ function load_photo_search_item(search, n, success, error) {
 
 
 function load_photo_search_change(search, updates, number_results, success, error) {
-    var params = jQuery.extend({}, search.params, updates, { number_results: number_results })
+    var params = jQuery.extend({}, search.criteria, updates, { number_results: number_results })
 
     ajax({
         url: '/a/photo/change/',

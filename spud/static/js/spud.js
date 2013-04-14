@@ -173,7 +173,7 @@ function datetime_a(dt) {
         return null
     }
     var search = {
-        params: {
+        criteria: {
             first_date: dt.date + " 00:00 " + dt.timezone,
             last_date: dt.date + " nextday " + dt.timezone,
         }
@@ -930,13 +930,13 @@ function cancel_keyboard() {
 }
 
 
-function photo_change_keyboard(photo, search_params, number_results) {
+function photo_change_keyboard(photo, search_criteria, number_results) {
     $(document).off("keydown")
-    $(document).on("keydown", function(ev) { photo_change_keyboard_event(ev, photo, search_params, number_results) })
+    $(document).on("keydown", function(ev) { photo_change_keyboard_event(ev, photo, search_criteria, number_results) })
 }
 
 
-function photo_change_keyboard_event(ev, photo, search_params, number_results) {
+function photo_change_keyboard_event(ev, photo, search_criteria, number_results) {
     var key = String.fromCharCode(ev.which)
 
     if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey)
@@ -958,7 +958,7 @@ function photo_change_keyboard_event(ev, photo, search_params, number_results) {
       source: operations,
       select: function( event, ui ) {
         dialog.dialog( "close" )
-        ui.item.fn(photo, search_params, number_results)
+        ui.item.fn(photo, search_criteria, number_results)
         return false;
       }
     })
@@ -983,7 +983,7 @@ function photo_change_keyboard_event(ev, photo, search_params, number_results) {
 }
 
 
-function display_change_photo_title(photo, search_params, number_results) {
+function display_change_photo_title(photo, search_criteria, number_results) {
     var title=""
     if (photo != null) {
         title = photo.title
@@ -996,11 +996,11 @@ function display_change_photo_title(photo, search_params, number_results) {
             set_title: form.title.value,
         }
     }
-    display_change_photo_attribute("title", table, get_updates, search_params, number_results)
+    display_change_photo_attribute("title", table, get_updates, search_criteria, number_results)
 }
 
 
-function display_change_photo_description(photo, search_params, number_results) {
+function display_change_photo_description(photo, search_criteria, number_results) {
     var description=""
     if (photo != null) {
         description = photo.description
@@ -1013,11 +1013,11 @@ function display_change_photo_description(photo, search_params, number_results) 
             set_description: form.description.value,
         }
     }
-    display_change_photo_attribute("description", table, get_updates, search_params, number_results, { width: 400, })
+    display_change_photo_attribute("description", table, get_updates, search_criteria, number_results, { width: 400, })
 }
 
 
-function display_change_photo_view(photo, search_params, number_results) {
+function display_change_photo_view(photo, search_criteria, number_results) {
     var view=""
     if (photo != null) {
         view = photo.view
@@ -1030,11 +1030,11 @@ function display_change_photo_view(photo, search_params, number_results) {
             set_view: form.view.value,
         }
     }
-    display_change_photo_attribute("view", table, get_updates, search_params, number_results, { width: 400, })
+    display_change_photo_attribute("view", table, get_updates, search_criteria, number_results, { width: 400, })
 }
 
 
-function display_change_photo_comment(photo, search_params, number_results) {
+function display_change_photo_comment(photo, search_criteria, number_results) {
     var comments=""
     if (photo != null) {
         comments = photo.comment
@@ -1047,11 +1047,11 @@ function display_change_photo_comment(photo, search_params, number_results) {
             set_comments: form.comments.value,
         }
     }
-    display_change_photo_attribute("comments", table, get_updates, search_params, number_results, { width: 400, } )
+    display_change_photo_attribute("comments", table, get_updates, search_criteria, number_results, { width: 400, } )
 }
 
 
-function display_change_photo_datetime(photo, search_params, number_results) {
+function display_change_photo_datetime(photo, search_criteria, number_results) {
     var datetime=""
     if (photo != null) {
         datetime = photo.localtime.date + " " + photo.localtime.time + " " + photo.localtime.timezone
@@ -1064,11 +1064,11 @@ function display_change_photo_datetime(photo, search_params, number_results) {
             set_datetime: form.datetime.value,
         }
     }
-    display_change_photo_attribute("datetime", table, get_updates, search_params, number_results, { } )
+    display_change_photo_attribute("datetime", table, get_updates, search_criteria, number_results, { } )
 }
 
 
-function display_change_photo_action(photo, search_params, number_results) {
+function display_change_photo_action(photo, search_criteria, number_results) {
     var action=""
     if (photo != null) {
         action = photo.action
@@ -1091,11 +1091,11 @@ function display_change_photo_action(photo, search_params, number_results) {
             set_action: form.action.value,
         }
     }
-    display_change_photo_attribute("action", table, get_updates, search_params, number_results, { width: 400, } )
+    display_change_photo_attribute("action", table, get_updates, search_criteria, number_results, { width: 400, } )
 }
 
 
-function display_change_photo_photographer(photo, search_params, number_results) {
+function display_change_photo_photographer(photo, search_criteria, number_results) {
     var photographer=""
     if (photo != null) {
         photographer = photo.photographer
@@ -1108,11 +1108,11 @@ function display_change_photo_photographer(photo, search_params, number_results)
             set_photographer: form.photographer.value,
         }
     }
-    display_change_photo_attribute("photographer", table, get_updates, search_params, number_results, { } )
+    display_change_photo_attribute("photographer", table, get_updates, search_criteria, number_results, { } )
 }
 
 
-function display_change_photo_place(photo, search_params, number_results) {
+function display_change_photo_place(photo, search_criteria, number_results) {
     var place=""
     if (photo != null) {
         place = photo.place
@@ -1125,11 +1125,11 @@ function display_change_photo_place(photo, search_params, number_results) {
             set_place: form.place.value,
         }
     }
-    display_change_photo_attribute("place", table, get_updates, search_params, number_results, { } )
+    display_change_photo_attribute("place", table, get_updates, search_criteria, number_results, { } )
 }
 
 
-function display_change_photo_albums(photo, search_params, number_results) {
+function display_change_photo_albums(photo, search_criteria, number_results) {
     var table = $("<table />")
 
     if (photo != null) {
@@ -1165,11 +1165,11 @@ function display_change_photo_albums(photo, search_params, number_results) {
             }
         }
     }
-    display_change_photo_attribute("album", table, get_updates, search_params, number_results, { } )
+    display_change_photo_attribute("album", table, get_updates, search_criteria, number_results, { } )
 }
 
 
-function display_change_photo_categorys(photo, search_params, number_results) {
+function display_change_photo_categorys(photo, search_criteria, number_results) {
     var table = $("<table />")
 
     if (photo != null) {
@@ -1205,11 +1205,11 @@ function display_change_photo_categorys(photo, search_params, number_results) {
             }
         }
     }
-    display_change_photo_attribute("category", table, get_updates, search_params, number_results, { } )
+    display_change_photo_attribute("category", table, get_updates, search_criteria, number_results, { } )
 }
 
 
-function display_change_photo_persons(photo, search_params, number_results) {
+function display_change_photo_persons(photo, search_criteria, number_results) {
     var table = $("<table />")
 
     if (photo != null) {
@@ -1245,11 +1245,11 @@ function display_change_photo_persons(photo, search_params, number_results) {
             }
         }
     }
-    display_change_photo_attribute("person", table, get_updates, search_params, number_results, { } )
+    display_change_photo_attribute("person", table, get_updates, search_criteria, number_results, { } )
 }
 
 
-function display_change_photo_attribute(title, table, get_updates, search_params, number_results, options) {
+function display_change_photo_attribute(title, table, get_updates, search_criteria, number_results, options) {
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Change photo " + title)
 
@@ -1261,7 +1261,7 @@ function display_change_photo_attribute(title, table, get_updates, search_params
         .append(f)
         .keypress(function(ev) {
             if (ev.which == 13 && !ev.shiftKey) {
-                submit_change_photo_attribute(search_params, get_updates(f[0]), number_results, $( this ))
+                submit_change_photo_attribute(search_criteria, get_updates(f[0]), number_results, $( this ))
                 return false
             }
         })
@@ -1270,7 +1270,7 @@ function display_change_photo_attribute(title, table, get_updates, search_params
             close: function( event, ui ) { $(this).dialog("destroy") },
             buttons: {
                 Save: function() {
-                    submit_change_photo_attribute(search_params, get_updates(f[0]), number_results, $( this ))
+                    submit_change_photo_attribute(search_criteria, get_updates(f[0]), number_results, $( this ))
                 },
                 Cancel: function() {
                     $( this ).dialog( "close" )
@@ -1280,9 +1280,9 @@ function display_change_photo_attribute(title, table, get_updates, search_params
 }
 
 
-function submit_change_photo_attribute(search_params, updates, number_results, dialog) {
+function submit_change_photo_attribute(search_criteria, updates, number_results, dialog) {
     var search = {
-        params: search_params
+        criteria: search_criteria
     }
 
     display_loading()
@@ -1365,7 +1365,7 @@ function submit_photo_relation_delete(photo_relation, dialog) {
 
 
 function display_photo_search_form(search, data) {
-    var params = search.params
+    var criteria = search.criteria
 
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Search photos")
@@ -1504,110 +1504,110 @@ function display_photo_search_form(search, data) {
 
 function submit_photo_search_form(dialog, form) {
 
-    var params = { }
+    var criteria = { }
 
     if (form.photo.value != "|") {
         var photo = form.photo.value.slice(1,-1).split("|")
-        params['photo'] = photo.join(".")
+        criteria['photo'] = photo.join(".")
     }
 
     if (form.first_date.value) {
-        params['first_date'] = form.first_date.value
+        criteria['first_date'] = form.first_date.value
     }
 
     if (form.last_date.value) {
-        params['last_date'] = form.last_date.value
+        criteria['last_date'] = form.last_date.value
     }
 
     if (form.lower_rating.value) {
-        params['lower_rating'] = form.lower_rating.value
+        criteria['lower_rating'] = form.lower_rating.value
     }
 
     if (form.upper_rating.value) {
-        params['upper_rating'] = form.upper_rating.value
+        criteria['upper_rating'] = form.upper_rating.value
     }
 
     if (form.title.value) {
-        params['title'] = form.title.value
+        criteria['title'] = form.title.value
     }
 
     if (form.photographer.value) {
-        params['photographer'] = form.photographer.value
+        criteria['photographer'] = form.photographer.value
     }
 
     if (form.person.value != "|") {
         var person = form.person.value.slice(1,-1).split("|")
-        params['person'] = person.join(".")
+        criteria['person'] = person.join(".")
     }
 
     if (form.person_none.checked) {
-        params['person_none'] = "true"
+        criteria['person_none'] = "true"
     }
 
     if (form.place.value) {
-        params['place'] = form.place.value
+        criteria['place'] = form.place.value
     }
 
     if (form.place_descendants.checked) {
-        params['place_descendants'] = "true"
+        criteria['place_descendants'] = "true"
     }
 
     if (form.place_none.checked) {
-        params['place_none'] = "true"
+        criteria['place_none'] = "true"
     }
 
     if (form.album.value != "|") {
         var album = form.album.value.slice(1,-1).split("|")
-        params['album'] = album.join(".")
+        criteria['album'] = album.join(".")
     }
 
     if (form.album_descendants.checked) {
-        params['album_descendants'] = "true"
+        criteria['album_descendants'] = "true"
     }
 
     if (form.album_none.checked) {
-        params['album_none'] = "true"
+        criteria['album_none'] = "true"
     }
 
     if (form.category.value != "|") {
         var category = form.category.value.slice(1,-1).split("|")
-        params['category'] = category.join(".")
+        criteria['category'] = category.join(".")
     }
 
     if (form.category_descendants.checked) {
-        params['category_descendants'] = "true"
+        criteria['category_descendants'] = "true"
     }
 
     if (form.category_none.checked) {
-        params['category_none'] = "true"
+        criteria['category_none'] = "true"
     }
 
     if (form.path.value) {
-        params['path'] = form.path.value
+        criteria['path'] = form.path.value
     }
 
     if (form.name.value) {
-        params['name'] = form.name.value
+        criteria['name'] = form.name.value
     }
 
     if (form.camera_make.value) {
-        params['camera_make'] = form.camera_make.value
+        criteria['camera_make'] = form.camera_make.value
     }
 
     if (form.camera_model.value) {
-        params['camera_model'] = form.camera_model.value
+        criteria['camera_model'] = form.camera_model.value
     }
 
     if (form.first_id.value) {
-        params['first_id'] = form.first_id.value
+        criteria['first_id'] = form.first_id.value
     }
 
     if (form.last_id.value) {
-        params['last_id'] = form.last_id.value
+        criteria['last_id'] = form.last_id.value
     }
 
     var search = {
-        params: params,
+        criteria: criteria,
     }
 
     do_photo_search_results(search, 0, true)
@@ -1669,7 +1669,7 @@ function display_photo_search_results(search, results) {
                 })
                 .html("<a href='#'>View</a>")
                 .appendTo(ul)
-            photo_change_keyboard(null, search.params, results.number_results)
+            photo_change_keyboard(null, search.criteria, results.number_results)
         } else {
             $("<li>")
                 .on("click", function() {
@@ -1954,8 +1954,8 @@ function do_photo_relation_delete(photo_relation_id, push_history) {
 
 
 function do_photo_search_form(search, push_history) {
-    if (search.params == null) {
-        search.params = {}
+    if (search.criteria == null) {
+        search.criteria = {}
     }
 
     display_loading()
