@@ -68,7 +68,7 @@ $.widget('ui.photo_summary',  {
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
 
         this.persons
-            .append_csv($.map(photo.persons, function(person) { return person_a(person); } ))
+            .append_csv($.map(photo.persons, function(person) { return persons.a(person); } ))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
 
         this.description
