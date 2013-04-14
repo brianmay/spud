@@ -82,11 +82,11 @@ $.widget('ui.album_list', $.ui.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.albums != null) {
-            this.set(this.options.albums, this.options.change_mode)
+            this.set(this.options.albums)
         }
     },
 
-    set: function(album_list, change_mode) {
+    set: function(album_list) {
         var mythis = this
         this.empty()
         $.each(album_list, function(j, album) {
@@ -106,11 +106,11 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.album != null) {
-            this.set(this.options.album, this.options.change_mode)
+            this.set(this.options.album)
         }
     },
 
-    set: function(album, change_mode) {
+    set: function(album) {
         this.element.empty()
 
         var criteria = { album: album.id }
@@ -119,19 +119,18 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
         this.add_item(photo_search_form_a(criteria))
         this.add_item(albums.search_form_a({}))
 
-        if (change_mode) {
-            if (album.can_add) {
-                this.add_item(album_add_a(album))
-            }
-
-            if (album.can_change) {
-                this.add_item(album_change_a(album))
-            }
-
-            if (album.can_delete) {
-                this.add_item(album_delete_a(album))
-            }
+        if (album.can_add) {
+            this.add_item(album_add_a(album))
         }
+
+        if (album.can_change) {
+            this.add_item(album_change_a(album))
+        }
+
+        if (album.can_delete) {
+            this.add_item(album_delete_a(album))
+        }
+
         return this
     },
 })
@@ -141,11 +140,11 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.change_mode)
+            this.set(this.options.search)
         }
     },
 
-    set: function(search, change_mode) {
+    set: function(search) {
         this.element.empty()
         this.add_item(albums.search_form_a(search.criteria))
         return this
@@ -288,7 +287,6 @@ album_doer.prototype.menu = function(album, div) {
 album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
     $.ui.album_list({
         albums: albums,
-        change_mode: true,
         page: page,
         last_page: last_page,
         html_page: html_page,
