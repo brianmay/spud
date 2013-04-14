@@ -246,11 +246,8 @@ function album_doer() {
 album_doer.prototype = new generic_doer()
 album_doer.constructor = album_doer
 
-album_doer.prototype.get_search = function(album) {
-    return {
-        results_per_page: get_settings().items_per_page,
-        criteria: { album: album.id },
-    }
+album_doer.prototype.get_criteria = function(album) {
+    return { album: album.id }
 }
 
 album_doer.prototype.get_new_object = function(parent) {

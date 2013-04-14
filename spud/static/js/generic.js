@@ -305,7 +305,10 @@ generic_doer.prototype.display_children = function(element, object, page) {
 
 
 generic_doer.prototype.display_photos = function(element, object, page) {
-    var search = this.get_search(object)
+    var search = {
+        results_per_page: get_settings().items_per_page,
+        criteria: this.get_criteria(object)
+    }
     load_photo_search_results(search, page,
         function(data) {
             var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
