@@ -1703,6 +1703,8 @@ def photo_search_form(request):
 
         if value == "":
             continue
+        elif key == "_":
+            continue
         elif key == "place_descendants":
             resp[key] = value
         elif key == "album_descendants":

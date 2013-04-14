@@ -457,59 +457,6 @@ function dt_dd(dl, title, value) {
 }
 
 
-function photo_thumb(photo, title, sort, description, url, selectable, onclick) {
-    var style = ""
-    var image = null
-    if (photo != null) {
-        var size = get_settings().list_size
-        var style = get_photo_style(photo)
-        var image = photo.thumb[size]
-    }
-
-    li = $("<li />")
-        .attr('class', "photo_list_item")
-        .on("click", onclick)
-        .data('photo', photo)
-
-    li.addClass(style)
-    if (selectable && is_photo_selected(photo)) {
-        li.addClass("ui-selected")
-    }
-
-
-    a = $("<a />")
-    a.attr("href", url)
-
-    if (image != null) {
-        $("<img />")
-        .attr("src", image.url)
-        .attr("alt", title)
-        .attr("width", image.width)
-        .attr("height", image.height)
-        .appendTo(a)
-    }
-
-    $("<div class='title'></div>")
-        .text(title)
-        .appendTo(a)
-
-    if (sort) {
-        $("<div class='sort'></div>")
-            .text(sort)
-            .appendTo(a)
-    }
-    if (description) {
-        $("<div class='desc'></div>")
-            .append(p(description))
-            .appendTo(a)
-    }
-
-    li.append(a)
-
-    return li
-}
-
-
 // *********************
 // * HTML form helpers *
 // *********************
@@ -1683,8 +1630,21 @@ function display_photo_search_results(search, results) {
     cm.append("<h1>Photo List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
 
     cm.append(photo_search_infobox(search, results))
-    cm.append(photo_search_photo_list(search, results))
-    cm.append(photo_search_paginator(search, results))
+
+    var html_page = function(page, text) {
+        return photo_search_results_a(search, page, text)
+    }
+
+    $("<div/>")
+        .photo_list({
+            search: search,
+            results: results,
+            change_mode: is_edit_mode(),
+            html_page: html_page,
+            page: page,
+            last_page: last_page,
+        })
+        .appendTo(cm)
 
     var ul = $('<ul class="menu"/>')
 
@@ -1739,15 +1699,15 @@ function photo_search_infobox(search, results) {
 
         var type = c.value.type
         if (type == 'album') {
-            dd.append(album_a(c.value))
+            dd.append(albums.a(c.value))
         } else if (type == 'category') {
-            dd.append(category_a(c.value))
+            dd.append(categorys.a(c.value))
         } else if (type == 'place') {
-            dd.append(place_a(c.value))
+            dd.append(places.a(c.value))
         } else if (type == 'person') {
-            dd.append(person_a(c.value))
+            dd.append(persons.a(c.value))
         } else if (type == 'datetime') {
-            dd.append(datetime_a(c.value))
+            dd.append(datetimes.a(c.value))
         } else if (type == 'photos') {
             var sep=""
             $.each(c.value.value, function(j, photo){ dd.append(sep); dd.append(photo_a(photo, photo.id)); sep=", " });
@@ -1764,55 +1724,6 @@ function photo_search_infobox(search, results) {
     ib = $("<div class='infobox'/>")
     ib.append(dl)
     return ib
-}
-
-
-function photo_search_photo_list(search, results) {
-    var pl = $("<ul class='photo_list'/>")
-
-    for (var i in results.photos) {
-        photo = results.photos[i]
-        n = results.first + Number(i)
-
-        li = photo_thumb(photo, photo.title, photo.localtime.date + " " + photo.localtime.time, photo.description,
-            photo_search_item_url(search, n, photo),
-            true,
-            function(photo, n) {
-                return function() {
-                    do_photo_search_item(search, n, null, true)
-                    return false
-                }
-            }(photo, n))
-        pl.append(li)
-    }
-    pl.myselectable({
-        filter: "li",
-        selected: function( event, ui ) {
-            add_selection( $(ui.selected).data('photo') ); },
-        unselected: function( event, ui ) {
-            del_selection( $(ui.unselected).data('photo') ); },
-    })
-    update_selection()
-    return pl
-}
-
-
-function photo_search_paginator(search, results) {
-    var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.ceil((results.number_results-1) / search.results_per_page) - 1
-
-    var html_page = function(page, text) {
-        return photo_search_results_a(search, page, text)
-    }
-
-    var paginator = $("<p></p>")
-        .paginator({
-            page: page,
-            last_page: last_page,
-            html_page: html_page
-        })
-
-    return paginator
 }
 
 
