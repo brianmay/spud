@@ -1284,6 +1284,9 @@ function submit_change_photo_attribute(search_criteria, updates, number_results,
         criteria: search_criteria
     }
 
+    if ($("#dialog").length > 0)
+        return
+
     display_loading()
     load_photo_search_change(
         search,
@@ -1910,6 +1913,9 @@ function do_photo_relation_delete(photo_relation_id, push_history) {
 
 
 function do_photo_search_form(criteria, push_history) {
+    if ($("#dialog").length > 0)
+        return
+
     display_loading()
     load_photo_search_form(criteria,
         function(data) {
@@ -1975,6 +1981,9 @@ function do_photo_search_item(search, n, photo_id, push_history) {
 }
 
 function do_settings_form(push_history) {
+    if ($("#dialog").length > 0)
+        return
+
     display_loading()
     load_settings(
         function(data) {
