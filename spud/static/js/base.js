@@ -464,10 +464,10 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
 
     set: function() {
         this.element.empty()
-        this.add_item(album_a({id: 1}, "Albums"))
-        this.add_item(category_a({id: 1}, "Categories"))
-        this.add_item(place_a({id: 1}, "Places"))
-        this.add_item(person_search_results_a({}, 0))
+        this.add_item(albums.a({id: 1}, "Albums"))
+        this.add_item(categorys.a({id: 1}, "Categories"))
+        this.add_item(places.a({id: 1}, "Places"))
+        this.add_item(persons.search_results_a({}, 0))
         this.add_item(photo_search_results_a({}, 0))
     },
 })
@@ -624,7 +624,9 @@ link_output_field.prototype = new output_field()
 link_output_field.constructor = link_output_field
 
 link_output_field.prototype.set = function(output, value) {
-    if (value.type == "album") {
+    if (value == null) {
+        output.text("None")
+    } else if (value.type == "album") {
         output.html(album_a(value))
     } else if (value.type == "category") {
         output.html(category_a(value))

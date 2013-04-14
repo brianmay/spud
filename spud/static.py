@@ -74,7 +74,7 @@ def album_search_results(request):
     js = json.dumps({'params': query})
     return render_to_response('html/static.html', {
         'title': 'Person results',
-        'onload': "do_album_search_results(%s, %d)" % (js, page),
+        'onload': "albums.do_search_results(%s, %d)" % (js, page),
     }, context_instance=RequestContext(request))
 
 
@@ -82,7 +82,7 @@ def album_detail(request, album_id):
     album_id = int(album_id)
     return render_to_response('html/static.html', {
         'title': 'Album detail',
-        'onload': "do_album(%d)" % album_id,
+        'onload': "albums.do(%d)" % album_id,
     }, context_instance=RequestContext(request))
 
 
@@ -96,16 +96,16 @@ def category_search_results(request):
 
     js = json.dumps({'params': query})
     return render_to_response('html/static.html', {
-        'title': 'Person results',
-        'onload': "do_category_search_results(%s, %d)" % (js, page),
+        'title': 'Category results',
+        'onload': "categorys.do_search_results(%s, %d)" % (js, page),
     }, context_instance=RequestContext(request))
 
 
 def category_detail(request, category_id):
     category_id = int(category_id)
     return render_to_response('html/static.html', {
-        'title': 'Album detail',
-        'onload': "do_category(%d)" % category_id,
+        'title': 'Category detail',
+        'onload': "categorys.do(%d)" % category_id,
     }, context_instance=RequestContext(request))
 
 
@@ -119,16 +119,16 @@ def place_search_results(request):
 
     js = json.dumps({'params': query})
     return render_to_response('html/static.html', {
-        'title': 'Person results',
-        'onload': "do_place_search_results(%s, %d)" % (js, page),
+        'title': 'Place results',
+        'onload': "places.do_search_results(%s, %d)" % (js, page),
     }, context_instance=RequestContext(request))
 
 
 def place_detail(request, place_id):
     place_id = int(place_id)
     return render_to_response('html/static.html', {
-        'title': 'Album detail',
-        'onload': "do_place(%d)" % place_id,
+        'title': 'Place detail',
+        'onload': "places.do(%d)" % place_id,
     }, context_instance=RequestContext(request))
 
 
@@ -143,7 +143,7 @@ def person_search_results(request):
     js = json.dumps({'params': query})
     return render_to_response('html/static.html', {
         'title': 'Person results',
-        'onload': "do_person_search_results(%s, %d)" % (js, page),
+        'onload': "persons.do_search_results(%s, %d)" % (js, page),
     }, context_instance=RequestContext(request))
 
 
@@ -151,7 +151,7 @@ def person_detail(request, person_id):
     person_id = int(person_id)
     return render_to_response('html/static.html', {
         'title': 'Person detail',
-        'onload': "do_person(%d)" % person_id,
+        'onload': "persons.do(%d)" % person_id,
     }, context_instance=RequestContext(request))
 
 

@@ -279,17 +279,17 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         this.set_field("name", photo.name)
 
         this.set_edit_field(
-            "place", place_a(photo.place),
+            "place", places.a(photo.place),
             can_change, photo_change_a(photo, display_change_photo_place, "[edit]")
         )
 
         this.set_edit_field(
-            "albums", $.map(photo.albums, function(album) { return album_a(album); } ),
+            "albums", $.map(photo.albums, function(album) { return albums.a(album); } ),
             can_change, photo_change_a(photo, display_change_photo_albums, "[edit]")
         )
 
         this.set_edit_field(
-            "categorys", $.map(photo.categorys, function(category) { return category_a(category); } ),
+            "categorys", $.map(photo.categorys, function(category) { return categorys.a(category); } ),
             can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]")
         )
 
@@ -299,7 +299,7 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         )
 
         this.set_edit_field(
-            "photographer", person_a(photo.photographer),
+            "photographer", persons.a(photo.photographer),
             can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]")
         )
 

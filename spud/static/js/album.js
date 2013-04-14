@@ -28,7 +28,7 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
             params: params
         }
 
-        do_album_search_results(search, 0, true)
+        albums.do_search_results(search, 0, true)
         this.close()
     },
 })
@@ -86,16 +86,16 @@ $.widget('ui.album_list', $.ui.photo_list_base, {
         }
     },
 
-    set: function(albums, change_mode) {
+    set: function(album_list, change_mode) {
         var mythis = this
         this.empty()
-        $.each(albums, function(j, album) {
+        $.each(album_list, function(j, album) {
             var photo = album.cover_photo
             var sort=""
             if  (album.sortorder || album.sortname) {
                 sort = album.sortname + " " + album.sortorder
             }
-            mythis.append_photo(photo, album.title, sort, album.description, album_a(album, null))
+            mythis.append_photo(photo, album.title, sort, album.description, albums.a(album, null))
         })
         return this
     }
@@ -117,7 +117,7 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 
         this.add_item(photo_search_results_a(search, 0, "Show Photos"))
         this.add_item(photo_search_form_a(search))
-        this.add_item(album_search_form_a({}))
+        this.add_item(albums.search_form_a({}))
 
         if (change_mode) {
             if (album.can_add) {
@@ -147,7 +147,7 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
 
     set: function(search, change_mode) {
         this.element.empty()
-        this.add_item(album_search_form_a(search))
+        this.add_item(albums.search_form_a(search))
         return this
     },
 })
@@ -185,7 +185,7 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
 
     _submit_values: function(values) {
         display_loading()
-        load_album_change(
+        albums.load_change(
             this.album_id,
             values,
             function(data) {
@@ -222,7 +222,7 @@ $.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
     _submit_values: function(values) {
         this.close()
         display_loading()
-        load_album_delete(
+        albums.load_delete(
             this.album_id,
             function(data) {
                 hide_loading()
@@ -234,3 +234,84 @@ $.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
 })
 
 
+function album_doer() {
+    this.type = "album"
+    this.display_type = "Album"
+    this.display_plural = "Albums"
+    this.list_type = "album_list"
+    this.has_children = true
+    generic_doer.call(this)
+}
+
+album_doer.prototype = new generic_doer()
+album_doer.constructor = album_doer
+
+album_doer.prototype.get_search = function(album) {
+    return {
+        results_per_page: get_settings().items_per_page,
+        params: { album: album.id },
+    }
+}
+
+album_doer.prototype.get_new_object = function(parent) {
+    return {
+        id: null,
+        type: "album",
+        title: "",
+        description: "",
+        cover_photo: null,
+        sortname: "",
+        sortorder: "",
+        parent: parent_album,
+        children: [],
+    }
+}
+
+album_doer.prototype.get_object = function(results) {
+    return results.album
+}
+
+album_doer.prototype.get_objects = function(results) {
+    return results.albums
+}
+
+album_doer.prototype.details = function(album, div) {
+    $.ui.album_details({album: album}, div)
+}
+
+album_doer.prototype.list_menu = function(search, div) {
+    $.ui.album_list_menu({search: search}, div)
+}
+
+
+album_doer.prototype.menu = function(album, div) {
+    $.ui.album_menu({album: album}, div)
+}
+
+album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
+    $.ui.album_list({
+        albums: albums,
+        change_mode: true,
+        page: page,
+        last_page: last_page,
+        html_page: html_page,
+    }, div)
+}
+
+album_doer.prototype.search_dialog = function(search, dialog) {
+    $.ui.album_search_dialog({ search: search }, dialog)
+}
+
+album_doer.prototype.search_details = function(search, results, dialog) {
+    $.ui.album_search_details({ search: search, results: results }, dialog)
+}
+
+album_doer.prototype.change_dialog = function(album, dialog) {
+    $.ui.album_change_dialog({ album: album }, dialog)
+}
+
+album_doer.prototype.delete_dialog = function(album, dialog) {
+    $.ui.album_delete_dialog({ album: album }, dialog)
+}
+
+albums = new album_doer()

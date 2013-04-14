@@ -1,0 +1,82 @@
+function place_doer() {
+    this.type = "place"
+    this.display_type = "Place"
+    this.display_plural = "Places"
+    this.list_type = "place_list"
+    this.has_children = true
+    generic_doer.call(this)
+}
+
+place_doer.prototype = new generic_doer()
+place_doer.constructor = place_doer
+
+place_doer.prototype.get_search = function(place) {
+    return {
+        results_per_page: get_settings().items_per_page,
+        params: { place: place.id },
+    }
+}
+
+place_doer.prototype.get_new_object = function(parent) {
+    return {
+        id: null,
+        type: "place",
+        title: "",
+        description: "",
+        cover_photo: null,
+        sortname: "",
+        sortorder: "",
+        parent: parent_place,
+        children: [],
+    }
+}
+
+place_doer.prototype.get_object = function(results) {
+    return results.place
+}
+
+place_doer.prototype.get_objects = function(results) {
+    return results.places
+}
+
+place_doer.prototype.details = function(place, div) {
+    $.ui.place_details({place: place}, div)
+}
+
+place_doer.prototype.list_menu = function(search, div) {
+    $.ui.place_list_menu(search, div)
+}
+
+
+place_doer.prototype.menu = function(place, div) {
+    $.ui.place_menu({place: place}, div)
+}
+
+place_doer.prototype.list = function(places, page, last_page, html_page, div) {
+    $.ui.place_list({
+        places: places,
+        change_mode: true,
+        page: page,
+        last_page: last_page,
+        html_page: html_page,
+    }, div)
+}
+
+place_doer.prototype.search_dialog = function(search, dialog) {
+    $.ui.place_search_dialog({ search: search }, dialog)
+}
+
+place_doer.prototype.search_details = function(search, results, dialog) {
+    $.ui.place_search_details({ search: search, results: results }, dialog)
+}
+
+place_doer.prototype.change_dialog = function(place, dialog) {
+    $.ui.place_change_dialog({ place: place }, dialog)
+}
+
+place_doer.prototype.delete_dialog = function(place, dialog) {
+    $.ui.place_delete_dialog({ place: place }, dialog)
+}
+
+places = new place_doer()
+

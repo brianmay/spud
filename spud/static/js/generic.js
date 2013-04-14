@@ -80,28 +80,31 @@ generic_doer.prototype.load_delete = function(object_id, success, error) {
 
 
 generic_doer.prototype.search_form_a = function(search, title) {
+    var mythis = this
     if (title == null) {
         title = this.display_type + " search"
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { this.do_search_form(search, true); return false; })
+        .on('click', function() { mythis.do_search_form(search, true); return false; })
         .text(title)
     return a
 }
 
 generic_doer.prototype.search_results_a = function(search, page, title) {
+    var mythis = this
     if (title == null) {
         title = this.display_plural
     }
     var a = $('<a/>')
         .attr('href', this.search_results_url(search, page))
-        .on('click', function() { this.do_search_results(search, page, true); return false; })
+        .on('click', function() { mythis.do_search_results(search, page, true); return false; })
         .text(title)
     return a
 }
 
 generic_doer.prototype.a = function(object, title) {
+    var mythis = this
     if (object == null) {
         return ""
     }
@@ -110,13 +113,14 @@ generic_doer.prototype.a = function(object, title) {
     }
     var a = $('<a/>')
         .attr('href', this.url(object))
-        .on('click', function() { this.do(object.id, true); return false; })
+        .on('click', function() { mythis.do(object.id, true); return false; })
         .data('photo', object.cover_photo)
         .text(title)
     return a
 }
 
 generic_doer.prototype.change_a = function(object, title) {
+    var mythis = this
     if (object == null) {
         return ""
     }
@@ -125,31 +129,33 @@ generic_doer.prototype.change_a = function(object, title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { this.do_change(object.id, true); return false; })
+        .on('click', function() { mythis.do_change(object.id, true); return false; })
         .data('photo', object.cover_photo)
         .text(title)
     return a
 }
 
 generic_doer.prototype.add_a = function(parent, title) {
+    var mythis = this
     if (title == null) {
         title = this.display_type + " add"
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { this.do_add(parent, true); return false; })
+        .on('click', function() { mythis.do_add(parent, true); return false; })
         .data('photo', parent.cover_photo)
         .text(title)
     return a
 }
 
 generic_doer.prototype.delete_a = function(object, title) {
+    var mythis = this
     if (title == null) {
         title = this.display_type + " delete"
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { this.do_delete(object.id, true); return false; })
+        .on('click', function() { mythis.do_delete(object.id, true); return false; })
         .data('photo', object.cover_photo)
         .text(title)
     return a
@@ -161,6 +167,8 @@ generic_doer.prototype.display_search_form = function(search, results) {
 }
 
 generic_doer.prototype.display_search_results = function(search, results) {
+    var mythis = this
+
     reset_display()
     var cm = $("#content-main")
     cm.html("")
@@ -176,7 +184,7 @@ generic_doer.prototype.display_search_results = function(search, results) {
 
 
     var html_page = function(page, text) {
-        return this.search_results_a(search, page, text)
+        return mythis.search_results_a(search, page, text)
     }
 
     var div = $("<div/>").appendTo(cm)
@@ -190,10 +198,9 @@ generic_doer.prototype.display_search_results = function(search, results) {
 
     append_action_links(ul)
 
-    var mythis = this
-    append_jump(object.type, object_a,
+    append_jump(this.type, this.type,
         function(ev, item) {
-            this.do_object(item.pk, true)
+            mythis.do_object(item.pk, true)
         }
     )
 
@@ -436,84 +443,3 @@ generic_doer.prototype.do_delete = function(object_id, push_history) {
 
 
 
-function album_doer() {
-    this.type = "album"
-    this.display_type = "Album"
-    this.display_plural = "Albums"
-    this.list_type = "album_list"
-    this.has_children = true
-    generic_doer.call(this)
-}
-
-album_doer.prototype = new generic_doer()
-album_doer.constructor = album_doer
-
-album_doer.prototype.get_search = function(album) {
-    return {
-        results_per_page: get_settings().items_per_page,
-        params: { album: album.id },
-    }
-}
-
-album_doer.prototype.get_new_object = function(parent) {
-    return {
-        id: null,
-        type: "album",
-        title: "",
-        description: "",
-        cover_photo: null,
-        sortname: "",
-        sortorder: "",
-        parent: parent_album,
-        children: [],
-    }
-}
-
-album_doer.prototype.get_object = function(results) {
-    return results.album
-}
-
-album_doer.prototype.get_objects = function(results) {
-    return results.albums
-}
-
-album_doer.prototype.details = function(album, div) {
-    $.ui.album_details({album: album}, div)
-}
-
-album_doer.prototype.list_menu = function(search, div) {
-    $.ui.album_list_menu(search, div)
-}
-
-
-album_doer.prototype.menu = function(album, div) {
-    $.ui.album_menu({album: album}, div)
-}
-
-album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
-    $.ui.album_list({
-        albums: albums,
-        change_mode: true,
-        page: page,
-        last_page: last_page,
-        html_page: html_page,
-    }, div)
-}
-
-album_doer.prototype.search_dialog = function(search, dialog) {
-    $.ui.album_search_dialog({ search: search }, dialog)
-}
-
-album_doer.prototype.search_details = function(search, results, dialog) {
-    $.ui.album_search_details({ search: search, results: results }, dialog)
-}
-
-album_doer.prototype.change_dialog = function(album, dialog) {
-    $.ui.album_change_dialog({ album: album }, dialog)
-}
-
-album_doer.prototype.delete_dialog = function(album, dialog) {
-    $.ui.album_delete_dialog({ album: album }, dialog)
-}
-
-albums = new album_doer()
