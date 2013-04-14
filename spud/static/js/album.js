@@ -175,7 +175,7 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
     set: function(album) {
         this.album_id = album.id
         if (album.id != null) {
-            this.set_title("Change album " + album.title)
+            this.set_title("Change album")
             this.set_description("Change album " + album.title)
         } else {
             this.set_title("Add new album")
