@@ -485,7 +485,7 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
         this.element.empty()
         if (selection.length > 0) {
             var search = {
-                params: {
+                criteria: {
                     photo: selection.join(".")
                 }
             }
