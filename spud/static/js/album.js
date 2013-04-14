@@ -10,8 +10,8 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
         this.options.button = "Search"
         this._super();
 
-        if (this.options.results != null) {
-            this.set(this.options.results)
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
         }
     },
 
@@ -44,8 +44,8 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
         this.element.addClass("infobox")
         this._super();
 
-        if (this.options.results != null) {
-            this.set(this.options.results)
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
         }
     },
 })
@@ -298,12 +298,12 @@ album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
     }, div)
 }
 
-album_doer.prototype.search_dialog = function(search, dialog) {
-    $.ui.album_search_dialog({ search: search }, dialog)
+album_doer.prototype.search_dialog = function(criteria, dialog) {
+    $.ui.album_search_dialog({ criteria: criteria }, dialog)
 }
 
-album_doer.prototype.search_details = function(search, results, dialog) {
-    $.ui.album_search_details({ search: search, results: results }, dialog)
+album_doer.prototype.search_details = function(criteria, dialog) {
+    $.ui.album_search_details({ criteria: criteria }, dialog)
 }
 
 album_doer.prototype.change_dialog = function(album, dialog) {

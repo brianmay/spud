@@ -1364,15 +1364,15 @@ function submit_photo_relation_delete(photo_relation, dialog) {
 }
 
 
-function display_photo_search_form(criteria, data) {
+function display_photo_search_form(criteria) {
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Search photos")
 
     var f = $("<form method='get' />")
 
     photo_ids = "|"
-    if (data.photo != null) {
-        photo_ids = $.map(data.photo, function(photo){ return photo.id });
+    if (criteria.photo != null) {
+        photo_ids = $.map(criteria.photo, function(photo){ return photo.id });
         photo_ids = "|" + photo_ids.join("|") + "|"
     }
     f.append(get_input_element("photo", photo_ids, "hidden"))
@@ -1389,34 +1389,34 @@ function display_photo_search_form(criteria, data) {
     var table = $("<table />")
 
     append_field(table, "first_date", "First Date")
-        .append(get_input_element("first_date", data.first_date, "text"))
+        .append(get_input_element("first_date", criteria.first_date, "text"))
 
     append_field(table, "last_date", "Last Date")
-        .append(get_input_element("last_date", data.last_date, "text"))
+        .append(get_input_element("last_date", criteria.last_date, "text"))
 
     append_field(table, "lower_rating", "Lower Rating")
-        .append(get_input_element("lower_rating", data.lower_rating, "text"))
+        .append(get_input_element("lower_rating", criteria.lower_rating, "text"))
 
     append_field(table, "upper_rating", "Upper Rating")
-        .append(get_input_element("upper_rating", data.upper_rating, "text"))
+        .append(get_input_element("upper_rating", criteria.upper_rating, "text"))
 
     append_field(table, "title", "Title")
-        .append(get_input_element("title", data.title, "text"))
+        .append(get_input_element("title", criteria.title, "text"))
 
     append_field(table, "photographer_text", "Photographer")
-        .append(get_ajax_select("photographer", 'person', data.photographer))
+        .append(get_ajax_select("photographer", 'person', criteria.photographer))
 
     append_field(table, "path", "Path")
-        .append(get_input_element("path", data.path, "text"))
+        .append(get_input_element("path", criteria.path, "text"))
 
     append_field(table, "name", "Name")
-        .append(get_input_element("name", data.name, "text"))
+        .append(get_input_element("name", criteria.name, "text"))
 
     append_field(table, "first_id", "First id")
-        .append(get_input_element("first_id", data.first_id, "text"))
+        .append(get_input_element("first_id", criteria.first_id, "text"))
 
     append_field(table, "last_id", "Last id")
-        .append(get_input_element("last_id", data.last_id, "text"))
+        .append(get_input_element("last_id", criteria.last_id, "text"))
 
     $("<div id='photo'></div>")
         .append(table)
@@ -1425,37 +1425,37 @@ function display_photo_search_form(criteria, data) {
     var table = $("<table />")
 
     append_field(table, "person_text", "Person")
-        .append(get_ajax_multiple_select("person", 'person', data.person, false))
+        .append(get_ajax_multiple_select("person", 'person', criteria.person, false))
 
     append_field(table, "person_none", "Person none")
-        .append(get_input_checkbox("person_none", data.person_none))
+        .append(get_input_checkbox("person_none", criteria.person_none))
 
     append_field(table, "place_text", "Place")
-        .append(get_ajax_select("place", 'place', data.place))
+        .append(get_ajax_select("place", 'place', criteria.place))
 
     append_field(table, "place_descendants", "Place descendants")
-        .append(get_input_checkbox("place_descendants", data.place_none))
+        .append(get_input_checkbox("place_descendants", criteria.place_none))
 
     append_field(table, "place_none", "Place none")
-        .append(get_input_checkbox("place_none", data.place_none))
+        .append(get_input_checkbox("place_none", criteria.place_none))
 
     append_field(table, "album_text", "Album")
-        .append(get_ajax_multiple_select("album", 'album', data.album, false))
+        .append(get_ajax_multiple_select("album", 'album', criteria.album, false))
 
     append_field(table, "album_descendants", "Album descendants")
-        .append(get_input_checkbox("album_descendants", data.album_descendants))
+        .append(get_input_checkbox("album_descendants", criteria.album_descendants))
 
     append_field(table, "album_none", "Album none")
-        .append(get_input_checkbox("album_none", data.album_none))
+        .append(get_input_checkbox("album_none", criteria.album_none))
 
     append_field(table, "category_text", "Category")
-        .append(get_ajax_multiple_select("category", 'category', data.category, false))
+        .append(get_ajax_multiple_select("category", 'category', criteria.category, false))
 
     append_field(table, "category_descendants", "Category descendants")
-        .append(get_input_checkbox("category_descendants", data.category_none))
+        .append(get_input_checkbox("category_descendants", criteria.category_none))
 
     append_field(table, "category_none", "Category none")
-        .append(get_input_checkbox("category_none", data.category_none))
+        .append(get_input_checkbox("category_none", criteria.category_none))
 
     $("<div id='connections'></div>")
         .append(table)
@@ -1464,10 +1464,10 @@ function display_photo_search_form(criteria, data) {
     var table = $("<table />")
 
     append_field(table, "camera_make", "Camera Make")
-        .append(get_input_element("camera_make", data.camera_make, "text"))
+        .append(get_input_element("camera_make", criteria.camera_make, "text"))
 
     append_field(table, "camera_model", "Camera Model")
-        .append(get_input_element("camera_model", data.camera_model, "text"))
+        .append(get_input_element("camera_model", criteria.camera_model, "text"))
 
     $("<div id='camera'></div>")
         .append(table)
@@ -1627,7 +1627,9 @@ function display_photo_search_results(search, results) {
     document.title = "Photo List " + (page+1) + "/" + (last_page+1) + " | Photos | Spud"
     cm.append("<h1>Photo List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
 
-    cm.append(photo_search_infobox(search, results))
+    $("<div/>")
+        .photo_search_details({ criteria: results.criteria })
+        .appendTo(cm)
 
     var html_page = function(page, text) {
         return photo_search_results_a(search, page, text)
@@ -1679,49 +1681,6 @@ function display_photo_search_results(search, results) {
                 .appendTo(ul)
         }
     }
-}
-
-
-function photo_search_infobox(search, results) {
-    var dl = $("<dl/>")
-
-    for (var i in results.criteria) {
-        c = results.criteria[i]
-
-        dd = dt_dd(dl, c.key, "")
-        $("<dt/>")
-
-        dd
-        .append(c.condition)
-        .append(" ")
-
-        var type = c.value.type
-        if (type == 'album') {
-            dd.append(albums.a(c.value))
-        } else if (type == 'category') {
-            dd.append(categorys.a(c.value))
-        } else if (type == 'place') {
-            dd.append(places.a(c.value))
-        } else if (type == 'person') {
-            dd.append(persons.a(c.value))
-        } else if (type == 'datetime') {
-            dd.append(datetimes.a(c.value))
-        } else if (type == 'photos') {
-            var sep=""
-            $.each(c.value.value, function(j, photo){ dd.append(sep); dd.append(photo_a(photo, photo.id)); sep=", " });
-        } else {
-            dd.append(escapeHTML(c.value.value))
-        }
-
-        if (c.post_text != null) {
-            dd.append(" ")
-            dd.append(escapeHTML(c.post_text))
-        }
-    }
-
-    ib = $("<div class='infobox'/>")
-    ib.append(dl)
-    return ib
 }
 
 
@@ -1956,7 +1915,7 @@ function do_photo_search_form(criteria, push_history) {
     load_photo_search_form(criteria,
         function(data) {
             hide_loading()
-            display_photo_search_form(criteria, data)
+            display_photo_search_form(data.criteria)
         },
 
         display_error

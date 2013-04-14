@@ -38,6 +38,80 @@ function get_photo_style(data) {
 }
 
 
+$.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
+    fields: {
+    },
+
+    _create: function() {
+        this.options.title = "Photo search"
+        this.options.description = "Please search for an photo."
+        this.options.button = "Search"
+        this._super();
+
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
+        }
+    },
+
+    _submit_values: function(values) {
+        criteria = {}
+
+        var v = values.q
+        if (v) { criteria.q = v }
+
+        var v = values.parent
+        if (v) { criteria.parent = v }
+
+        var search = {
+            criteria: criteria
+        }
+
+        photos.do_search_results(search, 0, true)
+        this.close()
+    },
+})
+
+
+$.widget('ui.photo_search_details',  $.ui.infobox, {
+    fields: {
+        first_id: new text_output_field("id >="),
+        last_id: new text_output_field("id <"),
+        first_date: new text_output_field("date >="),
+        last_date: new text_output_field("date <"),
+        lower_rating: new text_output_field("rating >="),
+        upper_rating: new text_output_field("rating <="),
+        title: new text_output_field("title contains"),
+        camera_make: new text_output_field("camera model"),
+        camera_model: new text_output_field("camera model"),
+        photographer: new link_output_field("photographer"),
+        place: new link_output_field("place"),
+        person: new link_list_output_field("people"),
+        album: new link_list_output_field("albums"),
+        category: new link_list_output_field("categories"),
+        photo: new link_list_output_field("photos"),
+        person_none: new text_output_field("no people"),
+        place_descendants: new text_output_field("descend places"),
+        album_descendants: new text_output_field("descend albums"),
+        category_descendants: new text_output_field("descend categories"),
+        place_none: new text_output_field("no place"),
+        album_none: new text_output_field("no albums"),
+        category_none: new text_output_field("no categories"),
+        action: new text_output_field("action"),
+        path: new text_output_field("path"),
+        name: new text_output_field("name"),
+    },
+
+    _create: function() {
+        this.element.addClass("infobox")
+        this._super();
+
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
+        }
+    },
+})
+
+
 $.widget('ui.photo_summary',  {
     _create: function() {
         this.element

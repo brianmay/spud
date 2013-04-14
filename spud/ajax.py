@@ -654,13 +654,13 @@ def logout(request):
 
 @check_errors
 def album_search_form(request):
-    resp = {}
+    criteria = {}
     search_dict = request.GET.copy()
     search_dict.pop("_", None)
 
     q = search_dict.pop("q", [None])[-1]
     if q:
-        resp['q'] = q
+        criteria['q'] = q
 
     parent = search_dict.pop("parent", [None])[-1]
     if parent:
@@ -669,14 +669,17 @@ def album_search_form(request):
             parent = spud.models.album.objects.get(pk=parent)
         except spud.models.album.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
-        resp['parent'] = _get_album(request.user, parent)
+        criteria['parent'] = _get_album(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
 
-    resp['type'] = 'album_search_form'
-    resp['can_add'] = request.user.has_perm('spud.add_album')
-    resp['session'] = _get_session(request)
+    resp = {
+        'type': 'album_search_form',
+        'criteria': criteria,
+        'can_add': request.user.has_perm('spud.add_album'),
+        'session': _get_session(request),
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -696,13 +699,13 @@ def album_search_results(request):
         raise HttpBadRequest("count is negative")
 
     album_list = spud.models.album.objects.all()
-    resp = {}
+    criteria = {}
 
     q = search_dict.pop("q", [None])[-1]
     if q:
         album_list = album_list.filter(
             Q(album__icontains=q) | Q(album_description__icontains=q))
-        resp['q'] = q
+        criteria['q'] = q
 
     parent = search_dict.pop("parent", [None])[-1]
     if parent:
@@ -712,7 +715,7 @@ def album_search_results(request):
         except spud.models.album.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         album_list = album_list.filter(parent_album=parent)
-        resp['parent'] = _get_album(request.user, parent)
+        criteria['parent'] = _get_album(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -721,15 +724,16 @@ def album_search_results(request):
     album_list = album_list[first:first+count]
     number_returned = len(album_list)
 
-    resp.update({
+    resp = {
         'type': 'album_search_results',
+        'criteria': criteria,
         'albums': [_get_album(request.user, p) for p in album_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_album'),
-    })
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -824,13 +828,13 @@ def album_finish(request, album):
 
 @check_errors
 def category_search_form(request):
-    resp = {}
+    criteria = {}
     search_dict = request.GET.copy()
     search_dict.pop("_", None)
 
     q = search_dict.pop("q", [None])[-1]
     if q:
-        resp['q'] = q
+        criteria['q'] = q
 
     parent = search_dict.pop("parent", [None])[-1]
     if parent:
@@ -839,14 +843,17 @@ def category_search_form(request):
             parent = spud.models.category.objects.get(pk=parent)
         except spud.models.category.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
-        resp['parent'] = _get_category(request.user, parent)
+        criteria['parent'] = _get_category(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
 
-    resp['type'] = 'category_search_form'
-    resp['can_add'] = request.user.has_perm('spud.add_category')
-    resp['session'] = _get_session(request)
+    resp = {
+        'type': 'category_search_form',
+        'criteria': criteria,
+        'can_add': request.user.has_perm('spud.add_category'),
+        'session': _get_session(request),
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -866,13 +873,13 @@ def category_search_results(request):
         raise HttpBadRequest("count is negative")
 
     category_list = spud.models.category.objects.all()
-    resp = {}
+    criteria = {}
 
     q = search_dict.pop("q", [None])[-1]
     if q:
         category_list = category_list.filter(
             Q(category__icontains=q) | Q(category_description__icontains=q))
-        resp['q'] = q
+        criteria['q'] = q
 
     parent = search_dict.pop("parent", [None])[-1]
     if parent:
@@ -882,7 +889,7 @@ def category_search_results(request):
         except spud.models.category.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         category_list = category_list.filter(parent_category=parent)
-        resp['parent'] = _get_category(request.user, parent)
+        criteria['parent'] = _get_category(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -891,15 +898,16 @@ def category_search_results(request):
     category_list = category_list[first:first+count]
     number_returned = len(category_list)
 
-    resp.update({
+    resp = {
         'type': 'category_search_results',
+        'criteria': criteria,
         'categorys': [_get_category(request.user, p) for p in category_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_category'),
-    })
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -995,13 +1003,13 @@ def category_finish(request, category):
 
 @check_errors
 def place_search_form(request):
-    resp = {}
+    criteria = {}
     search_dict = request.GET.copy()
     search_dict.pop("_", None)
 
     q = search_dict.pop("q", [None])[-1]
     if q:
-        resp['q'] = q
+        criteria['q'] = q
 
     parent = search_dict.pop("parent", [None])[-1]
     if parent:
@@ -1010,14 +1018,17 @@ def place_search_form(request):
             parent = spud.models.place.objects.get(pk=parent)
         except spud.models.place.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
-        resp['parent'] = _get_place(request.user, parent)
+        criteria['parent'] = _get_place(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
 
-    resp['type'] = 'place_search_form'
-    resp['can_add'] = request.user.has_perm('spud.add_place')
-    resp['session'] = _get_session(request)
+    resp = {
+        'type': 'place_search_form',
+        'criteria': criteria,
+        'can_add': request.user.has_perm('spud.add_place'),
+        'session': _get_session(request),
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1037,13 +1048,13 @@ def place_search_results(request):
         raise HttpBadRequest("count is negative")
 
     place_list = spud.models.place.objects.all()
-    resp = {}
+    criteria = {}
 
     q = search_dict.pop("q", [None])[-1]
     if q:
         place_list = place_list.filter(
             Q(title__icontains=q) | Q(address__icontains=q))
-        resp['q'] = q
+        criteria['q'] = q
 
     parent = search_dict.pop("parent", [None])[-1]
     if parent:
@@ -1053,7 +1064,7 @@ def place_search_results(request):
         except spud.models.place.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         place_list = place_list.filter(parent_place=parent)
-        resp['parent'] = _get_place(request.user, parent)
+        criteria['parent'] = _get_place(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -1062,15 +1073,16 @@ def place_search_results(request):
     place_list = place_list[first:first+count]
     number_returned = len(place_list)
 
-    resp.update({
+    resp = {
         'type': 'place_search_results',
+        'criteria': criteria,
         'places': [_get_place(request.user, p) for p in place_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_place'),
-    })
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1180,20 +1192,23 @@ def place_finish(request, place):
 
 @check_errors
 def person_search_form(request):
-    resp = {}
+    criteria = {}
     search_dict = request.GET.copy()
     search_dict.pop("_", None)
 
     q = search_dict.pop("q", [None])[-1]
     if q:
-        resp['q'] = q
+        criteria['q'] = q
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
 
-    resp['type'] = 'person_search_form'
-    resp['can_add'] = request.user.has_perm('spud.add_person')
-    resp['session'] = _get_session(request)
+    resp = {
+        'type': 'person_search_form',
+        'criteria': criteria,
+        'can_add': request.user.has_perm('spud.add_person'),
+        'session': _get_session(request),
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1213,14 +1228,14 @@ def person_search_results(request):
         raise HttpBadRequest("count is negative")
 
     person_list = spud.models.person.objects.all()
-    resp = {}
+    criteria = {}
 
     q = search_dict.pop("q", [None])[-1]
     if q:
         person_list = person_list.filter(
             Q(first_name__icontains=q) | Q(last_name__icontains=q) |
             Q(middle_name__icontains=q) | Q(called__icontains=q))
-        resp['q'] = q
+        criteria['q'] = q
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -1229,15 +1244,16 @@ def person_search_results(request):
     person_list = person_list[first:first+count]
     number_returned = len(person_list)
 
-    resp.update({
+    resp = {
         'type': 'person_search_results',
+        'criteria': criteria,
         'persons': [_get_person(request.user, p) for p in person_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_person'),
-    })
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1509,7 +1525,7 @@ def photo_relation_finish(request, photo_relation):
 
 
 def _get_search(user, search_dict):
-    criteria = []
+    criteria = {}
 
     search = Q()
     photo_list = spud.models.photo.objects.all()
@@ -1518,19 +1534,20 @@ def _get_search(user, search_dict):
 
     ld = search_dict.pop("place_descendants", ["false"])[-1]
     ld = _decode_boolean(ld)
+    if ld:
+        criteria["place_descendants"] = True
 
     ad = search_dict.pop("album_descendants", ["false"])[-1]
     ad = _decode_boolean(ad)
+    if ad:
+        criteria["album_descendants"] = True
 
     cd = search_dict.pop("category_descendants", ["false"])[-1]
     cd = _decode_boolean(cd)
+    if cd:
+        criteria["category_descendants"] = True
 
     timezone = django.conf.settings.TIME_ZONE
-
-    def add_criteria(key, condition, value, post_text=None):
-        criteria.append({
-            'key': key, 'condition': condition,
-            'value': value, 'post_text': post_text})
 
     for key in search_dict:
         value = search_dict[key]
@@ -1540,12 +1557,10 @@ def _get_search(user, search_dict):
         elif key == "timezone":
             continue
         elif key == "first_id":
-            add_criteria('id', 'is or greator then',
-                         {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(pk__gte=_decode_int(value))
         elif key == "last_id":
-            add_criteria('id', 'less then',
-                         {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(pk__lt=_decode_int(value))
         elif key == "first_date":
             try:
@@ -1553,9 +1568,8 @@ def _get_search(user, search_dict):
             except ValueError:
                 raise HttpBadRequest("Invalid date/time")
             utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-            add_criteria(
-                'date/time', 'at or later then',
-                _get_datetime(utc_value, value.utcoffset().total_seconds() / 60))
+            criteria[key] = _get_datetime(
+                utc_value, value.utcoffset().total_seconds() / 60)
             search = search & Q(datetime__gte=utc_value)
         elif key == "last_date":
             try:
@@ -1563,112 +1577,98 @@ def _get_search(user, search_dict):
             except ValueError:
                 raise HttpBadRequest("Invalid date/time")
             utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-            add_criteria(
-                'date/time', 'earlier then',
-                _get_datetime(utc_value, value.utcoffset().total_seconds() / 60))
+            criteria[key] = _get_datetime(
+                utc_value, value.utcoffset().total_seconds() / 60)
             search = search & Q(datetime__lt=utc_value)
         elif key == "lower_rating":
-            add_criteria('rating', 'higher then',
-                         {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(rating__gte=value)
         elif key == "upper_rating":
-            add_criteria('rating', 'less then',
-                         {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(rating__lte=value)
         elif key == "title":
-            add_criteria(key, 'contains',
-                         {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(title__icontains=value)
         elif key == "camera_make":
-            add_criteria(key, 'contains',
-                         {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(camera_make__icontains=value)
         elif key == "camera_model":
-            add_criteria(key, 'contains',
-                         {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(camera_model__icontains=value)
         elif key == "photographer":
             object = get_object_or_404(spud.models.person, pk=value)
-            add_criteria(key, 'is', _get_person(user, object))
+            criteria[key] = _get_person(user, object)
             search = search & Q(photographer=object)
         elif key == "place":
             object = get_object_or_404(spud.models.place, pk=value)
+            criteria[key] = _get_place(user, object)
             if ld:
-                add_criteria(key, 'is', _get_place(user, object),
-                             '(or descendants)')
                 descendants = object.get_descendants()
                 search = search & Q(location__in=descendants)
             else:
-                add_criteria(key, 'is', _get_place(user, object))
                 search = search & Q(location=object)
         elif key == "person":
             values = _decode_array(value)
+            criteria[key] = []
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.person, pk=value)
-                add_criteria(key, 'is', _get_person(user, object))
+                criteria[key].append(_get_person(user, object))
                 photo_list = photo_list.filter(persons=object)
         elif key == "album":
             values = _decode_array(value)
+            criteria[key] = []
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.album, pk=value)
+                criteria[key].append(_get_album(user, object))
                 if ad:
-                    add_criteria(key, 'is', _get_album(user, object),
-                                 '(or descendants)')
                     descendants = object.get_descendants()
                     photo_list = photo_list.filter(albums__in=descendants)
                 else:
-                    add_criteria(key, 'is', _get_album(user, object))
                     photo_list = photo_list.filter(albums=object)
         elif key == "category":
             values = _decode_array(value)
+            criteria[key] = []
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.category, pk=value)
+                criteria[key].append(_get_category(user, object))
                 if cd:
-                    add_criteria(key, 'is', _get_category(user, object),
-                                 '(or descendants)')
                     descendants = object.get_descendants()
                     photo_list = photo_list.filter(
                         categorys__in=descendants)
                 else:
-                    add_criteria(key, 'is', _get_category(user, object))
                     photo_list = photo_list.filter(categorys=object)
         elif key == "photo":
             values = _decode_array(value)
-            a = []
+            criteria[key] = []
             q = Q()
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.photo, pk=value)
-                a.append(_get_photo(user, object))
+                criteria[key].append(_get_photo(user, object))
                 q = q | Q(pk=object.pk)
-            add_criteria(key, 'is', {'type': "photos", 'value': a})
             photo_list = photo_list.filter(q)
         elif key == "place_none":
             value = _decode_boolean(value)
             if value:
-                add_criteria("location", 'is',
-                             {'type': "string", 'value': "None"})
+                criteria[key] = True
                 search = search & Q(location=None)
         elif key == "person_none":
             value = _decode_boolean(value)
             if value:
-                add_criteria("person", 'is',
-                             {'type': "string", 'value': "None"})
+                criteria[key] = True
                 search = search & Q(persons=None)
         elif key == "album_none":
             value = _decode_boolean(value)
             if value:
-                add_criteria("album", 'is',
-                             {'type': "string", 'value': "None"})
+                criteria[key] = True
                 search = search & Q(albums=None)
         elif key == "category_none":
             value = _decode_boolean(value)
             if value:
-                add_criteria("category", 'is',
-                             {'type': "string", 'value': "None"})
+                criteria[key] = True
                 search = search & Q(categorys=None)
         elif key == "action":
             if value == "none":
@@ -1676,12 +1676,12 @@ def _get_search(user, search_dict):
             else:
                 search = search & Q(action=value)
             value = spud.models.action_to_string(value)
-            add_criteria(key, 'is', {'type': "string", 'value': value})
+            criteria[key] = value
         elif key == "path":
-            add_criteria(key, 'is', {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(path=value)
         elif key == "name":
-            add_criteria(key, 'is', {'type': "string", 'value': value})
+            criteria[key] = value
             search = search & Q(name=value)
         else:
             raise HttpBadRequest("Unknown key %s" % (key))
@@ -1693,96 +1693,15 @@ def _get_search(user, search_dict):
 
 @check_errors
 def photo_search_form(request):
-    resp = {}
+    search_dict = request.GET.copy()
 
-    for key in request.GET:
-        value = request.GET[key]
+    photo_list, criteria = _get_search(request.user, search_dict)
 
-        if value == "":
-            continue
-        elif key == "_":
-            continue
-        elif key == "place_descendants":
-            resp[key] = value
-        elif key == "album_descendants":
-            resp[key] = value
-        elif key == "category_descendants":
-            resp[key] = value
-        elif key == "first_id":
-            resp[key] = value
-        elif key == "last_id":
-            resp[key] = value
-        elif key == "first_date":
-            resp[key] = value
-        elif key == "last_date":
-            resp[key] = value
-        elif key == "lower_rating":
-            resp[key] = value
-        elif key == "upper_rating":
-            resp[key] = value
-        elif key == "title":
-            resp[key] = value
-        elif key == "camera_make":
-            resp[key] = value
-        elif key == "camera_model":
-            resp[key] = value
-        elif key == "photographer":
-            value = _decode_int(value)
-            photographer = get_object_or_404(spud.models.person, pk=value)
-            resp['photographer'] = _get_person(request.user, photographer)
-        elif key == "place":
-            value = _decode_int(value)
-            place = get_object_or_404(spud.models.place, pk=value)
-            resp['place'] = _get_place(request.user, place)
-        elif key == "person":
-            values = _decode_array(value)
-            resp['person'] = []
-            for person_id in values:
-                person_id = _decode_int(person_id)
-                person = get_object_or_404(spud.models.person, pk=person_id)
-                resp['person'].append(_get_person(request.user, person))
-        elif key == "album":
-            values = _decode_array(value)
-            resp['album'] = []
-            for album_id in values:
-                album_id = _decode_int(album_id)
-                album = get_object_or_404(spud.models.album, pk=album_id)
-                resp['album'].append(_get_album(request.user, album))
-        elif key == "category":
-            values = _decode_array(request.GET['category'])
-            resp['category'] = []
-            for category_id in values:
-                category_id = _decode_int(category_id)
-                category = get_object_or_404(
-                    spud.models.category, pk=category_id)
-                resp['category'].append(_get_category(request.user, category))
-        elif key == "photo":
-            values = _decode_array(request.GET['photo'])
-            resp['photo'] = []
-            for photo_id in values:
-                photo_id = _decode_int(photo_id)
-                photo = get_object_or_404(
-                    spud.models.photo, pk=photo_id)
-                resp['photo'].append(_get_photo(request.user, photo))
-        elif key == "place_none":
-            resp[key] = value
-        elif key == "person_none":
-            resp[key] = value
-        elif key == "album_none":
-            resp[key] = value
-        elif key == "category_none":
-            resp[key] = value
-        elif key == "action":
-            resp[key] = value
-        elif key == "path":
-            resp[key] = value
-        elif key == "name":
-            resp[key] = value
-        else:
-            raise HttpBadRequest("Unknown key %s" % (key))
-
-    resp['type'] = 'search'
-    resp['session'] = _get_session(request)
+    resp = {
+        'type': 'search_form',
+        'criteria': criteria,
+        'session': _get_session(request),
+    }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 

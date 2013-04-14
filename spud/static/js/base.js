@@ -744,6 +744,23 @@ $.widget('ui.photo_list_base',  {
 })
 
 
+function object_a(object) {
+    if (object == null) {
+        return $("<span>None</span>")
+    } else if (object.type == "album") {
+        return albums.a(object)
+    } else if (object.type == "category") {
+        return categorys.a(object)
+    } else if (object.type == "place") {
+        return places.a(object)
+    } else if (object.type == "person") {
+        return persons.a(object)
+    } else {
+        return $("<span></span>")
+            .text(object.title + "(unknown)")
+    }
+}
+
 // **************
 // * INFO BOXES *
 // **************
@@ -798,19 +815,7 @@ link_output_field.prototype = new output_field()
 link_output_field.constructor = link_output_field
 
 link_output_field.prototype.set = function(output, value) {
-    if (value == null) {
-        output.text("None")
-    } else if (value.type == "album") {
-        output.html(album_a(value))
-    } else if (value.type == "category") {
-        output.html(category_a(value))
-    } else if (value.type == "place") {
-        output.html(place_a(value))
-    } else if (value.type == "person") {
-        output.html(person_a(value))
-    } else {
-        output.text(value.title)
-    }
+    output.html(object_a(value))
 }
 
 // define html_output_field
@@ -841,9 +846,40 @@ html_list_output_field.prototype.create = function(id) {
 html_list_output_field.prototype.set = function(output, value) {
     output.empty()
 
+    if (value==null) {
+        return
+    }
+
     $.each(value, function(i, item){
         $("<li></li>")
             .append(item)
+            .appendTo(output)
+    })
+}
+
+// define link_list_output_field
+function link_list_output_field(title) {
+    output_field.call(this, title)
+}
+
+
+link_list_output_field.prototype = new output_field()
+link_list_output_field.constructor = link_list_output_field
+
+link_list_output_field.prototype.create = function(id) {
+    return $('<ul />')
+}
+
+link_list_output_field.prototype.set = function(output, value) {
+    output.empty()
+
+    if (value==null) {
+        return
+    }
+
+    $.each(value, function(i, item){
+        $("<li></li>")
+            .append(object_a(item))
             .appendTo(output)
     })
 }
@@ -932,6 +968,11 @@ $.widget('ui.infobox', {
         this.dt[id].toggle(this.fields[id].show(value))
         this.dd[id].toggle(this.fields[id].show(value))
         this.fields[id].set(output, value)
+    },
+
+    toggle_field: function(id, show) {
+        this.dt[id].toggle(show)
+        this.dd[id].toggle(show)
     },
 
     set_edit_field: function(id, value, can_change, a) {

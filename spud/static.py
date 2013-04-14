@@ -51,7 +51,7 @@ def photo_detail(request, photo_id):
         except ValueError:
             n = 0
 
-        js = json.dumps({'params': query})
+        js = json.dumps({'criteria': query})
         return render_to_response('html/static.html', {
             'title': 'Photo detail',
             'onload': "do_photo_search_item(%s, %d, %d)" % (js, n, photo_id),
@@ -71,7 +71,7 @@ def album_search_results(request):
     except ValueError:
         page = 0
 
-    js = json.dumps({'params': query})
+    js = json.dumps({'criteria': query})
     return render_to_response('html/static.html', {
         'title': 'Person results',
         'onload': "albums.do_search_results(%s, %d)" % (js, page),
@@ -94,7 +94,7 @@ def category_search_results(request):
     except ValueError:
         page = 0
 
-    js = json.dumps({'params': query})
+    js = json.dumps({'criteria': query})
     return render_to_response('html/static.html', {
         'title': 'Category results',
         'onload': "categorys.do_search_results(%s, %d)" % (js, page),
@@ -117,7 +117,7 @@ def place_search_results(request):
     except ValueError:
         page = 0
 
-    js = json.dumps({'params': query})
+    js = json.dumps({'criteria': query})
     return render_to_response('html/static.html', {
         'title': 'Place results',
         'onload': "places.do_search_results(%s, %d)" % (js, page),
@@ -140,7 +140,7 @@ def person_search_results(request):
     except ValueError:
         page = 0
 
-    js = json.dumps({'params': query})
+    js = json.dumps({'criteria': query})
     return render_to_response('html/static.html', {
         'title': 'Person results',
         'onload': "persons.do_search_results(%s, %d)" % (js, page),
@@ -164,7 +164,7 @@ def photo_search_results(request):
         except ValueError:
             n = 0
 
-        js = json.dumps({'params': query})
+        js = json.dumps({'criteria': query})
         return render_to_response('html/static.html', {
             'title': 'Photo detail',
             'onload': "do_photo_search_item(%s, %d, %s)" % (js, n, "null"),
@@ -177,7 +177,7 @@ def photo_search_results(request):
         except ValueError:
             page = 0
 
-        js = json.dumps({'params': query})
+        js = json.dumps({'criteria': query})
         return render_to_response('html/static.html', {
             'title': 'Photo search results',
             'onload': "do_photo_search_results(%s, %d)" % (js, page),
