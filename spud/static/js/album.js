@@ -258,7 +258,7 @@ album_doer.prototype.get_new_object = function(parent) {
         cover_photo: null,
         sortname: "",
         sortorder: "",
-        parent: parent_album,
+        parent: parent,
         children: [],
     }
 }
