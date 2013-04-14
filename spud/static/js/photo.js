@@ -90,7 +90,7 @@ $.widget('ui.image', {
 
     set_loading: function() {
         this._clear()
-        this.element.attr("src", media_url("img/ajax-seter.gif"))
+        this.element.attr("src", media_url("img/ajax-loader.gif"))
     },
 
     resize: function(enlarge) {

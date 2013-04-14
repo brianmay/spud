@@ -534,6 +534,21 @@ function parse_form_string(string) {
 // * EVENTS, ETC *
 // ***************
 
+function get_doer(type) {
+    if (type == "album") {
+        return albums
+    } else if (type == "category") {
+        return catgorys
+    } else if (type == "place") {
+        return places
+    } else if (type == "persons") {
+        return persons
+    } else {
+        display_error("We stuffed up")
+        return null
+    }
+}
+
 window.onpopstate = function(event) {
     var state=event.state
     $("#dialog").dialog("close")
@@ -543,6 +558,10 @@ window.onpopstate = function(event) {
             do_root(false)
         } else if (state.type == 'display_photo') {
             do_photo(state.photo_id, false)
+        } else if (state.type == 'display_search_results') {
+            get_doer(state.object_type).do_search_results(state.search, state.page, false)
+        } else if (state.type == 'display') {
+            get_doer(state.object_type).do(state.object_id, false)
         } else if (state.type == 'display_album_search_results') {
             do_album_search_results(state.search, state.page, false)
         } else if (state.type == 'display_album') {
