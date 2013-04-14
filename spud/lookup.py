@@ -29,7 +29,7 @@ def format_match(object, photo=None, description=None):
     result = []
 
     if photo is None:
-        photo = object.get_cover_photo()
+        photo = object.cover_photo
 
     if photo is not None:
         web = webs.photo_web()
