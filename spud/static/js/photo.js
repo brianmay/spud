@@ -316,7 +316,7 @@ $.widget('ui.photo_slideshow',  {
             .appendTo(this.element)
 
         this.img = $("<img />")
-            .image()
+            .image({size: get_settings().click_size})
             .appendTo(this.pd)
 
         if (this.options.photo != null) {
@@ -335,7 +335,7 @@ $.widget('ui.photo_slideshow',  {
 
         var img = this.img
         img
-            .image("set", photo, get_settings().click_size)
+            .image("set", photo)
             .image("resize", true)
 
         $(window).off("resize")
