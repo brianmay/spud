@@ -219,8 +219,16 @@ function get_doer(type) {
     }
 }
 
+function close_all_dialog() {
+    close = $("#dialog").data("close")
+    if (close != null) {
+        close()
+    }
+}
+
 window.onpopstate = function(event) {
     var state=event.state
+    close_all_dialog()
     if (state != null) {
 //        alert("location: " + document.location + ", state: " + JSON.stringify(event.state));
         if (state.type == 'root') {
@@ -944,9 +952,7 @@ function photo_change_keyboard_event(ev, photo, search_criteria, number_results)
     if (key <'A' || key > 'Z')
         return true
 
-    if ($("#dialog").length > 0)
-       return true
-
+    close_all_dialog()
 
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Choose operation")
@@ -1284,8 +1290,7 @@ function submit_change_photo_attribute(search_criteria, updates, number_results,
         criteria: search_criteria
     }
 
-    if ($("#dialog").length > 0)
-        return
+    close_all_dialog()
 
     display_loading()
     load_photo_search_change(
@@ -1913,8 +1918,7 @@ function do_photo_relation_delete(photo_relation_id, push_history) {
 
 
 function do_photo_search_form(criteria, push_history) {
-    if ($("#dialog").length > 0)
-        return
+    close_all_dialog()
 
     display_loading()
     load_photo_search_form(criteria,
@@ -1981,8 +1985,7 @@ function do_photo_search_item(search, n, photo_id, push_history) {
 }
 
 function do_settings_form(push_history) {
-    if ($("#dialog").length > 0)
-        return
+    close_all_dialog()
 
     display_loading()
     load_settings(

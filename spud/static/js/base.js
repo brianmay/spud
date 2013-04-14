@@ -1178,6 +1178,8 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         var mythis = this
         var options = this.options
 
+        this.element.data("close", function() { mythis.close() })
+
         this.description = $("<p/>")
             .appendTo(this.element)
 

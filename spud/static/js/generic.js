@@ -336,8 +336,7 @@ generic_doer.prototype.display_delete = function(object, dialog) {
 
 generic_doer.prototype.do_search_form = function(criteria, push_history) {
     var mythis = this
-    if ($("#dialog").length > 0)
-        return
+    close_all_dialog()
 
     display_loading()
     this.load_search_form(criteria,
@@ -401,8 +400,7 @@ generic_doer.prototype.do = function(object_id, push_history) {
 
 generic_doer.prototype.do_change = function(object_id, push_history) {
     var mythis = this
-    if ($("#dialog").length > 0)
-        return
+    close_all_dialog()
 
     display_loading()
     this.load(object_id,
@@ -417,8 +415,7 @@ generic_doer.prototype.do_change = function(object_id, push_history) {
 
 
 generic_doer.prototype.do_add = function(parent, push_history) {
-    if ($("#dialog").length > 0)
-        return
+    close_all_dialog()
 
     this.display_change(
         this.get_new_object(parent)
@@ -427,8 +424,7 @@ generic_doer.prototype.do_add = function(parent, push_history) {
 
 
 generic_doer.prototype.do_delete = function(object_id, push_history) {
-    if ($("#dialog").length > 0)
-        return
+    close_all_dialog()
 
     var mythis = this
     display_loading()
