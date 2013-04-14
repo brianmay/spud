@@ -116,7 +116,7 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
         var search = { criteria: { album: album.id }}
 
         this.add_item(photo_search_results_a(search, 0, "Show Photos"))
-        this.add_item(photo_search_form_a(search))
+        this.add_item(photo_search_form_a(search.criteria))
         this.add_item(albums.search_form_a({}))
 
         if (change_mode) {
@@ -147,7 +147,7 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
 
     set: function(search, change_mode) {
         this.element.empty()
-        this.add_item(albums.search_form_a(search))
+        this.add_item(albums.search_form_a(search.criteria))
         return this
     },
 })

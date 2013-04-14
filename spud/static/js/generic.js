@@ -21,10 +21,10 @@ generic_doer.prototype.url = function(object) {
 }
 
 
-generic_doer.prototype.load_search_form = function(search, success, error) {
+generic_doer.prototype.load_search_form = function(criteria, success, error) {
     ajax({
         url: "/a/" + this.type + "/form/",
-        data: search.criteria,
+        data: criteria,
         success: success,
         error: error,
     })
@@ -78,14 +78,14 @@ generic_doer.prototype.load_delete = function(object_id, success, error) {
 }
 
 
-generic_doer.prototype.search_form_a = function(search, title) {
+generic_doer.prototype.search_form_a = function(criteria, title) {
     var mythis = this
     if (title == null) {
         title = this.display_type + " search"
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { mythis.do_search_form(search, true); return false; })
+        .on('click', function() { mythis.do_search_form(criteria, true); return false; })
         .text(title)
     return a
 }
@@ -160,7 +160,7 @@ generic_doer.prototype.delete_a = function(object, title) {
     return a
 }
 
-generic_doer.prototype.display_search_form = function(search, results) {
+generic_doer.prototype.display_search_form = function(results) {
     var dialog = $("<div id='dialog'></div>")
     this.search_dialog(results, dialog)
 }
@@ -333,17 +333,13 @@ generic_doer.prototype.display_delete = function(object, dialog) {
 }
 
 
-generic_doer.prototype.do_search_form = function(search, push_history) {
-    if (search.criteria == null) {
-        search.criteria = {}
-    }
-
+generic_doer.prototype.do_search_form = function(criteria, push_history) {
     var mythis = this
     display_loading()
-    this.load_search_form(search,
+    this.load_search_form(criteria,
         function(data) {
             hide_loading()
-            mythis.display_search_form(search, data)
+            mythis.display_search_form(data)
         },
 
         display_error

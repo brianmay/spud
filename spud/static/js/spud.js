@@ -110,13 +110,13 @@ function photo_relation_delete_a(photo_relation, title) {
 }
 
 
-function photo_search_form_a(search, title) {
+function photo_search_form_a(criteria, title) {
     if (title == null) {
         title = "Photo search"
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { do_photo_search_form(search, true); return false; })
+        .on('click', function() { do_photo_search_form(criteria, true); return false; })
         .text(title)
     return a
 }
@@ -1364,9 +1364,7 @@ function submit_photo_relation_delete(photo_relation, dialog) {
 }
 
 
-function display_photo_search_form(search, data) {
-    var criteria = search.criteria
-
+function display_photo_search_form(criteria, data) {
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Search photos")
 
@@ -1649,7 +1647,7 @@ function display_photo_search_results(search, results) {
     var ul = $('<ul class="menu"/>')
 
     $("<li/>")
-        .append(photo_search_form_a(search))
+        .append(photo_search_form_a(search.criteria))
         .appendTo(ul)
 
     append_action_links(ul)
@@ -1953,16 +1951,12 @@ function do_photo_relation_delete(photo_relation_id, push_history) {
 }
 
 
-function do_photo_search_form(search, push_history) {
-    if (search.criteria == null) {
-        search.criteria = {}
-    }
-
+function do_photo_search_form(criteria, push_history) {
     display_loading()
-    load_photo_search_form(search,
+    load_photo_search_form(criteria,
         function(data) {
             hide_loading()
-            display_photo_search_form(search, data)
+            display_photo_search_form(criteria, data)
         },
 
         display_error

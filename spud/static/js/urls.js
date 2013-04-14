@@ -162,10 +162,10 @@ function load_photo_relation_delete(photo_relation_id, success, error) {
 }
 
 
-function load_photo_search_form(search, success, error) {
+function load_photo_search_form(criteria, success, error) {
     ajax({
         url: '/a/photo/form/',
-        data: search.criteria,
+        data: criteria,
         success: success,
         error: error,
     })
