@@ -120,15 +120,15 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
         this.add_item(albums.search_form_a({}))
 
         if (album.can_add) {
-            this.add_item(album_add_a(album))
+            this.add_item(albums.add_a(album))
         }
 
         if (album.can_change) {
-            this.add_item(album_change_a(album))
+            this.add_item(albums.change_a(album))
         }
 
         if (album.can_delete) {
-            this.add_item(album_delete_a(album))
+            this.add_item(albums.delete_a(album))
         }
 
         return this
