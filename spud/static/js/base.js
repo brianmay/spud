@@ -534,9 +534,11 @@ $.widget('ui.paginator', {
 
         if (page > 0) {
             this.element.append(html_page(page-1, '<').attr("accesskey", "p"))
+            this.element.append(" ")
         }
         if (page < last_page) {
             this.element.append(html_page(page+1, '>').attr("accesskey", "n"))
+            this.element.append(" ")
         }
 
         var ON_EACH_SIDE = 3
