@@ -163,7 +163,7 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
     },
 
     _create: function() {
-        this.options.title = "Change Album"
+        this.options.title = "Change album"
         this.options.button = "Save"
         this._super();
 
@@ -175,8 +175,10 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
     set: function(album) {
         this.album_id = album.id
         if (album.id != null) {
-            this.set_description("Change " + album.title)
+            this.set_title("Change album " + album.title)
+            this.set_description("Change album " + album.title)
         } else {
+            this.set_title("Add new album")
             this.set_description("Add new album")
         }
         return this._super(album);
