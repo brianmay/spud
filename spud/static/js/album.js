@@ -113,10 +113,10 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
     set: function(album, change_mode) {
         this.element.empty()
 
-        var search = { criteria: { album: album.id }}
+        var criteria = { album: album.id }
 
-        this.add_item(photo_search_results_a(search, 0, "Show Photos"))
-        this.add_item(photo_search_form_a(search.criteria))
+        this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show Photos"))
+        this.add_item(photo_search_form_a(criteria))
         this.add_item(albums.search_form_a({}))
 
         if (change_mode) {
