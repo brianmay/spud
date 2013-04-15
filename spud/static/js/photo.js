@@ -392,14 +392,14 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         view: new p_output_field("View"),
         comment: new p_output_field("Comment"),
         name: new text_output_field("File"),
-        place: new html_output_field("Place"),
-        albums: new html_list_output_field("Albums"),
-        categorys: new html_list_output_field("Categories"),
+        place: new link_output_field("Place"),
+        albums: new link_list_output_field("Albums"),
+        categorys: new link_list_output_field("Categories"),
         utctime: new link_output_field("Date & time"),
         localtime: new link_output_field("Date & time"),
-        photographer: new html_output_field("Photographer"),
+        photographer: new link_output_field("Photographer"),
         rating: new text_output_field("Rating"),
-        related: new text_output_field("Related"),
+        related: new html_list_output_field("Related"),
         action: new text_output_field("Action"),
     },
 
@@ -441,17 +441,17 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         this.set_value("name", photo.name)
 
         this.set_edit_value(
-            "place", places.a(photo.place),
+            "place", photo.place,
             can_change, photo_change_a(photo, display_change_photo_place, "[edit]")
         )
 
         this.set_edit_value(
-            "albums", $.map(photo.albums, function(album) { return albums.a(album); } ),
+            "albums", photo.albums,
             can_change, photo_change_a(photo, display_change_photo_albums, "[edit]")
         )
 
         this.set_edit_value(
-            "categorys", $.map(photo.categorys, function(category) { return categorys.a(category); } ),
+            "categorys", photo.categorys,
             can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]")
         )
 
@@ -466,7 +466,7 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         )
 
         this.set_edit_value(
-            "photographer", persons.a(photo.photographer),
+            "photographer", photo.photographer,
             can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]")
         )
 
