@@ -494,13 +494,15 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
             mythis.close()
         }
 
-        var mythis = this
-        $.each(this.fields, function(id, field){
-            mythis.add_field(id, field)
-        })
+        this.fields = {}
+        if (options.fields != null) {
+            this.add_fields(options.fields)
+            delete options.fields
+        }
 
-        if (this.options.initial != null) {
-            this.set(this.options.initial)
+        if (options.initial != null) {
+            this.set(options.initial)
+            delete options.initial
         }
 
         options.width = 400
@@ -578,6 +580,18 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         var html = field.to_html(id)
         this.table.append(html)
         this.fields[id] = field
+    },
+
+    add_fields: function(fields) {
+        var mythis = this
+        $.each(fields, function(id, field){
+            mythis.add_field(id, field)
+        })
+    },
+
+    remove_all_fields: function() {
+        this.fields = []
+        this.f.empty()
     },
 
     set_value: function(id, value) {

@@ -208,7 +208,9 @@ photo_output_field.prototype.destroy = function() {
 
 $.widget('ui.infobox', {
     _create: function(){
-        if (this.options.title != null) {
+        var options = this.options
+
+        if (options.title != null) {
             $("<h2></h2")
                 .text(this.options.title)
                 .appendTo(this.element)
@@ -217,10 +219,16 @@ $.widget('ui.infobox', {
         this.dl = $("<dl></dl>")
             .appendTo(this.element)
 
-        var mythis = this
-        $.each(this.fields, function(id, field){
-            mythis.add_field(id, field)
-        })
+        this.fields = {}
+        if (options.fields != null) {
+            this.add_fields(options.fields)
+            delete options.fields
+        }
+
+        if (options.initial != null) {
+            this.set(options.initial)
+            delete options.initial
+        }
 
         this._super()
     },
@@ -245,6 +253,18 @@ $.widget('ui.infobox', {
         var html = field.to_html(id)
         this.dl.append(html)
         this.fields[id] = field
+    },
+
+    add_fields: function(fields) {
+        var mythis = this
+        $.each(fields, function(id, field){
+            mythis.add_field(id, field)
+        })
+    },
+
+    remove_all_fields: function() {
+        this.fields = []
+        this.dl.empty()
     },
 
     set_value: function(id, value) {

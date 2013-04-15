@@ -57,9 +57,6 @@ function get_photo_style(data) {
 
 
 $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
-    fields: {
-    },
-
     _create: function() {
         this.options.title = "Photo search"
         this.options.description = "Please search for an photo."
@@ -252,35 +249,35 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
 
 
 $.widget('ui.photo_search_details',  $.ui.infobox, {
-    fields: {
-        first_id: new text_output_field("id >="),
-        last_id: new text_output_field("id <"),
-        first_date: new datetime_output_field("date >="),
-        last_date: new datetime_output_field("date <"),
-        lower_rating: new text_output_field("rating >="),
-        upper_rating: new text_output_field("rating <="),
-        title: new text_output_field("title contains"),
-        camera_make: new text_output_field("camera model"),
-        camera_model: new text_output_field("camera model"),
-        photographer: new link_output_field("photographer"),
-        place: new link_output_field("place"),
-        person: new link_list_output_field("people"),
-        album: new link_list_output_field("albums"),
-        category: new link_list_output_field("categories"),
-        photo: new link_list_output_field("photos"),
-        person_none: new text_output_field("no people"),
-        place_descendants: new text_output_field("descend places"),
-        album_descendants: new text_output_field("descend albums"),
-        category_descendants: new text_output_field("descend categories"),
-        place_none: new text_output_field("no place"),
-        album_none: new text_output_field("no albums"),
-        category_none: new text_output_field("no categories"),
-        action: new text_output_field("action"),
-        path: new text_output_field("path"),
-        name: new text_output_field("name"),
-    },
-
     _create: function() {
+        this.options.fields = {
+            first_id: new text_output_field("id >="),
+            last_id: new text_output_field("id <"),
+            first_date: new datetime_output_field("date >="),
+            last_date: new datetime_output_field("date <"),
+            lower_rating: new text_output_field("rating >="),
+            upper_rating: new text_output_field("rating <="),
+            title: new text_output_field("title contains"),
+            camera_make: new text_output_field("camera model"),
+            camera_model: new text_output_field("camera model"),
+            photographer: new link_output_field("photographer"),
+            place: new link_output_field("place"),
+            person: new link_list_output_field("people"),
+            album: new link_list_output_field("albums"),
+            category: new link_list_output_field("categories"),
+            photo: new link_list_output_field("photos"),
+            person_none: new text_output_field("no people"),
+            place_descendants: new text_output_field("descend places"),
+            album_descendants: new text_output_field("descend albums"),
+            category_descendants: new text_output_field("descend categories"),
+            place_none: new text_output_field("no place"),
+            album_none: new text_output_field("no albums"),
+            category_none: new text_output_field("no categories"),
+            action: new text_output_field("action"),
+            path: new text_output_field("path"),
+            name: new text_output_field("name"),
+        }
+
         this.element.addClass("infobox")
         this._super();
 
@@ -386,24 +383,24 @@ $.widget('ui.photo_image',  {
 
 
 $.widget('ui.photo_details',  $.ui.infobox, {
-    fields: {
-        title: new text_output_field("Title"),
-        description: new p_output_field("Description"),
-        view: new p_output_field("View"),
-        comment: new p_output_field("Comment"),
-        name: new text_output_field("File"),
-        place: new link_output_field("Place"),
-        albums: new link_list_output_field("Albums"),
-        categorys: new link_list_output_field("Categories"),
-        utctime: new link_output_field("Date & time"),
-        localtime: new link_output_field("Date & time"),
-        photographer: new link_output_field("Photographer"),
-        rating: new text_output_field("Rating"),
-        related: new html_list_output_field("Related"),
-        action: new text_output_field("Action"),
-    },
-
     _create: function() {
+        this.options.fields = {
+            title: new text_output_field("Title"),
+            description: new p_output_field("Description"),
+            view: new p_output_field("View"),
+            comment: new p_output_field("Comment"),
+            name: new text_output_field("File"),
+            place: new link_output_field("Place"),
+            albums: new link_list_output_field("Albums"),
+            categorys: new link_list_output_field("Categories"),
+            utctime: new link_output_field("Date & time"),
+            localtime: new link_output_field("Date & time"),
+            photographer: new link_output_field("Photographer"),
+            rating: new text_output_field("Rating"),
+            related: new html_list_output_field("Related"),
+            action: new text_output_field("Action"),
+        },
+
         this.element
             .addClass("photo_details_block")
         this.options.title = "Photo details"
@@ -494,18 +491,18 @@ $.widget('ui.photo_details',  $.ui.infobox, {
 
 
 $.widget('ui.camera_details',  $.ui.infobox, {
-    fields: {
-        camera_make: new text_output_field("Camera make"),
-        camera_model: new text_output_field("Camera model"),
-        flash_used: new text_output_field("Flash"),
-        focal_length: new text_output_field("Focal Length"),
-        exposure: new text_output_field("Exposure"),
-        aperture: new text_output_field("Aperture"),
-        iso_equiv: new text_output_field("ISO"),
-        metering_mode: new text_output_field("Metering mode"),
-    },
-
     _create: function() {
+        this.options.fields = {
+            camera_make: new text_output_field("Camera make"),
+            camera_model: new text_output_field("Camera model"),
+            flash_used: new text_output_field("Flash"),
+            focal_length: new text_output_field("Focal Length"),
+            exposure: new text_output_field("Exposure"),
+            aperture: new text_output_field("Aperture"),
+            iso_equiv: new text_output_field("ISO"),
+            metering_mode: new text_output_field("Metering mode"),
+        }
+
         this.element
             .addClass("camera_details_block")
         this.options.title = "Camera details"
@@ -731,9 +728,6 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
 
 
 $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
-    fields: {
-    },
-
     _create: function() {
         this.options.title = "Change photo "+this.options.title
         this.options.description = "Please change photo's " + this.options.title + "."
@@ -765,7 +759,9 @@ $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
 $.widget('ui.change_photo_title_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "title"
-        this.fields.title = new text_input_field("Title", false)
+        this.options.fields = {
+            title: new text_input_field("Title", false)
+        }
         this._super();
     },
 
@@ -779,7 +775,9 @@ $.widget('ui.change_photo_title_dialog',  $.ui.change_photo_attribute_dialog, {
 $.widget('ui.change_photo_description_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "description"
-        this.fields.description = new p_input_field("Description", false)
+        this.options.fields = {
+            description: new p_input_field("Description", false)
+        }
         this._super();
     },
 
@@ -792,7 +790,9 @@ $.widget('ui.change_photo_description_dialog',  $.ui.change_photo_attribute_dial
 $.widget('ui.change_photo_view_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "view"
-        this.fields.view = new p_input_field("View", false)
+        this.options.fields = {
+            view: new p_input_field("View", false)
+        }
         this._super();
     },
 
@@ -806,7 +806,9 @@ $.widget('ui.change_photo_view_dialog',  $.ui.change_photo_attribute_dialog, {
 $.widget('ui.change_photo_comment_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "comment"
-        this.fields.comment = new p_input_field("Comment", false)
+        this.options.fields = {
+            comment: new p_input_field("Comment", false)
+        }
         this._super();
     },
 

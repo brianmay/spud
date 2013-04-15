@@ -17,12 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
-    fields: {
-        q: new text_input_field("Search for", false),
-        parent: new ajax_select_field("Parent album", "album", false),
-    },
 
     _create: function() {
+        this.options.fields = {
+            q: new text_input_field("Search for", false),
+            parent: new ajax_select_field("Parent album", "album", false),
+        }
         this.options.title = "Search albums"
         this.options.description = "Please search for an album."
         this.options.button = "Search"
@@ -53,12 +53,11 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
 
 
 $.widget('ui.album_search_details',  $.ui.infobox, {
-    fields: {
-        'q': new text_output_field("Search for"),
-        'parent': new link_output_field("Album parent"),
-    },
-
     _create: function() {
+        this.options.fields = {
+            'q': new text_output_field("Search for"),
+            'parent': new link_output_field("Album parent"),
+        }
         this.element.addClass("infobox")
         this._super();
 
@@ -71,17 +70,14 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
 
 
 $.widget('ui.album_details',  $.ui.infobox, {
-    fields: {
-        'title': new text_output_field("Title"),
-        'cover_photo': new photo_output_field("Photo", null),
-        'sortname': new text_output_field("Sort Name"),
-        'sortorder': new text_output_field("Sort Order"),
-        'description': new p_output_field("Description"),
-    },
-
     _create: function() {
-        this.fields['cover_photo'].size = get_settings().view_size
-        this.element.addClass("infobox")
+        this.options.fields = {
+            'title': new text_output_field("Title"),
+            'cover_photo': new photo_output_field("Photo", get_settings().view_size),
+            'sortname': new text_output_field("Sort Name"),
+            'sortorder': new text_output_field("Sort Order"),
+            'description': new p_output_field("Description"),
+        }
         this._super();
 
         if (this.options.album != null) {
@@ -172,16 +168,16 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
 
 
 $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
-    fields: {
-        title: new text_input_field("Title", true),
-        description: new p_input_field("Description", false),
-        cover_photo: new photo_select_field("Cover Photo", false),
-        sortname: new text_input_field("Sort Name", false),
-        sortorder: new text_input_field("Sort Order", false),
-        parent: new ajax_select_field("Parent", "album", false),
-    },
-
     _create: function() {
+        this.options.fields = {
+            title: new text_input_field("Title", true),
+            description: new p_input_field("Description", false),
+            cover_photo: new photo_select_field("Cover Photo", false),
+            sortname: new text_input_field("Sort Name", false),
+            sortorder: new text_input_field("Sort Order", false),
+            parent: new ajax_select_field("Parent", "album", false),
+        }
+
         this.options.title = "Change album"
         this.options.button = "Save"
         this._super();
@@ -221,9 +217,6 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
 
 
 $.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
-    fields: {
-    },
-
     _create: function() {
         this.options.title = "Delete album"
         this.options.button = "Delete"
