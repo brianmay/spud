@@ -1380,7 +1380,9 @@ function submit_photo_relation_delete(photo_relation, dialog) {
 
 function display_photo_search_form(criteria) {
     var dialog = $("<div id='dialog'></div>")
-        .attr('title', "Search photos")
+        .photo_search_dialog({ criteria: criteria })
+
+    return
 
     var f = $("<form method='get' />")
 

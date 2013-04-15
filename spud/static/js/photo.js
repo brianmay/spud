@@ -66,26 +66,187 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
         this.options.button = "Search"
         this._super();
 
+        var old_table = this.table
+
+        var tabs = $("<div></div>")
+
+        $("<ul></ul>")
+            .append("<li><a href='#photo'>Photo</a></li>")
+            .append("<li><a href='#connections'>Connections</a></li>")
+            .append("<li><a href='#camera'>Camera</a></li>")
+            .appendTo(tabs)
+
+        var table = $("<table />")
+        this.table = table
+
+        this.add_field("first_date", new text_input_field("First date", true))
+        this.add_field("last_date", new text_input_field("Last date", true))
+        this.add_field("lower_rating", new integer_input_field("Upper rating", true))
+        this.add_field("upper_rating", new integer_input_field("Lower rating", true))
+        this.add_field("title", new text_input_field("Title", true))
+        this.add_field("photographer", new ajax_select_field("Photographer", "person", true))
+        this.add_field("path", new text_input_field("Path", true))
+        this.add_field("name", new text_input_field("Name", true))
+        this.add_field("first_id", new integer_input_field("First id", true))
+        this.add_field("last_id", new integer_input_field("Last id", true))
+
+        $("<div id='photo'></div>")
+            .append(table)
+            .appendTo(tabs)
+
+        var table = $("<table />")
+        this.table = table
+
+        this.add_field("person", new ajax_select_multiple_field("People", "person", true))
+        this.add_field("person_none", new boolean_input_field("No people", true))
+
+        this.add_field("place", new ajax_select_field("Place", "place", true))
+        this.add_field("place_descendants", new boolean_input_field("Descend places", true))
+        this.add_field("place_none", new boolean_input_field("No places", true))
+
+        this.add_field("album", new ajax_select_multiple_field("Albums", "album", true))
+        this.add_field("album_descendants", new boolean_input_field("Descend albums", true))
+        this.add_field("album_none", new boolean_input_field("No albums", true))
+
+        this.add_field("category", new ajax_select_multiple_field("Categories", "category", true))
+        this.add_field("category_descendants", new boolean_input_field("Descend categories", true))
+        this.add_field("category_none", new boolean_input_field("No categories", true))
+
+        $("<div id='connections'></div>")
+            .append(table)
+            .appendTo(tabs)
+
+        var table = $("<table />")
+        this.table = table
+
+        this.add_field("camera_make", new text_input_field("Camera Make", true))
+        this.add_field("camera_model", new text_input_field("Camera Model", true))
+
+        $("<div id='camera'></div>")
+            .append(table)
+            .appendTo(tabs)
+
+        tabs.tabs()
+
+        old_table.replaceWith(tabs)
+
         if (this.options.criteria != null) {
             this.set(this.options.criteria)
         }
     },
 
+    set: function(values) {
+        if (values.photo) {
+            this.photos = values.photo
+        }
+        this._super(values);
+    },
+
     _submit_values: function(values) {
-        criteria = {}
+        var criteria = { }
 
-        var v = values.q
-        if (v) { criteria.q = v }
-
-        var v = values.parent
-        if (v) { criteria.parent = v }
-
-        var search = {
-            criteria: criteria
+        if (this.photos) {
+            criteria['photo'] = this.photos
         }
 
-        photos.do_search_results(search, 0, true)
+        if (values.first_date) {
+            criteria['first_date'] = values.first_date
+        }
+
+        if (values.last_date) {
+            criteria['last_date'] = values.last_date
+        }
+
+        if (values.lower_rating) {
+            criteria['lower_rating'] = values.lower_rating
+        }
+
+        if (values.upper_rating) {
+            criteria['upper_rating'] = values.upper_rating
+        }
+
+        if (values.title) {
+            criteria['title'] = values.title
+        }
+
+        if (values.photographer) {
+            criteria['photographer'] = values.photographer
+        }
+
+        if (values.person.length > 0) {
+            criteria['person'] = values.person.join(".")
+        }
+
+        if (values.person_none) {
+            criteria['person_none'] = "true"
+        }
+
+        if (values.place) {
+            criteria['place'] = values.place
+        }
+
+        if (values.place_descendants) {
+            criteria['place_descendants'] = "true"
+        }
+
+        if (values.place_none) {
+            criteria['place_none'] = "true"
+        }
+
+        if (values.album.length > 0) {
+            criteria['album'] = values.album.join(".")
+        }
+
+        if (values.album_descendants) {
+            criteria['album_descendants'] = "true"
+        }
+
+        if (values.album_none) {
+            criteria['album_none'] = "true"
+        }
+
+        if (values.category.length > 0) {
+            criteria['category'] = values.category.join(".")
+        }
+
+        if (values.category_descendants) {
+            criteria['category_descendants'] = "true"
+        }
+
+        if (values.category_none) {
+            criteria['category_none'] = "true"
+        }
+
+        if (values.path) {
+            criteria['path'] = values.path
+        }
+
+        if (values.name) {
+            criteria['name'] = values.name
+        }
+
+        if (values.camera_make) {
+            criteria['camera_make'] = values.camera_make
+        }
+
+        if (values.camera_model) {
+            criteria['camera_model'] = values.camera_model
+        }
+
+        if (values.first_id) {
+            criteria['first_id'] = values.first_id
+        }
+
+        if (values.last_id) {
+            criteria['last_id'] = values.last_id
+        }
+
+        var search = {
+            criteria: criteria,
+        }
+
         this.close()
+        do_photo_search_results(search, 0, true)
     },
 })
 

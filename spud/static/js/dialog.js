@@ -43,7 +43,7 @@ input_field.prototype.to_html = function(id) {
         .append(td)
 }
 
-input_field.prototype.get = function(id) {
+input_field.prototype.get = function() {
     return this.input.val().trim()
 }
 
@@ -150,6 +150,38 @@ select_input_field.prototype.set = function(value) {
     })
 }
 
+
+// define boolean_input_field
+function boolean_input_field(title, options, required) {
+    this.options_list = options
+    input_field.call(this, title, required)
+}
+
+boolean_input_field.prototype = new input_field()
+boolean_input_field.constructor = boolean_input_field
+boolean_input_field.prototype.create = function(id) {
+    return $('<input />')
+        .attr('type', 'checkbox')
+        .attr('name', id)
+        .attr('id', "id_" + id)
+
+
+    this.set_options(this.options_list)
+    return this.input
+}
+
+boolean_input_field.prototype.set = function(value) {
+    var mythis = this
+    if (value) {
+        mythis.input.attr('checked','checked')
+    } else {
+        mythis.input.removeAttr('checked')
+    }
+}
+
+boolean_input_field.prototype.get = function() {
+    return this.input.is(":checked")
+}
 
 // define ajax_select_field
 function ajax_select_field(title, type, required) {

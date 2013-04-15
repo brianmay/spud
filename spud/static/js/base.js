@@ -321,7 +321,12 @@ $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
     },
 
     get: function() {
-        return this.input.val().slice(1,-1).split("|")
+        var value = this.input.val().slice(1,-1)
+        if (value != "") {
+            return value.split("|")
+        } else {
+            return []
+        }
     },
 
     _receiveResult: function(ev, ui) {
