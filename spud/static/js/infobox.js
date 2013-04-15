@@ -149,10 +149,11 @@ html_list_output_field.prototype.set = function(value) {
         return
     }
 
+    var mythis = this
     $.each(value, function(i, item){
         $("<li></li>")
             .append(item)
-            .appendTo(this.output)
+            .appendTo(mythis.output)
     })
 }
 
