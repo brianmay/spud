@@ -53,7 +53,8 @@ input_field.prototype.get = function() {
     return this.input.val().trim()
 }
 
-input_field.prototype.validate = function(value) {
+input_field.prototype.validate = function() {
+    value = this.input.val().trim()
     if (this.required && !value) {
         return "This value is required"
     }
@@ -91,6 +92,115 @@ text_input_field.prototype.create = function(id) {
 
 text_input_field.prototype.set = function(value) {
     this.input.val(value)
+}
+
+// define datetime_input_field
+function datetime_input_field(title, required) {
+    input_field.call(this, title, required)
+}
+
+datetime_input_field.prototype = new input_field()
+datetime_input_field.constructor = text_input_field
+datetime_input_field.prototype.create = function(id) {
+    this.date = $('<input />')
+        .attr('id', "id_" + id + "_date")
+        .datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "yy-mm-dd",
+        })
+
+    this.time = $('<input />')
+        .attr('type', "text")
+        .attr('id', "id_" + id + "_time")
+
+    this.timezone = $('<input />')
+        .attr('type', "text")
+        .attr('id', "id_" + id + "_timezonetime")
+
+    return $("<span></span>")
+        .append(this.date)
+        .append(this.time)
+        .append(this.timezone)
+}
+
+datetime_input_field.prototype.set = function(value) {
+    if (value != null) {
+        this.date.val(value.date)
+        this.time.val(value.time)
+        this.timezone.val(value.timezone)
+    } else {
+        this.date.val("")
+        this.time.val("")
+        this.timezone.val("")
+    }
+}
+
+datetime_input_field.prototype.validate = function() {
+    var date = this.date.val().trim()
+    var time = this.time.val().trim()
+    var timezone = this.timezone.val().trim()
+
+    if (date != "") {
+        if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
+            return "date format not yyyy-mm-dd"
+        }
+
+        var a = date.split("-")
+        if (Number(a[1]) < 1 || Number(a[1]) > 12) {
+            return "Month must be between 1 and 12"
+        }
+        if (Number(a[2]) < 1 || Number(a[2]) > 31) {
+            return "date must be between 1 and 31"
+        }
+
+        if (time != "" && !/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
+            return "date format not hh:mm[:ss]"
+        }
+    }
+
+    if (time != "") {
+        if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
+            return "time format not hh:mm[:ss]"
+        }
+
+        var a = time.split(":")
+        if (Number(a[0]) < 0 || Number(a[0]) > 23) {
+            return "Hour must be between 0 and 23"
+        }
+        if (Number(a[1]) < 0 || Number(a[1]) > 59) {
+            return "Minutes must be between 0 and 59"
+        }
+        if (Number(a[2]) < 0 || Number(a[2]) > 59) {
+            return "Seconds must be between 0 and 59"
+        }
+    }
+
+    if (date == "") {
+        if (time != "") {
+            return "date must be given if time is given"
+        }
+    }
+
+    return null
+}
+
+datetime_input_field.prototype.get = function() {
+    var date = this.date.val().trim()
+    var time = this.time.val().trim()
+    var timezone = this.timezone.val().trim()
+
+    result = []
+    if (date != "") {
+        result.push(date)
+    }
+    if (time != "") {
+        result.push(time)
+    }
+    if (timezone != "") {
+        result.push(timezone)
+    }
+    return result.join(" ")
 }
 
 // define password_input_field
@@ -133,7 +243,8 @@ function integer_input_field(title, required) {
 integer_input_field.prototype = new text_input_field()
 integer_input_field.constructor = integer_input_field
 
-integer_input_field.prototype.validate = function(value) {
+integer_input_field.prototype.validate = function() {
+    value = this.input.val().trim()
     var intRegex = /^\d+$/;
     if (value && !intRegex.test(value)) {
         return "Value must be integer"
@@ -417,7 +528,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         var mythis = this
         var allok = true
         $.each(mythis.fields, function(id, field){
-            var error = field.validate(field.get())
+            var error = field.validate()
             field.set_error(error)
             if (error) { allok = false; }
         })

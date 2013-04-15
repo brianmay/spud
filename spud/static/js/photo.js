@@ -79,8 +79,8 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
         var table = $("<table />")
         this.table = table
 
-        this.add_field("first_date", new text_input_field("First date", false))
-        this.add_field("last_date", new text_input_field("Last date", false))
+        this.add_field("first_date", new datetime_input_field("First date", false))
+        this.add_field("last_date", new datetime_input_field("Last date", false))
         this.add_field("lower_rating", new integer_input_field("Upper rating", false))
         this.add_field("upper_rating", new integer_input_field("Lower rating", false))
         this.add_field("title", new text_input_field("Title", false))
@@ -255,8 +255,8 @@ $.widget('ui.photo_search_details',  $.ui.infobox, {
     fields: {
         first_id: new text_output_field("id >="),
         last_id: new text_output_field("id <"),
-        first_date: new text_output_field("date >="),
-        last_date: new text_output_field("date <"),
+        first_date: new datetime_output_field("date >="),
+        last_date: new datetime_output_field("date <"),
         lower_rating: new text_output_field("rating >="),
         upper_rating: new text_output_field("rating <="),
         title: new text_output_field("title contains"),
@@ -395,7 +395,8 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         place: new html_output_field("Place"),
         albums: new html_list_output_field("Albums"),
         categorys: new html_list_output_field("Categories"),
-        datetime: new html_output_field("Date & time"),
+        utctime: new link_output_field("Date & time"),
+        localtime: new link_output_field("Date & time"),
         photographer: new html_output_field("Photographer"),
         rating: new text_output_field("Rating"),
         related: new text_output_field("Related"),
@@ -455,7 +456,12 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         )
 
         this.set_edit_value(
-            "datetime", [ datetime_a(photo.utctime), " ", "<br />", datetime_a(photo.localtime)],
+            "utctime", photo.utctime,
+            can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]")
+        )
+
+        this.set_edit_value(
+            "localtime", photo.localtime,
             can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]")
         )
 

@@ -87,6 +87,24 @@ p_output_field.prototype.set = function(value) {
     this.output.p(value)
 }
 
+
+// define datetime_output_field
+function datetime_output_field(title) {
+    output_field.call(this, title)
+}
+
+datetime_output_field.prototype = new output_field()
+datetime_output_field.constructor = datetime_output_field
+
+datetime_output_field.prototype.set = function(value) {
+    if (value != null) {
+        this.output.text(value.title)
+    } else {
+        this.output.text("")
+    }
+}
+
+
 // define link_output_field
 function link_output_field(title) {
     output_field.call(this, title)

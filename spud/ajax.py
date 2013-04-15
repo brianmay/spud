@@ -93,6 +93,13 @@ def _decode_datetime(value, timezone):
 
     if dt is None:
         try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d nextday")
+            dt = dt + datetime.timedelta(days=1)
+        except ValueError:
+            pass
+
+    if dt is None:
+        try:
             dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             pass
@@ -582,6 +589,7 @@ def _get_datetime(value, utc_offset):
 
     return {
         'type': 'datetime',
+        'title': u"%s %s %s" % (local.date(), local.time(), tz_string),
 #        'url': reverse("date_detail", kwargs={'object_id': object_id}),
         'date': unicode(local.date()),
         'time': unicode(local.time()),
@@ -1548,6 +1556,7 @@ def _get_search(user, search_dict):
         criteria["category_descendants"] = True
 
     timezone = django.conf.settings.TIME_ZONE
+    timezone = pytz.timezone(timezone)
 
     for key in search_dict:
         value = search_dict[key]

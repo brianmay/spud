@@ -740,6 +740,8 @@ function object_a(object) {
         return places.a(object)
     } else if (object.type == "person") {
         return persons.a(object)
+    } else if (object.type == "datetime") {
+        return datetime_a(object)
     } else {
         return $("<span></span>")
             .text(object.title + " (" + object.type + ")")
