@@ -64,11 +64,6 @@ function photo_url(photo) {
 }
 
 
-function settings_url(dt) {
-   return "#"
-}
-
-
 // ****************
 // * AJAX LOADERS *
 // ****************
@@ -236,15 +231,6 @@ function load_photo_search_change(search, updates, number_results, success, erro
 function load_photo(photo_id, success, error) {
     ajax({
         url: '/a/photo/'+photo_id+'/',
-        success: success,
-        error: error,
-    })
-}
-
-
-function load_settings(success, error) {
-    ajax({
-        url: '/a/settings',
         success: success,
         error: error,
     })

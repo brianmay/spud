@@ -103,25 +103,25 @@ function select_input_field(title, options, required) {
 select_input_field.prototype = new input_field()
 select_input_field.constructor = select_input_field
 select_input_field.prototype.create = function(id) {
-    this.select = $('<select />')
+    this.input = $('<select />')
         .attr('name', id)
         .attr('id', "id_" + id)
 
     this.set_options(this.options_list)
-    return select
+    return this.input
 }
 
 select_input_field.prototype.set_options = function(options) {
-    this.select.empty()
-    this.options = []
+    this.input.empty()
+    this.options = {}
     var mythis = this
-    $.each(this.options, function(id, option){
-        var v = values[i]
-        mythis.options[i] = $('<option />')
-            .attr('value', v[0])
-            .text(v[1])
-            .appendTo(this.select)
+    $.each(options, function(id, value){
+        mythis.options[id] = $('<option />')
+            .attr('value', id)
+            .text(value)
+            .appendTo(mythis.input)
     })
+    this.options_list = options
 }
 
 select_input_field.prototype.set = function(value) {

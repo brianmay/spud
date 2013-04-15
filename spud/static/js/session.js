@@ -57,43 +57,50 @@ function set_settings(settings) {
 }
 
 
+list_sizes = {
+    thumb: "Thumb",
+}
+
+view_sizes = {
+    thumb: "Thumb",
+    mid: "Medium",
+    large: "Large",
+}
+
+click_sizes = {
+    thumb: "Thumb",
+    mid: "Medium",
+    large: "Large",
+}
+
+
 $.widget('ui.settings_dialog',  $.ui.form_dialog, {
     fields: {
         photos_per_page: new integer_input_field("Photos per page", true),
         items_per_page: new integer_input_field("Items per page", true),
-        list_size: new select_input_field("List size", "album", true),
-        view_size: new select_input_field("View size", "album", true),
-        click_size: new select_input_field("Click size", "album", true),
+        list_size: new select_input_field("List size", list_sizes, true),
+        view_size: new select_input_field("View size", view_sizes, true),
+        click_size: new select_input_field("Click size", click_sizes, true),
     },
 
     _create: function() {
+        if (this.options.initial == null) {
+            this.options.initial = get_settings()
+        }
         this.options.title = "Change settings"
         this.options.description = "Please change your settings."
         this.options.button = "Save"
         this._super();
     },
 
-    _set: function(values) {
-        this.fields["list_size"].set_options(data.list_sizes)
-        this.fields["view_size"].set_options(data.view_sizes)
-        this.fields["click_size"].set_options(data.click_sizes)
-        this._super(values);
-    },
-
     _submit_values: function(values) {
         settings = get_settings()
 
-        if (form.photos_per_page.value) {
-            settings.photos_per_page = Number(form.photos_per_page.value)
-        }
-
-        if (form.items_per_page.value) {
-            settings.items_per_page = Number(form.items_per_page.value)
-        }
-
-        settings.list_size = form.list_size.value
-        settings.view_size = form.view_size.value
-        settings.click_size = form.click_size.value
+        settings.photos_per_page = Number(values.photos_per_page)
+        settings.items_per_page = Number(values.items_per_page)
+        settings.list_size = values.list_size
+        settings.view_size = values.view_size
+        settings.click_size = values.click_size
 
         set_settings(settings)
 

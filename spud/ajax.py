@@ -2052,15 +2052,3 @@ def photo(request, photo_id):
         'session': _get_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
-
-
-def settings(request):
-    resp = {
-        'type': 'settings',
-        'list_sizes': django.conf.settings.LIST_SIZES,
-        'view_sizes': django.conf.settings.VIEW_SIZES,
-        'click_sizes': django.conf.settings.CLICK_SIZES,
-        'session': _get_session(request),
-    }
-
-    return HttpResponse(json.dumps(resp), mimetype="application/json")

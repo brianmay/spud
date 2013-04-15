@@ -179,7 +179,7 @@ function settings_a(title) {
         title = "Settings"
     }
     var a = $('<a/>')
-        .attr('href', settings_url())
+        .attr('href', "#")
         .on('click', function() { do_settings_form(true); return false; })
         .text(title)
     return a
@@ -1700,137 +1700,14 @@ function display_photo_search_results(search, results) {
 
 function display_settings(data) {
     var dialog = $("<div id='dialog'></div>")
-        .attr('title', "Login")
-
-    var f = $("<form method='get' />")
-
-    var table = $("<table />")
-
-    settings = get_settings()
-
-    append_field(table, "photos_per_page", "Photos per page")
-        .append(get_input_element("photos_per_page", settings.photos_per_page, "text"))
-
-    append_field(table, "items_per_page", "Items per page")
-        .append(get_input_element("items_per_page", settings.items_per_page, "text"))
-
-    append_field(table, "list_size", "List size")
-        .append(get_input_select("list_size", data.list_sizes, settings.list_size))
-
-    append_field(table, "view_size", "View size")
-        .append(get_input_select("view_size", data.view_sizes, settings.view_size))
-
-    append_field(table, "click_size", "Click size")
-        .append(get_input_select("click_size", data.click_sizes, settings.click_size))
-
-    f.append(table)
-
-    dialog
-        .keypress(function(ev) {
-            if (ev.which == 13 && !ev.shiftKey) {
-                submit_settings($( this ), f[0])
-                return false
-            }
-        })
-        .append(f)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            buttons: {
-                Save: function() {
-                    submit_settings($( this ), f[0])
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
-        })
-}
-
-
-function submit_settings(dialog, form) {
-    settings = get_settings()
-
-    if (form.photos_per_page.value) {
-        settings.photos_per_page = Number(form.photos_per_page.value)
-    }
-
-    if (form.items_per_page.value) {
-        settings.items_per_page = Number(form.items_per_page.value)
-    }
-
-    settings.list_size = form.list_size.value
-    settings.view_size = form.view_size.value
-    settings.click_size = form.click_size.value
-
-    set_settings(settings)
-
-    dialog.dialog( "close" )
-
-    reload_page()
-    return false
+        .settings_dialog()
 }
 
 
 function display_login(push_history) {
-    var dialog = $("<div id='dialog'></div>")
-        .attr('title', "Login")
-
-    var f = $("<form method='get' />")
-
-    var table = $("<table />")
-
-    append_field(table, "username", "Username")
-        .append(get_input_element("username", "", "text"))
-
-    append_field(table, "password", "Password")
-        .append(get_input_element("password", "", "password"))
-
-    f.append(table)
-
-    dialog
-        .keypress(function(ev) {
-            if (ev.which == 13 && !ev.shiftKey) {
-                submit_login($( this ), f[0])
-                return false
-            }
-        })
-        .append(f)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            buttons: {
-                Login: function() {
-                    submit_login($( this ), f[0])
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
-        })
+    var dialog = $("<div></div>")
+        .login_dialog()
 }
-
-
-function submit_login(dialog, form) {
-    display_loading()
-    load_login(
-        form.username.value,
-        form.password.value,
-        function(data) {
-            hide_loading()
-            dialog.dialog("close")
-            if (window.history.state==null) {
-                do_root(false)
-            } else {
-                reload_page()
-            }
-        },
-        display_error
-    )
-
-    return false
-}
-
 
 
 // ********************
@@ -1993,14 +1870,5 @@ function do_photo_search_item(search, n, photo_id, push_history) {
 
 function do_settings_form(push_history) {
     close_all_dialog()
-
-    display_loading()
-    load_settings(
-        function(data) {
-            hide_loading()
-            display_settings(data)
-        },
-
-        display_error
-    )
+    display_settings()
 }

@@ -73,13 +73,14 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
 $.widget('ui.album_details',  $.ui.infobox, {
     fields: {
         'title': new text_output_field("Title"),
-        'cover_photo': new photo_output_field("Photo", get_settings().view_size),
+        'cover_photo': new photo_output_field("Photo", null),
         'sortname': new text_output_field("Sort Name"),
         'sortorder': new text_output_field("Sort Order"),
         'description': new p_output_field("Description"),
     },
 
     _create: function() {
+        this.fields['cover_photo'].size = get_settings().view_size
         this.element.addClass("infobox")
         this._super();
 
