@@ -20,46 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // * STATE SAVING *
 // ****************
 
-function get_settings() {
-    var a = []
-    if (localStorage.settings != null)
-        if (localStorage.settings != "")
-            a = localStorage.settings.split(",")
-
-    var settings
-    if (a.length < 5) {
-        settings = {
-            photos_per_page: 10,
-            items_per_page: 10,
-            list_size: "thumb",
-            view_size: "mid",
-            click_size: "large",
-        }
-    } else {
-        settings = {
-            photos_per_page: Number(a[0]),
-            items_per_page: Number(a[1]),
-            list_size: a[2],
-            view_size: a[3],
-            click_size: a[4],
-        }
-    }
-    return settings
-}
-
-
-function set_settings(settings) {
-    var a = [
-        settings.photos_per_page,
-        settings.items_per_page,
-        settings.list_size,
-        settings.view_size,
-        settings.click_size,
-    ]
-    localStorage.settings = a.join(",")
-}
-
-
 function get_selection() {
     var selection = []
     if (localStorage.selection != null)

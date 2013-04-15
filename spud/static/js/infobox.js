@@ -25,17 +25,43 @@ function output_field(title) {
     this.title = title
 }
 
-output_field.prototype.show = function(value) {
-    return Boolean(value)
+output_field.prototype.to_html = function(id) {
+    this.output = this.create(id)
+
+    this.dt = $("<dt/>")
+        .text(this.title)
+    this.dd = $("<dd/>")
+        .append(this.output)
+
+    return [this.dt, this.dd]
 }
 
 output_field.prototype.create = function(id) {
     return $('<span />')
 }
 
-output_field.prototype.destroy = function(output) {
+output_field.prototype.destroy = function() {
 }
 
+output_field.prototype.append_a = function(html) {
+    this.dd.append(" ")
+    this.dd.append(html)
+}
+
+output_field.prototype.toggle = function(show) {
+    this.dt.toggle(show)
+    this.dd.toggle(show)
+}
+
+output_field.prototype.hide = function() {
+    this.dt.hide()
+    this.dd.hide()
+}
+
+output_field.prototype.show = function() {
+    this.dt.show()
+    this.dd.show()
+}
 
 // define text_output_field
 function text_output_field(title) {
@@ -45,8 +71,8 @@ function text_output_field(title) {
 text_output_field.prototype = new output_field()
 text_output_field.constructor = text_output_field
 
-text_output_field.prototype.set = function(output, value) {
-    output.text(value)
+text_output_field.prototype.set = function(value) {
+    this.output.text(value)
 }
 
 // define p_output_field
@@ -57,8 +83,8 @@ function p_output_field(title) {
 p_output_field.prototype = new output_field()
 p_output_field.constructor = p_output_field
 
-p_output_field.prototype.set = function(output, value) {
-    output.p(value)
+p_output_field.prototype.set = function(value) {
+    this.output.p(value)
 }
 
 // define link_output_field
@@ -69,8 +95,8 @@ function link_output_field(title) {
 link_output_field.prototype = new output_field()
 link_output_field.constructor = link_output_field
 
-link_output_field.prototype.set = function(output, value) {
-    output.html(object_a(value))
+link_output_field.prototype.set = function(value) {
+    this.output.html(object_a(value))
 }
 
 // define html_output_field
@@ -81,8 +107,8 @@ function html_output_field(title) {
 html_output_field.prototype = new output_field()
 html_output_field.constructor = html_output_field
 
-html_output_field.prototype.set = function(output, value) {
-    output.html(value)
+html_output_field.prototype.set = function(value) {
+    this.output.html(value)
 }
 
 // define html_list_output_field
@@ -98,8 +124,8 @@ html_list_output_field.prototype.create = function(id) {
     return $('<ul />')
 }
 
-html_list_output_field.prototype.set = function(output, value) {
-    output.empty()
+html_list_output_field.prototype.set = function(value) {
+    this.output.empty()
 
     if (value==null) {
         return
@@ -108,7 +134,7 @@ html_list_output_field.prototype.set = function(output, value) {
     $.each(value, function(i, item){
         $("<li></li>")
             .append(item)
-            .appendTo(output)
+            .appendTo(this.output)
     })
 }
 
@@ -125,8 +151,8 @@ link_list_output_field.prototype.create = function(id) {
     return $('<ul />')
 }
 
-link_list_output_field.prototype.set = function(output, value) {
-    output.empty()
+link_list_output_field.prototype.set = function(value) {
+    this.output.empty()
 
     if (value==null) {
         return
@@ -135,7 +161,7 @@ link_list_output_field.prototype.set = function(output, value) {
     $.each(value, function(i, item){
         $("<li></li>")
             .append(object_a(item))
-            .appendTo(output)
+            .appendTo(this.output)
     })
 }
 
@@ -152,12 +178,12 @@ photo_output_field.prototype.create = function(id) {
     return $('<img />').image({ size: this.size })
 }
 
-photo_output_field.prototype.set = function(output, value) {
-    output.image('set', value)
+photo_output_field.prototype.set = function(value) {
+    this.output.image('set', value)
 }
 
-photo_output_field.prototype.destroy = function(output) {
-    output.image('destroy')
+photo_output_field.prototype.destroy = function() {
+    this.output.image('destroy')
 }
 
 $.widget('ui.infobox', {
@@ -171,12 +197,7 @@ $.widget('ui.infobox', {
         this.dl = $("<dl></dl>")
             .appendTo(this.element)
 
-        this.dt = {}
-        this.dd = {}
-        this.output = {}
-
         var mythis = this
-        this.input = {}
         $.each(this.fields, function(id, field){
             mythis.add_field(id, field)
         })
@@ -187,8 +208,7 @@ $.widget('ui.infobox', {
     _destroy: function() {
         var mythis = this
         $.each(this.fields, function(id, field) {
-            var output = mythis.output[id]
-            field.destroy(output)
+            field.destroy()
         })
         this.element.empty()
         this._super()
@@ -197,49 +217,28 @@ $.widget('ui.infobox', {
     set: function(values) {
         var mythis = this
         $.each(mythis.fields, function(id, field){
-            values[id] = mythis.set_field(id, values[id])
+            values[id] = mythis.set_value(id, values[id])
         })
     },
 
     add_field: function(id, field) {
-        var output = field.create(id)
-
-        var dt = $("<dt/>")
-            .text(field.title)
-            .appendTo(this.dl)
-        var dd = $("<dd/>")
-            .append(output)
-            .appendTo(this.dl)
-
-        this.dt[id] = dt
-        this.dd[id] = dd
-        this.output[id] = output
+        var html = field.to_html(id)
+        this.dl.append(html)
         this.fields[id] = field
-        return dd
     },
 
-    set_field: function(id, value) {
-        var output = this.output[id]
-        this.dt[id].toggle(this.fields[id].show(value))
-        this.dd[id].toggle(this.fields[id].show(value))
-        this.fields[id].set(output, value)
+    set_value: function(id, value) {
+        this.fields[id].toggle(Boolean(value))
+        this.fields[id].set(value)
     },
 
-    toggle_field: function(id, show) {
-        this.dt[id].toggle(show)
-        this.dd[id].toggle(show)
-    },
-
-    set_edit_field: function(id, value, can_change, a) {
-        this.set_field(id, value)
+    set_edit_value: function(id, value, can_change, a) {
+        this.fields[id].set(value)
         if (can_change) {
-            this.dt[id].show()
-            this.dd[id].show()
-            this.dd[id].append(" ")
-            this.dd[id].append(a)
+            this.fields[id].show()
+            this.fields[id].append_a(a)
+        } else {
+            this.fields[id].toggle(Boolean(value))
         }
     },
 })
-
-
-

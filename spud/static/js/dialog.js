@@ -26,13 +26,29 @@ function input_field(title, required) {
     this.required = required
 }
 
-input_field.prototype.get = function(input, id) {
-    return input.val().trim()
+input_field.prototype.to_html = function(id) {
+    this.input = this.create(id)
+
+    var th = $("<th/>")
+    $("<label/>")
+        .attr("for", "id_" + id)
+        .html(escapeHTML(this.title + ":"))
+        .appendTo(th)
+
+    var td = $("<td/>")
+        .append(this.input)
+
+    return $("<tr/>")
+        .append(th)
+        .append(td)
 }
 
-input_field.prototype.destroy = function(input) {
+input_field.prototype.get = function(id) {
+    return this.input.val().trim()
 }
 
+input_field.prototype.destroy = function() {
+}
 
 // define text_input_field
 function text_input_field(title, required) {
@@ -48,8 +64,8 @@ text_input_field.prototype.create = function(id) {
         .attr('id', "id_" + id)
 }
 
-text_input_field.prototype.set = function(input, value) {
-    input.val(value)
+text_input_field.prototype.set = function(value) {
+    this.input.val(value)
 }
 
 
@@ -68,6 +84,58 @@ p_input_field.prototype.create = function(id) {
         .attr('id', "id_" + id)
 }
 
+
+// define integer_input_field
+function integer_input_field(title, required) {
+    text_input_field.call(this, title, required)
+}
+
+integer_input_field.prototype = new text_input_field()
+integer_input_field.constructor = integer_input_field
+
+
+// define select_input_field
+function select_input_field(title, options, required) {
+    this.options_list = options
+    input_field.call(this, title, required)
+}
+
+select_input_field.prototype = new input_field()
+select_input_field.constructor = select_input_field
+select_input_field.prototype.create = function(id) {
+    this.select = $('<select />')
+        .attr('name', id)
+        .attr('id', "id_" + id)
+
+    this.set_options(this.options_list)
+    return select
+}
+
+select_input_field.prototype.set_options = function(options) {
+    this.select.empty()
+    this.options = []
+    var mythis = this
+    $.each(this.options, function(id, option){
+        var v = values[i]
+        mythis.options[i] = $('<option />')
+            .attr('value', v[0])
+            .text(v[1])
+            .appendTo(this.select)
+    })
+}
+
+select_input_field.prototype.set = function(value) {
+    var mythis = this
+    $.each(this.options, function(id, option){
+        if (id == value) {
+            option.attr('selected' ,'selected')
+        } else {
+            option.removeAttr('selected')
+        }
+    })
+}
+
+
 // define ajax_select_field
 function ajax_select_field(title, type, required) {
     input_field.call(this, title, required)
@@ -83,11 +151,11 @@ ajax_select_field.prototype.create = function(id) {
         .ajaxautocomplete({type: this.type})
 }
 
-ajax_select_field.prototype.destroy = function(input) {
-    input.ajaxautocomplete("destroy")
+ajax_select_field.prototype.destroy = function() {
+    this.input.ajaxautocomplete("destroy")
 }
 
-ajax_select_field.prototype.set = function(input, value) {
+ajax_select_field.prototype.set = function(value) {
     var item = null
     if (value != null) {
         item = {
@@ -95,11 +163,11 @@ ajax_select_field.prototype.set = function(input, value) {
             repr: value.title,
         }
     }
-    input.ajaxautocomplete("set", item)
+    this.input.ajaxautocomplete("set", item)
 }
 
-ajax_select_field.prototype.get = function(input) {
-    return input.ajaxautocomplete("get")
+ajax_select_field.prototype.get = function() {
+    return this.input.ajaxautocomplete("get")
 }
 
 
@@ -118,22 +186,22 @@ ajax_select_multiple_field.prototype.create = function(id) {
         .ajaxautocompletemultiple({type: this.type})
 }
 
-ajax_select_multiple_field.prototype.destroy = function(input) {
-    input.ajaxautocompletemultiple("destroy")
+ajax_select_multiple_field.prototype.destroy = function() {
+    this.input.ajaxautocompletemultiple("destroy")
 }
 
-ajax_select_multiple_field.prototype.set = function(input, value) {
+ajax_select_multiple_field.prototype.set = function(value) {
     var value_arr = []
     if (value != null) {
         var value_arr = $.map(value,
             function(value){ return { pk: value.id, repr: value.title, } }
         );
     }
-    input.ajaxautocompletemultiple("set", value_arr)
+    this.input.ajaxautocompletemultiple("set", value_arr)
 }
 
-ajax_select_multiple_field.prototype.get = function(input) {
-    return input.ajaxautocompletemultiple("get")
+ajax_select_multiple_field.prototype.get = function() {
+    return this.input.ajaxautocompletemultiple("get")
 }
 
 
@@ -152,22 +220,22 @@ ajax_select_sorted_field.prototype.create = function(id) {
         .ajaxautocompletesorted({type: this.type})
 }
 
-ajax_select_sorted_field.prototype.destroy = function(input) {
-    input.ajaxautocompletesorted("destroy")
+ajax_select_sorted_field.prototype.destroy = function() {
+    this.input.ajaxautocompletesorted("destroy")
 }
 
-ajax_select_sorted_field.prototype.set = function(input, value) {
+ajax_select_sorted_field.prototype.set = function(value) {
     var value_arr = []
     if (value != null) {
         var value_arr = $.map(value,
             function(value){ return { pk: value.id, repr: value.title, } }
         );
     }
-    input.ajaxautocompletesorted("set", value_arr)
+    this.input.ajaxautocompletesorted("set", value_arr)
 }
 
-ajax_select_sorted_field.prototype.get = function(input) {
-    return input.ajaxautocompletesorted("get")
+ajax_select_sorted_field.prototype.get = function() {
+    return this.input.ajaxautocompletesorted("get")
 }
 
 
@@ -186,16 +254,16 @@ photo_select_field.prototype.create = function(id) {
         .photo_select()
 }
 
-photo_select_field.prototype.destroy = function(input) {
-    input.photo_select("destroy")
+photo_select_field.prototype.destroy = function() {
+    this.input.photo_select("destroy")
 }
 
-photo_select_field.prototype.set = function(input, value) {
-    input.photo_select("set", value)
+photo_select_field.prototype.set = function(value) {
+    this.input.photo_select("set", value)
 }
 
-photo_select_field.prototype.get = function(input) {
-    return input.photo_select("get")
+photo_select_field.prototype.get = function() {
+    return this.input.photo_select("get")
 }
 
 
@@ -237,10 +305,13 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         }
 
         var mythis = this
-        this.input = {}
         $.each(this.fields, function(id, field){
             mythis.add_field(id, field)
         })
+
+        if (this.options.initial != null) {
+            this.set(this.options.initial)
+        }
 
         options.width = 400
 
@@ -267,7 +338,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
         var mythis = this
         var values = {}
         $.each(mythis.fields, function(id, field){
-            values[id] = mythis.get_field(id)
+            values[id] = mythis.get_value(id)
         })
         this._submit_values(values)
     },
@@ -278,15 +349,14 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
     set: function(values) {
         var mythis = this
         $.each(mythis.fields, function(id, field){
-            values[id] = mythis.set_field(id, values[id])
+            values[id] = mythis.set_value(id, values[id])
         })
     },
 
     _destroy: function() {
         var mythis = this
         $.each(this.fields, function(id, field) {
-            var input = mythis.input[id]
-            field.destroy(input)
+            field.destroy()
         })
         this.element
             .empty()
@@ -302,33 +372,16 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
     },
 
     add_field: function(id, field) {
-        var input = field.create(id)
-
-        var th = $("<th/>")
-        $("<label/>")
-            .attr("for", "id_" + id)
-            .html(escapeHTML(field.title + ":"))
-            .appendTo(th)
-
-        var td = $("<td/>")
-            .append(input)
-
-        $("<tr/>")
-            .append(th)
-            .append(td)
-            .appendTo(this.table)
-
+        var html = field.to_html(id)
+        this.table.append(html)
         this.fields[id] = field
-        this.input[id] = input
     },
 
-    set_field: function(id, value) {
-        var input = this.input[id]
-        this.fields[id].set(input, value)
+    set_value: function(id, value) {
+        this.fields[id].set(value)
     },
 
-    get_field: function(id) {
-        var input = this.input[id]
-        return this.fields[id].get(input)
+    get_value: function(id) {
+        return this.fields[id].get()
     },
 })

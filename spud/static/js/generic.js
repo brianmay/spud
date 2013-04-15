@@ -19,14 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 function generic_doer() {
 }
 
-input_field.prototype.get = function(input, id) {
-    return input.val().trim()
-}
-
-input_field.prototype.destroy = function(input) {
-}
-
-
 generic_doer.prototype.search_results_url = function(search, page) {
     var params = jQuery.extend({}, search.criteria, {
         page: page

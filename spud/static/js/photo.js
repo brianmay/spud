@@ -256,56 +256,56 @@ $.widget('ui.photo_details',  $.ui.infobox, {
     set: function(photo, change_mode) {
         var can_change = change_mode && photo.can_change
 
-        this.set_edit_field(
+        this.set_edit_value(
             "title", photo.title,
             can_change, photo_change_a(photo, display_change_photo_title, "[edit]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "description", photo.description,
             can_change, photo_change_a(photo, display_change_photo_description, "[edit]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "view", photo.view,
             can_change, photo_change_a(photo, display_change_photo_view, "[edit]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "comment", photo.comment,
             can_change, photo_change_a(photo, display_change_photo_comment, "[edit]")
         )
 
-        this.set_field("name", photo.name)
+        this.set_value("name", photo.name)
 
-        this.set_edit_field(
+        this.set_edit_value(
             "place", places.a(photo.place),
             can_change, photo_change_a(photo, display_change_photo_place, "[edit]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "albums", $.map(photo.albums, function(album) { return albums.a(album); } ),
             can_change, photo_change_a(photo, display_change_photo_albums, "[edit]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "categorys", $.map(photo.categorys, function(category) { return categorys.a(category); } ),
             can_change, photo_change_a(photo, display_change_photo_categorys, "[edit]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "datetime", [ datetime_a(photo.utctime), " ", "<br />", datetime_a(photo.localtime)],
             can_change, photo_change_a(photo, display_change_photo_datetime, "[edit]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "photographer", persons.a(photo.photographer),
             can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]")
         )
 
-        this.set_field("rating", photo.rating ? photo.rating : "None")
+        this.set_value("rating", photo.rating ? photo.rating : "None")
 
-        this.set_edit_field(
+        this.set_edit_value(
             "related", $.map(photo.related, function(r) {
                 return [[
                     photo_a(r.photo, r.title),
@@ -316,7 +316,7 @@ $.widget('ui.photo_details',  $.ui.infobox, {
              can_change, photo_relation_add_a(photo, "[add]")
         )
 
-        this.set_edit_field(
+        this.set_edit_value(
             "action", get_photo_action(photo.action),
             can_change, photo_change_a(photo, display_change_photo_action, "[edit]")
         )
