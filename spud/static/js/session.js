@@ -113,7 +113,7 @@ $.widget('ui.settings_dialog',  $.ui.form_dialog, {
 $.widget('ui.login_dialog',  $.ui.form_dialog, {
     fields: {
         username: new text_input_field("Username", true),
-        password: new text_input_field("Password", true),
+        password: new password_input_field("Password", true),
     },
 
     _create: function() {
@@ -124,13 +124,14 @@ $.widget('ui.login_dialog',  $.ui.form_dialog, {
     },
 
     _submit_values: function(values) {
+        var mythis = this
         display_loading()
         load_login(
             values.username,
             values.password,
             function(data) {
                 hide_loading()
-                dialog.dialog("close")
+                mythis.close()
                 if (window.history.state==null) {
                     do_root(false)
                 } else {
@@ -139,8 +140,6 @@ $.widget('ui.login_dialog',  $.ui.form_dialog, {
             },
             display_error
         )
-        this.close()
-        reload_page()
     },
 })
 

@@ -68,6 +68,21 @@ text_input_field.prototype.set = function(value) {
     this.input.val(value)
 }
 
+// define password_input_field
+function password_input_field(title, required) {
+    text_input_field.call(this, title, required)
+}
+
+password_input_field.prototype = new text_input_field()
+password_input_field.constructor = password_input_field
+password_input_field.prototype.create = function(id) {
+    return $('<input />')
+        .attr('type', "password")
+        .attr('name', id)
+        .attr('id', "id_" + id)
+}
+
+
 
 // define p_input_field
 function p_input_field(title, required) {
