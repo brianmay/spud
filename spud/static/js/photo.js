@@ -730,23 +730,19 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
 })
 
 
-$.widget('ui.change_photo_title_dialog',  $.ui.form_dialog, {
+$.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
     fields: {
     },
 
     _create: function() {
-        this.options.title = "Photo change title"
-        this.options.description = "Please change photo's title."
+        this.options.title = "Change photo "+this.options.title
+        this.options.description = "Please change photo's " + this.options.title + "."
         this.options.button = "Save"
         this._super();
-
-        this.add_field("title", new text_input_field("Title", false))
     },
 
     _submit_values: function(values) {
         this.close()
-        values = { set_title: values.title }
-
         var mythis = this
         display_loading()
         load_photo_search_change(
@@ -765,3 +761,57 @@ $.widget('ui.change_photo_title_dialog',  $.ui.form_dialog, {
 })
 
 
+
+$.widget('ui.change_photo_title_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "title"
+        this.fields.title = new text_input_field("Title", false)
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_title: values.title }
+        this._super(values);
+    },
+})
+
+
+$.widget('ui.change_photo_description_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "description"
+        this.fields.description = new p_input_field("Description", false)
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_description: values.description }
+        this._super(values);
+    },
+})
+
+$.widget('ui.change_photo_view_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "view"
+        this.fields.view = new p_input_field("View", false)
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_view: values.view }
+        this._super(values);
+    },
+})
+
+
+$.widget('ui.change_photo_comment_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "comment"
+        this.fields.comment = new p_input_field("Comment", false)
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_comment: values.comment }
+        this._super(values);
+    },
+})

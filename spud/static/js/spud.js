@@ -923,72 +923,36 @@ function display_change_photo_title(photo, criteria, number_results) {
             criteria: criteria,
             number_results: number_results
         })
-    return
-
-    var title=""
-    if (photo != null) {
-        title = photo.title
-    }
-    var table = $("<table />")
-    append_field(table, "title", "Title")
-        .append(get_input_element("title", title, "text"))
-    var get_updates = function(form) {
-        return {
-            set_title: form.title.value,
-        }
-    }
-    display_change_photo_attribute("title", table, get_updates, search_criteria, number_results)
 }
 
 
-function display_change_photo_description(photo, search_criteria, number_results) {
-    var description=""
-    if (photo != null) {
-        description = photo.description
-    }
-    var table = $("<table />")
-    append_field(table, "description", "Description")
-        .append(get_input_textarea("description", 10, 40, description))
-    var get_updates = function(form) {
-        return {
-            set_description: form.description.value,
-        }
-    }
-    display_change_photo_attribute("description", table, get_updates, search_criteria, number_results, { width: 400, })
+function display_change_photo_description(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_description_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
-function display_change_photo_view(photo, search_criteria, number_results) {
-    var view=""
-    if (photo != null) {
-        view = photo.view
-    }
-    var table = $("<table />")
-    append_field(table, "view", "View")
-        .append(get_input_textarea("view", 10, 40, view))
-    var get_updates = function(form) {
-        return {
-            set_view: form.view.value,
-        }
-    }
-    display_change_photo_attribute("view", table, get_updates, search_criteria, number_results, { width: 400, })
+function display_change_photo_view(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_view_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
-function display_change_photo_comment(photo, search_criteria, number_results) {
-    var comments=""
-    if (photo != null) {
-        comments = photo.comment
-    }
-    var table = $("<table />")
-    append_field(table, "comments", "Comments")
-        .append(get_input_textarea("comments", 10, 40, comments))
-    var get_updates = function(form) {
-        return {
-            set_comments: form.comments.value,
-        }
-    }
-    display_change_photo_attribute("comments", table, get_updates, search_criteria, number_results, { width: 400, } )
+function display_change_photo_comment(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_comment_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
