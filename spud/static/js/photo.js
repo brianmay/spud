@@ -730,3 +730,38 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
 })
 
 
+$.widget('ui.change_photo_title_dialog',  $.ui.form_dialog, {
+    fields: {
+    },
+
+    _create: function() {
+        this.options.title = "Photo change title"
+        this.options.description = "Please change photo's title."
+        this.options.button = "Save"
+        this._super();
+
+        this.add_field("title", new text_input_field("Title", false))
+    },
+
+    _submit_values: function(values) {
+        this.close()
+        values = { set_title: values.title }
+
+        var mythis = this
+        display_loading()
+        load_photo_search_change(
+            this.options.criteria,
+            values,
+            this.options.number_results,
+            function(data) {
+                hide_loading()
+                mythis.close()
+                reload_page()
+            },
+
+            display_error
+        )
+    },
+})
+
+

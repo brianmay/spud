@@ -1690,8 +1690,9 @@ def _get_search(user, search_dict):
         elif key == "name":
             criteria[key] = value
             search = search & Q(name=value)
-        else:
-            raise HttpBadRequest("Unknown key %s" % (key))
+# FIXME
+#        else:
+#            raise HttpBadRequest("Unknown key %s" % (key))
 
         photo_list = photo_list.filter(search)
 
@@ -1791,11 +1792,16 @@ def photo_search_change(request):
     search_dict.pop("_", None)
 
     timezone = django.conf.settings.TIME_ZONE
+    timezone = pytz.timezone(timezone)
+
+    if 'number_results' not in search_dict:
+        raise HttpBadRequest("didn't get expected number_results")
+    expected_results = search_dict.pop("number_results", ["0"])[-1]
+    expected_results = _decode_int(expected_results)
 
     photo_list, criteria = _get_search(request.user, search_dict)
     number_results = photo_list.count()
 
-    expected_results = _decode_int(request.POST['number_results'])
     if number_results != expected_results:
         raise HttpBadRequest(
             "We expected %d changed but would have made %d" %
@@ -1803,28 +1809,28 @@ def photo_search_change(request):
 
     print number_results
     print "dddd"
-    print request.POST
+    print search_dict
     if request.method == "POST" and False:
-        if 'set_title' in request.POST:
-            photo_list.update(title=request.POST['set_title'])
-        if 'set_description' in request.POST:
-            photo_list.update(description=request.POST['set_description'])
-        if 'set_view' in request.POST:
-            photo_list.update(view=request.POST['set_view'])
-        if 'set_comment' in request.POST:
+        if 'set_title' in search_dict:
+            photo_list.update(title=search_dict['set_title'])
+        if 'set_description' in search_dict:
+            photo_list.update(description=search_dict['set_description'])
+        if 'set_view' in search_dict:
+            photo_list.update(view=search_dict['set_view'])
+        if 'set_comment' in search_dict:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change comment")
-            photo_list.update(view=request.POST['set_comment'])
-        if 'set_datetime' in request.POST:
-            dt = _decode_datetime(request.POST['set_datetime'], timezone)
+            photo_list.update(view=search_dict['set_comment'])
+        if 'set_datetime' in search_dict:
+            dt = _decode_datetime(search_dict['set_datetime'], timezone)
             utc_offset = dt.utcoffset().total_seconds() / 60
             dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
             photo_list.update(action="M",
                               utc_offset=utc_offset, datetime=dt)
             del utc_offset
             del dt
-        if 'set_action' in request.POST:
-            action = request.POST['set_action']
+        if 'set_action' in search_dict:
+            action = search_dict['set_action']
             found = False
             for a in spud.models.PHOTO_ACTION:
                 if a[0] == action:
@@ -1835,24 +1841,24 @@ def photo_search_change(request):
             del a
             del action
             del found
-        if 'set_photographer' in request.POST:
-            if request.POST['set_photographer'] == "":
+        if 'set_photographer' in search_dict:
+            if search_dict['set_photographer'] == "":
                 photographer = None
             else:
                 try:
-                    person_id = _decode_int(request.POST['set_photographer'])
+                    person_id = _decode_int(search_dict['set_photographer'])
                     photographer = spud.models.person.objects.get(pk=person_id)
                     del person_id
                 except spud.models.person.DoesNotExist:
                     raise HttpBadRequest("photographer does not exist")
             photo_list.update(photographer=photographer)
             del photographer
-        if 'set_place' in request.POST:
-            if request.POST['set_place'] == "":
+        if 'set_place' in search_dict:
+            if search_dict['set_place'] == "":
                 place = None
             else:
                 try:
-                    place_id = _decode_int(request.POST['set_place'])
+                    place_id = _decode_int(search_dict['set_place'])
                     place = spud.models.place.objects.get(pk=place_id)
                     del place_id
                 except spud.models.place.DoesNotExist:
@@ -1860,8 +1866,8 @@ def photo_search_change(request):
             photo_list.update(location=place)
             del place
 
-        if 'set_albums' in request.POST:
-            values = _decode_array(request.POST['set_albums'])
+        if 'set_albums' in search_dict:
+            values = _decode_array(search_dict['set_albums'])
             values = [_decode_int(i) for i in values]
             for photo in photo_list:
                 pa_list = list(photo.photo_album_set.all())
@@ -1882,8 +1888,8 @@ def photo_search_change(request):
                 del album
             del values
             del i
-        if 'add_albums' in request.POST:
-            values = _decode_array(request.POST['add_albums'])
+        if 'add_albums' in search_dict:
+            values = _decode_array(search_dict['add_albums'])
             for value in values:
                 album_id = _decode_int(value)
                 try:
@@ -1898,8 +1904,8 @@ def photo_search_change(request):
                 del album
             del value
             del values
-        if 'del_albums' in request.POST:
-            values = _decode_array(request.POST['del_albums'])
+        if 'del_albums' in search_dict:
+            values = _decode_array(search_dict['del_albums'])
             for value in values:
                 album_id = _decode_int(value)
                 value = None
@@ -1916,8 +1922,8 @@ def photo_search_change(request):
             del value
             del values
 
-        if 'set_categorys' in request.POST:
-            values = _decode_array(request.POST['set_albums'])
+        if 'set_categorys' in search_dict:
+            values = _decode_array(search_dict['set_albums'])
             values = [_decode_int(i) for i in values]
             pa_list = list(photo.photo_category_set.all())
             for photo in photo_list:
@@ -1938,8 +1944,8 @@ def photo_search_change(request):
                 del category
             del values
             del i
-        if 'add_categorys' in request.POST:
-            values = _decode_array(request.POST['add_categorys'])
+        if 'add_categorys' in search_dict:
+            values = _decode_array(search_dict['add_categorys'])
             for value in values:
                 category_id = _decode_int(value)
                 try:
@@ -1954,8 +1960,8 @@ def photo_search_change(request):
                 del category
             del value
             del values
-        if 'del_categorys' in request.POST:
-            values = _decode_array(request.POST['del_categorys'])
+        if 'del_categorys' in search_dict:
+            values = _decode_array(search_dict['del_categorys'])
             for value in values:
                 category_id = _decode_int(value)
                 try:
@@ -1971,8 +1977,8 @@ def photo_search_change(request):
             del value
             del values
 
-        if 'set_persons' in request.POST:
-            values = _decode_array(request.POST['set_albums'])
+        if 'set_persons' in search_dict:
+            values = _decode_array(search_dict['set_albums'])
             values = [_decode_int(i) for i in values]
             pa_list = list(photo.photo_person_set.all())
             for photo in photo_list:
@@ -2008,8 +2014,8 @@ def photo_search_change(request):
             del pa_list
             del values
             del photo
-        if 'add_persons' in request.POST:
-            values = _decode_array(request.POST['add_persons'])
+        if 'add_persons' in search_dict:
+            values = _decode_array(search_dict['add_persons'])
             for value in values:
                 person_id = _decode_int(value)
                 try:
@@ -2024,8 +2030,8 @@ def photo_search_change(request):
                 del person
             del value
             del values
-        if 'del_persons' in request.POST:
-            values = _decode_array(request.POST['del_persons'])
+        if 'del_persons' in search_dict:
+            values = _decode_array(search_dict['del_persons'])
             for value in values:
                 person_id = _decode_int(value)
                 try:

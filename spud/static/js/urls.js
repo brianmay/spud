@@ -215,8 +215,8 @@ function load_photo_search_item(search, n, success, error) {
 }
 
 
-function load_photo_search_change(search, updates, number_results, success, error) {
-    var params = jQuery.extend({}, search.criteria, updates, { number_results: number_results })
+function load_photo_search_change(criteria, updates, number_results, success, error) {
+    var params = jQuery.extend({}, criteria, updates, { number_results: number_results })
 
     ajax({
         url: '/a/photo/change/',

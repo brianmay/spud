@@ -879,7 +879,8 @@ function photo_change_keyboard_event(ev, photo, search_criteria, number_results)
     if (key <'A' || key > 'Z')
         return true
 
-    close_all_dialog()
+    if ($("#dialog").length > 0)
+        return true
 
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Choose operation")
@@ -915,7 +916,15 @@ function photo_change_keyboard_event(ev, photo, search_criteria, number_results)
 }
 
 
-function display_change_photo_title(photo, search_criteria, number_results) {
+function display_change_photo_title(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_title_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
+    return
+
     var title=""
     if (photo != null) {
         title = photo.title
@@ -1213,15 +1222,9 @@ function display_change_photo_attribute(title, table, get_updates, search_criter
 
 
 function submit_change_photo_attribute(search_criteria, updates, number_results, dialog) {
-    var search = {
-        criteria: search_criteria
-    }
-
-    close_all_dialog()
-
     display_loading()
     load_photo_search_change(
-        search,
+        criteria,
         updates,
         number_results,
         function(data) {
