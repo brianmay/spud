@@ -35,16 +35,41 @@ input_field.prototype.to_html = function(id) {
         .html(escapeHTML(this.title + ":"))
         .appendTo(th)
 
+    this.errors = $("<div></div>")
+
     var td = $("<td/>")
         .append(this.input)
+        .append(this.errors)
 
-    return $("<tr/>")
+
+    this.tr = $("<tr/>")
         .append(th)
         .append(td)
+
+    return this.tr
 }
 
 input_field.prototype.get = function() {
     return this.input.val().trim()
+}
+
+input_field.prototype.validate = function(value) {
+    if (this.required && !value) {
+        return "This value is required"
+    }
+    return null
+}
+
+input_field.prototype.set_error = function(error) {
+    this.tr.toggleClass("errors", Boolean(error))
+    this.errors.toggleClass("errornote", Boolean(error))
+    this.input.toggleClass("errors", Boolean(error))
+    this.input.find("input").toggleClass("errors", Boolean(error))
+    if (error) {
+        this.errors.text(error)
+    } else {
+        this.errors.text("")
+    }
 }
 
 input_field.prototype.destroy = function() {
@@ -108,6 +133,13 @@ function integer_input_field(title, required) {
 integer_input_field.prototype = new text_input_field()
 integer_input_field.constructor = integer_input_field
 
+integer_input_field.prototype.validate = function(value) {
+    var intRegex = /^\d+$/;
+    if (value && !intRegex.test(value)) {
+        return "Value must be integer"
+    }
+    return text_input_field.prototype.validate.call(this, value)
+}
 
 // define select_input_field
 function select_input_field(title, options, required) {
@@ -345,7 +377,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
 
         options.buttons = {}
         options.buttons[submit] = function() {
-            mythis._submit()
+            mythis._check_submit()
         }
         options.buttons['Cancel'] = function() {
             mythis.close()
@@ -368,7 +400,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
             "keypress",
             function(ev) {
                 if (ev.which == 13 && !ev.shiftKey) {
-                    mythis._submit()
+                    mythis._check_submit()
                     return false
                     }
             }
@@ -379,6 +411,19 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
                 mythis.destroy()
             }
         )
+    },
+
+    _check_submit: function() {
+        var mythis = this
+        var allok = true
+        $.each(mythis.fields, function(id, field){
+            var error = field.validate(field.get())
+            field.set_error(error)
+            if (error) { allok = false; }
+        })
+        if (allok) {
+            this._submit()
+        }
     },
 
     _submit: function() {

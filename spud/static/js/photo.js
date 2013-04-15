@@ -79,16 +79,16 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
         var table = $("<table />")
         this.table = table
 
-        this.add_field("first_date", new text_input_field("First date", true))
-        this.add_field("last_date", new text_input_field("Last date", true))
-        this.add_field("lower_rating", new integer_input_field("Upper rating", true))
-        this.add_field("upper_rating", new integer_input_field("Lower rating", true))
-        this.add_field("title", new text_input_field("Title", true))
-        this.add_field("photographer", new ajax_select_field("Photographer", "person", true))
-        this.add_field("path", new text_input_field("Path", true))
-        this.add_field("name", new text_input_field("Name", true))
-        this.add_field("first_id", new integer_input_field("First id", true))
-        this.add_field("last_id", new integer_input_field("Last id", true))
+        this.add_field("first_date", new text_input_field("First date", false))
+        this.add_field("last_date", new text_input_field("Last date", false))
+        this.add_field("lower_rating", new integer_input_field("Upper rating", false))
+        this.add_field("upper_rating", new integer_input_field("Lower rating", false))
+        this.add_field("title", new text_input_field("Title", false))
+        this.add_field("photographer", new ajax_select_field("Photographer", "person", false))
+        this.add_field("path", new text_input_field("Path", false))
+        this.add_field("name", new text_input_field("Name", false))
+        this.add_field("first_id", new integer_input_field("First id", false))
+        this.add_field("last_id", new integer_input_field("Last id", false))
 
         $("<div id='photo'></div>")
             .append(table)
@@ -97,20 +97,20 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
         var table = $("<table />")
         this.table = table
 
-        this.add_field("person", new ajax_select_multiple_field("People", "person", true))
-        this.add_field("person_none", new boolean_input_field("No people", true))
+        this.add_field("person", new ajax_select_multiple_field("People", "person", false))
+        this.add_field("person_none", new boolean_input_field("No people", false))
 
-        this.add_field("place", new ajax_select_field("Place", "place", true))
-        this.add_field("place_descendants", new boolean_input_field("Descend places", true))
-        this.add_field("place_none", new boolean_input_field("No places", true))
+        this.add_field("place", new ajax_select_field("Place", "place", false))
+        this.add_field("place_descendants", new boolean_input_field("Descend places", false))
+        this.add_field("place_none", new boolean_input_field("No places", false))
 
-        this.add_field("album", new ajax_select_multiple_field("Albums", "album", true))
-        this.add_field("album_descendants", new boolean_input_field("Descend albums", true))
-        this.add_field("album_none", new boolean_input_field("No albums", true))
+        this.add_field("album", new ajax_select_multiple_field("Albums", "album", false))
+        this.add_field("album_descendants", new boolean_input_field("Descend albums", false))
+        this.add_field("album_none", new boolean_input_field("No albums", false))
 
-        this.add_field("category", new ajax_select_multiple_field("Categories", "category", true))
-        this.add_field("category_descendants", new boolean_input_field("Descend categories", true))
-        this.add_field("category_none", new boolean_input_field("No categories", true))
+        this.add_field("category", new ajax_select_multiple_field("Categories", "category", false))
+        this.add_field("category_descendants", new boolean_input_field("Descend categories", false))
+        this.add_field("category_none", new boolean_input_field("No categories", false))
 
         $("<div id='connections'></div>")
             .append(table)
@@ -119,8 +119,8 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
         var table = $("<table />")
         this.table = table
 
-        this.add_field("camera_make", new text_input_field("Camera Make", true))
-        this.add_field("camera_model", new text_input_field("Camera Model", true))
+        this.add_field("camera_make", new text_input_field("Camera Make", false))
+        this.add_field("camera_model", new text_input_field("Camera Model", false))
 
         $("<div id='camera'></div>")
             .append(table)
