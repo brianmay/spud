@@ -1554,8 +1554,6 @@ def _get_search(user, search_dict):
 
         if value == "":
             continue
-        elif key == "timezone":
-            continue
         elif key == "first_id":
             criteria[key] = value
             search = search & Q(pk__gte=_decode_int(value))
