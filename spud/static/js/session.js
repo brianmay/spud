@@ -144,3 +144,24 @@ $.widget('ui.login_dialog',  $.ui.form_dialog, {
 })
 
 
+function update_session(session) {
+    ut = $("#user-tools")
+        .html("")
+
+    ut.append("Welcome, ")
+
+    if (session.is_authenticated) {
+        $("<strong></strong")
+            .text(session.first_name + " " + session.last_name)
+            .appendTo(ut)
+
+        ut.append(" / ")
+        ut.append(logout_a())
+    } else {
+        ut.append("<strong>guest</strong>")
+        ut.append(" / ")
+        ut.append(login_a())
+    }
+    ut.append(" / ")
+    ut.append(settings_a())
+}
