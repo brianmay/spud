@@ -184,6 +184,15 @@ datetime_input_field.prototype.validate = function() {
         }
     }
 
+    if (timezone != "") {
+        if (date == "") {
+            return "Specifying timezone without date wrong"
+        }
+        if (/\s/.test(timezone)) {
+            return "Timezone must not have whitespace"
+        }
+    }
+
     return null
 }
 
