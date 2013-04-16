@@ -16,10 +16,252 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+$.widget('ui.category_search_dialog',  $.ui.form_dialog, {
+
+    _create: function() {
+        this.options.fields = [
+            ["q", new text_input_field("Search for", false)],
+            ["parent", new ajax_select_field("Parent category", "category", false)],
+        ]
+        this.options.title = "Search categories"
+        this.options.description = "Please search for an category."
+        this.options.button = "Search"
+        this._super();
+
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
+        }
+    },
+
+    _submit_values: function(values) {
+        criteria = {}
+
+        var v = values.q
+        if (v) { criteria.q = v }
+
+        var v = values.parent
+        if (v) { criteria.parent = v }
+
+        var search = {
+            criteria: criteria
+        }
+
+        var mythis = this
+        categorys.do_search_results(search, 0, true, function() { mythis.close() })
+    },
+})
+
+
+$.widget('ui.category_search_details',  $.ui.infobox, {
+    _create: function() {
+        this.options.fields = [
+            ["q", new text_output_field("Search for")],
+            ["parent", new link_output_field("Category parent")],
+        ]
+        this.element.addClass("infobox")
+        this._super();
+
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
+        }
+    },
+})
+
+
+
+$.widget('ui.category_details',  $.ui.infobox, {
+    _create: function() {
+        this.options.fields = [
+            ["title", new text_output_field("Title")],
+            ["cover_photo", new photo_output_field("Photo", get_settings().view_size)],
+            ["sortname", new text_output_field("Sort Name")],
+            ["sortorder", new text_output_field("Sort Order")],
+            ["description", new p_output_field("Description")],
+        ]
+        this._super();
+
+        if (this.options.category != null) {
+            this.set(this.options.category)
+        }
+    },
+
+    _destroy: function() {
+        this.img.image("destroy")
+        this.element.empty()
+        this._super()
+    },
+})
+
+
+$.widget('ui.category_list', $.ui.photo_list_base, {
+    _create: function() {
+        this._super()
+        if (this.options.categorys != null) {
+            this.set(this.options.categorys)
+        }
+    },
+
+    set: function(category_list) {
+        var mythis = this
+        this.empty()
+        $.each(category_list, function(j, category) {
+            var photo = category.cover_photo
+            var sort=""
+            if  (category.sortorder || category.sortname) {
+                sort = category.sortname + " " + category.sortorder
+            }
+            mythis.append_photo(photo, category.title, sort, category.description, categorys.a(category, null))
+        })
+        return this
+    }
+})
+
+
+$.widget('ui.category_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.category != null) {
+            this.set(this.options.category)
+        }
+    },
+
+    set: function(category) {
+        this.element.empty()
+
+        var criteria = { category: category.id }
+
+        this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
+
+        this.add_item(
+            $("<a href=''>Slideshow</a>")
+            .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
+            .on("click", function() {
+                set_slideshow_mode()
+                do_photo_search_item({ criteria: criteria }, 0, null, true);
+                return false;
+            }))
+
+        this.add_item(photo_search_form_a(criteria))
+        this.add_item(categorys.search_form_a({}))
+
+        if (category.can_add) {
+            this.add_item(categorys.add_a(category))
+        }
+
+        if (category.can_change) {
+            this.add_item(categorys.change_a(category))
+        }
+
+        if (category.can_delete) {
+            this.add_item(categorys.delete_a(category))
+        }
+
+        return this
+    },
+})
+
+
+$.widget('ui.category_list_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.search != null) {
+            this.set(this.options.search, this.options.results)
+        }
+    },
+
+    set: function(search, results) {
+        this.element.empty()
+        this.add_item(categorys.search_form_a(search.criteria))
+        return this
+    },
+})
+
+
+$.widget('ui.category_change_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.fields = [
+            ["title", new text_input_field("Title", true)],
+            ["description", new p_input_field("Description", false)],
+            ["cover_photo", new photo_select_field("Cover Photo", false)],
+            ["sortname", new text_input_field("Sort Name", false)],
+            ["sortorder", new text_input_field("Sort Order", false)],
+            ["parent", new ajax_select_field("Parent", "category", false)],
+        ]
+
+        this.options.title = "Change category"
+        this.options.button = "Save"
+        this._super();
+
+        if (this.options.category != null) {
+            this.set(this.options.category)
+        }
+    },
+
+    set: function(category) {
+        this.category_id = category.id
+        if (category.id != null) {
+            this.set_title("Change category")
+            this.set_description("Please change category " + category.title + ".")
+        } else {
+            this.set_title("Add new category")
+            this.set_description("Please add new category.")
+        }
+        return this._super(category);
+    },
+
+    _submit_values: function(values) {
+        var mythis = this
+        display_loading()
+        categorys.load_change(
+            this.category_id,
+            values,
+            function(data) {
+                hide_loading()
+                mythis.close()
+                reload_page()
+            },
+            display_error
+        )
+    },
+})
+
+
+$.widget('ui.category_delete_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.title = "Delete category"
+        this.options.button = "Delete"
+        this._super();
+
+        if (this.options.category != null) {
+            this.set(this.options.category)
+        }
+    },
+
+    set: function(category) {
+        this.category_id = category.id
+        this.set_description("Are you absolutely positively sure you really want to delete " +
+            category.title + "? Go ahead join the dark side. There are cookies.")
+    },
+
+    _submit_values: function(values) {
+        this.close()
+        display_loading()
+        categorys.load_delete(
+            this.category_id,
+            function(data) {
+                hide_loading()
+                reload_page()
+            },
+            display_error
+        )
+    },
+})
+
+
 function category_doer() {
     this.type = "category"
-    this.display_type = "Category"
-    this.display_plural = "Categories"
+    this.display_type = "category"
+    this.display_plural = "categories"
     this.list_type = "category_list"
     this.has_children = true
     generic_doer.call(this)
@@ -28,11 +270,8 @@ function category_doer() {
 category_doer.prototype = new generic_doer()
 category_doer.constructor = category_doer
 
-category_doer.prototype.get_search = function(category) {
-    return {
-        results_per_page: get_settings().items_per_page,
-        params: { category: category.id },
-    }
+category_doer.prototype.get_criteria = function(category) {
+    return { category: category.id }
 }
 
 category_doer.prototype.get_new_object = function(parent) {
@@ -44,7 +283,7 @@ category_doer.prototype.get_new_object = function(parent) {
         cover_photo: null,
         sortname: "",
         sortorder: "",
-        parent: parent_category,
+        parent: parent,
         children: [],
     }
 }
@@ -61,8 +300,8 @@ category_doer.prototype.details = function(category, div) {
     $.ui.category_details({category: category}, div)
 }
 
-category_doer.prototype.list_menu = function(search, div) {
-    $.ui.category_list_menu(search, div)
+category_doer.prototype.list_menu = function(search, results, div) {
+    $.ui.category_list_menu({search: search, results: results}, div)
 }
 
 
@@ -79,12 +318,12 @@ category_doer.prototype.list = function(categorys, page, last_page, html_page, d
     }, div)
 }
 
-category_doer.prototype.search_dialog = function(search, dialog) {
-    $.ui.category_search_dialog({ search: search }, dialog)
+category_doer.prototype.search_dialog = function(criteria, dialog) {
+    $.ui.category_search_dialog({ criteria: criteria }, dialog)
 }
 
-category_doer.prototype.search_details = function(search, results, dialog) {
-    $.ui.category_search_details({ search: search, results: results }, dialog)
+category_doer.prototype.search_details = function(criteria, dialog) {
+    $.ui.category_search_details({ criteria: criteria }, dialog)
 }
 
 category_doer.prototype.change_dialog = function(category, dialog) {
@@ -96,4 +335,3 @@ category_doer.prototype.delete_dialog = function(category, dialog) {
 }
 
 categorys = new category_doer()
-

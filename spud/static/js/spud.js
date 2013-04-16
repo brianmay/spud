@@ -223,7 +223,7 @@ function get_doer(type) {
     if (type == "album") {
         return albums
     } else if (type == "category") {
-        return catgorys
+        return categorys
     } else if (type == "place") {
         return places
     } else if (type == "persons") {

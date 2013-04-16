@@ -387,7 +387,7 @@ def _get_category_detail(user, category):
     parent = category.parent_category
     seen = {}
     while parent is not None and parent.pk not in seen:
-        d['parents'].insert(0, _get_category(user, parent))
+        d['ancestors'].insert(0, _get_category(user, parent))
         seen[parent.pk] = True
         parent = parent.parent_category
 
