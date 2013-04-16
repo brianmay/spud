@@ -461,6 +461,14 @@ photo_select_field.prototype.get = function() {
     return this.input.photo_select("get")
 }
 
+photo_select_field.prototype.validate = function() {
+    value = this.input.photo_select("get")
+    if (this.required && !value) {
+        return "This value is required"
+    }
+    return null
+}
+
 
 // define dialog
 $.widget('ui.form_dialog',  $.ui.dialog, {
