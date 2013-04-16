@@ -643,23 +643,6 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
         }
 
         if (photo.can_change) {
-            if (is_edit_mode()) {
-                this.add_item(
-                    $("<a href='#'>View mode</a>")
-                    .on("click", function() {
-                        set_normal_mode()
-                        reload_page()
-                        return false;
-                    }))
-            } else {
-                this.add_item(
-                    $("<a href='#'>Edit mode</a>")
-                    .on("click", function() {
-                        set_edit_mode()
-                        reload_page()
-                        return false;
-                    }))
-            }
             this.add_item(
                 $("<a href='#'>Change photo</a>")
                 .on("click", function() {
@@ -756,23 +739,6 @@ $.widget('ui.photo_list_menu', $.ui.spud_menu, {
             }))
 
         if (results.can_change) {
-            if (is_edit_mode()) {
-                this.add_item(
-                    $("<a href='#'>View mode</a>")
-                    .on("click", function() {
-                        set_normal_mode()
-                        reload_page()
-                        return false;
-                    }))
-            } else {
-                this.add_item(
-                    $("<a href='#'>Edit mode</a>")
-                    .on("click", function() {
-                        set_edit_mode()
-                        reload_page()
-                        return false;
-                    }))
-            }
             this.add_item(
                 $("<a href='#'>Change listed photos</a>")
                 .on("click", function() {

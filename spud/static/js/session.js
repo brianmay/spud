@@ -157,6 +157,26 @@ function update_session(session) {
 
         ut.append(" / ")
         ut.append(logout_a())
+
+        ut.append(" / ")
+
+        if (is_edit_mode()) {
+            $("<a href='#'>Edit mode</a>")
+                .on("click", function() {
+                    set_normal_mode()
+                    reload_page()
+                    return false;
+                })
+                .appendTo(ut)
+        } else {
+            $("<a href='#'>View mode</a>")
+                .on("click", function() {
+                    set_edit_mode()
+                    reload_page()
+                    return false;
+                })
+                .appendTo(ut)
+        }
     } else {
         ut.append("<strong>guest</strong>")
         ut.append(" / ")
