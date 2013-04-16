@@ -161,31 +161,6 @@ $.widget('ui.myselectable', $.ui.selectable, {
 });
 
 
-$.widget('ui.quickautocomplete', $.ui.autocomplete, {
-    _renderItem: function( ul, item ) {
-        return $( "<li>" )
-            .append( "<a>" + item.label + "<br/>" + item.desc + "</a>" )
-            .appendTo( ul );
-    },
-    _suggest: function( items ) {
-        if (items.length != 1) {
-            this._super( items );
-            return
-        }
-        var item = items[0]
-        if ( false !== this._trigger( "select", null, { item: item } ) ) {
-            this._value( item.value );
-        }
-        // reset the term after the select event
-        // this allows custom select handling to work properly
-        this.term = this._value();
-
-        this.close();
-        this.selectedItem = item;
-    }
-});
-
-
 $.widget('ui.autocompletehtml', $.ui.autocomplete, {
     _create: function(){
         this._super();
@@ -347,6 +322,53 @@ $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
         div.fadeOut().remove();
     },
 })
+
+
+$.widget('ui.quickautocomplete', $.ui.ajaxautocomplete, {
+    _create: function(){
+        delete this.options.type
+        this.options.source = operations,
+        this._super();
+    },
+
+    _renderItem: function( ul, item ) {
+        return $( "<li>" )
+            .append( "<a>" + item.label + "<br/>" + item.desc + "</a>" )
+            .appendTo( ul );
+    },
+
+    _addKiller: function(item) {
+        var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
+        var div = $("<div></div>")
+            .attr("id", this.id+'_on_deck_'+item.pk)
+            .append(killButton)
+            .append(item.desc)
+            .appendTo(this.deck)
+        killButton.on("click", $.proxy(
+            function(ev) {
+                this._kill(item, div);
+                return this._trigger("killed", ev, item)
+            },
+            this))
+    },
+
+    _suggest: function( items ) {
+        if (items.length != 1) {
+            this._super( items );
+            return
+        }
+        var item = items[0]
+        if ( false !== this._trigger( "select", null, { item: item } ) ) {
+            this._value( item.value );
+        }
+        // reset the term after the select event
+        // this allows custom select handling to work properly
+        this.term = this._value();
+
+        this.close();
+        this.selectedItem = item;
+    }
+});
 
 
 $.widget('ui.photo_select',  $.ui.ajaxautocomplete, {

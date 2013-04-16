@@ -367,6 +367,41 @@ ajax_select_field.prototype.get = function() {
 }
 
 
+// define quick_select_field
+function quick_select_field(title, type, required) {
+    input_field.call(this, title, required)
+    this.type = type
+}
+
+quick_select_field.prototype = new input_field()
+quick_select_field.constructor = quick_select_field
+quick_select_field.prototype.create = function(id) {
+    return ac = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .quickautocomplete({type: this.type})
+}
+
+quick_select_field.prototype.destroy = function() {
+    this.input.quickautocomplete("destroy")
+}
+
+quick_select_field.prototype.set = function(value) {
+    var item = null
+    if (value != null) {
+        item = {
+            pk: value.id,
+            repr: value.title,
+        }
+    }
+    this.input.quickautocomplete("set", item)
+}
+
+quick_select_field.prototype.get = function() {
+    return this.input.quickautocomplete("get")
+}
+
+
 // define ajax_select_multiple_field
 function ajax_select_multiple_field(title, type, required) {
     input_field.call(this, title, required)

@@ -621,76 +621,6 @@ function display_photo_search_item(search, results, n) {
 }
 
 
-var operations = [
-    {
-        value: "title",
-        label: "Change title",
-        desc: "Change the photo's title",
-        fn: display_change_photo_title,
-    },
-    {
-        value: "description",
-        label: "Change description",
-        desc: "Change the photo's description",
-        fn: display_change_photo_description,
-    },
-    {
-        value: "view",
-        label: "Change view",
-        desc: "Change the photo's view",
-        fn: display_change_photo_view,
-    },
-    {
-        value: "comments",
-        label: "Change comments",
-        desc: "Change the photo's comments",
-        fn: display_change_photo_comment,
-    },
-    {
-        value: "datetime",
-        label: "Change datetime",
-        desc: "Change the photo's date/time",
-        fn: display_change_photo_datetime,
-    },
-    {
-        value: "action",
-        label: "Change action",
-        desc: "Change the photo's action",
-        fn: display_change_photo_action,
-    },
-    {
-        value: "photographer",
-        label: "Change photographer",
-        desc: "Change the photo's photographer",
-        fn: display_change_photo_photographer,
-    },
-    {
-        value: "place",
-        label: "Change place",
-        desc: "Change the photo's place",
-        fn: display_change_photo_place,
-    },
-    {
-        value: "album",
-        label: "Change albums",
-        desc: "Add/remove albums from photo",
-        fn: display_change_photo_albums,
-    },
-    {
-        value: "category",
-        label: "Change categories",
-        desc: "Add/remove categories from photo",
-        fn: display_change_photo_categorys,
-    },
-    {
-        value: "person",
-        label: "Change persons",
-        desc: "Add/remove people from photo",
-        fn: display_change_photo_persons,
-    },
-];
-
-
 function cancel_keyboard() {
     $(document).off("keydown")
 }
@@ -719,38 +649,84 @@ function photo_change_keyboard_event(ev, photo, criteria, number_results) {
 }
 
 
+var operations = [
+    {
+        pk: "title",
+        label: "Change title",
+        desc: "Change the photo's title",
+        fn: display_change_photo_title,
+    },
+    {
+        pk: "description",
+        label: "Change description",
+        desc: "Change the photo's description",
+        fn: display_change_photo_description,
+    },
+    {
+        pk: "view",
+        label: "Change view",
+        desc: "Change the photo's view",
+        fn: display_change_photo_view,
+    },
+    {
+        pk: "comments",
+        label: "Change comments",
+        desc: "Change the photo's comments",
+        fn: display_change_photo_comment,
+    },
+    {
+        pk: "datetime",
+        label: "Change datetime",
+        desc: "Change the photo's date/time",
+        fn: display_change_photo_datetime,
+    },
+    {
+        pk: "action",
+        label: "Change action",
+        desc: "Change the photo's action",
+        fn: display_change_photo_action,
+    },
+    {
+        pk: "photographer",
+        label: "Change photographer",
+        desc: "Change the photo's photographer",
+        fn: display_change_photo_photographer,
+    },
+    {
+        pk: "place",
+        label: "Change place",
+        desc: "Change the photo's place",
+        fn: display_change_photo_place,
+    },
+    {
+        pk: "album",
+        label: "Change albums",
+        desc: "Add/remove albums from photo",
+        fn: display_change_photo_albums,
+    },
+    {
+        pk: "category",
+        label: "Change categories",
+        desc: "Add/remove categories from photo",
+        fn: display_change_photo_categorys,
+    },
+    {
+        pk: "person",
+        label: "Change persons",
+        desc: "Add/remove people from photo",
+        fn: display_change_photo_persons,
+    },
+];
+
+
 function display_change_photo(photo, criteria, number_results) {
     close_all_dialog()
 
-    var dialog = $("<div id='dialog'></div>")
-        .attr('title', "Choose operation")
-
-    var ac = $('<input id="project" />')
-        .quickautocomplete({
-      minLength: 0,
-      source: operations,
-      select: function( event, ui ) {
-        dialog.dialog( "close" )
-        ui.item.fn(photo, search_criteria, number_results)
-        return false;
-      }
-    })
-
-
-    var f = $("<form method='get' />")
-        .append(ac)
-
-    dialog
-        .append("<p>" + escapeHTML(number_results) + " photos will be changed.</p>")
-        .append(f)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            buttons: {
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
+    $("<div id='dialog'></div>")
+        .change_photos_dialog({
+            photo: photo,
+            criteria: criteria,
+            number_results: number_results
         })
 }
 

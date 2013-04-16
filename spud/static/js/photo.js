@@ -729,8 +729,7 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
 
 $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
     _create: function() {
-        this.options.description = "Please change photo's " + this.options.title + "."
-        this.options.title = "Change photo "+this.options.title
+        this.options.title = "Change photo "+this.options.type
         this.options.button = "Save"
         this._super();
     },
@@ -818,6 +817,7 @@ $.widget('ui.change_photo_comment_dialog',  $.ui.change_photo_attribute_dialog, 
     },
 })
 
+
 $.widget('ui.change_photo_datetime_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "datetime"
@@ -832,6 +832,7 @@ $.widget('ui.change_photo_datetime_dialog',  $.ui.change_photo_attribute_dialog,
         this._super(values);
     },
 })
+
 
 $.widget('ui.change_photo_action_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
@@ -858,6 +859,7 @@ $.widget('ui.change_photo_action_dialog',  $.ui.change_photo_attribute_dialog, {
     },
 })
 
+
 $.widget('ui.change_photo_photographer_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "photographer"
@@ -873,6 +875,7 @@ $.widget('ui.change_photo_photographer_dialog',  $.ui.change_photo_attribute_dia
     },
 })
 
+
 $.widget('ui.change_photo_place_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "place"
@@ -887,6 +890,7 @@ $.widget('ui.change_photo_place_dialog',  $.ui.change_photo_attribute_dialog, {
         this._super(values);
     },
 })
+
 
 $.widget('ui.change_photo_albums_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
@@ -929,6 +933,7 @@ $.widget('ui.change_photo_albums_dialog',  $.ui.change_photo_attribute_dialog, {
         this._super(values);
     },
 })
+
 
 $.widget('ui.change_photo_categorys_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
@@ -1090,4 +1095,48 @@ $.widget('ui.delete_photo_relation_dialog',  $.ui.form_dialog, {
     },
 })
 
+
+$.widget('ui.change_photos_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.fields = [
+            ["action", new quick_select_field("Action")],
+        ]
+        this.options.title = "Change photo"
+        this.options.button = "Go"
+
+        var initial = this.options.initial
+        delete this.options.initial
+        this._super();
+
+        this.set(
+            initial,
+            this.options.photo,
+            this.options.criteria,
+            this.options.number_results
+        )
+    },
+
+    set: function(initial, photo, criteria, number_results) {
+        this.set_description("Please specify the attribute to change. " +
+            number_results + " photos will be altered.")
+        if (initial != null) {
+            this._super(initial);
+        }
+    },
+
+    _submit_values: function(values) {
+        var mythis = this
+        $.each(operations, function(j, op) {
+            if (op.pk == values.action) {
+                mythis.close()
+                op.fn(
+                    mythis.options.photo,
+                    mythis.options.criteria,
+                    mythis.options.number_results
+                )
+                return false
+            }
+        })
+    },
+})
 
