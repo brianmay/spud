@@ -1076,64 +1076,19 @@ function submit_change_photo_attribute(search_criteria, updates, number_results,
 }
 
 
-function submit_change_photo_relation(photo_relation, dialog, form) {
-    var updates = {
-        desc_1: parse_form_string(form.desc_1.value),
-        desc_2: parse_form_string(form.desc_2.value),
-        photo_1: parse_form_string(form.photo_1.value),
-        photo_2: parse_form_string(form.photo_2.value),
-    }
-
-    display_loading()
-    load_photo_relation_change(
-        photo_relation.id,
-        updates,
-        function(data) {
-            hide_loading()
-            dialog.dialog("close")
-            reload_page()
-        },
-        display_error
-    )
-
-    return false
-}
-
-
-function display_photo_relation_delete(photo_relation) {
-    var p = $("<p></p>").text("Are you sure you want to delete the photo relation between "
-            + photo_relation.photo_1.title + " and " + photo_relation.photo_2.title + "?")
-    var dialog = $("<div id='dialog'></div>")
-        .append(p)
-        .attr('title', "Delete " + photo_relation.title)
-        .dialog({
-            modal: true,
-            close: function( event, ui ) { $(this).dialog("destroy") },
-            buttons: {
-                Delete: function() {
-                    submit_photo_relation_delete(photo_relation, $(this))
-                },
-                Cancel: function() {
-                    $( this ).dialog( "close" )
-                },
-            },
+function display_change_photo_relation(photo_relation) {
+    $("<div id='dialog'></div>")
+        .change_photo_relation_dialog({
+            initial: photo_relation,
         })
 }
 
 
-function submit_photo_relation_delete(photo_relation, dialog) {
-    dialog.dialog("close")
-    display_loading()
-    load_photo_relation_delete(
-        photo_relation.id,
-        function(data) {
-            hide_loading()
-            window.history.go(-1)
-        },
-        display_error
-    )
-
-    return false
+function display_photo_relation_delete(photo_relation) {
+    $("<div id='dialog'></div>")
+        .delete_photo_relation_dialog({
+            initial: photo_relation,
+        })
 }
 
 
@@ -1529,6 +1484,7 @@ function do_change_photo_relation(photo_relation_id, push_history) {
     display_loading()
     load_photo_relation(photo_relation_id,
         function(data) {
+            hide_loading()
             display_change_photo_relation(data.photo_relation)
         },
 

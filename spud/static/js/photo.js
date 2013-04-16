@@ -1016,3 +1016,78 @@ $.widget('ui.change_photo_persons_dialog',  $.ui.change_photo_attribute_dialog, 
         this._super(values);
     },
 })
+
+$.widget('ui.change_photo_relation_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.fields = [
+            ["photo_1", new photo_select_field("Photo", true)],
+            ["desc_1", new text_input_field("Description", true)],
+            ["photo_2", new photo_select_field("Photo", true)],
+            ["desc_2", new text_input_field("Description", true)],
+        ]
+
+        this.options.title = "Change relationship"
+        this.options.button = "Save"
+        this._super();
+    },
+
+    set: function(initial) {
+        this.initial_id = initial.id
+        if (initial != null) {
+            this.set_title("Change relationship")
+            this.set_description("Change relationship")
+        } else {
+            this.set_title("Add new relationship")
+            this.set_description("Please add new relationship.")
+        }
+        return this._super(initial);
+    },
+
+    _submit_values: function(values) {
+        var mythis = this
+        display_loading()
+        load_photo_relation_change(
+            this.initial_id,
+            values,
+            function(data) {
+                hide_loading()
+                mythis.close()
+                reload_page()
+            },
+            display_error
+        )
+    },
+})
+
+
+$.widget('ui.delete_photo_relation_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.title = "Delete relationship"
+        this.options.button = "Delete"
+        this._super();
+    },
+
+    set: function(initial) {
+        this.initial_id = initial.id
+        this.set_description("Are you absolutely positively sure you really want to delete " +
+            "the relationship between " + initial.photo_1.title + " and " + initial.photo_2.title +
+            "? Go ahead join the dark side. There are cookies.")
+    },
+
+    _submit_values: function(values) {
+        var mythis = this
+        this.close()
+        display_loading()
+        load_photo_relation_delete(
+            this.initial_id,
+            function(data) {
+                hide_loading()
+                mythis.close()
+                reload_page()
+            },
+            display_error
+        )
+    },
+})
+
+
