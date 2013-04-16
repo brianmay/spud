@@ -112,24 +112,6 @@ $.fn.p = function(text){
     return this
 }
 
-// FIXME - is this still used???
-$.fn.append_list = function(list){
-    if (list.length == 0) {
-        return this
-    }
-
-    var ul = $("<ul></ul>")
-
-    $.each(list, function(i, item){
-        $("<li></li>")
-            .append(item)
-            .appendTo(ul)
-    })
-
-    ul.appendTo(this)
-    return this
-}
-
 
 $.fn.append_csv = function(list){
     if (list.length == 0) {
