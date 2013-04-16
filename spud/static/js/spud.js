@@ -540,6 +540,23 @@ function display_photo_article(photo, search, results, n) {
             })
             .appendTo("#content-main")
 
+        // preload next/prev photos
+        var size = get_settings().view_size
+        if (results.prev_photo) {
+            var image = results.prev_photo.thumb[size]
+            if (image) {
+                var img = new Image()
+                img.src = image.url
+            }
+        }
+        if (results.next_photo) {
+            var image = results.next_photo.thumb[size]
+            if (image) {
+                var img = new Image()
+                img.src = image.url
+            }
+        }
+
         if (n > 0) {
             photo_search_item_a(search, n-1, results.prev_photo, "")
                 .addClass("prevslide")
@@ -563,6 +580,23 @@ function display_photo_slideshow(photo, search, results, n) {
     $("<div></div>")
         .photo_slideshow({ photo: photo, })
         .appendTo("#content-main")
+
+    // preload next/prev photos
+    var size = get_settings().click_size
+    if (results.prev_photo) {
+        var image = results.prev_photo.thumb[size]
+        if (image) {
+            var img = new Image()
+            img.src = image.url
+        }
+    }
+    if (results.next_photo) {
+        var image = results.next_photo.thumb[size]
+        if (image) {
+            var img = new Image()
+            img.src = image.url
+        }
+    }
 
     if (search != null) {
         if (n > 0) {
