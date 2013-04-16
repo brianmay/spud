@@ -59,7 +59,7 @@ function get_photo_style(data) {
 $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
     _create: function() {
         this.options.title = "Photo search"
-        this.options.description = "Please search for an photo."
+        this.options.description = "Please search for a photo."
         this.options.button = "Search"
         this._super();
 
