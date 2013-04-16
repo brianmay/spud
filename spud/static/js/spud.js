@@ -477,7 +477,7 @@ function display_photo_article(photo, search, results, n) {
     if (photo.can_change && is_edit_mode()) {
         prefix = "Edit "
     }
-    document.title = prefix + photo.title + " | Album | Spud"
+    document.title = prefix + photo.title + " | Photo | Spud"
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
     $("<div></div>")
@@ -557,6 +557,16 @@ function display_photo_slideshow(photo, search, results, n) {
     $("<div></div>")
         .photo_slideshow({ photo: photo, })
         .appendTo("#content-main")
+
+    var prefix = ""
+    if (photo.can_change && is_edit_mode()) {
+        prefix = "Edit "
+    }
+    document.title = prefix + photo.title + " | Photo | Spud"
+
+    if (photo.can_change && is_edit_mode()) {
+        photo_change_keyboard(photo, { photos: photo.id }, 1)
+    }
 
     // preload next/prev photos
     var size = get_settings().click_size
