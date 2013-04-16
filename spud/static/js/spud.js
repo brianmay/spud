@@ -956,64 +956,33 @@ function display_change_photo_comment(photo, criteria, number_results) {
 }
 
 
-function display_change_photo_datetime(photo, search_criteria, number_results) {
-    var datetime=""
-    if (photo != null) {
-        datetime = photo.localtime.date + " " + photo.localtime.time + " " + photo.localtime.timezone
-    }
-    var table = $("<table />")
-    append_field(table, "datetime", "Date/Time")
-        .append(get_input_element("datetime", datetime, "text"))
-    var get_updates = function(form) {
-        return {
-            set_datetime: form.datetime.value,
-        }
-    }
-    display_change_photo_attribute("datetime", table, get_updates, search_criteria, number_results, { } )
+function display_change_photo_datetime(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_datetime_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
-function display_change_photo_action(photo, search_criteria, number_results) {
-    var action=""
-    if (photo != null) {
-        action = photo.action
-    }
-    var table = $("<table />")
-    append_field(table, "action", "Action")
-        .append(get_input_select("action", [
-            ['', 'no action'],
-            ['D', 'delete'],
-            ['S', 'regenerate size'],
-            ['R', 'regenerate thumbnails'],
-            ['M', 'move photo'],
-            ['auto', 'rotate automatic'],
-            ['90', 'rotate 90 degrees clockwise'],
-            ['180', 'rotate 180 degrees clockwise'],
-            ['270', 'rotate 270 degrees clockwise'],
-            ], action))
-    var get_updates = function(form) {
-        return {
-            set_action: form.action.value,
-        }
-    }
-    display_change_photo_attribute("action", table, get_updates, search_criteria, number_results, { width: 400, } )
+function display_change_photo_action(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_action_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
-function display_change_photo_photographer(photo, search_criteria, number_results) {
-    var photographer=""
-    if (photo != null) {
-        photographer = photo.photographer
-    }
-    var table = $("<table />")
-    append_field(table, "photographer_text", "Photographer")
-        .append(get_ajax_select("photographer", 'person', photographer))
-    var get_updates = function(form) {
-        return {
-            set_photographer: form.photographer.value,
-        }
-    }
-    display_change_photo_attribute("photographer", table, get_updates, search_criteria, number_results, { } )
+function display_change_photo_photographer(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_photographer_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 

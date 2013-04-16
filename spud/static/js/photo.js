@@ -817,3 +817,58 @@ $.widget('ui.change_photo_comment_dialog',  $.ui.change_photo_attribute_dialog, 
         this._super(values);
     },
 })
+
+$.widget('ui.change_photo_datetime_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "datetime"
+        this.options.fields = {
+            localtime: new datetime_input_field("date/time", false)
+        }
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_datetime: values.datetime }
+        this._super(values);
+    },
+})
+
+$.widget('ui.change_photo_action_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "action"
+        this.options.fields = {
+            action: new select_input_field("Action", {
+                null: 'no action',
+                D: 'delete',
+                S: 'regenerate size',
+                R: 'regenerate thumbnails',
+                M: 'move photo',
+                auto: 'rotate automatic',
+                90: 'rotate 90 degrees clockwise',
+                180: 'rotate 180 degrees clockwise',
+                270: 'rotate 270 degrees clockwise',
+            }, false),
+        }
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_action: values.action }
+        this._super(values);
+    },
+})
+
+$.widget('ui.change_photo_photographer_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "photographer"
+        this.options.fields = {
+            photographer: new ajax_select_field("Photographer", "person", false)
+        }
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_photographer: values.photographer }
+        this._super(values);
+    },
+})
