@@ -62,18 +62,6 @@ function is_photo_selected(photo) {
 }
 
 
-function set_edit_mode() {
-    $(document).data("mode", "edit")
-}
-
-function set_normal_mode() {
-    $(document).data("mode", null)
-}
-
-function is_edit_mode() {
-    return ($(document).data("mode") == "edit")
-}
-
 function set_slideshow_mode() {
     $(document).data("photo_mode", "slideshow")
 }

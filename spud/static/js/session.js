@@ -57,6 +57,18 @@ function set_settings(settings) {
 }
 
 
+function set_edit_mode() {
+    $(document).data("mode", "edit")
+}
+
+function set_normal_mode() {
+    $(document).data("mode", null)
+}
+
+function is_edit_mode() {
+    return ($(document).data("mode") == "edit")
+}
+
 list_sizes = [
     ["thumb", "Thumb"]
 ]
