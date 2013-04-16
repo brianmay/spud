@@ -168,6 +168,10 @@ datetime_input_field.prototype.validate = function() {
             return "time format not hh:mm[:ss]"
         }
 
+        if (date == "") {
+            return "date must be given if time is given"
+        }
+
         var a = time.split(":")
         if (Number(a[0]) < 0 || Number(a[0]) > 23) {
             return "Hour must be between 0 and 23"
@@ -177,12 +181,6 @@ datetime_input_field.prototype.validate = function() {
         }
         if (Number(a[2]) < 0 || Number(a[2]) > 59) {
             return "Seconds must be between 0 and 59"
-        }
-    }
-
-    if (date == "") {
-        if (time != "") {
-            return "date must be given if time is given"
         }
     }
 
