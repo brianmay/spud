@@ -73,6 +73,10 @@ input_field.prototype.set_error = function(error) {
     }
 }
 
+input_field.prototype.clear_error = function(error) {
+    this.set_error(null)
+}
+
 input_field.prototype.destroy = function() {
 }
 
@@ -531,10 +535,14 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
     _check_submit: function() {
         var mythis = this
         var allok = true
-        $.each(mythis.fields, function(id, field){
+        $.each(mythis.fields, function(id, field) {
             var error = field.validate()
-            field.set_error(error)
-            if (error) { allok = false; }
+            if (error) {
+                field.set_error(error)
+                allok = false;
+            } else {
+                field.clear_error()
+            }
         })
         if (allok) {
             this._submit()
@@ -544,7 +552,7 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
     _submit: function() {
         var mythis = this
         var values = {}
-        $.each(mythis.fields, function(id, field){
+        $.each(mythis.fields, function(id, field) {
             values[id] = mythis.get_value(id)
         })
         this._submit_values(values)
@@ -555,8 +563,8 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
 
     set: function(values) {
         var mythis = this
-        $.each(mythis.fields, function(id, field){
-            values[id] = mythis.set_value(id, values[id])
+        $.each(mythis.fields, function(id, field) {
+            mythis.set_value(id, values[id])
         })
     },
 
@@ -600,6 +608,10 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
 
     set_value: function(id, value) {
         this.fields[id].set(value)
+    },
+
+    set_error: function(id, message) {
+        this.fields[id].set_error(message)
     },
 
     get_value: function(id) {

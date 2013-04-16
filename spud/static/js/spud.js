@@ -986,60 +986,23 @@ function display_change_photo_photographer(photo, criteria, number_results) {
 }
 
 
-function display_change_photo_place(photo, search_criteria, number_results) {
-    var place=""
-    if (photo != null) {
-        place = photo.place
-    }
-    var table = $("<table />")
-    append_field(table, "place_text", "Place")
-        .append(get_ajax_select("place", 'place', place))
-    var get_updates = function(form) {
-        return {
-            set_place: form.place.value,
-        }
-    }
-    display_change_photo_attribute("place", table, get_updates, search_criteria, number_results, { } )
+function display_change_photo_place(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_place_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
-function display_change_photo_albums(photo, search_criteria, number_results) {
-    var table = $("<table />")
-
-    if (photo != null) {
-        var table = $("<table />")
-        append_field(table, "albums_text", "Albums")
-            .append(get_ajax_multiple_select("albums", 'album', photo.albums, false))
-        var get_updates = function(form) {
-            var set = []
-            if (form.albums.value != "|") {
-                set = form.albums.value.slice(1,-1).split("|")
-            }
-            return {
-                set_albums: set.join("."),
-            }
-        }
-    } else {
-        append_field(table, "add_album_text", "Add Album")
-            .append(get_ajax_multiple_select("add_album", 'album', [], false))
-        append_field(table, "del_album_text", "Delete Album")
-            .append(get_ajax_multiple_select("del_album", 'album', [], false))
-        var get_updates = function(form) {
-            var add = []
-            if (form.add_album.value != "|") {
-                add = form.add_album.value.slice(1,-1).split("|")
-            }
-            var del = []
-            if (form.del_album.value != "|") {
-                del = form.del_album.value.slice(1,-1).split("|")
-            }
-            return {
-                add_albums: add.join("."),
-                del_albums: del.join("."),
-            }
-        }
-    }
-    display_change_photo_attribute("album", table, get_updates, search_criteria, number_results, { } )
+function display_change_photo_albums(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_album_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 

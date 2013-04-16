@@ -244,8 +244,8 @@ $.widget('ui.infobox', {
 
     set: function(values) {
         var mythis = this
-        $.each(mythis.fields, function(id, field){
-            values[id] = mythis.set_value(id, values[id])
+        $.each(mythis.fields, function(id, field) {
+            mythis.set_value(id, values[id])
         })
     },
 
@@ -257,7 +257,7 @@ $.widget('ui.infobox', {
 
     add_fields: function(fields) {
         var mythis = this
-        $.each(fields, function(i, v){
+        $.each(fields, function(i, v) {
             var id = v[0]
             var field = v[1]
             mythis.add_field(id, field)

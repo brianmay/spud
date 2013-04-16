@@ -872,3 +872,60 @@ $.widget('ui.change_photo_photographer_dialog',  $.ui.change_photo_attribute_dia
         this._super(values);
     },
 })
+
+$.widget('ui.change_photo_place_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "place"
+        this.options.fields = [
+            ["place", new ajax_select_field("Place", "place", false)],
+        ]
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_place: values.place }
+        this._super(values);
+    },
+})
+
+$.widget('ui.change_photo_album_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "album"
+        var initial = this.options.initial
+        delete this.options.initial
+        this._super();
+        this.set(initial)
+    },
+
+    set: function(values) {
+        if (values != null) {
+            this.add_field("albums", new ajax_select_multiple_field("Albums", "album", false))
+            this._super(values);
+        } else {
+            this.add_field("add_albums", new ajax_select_multiple_field("Add albums", "album", false))
+            this.add_field("del_albums", new ajax_select_multiple_field("Remove albums", "album", false))
+            // do not call super as add_albums and del_albums don't exist in values
+        }
+    },
+
+    _submit_values: function(values) {
+        if (values.albums != null) {
+            values = { set_albums: values.albums }
+        } else {
+            var seen = {}
+            var dups = false
+            $.each(values.add_albums, function(j, id) { seen[id] = true; })
+            $.each(values.del_albums, function(j, id) { if (seen[id]) dups = true; })
+            if (dups) {
+                this.set_error("del_albums", "Trying to add and delete the same album")
+                return
+            }
+
+            values = {
+                add_albums: values.add_albums.join("."),
+                del_albums: values.del_albums.join("."),
+            }
+        }
+        this._super(values);
+    },
+})
