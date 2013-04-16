@@ -273,7 +273,9 @@ select_input_field.prototype.set_options = function(options) {
     this.input.empty()
     this.options = {}
     var mythis = this
-    $.each(options, function(id, value){
+    $.each(options, function(id, v){
+        var id = v[0]
+        var value = v[1]
         mythis.options[id] = $('<option />')
             .attr('value', id)
             .text(value)

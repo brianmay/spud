@@ -57,21 +57,21 @@ function set_settings(settings) {
 }
 
 
-list_sizes = {
-    thumb: "Thumb",
-}
+list_sizes = [
+    ["thumb", "Thumb"]
+]
 
-view_sizes = {
-    thumb: "Thumb",
-    mid: "Medium",
-    large: "Large",
-}
+view_sizes = [
+    ["thumb", "Thumb"],
+    ["mid", "Medium"],
+    ["large", "Large"],
+]
 
-click_sizes = {
-    thumb: "Thumb",
-    mid: "Medium",
-    large: "Large",
-}
+click_sizes = [
+    ["thumb", "Thumb"],
+    ["mid", "Medium"],
+    ["large", "Large"],
+]
 
 
 $.widget('ui.settings_dialog',  $.ui.form_dialog, {

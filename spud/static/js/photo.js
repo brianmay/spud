@@ -837,17 +837,17 @@ $.widget('ui.change_photo_action_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "action"
         this.options.fields = {
-            action: new select_input_field("Action", {
-                null: 'no action',
-                D: 'delete',
-                S: 'regenerate size',
-                R: 'regenerate thumbnails',
-                M: 'move photo',
-                auto: 'rotate automatic',
-                90: 'rotate 90 degrees clockwise',
-                180: 'rotate 180 degrees clockwise',
-                270: 'rotate 270 degrees clockwise',
-            }, false),
+            action: new select_input_field("Action", [
+                ["", "no action"],
+                ["D", "delete"],
+                ["S", "regenerate size"],
+                ["R", "regenerate thumbnails"],
+                ["M", "move photo"],
+                ["auto", "rotate automatic"],
+                ["90", "rotate 90 degrees clockwise"],
+                ["180", "rotate 180 degrees clockwise"],
+                ["270", "rotate 270 degrees clockwise"],
+            ], false),
         }
         this._super();
     },
