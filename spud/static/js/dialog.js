@@ -436,9 +436,8 @@ ajax_select_sorted_field.prototype.get = function() {
 
 
 // define photo_select_field
-function photo_select_field(title, type, required) {
+function photo_select_field(title, required) {
     input_field.call(this, title, required)
-    this.type = type
 }
 
 photo_select_field.prototype = new input_field()
