@@ -702,7 +702,7 @@ function photo_change_keyboard(photo, search_criteria, number_results) {
 }
 
 
-function photo_change_keyboard_event(ev, photo, search_criteria, number_results) {
+function photo_change_keyboard_event(ev, photo, criteria, number_results) {
     var key = String.fromCharCode(ev.which)
 
     if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey)
@@ -713,6 +713,14 @@ function photo_change_keyboard_event(ev, photo, search_criteria, number_results)
 
     if ($("#dialog").length > 0)
         return true
+
+    display_change_photo(photo, criteria, number_results)
+    return false
+}
+
+
+function display_change_photo(photo, criteria, number_results) {
+    close_all_dialog()
 
     var dialog = $("<div id='dialog'></div>")
         .attr('title', "Choose operation")
@@ -744,7 +752,6 @@ function photo_change_keyboard_event(ev, photo, search_criteria, number_results)
                 },
             },
         })
-    return false
 }
 
 
@@ -872,6 +879,7 @@ function display_photo_relation_delete(photo_relation) {
             initial: photo_relation,
         })
 }
+
 
 function display_photo_search_results(search, results) {
     reset_display()
