@@ -131,6 +131,16 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
         var criteria = { album: album.id }
 
         this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
+
+        this.add_item(
+            $("<a href=''>Slideshow</a>")
+            .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
+            .on("click", function() {
+                set_slideshow_mode()
+                do_photo_search_item({ criteria: criteria }, 0, null, true);
+                return false;
+            }))
+
         this.add_item(photo_search_form_a(criteria))
         this.add_item(albums.search_form_a({}))
 
@@ -144,35 +154,6 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 
         if (album.can_delete) {
             this.add_item(albums.delete_a(album))
-        }
-
-
-        // FIXME
-        if (true) {
-            var change_mode = is_edit_mode()
-            if (change_mode) {
-                this.add_item(
-                    $("<a href='#'>View mode</a>")
-                    .on("click", function() {
-                        set_normal_mode()
-                        reload_page()
-                        return false;
-                    }))
-            } else {
-                this.add_item(
-                    $("<a href='#'>Edit mode</a>")
-                    .on("click", function() {
-                        set_edit_mode()
-                        reload_page()
-                        return false;
-                    }))
-            }
-            this.add_item(
-                $("<a href='#'>Change listed photo</a>")
-                .on("click", function() {
-                    display_change_photo(null, criteria, 1)
-                    return false;
-                }))
         }
 
         return this
