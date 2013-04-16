@@ -126,7 +126,7 @@ def _decode_array(value):
     return value.split(".")
 
 
-def _get_session(request):
+def _json_session(request):
     is_authenticated = request.user.is_authenticated()
 
     session = {
@@ -142,7 +142,7 @@ def _get_session(request):
     return session
 
 
-def _get_photo(user, photo):
+def _json_photo(user, photo):
     if photo is None:
         return None
 
@@ -156,8 +156,8 @@ def _get_photo(user, photo):
         'view': photo.view,
         'rating': photo.rating,
         'description': photo.description,
-        'localtime': _get_datetime(photo.datetime, photo.utc_offset),
-        'utctime': _get_datetime(photo.datetime, 0),
+        'localtime': _json_datetime(photo.datetime, photo.utc_offset),
+        'utctime': _json_datetime(photo.datetime, 0),
 #        'camera_make': photo.camera_make,
 #        'camera_model': photo.camera_model,
 #        'flash_used': photo.flash_used,
@@ -202,7 +202,7 @@ def _get_photo(user, photo):
     return resp
 
 
-def _get_photo_detail(user, photo):
+def _json_photo_detail(user, photo):
     if photo is None:
         return None
 
@@ -212,13 +212,13 @@ def _get_photo_detail(user, photo):
         'id': photo.photo_id,
         'title': unicode(photo),
         'name': photo.name,
-        'photographer': _get_person(user, photo.photographer),
-        'place': _get_place(user, photo.location),
+        'photographer': _json_person(user, photo.photographer),
+        'place': _json_place(user, photo.location),
         'view': photo.view,
         'rating': photo.rating,
         'description': photo.description,
-        'localtime': _get_datetime(photo.datetime, photo.utc_offset),
-        'utctime': _get_datetime(photo.datetime, 0),
+        'localtime': _json_datetime(photo.datetime, photo.utc_offset),
+        'utctime': _json_datetime(photo.datetime, 0),
         'camera_make': photo.camera_make,
         'camera_model': photo.camera_model,
         'flash_used': photo.flash_used,
@@ -234,9 +234,9 @@ def _get_photo_detail(user, photo):
 #        'comment': photo.comment,
         'action': photo.action,
 #        'timestamp': photo.timestamp,
-        'albums': [_get_album(user, a) for a in photo.albums.all()],
-        'categorys': [_get_category(user, c) for c in photo.categorys.all()],
-        'persons': [_get_person(user, p) for p in photo.persons.order_by("photo_person__position").all()],
+        'albums': [_json_album(user, a) for a in photo.albums.all()],
+        'categorys': [_json_category(user, c) for c in photo.categorys.all()],
+        'persons': [_json_person(user, p) for p in photo.persons.order_by("photo_person__position").all()],
 #        'relations': photo.relations,
 
         'thumb': {},
@@ -252,14 +252,14 @@ def _get_photo_detail(user, photo):
         resp['related'].append({
             'id': pr.pk,
             'title': pr.desc_2,
-            'photo': _get_photo(user, pr.photo_2),
+            'photo': _json_photo(user, pr.photo_2),
         })
 
     for pr in photo.relations_2.all():
         resp['related'].append({
             'id': pr.pk,
             'title': pr.desc_1,
-            'photo': _get_photo(user, pr.photo_1),
+            'photo': _json_photo(user, pr.photo_1),
         })
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -283,7 +283,7 @@ def _get_photo_detail(user, photo):
     return resp
 
 
-def _get_album(user, album):
+def _json_album(user, album):
     if album is None:
         return None
 
@@ -294,7 +294,7 @@ def _get_album(user, album):
 #        'parent_album': album.parent_album,
         'title': album.album,
         'description': album.album_description,
-        'cover_photo': _get_photo(user, album.cover_photo),
+        'cover_photo': _json_photo(user, album.cover_photo),
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': unicode(album.revised),
@@ -305,7 +305,7 @@ def _get_album(user, album):
     return d
 
 
-def _get_album_detail(user, album):
+def _json_album_detail(user, album):
     if album is None:
         return None
 
@@ -313,14 +313,14 @@ def _get_album_detail(user, album):
         'type': 'album',
 #        'url': reverse("static_album_detail", kwargs={'album_id': album.pk}),
         'id': album.album_id,
-#        'parent_album': _get_album(user, album.parent_album),
+#        'parent_album': _json_album(user, album.parent_album),
         'title': album.album,
         'description': album.album_description,
-        'cover_photo': _get_photo(user, album.cover_photo),
+        'cover_photo': _json_photo(user, album.cover_photo),
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': unicode(album.revised),
-        'parent': _get_album(user, album.parent_album),
+        'parent': _json_album(user, album.parent_album),
         'ancestors': [],
         'children': [],
         'can_add': user.has_perm('spud.add_album'),
@@ -331,17 +331,17 @@ def _get_album_detail(user, album):
     parent = album.parent_album
     seen = {}
     while parent is not None and parent.pk not in seen:
-        d['ancestors'].insert(0, _get_album(user, parent))
+        d['ancestors'].insert(0, _json_album(user, parent))
         seen[parent.pk] = True
         parent = parent.parent_album
 
     for child in album.children.all():
-        d['children'].append(_get_album(user, child))
+        d['children'].append(_json_album(user, child))
 
     return d
 
 
-def _get_category(user, category):
+def _json_category(user, category):
     if category is None:
         return None
 
@@ -352,7 +352,7 @@ def _get_category(user, category):
 #        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
-        'cover_photo': _get_photo(user, category.cover_photo),
+        'cover_photo': _json_photo(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
         'can_add': user.has_perm('spud.add_category'),
@@ -362,7 +362,7 @@ def _get_category(user, category):
     return d
 
 
-def _get_category_detail(user, category):
+def _json_category_detail(user, category):
     if category is None:
         return None
 
@@ -373,10 +373,10 @@ def _get_category_detail(user, category):
 #        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
-        'cover_photo': _get_photo(user, category.cover_photo),
+        'cover_photo': _json_photo(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
-        'parent': _get_category(user, category.parent_category),
+        'parent': _json_category(user, category.parent_category),
         'ancestors': [],
         'children': [],
         'can_add': user.has_perm('spud.add_category'),
@@ -387,17 +387,17 @@ def _get_category_detail(user, category):
     parent = category.parent_category
     seen = {}
     while parent is not None and parent.pk not in seen:
-        d['ancestors'].insert(0, _get_category(user, parent))
+        d['ancestors'].insert(0, _json_category(user, parent))
         seen[parent.pk] = True
         parent = parent.parent_category
 
     for child in category.children.all():
-        d['children'].append(_get_category(user, child))
+        d['children'].append(_json_category(user, child))
 
     return d
 
 
-def _get_place(user, place):
+def _json_place(user, place):
     if place is None:
         return None
 
@@ -415,7 +415,7 @@ def _get_place(user, place):
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
-        'cover_photo': _get_photo(user, place.cover_photo),
+        'cover_photo': _json_photo(user, place.cover_photo),
         'notes': place.notes,
         'can_add': user.has_perm('spud.add_place'),
         'can_change': user.has_perm('spud.change_place'),
@@ -424,7 +424,7 @@ def _get_place(user, place):
     return d
 
 
-def _get_place_detail(user, place):
+def _json_place_detail(user, place):
     if place is None:
         return None
 
@@ -432,7 +432,7 @@ def _get_place_detail(user, place):
         'type': 'place',
 #        'url': reverse("place_detail", kwargs={'object_id': place.pk}),
         'id': place.place_id,
-        'parent': _get_place(place.parent_place),
+        'parent': _json_place(place.parent_place),
         'ancestors': [],
         'title': place.title,
         'address': place.address,
@@ -443,7 +443,7 @@ def _get_place_detail(user, place):
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
-        'cover_photo': _get_photo(user, place.cover_photo),
+        'cover_photo': _json_photo(user, place.cover_photo),
         'notes': place.notes,
         'parents': [],
         'children': [],
@@ -457,15 +457,15 @@ def _get_place_detail(user, place):
     while parent is not None and parent.pk not in seen:
         seen[parent.pk] = True
         parent = parent.parent_place
-        d['ancestors'].insert(0, _get_place(user, parent))
+        d['ancestors'].insert(0, _json_place(user, parent))
 
     for child in place.children.all():
-        d['children'].append(_get_place(user, child))
+        d['children'].append(_json_place(user, child))
 
     return d
 
 
-def _get_person(user, person):
+def _json_person(user, person):
     if person is None:
         return None
 
@@ -478,7 +478,7 @@ def _get_person(user, person):
         'last_name': person.last_name,
         'middle_name': person.middle_name,
         'called': person.called,
-        'cover_photo': _get_photo(user, person.cover_photo),
+        'cover_photo': _json_photo(user, person.cover_photo),
 #        'gender': person.gender,
 #        'dob': unicode(person.dob),
 #        'dod': unicode(person.dod),
@@ -496,7 +496,7 @@ def _get_person(user, person):
     return d
 
 
-def _get_person_detail(user, person):
+def _json_person_detail(user, person):
     if person is None:
         return None
 
@@ -509,7 +509,7 @@ def _get_person_detail(user, person):
         'last_name': person.last_name,
         'middle_name': person.middle_name,
         'called': person.called,
-        'cover_photo': _get_photo(user, person.cover_photo),
+        'cover_photo': _json_photo(user, person.cover_photo),
         'can_add': user.has_perm('spud.add_person'),
         'can_change': user.has_perm('spud.change_person'),
         'can_delete': user.has_perm('spud.delete_person'),
@@ -520,19 +520,19 @@ def _get_person_detail(user, person):
             'gender': person.gender,
             'dob': None,
             'dod': None,
-            'home': _get_place(user, person.home),
-            'work': _get_place(user, person.work),
-            'father': _get_person(user, person.father),
-            'mother': _get_person(user, person.mother),
+            'home': _json_place(user, person.home),
+            'work': _json_place(user, person.work),
+            'father': _json_person(user, person.father),
+            'mother': _json_person(user, person.mother),
             'spouses': [],
-            'grandparents': [_get_person(user, p) for p in person.grandparents()],
-            'uncles_aunts': [_get_person(user, p) for p in person.uncles_aunts()],
-            'parents': [_get_person(user, p) for p in person.parents()],
-            'siblings': [_get_person(user, p) for p in person.siblings()],
-            'cousins': [_get_person(user, p) for p in person.cousins()],
-            'children': [_get_person(user, p) for p in person.children()],
-            'nephews_nieces': [_get_person(user, p) for p in person.nephews_nieces()],
-            'grandchildren': [_get_person(user, p) for p in person.grandchildren()],
+            'grandparents': [_json_person(user, p) for p in person.grandparents()],
+            'uncles_aunts': [_json_person(user, p) for p in person.uncles_aunts()],
+            'parents': [_json_person(user, p) for p in person.parents()],
+            'siblings': [_json_person(user, p) for p in person.siblings()],
+            'cousins': [_json_person(user, p) for p in person.cousins()],
+            'children': [_json_person(user, p) for p in person.children()],
+            'nephews_nieces': [_json_person(user, p) for p in person.nephews_nieces()],
+            'grandchildren': [_json_person(user, p) for p in person.grandchildren()],
             'notes': person.notes,
             'email': person.email,
         })
@@ -544,33 +544,33 @@ def _get_person_detail(user, person):
             d['dod'] = unicode(person.dod)
 
         if person.spouse:
-            d['spouses'].append(_get_person(user, person.spouse))
+            d['spouses'].append(_json_person(user, person.spouse))
 
         for p in person.reverse_spouses.all():
             if person.spouse is None:
-                d['spouses'].append(_get_person(user, p))
+                d['spouses'].append(_json_person(user, p))
             elif p.person_id != person.spouse.person_id:
-                d['spouses'].append(_get_person(user, p))
+                d['spouses'].append(_json_person(user, p))
 
     return d
 
 
-def _get_photo_relation_detail(user, photo_relation):
+def _json_photo_relation_detail(user, photo_relation):
     if photo_relation is None:
         return None
 
     d = {
         'type': 'photo_relation',
         'id': photo_relation.pk,
-        'photo_1': _get_photo(user, photo_relation.photo_1),
+        'photo_1': _json_photo(user, photo_relation.photo_1),
         'desc_1': photo_relation.desc_1,
-        'photo_2': _get_photo(user, photo_relation.photo_2),
+        'photo_2': _json_photo(user, photo_relation.photo_2),
         'desc_2': photo_relation.desc_2,
     }
     return d
 
 
-def _get_datetime(value, utc_offset):
+def _json_datetime(value, utc_offset):
     from_tz = pytz.utc
     to_tz = pytz.FixedOffset(utc_offset)
     to_offset = datetime.timedelta(minutes=utc_offset)
@@ -613,14 +613,14 @@ def check_errors(func):
             resp = {
                 'type': 'error',
                 'message': "Bad request: " + unicode(e),
-                'session': _get_session(request),
+                'session': _json_session(request),
             }
             return HttpResponse(json.dumps(resp), mimetype="application/json")
         except HttpForbidden, e:
             resp = {
                 'type': 'error',
                 'message': "Access Forbidden: " + unicode(e),
-                'session': _get_session(request),
+                'session': _json_session(request),
             }
             return HttpResponse(json.dumps(resp), mimetype="application/json")
     return wrapper
@@ -646,7 +646,7 @@ def login(request):
             raise HttpForbidden("Account is disabled")
     else:
         raise HttpBadRequest("Invalid login")
-    resp['session'] = _get_session(request)
+    resp['session'] = _json_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -656,7 +656,7 @@ def logout(request):
         raise HttpBadRequest("Only POST is supported")
     django.contrib.auth.logout(request)
     resp = {'type': 'logout'}
-    resp['session'] = _get_session(request)
+    resp['session'] = _json_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -677,7 +677,7 @@ def album_search_form(request):
             parent = spud.models.album.objects.get(pk=parent)
         except spud.models.album.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
-        criteria['parent'] = _get_album(request.user, parent)
+        criteria['parent'] = _json_album(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -686,7 +686,7 @@ def album_search_form(request):
         'type': 'album_search_form',
         'criteria': criteria,
         'can_add': request.user.has_perm('spud.add_album'),
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -723,7 +723,7 @@ def album_search_results(request):
         except spud.models.album.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         album_list = album_list.filter(parent_album=parent)
-        criteria['parent'] = _get_album(request.user, parent)
+        criteria['parent'] = _json_album(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -735,11 +735,11 @@ def album_search_results(request):
     resp = {
         'type': 'album_search_results',
         'criteria': criteria,
-        'albums': [_get_album(request.user, p) for p in album_list],
+        'albums': [_json_album(request.user, p) for p in album_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _get_session(request),
+        'session': _json_session(request),
         'can_add': request.user.has_perm('spud.add_album'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -781,7 +781,7 @@ def album_delete(request, album_id):
 
     resp = {
         'type': 'album_delete',
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -828,8 +828,8 @@ def album_finish(request, album):
 
     resp = {
         'type': 'album_get',
-        'album': _get_album_detail(request.user, album),
-        'session': _get_session(request),
+        'album': _json_album_detail(request.user, album),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -851,7 +851,7 @@ def category_search_form(request):
             parent = spud.models.category.objects.get(pk=parent)
         except spud.models.category.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
-        criteria['parent'] = _get_category(request.user, parent)
+        criteria['parent'] = _json_category(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -860,7 +860,7 @@ def category_search_form(request):
         'type': 'category_search_form',
         'criteria': criteria,
         'can_add': request.user.has_perm('spud.add_category'),
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -897,7 +897,7 @@ def category_search_results(request):
         except spud.models.category.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         category_list = category_list.filter(parent_category=parent)
-        criteria['parent'] = _get_category(request.user, parent)
+        criteria['parent'] = _json_category(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -909,11 +909,11 @@ def category_search_results(request):
     resp = {
         'type': 'category_search_results',
         'criteria': criteria,
-        'categorys': [_get_category(request.user, p) for p in category_list],
+        'categorys': [_json_category(request.user, p) for p in category_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _get_session(request),
+        'session': _json_session(request),
         'can_add': request.user.has_perm('spud.add_category'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -955,7 +955,7 @@ def category_delete(request, category_id):
 
     resp = {
         'type': 'category_delete',
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1003,8 +1003,8 @@ def category_finish(request, category):
 
     resp = {
         'type': 'category_get',
-        'category': _get_category_detail(request.user, category),
-        'session': _get_session(request),
+        'category': _json_category_detail(request.user, category),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1026,7 +1026,7 @@ def place_search_form(request):
             parent = spud.models.place.objects.get(pk=parent)
         except spud.models.place.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
-        criteria['parent'] = _get_place(request.user, parent)
+        criteria['parent'] = _json_place(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -1035,7 +1035,7 @@ def place_search_form(request):
         'type': 'place_search_form',
         'criteria': criteria,
         'can_add': request.user.has_perm('spud.add_place'),
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1072,7 +1072,7 @@ def place_search_results(request):
         except spud.models.place.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         place_list = place_list.filter(parent_place=parent)
-        criteria['parent'] = _get_place(request.user, parent)
+        criteria['parent'] = _json_place(request.user, parent)
 
     if len(search_dict) > 0:
         raise HttpBadRequest("Unknown parameters")
@@ -1084,11 +1084,11 @@ def place_search_results(request):
     resp = {
         'type': 'place_search_results',
         'criteria': criteria,
-        'places': [_get_place(request.user, p) for p in place_list],
+        'places': [_json_place(request.user, p) for p in place_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _get_session(request),
+        'session': _json_session(request),
         'can_add': request.user.has_perm('spud.add_place'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1130,7 +1130,7 @@ def place_delete(request, place_id):
 
     resp = {
         'type': 'place_delete',
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1192,8 +1192,8 @@ def place_finish(request, place):
 
     resp = {
         'type': 'place_get',
-        'place': _get_place_detail(request.user, place),
-        'session': _get_session(request),
+        'place': _json_place_detail(request.user, place),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1215,7 +1215,7 @@ def person_search_form(request):
         'type': 'person_search_form',
         'criteria': criteria,
         'can_add': request.user.has_perm('spud.add_person'),
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1255,11 +1255,11 @@ def person_search_results(request):
     resp = {
         'type': 'person_search_results',
         'criteria': criteria,
-        'persons': [_get_person(request.user, p) for p in person_list],
+        'persons': [_json_person(request.user, p) for p in person_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _get_session(request),
+        'session': _json_session(request),
         'can_add': request.user.has_perm('spud.add_person'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1301,7 +1301,7 @@ def person_delete(request, person_id):
 
     resp = {
         'type': 'person_delete',
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1430,8 +1430,8 @@ def person_finish(request, person):
 
     resp = {
         'type': 'person_get',
-        'person': _get_person_detail(request.user, person),
-        'session': _get_session(request),
+        'person': _json_person_detail(request.user, person),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1482,7 +1482,7 @@ def photo_relation_delete(request, photo_relation_id):
 
     resp = {
         'type': 'photo_relation_delete',
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1526,13 +1526,13 @@ def photo_relation_finish(request, photo_relation):
 
     resp = {
         'type': 'photo_relation_get',
-        'photo_relation': _get_photo_relation_detail(request.user, photo_relation),
-        'session': _get_session(request),
+        'photo_relation': _json_photo_relation_detail(request.user, photo_relation),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def _get_search(user, search_dict):
+def _json_search(user, search_dict):
     criteria = {}
 
     search = Q()
@@ -1575,7 +1575,7 @@ def _get_search(user, search_dict):
             except ValueError:
                 raise HttpBadRequest("Invalid date/time")
             utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-            criteria[key] = _get_datetime(
+            criteria[key] = _json_datetime(
                 utc_value, value.utcoffset().total_seconds() / 60)
             search = search & Q(datetime__gte=utc_value)
         elif key == "last_date":
@@ -1584,7 +1584,7 @@ def _get_search(user, search_dict):
             except ValueError:
                 raise HttpBadRequest("Invalid date/time")
             utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-            criteria[key] = _get_datetime(
+            criteria[key] = _json_datetime(
                 utc_value, value.utcoffset().total_seconds() / 60)
             search = search & Q(datetime__lt=utc_value)
         elif key == "lower_rating":
@@ -1604,11 +1604,11 @@ def _get_search(user, search_dict):
             search = search & Q(camera_model__icontains=value)
         elif key == "photographer":
             object = get_object_or_404(spud.models.person, pk=value)
-            criteria[key] = _get_person(user, object)
+            criteria[key] = _json_person(user, object)
             search = search & Q(photographer=object)
         elif key == "place":
             object = get_object_or_404(spud.models.place, pk=value)
-            criteria[key] = _get_place(user, object)
+            criteria[key] = _json_place(user, object)
             if ld:
                 descendants = object.get_descendants()
                 search = search & Q(location__in=descendants)
@@ -1620,7 +1620,7 @@ def _get_search(user, search_dict):
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.person, pk=value)
-                criteria[key].append(_get_person(user, object))
+                criteria[key].append(_json_person(user, object))
                 photo_list = photo_list.filter(persons=object)
         elif key == "album":
             values = _decode_array(value)
@@ -1628,7 +1628,7 @@ def _get_search(user, search_dict):
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.album, pk=value)
-                criteria[key].append(_get_album(user, object))
+                criteria[key].append(_json_album(user, object))
                 if ad:
                     descendants = object.get_descendants()
                     photo_list = photo_list.filter(albums__in=descendants)
@@ -1640,7 +1640,7 @@ def _get_search(user, search_dict):
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.category, pk=value)
-                criteria[key].append(_get_category(user, object))
+                criteria[key].append(_json_category(user, object))
                 if cd:
                     descendants = object.get_descendants()
                     photo_list = photo_list.filter(
@@ -1654,7 +1654,7 @@ def _get_search(user, search_dict):
             for value in values:
                 value = _decode_int(value)
                 object = get_object_or_404(spud.models.photo, pk=value)
-                criteria[key].append(_get_photo(user, object))
+                criteria[key].append(_json_photo(user, object))
                 q = q | Q(pk=object.pk)
             photo_list = photo_list.filter(q)
         elif key == "place_none":
@@ -1703,12 +1703,12 @@ def _get_search(user, search_dict):
 def photo_search_form(request):
     search_dict = request.GET.copy()
 
-    photo_list, criteria = _get_search(request.user, search_dict)
+    photo_list, criteria = _json_search(request.user, search_dict)
 
     resp = {
         'type': 'search_form',
         'criteria': criteria,
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1733,7 +1733,7 @@ def photo_search_results(request):
     if count < 0:
         raise HttpBadRequest("count is negative")
 
-    photo_list, criteria = _get_search(request.user, search_dict)
+    photo_list, criteria = _json_search(request.user, search_dict)
     number_results = photo_list.count()
 
     photos = photo_list[first:first+count]
@@ -1742,11 +1742,11 @@ def photo_search_results(request):
     resp = {
         'type': 'photo_search_results',
         'criteria': criteria,
-        'photos': [_get_photo(request.user, p) for p in photos],
+        'photos': [_json_photo(request.user, p) for p in photos],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _get_session(request),
+        'session': _json_session(request),
         'can_add': request.user.has_perm('spud.add_photo'),
         'can_change': request.user.has_perm('spud.change_photo'),
         'can_delete': request.user.has_perm('spud.delete_photo'),
@@ -1755,7 +1755,7 @@ def photo_search_results(request):
 
 
 def photo_search_item(request, search_dict, number):
-    photo_list, criteria = _get_search(request.user, search_dict)
+    photo_list, criteria = _json_search(request.user, search_dict)
     number_results = photo_list.count()
 
     try:
@@ -1766,16 +1766,16 @@ def photo_search_item(request, search_dict, number):
     resp = {
         'type': 'photo_search_item',
         'criteria': criteria,
-        'photo': _get_photo_detail(request.user, photo),
+        'photo': _json_photo_detail(request.user, photo),
         'number_results': number_results,
-        'session': _get_session(request),
+        'session': _json_session(request),
     }
 
     if number > 1:
-        resp['prev_photo'] = _get_photo(request.user, photo_list[number-1])
+        resp['prev_photo'] = _json_photo(request.user, photo_list[number-1])
 
     try:
-        resp['next_photo'] = _get_photo(request.user, photo_list[number+1])
+        resp['next_photo'] = _json_photo(request.user, photo_list[number+1])
     except IndexError:
         pass
 
@@ -1801,7 +1801,7 @@ def photo_search_change(request):
     expected_results = search_dict.pop("number_results", ["0"])[-1]
     expected_results = _decode_int(expected_results)
 
-    photo_list, criteria = _get_search(request.user, search_dict)
+    photo_list, criteria = _json_search(request.user, search_dict)
     number_results = photo_list.count()
 
     if number_results != expected_results:
@@ -2053,7 +2053,7 @@ def photo_search_change(request):
         'type': 'photo_search_change',
         'criteria': criteria,
         'number_results': number_results,
-        'session': _get_session(request),
+        'session': _json_session(request),
         'can_add': request.user.has_perm('spud.add_photo'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2063,7 +2063,7 @@ def photo(request, photo_id):
     object = get_object_or_404(spud.models.photo, pk=photo_id)
     resp = {
         'type': 'photo_get',
-        'photo': _get_photo_detail(request.user, object),
-        'session': _get_session(request),
+        'photo': _json_photo_detail(request.user, object),
+        'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
