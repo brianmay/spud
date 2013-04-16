@@ -73,7 +73,6 @@ place_doer.prototype.menu = function(place, div) {
 place_doer.prototype.list = function(places, page, last_page, html_page, div) {
     $.ui.place_list({
         places: places,
-        change_mode: true,
         page: page,
         last_page: last_page,
         html_page: html_page,

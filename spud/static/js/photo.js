@@ -305,12 +305,12 @@ $.widget('ui.photo_summary',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo)
         }
     },
 
-    set: function(photo, change_mode) {
-        var can_change = change_mode && photo.can_change
+    set: function(photo) {
+        var can_change = is_edit_mode() && photo.can_change
 
         this.title
             .empty()
@@ -352,14 +352,14 @@ $.widget('ui.photo_image',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo)
         }
     },
 
-    set: function(photo, change_mode) {
+    set: function(photo) {
         var img = this.img
 
-        var can_change = change_mode && photo.can_change
+        var can_change = is_edit_mode() && photo.can_change
 
         img
             .image("set", photo)
@@ -369,7 +369,7 @@ $.widget('ui.photo_image',  {
         $(window).on("resize", function() { img.image("resize", false) })
 
         this.summary
-            .photo_summary("set", photo, change_mode)
+            .photo_summary("set", photo)
     },
 
     _destroy: function() {
@@ -408,12 +408,12 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         this._super();
 
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo)
         }
     },
 
-    set: function(photo, change_mode) {
-        var can_change = change_mode && photo.can_change
+    set: function(photo) {
+        var can_change = is_edit_mode() && photo.can_change
 
         this.set_edit_value(
             "title", photo.title,
@@ -510,7 +510,7 @@ $.widget('ui.camera_details',  $.ui.infobox, {
         this._super()
 
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo)
         }
     },
 })
@@ -534,11 +534,11 @@ $.widget('ui.photo_article',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo)
         }
     },
 
-    set: function(photo, change_mode) {
+    set: function(photo) {
         var style = get_photo_style(photo)
 
         this.element
@@ -547,9 +547,9 @@ $.widget('ui.photo_article',  {
             .addClass(style)
             .toggleClass("photo-selected", is_photo_selected(photo))
 
-        this.pi.photo_image("set", photo, change_mode)
-        this.pd.photo_details("set", photo, change_mode)
-        this.cd.camera_details("set", photo, change_mode)
+        this.pi.photo_image("set", photo)
+        this.pd.photo_details("set", photo)
+        this.cd.camera_details("set", photo)
         return this
     },
 
@@ -576,11 +576,11 @@ $.widget('ui.photo_slideshow',  {
             .appendTo(this.pd)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.change_mode)
+            this.set(this.options.photo, this.options)
         }
     },
 
-    set: function(photo, change_mode) {
+    set: function(photo) {
         var style = get_photo_style(photo)
 
         this.pd
@@ -614,11 +614,11 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.search, this.options.change_mode)
+            this.set(this.options.photo, this.options.search)
         }
     },
 
-    set: function(photo, search, change_mode) {
+    set: function(photo, search) {
         this.element.empty()
 
         var photo_mode = get_photo_mode()
@@ -643,7 +643,7 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
         }
 
         if (photo.can_change) {
-            if (change_mode) {
+            if (is_edit_mode()) {
                 this.add_item(
                     $("<a href='#'>View mode</a>")
                     .on("click", function() {
@@ -709,7 +709,7 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
                 del_selection( $(ui.unselected).data('photo') ); },
         })
         if (this.options.search != null && this.options.results != null) {
-            this.set(this.options.search, this.options.results, this.options.change_mode)
+            this.set(this.options.search, this.options.results)
         }
     },
 
@@ -719,7 +719,7 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
         this._super()
     },
 
-    set: function(search, results, change_mode) {
+    set: function(search, results) {
         var mythis = this
         this.empty()
         $.each(results.photos, function(j, photo) {
@@ -739,11 +739,11 @@ $.widget('ui.photo_list_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.results, this.options.change_mode)
+            this.set(this.options.search, this.options.results)
         }
     },
 
-    set: function(search, results, change_mode) {
+    set: function(search, results) {
         this.element.empty()
 
         this.add_item(
@@ -756,7 +756,7 @@ $.widget('ui.photo_list_menu', $.ui.spud_menu, {
             }))
 
         if (results.can_change) {
-            if (change_mode) {
+            if (is_edit_mode()) {
                 this.add_item(
                     $("<a href='#'>View mode</a>")
                     .on("click", function() {

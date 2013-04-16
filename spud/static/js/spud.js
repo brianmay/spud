@@ -504,7 +504,7 @@ function display_photo_article(photo, search, results, n) {
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
     $("<div></div>")
-        .photo_article({ photo: photo, change_mode: is_edit_mode(), })
+        .photo_article({ photo: photo, })
         .appendTo(cm)
 
     if (photo.can_change && is_edit_mode()) {
@@ -554,14 +554,14 @@ function display_photo_article(photo, search, results, n) {
     }
 
     var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, results: results, change_mode: is_edit_mode(), })
+        .photo_menu({ photo: photo, search: search, results: results, })
     append_action_links(ul)
 }
 
 
 function display_photo_slideshow(photo, search, results, n) {
     $("<div></div>")
-        .photo_slideshow({ photo: photo, change_mode: is_edit_mode(), })
+        .photo_slideshow({ photo: photo, })
         .appendTo("#content-main")
 
     if (search != null) {
@@ -587,14 +587,14 @@ function display_photo_slideshow(photo, search, results, n) {
         .append(escapeHTML(photo.title))
 
     var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, change_mode: is_edit_mode(), })
+        .photo_menu({ photo: photo, search: search, })
     append_action_links(ul)
 
     pdp = $('<div class="module"/>')
         .append("<h2>Photo Details</h2>")
 
     $("<div></div>")
-        .photo_summary({ photo: photo, change_mode: is_edit_mode(), })
+        .photo_summary({ photo: photo, })
         .appendTo(pdp)
 
     $("#content-related")
@@ -885,7 +885,6 @@ function display_photo_search_results(search, results) {
         .photo_list({
             search: search,
             results: results,
-            change_mode: is_edit_mode(),
             html_page: html_page,
             page: page,
             last_page: last_page,
@@ -893,7 +892,7 @@ function display_photo_search_results(search, results) {
         .appendTo(cm)
 
     var ul = $('<ul/>')
-        .photo_list_menu({ search: search, results: results, change_mode: is_edit_mode(), })
+        .photo_list_menu({ search: search, results: results, })
     append_action_links(ul)
 
     $(".breadcrumbs")

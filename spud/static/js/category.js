@@ -73,7 +73,6 @@ category_doer.prototype.menu = function(category, div) {
 category_doer.prototype.list = function(categorys, page, last_page, html_page, div) {
     $.ui.category_list({
         categorys: categorys,
-        change_mode: true,
         page: page,
         last_page: last_page,
         html_page: html_page,

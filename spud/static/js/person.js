@@ -73,7 +73,6 @@ person_doer.prototype.menu = function(person, div) {
 person_doer.prototype.list = function(persons, page, last_page, html_page, div) {
     $.ui.person_list({
         persons: persons,
-        change_mode: true,
         page: page,
         last_page: last_page,
         html_page: html_page,
