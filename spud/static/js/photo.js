@@ -729,8 +729,8 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
 
 $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
     _create: function() {
-        this.options.title = "Change photo "+this.options.title
         this.options.description = "Please change photo's " + this.options.title + "."
+        this.options.title = "Change photo "+this.options.title
         this.options.button = "Save"
         this._super();
     },
