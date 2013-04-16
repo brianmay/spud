@@ -729,7 +729,9 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
 
 $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
     _create: function() {
-        this.options.title = "Change photo "+this.options.type
+        this.options.description = "Please change the " + this.options.title + ". " +
+            this.options.number_results + " photos will be altered."
+        this.options.title = "Change photo "+this.options.title
         this.options.button = "Save"
         this._super();
     },
@@ -987,9 +989,8 @@ $.widget('ui.change_photo_persons_dialog',  $.ui.change_photo_attribute_dialog, 
     },
 
     set: function(values) {
-        var description = "Please change photo's " + this.options.title + "."
         if (values != null) {
-            description += " You may change the order of the people by moving them around below."
+            this.description.append(" You may change the order of the people by moving them around below.")
             this.add_field("persons", new ajax_select_sorted_field("People", "person", false))
             this._super(values);
         } else {
@@ -997,7 +998,6 @@ $.widget('ui.change_photo_persons_dialog',  $.ui.change_photo_attribute_dialog, 
             this.add_field("del_persons", new ajax_select_multiple_field("Remove people", "person", false))
             // do not call super as add_persons and del_persons don't exist in values
         }
-        this.set_description(description)
     },
 
     _submit_values: function(values) {
@@ -1101,27 +1101,11 @@ $.widget('ui.change_photos_dialog',  $.ui.form_dialog, {
         this.options.fields = [
             ["action", new quick_select_field("Action")],
         ]
+        this.options.descripton = "Please specify the attribute to change. " +
+            this.options.number_results + " photos will be altered."
         this.options.title = "Change photo"
         this.options.button = "Go"
-
-        var initial = this.options.initial
-        delete this.options.initial
         this._super();
-
-        this.set(
-            initial,
-            this.options.photo,
-            this.options.criteria,
-            this.options.number_results
-        )
-    },
-
-    set: function(initial, photo, criteria, number_results) {
-        this.set_description("Please specify the attribute to change. " +
-            number_results + " photos will be altered.")
-        if (initial != null) {
-            this._super(initial);
-        }
     },
 
     _submit_values: function(values) {

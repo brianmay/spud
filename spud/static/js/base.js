@@ -337,7 +337,19 @@ $.widget('ui.quickautocomplete', $.ui.ajaxautocomplete, {
             .appendTo( ul );
     },
 
+    _receiveResult: function(ev, ui) {
+        // same as _super() but this.text isn't cleared
+        if (this.input.val()) {
+            this._kill();
+        }
+        this.input.val(ui.item.pk);
+        this._addKiller(ui.item);
+        this._trigger("added", ev, ui.item);
+        return true;
+    },
+
     _addKiller: function(item) {
+        // same as _super() but uses item.desc instead of item.repr
         var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
         var div = $("<div></div>")
             .attr("id", this.id+'_on_deck_'+item.pk)
