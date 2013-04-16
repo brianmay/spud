@@ -1533,7 +1533,7 @@ function do_photo_search_form(criteria, push_history) {
 }
 
 
-function do_photo_search_results(search, page, push_history) {
+function do_photo_search_results(search, page, push_history, success) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().photos_per_page
 
@@ -1550,6 +1550,7 @@ function do_photo_search_results(search, page, push_history) {
                 }
             );
             display_photo_search_results(search, data)
+            if (success) { success() }
         },
 
         display_error

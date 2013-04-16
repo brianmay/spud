@@ -242,8 +242,8 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
             criteria: criteria,
         }
 
-        this.close()
-        do_photo_search_results(search, 0, true)
+        var mythis = this
+        do_photo_search_results(search, 0, true, function() { mythis.close() })
     },
 })
 

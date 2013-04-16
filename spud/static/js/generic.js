@@ -359,7 +359,7 @@ generic_doer.prototype.do_search_form = function(criteria, push_history) {
     )
 }
 
-generic_doer.prototype.do_search_results = function(search, page, push_history) {
+generic_doer.prototype.do_search_results = function(search, page, push_history, success) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().items_per_page
 
@@ -377,6 +377,7 @@ generic_doer.prototype.do_search_results = function(search, page, push_history) 
                     page: page,
                 });
             mythis.display_search_results(search, data)
+            if (success) { success() }
         },
 
         display_error

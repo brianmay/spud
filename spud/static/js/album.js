@@ -46,8 +46,8 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
             criteria: criteria
         }
 
-        albums.do_search_results(search, 0, true)
-        this.close()
+        var mythis = this
+        albums.do_search_results(search, 0, true, function() { mythis.close() })
     },
 })
 
