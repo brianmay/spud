@@ -76,13 +76,13 @@ click_sizes = [
 
 $.widget('ui.settings_dialog',  $.ui.form_dialog, {
     _create: function() {
-        this.options.fields = {
-            photos_per_page: new integer_input_field("Photos per page", true),
-            items_per_page: new integer_input_field("Items per page", true),
-            list_size: new select_input_field("List size", list_sizes, true),
-            view_size: new select_input_field("View size", view_sizes, true),
-            click_size: new select_input_field("Click size", click_sizes, true),
-        }
+        this.options.fields = [
+            ["photos_per_page", new integer_input_field("Photos per page", true)],
+            ["items_per_page", new integer_input_field("Items per page", true)],
+            ["list_size", new select_input_field("List size", list_sizes, true)],
+            ["view_size", new select_input_field("View size", view_sizes, true)],
+            ["click_size", new select_input_field("Click size", click_sizes, true)],
+        ]
 
         if (this.options.initial == null) {
             this.options.initial = get_settings()
@@ -112,10 +112,10 @@ $.widget('ui.settings_dialog',  $.ui.form_dialog, {
 
 $.widget('ui.login_dialog',  $.ui.form_dialog, {
     _create: function() {
-        this.options.fields = {
-            username: new text_input_field("Username", true),
-            password: new password_input_field("Password", true),
-        },
+        this.options.fields = [
+            ["username", new text_input_field("Username", true)],
+            ["password", new password_input_field("Password", true)],
+        ],
 
         this.options.title = "Login"
         this.options.description = "Please login by typing in your username and password below."

@@ -586,7 +586,9 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
 
     add_fields: function(fields) {
         var mythis = this
-        $.each(fields, function(id, field){
+        $.each(fields, function(i, v){
+            var id = v[0]
+            var field = v[1]
             mythis.add_field(id, field)
         })
     },
