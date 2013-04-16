@@ -503,7 +503,7 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
         if (selection.length > 0) {
             var search = {
                 criteria: {
-                    photo: selection.join(".")
+                    photos: selection.join(".")
                 }
             }
 

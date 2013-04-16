@@ -1647,7 +1647,7 @@ def _get_search(user, search_dict):
                         categorys__in=descendants)
                 else:
                     photo_list = photo_list.filter(categorys=object)
-        elif key == "photo":
+        elif key == "photos":
             values = _decode_array(value)
             criteria[key] = []
             q = Q()
@@ -1748,6 +1748,8 @@ def photo_search_results(request):
         'last': first + number_returned - 1,
         'session': _get_session(request),
         'can_add': request.user.has_perm('spud.add_photo'),
+        'can_change': request.user.has_perm('spud.change_photo'),
+        'can_delete': request.user.has_perm('spud.delete_photo'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1804,8 +1806,8 @@ def photo_search_change(request):
 
     if number_results != expected_results:
         raise HttpBadRequest(
-            "We expected %d changed but would have made %d" %
-            (expected_results, number_results))
+            "We expected to change %d photos but would have changed %d photos"
+            % (expected_results, number_results))
 
     print number_results
     print "dddd"

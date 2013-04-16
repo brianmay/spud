@@ -614,7 +614,7 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.seach, this.options.change_mode)
+            this.set(this.options.photo, this.options.search, this.options.change_mode)
         }
     },
 
@@ -645,7 +645,7 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
         if (photo.can_change) {
             if (change_mode) {
                 this.add_item(
-                    $("<a href='#'>View</a>")
+                    $("<a href='#'>View mode</a>")
                     .on("click", function() {
                         set_normal_mode()
                         reload_page()
@@ -653,13 +653,19 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
                     }))
             } else {
                 this.add_item(
-                    $("<a href='#'>Edit</a>")
+                    $("<a href='#'>Edit mode</a>")
                     .on("click", function() {
                         set_edit_mode()
                         reload_page()
                         return false;
                     }))
             }
+            this.add_item(
+                $("<a href='#'>Change photo</a>")
+                .on("click", function() {
+                    display_change_photo(photo, { photos: photo.id }, 1)
+                    return false;
+                }))
         }
 
         if (is_photo_selected(photo)) {
@@ -681,10 +687,12 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
         }
 
         if (search == null) {
-            search = {}
+            criteria = { }
+        } else {
+            criteria = search.criteria
         }
 
-        this.add_item(photo_search_form_a(search))
+        this.add_item(photo_search_form_a(criteria))
         return this
     },
 })
@@ -726,6 +734,57 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
     }
 })
 
+
+$.widget('ui.photo_list_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.search != null) {
+            this.set(this.options.search, this.options.results, this.options.change_mode)
+        }
+    },
+
+    set: function(search, results, change_mode) {
+        this.element.empty()
+
+        this.add_item(
+            $("<a href=''>Slideshow</a>")
+            .attr("href", photo_search_item_url(search, 0, null))
+            .on("click", function() {
+                set_slideshow_mode()
+                do_photo_search_item(search, 0, null, true);
+                return false;
+            }))
+
+        if (results.can_change) {
+            if (change_mode) {
+                this.add_item(
+                    $("<a href='#'>View mode</a>")
+                    .on("click", function() {
+                        set_normal_mode()
+                        reload_page()
+                        return false;
+                    }))
+            } else {
+                this.add_item(
+                    $("<a href='#'>Edit mode</a>")
+                    .on("click", function() {
+                        set_edit_mode()
+                        reload_page()
+                        return false;
+                    }))
+            }
+            this.add_item(
+                $("<a href='#'>Change listed photos</a>")
+                .on("click", function() {
+                    display_change_photo(null, search.criteria, results.number_results)
+                    return false;
+                }))
+        }
+
+        this.add_item(photo_search_form_a(search.criteria))
+        return this
+    },
+})
 
 $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
     _create: function() {
@@ -1101,7 +1160,7 @@ $.widget('ui.change_photos_dialog',  $.ui.form_dialog, {
         this.options.fields = [
             ["action", new quick_select_field("Action")],
         ]
-        this.options.descripton = "Please specify the attribute to change. " +
+        this.options.description = "Please specify the attribute to change. " +
             this.options.number_results + " photos will be altered."
         this.options.title = "Change photo"
         this.options.button = "Go"

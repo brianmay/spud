@@ -146,6 +146,35 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
             this.add_item(albums.delete_a(album))
         }
 
+
+        // FIXME
+        if (true) {
+            var change_mode = is_edit_mode()
+            if (change_mode) {
+                this.add_item(
+                    $("<a href='#'>View mode</a>")
+                    .on("click", function() {
+                        set_normal_mode()
+                        reload_page()
+                        return false;
+                    }))
+            } else {
+                this.add_item(
+                    $("<a href='#'>Edit mode</a>")
+                    .on("click", function() {
+                        set_edit_mode()
+                        reload_page()
+                        return false;
+                    }))
+            }
+            this.add_item(
+                $("<a href='#'>Change listed photo</a>")
+                .on("click", function() {
+                    display_change_photo(null, criteria, 1)
+                    return false;
+                }))
+        }
+
         return this
     },
 })
@@ -155,11 +184,11 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search)
+            this.set(this.options.search, this.options.results)
         }
     },
 
-    set: function(search) {
+    set: function(search, results) {
         this.element.empty()
         this.add_item(albums.search_form_a(search.criteria))
         return this
@@ -290,8 +319,8 @@ album_doer.prototype.details = function(album, div) {
     $.ui.album_details({album: album}, div)
 }
 
-album_doer.prototype.list_menu = function(search, div) {
-    $.ui.album_list_menu({search: search}, div)
+album_doer.prototype.list_menu = function(search, results, div) {
+    $.ui.album_list_menu({search: search, results: results}, div)
 }
 
 

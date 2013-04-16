@@ -152,7 +152,7 @@ function photo_search_results_a(search, page, title) {
 }
 
 
-function photo_search_item_a(search, n, photo, title, accesskey) {
+function photo_search_item_a(search, n, photo, title) {
     if (title == null) {
         title = "Photo "+n
     }
@@ -167,9 +167,6 @@ function photo_search_item_a(search, n, photo, title, accesskey) {
         .data('photo', photo)
         .text(title)
 
-    if (accesskey != null) {
-        a.attr('accesskey', accesskey)
-    }
     return a
 }
 
@@ -511,7 +508,7 @@ function display_photo_article(photo, search, results, n) {
         .appendTo(cm)
 
     if (photo.can_change && is_edit_mode()) {
-        photo_change_keyboard(photo, { photo: photo.id }, 1)
+        photo_change_keyboard(photo, { photos: photo.id }, 1)
     }
 
     $(".breadcrumbs")
@@ -544,20 +541,20 @@ function display_photo_article(photo, search, results, n) {
             .appendTo("#content-main")
 
         if (n > 0) {
-            photo_search_item_a(search, n-1, results.prev_photo, "", null)
+            photo_search_item_a(search, n-1, results.prev_photo, "")
                 .addClass("prevslide")
                 .appendTo(cm)
         }
 
         if (n < results.number_results-1) {
-            photo_search_item_a(search, n+1, results.next_photo, "", null)
+            photo_search_item_a(search, n+1, results.next_photo, "")
                 .addClass("nextslide")
                 .appendTo(cm)
         }
     }
 
     var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, change_mode: is_edit_mode(), })
+        .photo_menu({ photo: photo, search: search, results: results, change_mode: is_edit_mode(), })
     append_action_links(ul)
 }
 
@@ -569,13 +566,15 @@ function display_photo_slideshow(photo, search, results, n) {
 
     if (search != null) {
         if (n > 0) {
-            photo_search_item_a(search, n-1, results.prev_photo, "", "p")
+            photo_search_item_a(search, n-1, results.prev_photo, "")
+                .attr('accesskey', "p")
                 .addClass("prevslide")
                 .appendTo("#content-main")
         }
 
         if (n < results.number_results-1) {
-            photo_search_item_a(search, n+1, results.next_photo, "", "n")
+            photo_search_item_a(search, n+1, results.next_photo, "")
+                .attr('accesskey', "n")
                 .addClass("nextslide")
                 .appendTo("#content-main")
         }
@@ -857,6 +856,12 @@ function display_photo_relation_delete(photo_relation) {
 }
 
 
+function display_photo_search_form(criteria) {
+    var dialog = $("<div id='dialog'></div>")
+        .photo_search_dialog({ criteria: criteria })
+}
+
+
 function display_photo_search_results(search, results) {
     reset_display()
     var cm = $("#content-main")
@@ -887,41 +892,14 @@ function display_photo_search_results(search, results) {
         })
         .appendTo(cm)
 
-    var ul = $('<ul class="menu"/>')
-
-    $("<li/>")
-        .append(photo_search_form_a(search.criteria))
-        .appendTo(ul)
-
+    var ul = $('<ul/>')
+        .photo_list_menu({ search: search, results: results, change_mode: is_edit_mode(), })
     append_action_links(ul)
 
     $(".breadcrumbs")
         .html("")
         .append(root_a())
         .append(" › Photos")
-
-    if (results.number_results > 0 && results.photos[0].can_change) {
-        if (is_edit_mode()) {
-            $("<li>")
-                .on("click", function() {
-                    set_normal_mode()
-                    reload_page()
-                    return false;
-                })
-                .html("<a href='#'>View</a>")
-                .appendTo(ul)
-            photo_change_keyboard(null, search.criteria, results.number_results)
-        } else {
-            $("<li>")
-                .on("click", function() {
-                    set_edit_mode()
-                    reload_page()
-                    return false;
-                })
-                .html("<a href='#'>Edit</a>")
-                .appendTo(ul)
-        }
-    }
 }
 
 

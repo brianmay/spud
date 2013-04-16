@@ -203,7 +203,7 @@ generic_doer.prototype.display_search_results = function(search, results) {
     this.list(this.get_objects(results), page, last_page, html_page, div)
 
     var ul = $('<ul class="menu"/>')
-    this.list_menu(search, ul)
+    this.list_menu(search, results, ul)
 
     append_action_links(ul)
 
@@ -324,9 +324,14 @@ generic_doer.prototype.display_photos = function(element, object, page) {
             var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
             element.photo_list("set", search, data)
             element.photo_list("set_paginator", page, last_page)
+
+            cancel_keyboard()
+            if (data.can_change && is_edit_mode()) {
+                photo_change_keyboard(null, search.criteria, data.number_results)
+            }
         },
         function(message) {
-            // FIXME
+            cancel_keyboard()
         }
     )
 }
