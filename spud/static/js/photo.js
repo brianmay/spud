@@ -888,7 +888,7 @@ $.widget('ui.change_photo_place_dialog',  $.ui.change_photo_attribute_dialog, {
     },
 })
 
-$.widget('ui.change_photo_album_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('ui.change_photo_albums_dialog',  $.ui.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "album"
         var initial = this.options.initial
@@ -924,6 +924,93 @@ $.widget('ui.change_photo_album_dialog',  $.ui.change_photo_attribute_dialog, {
             values = {
                 add_albums: values.add_albums.join("."),
                 del_albums: values.del_albums.join("."),
+            }
+        }
+        this._super(values);
+    },
+})
+
+$.widget('ui.change_photo_categorys_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "category"
+        var initial = this.options.initial
+        delete this.options.initial
+        this._super();
+        this.set(initial)
+    },
+
+    set: function(values) {
+        if (values != null) {
+            this.add_field("categorys", new ajax_select_multiple_field("Categories", "category", false))
+            this._super(values);
+        } else {
+            this.add_field("add_categorys", new ajax_select_multiple_field("Add categories", "category", false))
+            this.add_field("del_categorys", new ajax_select_multiple_field("Remove categories", "category", false))
+            // do not call super as add_categorys and del_categorys don't exist in values
+        }
+    },
+
+    _submit_values: function(values) {
+        if (values.categorys != null) {
+            values = { set_categorys: values.categorys }
+        } else {
+            var seen = {}
+            var dups = false
+            $.each(values.add_categorys, function(j, id) { seen[id] = true; })
+            $.each(values.del_categorys, function(j, id) { if (seen[id]) dups = true; })
+            if (dups) {
+                this.set_error("del_categorys", "Trying to add and delete the same category")
+                return
+            }
+
+            values = {
+                add_categorys: values.add_categorys.join("."),
+                del_categorys: values.del_categorys.join("."),
+            }
+        }
+        this._super(values);
+    },
+})
+
+$.widget('ui.change_photo_persons_dialog',  $.ui.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "person"
+        var initial = this.options.initial
+        delete this.options.initial
+        this._super();
+        this.set(initial)
+    },
+
+    set: function(values) {
+        var description = "Please change photo's " + this.options.title + "."
+        if (values != null) {
+            description += " You may change the order of the people by moving them around below."
+            this.add_field("persons", new ajax_select_sorted_field("People", "person", false))
+            this._super(values);
+        } else {
+            this.add_field("add_persons", new ajax_select_multiple_field("Add people", "person", false))
+            this.add_field("del_persons", new ajax_select_multiple_field("Remove people", "person", false))
+            // do not call super as add_persons and del_persons don't exist in values
+        }
+        this.set_description(description)
+    },
+
+    _submit_values: function(values) {
+        if (values.persons != null) {
+            values = { set_persons: values.persons }
+        } else {
+            var seen = {}
+            var dups = false
+            $.each(values.add_persons, function(j, id) { seen[id] = true; })
+            $.each(values.del_persons, function(j, id) { if (seen[id]) dups = true; })
+            if (dups) {
+                this.set_error("del_persons", "Trying to add and delete the same person")
+                return
+            }
+
+            values = {
+                add_persons: values.add_persons.join("."),
+                del_persons: values.del_persons.join("."),
             }
         }
         this._super(values);

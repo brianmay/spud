@@ -998,7 +998,7 @@ function display_change_photo_place(photo, criteria, number_results) {
 
 function display_change_photo_albums(photo, criteria, number_results) {
     $("<div id='dialog'></div>")
-        .change_photo_album_dialog({
+        .change_photo_albums_dialog({
             initial: photo,
             criteria: criteria,
             number_results: number_results
@@ -1006,83 +1006,23 @@ function display_change_photo_albums(photo, criteria, number_results) {
 }
 
 
-function display_change_photo_categorys(photo, search_criteria, number_results) {
-    var table = $("<table />")
-
-    if (photo != null) {
-        var table = $("<table />")
-        append_field(table, "categorys_text", "Categories")
-            .append(get_ajax_multiple_select("categorys", 'category', photo.categorys, false))
-        var get_updates = function(form) {
-            var set = []
-            if (form.categorys.value != "|") {
-                set = form.categorys.value.slice(1,-1).split("|")
-            }
-            return {
-                set_categorys: set.join("."),
-            }
-        }
-    } else {
-        append_field(table, "add_category_text", "Add Category")
-            .append(get_ajax_multiple_select("add_category", 'category', [], false))
-        append_field(table, "del_category_text", "Delete Category")
-            .append(get_ajax_multiple_select("del_category", 'category', [], false))
-        var get_updates = function(form) {
-            var add = []
-            if (form.add_category.value != "|") {
-                add = form.add_category.value.slice(1,-1).split("|")
-            }
-            var del = []
-            if (form.del_category.value != "|") {
-                del = form.del_category.value.slice(1,-1).split("|")
-            }
-            return {
-                add_categorys: add.join("."),
-                del_categorys: del.join("."),
-            }
-        }
-    }
-    display_change_photo_attribute("category", table, get_updates, search_criteria, number_results, { } )
+function display_change_photo_categorys(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_categorys_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
-function display_change_photo_persons(photo, search_criteria, number_results) {
-    var table = $("<table />")
-
-    if (photo != null) {
-        var table = $("<table />")
-        append_field(table, "persons_text", "Persons")
-            .append(get_ajax_multiple_select("persons", 'person', photo.persons, true))
-        var get_updates = function(form) {
-            var set = []
-            if (form.persons.value != "|") {
-                set = form.persons.value.slice(1,-1).split("|")
-            }
-            return {
-                set_persons: set.join("."),
-            }
-        }
-    } else {
-        append_field(table, "add_person_text", "Add Person")
-            .append(get_ajax_multiple_select("add_person", 'person', [], false))
-        append_field(table, "del_person_text", "Delete Person")
-            .append(get_ajax_multiple_select("del_person", 'person', [], false))
-        var get_updates = function(form) {
-            var add = []
-            if (form.add_person.value != "|") {
-                add = form.add_person.value.slice(1,-1).split("|")
-            }
-            var del = []
-            if (form.del_person.value != "|") {
-                del = form.del_person.value.slice(1,-1).split("|")
-            }
-            return {
-                add_persons: add.join("."),
-                del_persons: del.join("."),
-            }
-        }
-    }
-    display_change_photo_attribute("person", table, get_updates, search_criteria, number_results, { } )
+function display_change_photo_persons(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_persons_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
 }
 
 
