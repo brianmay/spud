@@ -494,7 +494,7 @@ def _json_place_detail(user, place):
     d = {
         'type': 'place',
         'id': place.place_id,
-        'parent': _json_place(place.parent_place),
+        'parent': _json_place(user, place.parent_place),
         'ancestors': [],
         'title': place.title,
         'address': place.address,
@@ -517,9 +517,9 @@ def _json_place_detail(user, place):
     parent = place.parent_place
     seen = {}
     while parent is not None and parent.pk not in seen:
+        d['ancestors'].insert(0, _json_place(user, parent))
         seen[parent.pk] = True
         parent = parent.parent_place
-        d['ancestors'].insert(0, _json_place(user, parent))
 
     for child in place.children.all():
         d['children'].append(_json_place(user, child))
