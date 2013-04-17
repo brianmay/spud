@@ -33,7 +33,7 @@ ul.ui-autocomplete { z-index: 200; }
 
 /* Photo list */
 
-.photo_list {  padding-left:50px; border:1px solid #333; margin-bottom: 10px; }
+.photo_list { border:1px solid #333; margin-bottom: 10px; }
 .photo_list .title { font-weight:bold; }
 .photo_list li { display:inline-block; vertical-align:top; height:150px; margin:10px; padding-top:10px; text-align: center; width:170px; }
 .photo_list li .desc { float:left; display:none; }
@@ -43,7 +43,7 @@ ul.ui-autocomplete { z-index: 200; }
 .photo_list .ui-selected { background: #F39814; }
 
 /* PAGINATOR */
-.paginator { padding-top:10px; padding-bottom:10px; line-height:22px; margin:0; solid #ddd; }
+.paginator { padding:10px; line-height:22px; margin:0; solid #ddd; }
 .paginator a { padding:2px 6px; border:solid 1px #ccc; }
 .paginator a:link, .paginator a:visited { text-decoration:none; }
 .paginator a.showall { padding:0 !important; border:none !important; }
@@ -58,7 +58,7 @@ ul.ui-autocomplete { z-index: 200; }
 .infobox dt { margin-top: 10px; }
 .infobox dd { padding-left: 10px; }
 
-.children { padding-left:50px; border:1px solid #f00; }
+.children { border:1px solid #f00; }
 
 /* LINKS */
 a:link, a:visited { color: #5b80b2; text-decoration:none; }
