@@ -14,7 +14,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 {% load i18n %}
-{% load webs %}
 
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}" {% block bodyattrs %}{% endblock %}>
 
@@ -36,25 +35,13 @@
             <strong>{% trans 'Guest' %}</strong>
             {% endif %}
             {% block userlinks %}
-                {% if user.is_active %}
-                {% url 'django-admindocs-docroot' as docsroot %}
-                {% if docsroot %}
-                    <a href="{{ docsroot }}">{% trans 'Documentation' %}</a> /
-                {% endif %}
-                <a href="{% url 'settings_form' %}{% url_with_param next=request.path %}">Settings</a> /
-                <a href="{% url 'password_change' %}">{% trans 'Change password' %}</a> /
-                <a href="{% url 'logout' %}">{% trans 'Log out' %}</a>
-                {% else %}
-                <a href="{% url 'settings_form' %}{% url_with_param next=request.path %}">Settings</a> /
-                <a href="{% url 'login' %}{% url_with_param next=request.path %}">{% trans 'Log in' %}</a>
-                {% endif %}
             {% endblock %}
         </div>
         {% endblock %}
         {% block nav-global %}{% endblock %}
     </div>
     <!-- END Header -->
-    {% block breadcrumbs %}{% show_breadcrumbs breadcrumbs %}{% endblock %}
+    {% block breadcrumbs %}{% endblock %}
     {% endif %}
 
     {% block messages %}

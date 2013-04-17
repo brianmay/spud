@@ -63,7 +63,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'django_webs',
     'spud',
     'spud.comments',
     'django.contrib.auth',

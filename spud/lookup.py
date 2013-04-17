@@ -20,20 +20,22 @@ from django.db.models import Q
 from django.utils.html import escape
 from django.conf import settings
 
+
 class LookupChannel(LookupChannel):
     # anyone can use these lookup methods
     def check_auth(self, request):
         return
+
 
 def format_match(object, photo=None, description=None):
     result = []
 
     if photo is None:
         photo = object.cover_photo
+        thumb = photo.get_thumb(settings.DEFAULT_LIST_SIZE)
 
     if photo is not None:
-        web = webs.photo_web()
-        result.append(u"<img src='%s' alt=''/>"%web.get_thumb_url(photo,settings.DEFAULT_LIST_SIZE))
+        result.append(u"<img src='%s' alt=''/>" % thumb.get_url())
 
     result.append(u"<div class='title'>%s</div>"%(escape(object)))
 
@@ -42,6 +44,7 @@ def format_match(object, photo=None, description=None):
 
     result.append(u"<div class='clear'/>")
     return "".join(result)
+
 
 class person_lookup(LookupChannel):
 
@@ -65,6 +68,7 @@ class person_lookup(LookupChannel):
         for id in ids:
                 result.append(models.person.objects.get(pk=id))
         return result
+
 
 class place_lookup(LookupChannel):
 
@@ -99,6 +103,7 @@ class place_lookup(LookupChannel):
         """
         return models.place.objects.filter(pk__in=ids)
 
+
 class album_lookup(LookupChannel):
 
     def get_query(self,q,request):
@@ -119,6 +124,7 @@ class album_lookup(LookupChannel):
         """
         return models.album.objects.filter(pk__in=ids)
 
+
 class category_lookup(LookupChannel):
 
     def get_query(self,q,request):
@@ -138,6 +144,7 @@ class category_lookup(LookupChannel):
             this is for displaying the currently selected items (in the case of a ManyToMany field)
         """
         return models.category.objects.filter(pk__in=ids)
+
 
 class photo_lookup(LookupChannel):
 

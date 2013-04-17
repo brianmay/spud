@@ -15,9 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.conf import settings
-
 from django.db import models
 from django.db.models import Q
+from django.utils.encoding import iri_to_uri
+from django.utils.http import urlquote
 
 import os
 import datetime
@@ -68,6 +69,7 @@ def action_to_string(action):
 
     return "unknown action"
 
+
 # BASE ABSTRACT MODEL CLASS
 
 class base_model(models.Model):
@@ -84,7 +86,9 @@ class base_model(models.Model):
         error_list = []
         return error_list
 
+
 # ---------------------------------------------------------------------------
+
 
 class place(base_model):
     place_id = models.AutoField(primary_key=True)
@@ -149,6 +153,7 @@ class place(base_model):
                 pass
         return photo
 
+
 class album(base_model):
     album_id = models.AutoField(primary_key=True)
     parent_album = models.ForeignKey('self', related_name='children', null=True, blank=True)
@@ -198,6 +203,7 @@ class album(base_model):
                 pass
         return photo
 
+
 class category(base_model):
     category_id = models.AutoField(primary_key=True)
     parent_category = models.ForeignKey('self', related_name='children', null=True, blank=True)
@@ -245,6 +251,7 @@ class category(base_model):
             except IndexError:
                 pass
         return photo
+
 
 class person(base_model):
     person_id = models.AutoField(primary_key=True)
@@ -355,7 +362,9 @@ class person(base_model):
                 pass
         return photo
 
+
 # ---------------------------------------------------------------------------
+
 
 class photo(base_model):
     photo_id = models.AutoField(primary_key=True)
@@ -400,15 +409,20 @@ class photo(base_model):
         else:
                 return self.title
 
+    def get_orig_path(self):
+        return u"%sorig/%s/%s" % (settings.IMAGE_PATH, self.path, self.name)
+
+    def get_orig_url(self):
+        return iri_to_uri(u"%sorig/%s/%s" % (
+            settings.IMAGE_URL, urlquote(self.path), urlquote(self.name)))
+
     def get_thumb_path(self, size):
         if size in settings.IMAGE_SIZES:
             (shortname, _) = os.path.splitext(self.name)
-            return u"%sthumb/%s/%s/%s.jpg"%(settings.IMAGE_PATH,size,self.path,shortname)
+            return u"%sthumb/%s/%s/%s.jpg" % (
+                settings.IMAGE_PATH, size, self.path, shortname)
         else:
-            raise RuntimeError("unknown image size %s"%(size))
-
-    def get_orig_path(self):
-        return u"%sorig/%s/%s"%(settings.IMAGE_PATH,self.path,self.name)
+            raise RuntimeError("unknown image size %s" % (size))
 
     def get_thumb(self, size):
         if size not in settings.IMAGE_SIZES:
@@ -727,13 +741,30 @@ class photo_thumb(base_model):
     width = models.IntegerField(null=True, blank=True)
     height = models.IntegerField(null=True, blank=True)
 
+    def get_path(self):
+        photo = self.photo
+        (shortname, _) = os.path.splitext(photo.name)
+        return u"%sthumb/%s/%s/%s.jpg" % (
+            settings.IMAGE_PATH, self.size,
+            photo.path, self.shortname)
+
+    def get_url(self):
+        photo = self.photo
+        (shortname, _) = os.path.splitext(photo.name)
+        return iri_to_uri(u"%sthumb/%s/%s/%s.jpg" % (
+            settings.IMAGE_URL, urlquote(self.size),
+            urlquote(photo.path), urlquote(shortname)))
+
+
 class photo_album(base_model):
     photo = models.ForeignKey(photo)
     album = models.ForeignKey(album)
 
+
 class photo_category(base_model):
     photo = models.ForeignKey(photo)
     category = models.ForeignKey(category)
+
 
 class photo_person(base_model):
     photo = models.ForeignKey(photo)
@@ -741,6 +772,7 @@ class photo_person(base_model):
     position = models.IntegerField(null=True, blank=True)
     class Meta:
         ordering = [ 'position' ]
+
 
 class photo_relation(base_model):
     photo_1 = models.ForeignKey(photo, db_column="photo_id_1", related_name="relations_1")
