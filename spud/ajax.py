@@ -50,6 +50,9 @@ def _decode_boolean(title, string):
 
 
 def _decode_datetime(title, value, timezone):
+    if value is None:
+        return None
+
     index = value.find(" +")
     if index == -1:
         index = value.find(" -")
@@ -60,9 +63,11 @@ def _decode_datetime(title, value, timezone):
             value[index+2:]
         )
         if len(offset) == 2:
-            offset = _decode_int(offset) * 60
+            offset = _decode_int(title, offset) * 60
         elif len(offset) == 4:
-            offset = _decode_int(offset[0:2]) * 60 + _decode_int(offset[2:4])
+            offset = (
+                _decode_int(title, offset[0:2]) * 60 +
+                _decode_int(title, offset[2:4]))
         else:
             raise HttpBadRequest("%s can't parse timezone" % title)
         if sign == '-':
@@ -156,7 +161,7 @@ def _pop_boolean(params, key):
 
 
 def _pop_datetime(params, key, timezone):
-    return _decode_datetime(key, _pop_string(params, key, timezone))
+    return _decode_datetime(key, _pop_string(params, key), timezone)
 
 
 def _pop_int_array(params, key):
