@@ -229,6 +229,24 @@ password_input_field.prototype.create = function(id) {
 }
 
 
+// define date_input_field
+function date_input_field(title, required) {
+    text_input_field.call(this, title, required)
+}
+
+date_input_field.prototype = new text_input_field()
+date_input_field.constructor = date_input_field
+
+date_input_field.prototype.validate = function() {
+    value = this.input.val().trim()
+    var intRegex = /^\d\d\d\d-\d\d-\d\d$/;
+    if (value && !intRegex.test(value)) {
+        return "Value must be yyyy-mm-dd"
+    }
+    return text_input_field.prototype.validate.call(this, value)
+}
+
+
 
 // define p_input_field
 function p_input_field(title, required) {
@@ -297,13 +315,7 @@ select_input_field.prototype.set_options = function(options) {
 
 select_input_field.prototype.set = function(value) {
     var mythis = this
-    $.each(this.options, function(id, option){
-        if (id == value) {
-            option.attr('selected' ,'selected')
-        } else {
-            option.removeAttr('selected')
-        }
-    })
+    this.input.val(value)
 }
 
 

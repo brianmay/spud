@@ -182,7 +182,7 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
             ["description", new p_input_field("Description", false)],
-            ["cover_photo", new photo_select_field("Cover Photo", false)],
+            ["cover_photo", new photo_select_field("Photo", false)],
             ["sortname", new text_input_field("Sort Name", false)],
             ["sortorder", new text_input_field("Sort Order", false)],
             ["parent", new ajax_select_field("Parent", "album", false)],
@@ -276,15 +276,8 @@ album_doer.prototype.get_criteria = function(album) {
 
 album_doer.prototype.get_new_object = function(parent) {
     return {
-        id: null,
         type: "album",
-        title: "",
-        description: "",
-        cover_photo: null,
-        sortname: "",
-        sortorder: "",
         parent: parent,
-        children: [],
     }
 }
 

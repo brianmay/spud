@@ -1421,6 +1421,11 @@ def place_finish(request, place):
             place.city = value
             updated = True
 
+        value = _pop_string(params, "state")
+        if value is not None:
+            place.state = value
+            updated = True
+
         value = _pop_string(params, "zip")
         if value is not None:
             place.zip = value
@@ -1612,13 +1617,16 @@ def person_finish(request, person):
             person.called = value
             updated = True
 
-        value = _pop_int(params, "gender")
+        value = _pop_string(params, "gender")
         if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change gender")
-            if value < 1 or value > 2:
-                raise HttpBadRequest("Unknown gender")
-            person.gender = value
+            if value == "":
+                person.gender = None
+            else:
+                if value != "1" and value != "2":
+                    raise HttpBadRequest("Unknown gender")
+                person.gender = value
             updated = True
 
         value = _pop_string(params, "notes")

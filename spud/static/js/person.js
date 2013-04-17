@@ -16,10 +16,276 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+$.widget('ui.person_search_dialog',  $.ui.form_dialog, {
+
+    _create: function() {
+        this.options.fields = [
+            ["q", new text_input_field("Search for", false)],
+        ]
+        this.options.title = "Search persons"
+        this.options.description = "Please search for an person."
+        this.options.button = "Search"
+        this._super();
+
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
+        }
+    },
+
+    _submit_values: function(values) {
+        criteria = {}
+
+        var v = values.q
+        if (v) { criteria.q = v }
+
+        var search = {
+            criteria: criteria
+        }
+
+        var mythis = this
+        persons.do_search_results(search, 0, true, function() { mythis.close() })
+    },
+})
+
+
+$.widget('ui.person_search_details',  $.ui.infobox, {
+    _create: function() {
+        this.options.fields = [
+            ["q", new text_output_field("Search for")],
+        ]
+        this.element.addClass("infobox")
+        this._super();
+
+        if (this.options.criteria != null) {
+            this.set(this.options.criteria)
+        }
+    },
+})
+
+
+
+$.widget('ui.person_details',  $.ui.infobox, {
+    _create: function() {
+        this.options.fields = [
+            ["title", new text_output_field("Title")],
+            ["cover_photo", new photo_output_field("Photo", get_settings().view_size)],
+            ["first_name", new text_output_field("First name")],
+            ["middle_name", new text_output_field("Middle name")],
+            ["last_name", new text_output_field("Last name")],
+            ["called", new text_output_field("Called")],
+            ["gender", new text_output_field("Gender")],
+            ["email", new text_output_field("E-Mail")],
+            ["dob", new text_output_field("Date of birth")],
+            ["dod", new text_output_field("Date of death")],
+            ["work", new link_output_field("Work")],
+            ["home", new link_output_field("Home")],
+            ["mother", new link_output_field("Mother")],
+            ["father", new link_output_field("Father")],
+            ["spouses", new link_list_output_field("Spouses")],
+            ["notes", new p_output_field("Notes")],
+        ]
+        this._super();
+
+        if (this.options.person != null) {
+            this.set(this.options.person)
+        }
+    },
+
+    set: function(initial) {
+        this._super(initial)
+        if (initial.gender == "1") {
+            this.set_value("gender", "Male")
+        } else if (initial.gender == "2") {
+            this.set_value("gender", "Female")
+        }
+    },
+
+    _destroy: function() {
+        this.img.image("destroy")
+        this.element.empty()
+        this._super()
+    },
+})
+
+
+$.widget('ui.person_list', $.ui.photo_list_base, {
+    _create: function() {
+        this._super()
+        if (this.options.persons != null) {
+            this.set(this.options.persons)
+        }
+    },
+
+    set: function(person_list) {
+        var mythis = this
+        this.empty()
+        $.each(person_list, function(j, person) {
+            var photo = person.cover_photo
+            var sort=""
+            if  (person.sortorder || person.sortname) {
+                sort = person.sortname + " " + person.sortorder
+            }
+            mythis.append_photo(photo, person.title, sort, person.notes, persons.a(person, null))
+        })
+        return this
+    }
+})
+
+
+$.widget('ui.person_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.person != null) {
+            this.set(this.options.person)
+        }
+    },
+
+    set: function(person) {
+        this.element.empty()
+
+        var criteria = { person: person.id }
+
+        this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
+
+        this.add_item(
+            $("<a href=''>Slideshow</a>")
+            .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
+            .on("click", function() {
+                set_slideshow_mode()
+                do_photo_search_item({ criteria: criteria }, 0, null, true);
+                return false;
+            }))
+
+        this.add_item(photo_search_form_a(criteria))
+        this.add_item(persons.search_form_a({}))
+
+        if (person.can_add) {
+            this.add_item(persons.add_a(person))
+        }
+
+        if (person.can_change) {
+            this.add_item(persons.change_a(person))
+        }
+
+        if (person.can_delete) {
+            this.add_item(persons.delete_a(person))
+        }
+
+        return this
+    },
+})
+
+
+$.widget('ui.person_list_menu', $.ui.spud_menu, {
+    _create: function() {
+        this._super()
+        if (this.options.search != null) {
+            this.set(this.options.search, this.options.results)
+        }
+    },
+
+    set: function(search, results) {
+        this.element.empty()
+        this.add_item(persons.search_form_a(search.criteria))
+        return this
+    },
+})
+
+
+$.widget('ui.person_change_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.fields = [
+            ["cover_photo", new photo_select_field("Photo", false)],
+            ["first_name", new text_input_field("First name", false)],
+            ["middle_name", new text_input_field("Middle name", false)],
+            ["last_name", new text_input_field("Last name", false)],
+            ["called", new text_input_field("Called", false)],
+            ["gender", new select_input_field("Gender", [ ["", "Unknown"], ["1","Male"], ["2","Female"] ])],
+            ["email", new text_input_field("E-Mail", false)],
+            ["dob", new date_input_field("Date of birth", false)],
+            ["dod", new date_input_field("Date of death", false)],
+            ["work", new ajax_select_field("Work", "place", false)],
+            ["home", new ajax_select_field("Home", "place", false)],
+            ["mother", new ajax_select_field("Mother", "person", false)],
+            ["father", new ajax_select_field("Father", "person", false)],
+            ["spouse", new ajax_select_field("Spouse", "person", false)],
+            ["notes", new p_input_field("Notes", false)],
+        ]
+
+        this.options.title = "Change person"
+        this.options.button = "Save"
+        this._super();
+
+        if (this.options.person != null) {
+            this.set(this.options.person)
+        }
+    },
+
+    set: function(person) {
+        this.person_id = person.id
+        if (person.id != null) {
+            this.set_title("Change person")
+            this.set_description("Please change person " + person.title + ".")
+        } else {
+            this.set_title("Add new person")
+            this.set_description("Please add new person.")
+        }
+        return this._super(person);
+    },
+
+    _submit_values: function(values) {
+        var mythis = this
+        display_loading()
+        persons.load_change(
+            this.person_id,
+            values,
+            function(data) {
+                hide_loading()
+                mythis.close()
+                reload_page()
+            },
+            display_error
+        )
+    },
+})
+
+
+$.widget('ui.person_delete_dialog',  $.ui.form_dialog, {
+    _create: function() {
+        this.options.title = "Delete person"
+        this.options.button = "Delete"
+        this._super();
+
+        if (this.options.person != null) {
+            this.set(this.options.person)
+        }
+    },
+
+    set: function(person) {
+        this.person_id = person.id
+        this.set_description("Are you absolutely positively sure you really want to delete " +
+            person.title + "? Go ahead join the dark side. There are cookies.")
+    },
+
+    _submit_values: function(values) {
+        this.close()
+        display_loading()
+        persons.load_delete(
+            this.person_id,
+            function(data) {
+                hide_loading()
+                reload_page()
+            },
+            display_error
+        )
+    },
+})
+
+
 function person_doer() {
     this.type = "person"
-    this.display_type = "Person"
-    this.display_plural = "People"
+    this.display_type = "person"
+    this.display_plural = "persons"
     this.list_type = "person_list"
     this.has_children = true
     generic_doer.call(this)
@@ -28,24 +294,14 @@ function person_doer() {
 person_doer.prototype = new generic_doer()
 person_doer.constructor = person_doer
 
-person_doer.prototype.get_search = function(person) {
-    return {
-        results_per_page: get_settings().items_per_page,
-        params: { person: person.id },
-    }
+person_doer.prototype.get_criteria = function(person) {
+    return { person: person.id }
 }
 
 person_doer.prototype.get_new_object = function(parent) {
     return {
         id: null,
         type: "person",
-        title: "",
-        description: "",
-        cover_photo: null,
-        sortname: "",
-        sortorder: "",
-        parent: parent_person,
-        children: [],
     }
 }
 
@@ -61,8 +317,8 @@ person_doer.prototype.details = function(person, div) {
     $.ui.person_details({person: person}, div)
 }
 
-person_doer.prototype.list_menu = function(search, div) {
-    $.ui.person_list_menu(search, div)
+person_doer.prototype.list_menu = function(search, results, div) {
+    $.ui.person_list_menu({search: search, results: results}, div)
 }
 
 
@@ -79,12 +335,12 @@ person_doer.prototype.list = function(persons, page, last_page, html_page, div) 
     }, div)
 }
 
-person_doer.prototype.search_dialog = function(search, dialog) {
-    $.ui.person_search_dialog({ search: search }, dialog)
+person_doer.prototype.search_dialog = function(criteria, dialog) {
+    $.ui.person_search_dialog({ criteria: criteria }, dialog)
 }
 
-person_doer.prototype.search_details = function(search, results, dialog) {
-    $.ui.person_search_details({ search: search, results: results }, dialog)
+person_doer.prototype.search_details = function(criteria, dialog) {
+    $.ui.person_search_details({ criteria: criteria }, dialog)
 }
 
 person_doer.prototype.change_dialog = function(person, dialog) {
@@ -96,4 +352,3 @@ person_doer.prototype.delete_dialog = function(person, dialog) {
 }
 
 persons = new person_doer()
-

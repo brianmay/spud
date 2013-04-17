@@ -226,7 +226,7 @@ function get_doer(type) {
         return categorys
     } else if (type == "place") {
         return places
-    } else if (type == "persons") {
+    } else if (type == "person") {
         return persons
     } else {
         display_error("We stuffed up")
