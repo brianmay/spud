@@ -210,6 +210,8 @@ $.widget('ui.infobox', {
     _create: function(){
         var options = this.options
 
+        this.element.addClass("infobox")
+
         if (options.title != null) {
             $("<h2></h2")
                 .text(this.options.title)
@@ -235,6 +237,7 @@ $.widget('ui.infobox', {
 
     _destroy: function() {
         var mythis = this
+        this.element.removeClass("infobox")
         $.each(this.fields, function(id, field) {
             field.destroy()
         })

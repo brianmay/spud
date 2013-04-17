@@ -278,7 +278,6 @@ $.widget('ui.photo_search_details',  $.ui.infobox, {
             ["name", new text_output_field("name")],
         ]
 
-        this.element.addClass("infobox")
         this._super();
 
         if (this.options.criteria != null) {

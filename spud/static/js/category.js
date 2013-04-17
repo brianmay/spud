@@ -58,7 +58,6 @@ $.widget('ui.category_search_details',  $.ui.infobox, {
             ["q", new text_output_field("Search for")],
             ["parent", new link_output_field("Category parent")],
         ]
-        this.element.addClass("infobox")
         this._super();
 
         if (this.options.criteria != null) {

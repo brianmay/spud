@@ -53,7 +53,6 @@ $.widget('ui.person_search_details',  $.ui.infobox, {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
         ]
-        this.element.addClass("infobox")
         this._super();
 
         if (this.options.criteria != null) {
