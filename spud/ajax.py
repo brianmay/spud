@@ -657,6 +657,182 @@ def _json_datetime(value, utc_offset):
     }
 
 
+def _json_search(user, params):
+    criteria = {}
+
+    search = Q()
+    photo_list = spud.models.photo.objects.all()
+
+    ld = _pop_boolean(params, "place_descendants")
+    if ld:
+        criteria["place_descendants"] = True
+
+    ad = _pop_boolean(params, "album_descendants")
+    if ad:
+        criteria["album_descendants"] = True
+
+    cd = _pop_boolean(params, "category_descendants")
+    if cd:
+        criteria["category_descendants"] = True
+
+    timezone = django.conf.settings.TIME_ZONE
+    timezone = pytz.timezone(timezone)
+
+    value = _pop_string(params, "description")
+
+    value = _pop_int(params, "first_id")
+    if value is not None:
+        criteria["first_id"] = value
+        search = search & Q(pk__gte=value)
+
+    value = _pop_int(params, "last_id")
+    if value is not None:
+        criteria["last_id"] = value
+        search = search & Q(pk__lt=value)
+
+    value = _pop_datetime(params, "first_date", timezone)
+    if value is not None:
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+        criteria["first_date"] = _json_datetime(
+            utc_value, value.utcoffset().total_seconds() / 60)
+        search = search & Q(datetime__gte=utc_value)
+
+    value = _pop_datetime(params, "last_date", timezone)
+    if value is not None:
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+        criteria["last_date"] = _json_datetime(
+            utc_value, value.utcoffset().total_seconds() / 60)
+        search = search & Q(datetime__lt=utc_value)
+
+    value = _pop_int(params, "lower_rating")
+    if value is not None:
+        criteria["lower_rating"] = value
+        search = search & Q(rating__gte=value)
+
+    value = _pop_int(params, "upper_rating")
+    if value is not None:
+        criteria["upper_rating"] = value
+        search = search & Q(rating__lte=value)
+
+    value = _pop_string(params, "title")
+    if value is not None:
+        criteria["title"] = value
+        search = search & Q(title__icontains=value)
+
+    value = _pop_string(params, "camera_make")
+    if value is not None:
+        criteria["camera_make"] = value
+        search = search & Q(camera_make__icontains=value)
+
+    value = _pop_string(params, "camera_model")
+    if value is not None:
+        criteria["camera_model"] = value
+        search = search & Q(camera_model__icontains=value)
+
+    value = _pop_object(params, "photographer", spud.models.person)
+    if value is not None:
+        criteria["photographer"] = _json_person(value, value)
+        search = search & Q(photographer=value)
+
+    value = _pop_object(params, "place", spud.models.place)
+    if value is not None:
+        criteria["place"] = _json_place(value, value)
+        if ld:
+            descendants = value.get_descendants()
+            search = search & Q(location__in=descendants)
+        else:
+            search = search & Q(location=value)
+
+    del value
+
+    values = _pop_object_array(params, "person", spud.models.person)
+    if values is not None:
+        criteria["person"] = []
+        for value in values:
+            criteria["person"].append(_json_person(user, value))
+            photo_list = photo_list.filter(persons=value)
+
+    values = _pop_object_array(params, "album", spud.models.album)
+    if values is not None:
+        criteria["album"] = []
+        for value in values:
+            criteria["album"].append(_json_album(user, value))
+            if ad:
+                descendants = value.get_descendants()
+                photo_list = photo_list.filter(albums__in=descendants)
+            else:
+                photo_list = photo_list.filter(albums=value)
+
+    values = _pop_object_array(params, "category", spud.models.category)
+    if values is not None:
+        criteria["category"] = []
+        for value in values:
+            criteria["category"].append(_json_category(user, value))
+            if cd:
+                descendants = value.get_descendants()
+                photo_list = photo_list.filter(
+                    categorys__in=descendants)
+            else:
+                photo_list = photo_list.filter(categorys=value)
+
+    values = _pop_object_array(params, "photos", spud.models.photo)
+    if values is not None:
+        criteria["photos"] = []
+        q = Q()
+        for value in values:
+            criteria["photos"].append(_json_photo(user, value))
+            q = q | Q(pk=value.pk)
+        photo_list = photo_list.filter(q)
+
+    del values
+
+    value = _pop_boolean(params, "place_none")
+    if value is not None:
+        if value:
+            criteria["place_none"] = True
+            search = search & Q(location=None)
+
+    value = _pop_boolean(params, "person_none")
+    if value is not None:
+        if value:
+            criteria["person_none"] = True
+            search = search & Q(persons=None)
+
+    value = _pop_boolean(params, "album_none")
+    if value is not None:
+        if value:
+            criteria["album_none"] = True
+            search = search & Q(albums=None)
+
+    value = _pop_boolean(params, "category_none")
+    if value is not None:
+        if value:
+            criteria["category_none"] = True
+            search = search & Q(categorys=None)
+
+    value = _pop_string(params, "action")
+    if value is not None:
+        if value == "none":
+            search = search & Q(action__isnull=True)
+        else:
+            search = search & Q(action=value)
+        value = spud.models.action_to_string(value)
+        criteria["action"] = value
+
+    value = _pop_string(params, "path")
+    if value is not None:
+        criteria["path"] = value
+        search = search & Q(path=value)
+
+    value = _pop_string(params, "name")
+    if value is not None:
+        criteria["name"] = value
+        search = search & Q(name=value)
+
+    photo_list = photo_list.filter(search)
+    return photo_list, criteria
+
+
 class HttpBadRequest(Exception):
     pass
 
@@ -1665,182 +1841,6 @@ def photo_relation_finish(request, photo_relation):
         'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
-
-
-def _json_search(user, params):
-    criteria = {}
-
-    search = Q()
-    photo_list = spud.models.photo.objects.all()
-
-    ld = _pop_boolean(params, "place_descendants")
-    if ld:
-        criteria["place_descendants"] = True
-
-    ad = _pop_boolean(params, "album_descendants")
-    if ad:
-        criteria["album_descendants"] = True
-
-    cd = _pop_boolean(params, "category_descendants")
-    if cd:
-        criteria["category_descendants"] = True
-
-    timezone = django.conf.settings.TIME_ZONE
-    timezone = pytz.timezone(timezone)
-
-    value = _pop_string(params, "description")
-
-    value = _pop_int(params, "first_id")
-    if value is not None:
-        criteria["first_id"] = value
-        search = search & Q(pk__gte=value)
-
-    value = _pop_int(params, "last_id")
-    if value is not None:
-        criteria["last_id"] = value
-        search = search & Q(pk__lt=value)
-
-    value = _pop_datetime(params, "first_date", timezone)
-    if value is not None:
-        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-        criteria["first_date"] = _json_datetime(
-            utc_value, value.utcoffset().total_seconds() / 60)
-        search = search & Q(datetime__gte=utc_value)
-
-    value = _pop_datetime(params, "last_date", timezone)
-    if value is not None:
-        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-        criteria["last_date"] = _json_datetime(
-            utc_value, value.utcoffset().total_seconds() / 60)
-        search = search & Q(datetime__lt=utc_value)
-
-    value = _pop_int(params, "lower_rating")
-    if value is not None:
-        criteria["lower_rating"] = value
-        search = search & Q(rating__gte=value)
-
-    value = _pop_int(params, "upper_rating")
-    if value is not None:
-        criteria["upper_rating"] = value
-        search = search & Q(rating__lte=value)
-
-    value = _pop_string(params, "title")
-    if value is not None:
-        criteria["title"] = value
-        search = search & Q(title__icontains=value)
-
-    value = _pop_string(params, "camera_make")
-    if value is not None:
-        criteria["camera_make"] = value
-        search = search & Q(camera_make__icontains=value)
-
-    value = _pop_string(params, "camera_model")
-    if value is not None:
-        criteria["camera_model"] = value
-        search = search & Q(camera_model__icontains=value)
-
-    value = _pop_object(params, "photographer", spud.models.person)
-    if value is not None:
-        criteria["photographer"] = _json_person(value, value)
-        search = search & Q(photographer=value)
-
-    value = _pop_object(params, "place", spud.models.place)
-    if value is not None:
-        criteria["place"] = _json_place(value, value)
-        if ld:
-            descendants = value.get_descendants()
-            search = search & Q(location__in=descendants)
-        else:
-            search = search & Q(location=value)
-
-    del value
-
-    values = _pop_object_array(params, "person", spud.models.person)
-    if values is not None:
-        criteria["person"] = []
-        for value in values:
-            criteria["person"].append(_json_person(user, value))
-            photo_list = photo_list.filter(persons=value)
-
-    values = _pop_object_array(params, "album", spud.models.album)
-    if values is not None:
-        criteria["album"] = []
-        for value in values:
-            criteria["album"].append(_json_album(user, value))
-            if ad:
-                descendants = value.get_descendants()
-                photo_list = photo_list.filter(albums__in=descendants)
-            else:
-                photo_list = photo_list.filter(albums=value)
-
-    values = _pop_object_array(params, "category", spud.models.category)
-    if values is not None:
-        criteria["category"] = []
-        for value in values:
-            criteria["category"].append(_json_category(user, value))
-            if cd:
-                descendants = value.get_descendants()
-                photo_list = photo_list.filter(
-                    categorys__in=descendants)
-            else:
-                photo_list = photo_list.filter(categorys=value)
-
-    values = _pop_object_array(params, "photos", spud.models.photo)
-    if values is not None:
-        criteria["photos"] = []
-        q = Q()
-        for value in values:
-            criteria["photos"].append(_json_photo(user, value))
-            q = q | Q(pk=value.pk)
-        photo_list = photo_list.filter(q)
-
-    del values
-
-    value = _pop_boolean(params, "place_none")
-    if value is not None:
-        if value:
-            criteria["place_none"] = True
-            search = search & Q(location=None)
-
-    value = _pop_boolean(params, "person_none")
-    if value is not None:
-        if value:
-            criteria["person_none"] = True
-            search = search & Q(persons=None)
-
-    value = _pop_boolean(params, "album_none")
-    if value is not None:
-        if value:
-            criteria["album_none"] = True
-            search = search & Q(albums=None)
-
-    value = _pop_boolean(params, "category_none")
-    if value is not None:
-        if value:
-            criteria["category_none"] = True
-            search = search & Q(categorys=None)
-
-    value = _pop_string(params, "action")
-    if value is not None:
-        if value == "none":
-            search = search & Q(action__isnull=True)
-        else:
-            search = search & Q(action=value)
-        value = spud.models.action_to_string(value)
-        criteria["action"] = value
-
-    value = _pop_string(params, "path")
-    if value is not None:
-        criteria["path"] = value
-        search = search & Q(path=value)
-
-    value = _pop_string(params, "name")
-    if value is not None:
-        criteria["name"] = value
-        search = search & Q(name=value)
-
-    photo_list = photo_list.filter(search)
-    return photo_list, criteria
 
 
 @check_errors
