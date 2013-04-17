@@ -24,29 +24,32 @@ import django.conf
 import django.contrib.auth
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-#from django.core.urlresolvers import reverse
 from django.utils.http import urlquote
 from django.utils.encoding import iri_to_uri
 from django.db.models import Q
 
 
-def _decode_int(string):
+def _decode_int(title, string):
+    if string is None:
+        return None
     try:
         return int(string)
     except ValueError:
-        raise HttpBadRequest("Got non-integer")
+        raise HttpBadRequest("%s got non-integer" % title)
 
 
-def _decode_boolean(string):
-    if string.lower() == "true":
+def _decode_boolean(title, string):
+    if string is None:
+        return None
+    elif string.lower() == "true":
         return True
     elif string.lower() == "false":
         return False
     else:
-        raise HttpBadRequest("Got non-boolean")
+        raise HttpBadRequest("%s got non-boolean" % title)
 
 
-def _decode_datetime(value, timezone):
+def _decode_datetime(title, value, timezone):
     index = value.find(" +")
     if index == -1:
         index = value.find(" -")
@@ -61,7 +64,7 @@ def _decode_datetime(value, timezone):
         elif len(offset) == 4:
             offset = _decode_int(offset[0:2]) * 60 + _decode_int(offset[2:4])
         else:
-            raise HttpBadRequest("Can't parse timezone")
+            raise HttpBadRequest("%s can't parse timezone" % title)
         if sign == '-':
             offset = -offset
         timezone = pytz.FixedOffset(offset)
@@ -78,7 +81,7 @@ def _decode_datetime(value, timezone):
             try:
                 timezone = pytz.timezone(v)
             except pytz.UnknownTimeZoneError:
-                raise HttpBadRequest("Unknown timezone")
+                raise HttpBadRequest("%s unknown timezone" % title)
     value = " ".join(new_value)
     new_value = None
 
@@ -114,16 +117,77 @@ def _decode_datetime(value, timezone):
         try:
             dt = datetime.datetime.strptime(value, "%Y-%m-%d")
         except ValueError:
-            raise HttpBadRequest("Can't parse date/time")
+            raise HttpBadRequest("%s can't parse date/time", title)
 
     dt = timezone.localize(dt)
     return dt
 
 
-def _decode_array(value):
+# FIXME: Obsolete???
+def _decode_array(title, value):
     if value == "":
         return []
     return value.split(".")
+
+
+def _decode_object(title, model, pk):
+    if pk is None:
+        return pk
+    try:
+        return model.objects.get(pk=pk)
+    except model.DoestNotExist:
+        raise HttpBadRequest("%s does not exist" % title)
+
+
+def _pop_string(params, key):
+    value = params.pop(key, None)
+    if value is None:
+        return None
+    if len(value) < 1:
+        raise HttpBadRequest("%s has <0 length")
+    if len(value) > 1:
+        raise HttpBadRequest("%s has >1 length")
+    return value[0]
+
+
+def _pop_int(params, key):
+    return _decode_int(key, _pop_string(params, key))
+
+
+def _pop_object(params, key, model):
+    return _decode_int(key, _pop_string(params, key))
+
+
+def _pop_boolean(params, key):
+    return _decode_boolean(key, _pop_string(params, key))
+
+
+def _pop_datetime(params, key, timezone):
+    return _decode_datetime(key, _pop_string(params, key, timezone))
+
+
+def _pop_int_array(params, key):
+    value = params.pop(key, None)
+    if value is None:
+        return None
+    result = []
+    for v in value:
+        v = [_decode_int(key, w) for w in v.split(".")]
+        result.extend(v)
+    print result
+    return result
+
+
+def _pop_object_array(params, key, model):
+    value = params.pop(key, None)
+    if value is None:
+        return None
+    result = []
+    for v in value:
+        v = [_decode_object(key, model, w) for w in v.split(".")]
+        result.extend(v)
+    print result
+    return result
 
 
 def _json_session(request):
@@ -148,7 +212,6 @@ def _json_photo(user, photo):
 
     resp = {
         'type': 'photo',
-#        'url': reverse("static_photo_detail", kwargs={'photo_id': photo.pk}),
         'id': photo.photo_id,
         'title': unicode(photo),
 #        'photographer': photo.photographer,
@@ -180,7 +243,8 @@ def _json_photo(user, photo):
 
         'thumb': {},
 #        'orig': iri_to_uri(u"%sorig/%s/%s" % (
-#            django.conf.settings.IMAGE_URL, urlquote(photo.path), urlquote(photo.name)))
+#            django.conf.settings.IMAGE_URL,
+#            urlquote(photo.path), urlquote(photo.name)))
 
         'can_add': user.has_perm('spud.add_photo'),
         'can_change': user.has_perm('spud.change_photo'),
@@ -208,7 +272,6 @@ def _json_photo_detail(user, photo):
 
     resp = {
         'type': 'photo',
-#        'url': reverse("static_photo_detail", kwargs={'photo_id': photo.pk}),
         'id': photo.photo_id,
         'title': unicode(photo),
         'name': photo.name,
@@ -236,7 +299,9 @@ def _json_photo_detail(user, photo):
 #        'timestamp': photo.timestamp,
         'albums': [_json_album(user, a) for a in photo.albums.all()],
         'categorys': [_json_category(user, c) for c in photo.categorys.all()],
-        'persons': [_json_person(user, p) for p in photo.persons.order_by("photo_person__position").all()],
+        'persons': [
+            _json_person(user, p) for p in
+            photo.persons.order_by("photo_person__position").all()],
 #        'relations': photo.relations,
 
         'thumb': {},
@@ -289,9 +354,7 @@ def _json_album(user, album):
 
     d = {
         'type': 'album',
-#        'url': reverse("static_album_detail", kwargs={'album_id': album.pk}),
         'id': album.album_id,
-#        'parent_album': album.parent_album,
         'title': album.album,
         'description': album.album_description,
         'cover_photo': _json_photo(user, album.cover_photo),
@@ -301,6 +364,7 @@ def _json_album(user, album):
         'can_add': user.has_perm('spud.add_album'),
         'can_change': user.has_perm('spud.change_album'),
         'can_delete': user.has_perm('spud.delete_album'),
+#        'parent_album': album.parent_album,
     }
     return d
 
@@ -311,9 +375,7 @@ def _json_album_detail(user, album):
 
     d = {
         'type': 'album',
-#        'url': reverse("static_album_detail", kwargs={'album_id': album.pk}),
         'id': album.album_id,
-#        'parent_album': _json_album(user, album.parent_album),
         'title': album.album,
         'description': album.album_description,
         'cover_photo': _json_photo(user, album.cover_photo),
@@ -326,6 +388,7 @@ def _json_album_detail(user, album):
         'can_add': user.has_perm('spud.add_album'),
         'can_change': user.has_perm('spud.change_album'),
         'can_delete': user.has_perm('spud.delete_album'),
+#        'parent_album': _json_album(user, album.parent_album),
     }
 
     parent = album.parent_album
@@ -347,9 +410,7 @@ def _json_category(user, category):
 
     d = {
         'type': 'category',
-#        'url': reverse("category_detail", kwargs={'object_id': category.pk}),
         'id': category.category_id,
-#        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
         'cover_photo': _json_photo(user, category.cover_photo),
@@ -358,6 +419,7 @@ def _json_category(user, category):
         'can_add': user.has_perm('spud.add_category'),
         'can_change': user.has_perm('spud.change_category'),
         'can_delete': user.has_perm('spud.delete_category'),
+#        'parent_category': category.parent_category,
     }
     return d
 
@@ -368,9 +430,7 @@ def _json_category_detail(user, category):
 
     d = {
         'type': 'category',
-#        'url': reverse("category_detail", kwargs={'object_id': category.pk}),
         'id': category.category_id,
-#        'parent_category': category.parent_category,
         'title': category.category,
         'description': category.category_description,
         'cover_photo': _json_photo(user, category.cover_photo),
@@ -382,6 +442,7 @@ def _json_category_detail(user, category):
         'can_add': user.has_perm('spud.add_category'),
         'can_change': user.has_perm('spud.change_category'),
         'can_delete': user.has_perm('spud.delete_category'),
+#        'parent_category': category.parent_category,
     }
 
     parent = category.parent_category
@@ -403,9 +464,7 @@ def _json_place(user, place):
 
     d = {
         'type': 'place',
-#        'url': reverse("place_detail", kwargs={'object_id': place.pk}),
         'id': place.place_id,
-#        'parent': place.parent_place,
         'title': place.title,
         'address': place.address,
         'address2': place.address2,
@@ -420,6 +479,7 @@ def _json_place(user, place):
         'can_add': user.has_perm('spud.add_place'),
         'can_change': user.has_perm('spud.change_place'),
         'can_delete': user.has_perm('spud.delete_place'),
+#        'parent': place.parent_place,
     }
     return d
 
@@ -430,7 +490,6 @@ def _json_place_detail(user, place):
 
     d = {
         'type': 'place',
-#        'url': reverse("place_detail", kwargs={'object_id': place.pk}),
         'id': place.place_id,
         'parent': _json_place(place.parent_place),
         'ancestors': [],
@@ -471,7 +530,6 @@ def _json_person(user, person):
 
     d = {
         'type': 'person',
-#        'url': reverse("person_detail", kwargs={'object_id': person.pk}),
         'id': person.person_id,
         'title': unicode(person),
         'first_name': person.first_name,
@@ -502,7 +560,6 @@ def _json_person_detail(user, person):
 
     d = {
         'type': 'person',
-#        'url': reverse("person_detail", kwargs={'object_id': person.pk}),
         'id': person.person_id,
         'title': unicode(person),
         'first_name': person.first_name,
@@ -525,14 +582,18 @@ def _json_person_detail(user, person):
             'father': _json_person(user, person.father),
             'mother': _json_person(user, person.mother),
             'spouses': [],
-            'grandparents': [_json_person(user, p) for p in person.grandparents()],
-            'uncles_aunts': [_json_person(user, p) for p in person.uncles_aunts()],
+            'grandparents': [
+                _json_person(user, p) for p in person.grandparents()],
+            'uncles_aunts': [
+                _json_person(user, p) for p in person.uncles_aunts()],
             'parents': [_json_person(user, p) for p in person.parents()],
             'siblings': [_json_person(user, p) for p in person.siblings()],
             'cousins': [_json_person(user, p) for p in person.cousins()],
             'children': [_json_person(user, p) for p in person.children()],
-            'nephews_nieces': [_json_person(user, p) for p in person.nephews_nieces()],
-            'grandchildren': [_json_person(user, p) for p in person.grandchildren()],
+            'nephews_nieces': [
+                _json_person(user, p) for p in person.nephews_nieces()],
+            'grandchildren': [
+                _json_person(user, p) for p in person.grandchildren()],
             'notes': person.notes,
             'email': person.email,
         })
@@ -580,17 +641,16 @@ def _json_datetime(value, utc_offset):
 
     if utc_offset < 0:
         tz_string = "-%02d%02d" % (-utc_offset/60, -utc_offset % 60)
-        object_id = "%s-%02d%02d" % (local.date(),
-                                     -utc_offset/60, -utc_offset % 60)
+#        object_id = "%s-%02d%02d" % (local.date(),
+#                                     -utc_offset/60, -utc_offset % 60)
     else:
         tz_string = "+%02d%02d" % (utc_offset/60, utc_offset % 60)
-        object_id = "%s+%02d%02d" % (local.date(),
-                                     utc_offset/60, utc_offset % 60)
+#        object_id = "%s+%02d%02d" % (local.date(),
+#                                     utc_offset/60, utc_offset % 60)
 
     return {
         'type': 'datetime',
         'title': u"%s %s %s" % (local.date(), local.time(), tz_string),
-#        'url': reverse("date_detail", kwargs={'object_id': object_id}),
         'date': unicode(local.date()),
         'time': unicode(local.time()),
         'timezone': tz_string
@@ -630,12 +690,18 @@ def check_errors(func):
 def login(request):
     if request.method != "POST":
         raise HttpBadRequest("Only POST is supported")
-    if 'username' not in request.POST:
+
+    params = request.POST.copy()
+    _pop_string(params, "_")
+
+    username = _pop_string(params, "username")
+    password = _pop_string(params, "password")
+
+    if username is None:
         raise HttpBadRequest("username not supplied")
-    if 'password' not in request.POST:
+    if password is None:
         raise HttpBadRequest("password not supplied")
-    username = request.POST['username']
-    password = request.POST['password']
+
     user = django.contrib.auth.authenticate(
         username=username, password=password)
     if user is not None:
@@ -663,23 +729,22 @@ def logout(request):
 @check_errors
 def album_search_form(request):
     criteria = {}
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         criteria['q'] = q
 
-    parent = search_dict.pop("parent", [None])[-1]
-    if parent:
+    parent = _pop_int(params, "parent")
+    if parent is not None:
         try:
-            parent = _decode_int(parent)
             parent = spud.models.album.objects.get(pk=parent)
         except spud.models.album.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         criteria['parent'] = _json_album(request.user, parent)
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     resp = {
@@ -693,39 +758,40 @@ def album_search_form(request):
 
 @check_errors
 def album_search_results(request):
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    first = search_dict.pop("first", ["0"])[-1]
-    first = _decode_int(first)
+    first = _pop_int(params, "first")
+    if first is None:
+        raise HttpBadRequest("first is not specified")
     if first < 0:
         raise HttpBadRequest("first is negative")
 
-    count = search_dict.pop("count", ["10"])[-1]
-    count = _decode_int(count)
+    count = _pop_int(params, "count")
+    if count is None:
+        raise HttpBadRequest("count is not specified")
     if count < 0:
         raise HttpBadRequest("count is negative")
 
     album_list = spud.models.album.objects.all()
     criteria = {}
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         album_list = album_list.filter(
             Q(album__icontains=q) | Q(album_description__icontains=q))
         criteria['q'] = q
 
-    parent = search_dict.pop("parent", [None])[-1]
-    if parent:
+    parent = _pop_int(params, "parent")
+    if parent is not None:
         try:
-            parent = _decode_int(parent)
             parent = spud.models.album.objects.get(pk=parent)
         except spud.models.album.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         album_list = album_list.filter(parent_album=parent)
         criteria['parent'] = _json_album(request.user, parent)
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     number_results = album_list.count()
@@ -788,41 +854,52 @@ def album_delete(request, album_id):
 
 def album_finish(request, album):
     if request.method == "POST":
+        params = request.POST.copy()
+        _pop_string(params, "_")
+
         updated = False
-        if 'title' in request.POST:
-            album.album = request.POST['title']
+
+        value = _pop_string(params, "title")
+        if value is not None:
+            album.album = value
             updated = True
-        if 'description' in request.POST:
-            album.album_description = request.POST['description']
+
+        value = _pop_string(params, "description")
+        if value is not None:
+            album.album_description = value
             updated = True
-        if 'cover_photo' in request.POST:
-            if request.POST['cover_photo'] == "":
+
+        value = _pop_string(params, "cover_photo")
+        if value is not None:
+            if value == "":
                 album.cover_photo = None
             else:
-                try:
-                    photo_id = _decode_int(request.POST['cover_photo'])
-                    cp = spud.models.photo.objects.get(pk=photo_id)
-                    album.cover_photo = cp
-                except spud.models.photo.DoesNotExist:
-                    raise HttpBadRequest("cover_photo does not exist")
+                value = _decode_object("cover_photo", spud.models.photo, value)
+                album.cover_photo = value
             updated = True
-        if 'sortname' in request.POST:
-            album.sortname = request.POST['sortname']
+
+        value = _pop_string(params, "sortname")
+        if value is not None:
+            album.sortname = value
             updated = True
-        if 'sortorder' in request.POST:
-            album.sortorder = request.POST['sortorder']
+
+        value = _pop_string(params, "sortorder")
+        if value is not None:
+            album.sortorder = value
             updated = True
-        if 'parent' in request.POST:
-            if request.POST['parent'] == "":
+
+        value = _pop_string(params, "parent")
+        if value is not None:
+            if value == "":
                 album.parent_album = None
             else:
-                try:
-                    parent_id = _decode_int(request.POST['parent'])
-                    p = spud.models.album.objects.get(pk=parent_id)
-                    album.parent_album = p
-                except spud.models.album.DoesNotExist:
-                    raise HttpBadRequest("cover_photo does not exist")
+                value = _decode_object("parent", spud.models.album, value)
+                album.parent_album = value
             updated = True
+
+        if len(params) > 0:
+            raise HttpBadRequest("Unknown parameters")
+
         if updated:
             album.save()
 
@@ -837,23 +914,22 @@ def album_finish(request, album):
 @check_errors
 def category_search_form(request):
     criteria = {}
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         criteria['q'] = q
 
-    parent = search_dict.pop("parent", [None])[-1]
-    if parent:
+    parent = _pop_int(params, "parent")
+    if parent is not None:
         try:
-            parent = _decode_int(parent)
             parent = spud.models.category.objects.get(pk=parent)
         except spud.models.category.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         criteria['parent'] = _json_category(request.user, parent)
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     resp = {
@@ -867,39 +943,40 @@ def category_search_form(request):
 
 @check_errors
 def category_search_results(request):
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    first = search_dict.pop("first", ["0"])[-1]
-    first = _decode_int(first)
+    first = _pop_int(params, "first")
+    if first is None:
+        raise HttpBadRequest("first is not specified")
     if first < 0:
         raise HttpBadRequest("first is negative")
 
-    count = search_dict.pop("count", ["10"])[-1]
-    count = _decode_int(count)
+    count = _pop_int(params, "count")
+    if count is None:
+        raise HttpBadRequest("count is not specified")
     if count < 0:
         raise HttpBadRequest("count is negative")
 
     category_list = spud.models.category.objects.all()
     criteria = {}
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         category_list = category_list.filter(
             Q(category__icontains=q) | Q(category_description__icontains=q))
         criteria['q'] = q
 
-    parent = search_dict.pop("parent", [None])[-1]
-    if parent:
+    parent = _pop_int(params, "parent")
+    if parent is not None:
         try:
-            parent = _decode_int(parent)
             parent = spud.models.category.objects.get(pk=parent)
         except spud.models.category.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         category_list = category_list.filter(parent_category=parent)
         criteria['parent'] = _json_category(request.user, parent)
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     number_results = category_list.count()
@@ -963,42 +1040,53 @@ def category_delete(request, category_id):
 
 def category_finish(request, category):
     if request.method == "POST":
+        params = request.POST.copy()
+        _pop_string(params, "_")
+
         updated = False
-        if 'title' in request.POST:
-            category.category = request.POST['title']
+
+        value = _pop_string(params, "title")
+        if value is None:
+            category.category = value
             updated = True
-        if 'description' in request.POST:
-            category.category_description = request.POST['description']
+
+        value = _pop_string(params, "description")
+        if value is not None:
+            category.category_description = value
             updated = True
-        if 'cover_photo' in request.POST:
-            if request.POST['cover_photo'] == "":
+
+        value = _pop_string(params, "cover_photo")
+        if value is not None:
+            if value == "":
                 category.cover_photo = None
             else:
-                try:
-                    photo_id = _decode_int(request.POST['cover_photo'])
-                    cp = spud.models.photo.objects.get(pk=photo_id)
-                    category.cover_photo = cp
-                except spud.models.photo.DoesNotExist:
-                    raise HttpBadRequest("cover_photo does not exist")
+                value = _decode_object("cover_photo", spud.models.photo, value)
+                category.cover_photo = value
             updated = True
-        if 'sortname' in request.POST:
-            category.sortname = request.POST['sortname']
+
+        value = _pop_string(params, "sortname")
+        if value is not None:
+            category.sortname = value
             updated = True
-        if 'sortorder' in request.POST:
-            category.sortorder = request.POST['sortorder']
+
+        value = _pop_string(params, "sortorder")
+        if value is not None:
+            category.sortorder = value
             updated = True
+
+        value = _pop_string(params, "parent")
         if 'parent' in request.POST:
             if request.POST['parent'] == "":
                 category.parent_category = None
             else:
-                try:
-                    parent_id = _decode_int(request.POST['parent'])
-                    p = spud.models.category.objects.get(pk=parent_id)
-                    category.parent_category = p
-                except spud.models.category.DoesNotExist:
-                    raise HttpBadRequest("cover_photo does not exist")
+                value = _decode_object("parent", spud.models.category, value)
+                category.parent_category = value
             updated = True
-        if updated:
+
+        if len(params) > 0:
+            raise HttpBadRequest("Unknown parameters")
+
+        if updated is not None:
             category.save()
 
     resp = {
@@ -1012,23 +1100,22 @@ def category_finish(request, category):
 @check_errors
 def place_search_form(request):
     criteria = {}
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         criteria['q'] = q
 
-    parent = search_dict.pop("parent", [None])[-1]
-    if parent:
+    parent = _pop_int(params, "parent")
+    if parent is not None:
         try:
-            parent = _decode_int(parent)
             parent = spud.models.place.objects.get(pk=parent)
         except spud.models.place.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         criteria['parent'] = _json_place(request.user, parent)
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     resp = {
@@ -1042,39 +1129,40 @@ def place_search_form(request):
 
 @check_errors
 def place_search_results(request):
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    first = search_dict.pop("first", ["0"])[-1]
-    first = _decode_int(first)
+    first = _pop_int(params, "first")
+    if first is None:
+        raise HttpBadRequest("first is not specified")
     if first < 0:
         raise HttpBadRequest("first is negative")
 
-    count = search_dict.pop("count", ["10"])[-1]
-    count = _decode_int(count)
+    count = _pop_int(params, "count")
+    if count is None:
+        raise HttpBadRequest("count is not specified")
     if count < 0:
         raise HttpBadRequest("count is negative")
 
     place_list = spud.models.place.objects.all()
     criteria = {}
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         place_list = place_list.filter(
             Q(title__icontains=q) | Q(address__icontains=q))
         criteria['q'] = q
 
-    parent = search_dict.pop("parent", [None])[-1]
-    if parent:
+    parent = _pop_int(params, "parent")
+    if parent is not None:
         try:
-            parent = _decode_int(parent)
             parent = spud.models.place.objects.get(pk=parent)
         except spud.models.place.DoesNotExist:
             raise HttpBadRequest("parent does not exist")
         place_list = place_list.filter(parent_place=parent)
         criteria['parent'] = _json_place(request.user, parent)
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     number_results = place_list.count()
@@ -1137,56 +1225,77 @@ def place_delete(request, place_id):
 
 def place_finish(request, place):
     if request.method == "POST":
+        params = request.POST.copy()
+        _pop_string(params, "_")
+
         updated = False
-        if 'title' in request.POST:
-            place.title = request.POST['title']
+
+        value = _pop_string(params, "title")
+        if value is not None:
+            place.title = value
             updated = True
-        if 'address' in request.POST:
-            place.address = request.POST['address']
+
+        value = _pop_string(params, "address")
+        if value is not None:
+            place.address = value
             updated = True
-        if 'address2' in request.POST:
-            place.address2 = request.POST['address2']
+
+        value = _pop_string(params, "address2")
+        if value is not None:
+            place.address2 = value
             updated = True
-        if 'city' in request.POST:
-            place.city = request.POST['city']
+
+        value = _pop_string(params, "city")
+        if value is not None:
+            place.city = value
             updated = True
-        if 'zip' in request.POST:
-            place.zip = request.POST['zip']
+
+        value = _pop_string(params, "zip")
+        if value is not None:
+            place.zip = value
             updated = True
-        if 'country' in request.POST:
-            place.country = request.POST['country']
+
+        value = _pop_string(params, "country")
+        if value is not None:
+            place.country = value
             updated = True
-        if 'url' in request.POST:
-            place.url = request.POST['url']
+
+        value = _pop_string(params, "url")
+        if value is not None:
+            place.url = value
             updated = True
-        if 'urldesc' in request.POST:
-            place.urldesc = request.POST['urldesc']
+
+        value = _pop_string(params, "urldesc")
+        if value is not None:
+            place.urldesc = value
             updated = True
-        if 'notes' in request.POST:
-            place.notes = request.POST['notes']
+
+        value = _pop_string(params, "notes")
+        if value is not None:
+            place.notes = value
             updated = True
-        if 'cover_photo' in request.POST:
-            if request.POST['cover_photo'] == "":
+
+        value = _pop_string(params, "cover_photo")
+        if value is not None:
+            if value == "":
                 place.cover_photo = None
             else:
-                try:
-                    photo_id = _decode_int(request.POST['cover_photo'])
-                    cp = spud.models.photo.objects.get(pk=photo_id)
-                    place.cover_photo = cp
-                except spud.models.photo.DoesNotExist:
-                    raise HttpBadRequest("cover_photo does not exist")
+                value = _decode_object("cover_photo", spud.models.photo, value)
+                place.cover_photo = value
             updated = True
-        if 'parent' in request.POST:
-            if request.POST['parent'] == "":
+
+        value = _pop_string(params, "parent")
+        if value is not None:
+            if value == "":
                 place.parent_place = None
             else:
-                try:
-                    parent_id = _decode_int(request.POST['parent'])
-                    p = spud.models.place.objects.get(pk=parent_id)
-                    place.parent_place = p
-                except spud.models.place.DoesNotExist:
-                    raise HttpBadRequest("cover_photo does not exist")
+                value = _decode_object("parent", spud.models.place, value)
+                place.parent_place = value
             updated = True
+
+        if len(params) > 0:
+            raise HttpBadRequest("Unknown parameters")
+
         if updated:
             place.save()
 
@@ -1201,14 +1310,14 @@ def place_finish(request, place):
 @check_errors
 def person_search_form(request):
     criteria = {}
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         criteria['q'] = q
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     resp = {
@@ -1222,30 +1331,32 @@ def person_search_form(request):
 
 @check_errors
 def person_search_results(request):
-    search_dict = request.GET.copy()
-    search_dict.pop("_", None)
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    first = search_dict.pop("first", ["0"])[-1]
-    first = _decode_int(first)
+    first = _pop_int(params, "first")
+    if first is None:
+        raise HttpBadRequest("first is not specified")
     if first < 0:
         raise HttpBadRequest("first is negative")
 
-    count = search_dict.pop("count", ["10"])[-1]
-    count = _decode_int(count)
+    count = _pop_int(params, "count")
+    if count is None:
+        raise HttpBadRequest("count is not specified")
     if count < 0:
         raise HttpBadRequest("count is negative")
 
     person_list = spud.models.person.objects.all()
     criteria = {}
 
-    q = search_dict.pop("q", [None])[-1]
-    if q:
+    q = _pop_string(params, "q")
+    if q is not None:
         person_list = person_list.filter(
             Q(first_name__icontains=q) | Q(last_name__icontains=q) |
             Q(middle_name__icontains=q) | Q(called__icontains=q))
         criteria['q'] = q
 
-    if len(search_dict) > 0:
+    if len(params) > 0:
         raise HttpBadRequest("Unknown parameters")
 
     number_results = person_list.count()
@@ -1308,123 +1419,137 @@ def person_delete(request, person_id):
 
 def person_finish(request, person):
     if request.method == "POST":
+        params = request.POST.copy()
+        _pop_string(params, "_")
+
         updated = False
-        if 'first_name' in request.POST:
-            person.first_name = request.POST['first_name']
+
+        value = _pop_string(params, "first_name")
+        if value is not None:
+            person.first_name = value
             updated = True
-        if 'middle_name' in request.POST:
-            person.middle_name = request.POST['middle_name']
+
+        value = _pop_string(params, "middle_name")
+        if value is not None:
+            person.middle_name = value
             updated = True
-        if 'last_name' in request.POST:
-            person.last_name = request.POST['last_name']
+
+        value = _pop_string(params, "last_name")
+        if value is not None:
+            person.last_name = value
             updated = True
-        if 'called' in request.POST:
-            person.called = request.POST['called']
+
+        value = _pop_string(params, "called")
+        if value is not None:
+            person.called = value
             updated = True
-        if 'gender' in request.POST:
+
+        value = _pop_int(params, "gender")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change gender")
-            gender = _decode_int(request.POST['gender'])
-            if gender < 1 or gender > 2:
+            if value < 1 or value > 2:
                 raise HttpBadRequest("Unknown gender")
-            person.gender = gender
+            person.gender = value
             updated = True
-        if 'notes' in request.POST:
+
+        value = _pop_string(params, "notes")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change notes")
-            person.notes = request.POST['notes']
+            person.notes = value
             updated = True
-        if 'email' in request.POST:
+
+        value = _pop_string(params, "email")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change email")
-            person.email = request.POST['email']
+            person.email = value
             updated = True
-        if 'dob' in request.POST:
+
+        # FIXME check format
+        value = _pop_string(params, "dob")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change dob")
-            person.dob = request.POST['dob']
+            person.dob = value
             updated = True
-        if 'dod' in request.POST:
+
+        # FIXME check format
+        value = _pop_string(params, "dod")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change dod")
-            person.email = request.POST['dod']
+            person.email = value
             updated = True
-        if 'cover_photo' in request.POST:
-            if request.POST['cover_photo'] == "":
+
+        value = _pop_string(params, "cover_photo")
+        if value is not None:
+            if value == "":
                 person.cover_photo = None
             else:
-                try:
-                    photo_id = _decode_int(request.POST['cover_photo'])
-                    cp = spud.models.photo.objects.get(pk=photo_id)
-                    person.cover_photo = cp
-                except spud.models.photo.DoesNotExist:
-                    raise HttpBadRequest("cover_photo does not exist")
+                value = _decode_object("cover_photo", spud.models.photo, value)
+                person.cover_photo = value
             updated = True
-        if 'work' in request.POST:
+
+        value = _pop_string(params, "work")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change work")
-            if request.POST['work'] == "":
+            if value == "":
                 person.work = None
             else:
-                try:
-                    place_id = _decode_int(request.POST['work'])
-                    p = spud.models.place.objects.get(pk=place_id)
-                    person.work = p
-                except spud.models.place.DoesNotExist:
-                    raise HttpBadRequest("work does not exist")
+                value = _decode_object("work",  spud.models.place, value)
+                person.work = value
             updated = True
-        if 'home' in request.POST:
+
+        value = _pop_string(params, "home")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change home")
-            if request.POST['home'] == "":
+            if value == "":
                 person.home = None
             else:
-                try:
-                    place_id = _decode_int(request.POST['home'])
-                    p = spud.models.place.objects.get(pk=place_id)
-                    person.home = p
-                except spud.models.place.DoesNotExist:
-                    raise HttpBadRequest("home does not exist")
+                value = _decode_object("home", spud.models.place, value)
+                person.home = value
             updated = True
-        if 'mother' in request.POST:
+
+        value = _pop_string(params, "mother")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change mother")
-            if request.POST['mother'] == "":
+            if value == "":
                 person.mother = None
             else:
-                try:
-                    person_id = _decode_int(request.POST['mother'])
-                    p = spud.models.person.objects.get(pk=person_id)
-                    person.mother = p
-                except spud.models.person.DoesNotExist:
-                    raise HttpBadRequest("mother does not exist")
+                value = _decode_object("mother", spud.models.person, value)
+                person.mother = value
             updated = True
-        if 'father' in request.POST:
+
+        value = _pop_string(params, "father")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change father")
-            if request.POST['father'] == "":
+            if value == "":
                 person.father = None
             else:
-                try:
-                    person_id = _decode_int(request.POST['father'])
-                    p = spud.models.person.objects.get(pk=person_id)
-                    person.father = p
-                except spud.models.person.DoesNotExist:
-                    raise HttpBadRequest("father does not exist")
+                value = _decode_object("father", spud.models.person, value)
+                person.father = value
             updated = True
-        if 'spouse' in request.POST:
+
+        value = _pop_string(params, "spouse")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change spouse")
-            if request.POST['spouse'] == "":
+            if value == "":
                 person.spouse = None
             else:
-                try:
-                    person_id = _decode_int(request.POST['spouse'])
-                    p = spud.models.person.objects.get(pk=person_id)
-                    person.spouse = p
-                except spud.models.person.DoesNotExist:
-                    raise HttpBadRequest("spouse does not exist")
+                value = _decode_object("spouse", spud.models.person, value)
+                person.spouse = value
             updated = True
+
+        if len(params) > 0:
+            raise HttpBadRequest("Unknown parameters")
+
         if updated:
             person.save()
 
@@ -1441,7 +1566,8 @@ def photo_relation(request, photo_relation_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_relation'):
             raise HttpForbidden("No rights to change photo_relations")
-    photo_relation = get_object_or_404(spud.models.photo_relation, pk=photo_relation_id)
+    photo_relation = get_object_or_404(
+        spud.models.photo_relation, pk=photo_relation_id)
     return photo_relation_finish(request, photo_relation)
 
 
@@ -1472,7 +1598,8 @@ def photo_relation_delete(request, photo_relation_id):
         raise HttpBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_relation'):
         raise HttpForbidden("No rights to delete photo_relations")
-    photo_relation = get_object_or_404(spud.models.photo_relation, pk=photo_relation_id)
+    photo_relation = get_object_or_404(
+        spud.models.photo_relation, pk=photo_relation_id)
 
     errors = photo_relation.check_delete()
     if len(errors) > 0:
@@ -1490,220 +1617,241 @@ def photo_relation_delete(request, photo_relation_id):
 
 def photo_relation_finish(request, photo_relation):
     if request.method == "POST":
+        params = request.POST.copy()
+        _pop_string(params, "_")
+
         updated = False
-        if 'desc_1' in request.POST:
-            if request.POST['desc_1'] == "":
+
+        value = _pop_string(params, "desc_1")
+        if value is not None:
+            if value == "":
                 raise HttpBadRequest("desc_1 must be non-empty")
-            photo_relation.desc_1 = request.POST['desc_1']
+            photo_relation.desc_1 = value
             updated = True
-        if 'desc_2' in request.POST:
-            if request.POST['desc_2'] == "":
+
+        value = _pop_string(params, "desc_2")
+        if value is not None:
+            if value == "":
                 raise HttpBadRequest("desc_2 must be non-empty")
-            photo_relation.desc_2 = request.POST['desc_2']
+            photo_relation.desc_2 = value
             updated = True
-        if 'photo_1' in request.POST:
-            if request.POST['photo_1'] == "":
+
+        value = _pop_string(params, "photo_1")
+        if value is not None:
+            if value == "":
                 raise HttpBadRequest("photo_1 must be non-empty")
-            try:
-                photo_id = _decode_int(request.POST['photo_1'])
-                cp = spud.models.photo.objects.get(pk=photo_id)
-                photo_relation.photo_1 = cp
-            except spud.models.photo.DoesNotExist:
-                raise HttpBadRequest("photo_1 does not exist")
+            value = _decode_object("photo_1", spud.models.photo, value)
+            photo_relation.photo_1 = value
             updated = True
-        if 'photo_2' in request.POST:
-            if request.POST['photo_2'] == "":
+
+        value = _pop_string(params, "photo_2")
+        if value is not None:
+            if value == "":
                 raise HttpBadRequest("photo_2 must be non-empty")
-            try:
-                photo_id = _decode_int(request.POST['photo_2'])
-                cp = spud.models.photo.objects.get(pk=photo_id)
-                photo_relation.photo_2 = cp
-            except spud.models.photo.DoesNotExist:
-                raise HttpBadRequest("photo_2 does not exist")
+            value = _decode_object("photo_2", spud.models.photo, value)
+            photo_relation.photo_2 = value
             updated = True
+
+        if len(params) > 0:
+            raise HttpBadRequest("Unknown parameters")
+
         if updated:
             photo_relation.save()
 
     resp = {
         'type': 'photo_relation_get',
-        'photo_relation': _json_photo_relation_detail(request.user, photo_relation),
+        'photo_relation': _json_photo_relation_detail(request.user,
+                                                      photo_relation),
         'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def _json_search(user, search_dict):
+def _json_search(user, params):
     criteria = {}
 
     search = Q()
     photo_list = spud.models.photo.objects.all()
 
-    search_dict.pop("_", None)
-
-    ld = search_dict.pop("place_descendants", ["false"])[-1]
-    ld = _decode_boolean(ld)
+    ld = _pop_boolean(params, "place_descendants")
     if ld:
         criteria["place_descendants"] = True
 
-    ad = search_dict.pop("album_descendants", ["false"])[-1]
-    ad = _decode_boolean(ad)
+    ad = _pop_boolean(params, "album_descendants")
     if ad:
         criteria["album_descendants"] = True
 
-    cd = search_dict.pop("category_descendants", ["false"])[-1]
-    cd = _decode_boolean(cd)
+    cd = _pop_boolean(params, "category_descendants")
     if cd:
         criteria["category_descendants"] = True
 
     timezone = django.conf.settings.TIME_ZONE
     timezone = pytz.timezone(timezone)
 
-    for key in search_dict:
-        value = search_dict[key]
+    value = _pop_string(params, "description")
 
-        if value == "":
-            continue
-        elif key == "first_id":
-            criteria[key] = value
-            search = search & Q(pk__gte=_decode_int(value))
-        elif key == "last_id":
-            criteria[key] = value
-            search = search & Q(pk__lt=_decode_int(value))
-        elif key == "first_date":
-            try:
-                value = _decode_datetime(value, timezone)
-            except ValueError:
-                raise HttpBadRequest("Invalid date/time")
-            utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-            criteria[key] = _json_datetime(
-                utc_value, value.utcoffset().total_seconds() / 60)
-            search = search & Q(datetime__gte=utc_value)
-        elif key == "last_date":
-            try:
-                value = _decode_datetime(value, timezone)
-            except ValueError:
-                raise HttpBadRequest("Invalid date/time")
-            utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-            criteria[key] = _json_datetime(
-                utc_value, value.utcoffset().total_seconds() / 60)
-            search = search & Q(datetime__lt=utc_value)
-        elif key == "lower_rating":
-            criteria[key] = value
-            search = search & Q(rating__gte=value)
-        elif key == "upper_rating":
-            criteria[key] = value
-            search = search & Q(rating__lte=value)
-        elif key == "title":
-            criteria[key] = value
-            search = search & Q(title__icontains=value)
-        elif key == "camera_make":
-            criteria[key] = value
-            search = search & Q(camera_make__icontains=value)
-        elif key == "camera_model":
-            criteria[key] = value
-            search = search & Q(camera_model__icontains=value)
-        elif key == "photographer":
-            object = get_object_or_404(spud.models.person, pk=value)
-            criteria[key] = _json_person(user, object)
-            search = search & Q(photographer=object)
-        elif key == "place":
-            object = get_object_or_404(spud.models.place, pk=value)
-            criteria[key] = _json_place(user, object)
-            if ld:
-                descendants = object.get_descendants()
-                search = search & Q(location__in=descendants)
+    value = _pop_int(params, "first_id")
+    if value is not None:
+        criteria["first_id"] = value
+        search = search & Q(pk__gte=value)
+
+    value = _pop_int(params, "last_id")
+    if value is not None:
+        criteria["last_id"] = value
+        search = search & Q(pk__lt=value)
+
+    value = _pop_datetime(params, "first_date", timezone)
+    if value is not None:
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+        criteria["first_date"] = _json_datetime(
+            utc_value, value.utcoffset().total_seconds() / 60)
+        search = search & Q(datetime__gte=utc_value)
+
+    value = _pop_datetime(params, "last_date", timezone)
+    if value is not None:
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+        criteria["last_date"] = _json_datetime(
+            utc_value, value.utcoffset().total_seconds() / 60)
+        search = search & Q(datetime__lt=utc_value)
+
+    value = _pop_int(params, "lower_rating")
+    if value is not None:
+        criteria["lower_rating"] = value
+        search = search & Q(rating__gte=value)
+
+    value = _pop_int(params, "upper_rating")
+    if value is not None:
+        criteria["upper_rating"] = value
+        search = search & Q(rating__lte=value)
+
+    value = _pop_string(params, "title")
+    if value is not None:
+        criteria["title"] = value
+        search = search & Q(title__icontains=value)
+
+    value = _pop_string(params, "camera_make")
+    if value is not None:
+        criteria["camera_make"] = value
+        search = search & Q(camera_make__icontains=value)
+
+    value = _pop_string(params, "camera_model")
+    if value is not None:
+        criteria["camera_model"] = value
+        search = search & Q(camera_model__icontains=value)
+
+    value = _pop_object(params, "photographer", spud.models.person)
+    if value is not None:
+        criteria["photographer"] = _json_person(value, value)
+        search = search & Q(photographer=value)
+
+    value = _pop_object(params, "place", spud.models.place)
+    if value is not None:
+        criteria["place"] = _json_place(value, value)
+        if ld:
+            descendants = value.get_descendants()
+            search = search & Q(location__in=descendants)
+        else:
+            search = search & Q(location=value)
+
+    del value
+
+    values = _pop_object_array(params, "person", spud.models.person)
+    if values is not None:
+        criteria["person"] = []
+        for value in values:
+            criteria["person"].append(_json_person(user, value))
+            photo_list = photo_list.filter(persons=value)
+
+    values = _pop_object_array(params, "album", spud.models.album)
+    if values is not None:
+        criteria["album"] = []
+        for value in values:
+            criteria["album"].append(_json_album(user, value))
+            if ad:
+                descendants = value.get_descendants()
+                photo_list = photo_list.filter(albums__in=descendants)
             else:
-                search = search & Q(location=object)
-        elif key == "person":
-            values = _decode_array(value)
-            criteria[key] = []
-            for value in values:
-                value = _decode_int(value)
-                object = get_object_or_404(spud.models.person, pk=value)
-                criteria[key].append(_json_person(user, object))
-                photo_list = photo_list.filter(persons=object)
-        elif key == "album":
-            values = _decode_array(value)
-            criteria[key] = []
-            for value in values:
-                value = _decode_int(value)
-                object = get_object_or_404(spud.models.album, pk=value)
-                criteria[key].append(_json_album(user, object))
-                if ad:
-                    descendants = object.get_descendants()
-                    photo_list = photo_list.filter(albums__in=descendants)
-                else:
-                    photo_list = photo_list.filter(albums=object)
-        elif key == "category":
-            values = _decode_array(value)
-            criteria[key] = []
-            for value in values:
-                value = _decode_int(value)
-                object = get_object_or_404(spud.models.category, pk=value)
-                criteria[key].append(_json_category(user, object))
-                if cd:
-                    descendants = object.get_descendants()
-                    photo_list = photo_list.filter(
-                        categorys__in=descendants)
-                else:
-                    photo_list = photo_list.filter(categorys=object)
-        elif key == "photos":
-            values = _decode_array(value)
-            criteria[key] = []
-            q = Q()
-            for value in values:
-                value = _decode_int(value)
-                object = get_object_or_404(spud.models.photo, pk=value)
-                criteria[key].append(_json_photo(user, object))
-                q = q | Q(pk=object.pk)
-            photo_list = photo_list.filter(q)
-        elif key == "place_none":
-            value = _decode_boolean(value)
-            if value:
-                criteria[key] = True
-                search = search & Q(location=None)
-        elif key == "person_none":
-            value = _decode_boolean(value)
-            if value:
-                criteria[key] = True
-                search = search & Q(persons=None)
-        elif key == "album_none":
-            value = _decode_boolean(value)
-            if value:
-                criteria[key] = True
-                search = search & Q(albums=None)
-        elif key == "category_none":
-            value = _decode_boolean(value)
-            if value:
-                criteria[key] = True
-                search = search & Q(categorys=None)
-        elif key == "action":
-            if value == "none":
-                search = search & Q(action__isnull=True)
+                photo_list = photo_list.filter(albums=value)
+
+    values = _pop_object_array(params, "category", spud.models.category)
+    if values is not None:
+        criteria["category"] = []
+        for value in values:
+            criteria["category"].append(_json_category(user, value))
+            if cd:
+                descendants = value.get_descendants()
+                photo_list = photo_list.filter(
+                    categorys__in=descendants)
             else:
-                search = search & Q(action=value)
-            value = spud.models.action_to_string(value)
-            criteria[key] = value
-        elif key == "path":
-            criteria[key] = value
-            search = search & Q(path=value)
-        elif key == "name":
-            criteria[key] = value
-            search = search & Q(name=value)
-# FIXME
-#        else:
-#            raise HttpBadRequest("Unknown key %s" % (key))
+                photo_list = photo_list.filter(categorys=value)
 
-        photo_list = photo_list.filter(search)
+    values = _pop_object_array(params, "photos", spud.models.photo)
+    if values is not None:
+        criteria["photos"] = []
+        q = Q()
+        for value in values:
+            criteria["photos"].append(_json_photo(user, value))
+            q = q | Q(pk=value.pk)
+        photo_list = photo_list.filter(q)
 
+    del values
+
+    value = _pop_boolean(params, "place_none")
+    if value is not None:
+        if value:
+            criteria["place_none"] = True
+            search = search & Q(location=None)
+
+    value = _pop_boolean(params, "person_none")
+    if value is not None:
+        if value:
+            criteria["person_none"] = True
+            search = search & Q(persons=None)
+
+    value = _pop_boolean(params, "album_none")
+    if value is not None:
+        if value:
+            criteria["album_none"] = True
+            search = search & Q(albums=None)
+
+    value = _pop_boolean(params, "category_none")
+    if value is not None:
+        if value:
+            criteria["category_none"] = True
+            search = search & Q(categorys=None)
+
+    value = _pop_string(params, "action")
+    if value is not None:
+        if value == "none":
+            search = search & Q(action__isnull=True)
+        else:
+            search = search & Q(action=value)
+        value = spud.models.action_to_string(value)
+        criteria["action"] = value
+
+    value = _pop_string(params, "path")
+    if value is not None:
+        criteria["path"] = value
+        search = search & Q(path=value)
+
+    value = _pop_string(params, "name")
+    if value is not None:
+        criteria["name"] = value
+        search = search & Q(name=value)
+
+    photo_list = photo_list.filter(search)
     return photo_list, criteria
 
 
 @check_errors
 def photo_search_form(request):
-    search_dict = request.GET.copy()
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    photo_list, criteria = _json_search(request.user, search_dict)
+    photo_list, criteria = _json_search(request.user, params)
+
+    if len(params) > 0:
+        raise HttpBadRequest("Unknown parameters")
 
     resp = {
         'type': 'search_form',
@@ -1715,27 +1863,31 @@ def photo_search_form(request):
 
 @check_errors
 def photo_search_results(request):
-    search_dict = request.GET.copy()
+    params = request.GET.copy()
+    _pop_string(params, "_")
 
-    if 'number' in search_dict:
-        number = search_dict.pop("number")[-1]
-        number = _decode_int(number)
-        return photo_search_item(request, search_dict, number)
+    number = _pop_int(params, "number")
+    if number is not None:
+        return photo_search_item(request, params, number)
 
-
-    first = search_dict.pop("first", ["0"])[-1]
-    first = _decode_int(first)
+    first = _pop_int(params, "first")
+    if first is None:
+        raise HttpBadRequest("first is not specified")
     if first < 0:
         raise HttpBadRequest("first is negative")
 
-    count = search_dict.pop("count", ["10"])[-1]
-    count = _decode_int(count)
+    count = _pop_int(params, "count")
+    if count is None:
+        raise HttpBadRequest("count is not specified")
     if count < 0:
         raise HttpBadRequest("count is negative")
 
-    photo_list, criteria = _json_search(request.user, search_dict)
-    number_results = photo_list.count()
+    photo_list, criteria = _json_search(request.user, params)
 
+    if len(params) > 0:
+        raise HttpBadRequest("Unknown parameters")
+
+    number_results = photo_list.count()
     photos = photo_list[first:first+count]
     number_returned = len(photos)
 
@@ -1754,9 +1906,12 @@ def photo_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def photo_search_item(request, search_dict, number):
-    photo_list, criteria = _json_search(request.user, search_dict)
+def photo_search_item(request, params, number):
+    photo_list, criteria = _json_search(request.user, params)
     number_results = photo_list.count()
+
+    if len(params) > 0:
+        raise HttpBadRequest("Unknown parameters")
 
     try:
         photo = photo_list[number]
@@ -1790,18 +1945,17 @@ def photo_search_change(request):
         if not request.user.has_perm('spud.change_photo'):
             raise HttpForbidden("No rights to change photos")
 
-    search_dict = request.POST.copy()
-    search_dict.pop("_", None)
+    params = request.POST.copy()
+    _pop_string(params, "_")
 
     timezone = django.conf.settings.TIME_ZONE
     timezone = pytz.timezone(timezone)
 
-    if 'number_results' not in search_dict:
+    expected_results = _pop_int(params, "number_results")
+    if expected_results is None:
         raise HttpBadRequest("didn't get expected number_results")
-    expected_results = search_dict.pop("number_results", ["0"])[-1]
-    expected_results = _decode_int(expected_results)
 
-    photo_list, criteria = _json_search(request.user, search_dict)
+    photo_list, criteria = _json_search(request.user, params)
     number_results = photo_list.count()
 
     if number_results != expected_results:
@@ -1811,28 +1965,39 @@ def photo_search_change(request):
 
     print number_results
     print "dddd"
-    print search_dict
+    print params
     if request.method == "POST" and False:
-        if 'set_title' in search_dict:
-            photo_list.update(title=search_dict['set_title'])
-        if 'set_description' in search_dict:
-            photo_list.update(description=search_dict['set_description'])
-        if 'set_view' in search_dict:
-            photo_list.update(view=search_dict['set_view'])
-        if 'set_comment' in search_dict:
+        value = _pop_string(params, "set_title")
+        if value is not None:
+            photo_list.update(title=value)
+
+        value = _pop_string(params, "set_description")
+        if value is not None:
+            photo_list.update(description=value)
+
+        value = _pop_string(params, "set_view")
+        if value is not None:
+            photo_list.update(view=value)
+
+        value = _pop_string(params, "set_comment")
+        if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change comment")
-            photo_list.update(view=search_dict['set_comment'])
-        if 'set_datetime' in search_dict:
-            dt = _decode_datetime(search_dict['set_datetime'], timezone)
+            photo_list.update(view=value)
+
+        value = _pop_string(params, "set_datetime")
+        if value is not None:
+            dt = _decode_datetime("set_datetime", value, timezone)
             utc_offset = dt.utcoffset().total_seconds() / 60
             dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
             photo_list.update(action="M",
                               utc_offset=utc_offset, datetime=dt)
             del utc_offset
             del dt
-        if 'set_action' in search_dict:
-            action = search_dict['set_action']
+
+        value = _pop_string(params, "set_action")
+        if value is not None:
+            action = value
             found = False
             for a in spud.models.PHOTO_ACTION:
                 if a[0] == action:
@@ -1843,34 +2008,28 @@ def photo_search_change(request):
             del a
             del action
             del found
-        if 'set_photographer' in search_dict:
-            if search_dict['set_photographer'] == "":
-                photographer = None
-            else:
-                try:
-                    person_id = _decode_int(search_dict['set_photographer'])
-                    photographer = spud.models.person.objects.get(pk=person_id)
-                    del person_id
-                except spud.models.person.DoesNotExist:
-                    raise HttpBadRequest("photographer does not exist")
-            photo_list.update(photographer=photographer)
-            del photographer
-        if 'set_place' in search_dict:
-            if search_dict['set_place'] == "":
-                place = None
-            else:
-                try:
-                    place_id = _decode_int(search_dict['set_place'])
-                    place = spud.models.place.objects.get(pk=place_id)
-                    del place_id
-                except spud.models.place.DoesNotExist:
-                    raise HttpBadRequest("place does not exist")
-            photo_list.update(location=place)
-            del place
 
-        if 'set_albums' in search_dict:
-            values = _decode_array(search_dict['set_albums'])
-            values = [_decode_int(i) for i in values]
+        value = _pop_string(params, "set_photographer")
+        if value is not None:
+            if value == "":
+                value = None
+            else:
+                value = _decode_object(
+                    "set_photographer", spud.models.person, value)
+            photo_list.update(photographer=value)
+
+        value = _pop_string(params, "set_place")
+        if value is not None:
+            if value == "":
+                value = None
+            else:
+                value = _decode_object("set_place", spud.models.place, value)
+            photo_list.update(location=value)
+
+        value = None
+
+        values = _pop_object_array(params, "set_albums", spud.models.album)
+        if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_album_set.all())
                 for pa in pa_list:
@@ -1878,115 +2037,79 @@ def photo_search_change(request):
                         values.remove(pa.album.pk)
                     else:
                         pa.delete()
-                for album_id in values:
-                    try:
-                        album = spud.models.album.objects.get(pk=album_id)
-                    except spud.models.album.DoesNotExist:
-                        raise HttpBadRequest("album does not exist")
+                for value in values:
                     spud.models.photo_album.objects.create(
-                        photo=photo, album=album)
+                        photo=photo, album=value)
+                del value
                 del pa_list
-                del album_id
-                del album
-            del values
-            del i
-        if 'add_albums' in search_dict:
-            values = _decode_array(search_dict['add_albums'])
-            for value in values:
-                album_id = _decode_int(value)
-                try:
-                    album = spud.models.album.objects.get(pk=album_id)
-                except spud.models.album.DoesNotExist:
-                    raise HttpBadRequest("album does not exist")
-                for photo in photo_list:
+            del photo
+
+        values = _pop_object_array(params, "add_albums", spud.models.albums)
+        if values is not None:
+            for photo in photo_list:
+                for value in values:
                     spud.models.photo_album.objects.get_or_create(
-                        photo=photo, album=album
+                        photo=photo, album=value
                     )
-                del album_id
-                del album
-            del value
-            del values
-        if 'del_albums' in search_dict:
-            values = _decode_array(search_dict['del_albums'])
-            for value in values:
-                album_id = _decode_int(value)
-                value = None
-                try:
-                    album = spud.models.album.objects.get(pk=album_id)
-                except spud.models.album.DoesNotExist:
-                    raise HttpBadRequest("album does not exist")
-                for photo in photo_list:
+            del photo
+
+        values = _pop_object_array(params, "del_albums", spud.models.albums)
+        if values is not None:
+            for photo in photo_list:
+                for value in values:
                     spud.models.photo_album.objects.filter(
                         photo=photo, album=album
                     ).delete()
-                del album_id
-                del album
-            del value
-            del values
+                del value
+            del photo
 
-        if 'set_categorys' in search_dict:
-            values = _decode_array(search_dict['set_albums'])
-            values = [_decode_int(i) for i in values]
-            pa_list = list(photo.photo_category_set.all())
+        values = _pop_object_array(
+            params, "set_categorys", spud.models.categorys)
+        if values is not None:
             for photo in photo_list:
+                pa_list = list(photo.photo_category_set.all())
                 for pa in pa_list:
                     if pa.category.pk in values:
                         values.remove(pa.category.pk)
                     else:
                         pa.delete()
-                for category_id in values:
-                    try:
-                        category = spud.models.category.objects.get(pk=category_id)
-                    except spud.models.category.DoesNotExist:
-                        raise HttpBadRequest("category does not exist")
+                for value in values:
                     spud.models.photo_category.objects.create(
-                        photo=photo, category=category)
+                        photo=photo, category=values)
+                del value
                 del pa_list
-                del category_id
-                del category
-            del values
-            del i
-        if 'add_categorys' in search_dict:
-            values = _decode_array(search_dict['add_categorys'])
-            for value in values:
-                category_id = _decode_int(value)
-                try:
-                    category = spud.models.category.objects.get(pk=category_id)
-                except spud.models.category.DoesNotExist:
-                    raise HttpBadRequest("category does not exist")
-                for photo in photo_list:
-                    spud.models.photo_category.objects.get_or_create(
-                        photo=photo, category=category
-                    )
-                del category_id
-                del category
-            del value
-            del values
-        if 'del_categorys' in search_dict:
-            values = _decode_array(search_dict['del_categorys'])
-            for value in values:
-                category_id = _decode_int(value)
-                try:
-                    category = spud.models.category.objects.get(pk=category_id)
-                except spud.models.category.DoesNotExist:
-                    raise HttpBadRequest("category does not exist")
-                for photo in photo_list:
-                    spud.models.photo_category.objects.filter(
-                        photo=photo, category=category
-                    ).delete()
-                del category_id
-                del category
-            del value
-            del values
+            del photo
 
-        if 'set_persons' in search_dict:
-            values = _decode_array(search_dict['set_albums'])
-            values = [_decode_int(i) for i in values]
-            pa_list = list(photo.photo_person_set.all())
+        values = _pop_object_array(
+            params, "add_categorys", spud.models.categorys)
+        if values is not None:
             for photo in photo_list:
+                for value in values:
+                    spud.models.photo_category.objects.get_or_create(
+                        photo=photo, category=value
+                    )
+                del value
+            del photo
+
+        values = _pop_object_array(
+            params, "del_categorys", spud.models.categorys)
+        if values is not None:
+            for photo in photo_list:
+                for value in values:
+                    spud.models.photo_category.objects.filter(
+                        photo=photo, category=value
+                    ).delete()
+                del value
+            del photo
+
+        values = _pop_object_array(params, "set_persons", spud.models.persons)
+        if values is not None:
+            for photo in photo_list:
+                pa_list = list(photo.photo_person_set.all())
                 position = 1
                 for pa, person in zip(pa_list, values):
-                    if pa.position != position or pa.person != person:
+                    if (pa.position.pk != position.pk or
+                            pa.person.pk != person.pk):
                         pa.position = position
                         pa.person = person
                         pa.save()
@@ -1996,16 +2119,11 @@ def photo_search_change(request):
 
                 # for every value not already in pa_list
                 for i in xrange(len(pa_list), len(values)):
-                    person_id = values[i]
-                    try:
-                        person = spud.models.person.objects.get(pk=person_id)
-                    except spud.models.person.DoesNotExist:
-                        raise HttpBadRequest("person does not exist")
+                    person = values[i]
                     spud.models.photo_person.objects.create(
                         photo=photo, person=person, position=position)
                     position = position + 1
                 del i
-                del person_id
                 del person
                 del position
 
@@ -2014,40 +2132,30 @@ def photo_search_change(request):
                     pa_list[i].delete()
                 del i
             del pa_list
-            del values
             del photo
-        if 'add_persons' in search_dict:
-            values = _decode_array(search_dict['add_persons'])
-            for value in values:
-                person_id = _decode_int(value)
-                try:
-                    person = spud.models.person.objects.get(pk=person_id)
-                except spud.models.person.DoesNotExist:
-                    raise HttpBadRequest("person does not exist")
-                for photo in photo_list:
+
+        values = _pop_object_array(params, "add_persons", spud.models.persons)
+        if values is not None:
+            for photo in photo_list:
+                for value in values:
                     spud.models.photo_person.objects.get_or_create(
-                        photo=photo, person=person
+                        photo=photo, person=value
                     )
-                del person_id
-                del person
-            del value
-            del values
-        if 'del_persons' in search_dict:
-            values = _decode_array(search_dict['del_persons'])
-            for value in values:
-                person_id = _decode_int(value)
-                try:
-                    person = spud.models.person.objects.get(pk=person_id)
-                except spud.models.person.DoesNotExist:
-                    raise HttpBadRequest("person does not exist")
-                for photo in photo_list:
+                del value
+            del photo
+
+        values = _pop_object_array(params, "del_persons", spud.models.persons)
+        if values is not None:
+            for photo in photo_list:
+                for value in values:
                     spud.models.photo_person.objects.filter(
-                        photo=photo, person=person
+                        photo=photo, person=value
                     ).delete()
-                del person_id
-                del person
-            del value
-            del values
+                del value
+            del photo
+
+    if len(params) > 0:
+        raise HttpBadRequest("Unknown parameters")
 
     resp = {
         'type': 'photo_search_change',
@@ -2060,10 +2168,10 @@ def photo_search_change(request):
 
 
 def photo(request, photo_id):
-    object = get_object_or_404(spud.models.photo, pk=photo_id)
+    value = get_object_or_404(spud.models.photo, pk=photo_id)
     resp = {
         'type': 'photo_get',
-        'photo': _json_photo_detail(request.user, object),
+        'photo': _json_photo_detail(request.user, value),
         'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
