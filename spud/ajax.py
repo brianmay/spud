@@ -123,13 +123,6 @@ def _decode_datetime(title, value, timezone):
     return dt
 
 
-# FIXME: Obsolete???
-def _decode_array(title, value):
-    if value == "":
-        return []
-    return value.split(".")
-
-
 def _decode_object(title, model, pk):
     if pk is None:
         return pk
