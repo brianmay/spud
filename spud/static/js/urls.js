@@ -25,17 +25,17 @@ function media_url(file) {
 
 
 function root_url() {
-   return "/b/"
+   return "/"
 }
 
 
 function login_url() {
-   return "/b/login/"
+   return "/login/"
 }
 
 
 function logout_url() {
-   return "/b/logout/"
+   return "/logout/"
 }
 
 
@@ -43,7 +43,7 @@ function photo_search_results_url(search, page) {
     var params = jQuery.extend({}, search.criteria, {
         page: page
     })
-    return "/b/photo/?" + jQuery.param(params)
+    return "/photo/?" + jQuery.param(params)
 }
 
 
@@ -52,15 +52,15 @@ function photo_search_item_url(search, n, photo) {
         n: n
     })
     if (photo != null) {
-        return "/b/photo/" + photo.id + "/?" + jQuery.param(params)
+        return "/photo/" + photo.id + "/?" + jQuery.param(params)
     } else {
-        return "/b/photo/?" + jQuery.param(params)
+        return "/photo/?" + jQuery.param(params)
     }
 }
 
 
 function photo_url(photo) {
-   return "/b/photo/"+photo.id+"/"
+   return "/photo/"+photo.id+"/"
 }
 
 

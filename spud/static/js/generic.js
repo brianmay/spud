@@ -23,11 +23,11 @@ generic_doer.prototype.search_results_url = function(search, page) {
     var params = jQuery.extend({}, search.criteria, {
         page: page
     })
-    return "/b/"+ this.type + "/?" + jQuery.param(params)
+    return "/"+ this.type + "/?" + jQuery.param(params)
 }
 
 generic_doer.prototype.url = function(object) {
-   return "/b/" + this.type + "/" + object.id + "/"
+   return "/" + this.type + "/" + object.id + "/"
 }
 
 
