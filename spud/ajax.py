@@ -153,7 +153,7 @@ def _pop_int(params, key):
 
 
 def _pop_object(params, key, model):
-    return _decode_int(key, _pop_string(params, key))
+    return _decode_object(key, model, _pop_string(params, key))
 
 
 def _pop_boolean(params, key):
@@ -734,12 +734,12 @@ def _json_search(user, params):
 
     value = _pop_object(params, "photographer", spud.models.person)
     if value is not None:
-        criteria["photographer"] = _json_person(value, value)
+        criteria["photographer"] = _json_person(user, value)
         search = search & Q(photographer=value)
 
     value = _pop_object(params, "place", spud.models.place)
     if value is not None:
-        criteria["place"] = _json_place(value, value)
+        criteria["place"] = _json_place(user, value)
         if ld:
             descendants = value.get_descendants()
             search = search & Q(location__in=descendants)
