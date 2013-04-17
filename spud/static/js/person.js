@@ -79,10 +79,16 @@ $.widget('ui.person_details',  $.ui.infobox, {
             ["dod", new text_output_field("Date of death")],
             ["work", new link_output_field("Work")],
             ["home", new link_output_field("Home")],
-            ["mother", new link_output_field("Mother")],
-            ["father", new link_output_field("Father")],
             ["spouses", new link_list_output_field("Spouses")],
             ["notes", new p_output_field("Notes")],
+            ["grandparents", new link_list_output_field("Grand Parents")],
+            ["uncles_aunts", new link_list_output_field("Uncles/Aunts")],
+            ["parents", new link_list_output_field("Parents")],
+            ["siblings", new link_list_output_field("Siblings")],
+            ["cousins", new link_list_output_field("Cousins")],
+            ["children", new link_list_output_field("Children")],
+            ["nephews_nieces", new link_list_output_field("Nephews/Nieces")],
+            ["grandchildren", new link_list_output_field("Grand children")],
         ]
         this._super();
 
