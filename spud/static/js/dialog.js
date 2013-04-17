@@ -104,7 +104,7 @@ function datetime_input_field(title, required) {
 }
 
 datetime_input_field.prototype = new input_field()
-datetime_input_field.constructor = text_input_field
+datetime_input_field.constructor = datetime_input_field
 datetime_input_field.prototype.create = function(id) {
     this.date = $('<input />')
         .attr('id', "id_" + id + "_date")
@@ -157,13 +157,13 @@ datetime_input_field.prototype.validate = function() {
         if (Number(a[2]) < 1 || Number(a[2]) > 31) {
             return "date must be between 1 and 31"
         }
-
-        if (time != "" && !/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
-            return "date format not hh:mm[:ss]"
-        }
     }
 
     if (time != "") {
+        if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
+            return "date format not hh:mm[:ss]"
+        }
+
         if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
             return "time format not hh:mm[:ss]"
         }
@@ -214,6 +214,7 @@ datetime_input_field.prototype.get = function() {
     return result.join(" ")
 }
 
+
 // define password_input_field
 function password_input_field(title, required) {
     text_input_field.call(this, title, required)
@@ -236,16 +237,34 @@ function date_input_field(title, required) {
 
 date_input_field.prototype = new text_input_field()
 date_input_field.constructor = date_input_field
-
-date_input_field.prototype.validate = function() {
-    value = this.input.val().trim()
-    var intRegex = /^\d\d\d\d-\d\d-\d\d$/;
-    if (value && !intRegex.test(value)) {
-        return "Value must be yyyy-mm-dd"
-    }
-    return text_input_field.prototype.validate.call(this, value)
+date_input_field.prototype.create = function(id) {
+    return $('<input />')
+        .attr('id', "id_" + id)
+        .datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "yy-mm-dd",
+        })
 }
 
+date_input_field.prototype.validate = function() {
+    var date = this.input.val().trim()
+
+    if (date != "") {
+        if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
+            return "date format not yyyy-mm-dd"
+        }
+
+        var a = date.split("-")
+        if (Number(a[1]) < 1 || Number(a[1]) > 12) {
+            return "Month must be between 1 and 12"
+        }
+        if (Number(a[2]) < 1 || Number(a[2]) > 31) {
+            return "date must be between 1 and 31"
+        }
+    }
+    return null
+}
 
 
 // define p_input_field

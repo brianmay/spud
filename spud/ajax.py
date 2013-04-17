@@ -19,6 +19,7 @@ import spud.models
 import os.path
 import pytz
 import datetime
+import re
 
 import django.conf
 import django.contrib.auth
@@ -172,7 +173,6 @@ def _pop_int_array(params, key):
     for v in value:
         v = [_decode_int(key, w) for w in v.split(".")]
         result.extend(v)
-    print result
     return result
 
 
@@ -184,7 +184,6 @@ def _pop_object_array(params, key, model):
     for v in value:
         v = [_decode_object(key, model, w) for w in v.split(".")]
         result.extend(v)
-    print result
     return result
 
 
@@ -1643,20 +1642,28 @@ def person_finish(request, person):
             person.email = value
             updated = True
 
-        # FIXME check format
         value = _pop_string(params, "dob")
         if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change dob")
-            person.dob = value
+            if value == "":
+                person.dob = None
+            else:
+                if not re.match("\d\d\d\d-\d\d-\d\d", value):
+                    raise HttpBadRequest("dob needs to be yyyy-mm-dd")
+                person.dob = value
             updated = True
 
-        # FIXME check format
         value = _pop_string(params, "dod")
         if value is not None:
             if not request.user.is_staff:
                 raise HttpForbidden("No rights to change dod")
-            person.email = value
+            if value == "":
+                person.dod = None
+            else:
+                if not re.match("\d\d\d\d-\d\d-\d\d", value):
+                    raise HttpBadRequest("dod needs to be yyyy-mm-dd")
+                person.dod = value
             updated = True
 
         value = _pop_string(params, "cover_photo")
