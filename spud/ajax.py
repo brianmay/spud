@@ -393,12 +393,8 @@ def _json_album_detail(user, album):
 #        'parent_album': _json_album(user, album.parent_album),
     }
 
-    parent = album.parent_album
-    seen = {}
-    while parent is not None and parent.pk not in seen:
-        d['ancestors'].insert(0, _json_album(user, parent))
-        seen[parent.pk] = True
-        parent = parent.parent_album
+    for ancestor in album.get_ascendants(include_self=False):
+        d['ancestors'].insert(0, _json_album(user, ancestor))
 
     for child in album.children.all():
         d['children'].append(_json_album(user, child))
@@ -447,12 +443,8 @@ def _json_category_detail(user, category):
 #        'parent_category': category.parent_category,
     }
 
-    parent = category.parent_category
-    seen = {}
-    while parent is not None and parent.pk not in seen:
-        d['ancestors'].insert(0, _json_category(user, parent))
-        seen[parent.pk] = True
-        parent = parent.parent_category
+    for ancestor in category.get_ascendants(include_self=False):
+        d['ancestors'].insert(0, _json_category(user, ancestor))
 
     for child in category.children.all():
         d['children'].append(_json_category(user, child))
@@ -513,12 +505,8 @@ def _json_place_detail(user, place):
         'can_delete': user.has_perm('spud.delete_place'),
     }
 
-    parent = place.parent_place
-    seen = {}
-    while parent is not None and parent.pk not in seen:
-        d['ancestors'].insert(0, _json_place(user, parent))
-        seen[parent.pk] = True
-        parent = parent.parent_place
+    for ancestor in place.get_ascendants(include_self=False):
+        d['ancestors'].insert(0, _json_place(user, ancestor))
 
     for child in place.children.all():
         d['children'].append(_json_place(user, child))
@@ -740,7 +728,7 @@ def _json_search(user, params):
     if value is not None:
         criteria["place"] = _json_place(user, value)
         if ld:
-            descendants = value.get_descendants()
+            descendants = value.get_descendants(include_self=True)
             search = search & Q(location__in=descendants)
         else:
             search = search & Q(location=value)
@@ -760,7 +748,7 @@ def _json_search(user, params):
         for value in values:
             criteria["album"].append(_json_album(user, value))
             if ad:
-                descendants = value.get_descendants()
+                descendants = value.get_descendants(include_self=True)
                 photo_list = photo_list.filter(albums__in=descendants)
             else:
                 photo_list = photo_list.filter(albums=value)
@@ -771,7 +759,7 @@ def _json_search(user, params):
         for value in values:
             criteria["category"].append(_json_category(user, value))
             if cd:
-                descendants = value.get_descendants()
+                descendants = value.get_descendants(include_self=True)
                 photo_list = photo_list.filter(
                     categorys__in=descendants)
             else:
@@ -1034,6 +1022,7 @@ def album_finish(request, album):
         _pop_string(params, "_")
 
         updated = False
+        updated_parent = False
 
         value = _pop_string(params, "title")
         if value is not None:
@@ -1072,11 +1061,15 @@ def album_finish(request, album):
                 value = _decode_object("parent", spud.models.album, value)
                 album.parent_album = value
             updated = True
+            updated_parent = True
 
         check_params_empty(params)
 
         if updated:
             album.save()
+
+        if updated_parent:
+            album.fix_ascendants()
 
     resp = {
         'type': 'album_get',
@@ -1217,6 +1210,7 @@ def category_finish(request, category):
         _pop_string(params, "_")
 
         updated = False
+        updated_parent = False
 
         value = _pop_string(params, "title")
         if value is None:
@@ -1255,11 +1249,15 @@ def category_finish(request, category):
                 value = _decode_object("parent", spud.models.category, value)
                 category.parent_category = value
             updated = True
+            updated_parent = True
 
         check_params_empty(params)
 
         if updated is not None:
             category.save()
+
+        if updated_parent:
+            category.fix_ascendants()
 
     resp = {
         'type': 'category_get',
@@ -1399,6 +1397,7 @@ def place_finish(request, place):
         _pop_string(params, "_")
 
         updated = False
+        updated_parent = False
 
         value = _pop_string(params, "title")
         if value is not None:
@@ -1467,11 +1466,15 @@ def place_finish(request, place):
                 value = _decode_object("parent", spud.models.place, value)
                 place.parent_place = value
             updated = True
+            updated_parent = True
 
         check_params_empty(params)
 
         if updated:
             place.save()
+
+        if updated_parent:
+            place.fix_ascendants()
 
     resp = {
         'type': 'place_get',
@@ -1595,6 +1598,7 @@ def person_finish(request, person):
         _pop_string(params, "_")
 
         updated = False
+        updated_parent = False
 
         value = _pop_string(params, "first_name")
         if value is not None:
@@ -1707,6 +1711,7 @@ def person_finish(request, person):
                 value = _decode_object("mother", spud.models.person, value)
                 person.mother = value
             updated = True
+            updated_parent = True
 
         value = _pop_string(params, "father")
         if value is not None:
@@ -1718,6 +1723,7 @@ def person_finish(request, person):
                 value = _decode_object("father", spud.models.person, value)
                 person.father = value
             updated = True
+            updated_parent = True
 
         value = _pop_string(params, "spouse")
         if value is not None:
@@ -1734,6 +1740,9 @@ def person_finish(request, person):
 
         if updated:
             person.save()
+
+        if updated_parent:
+            person.fix_ascendants()
 
     resp = {
         'type': 'person_get',

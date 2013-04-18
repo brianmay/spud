@@ -87,10 +87,71 @@ class base_model(models.Model):
         return error_list
 
 
+class hierarchy_model(base_model):
+
+    class Meta:
+        abstract = True
+
+    def get_descendants(self, include_self):
+        if include_self:
+            for i in self.descendant_set.all():
+                yield i.descendant
+        else:
+            for i in self.descendant_set.filter(position__gt=0):
+                yield i.descendant
+
+    def get_ascendants(self, include_self):
+        if include_self:
+            for i in self.ascendant_set.all():
+                yield i.ascendant
+        else:
+            for i in self.ascendant_set.filter(position__gt=0):
+                yield i.ascendant
+
+    def _ascendants_glue(self, instance, position, seen, parent_attributes):
+        glue = []
+        if instance is None:
+            return glue
+
+        if instance.pk in seen:
+            return glue
+
+        glue.append((instance, self, position))
+        seen[instance.pk] = True
+        for attr in parent_attributes:
+            parent = getattr(instance, attr)
+            glue.extend(self._ascendants_glue(
+                parent, position+1, seen, parent_attributes))
+
+        return glue
+
+    def _fix_ascendants(self, parent_attributes):
+        new_glue = self._ascendants_glue(self, 0, {}, parent_attributes)
+
+        old_glue = [
+            (i.ascendant, i.descendant, i.position)
+            for i in self.ascendant_set.all()]
+        for glue in new_glue:
+            if glue in old_glue:
+                old_glue.remove(glue)
+            else:
+                album_ascendant.objects.create(
+                    ascendant=glue[0], descendant=glue[1], position=glue[2])
+
+        for glue in old_glue:
+            album_ascendant.objects.get(
+                ascendant=glue[0], descendant=glue[1], position=glue[2]
+            ).delete()
+
+    def fix_ascendants(self):
+        self._fix_ascendants(["parent"])
+
+
+
 # ---------------------------------------------------------------------------
 
 
-class place(base_model):
+class place(hierarchy_model):
     place_id = models.AutoField(primary_key=True)
     parent_place = models.ForeignKey('self', related_name='children', null=True, blank=True)
     title = models.CharField(max_length=192, db_index=True)
@@ -111,19 +172,8 @@ class place(base_model):
     def __unicode__(self):
         return self.title
 
-    def _get_descendants(self, descendants):
-        if self in descendants:
-            return descendants
-
-        descendants.append(self)
-
-        for place in self.children.all():
-            place._get_descendants(descendants)
-
-    def get_descendants(self):
-        descendants = []
-        self._get_descendants(descendants)
-        return descendants
+    def fix_ascendants(self):
+        self._fix_ascendants(["parent_place"])
 
     def check_delete(self):
         errorlist = []
@@ -154,7 +204,7 @@ class place(base_model):
         return photo
 
 
-class album(base_model):
+class album(hierarchy_model):
     album_id = models.AutoField(primary_key=True)
     parent_album = models.ForeignKey('self', related_name='children', null=True, blank=True)
     album = models.CharField(max_length=96, db_index=True)
@@ -170,19 +220,8 @@ class album(base_model):
     def __unicode__(self):
         return self.album
 
-    def _get_descendants(self, descendants):
-        if self in descendants:
-            return descendants
-
-        descendants.append(self)
-
-        for album in self.children.all():
-            album._get_descendants(descendants)
-
-    def get_descendants(self):
-        descendants = []
-        self._get_descendants(descendants)
-        return descendants
+    def fix_ascendants(self):
+        self._fix_ascendants(["parent_album"])
 
     def check_delete(self):
         errorlist = []
@@ -204,7 +243,7 @@ class album(base_model):
         return photo
 
 
-class category(base_model):
+class category(hierarchy_model):
     category_id = models.AutoField(primary_key=True)
     parent_category = models.ForeignKey('self', related_name='children', null=True, blank=True)
     category = models.CharField(max_length=96, db_index=True)
@@ -219,19 +258,8 @@ class category(base_model):
     def __unicode__(self):
         return self.category
 
-    def _get_descendants(self, descendants):
-        if self in descendants:
-            return descendants
-
-        descendants.append(self)
-
-        for category in self.children.all():
-            category._get_descendants(descendants)
-
-    def get_descendants(self):
-        descendants = []
-        self._get_descendants(descendants)
-        return descendants
+    def fix_ascendants(self):
+        self._fix_ascendants(["parent_category"])
 
     def check_delete(self):
         errorlist = []
@@ -253,7 +281,7 @@ class category(base_model):
         return photo
 
 
-class person(base_model):
+class person(hierarchy_model):
     person_id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=96, blank=True, db_index=True)
     last_name = models.CharField(max_length=96, blank=True, db_index=True)
@@ -304,6 +332,9 @@ class person(base_model):
         self.reverse_spouses.clear()
         self.photographed.clear()
         super(person, self).delete()
+
+    def fix_ascendants(self):
+        self._fix_ascendants(["mother", "father" ])
 
     # grand parents generation
 
@@ -783,3 +814,41 @@ class photo_relation(base_model):
     def __unicode__(self):
         return "relationship '%s' to '%s'"%(self.photo_1,self.photo_2)
 
+
+# ---------------------------------------------------------------------------
+
+
+class album_ascendant(base_model):
+    ascendant = models.ForeignKey(album, related_name='descendant_set')
+    descendant = models.ForeignKey(album, related_name='ascendant_set')
+    position = models.IntegerField()
+
+    class Meta:
+        ordering = ['position']
+
+
+class category_ascendant(base_model):
+    ascendant = models.ForeignKey(category, related_name='descendant_set')
+    descendant = models.ForeignKey(category, related_name='ascendant_set')
+    position = models.IntegerField()
+
+    class Meta:
+        ordering = ['position']
+
+
+class place_ascendant(base_model):
+    ascendant = models.ForeignKey(place, related_name='descendant_set')
+    descendant = models.ForeignKey(place, related_name='ascendant_set')
+    position = models.IntegerField()
+
+    class Meta:
+        ordering = ['position']
+
+
+class person_ascendant(base_model):
+    ascendant = models.ForeignKey(person, related_name='descendant_set')
+    descendant = models.ForeignKey(person, related_name='ascendant_set')
+    position = models.IntegerField()
+
+    class Meta:
+        ordering = ['position']
