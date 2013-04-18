@@ -21,6 +21,7 @@ import pytz
 import datetime
 import re
 
+import django.db.transaction
 import django.conf
 import django.contrib.auth
 from django.shortcuts import get_object_or_404
@@ -36,7 +37,7 @@ def _decode_int(title, string):
     try:
         return int(string)
     except ValueError:
-        raise HttpBadRequest("%s got non-integer" % title)
+        raise ErrorBadRequest("%s got non-integer" % title)
 
 
 def _decode_boolean(title, string):
@@ -47,7 +48,7 @@ def _decode_boolean(title, string):
     elif string.lower() == "false":
         return False
     else:
-        raise HttpBadRequest("%s got non-boolean" % title)
+        raise ErrorBadRequest("%s got non-boolean" % title)
 
 
 def _decode_datetime(title, value, timezone):
@@ -70,7 +71,7 @@ def _decode_datetime(title, value, timezone):
                 _decode_int(title, offset[0:2]) * 60 +
                 _decode_int(title, offset[2:4]))
         else:
-            raise HttpBadRequest("%s can't parse timezone" % title)
+            raise ErrorBadRequest("%s can't parse timezone" % title)
         if sign == '-':
             offset = -offset
         timezone = pytz.FixedOffset(offset)
@@ -87,7 +88,7 @@ def _decode_datetime(title, value, timezone):
             try:
                 timezone = pytz.timezone(v)
             except pytz.UnknownTimeZoneError:
-                raise HttpBadRequest("%s unknown timezone" % title)
+                raise ErrorBadRequest("%s unknown timezone" % title)
     value = " ".join(new_value)
     new_value = None
 
@@ -123,7 +124,7 @@ def _decode_datetime(title, value, timezone):
         try:
             dt = datetime.datetime.strptime(value, "%Y-%m-%d")
         except ValueError:
-            raise HttpBadRequest("%s can't parse date/time", title)
+            raise ErrorBadRequest("%s can't parse date/time", title)
 
     dt = timezone.localize(dt)
     return dt
@@ -135,7 +136,7 @@ def _decode_object(title, model, pk):
     try:
         return model.objects.get(pk=pk)
     except model.DoesNotExist:
-        raise HttpBadRequest("%s does not exist" % title)
+        raise ErrorBadRequest("%s does not exist" % title)
 
 
 def _pop_string(params, key):
@@ -143,9 +144,9 @@ def _pop_string(params, key):
     if value is None:
         return None
     if len(value) < 1:
-        raise HttpBadRequest("%s has <0 length")
+        raise ErrorBadRequest("%s has <0 length")
     if len(value) > 1:
-        raise HttpBadRequest("%s has >1 length")
+        raise ErrorBadRequest("%s has >1 length")
     return value[0]
 
 
@@ -191,7 +192,7 @@ def _pop_object_array(params, key, model):
 
 def check_params_empty(params):
     if len(params) > 0:
-        raise HttpBadRequest("Unknown parameters %s" % params)
+        raise ErrorBadRequest("Unknown parameters %s" % params)
 
 
 def _json_session(request):
@@ -831,26 +832,46 @@ def _json_search(user, params):
     return photo_list, criteria
 
 
-class HttpBadRequest(Exception):
+# These errors are due to bad input from user. These
+# are expected and don't require rollback.
+class ErrorUser(Exception):
     pass
 
 
-class HttpForbidden(Exception):
+# These errors should not occur and are due to bad parameters from the client
+class ErrorBadRequest(Exception):
     pass
 
 
+# User tried to access something they are not allowed to. Should never
+# occur under normal usage
+class ErrorForbidden(Exception):
+    pass
+
+
+# Check if one of the above errors occured and give appropriate JSON
+# response
 def check_errors(func):
     def wrapper(request, *args, **kwargs):
         try:
             return func(request, *args, **kwargs)
-        except HttpBadRequest, e:
+        except ErrorUser, e:
+            resp = {
+                'type': 'error',
+                'message': unicode(e),
+                'session': _json_session(request),
+            }
+            return HttpResponse(json.dumps(resp), mimetype="application/json")
+        except ErrorBadRequest, e:
+            django.db.transaction.rollback()
             resp = {
                 'type': 'error',
                 'message': "Bad request: " + unicode(e),
                 'session': _json_session(request),
             }
             return HttpResponse(json.dumps(resp), mimetype="application/json")
-        except HttpForbidden, e:
+        except ErrorForbidden, e:
+            django.db.transaction.rollback()
             resp = {
                 'type': 'error',
                 'message': "Access Forbidden: " + unicode(e),
@@ -863,7 +884,7 @@ def check_errors(func):
 @check_errors
 def login(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
 
     params = request.POST.copy()
     _pop_string(params, "_")
@@ -872,9 +893,9 @@ def login(request):
     password = _pop_string(params, "password")
 
     if username is None:
-        raise HttpBadRequest("username not supplied")
+        raise ErrorBadRequest("username not supplied")
     if password is None:
-        raise HttpBadRequest("password not supplied")
+        raise ErrorBadRequest("password not supplied")
 
     user = django.contrib.auth.authenticate(
         username=username, password=password)
@@ -883,9 +904,9 @@ def login(request):
             django.contrib.auth.login(request, user)
             resp = {'type': 'login'}
         else:
-            raise HttpForbidden("Account is disabled")
+            raise ErrorUser("Account is disabled")
     else:
-        raise HttpBadRequest("Invalid login")
+        raise ErrorUser("Invalid login")
     resp['session'] = _json_session(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -893,7 +914,7 @@ def login(request):
 @check_errors
 def logout(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     django.contrib.auth.logout(request)
     resp = {'type': 'logout'}
     resp['session'] = _json_session(request)
@@ -915,7 +936,7 @@ def album_search_form(request):
         try:
             parent = spud.models.album.objects.get(pk=parent)
         except spud.models.album.DoesNotExist:
-            raise HttpBadRequest("parent does not exist")
+            raise ErrorBadRequest("parent does not exist")
         criteria['parent'] = _json_album(request.user, parent)
 
     check_params_empty(params)
@@ -936,15 +957,15 @@ def album_search_results(request):
 
     first = _pop_int(params, "first")
     if first is None:
-        raise HttpBadRequest("first is not specified")
+        raise ErrorBadRequest("first is not specified")
     if first < 0:
-        raise HttpBadRequest("first is negative")
+        raise ErrorBadRequest("first is negative")
 
     count = _pop_int(params, "count")
     if count is None:
-        raise HttpBadRequest("count is not specified")
+        raise ErrorBadRequest("count is not specified")
     if count < 0:
-        raise HttpBadRequest("count is negative")
+        raise ErrorBadRequest("count is negative")
 
     album_list = spud.models.album.objects.all()
     criteria = {}
@@ -960,7 +981,7 @@ def album_search_results(request):
         try:
             parent = spud.models.album.objects.get(pk=parent)
         except spud.models.album.DoesNotExist:
-            raise HttpBadRequest("parent does not exist")
+            raise ErrorBadRequest("parent does not exist")
         album_list = album_list.filter(parent_album=parent)
         criteria['parent'] = _json_album(request.user, parent)
 
@@ -987,7 +1008,7 @@ def album_search_results(request):
 def album(request, album_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_album'):
-            raise HttpForbidden("No rights to change albums")
+            raise ErrorForbidden("No rights to change albums")
     album = get_object_or_404(spud.models.album, pk=album_id)
     return album_finish(request, album)
 
@@ -995,10 +1016,10 @@ def album(request, album_id):
 @check_errors
 def album_add(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_album'):
-            raise HttpForbidden("No rights to add albums")
+            raise ErrorForbidden("No rights to add albums")
     album = spud.models.album()
     return album_finish(request, album)
 
@@ -1006,14 +1027,14 @@ def album_add(request):
 @check_errors
 def album_delete(request, album_id):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_album'):
-        raise HttpForbidden("No rights to delete albums")
+        raise ErrorForbidden("No rights to delete albums")
     album = get_object_or_404(spud.models.album, pk=album_id)
 
     errors = album.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(", ".join(errors))
+        raise ErrorBadRequest(", ".join(errors))
 
     album.delete()
 
@@ -1102,7 +1123,7 @@ def category_search_form(request):
         try:
             parent = spud.models.category.objects.get(pk=parent)
         except spud.models.category.DoesNotExist:
-            raise HttpBadRequest("parent does not exist")
+            raise ErrorBadRequest("parent does not exist")
         criteria['parent'] = _json_category(request.user, parent)
 
     check_params_empty(params)
@@ -1123,15 +1144,15 @@ def category_search_results(request):
 
     first = _pop_int(params, "first")
     if first is None:
-        raise HttpBadRequest("first is not specified")
+        raise ErrorBadRequest("first is not specified")
     if first < 0:
-        raise HttpBadRequest("first is negative")
+        raise ErrorBadRequest("first is negative")
 
     count = _pop_int(params, "count")
     if count is None:
-        raise HttpBadRequest("count is not specified")
+        raise ErrorBadRequest("count is not specified")
     if count < 0:
-        raise HttpBadRequest("count is negative")
+        raise ErrorBadRequest("count is negative")
 
     category_list = spud.models.category.objects.all()
     criteria = {}
@@ -1147,7 +1168,7 @@ def category_search_results(request):
         try:
             parent = spud.models.category.objects.get(pk=parent)
         except spud.models.category.DoesNotExist:
-            raise HttpBadRequest("parent does not exist")
+            raise ErrorBadRequest("parent does not exist")
         category_list = category_list.filter(parent_category=parent)
         criteria['parent'] = _json_category(request.user, parent)
 
@@ -1174,7 +1195,7 @@ def category_search_results(request):
 def category(request, category_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_category'):
-            raise HttpForbidden("No rights to change categorys")
+            raise ErrorForbidden("No rights to change categorys")
     category = get_object_or_404(spud.models.category, pk=category_id)
     return category_finish(request, category)
 
@@ -1182,10 +1203,10 @@ def category(request, category_id):
 @check_errors
 def category_add(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_category'):
-            raise HttpForbidden("No rights to add categorys")
+            raise ErrorForbidden("No rights to add categorys")
     category = spud.models.category()
     return category_finish(request, category)
 
@@ -1193,14 +1214,14 @@ def category_add(request):
 @check_errors
 def category_delete(request, category_id):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_category'):
-        raise HttpForbidden("No rights to delete categorys")
+        raise ErrorForbidden("No rights to delete categorys")
     category = get_object_or_404(spud.models.category, pk=category_id)
 
     errors = category.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(", ".join(errors))
+        raise ErrorBadRequest(", ".join(errors))
 
     category.delete()
 
@@ -1290,7 +1311,7 @@ def place_search_form(request):
         try:
             parent = spud.models.place.objects.get(pk=parent)
         except spud.models.place.DoesNotExist:
-            raise HttpBadRequest("parent does not exist")
+            raise ErrorBadRequest("parent does not exist")
         criteria['parent'] = _json_place(request.user, parent)
 
     check_params_empty(params)
@@ -1311,15 +1332,15 @@ def place_search_results(request):
 
     first = _pop_int(params, "first")
     if first is None:
-        raise HttpBadRequest("first is not specified")
+        raise ErrorBadRequest("first is not specified")
     if first < 0:
-        raise HttpBadRequest("first is negative")
+        raise ErrorBadRequest("first is negative")
 
     count = _pop_int(params, "count")
     if count is None:
-        raise HttpBadRequest("count is not specified")
+        raise ErrorBadRequest("count is not specified")
     if count < 0:
-        raise HttpBadRequest("count is negative")
+        raise ErrorBadRequest("count is negative")
 
     place_list = spud.models.place.objects.all()
     criteria = {}
@@ -1335,7 +1356,7 @@ def place_search_results(request):
         try:
             parent = spud.models.place.objects.get(pk=parent)
         except spud.models.place.DoesNotExist:
-            raise HttpBadRequest("parent does not exist")
+            raise ErrorBadRequest("parent does not exist")
         place_list = place_list.filter(parent_place=parent)
         criteria['parent'] = _json_place(request.user, parent)
 
@@ -1362,7 +1383,7 @@ def place_search_results(request):
 def place(request, place_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_place'):
-            raise HttpForbidden("No rights to change places")
+            raise ErrorForbidden("No rights to change places")
     place = get_object_or_404(spud.models.place, pk=place_id)
     return place_finish(request, place)
 
@@ -1370,10 +1391,10 @@ def place(request, place_id):
 @check_errors
 def place_add(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_place'):
-            raise HttpForbidden("No rights to add places")
+            raise ErrorForbidden("No rights to add places")
     place = spud.models.place()
     return place_finish(request, place)
 
@@ -1381,14 +1402,14 @@ def place_add(request):
 @check_errors
 def place_delete(request, place_id):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_place'):
-        raise HttpForbidden("No rights to delete places")
+        raise ErrorForbidden("No rights to delete places")
     place = get_object_or_404(spud.models.place, pk=place_id)
 
     errors = place.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(", ".join(errors))
+        raise ErrorBadRequest(", ".join(errors))
 
     place.delete()
 
@@ -1520,15 +1541,15 @@ def person_search_results(request):
 
     first = _pop_int(params, "first")
     if first is None:
-        raise HttpBadRequest("first is not specified")
+        raise ErrorBadRequest("first is not specified")
     if first < 0:
-        raise HttpBadRequest("first is negative")
+        raise ErrorBadRequest("first is negative")
 
     count = _pop_int(params, "count")
     if count is None:
-        raise HttpBadRequest("count is not specified")
+        raise ErrorBadRequest("count is not specified")
     if count < 0:
-        raise HttpBadRequest("count is negative")
+        raise ErrorBadRequest("count is negative")
 
     person_list = spud.models.person.objects.all()
     criteria = {}
@@ -1563,7 +1584,7 @@ def person_search_results(request):
 def person(request, person_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_person'):
-            raise HttpForbidden("No rights to change persons")
+            raise ErrorForbidden("No rights to change persons")
     person = get_object_or_404(spud.models.person, pk=person_id)
     return person_finish(request, person)
 
@@ -1571,10 +1592,10 @@ def person(request, person_id):
 @check_errors
 def person_add(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_person'):
-            raise HttpForbidden("No rights to add persons")
+            raise ErrorForbidden("No rights to add persons")
     person = spud.models.person()
     return person_finish(request, person)
 
@@ -1582,14 +1603,14 @@ def person_add(request):
 @check_errors
 def person_delete(request, person_id):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_person'):
-        raise HttpForbidden("No rights to delete persons")
+        raise ErrorForbidden("No rights to delete persons")
     person = get_object_or_404(spud.models.person, pk=person_id)
 
     errors = person.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(", ".join(errors))
+        raise ErrorBadRequest(", ".join(errors))
 
     person.delete()
 
@@ -1631,50 +1652,50 @@ def person_finish(request, person):
         value = _pop_string(params, "gender")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change gender")
+                raise ErrorForbidden("No rights to change gender")
             if value == "":
                 person.gender = None
             else:
                 if value != "1" and value != "2":
-                    raise HttpBadRequest("Unknown gender")
+                    raise ErrorBadRequest("Unknown gender")
                 person.gender = value
             updated = True
 
         value = _pop_string(params, "notes")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change notes")
+                raise ErrorForbidden("No rights to change notes")
             person.notes = value
             updated = True
 
         value = _pop_string(params, "email")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change email")
+                raise ErrorForbidden("No rights to change email")
             person.email = value
             updated = True
 
         value = _pop_string(params, "dob")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change dob")
+                raise ErrorForbidden("No rights to change dob")
             if value == "":
                 person.dob = None
             else:
                 if not re.match("\d\d\d\d-\d\d-\d\d", value):
-                    raise HttpBadRequest("dob needs to be yyyy-mm-dd")
+                    raise ErrorBadRequest("dob needs to be yyyy-mm-dd")
                 person.dob = value
             updated = True
 
         value = _pop_string(params, "dod")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change dod")
+                raise ErrorForbidden("No rights to change dod")
             if value == "":
                 person.dod = None
             else:
                 if not re.match("\d\d\d\d-\d\d-\d\d", value):
-                    raise HttpBadRequest("dod needs to be yyyy-mm-dd")
+                    raise ErrorBadRequest("dod needs to be yyyy-mm-dd")
                 person.dod = value
             updated = True
 
@@ -1690,7 +1711,7 @@ def person_finish(request, person):
         value = _pop_string(params, "work")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change work")
+                raise ErrorForbidden("No rights to change work")
             if value == "":
                 person.work = None
             else:
@@ -1701,7 +1722,7 @@ def person_finish(request, person):
         value = _pop_string(params, "home")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change home")
+                raise ErrorForbidden("No rights to change home")
             if value == "":
                 person.home = None
             else:
@@ -1712,7 +1733,7 @@ def person_finish(request, person):
         value = _pop_string(params, "mother")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change mother")
+                raise ErrorForbidden("No rights to change mother")
             if value == "":
                 person.mother = None
             else:
@@ -1724,7 +1745,7 @@ def person_finish(request, person):
         value = _pop_string(params, "father")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change father")
+                raise ErrorForbidden("No rights to change father")
             if value == "":
                 person.father = None
             else:
@@ -1736,7 +1757,7 @@ def person_finish(request, person):
         value = _pop_string(params, "spouse")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change spouse")
+                raise ErrorForbidden("No rights to change spouse")
             if value == "":
                 person.spouse = None
             else:
@@ -1764,7 +1785,7 @@ def person_finish(request, person):
 def photo_relation(request, photo_relation_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_relation'):
-            raise HttpForbidden("No rights to change photo_relations")
+            raise ErrorForbidden("No rights to change photo_relations")
     photo_relation = get_object_or_404(
         spud.models.photo_relation, pk=photo_relation_id)
     return photo_relation_finish(request, photo_relation)
@@ -1773,19 +1794,19 @@ def photo_relation(request, photo_relation_id):
 @check_errors
 def photo_relation_add(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.add_relation'):
-            raise HttpForbidden("No rights to add photo_relations")
+            raise ErrorForbidden("No rights to add photo_relations")
 
     if 'photo_1' not in request.POST:
-        raise HttpBadRequest("photo_1 must be given")
+        raise ErrorBadRequest("photo_1 must be given")
     if 'photo_2' not in request.POST:
-        raise HttpBadRequest("photo_2 must be given")
+        raise ErrorBadRequest("photo_2 must be given")
     if 'desc_1' not in request.POST:
-        raise HttpBadRequest("desc_1 must be given")
+        raise ErrorBadRequest("desc_1 must be given")
     if 'desc_2' not in request.POST:
-        raise HttpBadRequest("desc_2 must be given")
+        raise ErrorBadRequest("desc_2 must be given")
 
     photo_relation = spud.models.photo_relation()
     return photo_relation_finish(request, photo_relation)
@@ -1794,15 +1815,15 @@ def photo_relation_add(request):
 @check_errors
 def photo_relation_delete(request, photo_relation_id):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_relation'):
-        raise HttpForbidden("No rights to delete photo_relations")
+        raise ErrorForbidden("No rights to delete photo_relations")
     photo_relation = get_object_or_404(
         spud.models.photo_relation, pk=photo_relation_id)
 
     errors = photo_relation.check_delete()
     if len(errors) > 0:
-        raise HttpBadRequest(", ".join(errors))
+        raise ErrorBadRequest(", ".join(errors))
 
     photo_relation.delete()
 
@@ -1824,21 +1845,21 @@ def photo_relation_finish(request, photo_relation):
         value = _pop_string(params, "desc_1")
         if value is not None:
             if value == "":
-                raise HttpBadRequest("desc_1 must be non-empty")
+                raise ErrorBadRequest("desc_1 must be non-empty")
             photo_relation.desc_1 = value
             updated = True
 
         value = _pop_string(params, "desc_2")
         if value is not None:
             if value == "":
-                raise HttpBadRequest("desc_2 must be non-empty")
+                raise ErrorBadRequest("desc_2 must be non-empty")
             photo_relation.desc_2 = value
             updated = True
 
         value = _pop_string(params, "photo_1")
         if value is not None:
             if value == "":
-                raise HttpBadRequest("photo_1 must be non-empty")
+                raise ErrorBadRequest("photo_1 must be non-empty")
             value = _decode_object("photo_1", spud.models.photo, value)
             photo_relation.photo_1 = value
             updated = True
@@ -1846,7 +1867,7 @@ def photo_relation_finish(request, photo_relation):
         value = _pop_string(params, "photo_2")
         if value is not None:
             if value == "":
-                raise HttpBadRequest("photo_2 must be non-empty")
+                raise ErrorBadRequest("photo_2 must be non-empty")
             value = _decode_object("photo_2", spud.models.photo, value)
             photo_relation.photo_2 = value
             updated = True
@@ -1893,15 +1914,15 @@ def photo_search_results(request):
 
     first = _pop_int(params, "first")
     if first is None:
-        raise HttpBadRequest("first is not specified")
+        raise ErrorBadRequest("first is not specified")
     if first < 0:
-        raise HttpBadRequest("first is negative")
+        raise ErrorBadRequest("first is negative")
 
     count = _pop_int(params, "count")
     if count is None:
-        raise HttpBadRequest("count is not specified")
+        raise ErrorBadRequest("count is not specified")
     if count < 0:
-        raise HttpBadRequest("count is negative")
+        raise ErrorBadRequest("count is negative")
 
     photo_list, criteria = _json_search(request.user, params)
 
@@ -1935,7 +1956,7 @@ def photo_search_item(request, params, number):
     try:
         photo = photo_list[number]
     except IndexError:
-        raise HttpBadRequest("Result %d does not exist" % (number))
+        raise ErrorBadRequest("Result %d does not exist" % (number))
 
     resp = {
         'type': 'photo_search_item',
@@ -1959,10 +1980,10 @@ def photo_search_item(request, params, number):
 @check_errors
 def photo_search_change(request):
     if request.method != "POST":
-        raise HttpBadRequest("Only POST is supported")
+        raise ErrorBadRequest("Only POST is supported")
     if request.method == "POST":
         if not request.user.has_perm('spud.change_photo'):
-            raise HttpForbidden("No rights to change photos")
+            raise ErrorForbidden("No rights to change photos")
 
     params = request.POST.copy()
     _pop_string(params, "_")
@@ -1972,13 +1993,13 @@ def photo_search_change(request):
 
     expected_results = _pop_int(params, "number_results")
     if expected_results is None:
-        raise HttpBadRequest("didn't get expected number_results")
+        raise ErrorBadRequest("didn't get expected number_results")
 
     photo_list, criteria = _json_search(request.user, params)
     number_results = photo_list.count()
 
     if number_results != expected_results:
-        raise HttpBadRequest(
+        raise ErrorBadRequest(
             "We expected to change %d photos but would have changed %d photos"
             % (expected_results, number_results))
 
@@ -2001,7 +2022,7 @@ def photo_search_change(request):
         value = _pop_string(params, "set_comment")
         if value is not None:
             if not request.user.is_staff:
-                raise HttpForbidden("No rights to change comment")
+                raise ErrorForbidden("No rights to change comment")
             photo_list.update(view=value)
 
         value = _pop_string(params, "set_datetime")
@@ -2022,7 +2043,7 @@ def photo_search_change(request):
                 if a[0] == action:
                     found = True
             if not found:
-                raise HttpBadRequest("Unknown action")
+                raise ErrorBadRequest("Unknown action")
             photo_list.update(action=action)
             del a
             del action
