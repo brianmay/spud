@@ -2003,6 +2003,12 @@ def photo_search_change(request):
             "We expected to change %d photos but would have changed %d photos"
             % (expected_results, number_results))
 
+    for key in params.keys():
+        if (not key.startswith("set_") and
+           not key.startswith("add_") and
+           not key.startswith("del_")):
+            raise ErrorBadRequest("We got a bad parameter '%s'" % key)
+
     print "updating"
     print number_results
     print params
