@@ -34,6 +34,7 @@ input_field.prototype.to_html = function(id) {
         .attr("for", "id_" + id)
         .html(escapeHTML(this.title + ":"))
         .appendTo(th)
+        .toggleClass("required", this.required)
 
     this.errors = $("<div></div>")
 
