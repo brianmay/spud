@@ -96,6 +96,7 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
 
         this.add_field("person", new ajax_select_multiple_field("People", "person", false))
         this.add_field("person_none", new boolean_input_field("No people", false))
+        this.add_field("person_descendants", new boolean_input_field("Descend people", false))
 
         this.add_field("place", new ajax_select_field("Place", "place", false))
         this.add_field("place_descendants", new boolean_input_field("Descend places", false))
@@ -176,6 +177,10 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
 
         if (values.person_none) {
             criteria['person_none'] = "true"
+        }
+
+        if (values.person_descendants) {
+            criteria['person_descendants'] = "true"
         }
 
         if (values.place) {
@@ -267,6 +272,7 @@ $.widget('ui.photo_search_details',  $.ui.infobox, {
             ["category", new link_list_output_field("categories")],
             ["photo", new link_list_output_field("photos")],
             ["person_none", new text_output_field("no people")],
+            ["person_descendants", new text_output_field("descend people")],
             ["place_descendants", new text_output_field("descend places")],
             ["album_descendants", new text_output_field("descend albums")],
             ["category_descendants", new text_output_field("descend categories")],

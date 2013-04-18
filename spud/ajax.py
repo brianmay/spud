@@ -655,6 +655,10 @@ def _json_search(user, params):
     search = Q()
     photo_list = spud.models.photo.objects.all()
 
+    pd = _pop_boolean(params, "person_descendants")
+    if pd:
+        criteria["person_descendants"] = True
+
     ld = _pop_boolean(params, "place_descendants")
     if ld:
         criteria["place_descendants"] = True
@@ -741,7 +745,11 @@ def _json_search(user, params):
         criteria["person"] = []
         for value in values:
             criteria["person"].append(_json_person(user, value))
-            photo_list = photo_list.filter(persons=value)
+            if pd:
+                photo_list = photo_list.filter(
+                    persons__ascendant_set__ascendant=value)
+            else:
+                photo_list = photo_list.filter(persons=value)
 
     values = _pop_object_array(params, "album", spud.models.album)
     if values is not None:
