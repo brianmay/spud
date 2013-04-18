@@ -768,9 +768,8 @@ def _json_search(user, params):
         for value in values:
             criteria["category"].append(_json_category(user, value))
             if cd:
-                descendants = value.get_descendants(include_self=True)
                 photo_list = photo_list.filter(
-                    categorys__ascendant_set__ascendant=descendants)
+                    categorys__ascendant_set__ascendant=value)
             else:
                 photo_list = photo_list.filter(categorys=value)
 
