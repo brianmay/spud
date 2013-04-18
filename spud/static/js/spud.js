@@ -246,7 +246,7 @@ window.onpopstate = function(event) {
     close_all_dialog()
     if (state != null) {
 //        alert("location: " + document.location + ", state: " + JSON.stringify(event.state));
-        if (state.type == 'root') {
+        if (state.type == 'display_root') {
             do_root(false)
         } else if (state.type == 'display_photo') {
             do_photo(state.photo_id, false)
@@ -943,7 +943,7 @@ function display_login(push_history) {
 function do_root(push_history) {
     replace_links()
     update_history(push_history, root_url(), {
-        type: 'do_root',
+        type: 'display_root',
     });
     display_root()
 }
