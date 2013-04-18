@@ -125,7 +125,7 @@ class hierarchy_model(base_model):
 
         return glue
 
-    def _fix_ascendants(self, parent_attributes):
+    def _fix_ascendants(self, parent_attributes, glue_class):
         new_glue = self._ascendants_glue(self, 0, {}, parent_attributes)
 
         old_glue = [
@@ -135,17 +135,13 @@ class hierarchy_model(base_model):
             if glue in old_glue:
                 old_glue.remove(glue)
             else:
-                album_ascendant.objects.create(
+                glue_class.objects.create(
                     ascendant=glue[0], descendant=glue[1], position=glue[2])
 
         for glue in old_glue:
-            album_ascendant.objects.get(
+            glue_class.objects.get(
                 ascendant=glue[0], descendant=glue[1], position=glue[2]
             ).delete()
-
-    def fix_ascendants(self):
-        self._fix_ascendants(["parent"])
-
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +169,7 @@ class place(hierarchy_model):
         return self.title
 
     def fix_ascendants(self):
-        self._fix_ascendants(["parent_place"])
+        self._fix_ascendants(["parent_place"], place_ascendant)
 
     def check_delete(self):
         errorlist = []
@@ -221,7 +217,7 @@ class album(hierarchy_model):
         return self.album
 
     def fix_ascendants(self):
-        self._fix_ascendants(["parent_album"])
+        self._fix_ascendants(["parent_album"], album_ascendant)
 
     def check_delete(self):
         errorlist = []
@@ -259,7 +255,7 @@ class category(hierarchy_model):
         return self.category
 
     def fix_ascendants(self):
-        self._fix_ascendants(["parent_category"])
+        self._fix_ascendants(["parent_category"], category_ascendant)
 
     def check_delete(self):
         errorlist = []
@@ -334,7 +330,7 @@ class person(hierarchy_model):
         super(person, self).delete()
 
     def fix_ascendants(self):
-        self._fix_ascendants(["mother", "father" ])
+        self._fix_ascendants(["mother", "father" ], person_ascendant)
 
     # grand parents generation
 
