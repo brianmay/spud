@@ -45,9 +45,9 @@ function get_photo_action(action) {
 function get_photo_style(data) {
     if (data.action==null)
         return ""
-    elif (data.action=="D")
+    else if (data.action=="D")
         return "photo-D"
-    elif (data.action=="R"
+    else if (data.action=="R"
             || data.action=="M"
             || data.action=="auto"
             || data.action=="90" || data.action=="180" || data.action=="270")
@@ -761,7 +761,6 @@ $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
     },
 
     _submit_values: function(values) {
-        this.close()
         var mythis = this
         display_loading()
         load_photo_search_change(
@@ -940,7 +939,7 @@ $.widget('ui.change_photo_albums_dialog',  $.ui.change_photo_attribute_dialog, {
 
     _submit_values: function(values) {
         if (values.albums != null) {
-            values = { set_albums: values.albums }
+            values = { set_albums: values.albums.join(".") }
         } else {
             var seen = {}
             var dups = false
@@ -983,7 +982,7 @@ $.widget('ui.change_photo_categorys_dialog',  $.ui.change_photo_attribute_dialog
 
     _submit_values: function(values) {
         if (values.categorys != null) {
-            values = { set_categorys: values.categorys }
+            values = { set_categorys: values.categorys.join(".") }
         } else {
             var seen = {}
             var dups = false
@@ -1026,7 +1025,7 @@ $.widget('ui.change_photo_persons_dialog',  $.ui.change_photo_attribute_dialog, 
 
     _submit_values: function(values) {
         if (values.persons != null) {
-            values = { set_persons: values.persons }
+            values = { set_persons: values.persons.join(".") }
         } else {
             var seen = {}
             var dups = false

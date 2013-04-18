@@ -15,11 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ajax_select import LookupChannel
-from spud import models, webs
 from django.db.models import Q
 from django.utils.html import escape
 from django.conf import settings
-
+from spud import models
 
 class LookupChannel(LookupChannel):
     # anyone can use these lookup methods
@@ -32,6 +31,8 @@ def format_match(object, photo=None, description=None):
 
     if photo is None:
         photo = object.cover_photo
+
+    if photo is not None:
         thumb = photo.get_thumb(settings.DEFAULT_LIST_SIZE)
 
     if photo is not None:

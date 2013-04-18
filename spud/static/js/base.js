@@ -571,6 +571,7 @@ $.widget('ui.image', {
             .removeClass("photo-D")
             .removeClass("photo-R")
             .removeAttr("id")
+            .removeAttr("src")
             .removeAttr("class")
             .removeAttr("alt")
             .removeAttr("width")
@@ -598,7 +599,9 @@ $.widget('ui.image', {
             this.height = image.height
         } else {
             this._clear()
-            this.element.attr("src", media_url("img/none.jpg"))
+            this.element
+                .attr('width', 120)
+                .attr("src", media_url("img/none.jpg"))
             this.width = null
             this.height = null
         }

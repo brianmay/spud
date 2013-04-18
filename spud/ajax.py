@@ -134,7 +134,7 @@ def _decode_object(title, model, pk):
         return pk
     try:
         return model.objects.get(pk=pk)
-    except model.DoestNotExist:
+    except model.DoesNotExist:
         raise HttpBadRequest("%s does not exist" % title)
 
 
@@ -171,8 +171,9 @@ def _pop_int_array(params, key):
         return None
     result = []
     for v in value:
-        v = [_decode_int(key, w) for w in v.split(".")]
-        result.extend(v)
+        if v != "":
+            v = [_decode_int(key, w) for w in v.split(".")]
+            result.extend(v)
     return result
 
 
@@ -182,8 +183,9 @@ def _pop_object_array(params, key, model):
         return None
     result = []
     for v in value:
-        v = [_decode_object(key, model, w) for w in v.split(".")]
-        result.extend(v)
+        if v != "":
+            v = [_decode_object(key, model, w) for w in v.split(".")]
+            result.extend(v)
     return result
 
 
@@ -748,8 +750,7 @@ def _json_search(user, params):
         for value in values:
             criteria["album"].append(_json_album(user, value))
             if ad:
-                descendants = value.get_descendants(include_self=True)
-                photo_list = photo_list.filter(albums__in=descendants)
+                photo_list = photo_list.filter(albums__ascendant_set__ascendant=value)
             else:
                 photo_list = photo_list.filter(albums=value)
 
@@ -1974,10 +1975,10 @@ def photo_search_change(request):
             "We expected to change %d photos but would have changed %d photos"
             % (expected_results, number_results))
 
+    print "updating"
     print number_results
-    print "dddd"
     print params
-    if request.method == "POST" and False:
+    if request.method == "POST":
         value = _pop_string(params, "set_title")
         if value is not None:
             photo_list.update(title=value)
@@ -2055,7 +2056,7 @@ def photo_search_change(request):
                 del pa_list
             del photo
 
-        values = _pop_object_array(params, "add_albums", spud.models.albums)
+        values = _pop_object_array(params, "add_albums", spud.models.album)
         if values is not None:
             for photo in photo_list:
                 for value in values:
@@ -2064,7 +2065,7 @@ def photo_search_change(request):
                     )
             del photo
 
-        values = _pop_object_array(params, "del_albums", spud.models.albums)
+        values = _pop_object_array(params, "del_albums", spud.models.album)
         if values is not None:
             for photo in photo_list:
                 for value in values:
@@ -2075,7 +2076,7 @@ def photo_search_change(request):
             del photo
 
         values = _pop_object_array(
-            params, "set_categorys", spud.models.categorys)
+            params, "set_categorys", spud.models.category)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_category_set.all())
@@ -2092,7 +2093,7 @@ def photo_search_change(request):
             del photo
 
         values = _pop_object_array(
-            params, "add_categorys", spud.models.categorys)
+            params, "add_categorys", spud.models.category)
         if values is not None:
             for photo in photo_list:
                 for value in values:
@@ -2103,7 +2104,7 @@ def photo_search_change(request):
             del photo
 
         values = _pop_object_array(
-            params, "del_categorys", spud.models.categorys)
+            params, "del_categorys", spud.models.category)
         if values is not None:
             for photo in photo_list:
                 for value in values:
@@ -2113,7 +2114,7 @@ def photo_search_change(request):
                 del value
             del photo
 
-        values = _pop_object_array(params, "set_persons", spud.models.persons)
+        values = _pop_object_array(params, "set_persons", spud.models.person)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_person_set.all())
@@ -2145,7 +2146,7 @@ def photo_search_change(request):
             del pa_list
             del photo
 
-        values = _pop_object_array(params, "add_persons", spud.models.persons)
+        values = _pop_object_array(params, "add_persons", spud.models.person)
         if values is not None:
             for photo in photo_list:
                 for value in values:
@@ -2155,7 +2156,7 @@ def photo_search_change(request):
                 del value
             del photo
 
-        values = _pop_object_array(params, "del_persons", spud.models.persons)
+        values = _pop_object_array(params, "del_persons", spud.models.person)
         if values is not None:
             for photo in photo_list:
                 for value in values:

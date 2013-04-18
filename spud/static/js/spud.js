@@ -81,7 +81,7 @@ function photo_change_a(photo, fn, title) {
     }
     var a = $('<a/>')
         .attr('href', photo_url(photo))
-        .on('click', function() { fn(photo, { photo: photo.id }, 1); return false; })
+        .on('click', function() { fn(photo, { photos: photo.id }, 1); return false; })
         .text(title)
     return a
 }
