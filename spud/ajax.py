@@ -730,8 +730,7 @@ def _json_search(user, params):
     if value is not None:
         criteria["place"] = _json_place(user, value)
         if ld:
-            descendants = value.get_descendants(include_self=True)
-            search = search & Q(location__in=descendants)
+            search = search & Q(location__ascendant_set__ascendant=value)
         else:
             search = search & Q(location=value)
 
@@ -750,7 +749,8 @@ def _json_search(user, params):
         for value in values:
             criteria["album"].append(_json_album(user, value))
             if ad:
-                photo_list = photo_list.filter(albums__ascendant_set__ascendant=value)
+                photo_list = photo_list.filter(
+                    albums__ascendant_set__ascendant=value)
             else:
                 photo_list = photo_list.filter(albums=value)
 
@@ -762,7 +762,7 @@ def _json_search(user, params):
             if cd:
                 descendants = value.get_descendants(include_self=True)
                 photo_list = photo_list.filter(
-                    categorys__in=descendants)
+                    categorys__ascendant_set__ascendant=descendants)
             else:
                 photo_list = photo_list.filter(categorys=value)
 
