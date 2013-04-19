@@ -387,12 +387,12 @@ function replace_links() {
     var ul = $('<ul class="menu"/>')
         .main_menu()
 
-    $('<div class="module"/>')
-        .append("<h2>Quick links</h2>")
+    $('<div class="module main_menu"/>')
+        .append("<h2>Spud</h2>")
         .append(ul)
         .appendTo("#content-related")
 
-    $('<div id="selection" class="module"/>')
+    $('<div id="selection" class="module selection_menu"/>')
         .appendTo("#content-related")
     update_selection()
 }

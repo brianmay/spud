@@ -219,6 +219,15 @@ table#change-history tbody th { width:16em; }
     display: none;
 }
 
+.overlapped .main_menu  {
+    display: none;
+}
+
+.overlapped .selection_menu  {
+    display: none;
+}
+
+
 #content-related.overlapped {
     position: absolute;
     top: 10px;
