@@ -2048,6 +2048,35 @@ def photo_search_item(request, params, number):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+def _set_persons(photo, pa_list, values):
+    pa_list = list(photo.photo_person_set.all())
+    position = 1
+    for pa, person in zip(pa_list, values):
+        if (pa.position != position or
+                pa.person.pk != person.pk):
+            pa.position = position
+            pa.person = person
+            pa.save()
+        position = position + 1
+        del pa
+        del person
+
+    # for every value not already in pa_list
+    for i in xrange(len(pa_list), len(values)):
+        person = values[i]
+        spud.models.photo_person.objects.create(
+            photo=photo, person=person, position=position)
+        position = position + 1
+        del i
+        del person
+    del position
+
+    # for every pa that was not included in values list
+    for i in xrange(len(values), len(pa_list)):
+        pa_list[i].delete()
+        del i
+
+
 @check_errors
 def photo_search_change(request):
     if request.method != "POST":
@@ -2226,52 +2255,31 @@ def photo_search_change(request):
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_person_set.all())
-                position = 1
-                for pa, person in zip(pa_list, values):
-                    if (pa.position != position or
-                            pa.person.pk != person.pk):
-                        pa.position = position
-                        pa.person = person
-                        pa.save()
-                    position = position + 1
-                    del pa
-                    del person
-
-                # for every value not already in pa_list
-                for i in xrange(len(pa_list), len(values)):
-                    person = values[i]
-                    spud.models.photo_person.objects.create(
-                        photo=photo, person=person, position=position)
-                    position = position + 1
-                    del i
-                    del person
-                del position
-
-                # for every pa that was not included in values list
-                for i in xrange(len(values), len(pa_list)):
-                    pa_list[i].delete()
-                    del i
+                _set_persons(photo, pa_list, values)
             del pa_list
             del photo
 
         values = _pop_object_array(params, "add_persons", spud.models.person)
         if values is not None:
             for photo in photo_list:
+                pa_list = list(photo.photo_person_set.all())
+                new_values = [pa.person for pa in pa_list]
                 for value in values:
-                    spud.models.photo_person.objects.get_or_create(
-                        photo=photo, person=value
-                    )
-                    del value
+                    if value not in new_values:
+                        new_values.append(value)
+                _set_persons(photo, pa_list, new_values)
+                del new_values
             del photo
 
         values = _pop_object_array(params, "del_persons", spud.models.person)
         if values is not None:
             for photo in photo_list:
+                pa_list = list(photo.photo_person_set.all())
+                new_values = [pa.person for pa in pa_list]
                 for value in values:
-                    spud.models.photo_person.objects.filter(
-                        photo=photo, person=value
-                    ).delete()
-                    del value
+                    if value in new_values:
+                        new_values.remove(value)
+                _set_persons(photo, pa_list, new_values)
             del photo
 
     check_params_empty(params)
