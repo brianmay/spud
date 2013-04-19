@@ -15,7 +15,7 @@ ul.ui-autocomplete { z-index: 200; }
 .photo-K { background:#DDEEDD; color:#333333; }
 .photo-selected { background: #DDDDDD; }
 
-.photo_list_item { border:1px solid #dddddd; }
+.photo_item { border:1px solid #dddddd; }
 
 .photo_article { border:1px solid #dddddd; }
 
@@ -38,7 +38,7 @@ ul.ui-autocomplete { z-index: 200; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:150px; margin:10px; padding-top:10px; text-align: center; width:170px; }
 .photo_list .photo_item .desc { float:left; display:none; text-align:left; }
 .photo_list .photo_item:HOVER { border:1px solid #000; }
-.photo_list .photo_item:HOVER .desc { display:inline; background:#ddd; foreground:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
+.photo_list .photo_item:HOVER .desc { display:inline; background:#ddd; color:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
 .photo_list .ui-selecting { background: #FECA40; }
 .photo_list .ui-selected { background: #F39814; }
 
