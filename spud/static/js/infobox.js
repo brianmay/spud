@@ -73,6 +73,7 @@ text_output_field.constructor = text_output_field
 
 text_output_field.prototype.set = function(value) {
     this.output.text(value)
+    this.toggle(Boolean(value))
 }
 
 // define p_output_field
@@ -85,6 +86,7 @@ p_output_field.constructor = p_output_field
 
 p_output_field.prototype.set = function(value) {
     this.output.p(value)
+    this.toggle(Boolean(value))
 }
 
 
@@ -99,8 +101,10 @@ datetime_output_field.constructor = datetime_output_field
 datetime_output_field.prototype.set = function(value) {
     if (value != null) {
         this.output.text(value.title)
+        this.show()
     } else {
         this.output.text("")
+        this.hide()
     }
 }
 
@@ -115,6 +119,7 @@ link_output_field.constructor = link_output_field
 
 link_output_field.prototype.set = function(value) {
     this.output.html(object_a(value))
+    this.toggle(value != null)
 }
 
 // define html_output_field
@@ -127,6 +132,7 @@ html_output_field.constructor = html_output_field
 
 html_output_field.prototype.set = function(value) {
     this.output.html(value)
+    this.toggle(value != null)
 }
 
 // define html_list_output_field
@@ -146,6 +152,7 @@ html_list_output_field.prototype.set = function(value) {
     this.output.empty()
 
     if (value==null) {
+        this.hide()
         return
     }
 
@@ -155,6 +162,7 @@ html_list_output_field.prototype.set = function(value) {
             .append(item)
             .appendTo(mythis.output)
     })
+    this.toggle(value.length > 0)
 }
 
 // define link_list_output_field
@@ -174,6 +182,7 @@ link_list_output_field.prototype.set = function(value) {
     this.output.empty()
 
     if (value==null) {
+        this.hide()
         return
     }
 
@@ -183,6 +192,7 @@ link_list_output_field.prototype.set = function(value) {
             .append(object_a(item))
             .appendTo(mythis.output)
     })
+    this.toggle(value.length > 0)
 }
 
 // define photo_output_field
@@ -200,6 +210,7 @@ photo_output_field.prototype.create = function(id) {
 
 photo_output_field.prototype.set = function(value) {
     this.output.image('set', value)
+    this.toggle(value != null)
 }
 
 photo_output_field.prototype.destroy = function() {
@@ -273,7 +284,6 @@ $.widget('ui.infobox', {
     },
 
     set_value: function(id, value) {
-        this.fields[id].toggle(Boolean(value))
         this.fields[id].set(value)
     },
 
@@ -282,8 +292,6 @@ $.widget('ui.infobox', {
         if (can_change) {
             this.fields[id].show()
             this.fields[id].append_a(a)
-        } else {
-            this.fields[id].toggle(Boolean(value))
         }
     },
 })
