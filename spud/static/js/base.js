@@ -709,7 +709,7 @@ $.widget('ui.photo_list_base',  {
         }
 
         li = $("<li />")
-            .attr('class', "photo_list_item")
+            .attr('class', "photo_item")
             .addClass(style)
             .append(a)
             .on("click", function(ev) { a.trigger('click'); })
