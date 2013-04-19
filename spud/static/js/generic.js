@@ -103,7 +103,7 @@ generic_doer.prototype.search_form_a = function(criteria, title) {
 generic_doer.prototype.search_results_a = function(search, page, title) {
     var mythis = this
     if (title == null) {
-        title = this.display_plural
+        title = "List "+this.display_plural
     }
     var a = $('<a/>')
         .attr('href', this.search_results_url(search, page))

@@ -454,6 +454,9 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
         this.add_item(albums.a({id: 1}, "Albums"))
         this.add_item(categorys.a({id: 1}, "Categories"))
         this.add_item(places.a({id: 1}, "Places"))
+        this.add_item(albums.search_results_a({}, 0))
+        this.add_item(categorys.search_results_a({}, 0))
+        this.add_item(places.search_results_a({}, 0))
         this.add_item(persons.search_results_a({}, 0))
         this.add_item(photo_search_results_a({}, 0))
     },
