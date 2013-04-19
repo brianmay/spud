@@ -428,7 +428,7 @@ class photo(base_model):
     relations = models.ManyToManyField('self', through='photo_relation',symmetrical=False)
 
     class Meta:
-        ordering = [ 'datetime' ]
+        ordering = [ 'datetime', 'photo_id' ]
 
     def __unicode__(self):
         if self.title is None or self.title=="":
