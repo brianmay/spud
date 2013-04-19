@@ -101,6 +101,7 @@ $.widget('ui.place_details',  $.ui.infobox, {
         this.set_value("url", $("<a></a>")
             .attr("href", initial.url)
             .text(initial.urldesc))
+        this.fields["url"].toggle(Boolean(initial.url))
     },
 
     _destroy: function() {
