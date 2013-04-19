@@ -589,8 +589,8 @@ $.widget('ui.image', {
         }
 
         if (image != null) {
+            this._clear()
             this.element
-                .attr('id', photo)
                 .attr('src', image.url)
                 .attr('width', image.width)
                 .attr('height', image.height)
