@@ -2189,7 +2189,7 @@ def photo_search_change(request):
                         photo=photo, album=value)
                     del value
                 del pa_list
-            del photo
+                del photo
 
         values = _pop_object_array(params, "add_albums", spud.models.album)
         if values is not None:
@@ -2199,7 +2199,7 @@ def photo_search_change(request):
                         photo=photo, album=value
                     )
                     del value
-            del photo
+                del photo
 
         values = _pop_object_array(params, "del_albums", spud.models.album)
         if values is not None:
@@ -2209,7 +2209,7 @@ def photo_search_change(request):
                         photo=photo, album=album
                     ).delete()
                     del value
-            del photo
+                del photo
 
         values = _pop_object_array(
             params, "set_categorys", spud.models.category)
@@ -2227,7 +2227,7 @@ def photo_search_change(request):
                         photo=photo, category=values)
                     del value
                 del pa_list
-            del photo
+                del photo
 
         values = _pop_object_array(
             params, "add_categorys", spud.models.category)
@@ -2237,8 +2237,8 @@ def photo_search_change(request):
                     spud.models.photo_category.objects.get_or_create(
                         photo=photo, category=value
                     )
-                del value
-            del photo
+                    del value
+                del photo
 
         values = _pop_object_array(
             params, "del_categorys", spud.models.category)
@@ -2248,16 +2248,16 @@ def photo_search_change(request):
                     spud.models.photo_category.objects.filter(
                         photo=photo, category=value
                     ).delete()
-                del value
-            del photo
+                    del value
+                del photo
 
         values = _pop_object_array(params, "set_persons", spud.models.person)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_person_set.all())
                 _set_persons(photo, pa_list, values)
-            del pa_list
-            del photo
+                del pa_list
+                del photo
 
         values = _pop_object_array(params, "add_persons", spud.models.person)
         if values is not None:
@@ -2269,7 +2269,7 @@ def photo_search_change(request):
                         new_values.append(value)
                 _set_persons(photo, pa_list, new_values)
                 del new_values
-            del photo
+                del photo
 
         values = _pop_object_array(params, "del_persons", spud.models.person)
         if values is not None:
@@ -2280,7 +2280,7 @@ def photo_search_change(request):
                     if value in new_values:
                         new_values.remove(value)
                 _set_persons(photo, pa_list, new_values)
-            del photo
+                del photo
 
     check_params_empty(params)
 
