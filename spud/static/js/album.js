@@ -295,7 +295,7 @@ album_doer.prototype.get_objects = function(results) {
 }
 
 album_doer.prototype.details = function(album, div) {
-    $.ui.album_details({albums: album}, div)
+    $.ui.album_details({album: album}, div)
 }
 
 album_doer.prototype.list_menu = function(search, results, div) {
@@ -304,7 +304,7 @@ album_doer.prototype.list_menu = function(search, results, div) {
 
 
 album_doer.prototype.menu = function(album, div) {
-    $.ui.album_menu({albums: album}, div)
+    $.ui.album_menu({album: album}, div)
 }
 
 album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
@@ -325,11 +325,11 @@ album_doer.prototype.search_details = function(criteria, dialog) {
 }
 
 album_doer.prototype.change_dialog = function(album, dialog) {
-    $.ui.album_change_dialog({ albums: album }, dialog)
+    $.ui.album_change_dialog({ album: album }, dialog)
 }
 
 album_doer.prototype.delete_dialog = function(album, dialog) {
-    $.ui.album_delete_dialog({ albums: album }, dialog)
+    $.ui.album_delete_dialog({ album: album }, dialog)
 }
 
 albums = new album_doer()

@@ -296,7 +296,7 @@ category_doer.prototype.get_objects = function(results) {
 }
 
 category_doer.prototype.details = function(category, div) {
-    $.ui.category_details({categorys: category}, div)
+    $.ui.category_details({category: category}, div)
 }
 
 category_doer.prototype.list_menu = function(search, results, div) {
@@ -305,7 +305,7 @@ category_doer.prototype.list_menu = function(search, results, div) {
 
 
 category_doer.prototype.menu = function(category, div) {
-    $.ui.category_menu({categorys: category}, div)
+    $.ui.category_menu({category: category}, div)
 }
 
 category_doer.prototype.list = function(categorys, page, last_page, html_page, div) {
@@ -326,11 +326,11 @@ category_doer.prototype.search_details = function(criteria, dialog) {
 }
 
 category_doer.prototype.change_dialog = function(category, dialog) {
-    $.ui.category_change_dialog({ categorys: category }, dialog)
+    $.ui.category_change_dialog({ category: category }, dialog)
 }
 
 category_doer.prototype.delete_dialog = function(category, dialog) {
-    $.ui.category_delete_dialog({ categorys: category }, dialog)
+    $.ui.category_delete_dialog({ category: category }, dialog)
 }
 
 categorys = new category_doer()

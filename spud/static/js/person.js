@@ -367,7 +367,7 @@ person_doer.prototype.get_objects = function(results) {
 }
 
 person_doer.prototype.details = function(person, div) {
-    $.ui.person_details({persons: person}, div)
+    $.ui.person_details({person: person}, div)
 }
 
 person_doer.prototype.list_menu = function(search, results, div) {
@@ -376,7 +376,7 @@ person_doer.prototype.list_menu = function(search, results, div) {
 
 
 person_doer.prototype.menu = function(person, div) {
-    $.ui.person_menu({persons: person}, div)
+    $.ui.person_menu({person: person}, div)
 }
 
 person_doer.prototype.list = function(persons, page, last_page, html_page, div) {
@@ -397,11 +397,11 @@ person_doer.prototype.search_details = function(criteria, dialog) {
 }
 
 person_doer.prototype.change_dialog = function(person, dialog) {
-    $.ui.person_change_dialog({ persons: person }, dialog)
+    $.ui.person_change_dialog({ person: person }, dialog)
 }
 
 person_doer.prototype.delete_dialog = function(person, dialog) {
-    $.ui.person_delete_dialog({ persons: person }, dialog)
+    $.ui.person_delete_dialog({ person: person }, dialog)
 }
 
 persons = new person_doer()
