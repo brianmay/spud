@@ -2224,7 +2224,7 @@ def photo_search_change(request):
                     del pa
                 for value in values:
                     spud.models.photo_category.objects.create(
-                        photo=photo, category=values)
+                        photo=photo, category=value)
                     del value
                 del pa_list
                 del photo
