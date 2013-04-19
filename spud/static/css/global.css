@@ -240,7 +240,8 @@ table#change-history tbody th { width:16em; }
     background: transparent;
 }
 
-.prevslide, .nextslide{ position:absolute; height:43px; width:43px; top:50%; margin-top:-21px; opacity:0.6; }
+.slideshow .prevslide, .slideshow .nextslide { top:50%; }
+.prevslide, .nextslide{ position:absolute; height:43px; width:43px; bottom:0; margin-top:-21px; opacity:0.6; }
 .prevslide{ left:10px; background:url('../img/back.png'); }
 .nextslide{ right:10px; background:url('../img/forward.png'); }
 .prevslide:active, .nextslide:active{ margin-top:-19px; }
