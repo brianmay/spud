@@ -514,6 +514,11 @@ def _json_place_detail(user, place):
     for child in place.children.all():
         d['children'].append(_json_place(user, child))
 
+    if user.is_staff:
+        d.update({
+            'work_of': [_json_person(user, p) for p in place.work_of.all()],
+            'home_of': [_json_person(user, p) for p in place.home_of.all()],
+        })
     return d
 
 

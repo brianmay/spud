@@ -85,6 +85,8 @@ $.widget('ui.place_details',  $.ui.infobox, {
             ["state", new text_output_field("State")],
             ["zip", new text_output_field("zip")],
             ["url", new html_output_field("URL")],
+            ["home_of", new link_list_output_field("Home of")],
+            ["work_of", new link_list_output_field("Work of")],
             ["notes", new p_output_field("notes")],
         ]
         this._super();
