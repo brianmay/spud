@@ -272,7 +272,7 @@ generic_doer.prototype.display = function(object) {
     var mythis = this
     append_jump(this.type, this.type,
         function(ev, item) {
-            mythis.do_object(item.pk, true)
+            mythis.do(item.pk, true)
         }
     )
 
