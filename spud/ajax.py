@@ -1727,12 +1727,9 @@ def person_finish(request, person):
         if value is not None:
             if not request.user.is_staff:
                 raise ErrorForbidden("No rights to change gender")
-            if value == "":
-                person.gender = None
-            else:
-                if value != "1" and value != "2":
-                    raise ErrorBadRequest("Unknown gender")
-                person.gender = value
+            if value != "1" and value != "2":
+                raise ErrorBadRequest("Unknown gender")
+            person.gender = value
             updated = True
 
         value = _pop_string(params, "notes")
