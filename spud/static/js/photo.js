@@ -683,6 +683,13 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
         }
 
         this.add_item(photo_search_form_a(criteria))
+
+        if (photo.orig != null) {
+            this.add_item($("<a>Original photo</a>")
+                .attr("href", photo.orig)
+                .on("click", function() { parent.location=photo.orig; return false; })
+            )
+        }
         return this
     },
 })
