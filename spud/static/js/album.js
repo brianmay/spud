@@ -147,7 +147,7 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
             }))
 
         this.add_item(photo_search_form_a(criteria))
-        this.add_item(albums.search_form_a({}))
+        this.add_item(albums.search_form_a({ instance: album.id }))
 
         if (album.can_add) {
             this.add_item(albums.add_a(album))

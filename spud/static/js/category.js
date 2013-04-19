@@ -147,7 +147,7 @@ $.widget('ui.category_menu', $.ui.spud_menu, {
             }))
 
         this.add_item(photo_search_form_a(criteria))
-        this.add_item(categorys.search_form_a({}))
+        this.add_item(categorys.search_form_a({ instance: category.id }))
 
         if (category.can_add) {
             this.add_item(categorys.add_a(category))

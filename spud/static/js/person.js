@@ -173,7 +173,7 @@ $.widget('ui.person_menu', $.ui.spud_menu, {
             }))
 
         this.add_item(photo_search_form_a(criteria))
-        this.add_item(persons.search_form_a({}))
+        this.add_item(persons.search_form_a({ instance: person.id }))
 
         if (person.can_add) {
             this.add_item(persons.add_a(person))

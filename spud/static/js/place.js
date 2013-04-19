@@ -160,7 +160,7 @@ $.widget('ui.place_menu', $.ui.spud_menu, {
             }))
 
         this.add_item(photo_search_form_a(criteria))
-        this.add_item(places.search_form_a({}))
+        this.add_item(places.search_form_a({ instance: place.id }))
 
         if (place.can_add) {
             this.add_item(places.add_a(place))
