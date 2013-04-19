@@ -298,7 +298,7 @@ generic_doer.prototype.display = function(object) {
 generic_doer.prototype.display_children = function(element, object, page) {
     var search = {
         results_per_page: get_settings().items_per_page,
-        criteria: { parent: object.id },
+        criteria: { instance: object.id, mode: "children", },
     }
     var mythis = this
     this.load_search_results(search, page,

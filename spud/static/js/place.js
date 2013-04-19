@@ -21,7 +21,9 @@ $.widget('ui.place_search_dialog',  $.ui.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["q", new text_input_field("Search for", false)],
-            ["parent", new ajax_select_field("Parent place", "place", false)],
+            ["instance", new ajax_select_field("Place", "place", false)],
+            ["mode", new select_input_field("Mode",
+                [ ["children", "children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
         ]
         this.options.title = "Search places"
         this.options.description = "Please search for an place."
@@ -39,8 +41,11 @@ $.widget('ui.place_search_dialog',  $.ui.form_dialog, {
         var v = values.q
         if (v) { criteria.q = v }
 
-        var v = values.parent
-        if (v) { criteria.parent = v }
+        var v = values.instance
+        if (v) { criteria.instance = v }
+
+        var v = values.mode
+        if (v) { criteria.mode = v }
 
         var search = {
             criteria: criteria
@@ -56,7 +61,8 @@ $.widget('ui.place_search_details',  $.ui.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
-            ["parent", new link_output_field("Place parent")],
+            ["instance", new link_output_field("Place")],
+            ["mode", new text_output_field("Mode")],
         ]
         this._super();
 

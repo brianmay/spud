@@ -931,13 +931,14 @@ def album_search_form(request):
     if q is not None:
         criteria['q'] = q
 
-    parent = _pop_int(params, "parent")
-    if parent is not None:
-        try:
-            parent = spud.models.album.objects.get(pk=parent)
-        except spud.models.album.DoesNotExist:
-            raise ErrorBadRequest("parent does not exist")
-        criteria['parent'] = _json_album(request.user, parent)
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.album)
+    if instance is not None:
+        criteria['instance'] = _json_album(request.user, instance)
 
     check_params_empty(params)
 
@@ -976,14 +977,26 @@ def album_search_results(request):
             Q(album__icontains=q) | Q(album_description__icontains=q))
         criteria['q'] = q
 
-    parent = _pop_int(params, "parent")
-    if parent is not None:
-        try:
-            parent = spud.models.album.objects.get(pk=parent)
-        except spud.models.album.DoesNotExist:
-            raise ErrorBadRequest("parent does not exist")
-        album_list = album_list.filter(parent_album=parent)
-        criteria['parent'] = _json_album(request.user, parent)
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.album)
+    if instance is not None:
+        criteria['instance'] = _json_album(request.user, instance)
+        if mode == "children":
+            album_list = album_list.filter(parent_album=instance)
+        elif mode == "ascendants":
+            album_list = album_list.filter(
+                descendant_set__descendant=instance,
+                descendant_set__position__gt=0)
+        elif mode == "descendants":
+            album_list = album_list.filter(
+                ascendant_set__ascendant=instance,
+                ascendant_set__position__gt=0)
+        else:
+            ErrorBadRequest("Unknown search mode")
 
     check_params_empty(params)
 
@@ -1118,13 +1131,14 @@ def category_search_form(request):
     if q is not None:
         criteria['q'] = q
 
-    parent = _pop_int(params, "parent")
-    if parent is not None:
-        try:
-            parent = spud.models.category.objects.get(pk=parent)
-        except spud.models.category.DoesNotExist:
-            raise ErrorBadRequest("parent does not exist")
-        criteria['parent'] = _json_category(request.user, parent)
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.category)
+    if instance is not None:
+        criteria['instance'] = _json_category(request.user, instance)
 
     check_params_empty(params)
 
@@ -1163,14 +1177,26 @@ def category_search_results(request):
             Q(category__icontains=q) | Q(category_description__icontains=q))
         criteria['q'] = q
 
-    parent = _pop_int(params, "parent")
-    if parent is not None:
-        try:
-            parent = spud.models.category.objects.get(pk=parent)
-        except spud.models.category.DoesNotExist:
-            raise ErrorBadRequest("parent does not exist")
-        category_list = category_list.filter(parent_category=parent)
-        criteria['parent'] = _json_category(request.user, parent)
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.category)
+    if instance is not None:
+        criteria['instance'] = _json_category(request.user, instance)
+        if mode == "children":
+            category_list = category_list.filter(parent_category=instance)
+        elif mode == "ascendants":
+            category_list = category_list.filter(
+                descendant_set__descendant=instance,
+                descendant_set__position__gt=0)
+        elif mode == "descendants":
+            category_list = category_list.filter(
+                ascendant_set__ascendant=instance,
+                ascendant_set__position__gt=0)
+        else:
+            ErrorBadRequest("Unknown search mode")
 
     check_params_empty(params)
 
@@ -1306,13 +1332,14 @@ def place_search_form(request):
     if q is not None:
         criteria['q'] = q
 
-    parent = _pop_int(params, "parent")
-    if parent is not None:
-        try:
-            parent = spud.models.place.objects.get(pk=parent)
-        except spud.models.place.DoesNotExist:
-            raise ErrorBadRequest("parent does not exist")
-        criteria['parent'] = _json_place(request.user, parent)
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.place)
+    if instance is not None:
+        criteria['instance'] = _json_place(request.user, instance)
 
     check_params_empty(params)
 
@@ -1351,14 +1378,26 @@ def place_search_results(request):
             Q(title__icontains=q) | Q(address__icontains=q))
         criteria['q'] = q
 
-    parent = _pop_int(params, "parent")
-    if parent is not None:
-        try:
-            parent = spud.models.place.objects.get(pk=parent)
-        except spud.models.place.DoesNotExist:
-            raise ErrorBadRequest("parent does not exist")
-        place_list = place_list.filter(parent_place=parent)
-        criteria['parent'] = _json_place(request.user, parent)
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.place)
+    if instance is not None:
+        criteria['instance'] = _json_place(request.user, instance)
+        if mode == "children":
+            place_list = place_list.filter(parent_place=instance)
+        elif mode == "ascendants":
+            place_list = place_list.filter(
+                descendant_set__descendant=instance,
+                descendant_set__position__gt=0)
+        elif mode == "descendants":
+            place_list = place_list.filter(
+                ascendant_set__ascendant=instance,
+                ascendant_set__position__gt=0)
+        else:
+            ErrorBadRequest("Unknown search mode")
 
     check_params_empty(params)
 
@@ -1523,6 +1562,15 @@ def person_search_form(request):
     if q is not None:
         criteria['q'] = q
 
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.person)
+    if instance is not None:
+        criteria['instance'] = _json_person(request.user, instance)
+
     check_params_empty(params)
 
     resp = {
@@ -1560,6 +1608,27 @@ def person_search_results(request):
             Q(first_name__icontains=q) | Q(last_name__icontains=q) |
             Q(middle_name__icontains=q) | Q(called__icontains=q))
         criteria['q'] = q
+
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.person)
+    if instance is not None:
+        criteria['instance'] = _json_person(request.user, instance)
+        if mode == "children":
+            person_list = person_list.filter(Q(mother=instance) | Q(father=instance))
+        elif mode == "ascendants":
+            person_list = person_list.filter(
+                descendant_set__descendant=instance,
+                descendant_set__position__gt=0).order_by('descendant_set__position')
+        elif mode == "descendants":
+            person_list = person_list.filter(
+                ascendant_set__ascendant=instance,
+                ascendant_set__position__gt=0).order_by('ascendant_set__position')
+        else:
+            ErrorBadRequest("Unknown search mode")
 
     check_params_empty(params)
 

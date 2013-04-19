@@ -21,6 +21,9 @@ $.widget('ui.person_search_dialog',  $.ui.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["q", new text_input_field("Search for", false)],
+            ["instance", new ajax_select_field("Person", "person", false)],
+            ["mode", new select_input_field("Mode",
+                [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"]])],
         ]
         this.options.title = "Search persons"
         this.options.description = "Please search for an person."
@@ -38,6 +41,12 @@ $.widget('ui.person_search_dialog',  $.ui.form_dialog, {
         var v = values.q
         if (v) { criteria.q = v }
 
+        var v = values.instance
+        if (v) { criteria.instance = v }
+
+        var v = values.mode
+        if (v) { criteria.mode = v }
+
         var search = {
             criteria: criteria
         }
@@ -52,6 +61,8 @@ $.widget('ui.person_search_details',  $.ui.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
+            ["instance", new link_output_field("Person")],
+            ["mode", new text_output_field("Mode")],
         ]
         this._super();
 
