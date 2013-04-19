@@ -602,8 +602,8 @@ $.widget('ui.image', {
             this.element
                 .attr('width', 120)
                 .attr("src", media_url("img/none.jpg"))
-            this.width = null
-            this.height = null
+            this.width = 227
+            this.height = 222
         }
     },
 
