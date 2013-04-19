@@ -552,7 +552,7 @@ function display_photo_slideshow(photo, search, results, n) {
     var cm = $("#content-main")
     cm.html("")
 
-    $("<div></div>")
+    var div = $("<div></div>")
         .photo_slideshow({ photo: photo, })
         .appendTo(cm)
 
@@ -590,14 +590,14 @@ function display_photo_slideshow(photo, search, results, n) {
             photo_search_item_a(search, n-1, null, "")
                 .attr('accesskey', "p")
                 .addClass("prevslide")
-                .appendTo("#content-main")
+                .appendTo(div)
         }
 
         if (n < results.number_results-1) {
             photo_search_item_a(search, n+1, null, "")
                 .attr('accesskey', "n")
                 .addClass("nextslide")
-                .appendTo("#content-main")
+                .appendTo(div)
         }
     }
 
