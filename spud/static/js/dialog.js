@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // define input_field
 function input_field(title, required) {
     this.title = title
-    this.required = required
+    this.required = Boolean(required)
 }
 
 input_field.prototype.to_html = function(id) {

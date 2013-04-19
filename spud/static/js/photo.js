@@ -411,6 +411,7 @@ $.widget('ui.photo_details',  $.ui.infobox, {
         this.options.title = "Photo details"
 
         this._super();
+        this.element.removeClass("infobox")
 
         if (this.options.photo != null) {
             this.set(this.options.photo)
@@ -513,6 +514,7 @@ $.widget('ui.camera_details',  $.ui.infobox, {
         this.options.title = "Camera details"
 
         this._super()
+        this.element.removeClass("infobox")
 
         if (this.options.photo != null) {
             this.set(this.options.photo)

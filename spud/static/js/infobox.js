@@ -175,7 +175,7 @@ link_list_output_field.prototype = new output_field()
 link_list_output_field.constructor = link_list_output_field
 
 link_list_output_field.prototype.create = function(id) {
-    return $('<ul />')
+    return $('<span />')
 }
 
 link_list_output_field.prototype.set = function(value) {
@@ -187,11 +187,14 @@ link_list_output_field.prototype.set = function(value) {
     }
 
     var mythis = this
+    var sep = ""
     $.each(value, function(i, item){
-        $("<li></li>")
+        mythis.output
+            .append(sep)
             .append(object_a(item))
-            .appendTo(mythis.output)
+        sep = ", "
     })
+    mythis.output.append(".")
     this.toggle(value.length > 0)
 }
 
@@ -230,6 +233,9 @@ $.widget('ui.infobox', {
         }
 
         this.dl = $("<dl></dl>")
+            .appendTo(this.element)
+
+        $("<div class='clear'></div>")
             .appendTo(this.element)
 
         this.fields = {}

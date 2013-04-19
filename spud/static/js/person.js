@@ -92,12 +92,12 @@ $.widget('ui.person_details',  $.ui.infobox, {
             ["spouses", new link_list_output_field("Spouses")],
             ["notes", new p_output_field("Notes")],
             ["grandparents", new link_list_output_field("Grand Parents")],
-            ["uncles_aunts", new link_list_output_field("Uncles/Aunts")],
+            ["uncles_aunts", new link_list_output_field("Uncles and Aunts")],
             ["parents", new link_list_output_field("Parents")],
             ["siblings", new link_list_output_field("Siblings")],
             ["cousins", new link_list_output_field("Cousins")],
             ["children", new link_list_output_field("Children")],
-            ["nephews_nieces", new link_list_output_field("Nephews/Nieces")],
+            ["nephews_nieces", new link_list_output_field("Nephews and Nieces")],
             ["grandchildren", new link_list_output_field("Grand children")],
         ]
         this._super();
@@ -210,28 +210,65 @@ $.widget('ui.person_list_menu', $.ui.spud_menu, {
 
 $.widget('ui.person_change_dialog',  $.ui.form_dialog, {
     _create: function() {
-        this.options.fields = [
-            ["cover_photo", new photo_select_field("Photo", false)],
-            ["first_name", new text_input_field("First name", false)],
-            ["middle_name", new text_input_field("Middle name", false)],
-            ["last_name", new text_input_field("Last name", false)],
-            ["called", new text_input_field("Called", false)],
-            ["gender", new select_input_field("Gender", [ ["", "Unknown"], ["1","Male"], ["2","Female"] ])],
-            ["email", new text_input_field("E-Mail", false)],
-            ["dob", new date_input_field("Date of birth", false)],
-            ["dod", new date_input_field("Date of death", false)],
-            ["work", new ajax_select_field("Work", "place", false)],
-            ["home", new ajax_select_field("Home", "place", false)],
-            ["mother", new ajax_select_field("Mother", "person", false)],
-            ["father", new ajax_select_field("Father", "person", false)],
-            ["spouse", new ajax_select_field("Spouse", "person", false)],
-            ["notes", new p_input_field("Notes", false)],
+        this.options.fields2 = [
         ]
 
         this.options.title = "Change person"
         this.options.button = "Save"
         this._super();
 
+        var old_table = this.table
+
+        var tabs = $("<div></div>")
+
+        $("<ul></ul>")
+            .append("<li><a href='#name'>Name</a></li>")
+            .append("<li><a href='#connections'>Connections</a></li>")
+            .append("<li><a href='#other'>Other</a></li>")
+            .appendTo(tabs)
+
+        var table = $("<table />")
+        this.table = table
+
+        this.add_field("cover_photo", new photo_select_field("Photo", false))
+        this.add_field("first_name", new text_input_field("First name", false))
+        this.add_field("middle_name", new text_input_field("Middle name", false))
+        this.add_field("last_name", new text_input_field("Last name", false))
+        this.add_field("called", new text_input_field("Called", false))
+        this.add_field("gender", new select_input_field("Gender", [ ["1","Male"], ["2","Female"] ], true))
+
+        $("<div id='name'></div>")
+            .append(table)
+            .appendTo(tabs)
+
+        var table = $("<table />")
+        this.table = table
+
+        this.add_field("work", new ajax_select_field("Work", "place", false))
+        this.add_field("home", new ajax_select_field("Home", "place", false))
+        this.add_field("mother", new ajax_select_field("Mother", "person", false))
+        this.add_field("father", new ajax_select_field("Father", "person", false))
+        this.add_field("spouse", new ajax_select_field("Spouse", "person", false))
+
+        $("<div id='connections'></div>")
+            .append(table)
+            .appendTo(tabs)
+
+        var table = $("<table />")
+        this.table = table
+
+        this.add_field("email", new text_input_field("E-Mail", false))
+        this.add_field("dob", new date_input_field("Date of birth", false))
+        this.add_field("dod", new date_input_field("Date of death", false))
+        this.add_field("notes", new p_input_field("Notes", false))
+
+        $("<div id='other'></div>")
+            .append(table)
+            .appendTo(tabs)
+
+        tabs.tabs()
+
+        old_table.replaceWith(tabs)
         if (this.options.person != null) {
             this.set(this.options.person)
         }
