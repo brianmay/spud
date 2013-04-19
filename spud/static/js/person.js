@@ -159,7 +159,7 @@ $.widget('ui.person_menu', $.ui.spud_menu, {
     set: function(person) {
         this.element.empty()
 
-        var criteria = { person: person.id }
+        var criteria = { persons: person.id }
 
         this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
 
@@ -348,7 +348,7 @@ person_doer.prototype = new generic_doer()
 person_doer.constructor = person_doer
 
 person_doer.prototype.get_criteria = function(person) {
-    return { person: person.id }
+    return { persons: person.id }
 }
 
 person_doer.prototype.get_new_object = function(parent) {
@@ -367,7 +367,7 @@ person_doer.prototype.get_objects = function(results) {
 }
 
 person_doer.prototype.details = function(person, div) {
-    $.ui.person_details({person: person}, div)
+    $.ui.person_details({persons: person}, div)
 }
 
 person_doer.prototype.list_menu = function(search, results, div) {
@@ -376,7 +376,7 @@ person_doer.prototype.list_menu = function(search, results, div) {
 
 
 person_doer.prototype.menu = function(person, div) {
-    $.ui.person_menu({person: person}, div)
+    $.ui.person_menu({persons: person}, div)
 }
 
 person_doer.prototype.list = function(persons, page, last_page, html_page, div) {
@@ -397,11 +397,11 @@ person_doer.prototype.search_details = function(criteria, dialog) {
 }
 
 person_doer.prototype.change_dialog = function(person, dialog) {
-    $.ui.person_change_dialog({ person: person }, dialog)
+    $.ui.person_change_dialog({ persons: person }, dialog)
 }
 
 person_doer.prototype.delete_dialog = function(person, dialog) {
-    $.ui.person_delete_dialog({ person: person }, dialog)
+    $.ui.person_delete_dialog({ persons: person }, dialog)
 }
 
 persons = new person_doer()

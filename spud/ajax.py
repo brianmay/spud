@@ -746,7 +746,7 @@ def _json_search(user, params):
 
     del value
 
-    values = _pop_object_array(params, "person", spud.models.person)
+    values = _pop_object_array(params, "persons", spud.models.person)
     if values is not None:
         criteria["person"] = []
         for value in values:
@@ -757,7 +757,7 @@ def _json_search(user, params):
             else:
                 photo_list = photo_list.filter(persons=value)
 
-    values = _pop_object_array(params, "album", spud.models.album)
+    values = _pop_object_array(params, "albums", spud.models.album)
     if values is not None:
         criteria["album"] = []
         for value in values:
@@ -768,7 +768,7 @@ def _json_search(user, params):
             else:
                 photo_list = photo_list.filter(albums=value)
 
-    values = _pop_object_array(params, "category", spud.models.category)
+    values = _pop_object_array(params, "categorys", spud.models.category)
     if values is not None:
         criteria["category"] = []
         for value in values:
