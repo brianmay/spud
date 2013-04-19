@@ -499,13 +499,6 @@ function display_photo_article(photo, search, results, n) {
 
         var html_page = function(page, text) {
             var photo = null
-            if (page == n-1) {
-                photo = results.prev_photo
-            } else if (page == n) {
-                photo = results.photo
-            } else if (page == n+1) {
-                photo = results.next_photo
-            }
             return photo_search_item_a(search, page, photo, text)
         }
 
@@ -535,13 +528,13 @@ function display_photo_article(photo, search, results, n) {
         }
 
         if (n > 0) {
-            photo_search_item_a(search, n-1, results.prev_photo, "")
+            photo_search_item_a(search, n-1, null, "")
                 .addClass("prevslide")
                 .appendTo(cm)
         }
 
         if (n < results.number_results-1) {
-            photo_search_item_a(search, n+1, results.next_photo, "")
+            photo_search_item_a(search, n+1, null, "")
                 .addClass("nextslide")
                 .appendTo(cm)
         }
@@ -587,14 +580,14 @@ function display_photo_slideshow(photo, search, results, n) {
 
     if (search != null) {
         if (n > 0) {
-            photo_search_item_a(search, n-1, results.prev_photo, "")
+            photo_search_item_a(search, n-1, null, "")
                 .attr('accesskey', "p")
                 .addClass("prevslide")
                 .appendTo("#content-main")
         }
 
         if (n < results.number_results-1) {
-            photo_search_item_a(search, n+1, results.next_photo, "")
+            photo_search_item_a(search, n+1, null, "")
                 .attr('accesskey', "n")
                 .addClass("nextslide")
                 .appendTo("#content-main")
