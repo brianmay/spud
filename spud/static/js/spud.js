@@ -549,9 +549,12 @@ function display_photo_article(photo, search, results, n) {
 
 
 function display_photo_slideshow(photo, search, results, n) {
+    var cm = $("#content-main")
+    cm.html("")
+
     $("<div></div>")
         .photo_slideshow({ photo: photo, })
-        .appendTo("#content-main")
+        .appendTo(cm)
 
     var prefix = ""
     if (photo.can_change && is_edit_mode()) {
