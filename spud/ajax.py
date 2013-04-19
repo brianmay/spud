@@ -2157,10 +2157,11 @@ def photo_search_change(request):
                         values.remove(pa.album.pk)
                     else:
                         pa.delete()
+                    del pa
                 for value in values:
                     spud.models.photo_album.objects.create(
                         photo=photo, album=value)
-                del value
+                    del value
                 del pa_list
             del photo
 
@@ -2171,6 +2172,7 @@ def photo_search_change(request):
                     spud.models.photo_album.objects.get_or_create(
                         photo=photo, album=value
                     )
+                    del value
             del photo
 
         values = _pop_object_array(params, "del_albums", spud.models.album)
@@ -2180,7 +2182,7 @@ def photo_search_change(request):
                     spud.models.photo_album.objects.filter(
                         photo=photo, album=album
                     ).delete()
-                del value
+                    del value
             del photo
 
         values = _pop_object_array(
@@ -2193,10 +2195,11 @@ def photo_search_change(request):
                         values.remove(pa.category.pk)
                     else:
                         pa.delete()
+                    del pa
                 for value in values:
                     spud.models.photo_category.objects.create(
                         photo=photo, category=values)
-                del value
+                    del value
                 del pa_list
             del photo
 
@@ -2228,14 +2231,14 @@ def photo_search_change(request):
                 pa_list = list(photo.photo_person_set.all())
                 position = 1
                 for pa, person in zip(pa_list, values):
-                    if (pa.position.pk != position.pk or
+                    if (pa.position != position or
                             pa.person.pk != person.pk):
                         pa.position = position
                         pa.person = person
                         pa.save()
                     position = position + 1
-                del pa
-                del person
+                    del pa
+                    del person
 
                 # for every value not already in pa_list
                 for i in xrange(len(pa_list), len(values)):
@@ -2243,14 +2246,14 @@ def photo_search_change(request):
                     spud.models.photo_person.objects.create(
                         photo=photo, person=person, position=position)
                     position = position + 1
-                del i
-                del person
+                    del i
+                    del person
                 del position
 
                 # for every pa that was not included in values list
                 for i in xrange(len(values), len(pa_list)):
                     pa_list[i].delete()
-                del i
+                    del i
             del pa_list
             del photo
 
@@ -2261,7 +2264,7 @@ def photo_search_change(request):
                     spud.models.photo_person.objects.get_or_create(
                         photo=photo, person=value
                     )
-                del value
+                    del value
             del photo
 
         values = _pop_object_array(params, "del_persons", spud.models.person)
@@ -2271,7 +2274,7 @@ def photo_search_change(request):
                     spud.models.photo_person.objects.filter(
                         photo=photo, person=value
                     ).delete()
-                del value
+                    del value
             del photo
 
     check_params_empty(params)

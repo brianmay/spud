@@ -895,6 +895,8 @@ function display_photo_search_results(search, results) {
         return photo_search_results_a(search, page, text)
     }
 
+    photo_change_keyboard(null, search.criteria, results.number_results)
+
     $("<div/>")
         .photo_list({
             search: search,
