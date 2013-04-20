@@ -24,6 +24,7 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
             ["instance", new ajax_select_field("Album", "album", false)],
             ["mode", new select_input_field("Mode",
                 [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
+            ["root_only", new boolean_input_field("Root only", false)],
         ]
         this.options.title = "Search albums"
         this.options.description = "Please search for an album."
@@ -47,6 +48,9 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
         var v = values.mode
         if (v) { criteria.mode = v }
 
+        var v = values.root_only
+        if (v) { criteria.root_only = v }
+
         var search = {
             criteria: criteria
         }
@@ -63,6 +67,7 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
             ["q", new text_output_field("Search for")],
             ["instance", new link_output_field("Album")],
             ["mode", new text_output_field("Mode")],
+            ["root_only", new text_output_field("Root Only")],
         ]
         this._super();
 
@@ -273,7 +278,6 @@ function album_doer() {
     this.display_type = "album"
     this.display_plural = "albums"
     this.list_type = "album_list"
-    this.has_children = true
     generic_doer.call(this)
 }
 

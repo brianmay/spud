@@ -17,6 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 function generic_doer() {
+    this.has_ancestors = true
+    this.has_children = true
+    this.has_photos = true
 }
 
 generic_doer.prototype.search_results_url = function(search, page) {
@@ -249,18 +252,20 @@ generic_doer.prototype.display = function(object) {
     }
 
 
-    var pl = $("<div/>")
-    pl
-        .photo_list({ html_page:
-            function(page, text) {
-                return $("<a/>")
-                    .text(text)
-                    .attr("href", "#")
-                    .on("click", function() { mythis.display_photos(pl, object, page); return false; })
-            }
-        })
-        .appendTo(cm)
-     this.display_photos(pl, object, 0);
+    if (this.has_photos) {
+        var pl = $("<div/>")
+        pl
+            .photo_list({ html_page:
+                function(page, text) {
+                    return $("<a/>")
+                        .text(text)
+                        .attr("href", "#")
+                        .on("click", function() { mythis.display_photos(pl, object, page); return false; })
+                }
+            })
+            .appendTo(cm)
+         this.display_photos(pl, object, 0);
+    }
 
     var ul = $('<ul class="menu"/>')
 
@@ -281,7 +286,7 @@ generic_doer.prototype.display = function(object) {
         .append(" › ")
         .append(this.search_results_a({}, 0, null))
 
-    if (this.has_children) {
+    if (this.has_ancestors) {
         for (var i in object.ancestors) {
             var a = object.ancestors[i]
             bc.append(" › ")
@@ -300,14 +305,16 @@ generic_doer.prototype.display_children = function(element, object, page) {
         criteria: { instance: object.id, mode: "children", },
     }
     var mythis = this
+    element[mythis.list_type]("display_loading")
     this.load_search_results(search, page,
         function(data) {
+            element[mythis.list_type]("clear_status")
             var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
             element[mythis.list_type]("set", mythis.get_objects(data))
             element[mythis.list_type]("set_paginator", page, last_page)
         },
         function(message) {
-            // FIXME
+            element[mythis.list_type]("display_error")
         }
     )
 }
@@ -318,8 +325,10 @@ generic_doer.prototype.display_photos = function(element, object, page) {
         results_per_page: get_settings().items_per_page,
         criteria: this.get_criteria(object)
     }
+    element.photo_list("display_loading")
     load_photo_search_results(search, page,
         function(data) {
+            element.photo_list("clear_status")
             var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
             element.photo_list("set", search, data)
             element.photo_list("set_paginator", page, last_page)
@@ -331,6 +340,7 @@ generic_doer.prototype.display_photos = function(element, object, page) {
         },
         function(message) {
             cancel_keyboard()
+            element.photo_list("display_error")
         }
     )
 }

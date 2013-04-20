@@ -147,6 +147,27 @@ class category_lookup(LookupChannel):
         return models.category.objects.filter(pk__in=ids)
 
 
+class feedback_lookup(LookupChannel):
+
+    def get_query(self,q,request):
+        """ return a query set.  you also have access to request.user if needed """
+        return models.feedback.objects.filter(Q(comment__icontains=q))
+
+    def format_item_display(self,object):
+        """ simple display of an object when it is displayed in the list of selected objects """
+        return escape(unicode(object))
+
+    def format_match(self,object):
+        """ (HTML) formatted item for display in the dropdown """
+        return format_match(object, photo=object.feedback.photo, description=object.feedback_comment)
+
+    def get_objects(self,ids):
+        """ given a list of ids, return the objects ordered as you would like them on the admin page.
+            this is for displaying the currently selected items (in the case of a ManyToMany field)
+        """
+        return models.feedback.objects.filter(pk__in=ids)
+
+
 class photo_lookup(LookupChannel):
 
     def get_query(self,q,request):

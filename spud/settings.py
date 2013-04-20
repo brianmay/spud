@@ -87,6 +87,7 @@ AJAX_LOOKUP_CHANNELS = {
     'place' : ('spud.lookup', 'place_lookup'),
     'album' : ('spud.lookup', 'album_lookup'),
     'category' : ('spud.lookup', 'category_lookup'),
+    'feedback' : ('spud.lookup', 'feedback_lookup'),
     'photo' : ('spud.lookup', 'photo_lookup'),
 }
 AJAX_SELECT_BOOTSTRAP = False

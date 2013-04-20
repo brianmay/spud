@@ -450,14 +450,12 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
     },
 
     set: function() {
+        search = { criteria: { root_only: true} }
         this.element.empty()
-        this.add_item(albums.a({id: 1}, "Albums"))
-        this.add_item(categorys.a({id: 1}, "Categories"))
-        this.add_item(places.a({id: 1}, "Places"))
-        this.add_item(albums.search_results_a({}, 0))
-        this.add_item(categorys.search_results_a({}, 0))
-        this.add_item(places.search_results_a({}, 0))
-        this.add_item(persons.search_results_a({}, 0))
+        this.add_item(albums.search_results_a(search, 0, "Albums"))
+        this.add_item(categorys.search_results_a(search, 0, "Categories"))
+        this.add_item(places.search_results_a(search, 0, "Places"))
+        this.add_item(persons.search_results_a(search, 0, "People"))
         this.add_item(photo_search_results_a({}, 0))
     },
 })
@@ -681,7 +679,11 @@ $.widget('ui.photo_list_base',  {
     },
 
     empty: function() {
+        this.element.find("img")
+            .image("destroy")
         this.ul.empty()
+        this.element.removeClass("loading")
+        this.element.removeClass("errors")
     },
 
     append_photo: function(photo, title, sort, description, a) {
@@ -721,16 +723,29 @@ $.widget('ui.photo_list_base',  {
         return li
     },
 
+    clear_status: function() {
+        this.element.removeClass("loading")
+        this.element.removeClass("errors")
+    },
+
+    display_loading: function() {
+        this.empty()
+        this.element.addClass("loading")
+    },
+
+    display_error: function() {
+        this.empty()
+        this.element.addClass("errors")
+    },
+
     _destroy: function() {
         this.p
             .paginator("destroy")
 
-        this.element.find("img")
-            .image("destroy")
+        this.empty()
 
         this.element
             .removeAttr("photo_list")
-            .empty()
 
         this._super()
     },

@@ -153,7 +153,7 @@ def _pop_int(params, key):
 
 
 def _pop_object(params, key, model):
-    return _decode_object(key, model, _pop_string(params, key))
+    return _decode_object(key, model, _pop_int(params, key))
 
 
 def _pop_boolean(params, key):
@@ -617,6 +617,51 @@ def _json_photo_relation_detail(user, photo_relation):
     return d
 
 
+def _json_feedback(user, feedback):
+    if feedback is None:
+        return None
+
+    if not feedback.is_public and not user.is_staff:
+        return None
+
+    d = {
+        'type': "feedback",
+        'title': u"%s feedback" % unicode(feedback.photo),
+        'id': feedback.pk,
+        'is_public': feedback.is_public,
+        'is_removed': feedback.is_removed,
+        'can_add': user.has_perm('spud.add_feedback'),
+        'can_change': user.has_perm('spud.change_feedback'),
+        'can_delete': user.has_perm('spud.delete_feedback'),
+        'can_moderate': user.is_staff,
+    }
+
+    if not feedback.is_removed or user.is_staff:
+        d.update({
+            'rating': feedback.rating,
+            'comment': feedback.comment,
+            'user': feedback.user.username,
+            'user_name': feedback.user_name,
+            'user_email': feedback.user_email,
+            'user_url': feedback.user_url,
+            'submit_datetime': _json_datetime(
+                feedback.submit_datetime, feedback.utc_offset),
+            'photo': _json_photo(user, feedback.photo)
+        })
+
+    if user.is_staff:
+        d.update({
+            'ip_address': feedback.ip_address,
+        })
+
+    return d
+
+
+def _json_feedback_detail(user, feedback):
+    d = _json_feedback(user, feedback)
+    return d
+
+
 def _json_datetime(value, utc_offset):
     from_tz = pytz.utc
     to_tz = pytz.FixedOffset(utc_offset)
@@ -682,7 +727,7 @@ def _json_search(user, params):
 
     value = _pop_datetime(params, "first_date", timezone)
     if value is not None:
-        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=none)
         criteria["first_date"] = _json_datetime(
             utc_value, value.utcoffset().total_seconds() / 60)
         search = search & Q(datetime__gte=utc_value)
@@ -933,6 +978,10 @@ def album_search_form(request):
     if instance is not None:
         criteria['instance'] = _json_album(request.user, instance)
 
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        criteria["root_only"] = True
+
     check_params_empty(params)
 
     resp = {
@@ -990,6 +1039,11 @@ def album_search_results(request):
                 ascendant_set__position__gt=0)
         else:
             ErrorBadRequest("Unknown search mode")
+
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        album_list = album_list.filter(parent_album=None)
+        criteria["root_only"] = True
 
     check_params_empty(params)
 
@@ -1133,6 +1187,10 @@ def category_search_form(request):
     if instance is not None:
         criteria['instance'] = _json_category(request.user, instance)
 
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        criteria["root_only"] = True
+
     check_params_empty(params)
 
     resp = {
@@ -1190,6 +1248,11 @@ def category_search_results(request):
                 ascendant_set__position__gt=0)
         else:
             ErrorBadRequest("Unknown search mode")
+
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        category_list = category_list.filter(parent_category=None)
+        criteria["root_only"] = True
 
     check_params_empty(params)
 
@@ -1334,6 +1397,10 @@ def place_search_form(request):
     if instance is not None:
         criteria['instance'] = _json_place(request.user, instance)
 
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        criteria["root_only"] = True
+
     check_params_empty(params)
 
     resp = {
@@ -1391,6 +1458,11 @@ def place_search_results(request):
                 ascendant_set__position__gt=0)
         else:
             ErrorBadRequest("Unknown search mode")
+
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        place_list = place_list.filter(parent_place=None)
+        criteria["root_only"] = True
 
     check_params_empty(params)
 
@@ -1564,6 +1636,10 @@ def person_search_form(request):
     if instance is not None:
         criteria['instance'] = _json_person(request.user, instance)
 
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        criteria["root_only"] = True
+
     check_params_empty(params)
 
     resp = {
@@ -1627,6 +1703,11 @@ def person_search_results(request):
                 'ascendant_set__position')
         else:
             ErrorBadRequest("Unknown search mode")
+
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        person_list = person_list.filter(mother=None, father=None)
+        criteria["root_only"] = True
 
     check_params_empty(params)
 
@@ -1945,6 +2026,280 @@ def photo_relation_finish(request, photo_relation):
         'type': 'photo_relation_get',
         'photo_relation': _json_photo_relation_detail(request.user,
                                                       photo_relation),
+        'session': _json_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
+def feedback_search_form(request):
+    criteria = {}
+    params = request.GET.copy()
+    _pop_string(params, "_")
+
+    q = _pop_string(params, "q")
+    if q is not None:
+        criteria['q'] = q
+
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.feedback)
+    if instance is not None:
+        criteria['instance'] = _json_feedback(request.user, instance)
+
+    instance = _pop_object(params, "photo", spud.models.photo)
+    if instance is not None:
+        criteria['photo'] = _json_photo(request.user, instance)
+
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        criteria["root_only"] = True
+
+    if request.user.is_staff:
+        value = _pop_boolean(params, "is_public")
+        if value is not None:
+            criteria["is_public"] = value
+
+        value = _pop_boolean(params, "is_removed")
+        if value is not None:
+            criteria["is_removed"] = value
+
+    check_params_empty(params)
+
+    resp = {
+        'type': 'feedback_search_form',
+        'criteria': criteria,
+        'session': _json_session(request),
+
+        'can_add': request.user.has_perm('spud.add_feedback'),
+        'can_moderate': request.user.is_staff,
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
+def feedback_search_results(request):
+    params = request.GET.copy()
+    _pop_string(params, "_")
+
+    first = _pop_int(params, "first")
+    if first is None:
+        raise ErrorBadRequest("first is not specified")
+    if first < 0:
+        raise ErrorBadRequest("first is negative")
+
+    count = _pop_int(params, "count")
+    if count is None:
+        raise ErrorBadRequest("count is not specified")
+    if count < 0:
+        raise ErrorBadRequest("count is negative")
+
+    feedback_list = spud.models.feedback.objects.all()
+    criteria = {}
+
+    q = _pop_string(params, "q")
+    if q is not None:
+        feedback_list = feedback_list.filter(
+            Q(title__icontains=q) | Q(address__icontains=q))
+        criteria['q'] = q
+
+    mode = _pop_string(params, "mode")
+    if mode is not None:
+        mode = mode.lower()
+        criteria['mode'] = mode
+
+    instance = _pop_object(params, "instance", spud.models.feedback)
+    if instance is not None:
+        criteria['instance'] = _json_feedback(request.user, instance)
+        if mode == "children":
+            feedback_list = feedback_list.filter(
+                parent=instance)
+        elif mode == "ascendants":
+            feedback_list = feedback_list.filter(
+                descendant_set__descendant=instance,
+                descendant_set__position__gt=0)
+        elif mode == "descendants":
+            feedback_list = feedback_list.filter(
+                ascendant_set__ascendant=instance,
+                ascendant_set__position__gt=0)
+        else:
+            ErrorBadRequest("Unknown search mode")
+
+    instance = _pop_object(params, "photo", spud.models.photo)
+    if instance is not None:
+        feedback_list = feedback_list.filter(photo=instance)
+        criteria['photo'] = _json_photo(request.user, instance)
+
+    root_only = _pop_boolean(params, "root_only")
+    if root_only:
+        feedback_list = feedback_list.filter(parent=None)
+        criteria["root_only"] = True
+
+    if request.user.is_staff:
+        value = _pop_boolean(params, "is_public")
+        if value is not None:
+            feedback_list = feedback_list.filter(is_public=value)
+            criteria["is_public"] = value
+
+        value = _pop_boolean(params, "is_removed")
+        if value is not None:
+            feedback_list = feedback_list.filter(is_removed=value)
+            criteria["is_removed"] = value
+
+    else:
+        feedback_list = feedback_list.filter(is_public=True)
+
+    check_params_empty(params)
+
+    number_results = feedback_list.count()
+    feedback_list = feedback_list[first:first+count]
+    number_returned = len(feedback_list)
+
+    resp = {
+        'type': 'feedback_search_results',
+        'criteria': criteria,
+        'feedbacks': [
+            _json_feedback(request.user, p) for p in feedback_list],
+        'number_results': number_results,
+        'first': first,
+        'last': first + number_returned - 1,
+        'session': _json_session(request),
+        'can_add': request.user.has_perm('spud.add_feedback'),
+        'can_moderate': request.user.is_staff,
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+@check_errors
+def feedback(request, feedback_id):
+    if request.method == "POST":
+        if not request.user.has_perm('spud.change_feedback'):
+            raise ErrorForbidden("No rights to change feedbacks")
+    feedback = get_object_or_404(
+        spud.models.feedback, pk=feedback_id)
+    return feedback_finish(request, feedback)
+
+
+@check_errors
+def feedback_add(request):
+    if request.method != "POST":
+        raise ErrorBadRequest("Only POST is supported")
+    if request.method == "POST":
+        if not request.user.has_perm('spud.add_feedback'):
+            raise ErrorForbidden("No rights to add feedbacks")
+
+    if 'photo' not in request.POST or request.POST['photo'] is None:
+        raise ErrorBadRequest("Photo must be specified")
+
+    if 'rating' not in request.POST or request.POST['rating'] is None:
+        raise ErrorBadRequest("Rating must be specified")
+
+    feedback = spud.models.feedback()
+    feedback.user = request.user
+    feedback.ip_address = request.META.get("REMOTE_ADDR", None)
+    feedback.is_public = False
+    feedback.is_removed = False
+    return feedback_finish(request, feedback)
+
+
+@check_errors
+def feedback_delete(request, feedback_id):
+    if request.method != "POST":
+        raise ErrorBadRequest("Only POST is supported")
+    if not request.user.has_perm('spud.delete_feedback'):
+        raise ErrorForbidden("No rights to delete feedbacks")
+    feedback = get_object_or_404(
+        spud.models.feedback, pk=feedback_id)
+
+    errors = feedback.check_delete()
+    if len(errors) > 0:
+        raise ErrorBadRequest(", ".join(errors))
+
+    feedback.delete()
+
+    resp = {
+        'type': 'feedback_delete',
+        'session': _json_session(request),
+    }
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def feedback_finish(request, feedback):
+    if request.method == "POST":
+        params = request.POST.copy()
+        _pop_string(params, "_")
+
+        updated = False
+        updated_parent = False
+
+        value = _pop_object(params, "photo", spud.models.photo)
+        if value is not None:
+            feedback.photo = value
+            updated = True
+
+        value = _pop_string(params, "parent")
+        if value is not None:
+            if value == "":
+                place.parent = None
+            else:
+                value = _decode_object("parent", spud.models.feedback, value)
+                place.parent = value
+            updated = True
+            updated_parent = True
+
+        value = _pop_int(params, "rating")
+        if value is not None:
+            if value < 0 or value > 10:
+                raise ErrorBadRequest("Invalid rating")
+            feedback.rating = value
+            updated = True
+
+        value = _pop_string(params, "comment")
+        if value is not None:
+            feedback.comment = value
+            updated = True
+
+        value = _pop_string(params, "user_name")
+        if value is not None:
+            feedback.user_name = value
+            updated = True
+
+        value = _pop_string(params, "user_email")
+        if value is not None:
+            feedback.user_email = value
+            updated = True
+
+        value = _pop_string(params, "user_url")
+        if value is not None:
+            feedback.user_url = value
+            updated = True
+
+        if request.user.is_staff:
+            value = _pop_boolean(params, "is_public")
+            if value is not None:
+                feedback.is_public = value
+                updated = True
+
+            value = _pop_boolean(params, "is_removed")
+            if value is not None:
+                feedback.is_removed = value
+                updated = True
+
+        check_params_empty(params)
+
+        if updated:
+            feedback.save()
+
+        if updated_parent:
+            feedback.fix_ascendants()
+
+    resp = {
+        'type': 'feedback_get',
+        'feedback': _json_feedback_detail(
+            request.user, feedback),
         'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")

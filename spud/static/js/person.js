@@ -24,6 +24,7 @@ $.widget('ui.person_search_dialog',  $.ui.form_dialog, {
             ["instance", new ajax_select_field("Person", "person", false)],
             ["mode", new select_input_field("Mode",
                 [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"]])],
+            ["root_only", new boolean_input_field("Root only", false)],
         ]
         this.options.title = "Search persons"
         this.options.description = "Please search for an person."
@@ -47,6 +48,9 @@ $.widget('ui.person_search_dialog',  $.ui.form_dialog, {
         var v = values.mode
         if (v) { criteria.mode = v }
 
+        var v = values.root_only
+        if (v) { criteria.root_only = v }
+
         var search = {
             criteria: criteria
         }
@@ -63,6 +67,7 @@ $.widget('ui.person_search_details',  $.ui.infobox, {
             ["q", new text_output_field("Search for")],
             ["instance", new link_output_field("Person")],
             ["mode", new text_output_field("Mode")],
+            ["root_only", new text_output_field("Root Only")],
         ]
         this._super();
 
@@ -345,7 +350,6 @@ function person_doer() {
     this.display_type = "person"
     this.display_plural = "persons"
     this.list_type = "person_list"
-    this.has_children = true
     generic_doer.call(this)
 }
 

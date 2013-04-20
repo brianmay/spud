@@ -19,6 +19,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
+import dateutil.tz
 
 import os
 import datetime
@@ -388,6 +389,43 @@ class person(hierarchy_model):
             except IndexError:
                 pass
         return photo
+
+
+class feedback(hierarchy_model):
+    photo = models.ForeignKey('photo', related_name="feedbacks")
+    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    rating = models.IntegerField()
+    comment = models.TextField(blank=True)
+
+    # Information about the user leaving the comment
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True, null=True, related_name="photos_feedbacks")
+    user_name = models.CharField(max_length=50, blank=True)
+    user_email = models.EmailField(blank=True)
+    user_url = models.URLField(blank=True)
+
+    # Metadata about the comment
+    submit_datetime = models.DateTimeField()
+    utc_offset = models.IntegerField()
+    ip_address = models.IPAddressField(blank=True, null=True)
+    is_public = models.BooleanField(default=True)
+    is_removed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('submit_datetime',)
+
+    def save(self, *args, **kwargs):
+        if self.submit_datetime is None:
+            value = datetime.datetime.now(dateutil.tz.tzlocal())
+            print value
+            self.submit_datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
+            self.utc_offset = value.utcoffset().total_seconds() / 60
+            print self.submit_datetime, self.utc_offset
+        super(feedback, self).save(*args, **kwargs)
+
+    def fix_ascendants(self):
+        self._fix_ascendants(["parent"], feedback_ascendant)
 
 
 # ---------------------------------------------------------------------------
@@ -844,6 +882,15 @@ class place_ascendant(base_model):
 class person_ascendant(base_model):
     ascendant = models.ForeignKey(person, related_name='descendant_set')
     descendant = models.ForeignKey(person, related_name='ascendant_set')
+    position = models.IntegerField()
+
+    class Meta:
+        ordering = ['position']
+
+
+class feedback_ascendant(base_model):
+    ascendant = models.ForeignKey(feedback, related_name='descendant_set')
+    descendant = models.ForeignKey(feedback, related_name='ascendant_set')
     position = models.IntegerField()
 
     class Meta:

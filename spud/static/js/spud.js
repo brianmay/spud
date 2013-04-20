@@ -228,6 +228,8 @@ function get_doer(type) {
         return places
     } else if (type == "person") {
         return persons
+    } else if (type == "feedback") {
+        return feedbacks
     } else {
         display_error("We stuffed up")
         return null
@@ -542,9 +544,45 @@ function display_photo_article(photo, search, results, n) {
         }
     }
 
+    var pl = $("<div/>")
+    pl
+        .feedback_list({ html_page:
+            function(page, text) {
+                return $("<a/>")
+                    .text(text)
+                    .attr("href", "#")
+                    .on("click", function() { mythis.display_feedback(pl, photo, page); return false; })
+            }
+        })
+        .appendTo(cm)
+     this.display_feedback(pl, photo, 0);
+
     var ul = $('<ul/>')
         .photo_menu({ photo: photo, search: search, results: results, })
     append_action_links(ul)
+}
+
+
+display_feedback = function(element, photo, page) {
+    var search = {
+        results_per_page: get_settings().items_per_page,
+        criteria: {
+            photo: photo.id,
+            root_only: true,
+        }
+    }
+    element.feedback_list("display_loading")
+    feedbacks.load_search_results(search, page,
+        function(data) {
+            var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
+            element.feedback_list("clear_status")
+            element.feedback_list("set", data.feedbacks)
+            element.feedback_list("set_paginator", page, last_page)
+        },
+        function(message) {
+            element.feedback_list("display_error")
+        }
+    )
 }
 
 

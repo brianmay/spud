@@ -240,6 +240,8 @@ table#change-history tbody th { width:16em; }
     background: transparent;
 }
 
+.loading { background:#ccc; }
+
 .slideshow .prevslide, .slideshow .nextslide { top:50%; }
 .prevslide, .nextslide{ position:absolute; height:43px; width:43px; bottom:0; margin-top:-21px; opacity:0.6; }
 .prevslide{ left:10px; background:url('../img/back.png'); }

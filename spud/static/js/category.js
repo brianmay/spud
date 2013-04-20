@@ -24,6 +24,7 @@ $.widget('ui.category_search_dialog',  $.ui.form_dialog, {
             ["instance", new ajax_select_field("Category", "category", false)],
             ["mode", new select_input_field("Mode",
                                 [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
+            ["root_only", new boolean_input_field("Root only", false)],
         ]
         this.options.title = "Search categories"
         this.options.description = "Please search for an category."
@@ -47,6 +48,9 @@ $.widget('ui.category_search_dialog',  $.ui.form_dialog, {
         var v = values.mode
         if (v) { criteria.mode = v }
 
+        var v = values.root_only
+        if (v) { criteria.root_only = v }
+
         var search = {
             criteria: criteria
         }
@@ -63,6 +67,7 @@ $.widget('ui.category_search_details',  $.ui.infobox, {
             ["q", new text_output_field("Search for")],
             ["instance", new link_output_field("Category")],
             ["mode", new text_output_field("Mode")],
+            ["root_only", new text_output_field("Root Only")],
         ]
         this._super();
 
@@ -273,7 +278,6 @@ function category_doer() {
     this.display_type = "category"
     this.display_plural = "categories"
     this.list_type = "category_list"
-    this.has_children = true
     generic_doer.call(this)
 }
 

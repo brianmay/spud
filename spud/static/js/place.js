@@ -24,6 +24,7 @@ $.widget('ui.place_search_dialog',  $.ui.form_dialog, {
             ["instance", new ajax_select_field("Place", "place", false)],
             ["mode", new select_input_field("Mode",
                 [ ["children", "children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
+            ["root_only", new boolean_input_field("Root only", false)],
         ]
         this.options.title = "Search places"
         this.options.description = "Please search for an place."
@@ -47,6 +48,9 @@ $.widget('ui.place_search_dialog',  $.ui.form_dialog, {
         var v = values.mode
         if (v) { criteria.mode = v }
 
+        var v = values.root_only
+        if (v) { criteria.root_only = v }
+
         var search = {
             criteria: criteria
         }
@@ -63,6 +67,7 @@ $.widget('ui.place_search_details',  $.ui.infobox, {
             ["q", new text_output_field("Search for")],
             ["instance", new link_output_field("Place")],
             ["mode", new text_output_field("Mode")],
+            ["root_only", new text_output_field("Root Only")],
         ]
         this._super();
 
@@ -295,7 +300,6 @@ function place_doer() {
     this.display_type = "place"
     this.display_plural = "places"
     this.list_type = "place_list"
-    this.has_children = true
     generic_doer.call(this)
 }
 

@@ -194,6 +194,29 @@ def person_detail(request, person_id):
     }, context_instance=RequestContext(request))
 
 
+def feedback_search_results(request):
+    query = request.GET.copy()
+    page = query.pop('page', [0])[-1]
+    try:
+        page = int(page)
+    except ValueError:
+        page = 0
+
+    js = json.dumps({'criteria': query})
+    return render_to_response('spud/static.html', {
+        'title': 'Feedback results',
+        'onload': "feedbacks.do_search_results(%s, %d)" % (js, page),
+    }, context_instance=RequestContext(request))
+
+
+def feedback_detail(request, feedback_id):
+    feedback_id = int(feedback_id)
+    return render_to_response('spud/static.html', {
+        'title': 'Feedback detail',
+        'onload': "feedbacks.do(%d)" % feedback_id,
+    }, context_instance=RequestContext(request))
+
+
 def photo_search_results(request):
     if 'n' in request.GET:
         query = request.GET.copy()
