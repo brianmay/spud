@@ -98,10 +98,13 @@ $.widget('ui.place_details',  $.ui.infobox, {
 
     set: function(initial) {
         this._super(initial)
-        this.set_value("url", $("<a></a>")
-            .attr("href", initial.url)
-            .text(initial.urldesc))
-        this.fields["url"].toggle(Boolean(initial.url))
+        if (url) {
+            this.set_value("url", $("<a></a>")
+                .attr("href", initial.url)
+                .text(initial.urldesc))
+        } else {
+            this.set_value("url", null)
+        }
     },
 
     _destroy: function() {
