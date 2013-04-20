@@ -35,7 +35,7 @@ def format_match(object, photo=None, description=None):
     if photo is not None:
         thumb = photo.get_thumb(settings.DEFAULT_LIST_SIZE)
 
-    if photo is not None:
+    if thumb is not None:
         result.append(u"<img src='%s' alt=''/>" % thumb.get_url())
 
     result.append(u"<div class='title'>%s</div>"%(escape(object)))
