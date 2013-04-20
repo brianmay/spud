@@ -194,6 +194,11 @@ $.widget('ui.place_list_menu', $.ui.spud_menu, {
     set: function(search, results) {
         this.element.empty()
         this.add_item(places.search_form_a(search.criteria))
+
+        if (results.can_add) {
+            this.add_item(places.add_a(null))
+        }
+
         return this
     },
 })

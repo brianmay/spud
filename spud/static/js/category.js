@@ -177,6 +177,11 @@ $.widget('ui.category_list_menu', $.ui.spud_menu, {
     set: function(search, results) {
         this.element.empty()
         this.add_item(categorys.search_form_a(search.criteria))
+
+        if (results.can_add) {
+            this.add_item(categorys.add_a(null))
+        }
+
         return this
     },
 })

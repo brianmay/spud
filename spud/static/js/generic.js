@@ -152,7 +152,6 @@ generic_doer.prototype.add_a = function(parent, title) {
     var a = $('<a/>')
         .attr('href', "#")
         .on('click', function() { mythis.do_add(parent, true); return false; })
-        .data('photo', parent.cover_photo)
         .text(title)
     return a
 }
