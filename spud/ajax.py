@@ -26,8 +26,6 @@ import django.conf
 import django.contrib.auth
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from django.utils.http import urlquote
-from django.utils.encoding import iri_to_uri
 from django.db.models import Q
 
 
@@ -247,9 +245,7 @@ def _json_photo(user, photo):
 #        'relations': photo.relations,
 
         'thumb': {},
-#        'orig': iri_to_uri(u"%sorig/%s/%s" % (
-#            django.conf.settings.IMAGE_URL,
-#            urlquote(photo.path), urlquote(photo.name)))
+#        'orig': photo.get_orig_url(),
 
         'can_add': user.has_perm('spud.add_photo'),
         'can_change': user.has_perm('spud.change_photo'),
@@ -259,14 +255,11 @@ def _json_photo(user, photo):
     (shortname, _) = os.path.splitext(photo.name)
 
     for pt in photo.photo_thumb_set.all():
-        d = {
+        resp['thumb'][pt.size] = {
             'width': pt.width,
             'height': pt.height,
-            'url': iri_to_uri(u"%sthumb/%s/%s/%s.jpg" % (
-                django.conf.settings.IMAGE_URL, urlquote(pt.size),
-                urlquote(photo.path), urlquote(shortname)))
+            'url': pt.get_url(),
         }
-        resp['thumb'][pt.size] = d
 
     return resp
 
@@ -335,19 +328,14 @@ def _json_photo_detail(user, photo):
     (shortname, _) = os.path.splitext(photo.name)
 
     for pt in photo.photo_thumb_set.all():
-        d = {
+        resp['thumb'][pt.size] = {
             'width': pt.width,
             'height': pt.height,
-            'url': iri_to_uri(u"%sthumb/%s/%s/%s.jpg" % (
-                django.conf.settings.IMAGE_URL, urlquote(pt.size),
-                urlquote(photo.path), urlquote(shortname)))
+            'url': pt.get_url(),
         }
-        resp['thumb'][pt.size] = d
 
     if user.is_staff:
-        resp['orig'] = iri_to_uri(u"%sorig/%s/%s" % (
-            django.conf.settings.IMAGE_URL,
-            urlquote(photo.path), urlquote(photo.name)))
+        resp['orig'] = photo.get_orig_url()
         resp['comment'] = photo.comment
 
     return resp
@@ -1623,15 +1611,20 @@ def person_search_results(request):
     if instance is not None:
         criteria['instance'] = _json_person(request.user, instance)
         if mode == "children":
-            person_list = person_list.filter(Q(mother=instance) | Q(father=instance))
+            person_list = person_list.filter(
+                Q(mother=instance) | Q(father=instance))
         elif mode == "ascendants":
             person_list = person_list.filter(
                 descendant_set__descendant=instance,
-                descendant_set__position__gt=0).order_by('descendant_set__position')
+                descendant_set__position__gt=0)
+            person_list = person_list.order_by(
+                'descendant_set__position')
         elif mode == "descendants":
             person_list = person_list.filter(
                 ascendant_set__ascendant=instance,
-                ascendant_set__position__gt=0).order_by('ascendant_set__position')
+                ascendant_set__position__gt=0)
+            person_list = person_list.order_by(
+                'ascendant_set__position')
         else:
             ErrorBadRequest("Unknown search mode")
 
