@@ -159,7 +159,7 @@ class feedback_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        return format_match(object, photo=object.feedback.photo, description=object.feedback_comment)
+        return format_match(object, photo=object.photo, description=object.comment)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.

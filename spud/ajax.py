@@ -659,6 +659,13 @@ def _json_feedback(user, feedback):
 
 def _json_feedback_detail(user, feedback):
     d = _json_feedback(user, feedback)
+    d.update({
+        'parent': _json_feedback(user, feedback.parent),
+        'ancestors': [],
+    })
+
+    for ancestor in feedback.get_ascendants(include_self=False):
+        d['ancestors'].insert(0, _json_feedback(user, ancestor))
     return d
 
 
@@ -2243,10 +2250,10 @@ def feedback_finish(request, feedback):
         value = _pop_string(params, "parent")
         if value is not None:
             if value == "":
-                place.parent = None
+                feedback.parent = None
             else:
                 value = _decode_object("parent", spud.models.feedback, value)
-                place.parent = value
+                feedback.parent = value
             updated = True
             updated_parent = True
 

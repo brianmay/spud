@@ -160,7 +160,20 @@ $.widget('ui.feedback_menu', $.ui.spud_menu, {
         this.add_item(feedbacks.search_form_a({ instance: feedback.id }))
 
         if (feedback.can_add) {
-            this.add_item(feedbacks.add_a(feedback))
+            var a = $('<a/>')
+                .attr('href', "#")
+                .on('click', function() {
+                    close_all_dialog()
+                    feedbacks.display_change(
+                    {
+                        type: "feedback",
+                        photo: feedback.photo,
+                        parent: feedback,
+                    })
+                    return false;
+                })
+                .text("Add reply")
+            this.add_item(a)
         }
 
         if (feedback.can_change) {
