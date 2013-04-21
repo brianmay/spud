@@ -109,7 +109,7 @@ $.widget('ui.feedback_search_details',  $.ui.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
-            ["photo", new photo_output_field("Photo")],
+            ["photo", new photo_output_field("Photo", get_settings().view_size)],
             ["instance", new link_output_field("Feedback")],
             ["mode", new text_output_field("Mode")],
             ["root_only", new text_output_field("Root Only")],
@@ -127,7 +127,7 @@ $.widget('ui.feedback_search_details',  $.ui.infobox, {
 $.widget('ui.feedback_details',  $.ui.infobox, {
     _create: function() {
         this.options.fields = [
-            ["photo", new photo_output_field("Photo")],
+            ["photo", new photo_output_field("Photo", get_settings().view_size, true)],
             ["rating", new text_output_field("Rating")],
             ["user", new text_output_field("Name (verified)")],
             ["user_name", new text_output_field("Name (unverified)")],
@@ -135,6 +135,8 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
             ["user_url", new text_output_field("URL (unverified)")],
             ["parent", new html_output_field("In response to")],
             ["comment", new p_output_field("Response")],
+            ["is_public", new boolean_output_field("Is public")],
+            ["is_removed", new boolean_output_field("Is removed")],
         ]
         this._super();
 

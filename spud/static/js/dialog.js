@@ -27,7 +27,7 @@ function input_field(title, required) {
 }
 
 input_field.prototype.to_html = function(id) {
-    this.input = this.create(id)
+    html = this.create(id)
 
     var th = $("<th/>")
     $("<label/>")
@@ -39,7 +39,7 @@ input_field.prototype.to_html = function(id) {
     this.errors = $("<div></div>")
 
     var td = $("<td/>")
-        .append(this.input)
+        .append(html)
         .append(this.errors)
 
 
@@ -89,7 +89,7 @@ function text_input_field(title, required) {
 text_input_field.prototype = new input_field()
 text_input_field.constructor = text_input_field
 text_input_field.prototype.create = function(id) {
-    return $('<input />')
+    return this.input = $('<input />')
         .attr('type', "text")
         .attr('name', id)
         .attr('id', "id_" + id)
@@ -224,7 +224,7 @@ function password_input_field(title, required) {
 password_input_field.prototype = new text_input_field()
 password_input_field.constructor = password_input_field
 password_input_field.prototype.create = function(id) {
-    return $('<input />')
+    return this.input = $('<input />')
         .attr('type', "password")
         .attr('name', id)
         .attr('id', "id_" + id)
@@ -239,7 +239,7 @@ function date_input_field(title, required) {
 date_input_field.prototype = new text_input_field()
 date_input_field.constructor = date_input_field
 date_input_field.prototype.create = function(id) {
-    return $('<input />')
+    return this.input = $('<input />')
         .attr('id', "id_" + id)
         .datepicker({
             changeMonth: true,
@@ -276,7 +276,7 @@ function p_input_field(title, required) {
 p_input_field.prototype = new text_input_field()
 p_input_field.constructor = p_input_field
 p_input_field.prototype.create = function(id) {
-    return $('<textarea />')
+    return this.input = $('<textarea />')
         .attr('rows', 10)
         .attr('cols', 40)
         .attr('name', id)
@@ -348,14 +348,10 @@ function boolean_input_field(title, options, required) {
 boolean_input_field.prototype = new input_field()
 boolean_input_field.constructor = boolean_input_field
 boolean_input_field.prototype.create = function(id) {
-    return $('<input />')
+    return this.input = $('<input />')
         .attr('type', 'checkbox')
         .attr('name', id)
         .attr('id', "id_" + id)
-
-
-    this.set_options(this.options_list)
-    return this.input
 }
 
 boolean_input_field.prototype.set = function(value) {
@@ -380,7 +376,7 @@ function ajax_select_field(title, type, required) {
 ajax_select_field.prototype = new input_field()
 ajax_select_field.constructor = ajax_select_field
 ajax_select_field.prototype.create = function(id) {
-    return ac = $("<span/>")
+    return this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .ajaxautocomplete({type: this.type})
@@ -415,7 +411,7 @@ function quick_select_field(title, type, required) {
 quick_select_field.prototype = new input_field()
 quick_select_field.constructor = quick_select_field
 quick_select_field.prototype.create = function(id) {
-    return ac = $("<span/>")
+    return this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .quickautocomplete({type: this.type})
@@ -450,7 +446,7 @@ function ajax_select_multiple_field(title, type, required) {
 ajax_select_multiple_field.prototype = new input_field()
 ajax_select_multiple_field.constructor = ajax_select_multiple_field
 ajax_select_multiple_field.prototype.create = function(id) {
-    return ac = $("<span/>")
+    return this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .ajaxautocompletemultiple({type: this.type})
@@ -484,7 +480,7 @@ function ajax_select_sorted_field(title, type, required) {
 ajax_select_sorted_field.prototype = new input_field()
 ajax_select_sorted_field.constructor = ajax_select_sorted_field
 ajax_select_sorted_field.prototype.create = function(id) {
-    return ac = $("<span/>")
+    return this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .ajaxautocompletesorted({type: this.type})
@@ -517,7 +513,7 @@ function photo_select_field(title, required) {
 photo_select_field.prototype = new input_field()
 photo_select_field.constructor = photo_select_field
 photo_select_field.prototype.create = function(id) {
-    return ac = $("<span/>")
+    return this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .photo_select()

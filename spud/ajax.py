@@ -570,6 +570,7 @@ def _json_person_detail(user, person):
                 _json_person(user, p) for p in person.grandchildren()],
             'notes': person.notes,
             'email': person.email,
+            'ancestors': None,
         })
 
         if person.dob:
@@ -586,6 +587,9 @@ def _json_person_detail(user, person):
                 d['spouses'].append(_json_person(user, p))
             elif p.person_id != person.spouse.person_id:
                 d['spouses'].append(_json_person(user, p))
+
+        for ancestor in feedback.get_ascendants(include_self=False):
+            d['ancestors'].insert(0, _json_feedback(user, ancestor))
 
     return d
 
@@ -637,13 +641,12 @@ def _json_feedback(user, feedback, seen=None):
         d.update({
             'rating': feedback.rating,
             'comment': feedback.comment,
-            'user': feedback.user.username,
+            'user': feedback.user.get_full_name(),
             'user_name': feedback.user_name,
             'user_email': feedback.user_email,
             'user_url': feedback.user_url,
             'submit_datetime': _json_datetime(
                 feedback.submit_datetime, feedback.utc_offset),
-            'photo': _json_photo(user, feedback.photo)
         })
 
         for child in feedback.children.all():
@@ -665,6 +668,7 @@ def _json_feedback_detail(user, feedback):
     d = _json_feedback(user, feedback)
     d.update({
         'parent': _json_feedback(user, feedback.parent),
+        'photo': _json_photo(user, feedback.photo),
         'ancestors': [],
     })
 

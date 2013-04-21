@@ -26,18 +26,18 @@ function output_field(title) {
 }
 
 output_field.prototype.to_html = function(id) {
-    this.output = this.create(id)
+    html = this.create(id)
 
     this.dt = $("<dt/>")
         .text(this.title)
     this.dd = $("<dd/>")
-        .append(this.output)
+        .append(html)
 
     return [this.dt, this.dd]
 }
 
 output_field.prototype.create = function(id) {
-    return $('<span />')
+    return this.output = $('<span />')
 }
 
 output_field.prototype.destroy = function() {
@@ -75,6 +75,20 @@ text_output_field.prototype.set = function(value) {
     this.output.text(value)
     this.toggle(Boolean(value))
 }
+
+// define boolean_outbooleanut_field
+function boolean_output_field(title) {
+    output_field.call(this, title)
+}
+
+boolean_output_field.prototype = new output_field()
+boolean_output_field.constructor = boolean_output_field
+
+boolean_output_field.prototype.set = function(value) {
+    this.output.p(value ? "True" : " False")
+    this.toggle(value != null)
+}
+
 
 // define p_output_field
 function p_output_field(title) {
@@ -145,7 +159,7 @@ html_list_output_field.prototype = new output_field()
 html_list_output_field.constructor = html_list_output_field
 
 html_list_output_field.prototype.create = function(id) {
-    return $('<ul />')
+    return this.output = $('<ul />')
 }
 
 html_list_output_field.prototype.set = function(value) {
@@ -175,7 +189,7 @@ link_list_output_field.prototype = new output_field()
 link_list_output_field.constructor = link_list_output_field
 
 link_list_output_field.prototype.create = function(id) {
-    return $('<span />')
+    return this.output = $('<span />')
 }
 
 link_list_output_field.prototype.set = function(value) {
@@ -199,8 +213,9 @@ link_list_output_field.prototype.set = function(value) {
 }
 
 // define photo_output_field
-function photo_output_field(title, size) {
+function photo_output_field(title, size, do_link) {
     this.size = size
+    this.do_link = do_link
     output_field.call(this, title)
 }
 
@@ -208,12 +223,29 @@ photo_output_field.prototype = new output_field()
 photo_output_field.constructor = photo_output_field
 
 photo_output_field.prototype.create = function(id) {
-    return $('<img />').image({ size: this.size })
+    this.output = $('<img />').image({ size: this.size })
+    if (this.do_link) {
+        this.a = $("<a></a>")
+            .append(this.output)
+    } else {
+        this.a = null
+    }
+    return this.a
 }
 
 photo_output_field.prototype.set = function(value) {
     this.output.image('set', value)
     this.toggle(value != null)
+    if (this.a) {
+        this.a
+            .off('click')
+            .removeAttr("href")
+        if (value != null) {
+            this.a
+                .attr('href', photo_url(value))
+                .on('click', function() { do_photo(value.id, true); return false; })
+        }
+    }
 }
 
 photo_output_field.prototype.destroy = function() {
