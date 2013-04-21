@@ -148,8 +148,6 @@ class hierarchy_model(base_model):
             instance_list = [self]
 
         print "((("
-        print list(instance_list)
-        print len(list(instance_list))
         for instance in instance_list:
             new_glue = instance._ascendants_glue(instance, 0, {}, cache, parent_attributes)
             cache[instance.pk] = new_glue
@@ -161,15 +159,21 @@ class hierarchy_model(base_model):
             old_glue = [
                 (i.ascendant, i.descendant, i.position)
                 for i in instance.ascendant_set.all()]
+            print "og", [(i[0].pk, i[1].pk, i[2]) for i in old_glue]
             for glue in new_glue:
+                print glue[0].pk, glue[1].pk, glue[2]
                 if glue in old_glue:
+                    print "found"
                     old_glue.remove(glue)
                 else:
+                    print "not found found"
                     glue_class.objects.create(
                         ascendant=glue[0], descendant=glue[1], position=glue[2])
 
+            print "og", [(i[0].pk, i[1].pk, i[2]) for i in old_glue]
             for glue in old_glue:
-                glue_class.objects.get(
+                print glue[0].pk, glue[1].pk, glue[2]
+                glue_class.objects.filter(
                     ascendant=glue[0], descendant=glue[1], position=glue[2]
                 ).delete()
         print ")))"
