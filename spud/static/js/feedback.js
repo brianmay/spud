@@ -35,6 +35,9 @@ function _feedback_html(feedback, children) {
     )
 
     div.append($("<div></div>")
+        .text("Rating: "+ feedback.rating))
+
+    div.append($("<div></div>")
         .p(feedback.comment)
     )
 
@@ -247,7 +250,19 @@ $.widget('ui.feedback_list_menu', $.ui.spud_menu, {
 $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
     _create: function() {
         this.options.fields = [
-            ["rating", new integer_input_field("Rating", true)],
+            ["rating", new select_input_field("Rating", [
+                ["0", "Delete it"],
+                ["1", "Disgusting"],
+                ["2", "Very bad"],
+                ["3", "Bad"],
+                ["4", "Not acceptable"],
+
+                ["5", "Acceptable"],
+                ["6", "Good"],
+                ["7", "Excellent"],
+                ["8", "Sell it"],
+                ["9", "Perfect"],
+            ])],
             ["user_name", new text_input_field("Name", false)],
             ["user_email", new text_input_field("E-Mail", false)],
             ["user_url", new text_input_field("URL", false)],
@@ -290,10 +305,14 @@ $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
 
     _submit_values: function(values) {
         var mythis = this
+        values = $.extend({}, values, { photo: this.feedback.photo.id })
+        if (this.feedback.parent != null) {
+            values.parent = this.feedback.parent.id
+        }
         display_loading()
         feedbacks.load_change(
             this.feedback.id,
-            $.extend({}, values, { photo: this.feedback.photo.id, parent: this.feedback.parent.id }),
+            values,
             function(data) {
                 hide_loading()
                 mythis.close()

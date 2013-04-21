@@ -333,6 +333,7 @@ class person(hierarchy_model):
     def fix_ascendants(self):
         self._fix_ascendants(["mother", "father" ], person_ascendant)
 
+
     # grand parents generation
 
     def grandparents(self):
@@ -473,6 +474,21 @@ class photo(base_model):
                 return self.name
         else:
                 return self.title
+
+    def fix_rating(self):
+        feedbacks = self.feedbacks.all()
+        if len(feedbacks) == 0:
+            self.rating = None
+            self.save()
+
+        rating = 0
+        n = 0
+        for feedback in feedbacks:
+            n = n + 1
+            rating = rating + feedback.rating
+
+        self.rating = rating
+        self.save()
 
     def get_orig_path(self):
         return u"%sorig/%s/%s" % (settings.IMAGE_PATH, self.path, self.name)

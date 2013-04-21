@@ -2249,9 +2249,12 @@ def feedback_finish(request, feedback):
 
         updated = False
         updated_parent = False
+        updated_rating = False
+        old_photo = None
 
         value = _pop_object(params, "photo", spud.models.photo)
         if value is not None:
+            old_photo = feedback.photo
             feedback.photo = value
             updated = True
 
@@ -2267,7 +2270,7 @@ def feedback_finish(request, feedback):
 
         value = _pop_int(params, "rating")
         if value is not None:
-            if value < 0 or value > 10:
+            if value < 0 or value > 9:
                 raise ErrorBadRequest("Invalid rating")
             feedback.rating = value
             updated = True
@@ -2310,6 +2313,12 @@ def feedback_finish(request, feedback):
 
         if updated_parent:
             feedback.fix_ascendants()
+
+        if old_photo is not None:
+            old_photo.fix_rating()
+
+        if updated_rating:
+            feedback.photo.fix_rating()
 
     resp = {
         'type': 'feedback_get',
