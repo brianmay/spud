@@ -131,7 +131,7 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
     _create: function() {
         this.options.fields = [
             ["photo", new photo_output_field("Photo", get_settings().view_size, true)],
-            ["rating", new text_output_field("Rating")],
+            ["rating", new integer_output_field("Rating")],
             ["user", new text_output_field("Name (verified)")],
             ["user_name", new text_output_field("Name (unverified)")],
             ["user_email", new text_output_field("E-Mail (unverified)")],

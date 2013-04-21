@@ -90,6 +90,20 @@ boolean_output_field.prototype.set = function(value) {
 }
 
 
+// define integer_outintegerut_field
+function integer_output_field(title) {
+    output_field.call(this, title)
+}
+
+integer_output_field.prototype = new output_field()
+integer_output_field.constructor = integer_output_field
+
+integer_output_field.prototype.set = function(value) {
+    this.output.text(value)
+    this.toggle(value != null)
+}
+
+
 // define p_output_field
 function p_output_field(title) {
     output_field.call(this, title)
