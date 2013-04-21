@@ -109,40 +109,72 @@ class hierarchy_model(base_model):
             for i in self.ascendant_set.filter(position__gt=0):
                 yield i.ascendant
 
-    def _ascendants_glue(self, instance, position, seen, parent_attributes):
+    def _ascendants_glue(self, instance, position, seen, cache, parent_attributes):
         glue = []
         if instance is None:
             return glue
+
+        if instance.pk in cache:
+            print "glue0", instance.pk,  [(i[0].pk, self.pk, i[2]+position) for i in cache[instance.pk]]
+            return [(i[0], self, i[2]+position) for i in cache[instance.pk]]
 
         if instance.pk in seen:
             return glue
 
         glue.append((instance, self, position))
+        print "glue1", instance.pk,  [(i[0].pk, i[1].pk, i[2]) for i in glue]
+
         seen[instance.pk] = True
         for attr in parent_attributes:
             parent = getattr(instance, attr)
             glue.extend(self._ascendants_glue(
-                parent, position+1, seen, parent_attributes))
+                parent, position+1, seen, cache, parent_attributes))
 
+        print "glue2", instance.pk,  [(i[0].pk, i[1].pk, i[2]) for i in glue]
         return glue
 
-    def _fix_ascendants(self, parent_attributes, glue_class):
-        new_glue = self._ascendants_glue(self, 0, {}, parent_attributes)
+    def _fix_ascendants(self, parent_attributes, glue_class, cache, do_descendants):
+        if cache is None:
+            cache={}
 
-        old_glue = [
-            (i.ascendant, i.descendant, i.position)
-            for i in self.ascendant_set.all()]
-        for glue in new_glue:
-            if glue in old_glue:
-                old_glue.remove(glue)
-            else:
-                glue_class.objects.create(
-                    ascendant=glue[0], descendant=glue[1], position=glue[2])
+        if do_descendants:
+            instance_list = list(self.get_descendants(True))
+            # if descendants list is length 0 it is invalid,
+            # should include self
+            if len(instance_list) == 0:
+                instance_list = [self]
+                instance_list.extend(self.children.all())
+        else:
+            instance_list = [self]
 
-        for glue in old_glue:
-            glue_class.objects.get(
-                ascendant=glue[0], descendant=glue[1], position=glue[2]
-            ).delete()
+        print "((("
+        print list(instance_list)
+        print len(list(instance_list))
+        for instance in instance_list:
+            new_glue = instance._ascendants_glue(instance, 0, {}, cache, parent_attributes)
+            cache[instance.pk] = new_glue
+            print "----"
+            print instance, instance.pk
+            print "ng", [(i[0].pk, i[1].pk, i[2]) for i in new_glue]
+            print "cache", cache.keys()
+
+            old_glue = [
+                (i.ascendant, i.descendant, i.position)
+                for i in instance.ascendant_set.all()]
+            for glue in new_glue:
+                if glue in old_glue:
+                    old_glue.remove(glue)
+                else:
+                    glue_class.objects.create(
+                        ascendant=glue[0], descendant=glue[1], position=glue[2])
+
+            for glue in old_glue:
+                glue_class.objects.get(
+                    ascendant=glue[0], descendant=glue[1], position=glue[2]
+                ).delete()
+        print ")))"
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -169,8 +201,8 @@ class place(hierarchy_model):
     def __unicode__(self):
         return self.title
 
-    def fix_ascendants(self):
-        self._fix_ascendants(["parent_place"], place_ascendant)
+    def fix_ascendants(self, cache=None, do_descendants=True):
+        self._fix_ascendants(["parent_place"], place_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -217,8 +249,8 @@ class album(hierarchy_model):
     def __unicode__(self):
         return self.album
 
-    def fix_ascendants(self):
-        self._fix_ascendants(["parent_album"], album_ascendant)
+    def fix_ascendants(self, cache=None, do_descendants=True):
+        self._fix_ascendants(["parent_album"], album_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -255,8 +287,8 @@ class category(hierarchy_model):
     def __unicode__(self):
         return self.category
 
-    def fix_ascendants(self):
-        self._fix_ascendants(["parent_category"], category_ascendant)
+    def fix_ascendants(self, cache=None, do_descendants=True):
+        self._fix_ascendants(["parent_category"], category_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -330,8 +362,8 @@ class person(hierarchy_model):
         self.photographed.clear()
         super(person, self).delete()
 
-    def fix_ascendants(self):
-        self._fix_ascendants(["mother", "father" ], person_ascendant)
+    def fix_ascendants(self, cache=None, do_descendants=True):
+        self._fix_ascendants(["mother", "father" ], person_ascendant, cache, do_descendants)
 
 
     # grand parents generation
@@ -425,8 +457,8 @@ class feedback(hierarchy_model):
             print self.submit_datetime, self.utc_offset
         super(feedback, self).save(*args, **kwargs)
 
-    def fix_ascendants(self):
-        self._fix_ascendants(["parent"], feedback_ascendant)
+    def fix_ascendants(self, cache=None, do_descendants=True):
+        self._fix_ascendants(["parent"], feedback_ascendant, cache, do_descendants)
 
 
 # ---------------------------------------------------------------------------
