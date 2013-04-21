@@ -1122,15 +1122,13 @@ $.widget('ui.delete_photo_relation_dialog',  $.ui.form_dialog, {
     },
 
     _submit_values: function(values) {
-        var mythis = this
         this.close()
         display_loading()
         load_photo_relation_delete(
             this.initial_id,
             function(data) {
                 hide_loading()
-                mythis.close()
-                reload_page()
+                window.history.go(-1)
             },
             display_error
         )

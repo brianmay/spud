@@ -287,7 +287,7 @@ $.widget('ui.place_delete_dialog',  $.ui.form_dialog, {
             this.place_id,
             function(data) {
                 hide_loading()
-                reload_page()
+                window.history.go(-1)
             },
             display_error
         )

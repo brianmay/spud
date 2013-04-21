@@ -2235,7 +2235,9 @@ def feedback_delete(request, feedback_id):
     if len(errors) > 0:
         raise ErrorBadRequest(", ".join(errors))
 
+    old_photo = feedback.photo
     feedback.delete()
+    old_photo.fix_rating()
 
     resp = {
         'type': 'feedback_delete',

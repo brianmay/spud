@@ -348,7 +348,7 @@ $.widget('ui.feedback_delete_dialog',  $.ui.form_dialog, {
             this.feedback_id,
             function(data) {
                 hide_loading()
-                reload_page()
+                window.history.go(-1)
             },
             display_error
         )

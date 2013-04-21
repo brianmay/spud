@@ -265,7 +265,7 @@ $.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
             this.album_id,
             function(data) {
                 hide_loading()
-                reload_page()
+                window.history.go(-1)
             },
             display_error
         )
