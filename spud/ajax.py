@@ -605,9 +605,17 @@ def _json_photo_relation_detail(user, photo_relation):
     return d
 
 
-def _json_feedback(user, feedback):
+def _json_feedback(user, feedback, seen=None):
     if feedback is None:
         return None
+
+    if seen is None:
+        seen = set()
+
+    if feedback.pk in seen:
+        return None
+
+    seen.add(feedback.pk)
 
     if not feedback.is_public and not user.is_staff:
         return None
@@ -618,6 +626,7 @@ def _json_feedback(user, feedback):
         'id': feedback.pk,
         'is_public': feedback.is_public,
         'is_removed': feedback.is_removed,
+        'children': [],
         'can_add': user.has_perm('spud.add_feedback'),
         'can_change': user.has_perm('spud.change_feedback'),
         'can_delete': user.has_perm('spud.delete_feedback'),
@@ -636,6 +645,13 @@ def _json_feedback(user, feedback):
                 feedback.submit_datetime, feedback.utc_offset),
             'photo': _json_photo(user, feedback.photo)
         })
+
+        for child in feedback.children.all():
+            child_json = _json_feedback(user, child, seen)
+            if json is not None:
+                d['children'].append(child_json)
+            del child_json
+            del child
 
     if user.is_staff:
         d.update({
