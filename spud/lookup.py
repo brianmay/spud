@@ -32,6 +32,7 @@ def format_match(object, photo=None, description=None):
     if photo is None:
         photo = object.cover_photo
 
+    thumb = None
     if photo is not None:
         thumb = photo.get_thumb(settings.DEFAULT_LIST_SIZE)
 
