@@ -551,7 +551,7 @@ function display_photo_article(photo, search, results, n) {
                 return $("<a/>")
                     .text(text)
                     .attr("href", "#")
-                    .on("click", function() { mythis.display_feedback(pl, photo, page); return false; })
+                    .on("click", function() { display_feedback(pl, photo, page); return false; })
             }
         })
         .appendTo(cm)
