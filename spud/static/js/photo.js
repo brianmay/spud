@@ -684,6 +684,10 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
 
         this.add_item(photo_search_form_a(criteria))
 
+        if (photo.can_add_feedback) {
+            this.add_item(feedbacks.add_a(photo, null, null))
+        }
+
         if (photo.orig != null) {
             this.add_item($("<a>Original photo</a>")
                 .attr("href", photo.orig)

@@ -309,6 +309,8 @@ def _json_photo_detail(user, photo):
         'can_add': user.has_perm('spud.add_photo'),
         'can_change': user.has_perm('spud.change_photo'),
         'can_delete': user.has_perm('spud.delete_photo'),
+
+        'can_add_feedback': user.has_perm('spud.add_feedback'),
     }
 
     for pr in photo.relations_1.all():
@@ -2254,7 +2256,8 @@ def feedback_finish(request, feedback):
 
         value = _pop_object(params, "photo", spud.models.photo)
         if value is not None:
-            old_photo = feedback.photo
+            if feedback.pk is not None:
+                old_photo = feedback.photo
             feedback.photo = value
             updated = True
 
