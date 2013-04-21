@@ -632,7 +632,6 @@ def _json_feedback(user, feedback, seen=None):
         'id': feedback.pk,
         'is_public': feedback.is_public,
         'is_removed': feedback.is_removed,
-        'children': [],
         'can_add': user.has_perm('spud.add_feedback'),
         'can_change': user.has_perm('spud.change_feedback'),
         'can_delete': user.has_perm('spud.delete_feedback'),
@@ -649,6 +648,8 @@ def _json_feedback(user, feedback, seen=None):
             'user_url': feedback.user_url,
             'submit_datetime': _json_datetime(
                 feedback.submit_datetime, feedback.utc_offset),
+            'children': [],
+            'photo': _json_photo(user, feedback.photo),
         })
 
         for child in feedback.children.all():
@@ -670,7 +671,6 @@ def _json_feedback_detail(user, feedback):
     d = _json_feedback(user, feedback)
     d.update({
         'parent': _json_feedback(user, feedback.parent),
-        'photo': _json_photo(user, feedback.photo),
         'ancestors': [],
     })
 

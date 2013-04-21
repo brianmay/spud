@@ -40,6 +40,7 @@ ul.ui-autocomplete { z-index: 200; }
 .feedback_item { border:1px solid #dddddd; }
 .feedback_item:HOVER { border:1px solid #000; }
 .feedback_item .title { font-weight:bold; }
+.feedback_item img { float: right; }
 
 .feedback_list { border:1px solid #333; margin-bottom: 10px; }
 .feedback_list .feedback_ul { padding: 0; }

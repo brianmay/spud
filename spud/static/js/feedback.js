@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function _feedback_html(feedback, children) {
+function _feedback_html(feedback, include_children, include_photo) {
     if (feedback == null) {
         return null;
     }
@@ -28,33 +28,45 @@ function _feedback_html(feedback, children) {
     var datetime = feedbacks.a(feedback, "")
         .text(feedback.submit_datetime.title)
 
-    div.append($("<div></div>")
+    if (include_photo) {
+        $("<img />")
+            .image({ photo: feedback.photo, size: get_settings().thumb_size })
+            .appendTo(div)
+    }
+
+    $("<div></div>")
         .addClass("title")
         .text("Response by " + user + " at ")
         .append(datetime)
-    )
+        .appendTo(div)
 
-    div.append($("<div></div>")
-        .text("Rating: "+ feedback.rating))
+    $("<div></div>")
+        .text("Rating: "+ feedback.rating)
+        .appendTo(div)
 
-    div.append($("<div></div>")
+    $("<div></div>")
         .p(feedback.comment)
-    )
+        .appendTo(div)
 
     div.append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
 
-    if (children && feedback.children.length > 0) {
+    if (include_children && feedback.children.length > 0) {
         var ul = $("<ul></ul>")
+            .addClass("clear")
             .addClass("feedback_ul")
 
         $.each(feedback.children, function(j, child) {
             $("<li></li>")
-                .append(_feedback_html(child, true))
+                .append(_feedback_html(child, include_children, include_photo))
                 .appendTo(ul)
         })
 
        div.append(ul)
     }
+
+    $("<div></div>")
+        .addClass("clear")
+        .appendTo(div)
 
     return div
 }
@@ -150,7 +162,7 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
 
     set: function(initial) {
         this._super(initial);
-        this.set_value("parent", _feedback_html(initial.parent, false))
+        this.set_value("parent", _feedback_html(initial.parent, false, false))
     },
 
     _destroy: function() {
@@ -173,6 +185,8 @@ $.widget('ui.feedback_list', $.ui.list_base, {
 
     _destroy: function() {
         this.element.removeClass("feedback_list")
+        this.element.find("img")
+            .image("destroy")
         this._super()
     },
 
@@ -180,7 +194,7 @@ $.widget('ui.feedback_list', $.ui.list_base, {
         var mythis = this
         this.empty()
         $.each(feedback_list, function(j, feedback) {
-            mythis.append_item(_feedback_html(feedback, true))
+            mythis.append_item(_feedback_html(feedback, true, true))
         })
         return this
     }
