@@ -377,7 +377,6 @@ def _json_album_detail(user, album):
         'revised': unicode(album.revised),
         'parent': _json_album(user, album.parent_album),
         'ancestors': [],
-        'children': [],
         'can_add': user.has_perm('spud.add_album'),
         'can_change': user.has_perm('spud.change_album'),
         'can_delete': user.has_perm('spud.delete_album'),
@@ -386,9 +385,6 @@ def _json_album_detail(user, album):
 
     for ancestor in album.get_ascendants(include_self=False):
         d['ancestors'].insert(0, _json_album(user, ancestor))
-
-    for child in album.children.all():
-        d['children'].append(_json_album(user, child))
 
     return d
 
@@ -427,7 +423,6 @@ def _json_category_detail(user, category):
         'sortorder': category.sortorder,
         'parent': _json_category(user, category.parent_category),
         'ancestors': [],
-        'children': [],
         'can_add': user.has_perm('spud.add_category'),
         'can_change': user.has_perm('spud.change_category'),
         'can_delete': user.has_perm('spud.delete_category'),
@@ -436,9 +431,6 @@ def _json_category_detail(user, category):
 
     for ancestor in category.get_ascendants(include_self=False):
         d['ancestors'].insert(0, _json_category(user, ancestor))
-
-    for child in category.children.all():
-        d['children'].append(_json_category(user, child))
 
     return d
 
@@ -490,7 +482,6 @@ def _json_place_detail(user, place):
         'cover_photo': _json_photo(user, place.cover_photo),
         'notes': place.notes,
         'parents': [],
-        'children': [],
         'can_add': user.has_perm('spud.add_place'),
         'can_change': user.has_perm('spud.change_place'),
         'can_delete': user.has_perm('spud.delete_place'),
@@ -498,9 +489,6 @@ def _json_place_detail(user, place):
 
     for ancestor in place.get_ascendants(include_self=False):
         d['ancestors'].insert(0, _json_place(user, ancestor))
-
-    for child in place.children.all():
-        d['children'].append(_json_place(user, child))
 
     if user.is_staff:
         d.update({
