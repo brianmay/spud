@@ -351,6 +351,7 @@ function person_doer() {
     this.display_plural = "persons"
     this.list_type = "person_list"
     generic_doer.call(this)
+    this.has_ancestors = false
 }
 
 person_doer.prototype = new generic_doer()
