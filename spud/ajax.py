@@ -572,7 +572,7 @@ def _json_person_detail(user, person):
                 _json_person(user, p) for p in person.grandchildren()],
             'notes': person.notes,
             'email': person.email,
-            'ancestors': None,
+            'ancestors': [],
         })
 
         if person.dob:
@@ -590,8 +590,8 @@ def _json_person_detail(user, person):
             elif p.person_id != person.spouse.person_id:
                 d['spouses'].append(_json_person(user, p))
 
-        for ancestor in feedback.get_ascendants(include_self=False):
-            d['ancestors'].insert(0, _json_feedback(user, ancestor))
+        for ancestor in person.get_ascendants(include_self=False):
+            d['ancestors'].insert(0, _json_person(user, ancestor))
 
     return d
 
