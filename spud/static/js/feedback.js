@@ -22,20 +22,23 @@ function _feedback_html(feedback, children) {
     }
     var user=feedback.user || feedback.user_name
 
-    var html = []
+    var div = $("<div></div>")
+        .addClass("feedback_item")
 
     var datetime = feedbacks.a(feedback, "")
         .text(feedback.submit_datetime.title)
 
-    html.push($("<div></div>")
+    div.append($("<div></div>")
         .addClass("title")
         .text("Response by " + user + " at ")
         .append(datetime)
     )
 
-    html.push($("<div></div>")
+    div.append($("<div></div>")
         .p(feedback.comment)
     )
+
+    div.append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
 
     if (children && feedback.children.length > 0) {
         var ul = $("<ul></ul>")
@@ -43,14 +46,14 @@ function _feedback_html(feedback, children) {
 
         $.each(feedback.children, function(j, child) {
             $("<li></li>")
-                .addClass("feedback_item")
                 .append(_feedback_html(child, true))
                 .appendTo(ul)
         })
 
-        html.push(ul)
+       div.append(ul)
     }
-    return html
+
+    return div
 }
 
 $.widget('ui.feedback_search_dialog',  $.ui.form_dialog, {
@@ -131,7 +134,7 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
             ["user_email", new text_output_field("E-Mail (unverified)")],
             ["user_url", new text_output_field("URL (unverified)")],
             ["parent", new html_output_field("In response to")],
-            ["comment", new p_output_field("Description")],
+            ["comment", new p_output_field("Response")],
         ]
         this._super();
 
@@ -142,7 +145,7 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
 
     set: function(initial) {
         this._super(initial);
-        this.set_value("parent", _feedback_html(initial.parent))
+        this.set_value("parent", _feedback_html(initial.parent, false))
     },
 
     _destroy: function() {
@@ -173,7 +176,6 @@ $.widget('ui.feedback_list', $.ui.list_base, {
         this.empty()
         $.each(feedback_list, function(j, feedback) {
             mythis.append_item(_feedback_html(feedback, true))
-                .addClass("feedback_item")
         })
         return this
     }
@@ -208,20 +210,7 @@ $.widget('ui.feedback_menu', $.ui.spud_menu, {
         this.add_item(feedbacks.search_form_a({ instance: feedback.id }))
 
         if (feedback.can_add) {
-            var a = $('<a/>')
-                .attr('href', "#")
-                .on('click', function() {
-                    close_all_dialog()
-                    feedbacks.display_change(
-                    {
-                        type: "feedback",
-                        photo: feedback.photo,
-                        parent: feedback,
-                    })
-                    return false;
-                })
-                .text("Add reply")
-            this.add_item(a)
+            this.add_item(feedbacks.add_a(feedback.photo, feedback, "Reply"))
         }
 
         if (feedback.can_change) {
@@ -248,11 +237,6 @@ $.widget('ui.feedback_list_menu', $.ui.spud_menu, {
     set: function(search, results) {
         this.element.empty()
         this.add_item(feedbacks.search_form_a(search.criteria))
-
-        if (results.can_add) {
-            this.add_item(feedbacks.add_a(null))
-        }
-
         return this
     },
 })
@@ -261,26 +245,33 @@ $.widget('ui.feedback_list_menu', $.ui.spud_menu, {
 $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
     _create: function() {
         this.options.fields = [
-            ["photo", new photo_select_field("Photo", true)],
             ["rating", new integer_input_field("Rating", true)],
             ["user_name", new text_input_field("Name", false)],
             ["user_email", new text_input_field("E-Mail", false)],
             ["user_url", new text_input_field("URL", false)],
             ["comment", new p_input_field("Description", false)],
-            ["parent", new ajax_select_field("Parent", "feedback", false)],
         ]
 
         this.options.title = "Change feedback"
         this.options.button = "Save"
         this._super();
 
+        this.details = $("<div></div>")
+            .feedback_details()
+            .insertAfter(this.description)
+
         if (this.options.feedback != null) {
             this.set(this.options.feedback)
         }
     },
 
+    _destroy: function() {
+        this.details.remove()
+        this._super()
+    },
+
     set: function(feedback) {
-        this.feedback_id = feedback.id
+        this.feedback = feedback
         if (feedback.id != null) {
             this.set_title("Change feedback")
             this.set_description("Please change feedback " + feedback.title + ".")
@@ -288,6 +279,10 @@ $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
             this.set_title("Add new feedback")
             this.set_description("Please add new feedback.")
         }
+        if (this.feedback.photo == null) {
+            error_require_photo()
+        }
+        this.details.feedback_details("set", feedback)
         return this._super(feedback);
     },
 
@@ -295,8 +290,8 @@ $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
         var mythis = this
         display_loading()
         feedbacks.load_change(
-            this.feedback_id,
-            values,
+            this.feedback.id,
+            $.extend({}, values, { photo: this.feedback.photo.id, parent: this.feedback.parent.id }),
             function(data) {
                 hide_loading()
                 mythis.close()
@@ -356,11 +351,32 @@ feedback_doer.prototype.get_criteria = function(feedback) {
     return { feedbacks: feedback.id }
 }
 
-feedback_doer.prototype.get_new_object = function(parent) {
+feedback_doer.prototype.get_new_object = function(photo, parent) {
     return {
         type: "feedback",
+        photo: photo,
         parent: parent,
     }
+}
+
+feedback_doer.prototype.do_add = function(photo, parent, push_history) {
+    close_all_dialog()
+
+    this.display_change(
+        this.get_new_object(photo, parent)
+    )
+}
+
+feedback_doer.prototype.add_a = function(photo, parent, title) {
+    var mythis = this
+    if (title == null) {
+        title = "Add " + this.display_type
+    }
+    var a = $('<a/>')
+        .attr('href', "#")
+        .on('click', function() { mythis.do_add(photo, parent, true); return false; })
+        .text(title)
+    return a
 }
 
 feedback_doer.prototype.get_object = function(results) {

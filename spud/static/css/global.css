@@ -4,11 +4,6 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; max-width:340px; }
 ul.ui-autocomplete { z-index: 200; }
 
-.ui-corner-all { padding-top:4px; padding-bottom:4px; }
-.ui-corner-all img { float:left; }
-.ui-corner-all .title { margin-left:140px; font-weight:bold; }
-.ui-corner-all .desc { margin-left:140px; }
-
 .photo_ { }
 .photo-D { background:#EEDDDD; color:#333333; }
 .photo-R { background:#DDDDEE; color:#333333; }
@@ -31,24 +26,25 @@ ul.ui-autocomplete { z-index: 200; }
 
 /* PHOTO LIST */
 .photo_item { border:1px solid #dddddd; }
+.photo_item:HOVER { border:1px solid #000; }
+.photo_item .title { font-weight:bold; }
 .photo_item.ui-selecting { background: #FECA40; }
 .photo_item.ui-selected { background: #F39814; }
 
 .photo_list { border:1px solid #333; margin-bottom: 10px; }
-.photo_list .title { font-weight:bold; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:150px; margin:10px; padding-top:10px; text-align: center; width:170px; }
 .photo_list .photo_item .desc { float:left; display:none; }
-.photo_list .photo_item:HOVER { border:1px solid #000; }
 .photo_list .photo_item:HOVER .desc { display:inline; background:#ddd; color:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
 
 /* FEEDBACK LIST */
 .feedback_item { border:1px solid #dddddd; }
+.feedback_item:HOVER { border:1px solid #000; }
+.feedback_item .title { font-weight:bold; }
 
-.feedback_list { border:1px solid #333; margin-bottom: 10px; list-style-type: none; }
+.feedback_list { border:1px solid #333; margin-bottom: 10px; }
 .feedback_list .feedback_ul { padding: 0; }
-.feedback_list .title { font-weight:bold; }
-.feedback_list .feedback_item { vertical-align:top; margin:10px; padding:10px; list-style-type: none;}
-.feedback_list .feedback_item:HOVER { border:1px solid #000; }
+.feedback_list .feedback_ul > li { list-style-type: none; }
+.feedback_list .feedback_item { vertical-align:top; margin:10px; padding:10px; }
 
 /* PAGINATOR */
 .paginator { padding:10px; line-height:22px; margin:0; solid #ddd; }
