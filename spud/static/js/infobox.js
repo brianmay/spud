@@ -241,10 +241,11 @@ photo_output_field.prototype.create = function(id) {
     if (this.do_link) {
         this.a = $("<a></a>")
             .append(this.output)
+        return this.a
     } else {
         this.a = null
+        return this.output
     }
-    return this.a
 }
 
 photo_output_field.prototype.set = function(value) {
