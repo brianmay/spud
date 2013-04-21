@@ -15,10 +15,6 @@ ul.ui-autocomplete { z-index: 200; }
 .photo-K { background:#DDEEDD; color:#333333; }
 .photo-selected { background: #DDDDDD; }
 
-.photo_item { border:1px solid #dddddd; }
-.photo_item.ui-selecting { background: #FECA40; }
-.photo_item.ui-selected { background: #F39814; }
-
 .photo_article { border:1px solid #dddddd; }
 
 .photo_block { display:inline-block; vertical-align:top; padding:10px; width:200px; min-height:420px; } 
@@ -33,7 +29,10 @@ ul.ui-autocomplete { z-index: 200; }
 .photo_image_block { width:auto; }
 .photo_image_block .title { font-weight:bold; }
 
-/* Photo list */
+/* PHOTO LIST */
+.photo_item { border:1px solid #dddddd; }
+.photo_item.ui-selecting { background: #FECA40; }
+.photo_item.ui-selected { background: #F39814; }
 
 .photo_list { border:1px solid #333; margin-bottom: 10px; }
 .photo_list .title { font-weight:bold; }
@@ -41,6 +40,15 @@ ul.ui-autocomplete { z-index: 200; }
 .photo_list .photo_item .desc { float:left; display:none; }
 .photo_list .photo_item:HOVER { border:1px solid #000; }
 .photo_list .photo_item:HOVER .desc { display:inline; background:#ddd; color:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
+
+/* FEEDBACK LIST */
+.feedback_item { border:1px solid #dddddd; }
+
+.feedback_list { border:1px solid #333; margin-bottom: 10px; list-style-type: none; }
+.feedback_list .feedback_ul { padding: 0; }
+.feedback_list .title { font-weight:bold; }
+.feedback_list .feedback_item { vertical-align:top; margin:10px; padding:10px; list-style-type: none;}
+.feedback_list .feedback_item:HOVER { border:1px solid #000; }
 
 /* PAGINATOR */
 .paginator { padding:10px; line-height:22px; margin:0; solid #ddd; }
@@ -240,8 +248,6 @@ table#change-history tbody th { width:16em; }
     background: transparent;
 }
 
-.loading { background:#ccc; }
-
 .slideshow .prevslide, .slideshow .nextslide { top:50%; }
 .prevslide, .nextslide{ position:absolute; height:43px; width:43px; bottom:0; margin-top:-21px; opacity:0.6; }
 .prevslide{ left:10px; background:url('../img/back.png'); }
@@ -249,6 +255,8 @@ table#change-history tbody th { width:16em; }
 .prevslide:active, .nextslide:active{ margin-top:-19px; }
 .prevslide:hover, .nextslide:hover{ cursor:pointer; }
 
+/* OTHER */
+.loading { background:#ccc; }
 label { font-weight:normal; color:#666; font-size:12px; }
 .required label, label.required { font-weight:bold; color:#333; }
 

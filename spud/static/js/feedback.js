@@ -16,6 +16,43 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+function _feedback_html(feedback, children) {
+    if (feedback == null) {
+        return null;
+    }
+    var user=feedback.user || feedback.user_name
+
+    var html = []
+
+    var datetime = feedbacks.a(feedback, "")
+        .text(feedback.submit_datetime.title)
+
+    html.push($("<div></div>")
+        .addClass("title")
+        .text("Response by " + user + " at ")
+        .append(datetime)
+    )
+
+    html.push($("<div></div>")
+        .p(feedback.comment)
+    )
+
+    if (children && feedback.children.length > 0) {
+        var ul = $("<ul></ul>")
+            .addClass("feedback_ul")
+
+        $.each(feedback.children, function(j, child) {
+            $("<li></li>")
+                .addClass("feedback_item")
+                .append(_feedback_html(child, true))
+                .appendTo(ul)
+        })
+
+        html.push(ul)
+    }
+    return html
+}
+
 $.widget('ui.feedback_search_dialog',  $.ui.form_dialog, {
 
     _create: function() {
@@ -93,14 +130,19 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
             ["user_name", new text_output_field("Name (unverified)")],
             ["user_email", new text_output_field("E-Mail (unverified)")],
             ["user_url", new text_output_field("URL (unverified)")],
+            ["parent", new html_output_field("In response to")],
             ["comment", new p_output_field("Description")],
-            ["parent", new link_output_field("Parent")],
         ]
         this._super();
 
         if (this.options.feedback != null) {
             this.set(this.options.feedback)
         }
+    },
+
+    set: function(initial) {
+        this._super(initial);
+        this.set_value("parent", _feedback_html(initial.parent))
     },
 
     _destroy: function() {
@@ -111,21 +153,27 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.feedback_list', $.ui.photo_list_base, {
+$.widget('ui.feedback_list', $.ui.list_base, {
     _create: function() {
+        this.element.addClass("feedback_list")
         this._super()
+        this.ul.addClass("feedback_ul")
         if (this.options.feedbacks != null) {
             this.set(this.options.feedbacks)
         }
+    },
+
+    _destroy: function() {
+        this.element.removeClass("feedback_list")
+        this._super()
     },
 
     set: function(feedback_list) {
         var mythis = this
         this.empty()
         $.each(feedback_list, function(j, feedback) {
-            var photo = feedback.photo
-            var sort=feedback.user || feedback.user_name
-            mythis.append_photo(photo, photo.title, sort, feedback.comment, feedbacks.a(feedback, null))
+            mythis.append_item(_feedback_html(feedback, true))
+                .addClass("feedback_item")
         })
         return this
     }

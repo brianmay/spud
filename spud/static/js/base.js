@@ -655,11 +655,8 @@ $.widget('ui.image', {
 })
 
 
-$.widget('ui.photo_list_base',  {
+$.widget('ui.list_base',  {
     _create: function() {
-        this.element
-            .addClass("photo_list")
-
         this.ul = $("<ul></ul")
             .appendTo(this.element)
 
@@ -679,11 +676,53 @@ $.widget('ui.photo_list_base',  {
     },
 
     empty: function() {
-        this.element.find("img")
-            .image("destroy")
         this.ul.empty()
         this.element.removeClass("loading")
         this.element.removeClass("errors")
+    },
+
+    append_item: function(html) {
+        li = $("<li />")
+            .append(html)
+            .appendTo(this.ul)
+        return li
+    },
+
+    clear_status: function() {
+        this.element.removeClass("loading")
+        this.element.removeClass("errors")
+    },
+
+    display_loading: function() {
+        this.empty()
+        this.element.addClass("loading")
+    },
+
+    display_error: function() {
+        this.empty()
+        this.element.addClass("errors")
+    },
+
+    _destroy: function() {
+        this.p
+            .paginator("destroy")
+        this.empty()
+        this._super()
+    },
+})
+
+
+$.widget('ui.photo_list_base',  $.ui.list_base, {
+    _create: function() {
+        this.element
+            .addClass("photo_list")
+        this._super()
+    },
+
+    empty: function() {
+        this.element.find("img")
+            .image("destroy")
+        this._super()
     },
 
     append_photo: function(photo, title, sort, description, a) {
@@ -739,14 +778,8 @@ $.widget('ui.photo_list_base',  {
     },
 
     _destroy: function() {
-        this.p
-            .paginator("destroy")
-
-        this.empty()
-
         this.element
             .removeAttr("photo_list")
-
         this._super()
     },
 })
