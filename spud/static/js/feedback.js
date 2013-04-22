@@ -29,7 +29,7 @@ function _feedback_html(feedback, include_children, include_photo) {
         .text(feedback.submit_datetime.title)
 
     if (include_photo) {
-        $("<img />")
+        var img = $("<img />")
             .image({ photo: feedback.photo, size: get_settings().list_size })
             .appendTo(div)
     }
@@ -48,7 +48,10 @@ function _feedback_html(feedback, include_children, include_photo) {
         .p(feedback.comment)
         .appendTo(div)
 
-    div.append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
+    div
+        .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
+        .append(" / ")
+        .append(photo_a(feedback.photo, "Goto photo"))
 
     if (include_children && feedback.children.length > 0) {
         var ul = $("<ul></ul>")
@@ -215,18 +218,6 @@ $.widget('ui.feedback_menu', $.ui.spud_menu, {
 
         var criteria = { feedbacks: feedback.id }
 
-        this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
-
-        this.add_item(
-            $("<a href=''>Slideshow</a>")
-            .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
-            .on("click", function() {
-                set_slideshow_mode()
-                do_photo_search_item({ criteria: criteria }, 0, null, true);
-                return false;
-            }))
-
-        this.add_item(photo_search_form_a(criteria))
         this.add_item(feedbacks.search_form_a({ instance: feedback.id }))
 
         if (feedback.can_add) {
@@ -266,22 +257,22 @@ $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["rating", new select_input_field("Rating", [
-                ["0", "Delete it"],
-                ["1", "Disgusting"],
-                ["2", "Very bad"],
-                ["3", "Bad"],
-                ["4", "Not acceptable"],
-
                 ["5", "Acceptable"],
                 ["6", "Good"],
                 ["7", "Excellent"],
                 ["8", "Sell it"],
                 ["9", "Perfect"],
+
+                ["0", "Delete it"],
+                ["1", "Disgusting"],
+                ["2", "Very bad"],
+                ["3", "Bad"],
+                ["4", "Not acceptable"],
             ])],
-            ["user_name", new text_input_field("Name", false)],
+            ["user_name", new text_input_field("Name", true)],
             ["user_email", new text_input_field("E-Mail", false)],
             ["user_url", new text_input_field("URL", false)],
-            ["comment", new p_input_field("Description", false)],
+            ["comment", new p_input_field("Comment", true)],
         ]
 
         this.options.title = "Change feedback"
