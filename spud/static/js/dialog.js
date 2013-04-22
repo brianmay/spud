@@ -65,8 +65,10 @@ input_field.prototype.validate = function() {
 input_field.prototype.set_error = function(error) {
     this.tr.toggleClass("errors", Boolean(error))
     this.errors.toggleClass("errornote", Boolean(error))
-    this.input.toggleClass("errors", Boolean(error))
-    this.input.find("input").toggleClass("errors", Boolean(error))
+    if (this.input) {
+        this.input.toggleClass("errors", Boolean(error))
+        this.input.find("input").toggleClass("errors", Boolean(error))
+    }
     if (error) {
         this.errors.text(error)
     } else {

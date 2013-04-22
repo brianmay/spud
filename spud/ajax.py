@@ -799,9 +799,9 @@ def _json_search(user, params):
 
     values = _pop_object_array(params, "persons", spud.models.person)
     if values is not None:
-        criteria["person"] = []
+        criteria["persons"] = []
         for value in values:
-            criteria["person"].append(_json_person(user, value))
+            criteria["persons"].append(_json_person(user, value))
             if pd:
                 photo_list = photo_list.filter(
                     persons__ascendant_set__ascendant=value)
@@ -810,9 +810,9 @@ def _json_search(user, params):
 
     values = _pop_object_array(params, "albums", spud.models.album)
     if values is not None:
-        criteria["album"] = []
+        criteria["albums"] = []
         for value in values:
-            criteria["album"].append(_json_album(user, value))
+            criteria["albums"].append(_json_album(user, value))
             if ad:
                 photo_list = photo_list.filter(
                     albums__ascendant_set__ascendant=value)
@@ -821,9 +821,9 @@ def _json_search(user, params):
 
     values = _pop_object_array(params, "categorys", spud.models.category)
     if values is not None:
-        criteria["category"] = []
+        criteria["categorys"] = []
         for value in values:
-            criteria["category"].append(_json_category(user, value))
+            criteria["categorys"].append(_json_category(user, value))
             if cd:
                 photo_list = photo_list.filter(
                     categorys__ascendant_set__ascendant=value)

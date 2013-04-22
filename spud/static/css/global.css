@@ -4,6 +4,12 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; max-width:340px; }
 ul.ui-autocomplete { z-index: 200; }
 
+.ui-menu-item { padding-top:4px; padding-bottom:4px; }
+.ui-menu-item a { border: 1px solid #ffffff; margin: -1px; }
+.ui-menu-item img { float:left; }
+.ui-menu-item .title { margin-left:140px; font-weight:bold; }
+.ui-menu-item .desc { margin-left:140px; }
+
 .photo_ { }
 .photo-D { background:#EEDDDD; color:#333333; }
 .photo-R { background:#DDDDEE; color:#333333; }

@@ -94,7 +94,7 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
         var table = $("<table />")
         this.table = table
 
-        this.add_field("person", new ajax_select_multiple_field("People", "person", false))
+        this.add_field("persons", new ajax_select_multiple_field("People", "person", false))
         this.add_field("person_none", new boolean_input_field("No people", false))
         this.add_field("person_descendants", new boolean_input_field("Descend people", false))
 
@@ -102,11 +102,11 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
         this.add_field("place_descendants", new boolean_input_field("Descend places", false))
         this.add_field("place_none", new boolean_input_field("No places", false))
 
-        this.add_field("album", new ajax_select_multiple_field("Albums", "album", false))
+        this.add_field("albums", new ajax_select_multiple_field("Albums", "album", false))
         this.add_field("album_descendants", new boolean_input_field("Descend albums", false))
         this.add_field("album_none", new boolean_input_field("No albums", false))
 
-        this.add_field("category", new ajax_select_multiple_field("Categories", "category", false))
+        this.add_field("categorys", new ajax_select_multiple_field("Categories", "category", false))
         this.add_field("category_descendants", new boolean_input_field("Descend categories", false))
         this.add_field("category_none", new boolean_input_field("No categories", false))
 
@@ -171,8 +171,8 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
             criteria['photographer'] = values.photographer
         }
 
-        if (values.person.length > 0) {
-            criteria['person'] = values.person.join(".")
+        if (values.persons.length > 0) {
+            criteria['persons'] = values.persons.join(".")
         }
 
         if (values.person_none) {
@@ -195,8 +195,8 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
             criteria['place_none'] = "true"
         }
 
-        if (values.album.length > 0) {
-            criteria['album'] = values.album.join(".")
+        if (values.albums.length > 0) {
+            criteria['albums'] = values.albums.join(".")
         }
 
         if (values.album_descendants) {
@@ -207,8 +207,8 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
             criteria['album_none'] = "true"
         }
 
-        if (values.category.length > 0) {
-            criteria['category'] = values.category.join(".")
+        if (values.categorys.length > 0) {
+            criteria['categorys'] = values.categorys.join(".")
         }
 
         if (values.category_descendants) {
@@ -267,9 +267,9 @@ $.widget('ui.photo_search_details',  $.ui.infobox, {
             ["camera_model", new text_output_field("camera model")],
             ["photographer", new link_output_field("photographer")],
             ["place", new link_output_field("place")],
-            ["person", new link_list_output_field("people")],
-            ["album", new link_list_output_field("albums")],
-            ["category", new link_list_output_field("categories")],
+            ["persons", new link_list_output_field("people")],
+            ["albums", new link_list_output_field("albums")],
+            ["categorys", new link_list_output_field("categories")],
             ["photo", new link_list_output_field("photos")],
             ["person_none", new text_output_field("no people")],
             ["person_descendants", new text_output_field("descend people")],
