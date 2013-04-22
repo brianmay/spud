@@ -79,6 +79,7 @@ input_field.prototype.clear_error = function(error) {
 }
 
 input_field.prototype.destroy = function() {
+    this.tr.remove()
 }
 
 // define text_input_field
@@ -657,16 +658,19 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
 
     set_title: function(title) {
         this.element.parent().find(".ui-dialog-title").html(title)
+        return this
     },
 
     set_description: function(description) {
         this.description.text(description)
+        return this
     },
 
     add_field: function(id, field) {
         var html = field.to_html(id)
         this.table.append(html)
         this.fields[id] = field
+        return this
     },
 
     add_fields: function(fields) {
@@ -676,19 +680,33 @@ $.widget('ui.form_dialog',  $.ui.dialog, {
             var field = v[1]
             mythis.add_field(id, field)
         })
+        return this
+    },
+
+    remove_field: function(id) {
+        var field = this.fields[id]
+        if (field == null) return this
+        field.destroy()
+        delete this.fields[id]
+        return this
     },
 
     remove_all_fields: function() {
-        this.fields = []
-        this.f.empty()
+        var mythis = this
+        $.each(this.fields, function(i, v) {
+            mythis.remove_field(i)
+        })
+        return this
     },
 
     set_value: function(id, value) {
         this.fields[id].set(value)
+        return this
     },
 
     set_error: function(id, message) {
         this.fields[id].set_error(message)
+        return this
     },
 
     get_value: function(id) {

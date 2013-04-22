@@ -67,7 +67,7 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
             ["q", new text_output_field("Search for")],
             ["instance", new link_output_field("Album")],
             ["mode", new text_output_field("Mode")],
-            ["root_only", new text_output_field("Root Only")],
+            ["root_only", new boolean_output_field("Root Only")],
         ]
         this._super();
 

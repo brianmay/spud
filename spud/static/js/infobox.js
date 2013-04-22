@@ -41,6 +41,8 @@ output_field.prototype.create = function(id) {
 }
 
 output_field.prototype.destroy = function() {
+    this.dt.remove()
+    this.dd.remove()
 }
 
 output_field.prototype.append_a = function(html) {
@@ -265,6 +267,7 @@ photo_output_field.prototype.set = function(value) {
 
 photo_output_field.prototype.destroy = function() {
     this.output.image('destroy')
+    output_field.prototype.destroy.call(this)
 }
 
 $.widget('ui.infobox', {
@@ -314,12 +317,14 @@ $.widget('ui.infobox', {
         $.each(mythis.fields, function(id, field) {
             mythis.set_value(id, values[id])
         })
+        return this
     },
 
     add_field: function(id, field) {
         var html = field.to_html(id)
         this.dl.append(html)
         this.fields[id] = field
+        return this
     },
 
     add_fields: function(fields) {
@@ -329,15 +334,28 @@ $.widget('ui.infobox', {
             var field = v[1]
             mythis.add_field(id, field)
         })
+        return this
+    },
+
+    remove_field: function(id) {
+        var field = this.fields[id]
+        if (field == null) return this
+        field.destroy()
+        delete this.fields[id]
+        return this
     },
 
     remove_all_fields: function() {
-        this.fields = []
-        this.dl.empty()
+        var mythis = this
+        $.each(this.fields, function(i, v) {
+            mythis.remove_field(i)
+        })
+        return this
     },
 
     set_value: function(id, value) {
         this.fields[id].set(value)
+        return this
     },
 
     set_edit_value: function(id, value, can_change, a) {

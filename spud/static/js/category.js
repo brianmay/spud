@@ -67,7 +67,7 @@ $.widget('ui.category_search_details',  $.ui.infobox, {
             ["q", new text_output_field("Search for")],
             ["instance", new link_output_field("Category")],
             ["mode", new text_output_field("Mode")],
-            ["root_only", new text_output_field("Root Only")],
+            ["root_only", new boolean_output_field("Root Only")],
         ]
         this._super();
 

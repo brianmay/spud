@@ -16,41 +16,100 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+function _change_feedback(feedback, updates) {
+    display_loading()
+    feedbacks.load_change(
+        feedback.id,
+        updates,
+        function(data) {
+            hide_loading()
+            reload_page()
+        },
+        display_error
+    )
+}
+
 function _feedback_html(feedback, include_children, include_photo) {
     if (feedback == null) {
         return null;
     }
-    var user=feedback.user || feedback.user_name
+    var user=null
+    if (feedback.user) {
+       user = feedback.user + " (verified)"
+    } else {
+       user = feedback.user_name + " (unverified)"
+    }
 
     var div = $("<div></div>")
         .addClass("feedback_item")
 
-    var datetime = feedbacks.a(feedback, "")
-        .text(feedback.submit_datetime.title)
+    if (feedback.is_removed && !feedback.can_moderate) {
+        $("<p></p>")
+            .text(" feedback was deleted.")
+            .prepend(feedbacks.a(feedback, "This"))
+            .appendTo(div)
 
-    if (include_photo) {
-        var img = $("<img />")
-            .image({ photo: feedback.photo, size: get_settings().list_size })
+    } else {
+        var datetime = feedbacks.a(feedback, "")
+            .text(feedback.submit_datetime.title)
+
+        if (include_photo) {
+            var img = $("<img />")
+                .image({ photo: feedback.photo, size: get_settings().list_size })
+                .appendTo(div)
+        }
+
+        $("<div></div>")
+            .addClass("title")
+            .text("Response by " + user + " at ")
+            .append(datetime)
+            .appendTo(div)
+
+        $("<div></div>")
+            .text("Rating: "+ feedback.rating)
+            .appendTo(div)
+
+        $("<div></div>")
+            .p(feedback.comment)
             .appendTo(div)
     }
 
-    $("<div></div>")
-        .addClass("title")
-        .text("Response by " + user + " at ")
-        .append(datetime)
-        .appendTo(div)
+    if (feedback.can_moderate) {
+        div
+            .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
+            .append(" / ")
+        if (feedback.is_public) {
+            $("<a></a>")
+                .attr("href", "#")
+                .on("click", function() { _change_feedback(feedback, { is_public: false }); return false; })
+                .text("Set private")
+                .appendTo(div)
+        } else {
+            $("<a></a>")
+                .attr("href", "#")
+                .on("click", function() { _change_feedback(feedback, { is_public: true }); return false; })
+                .text("Set public")
+                .appendTo(div)
+        }
+        div.append(" / ")
+        if (feedback.is_removed) {
+            $("<a></a>")
+                .attr("href", "#")
+                .on("click", function() { _change_feedback(feedback, { is_removed: false }); return false; })
+                .text("Undelete")
+                .appendTo(div)
+        } else {
+            $("<a></a>")
+                .attr("href", "#")
+                .on("click", function() { _change_feedback(feedback, { is_removed: true }); return false; })
+                .text("Delete")
+                .appendTo(div)
+        }
+        div.append(" / ")
+    }
 
-    $("<div></div>")
-        .text("Rating: "+ feedback.rating)
-        .appendTo(div)
-
-    $("<div></div>")
-        .p(feedback.comment)
-        .appendTo(div)
 
     div
-        .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
-        .append(" / ")
         .append(photo_a(feedback.photo, "Goto photo"))
 
     if (include_children && feedback.children.length > 0) {
@@ -95,6 +154,30 @@ $.widget('ui.feedback_search_dialog',  $.ui.form_dialog, {
         }
     },
 
+    set: function(initial) {
+        if (initial.is_public != null) {
+            this.add_field("is_public",
+                new select_input_field("Is public", [ ["","Don't care"], ["true", "Yes"], ["false", "No" ] ], false))
+        } else {
+            this.remove_field("is_public")
+        }
+        if (initial.is_removed != null) {
+            this.add_field("is_removed",
+                new select_input_field("Is removed", [ ["","Don't care"], ["true", "Yes"], ["false", "No" ] ], false))
+        } else {
+            this.remove_field("is_removed")
+        }
+
+        this._super(initial);
+
+        if (initial.is_public != null) {
+            this.set_value("is_public", initial.is_public ? "true" : "false")
+        }
+        if (initial.is_removed != null) {
+            this.set_value("is_removed", initial.is_removed ? "true" : "false")
+        }
+    },
+
     _submit_values: function(values) {
         criteria = {}
 
@@ -113,6 +196,12 @@ $.widget('ui.feedback_search_dialog',  $.ui.form_dialog, {
         var v = values.root_only
         if (v) { criteria.root_only = v }
 
+        var v = values.is_public
+        if (v) { criteria.is_public = v }
+
+        var v = values.is_removed
+        if (v) { criteria.is_removed = v }
+
         var search = {
             criteria: criteria
         }
@@ -130,7 +219,9 @@ $.widget('ui.feedback_search_details',  $.ui.infobox, {
             ["photo", new photo_output_field("Photo", get_settings().view_size)],
             ["instance", new link_output_field("Feedback")],
             ["mode", new text_output_field("Mode")],
-            ["root_only", new text_output_field("Root Only")],
+            ["root_only", new boolean_output_field("Root Only")],
+            ["is_public", new boolean_output_field("Is public")],
+            ["is_removed", new boolean_output_field("Is removed")],
         ]
         this._super();
 
@@ -216,9 +307,19 @@ $.widget('ui.feedback_menu', $.ui.spud_menu, {
     set: function(feedback) {
         this.element.empty()
 
-        var criteria = { feedbacks: feedback.id }
-
-        this.add_item(feedbacks.search_form_a({ instance: feedback.id }))
+        if (feedback.can_moderate) {
+            var criteria = {
+                instance: feedback.id,
+                is_public: true,
+                is_removed: false,
+            }
+            this.add_item(feedbacks.search_form_a(criteria, "Extended search"))
+        } else {
+            var criteria = {
+                instance: feedback.id,
+            }
+            this.add_item(feedbacks.search_form_a(criteria))
+        }
 
         if (feedback.can_add) {
             this.add_item(feedbacks.add_a(feedback.photo, feedback, "Reply"))
@@ -247,7 +348,15 @@ $.widget('ui.feedback_list_menu', $.ui.spud_menu, {
 
     set: function(search, results) {
         this.element.empty()
-        this.add_item(feedbacks.search_form_a(search.criteria))
+        if (results.can_moderate) {
+            var criteria = $.extend({}, search.criteria, {
+                is_public: true,
+                is_removed: false,
+            })
+            this.add_item(feedbacks.search_form_a(criteria, "Extended search"))
+        } else {
+            this.add_item(feedbacks.search_form_a(search.criteria))
+        }
         return this
     },
 })
@@ -304,6 +413,15 @@ $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
         }
         if (this.feedback.photo == null) {
             error_require_photo()
+        }
+        if (this.feedback.can_moderate) {
+            this.add_field("is_public",
+                new boolean_input_field("Is public", false))
+            this.add_field("is_removed",
+                new boolean_input_field("Is removed", false))
+        } else {
+            this.remove_field("is_public")
+            this.remove_field("is_removed")
         }
         this.details.feedback_details("set", feedback)
         return this._super(feedback);

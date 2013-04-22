@@ -637,7 +637,15 @@ def _json_feedback(user, feedback, seen=None):
         'can_change': user.has_perm('spud.change_feedback'),
         'can_delete': user.has_perm('spud.delete_feedback'),
         'can_moderate': user.is_staff,
+        'children': [],
     }
+
+    for child in feedback.children.all():
+        child_json = _json_feedback(user, child, seen)
+        if json is not None:
+            d['children'].append(child_json)
+        del child_json
+        del child
 
     if not feedback.is_removed or user.is_staff:
         d.update({
@@ -649,16 +657,8 @@ def _json_feedback(user, feedback, seen=None):
             'user_url': feedback.user_url,
             'submit_datetime': _json_datetime(
                 feedback.submit_datetime, feedback.utc_offset),
-            'children': [],
             'photo': _json_photo(user, feedback.photo),
         })
-
-        for child in feedback.children.all():
-            child_json = _json_feedback(user, child, seen)
-            if json is not None:
-                d['children'].append(child_json)
-            del child_json
-            del child
 
     if user.is_staff:
         d.update({
@@ -2136,7 +2136,7 @@ def feedback_search_results(request):
     q = _pop_string(params, "q")
     if q is not None:
         feedback_list = feedback_list.filter(
-            Q(title__icontains=q) | Q(address__icontains=q))
+            Q(comment__icontains=q) | Q(user_name__icontains=q))
         criteria['q'] = q
 
     mode = _pop_string(params, "mode")
@@ -2183,7 +2183,7 @@ def feedback_search_results(request):
             criteria["is_removed"] = value
 
     else:
-        feedback_list = feedback_list.filter(is_public=True)
+        feedback_list = feedback_list.filter(is_public=True, is_removed=False)
 
     check_params_empty(params)
 
