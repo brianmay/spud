@@ -30,7 +30,7 @@ function _feedback_html(feedback, include_children, include_photo) {
 
     if (include_photo) {
         $("<img />")
-            .image({ photo: feedback.photo, size: get_settings().thumb_size })
+            .image({ photo: feedback.photo, size: get_settings().list_size })
             .appendTo(div)
     }
 
@@ -142,7 +142,7 @@ $.widget('ui.feedback_search_details',  $.ui.infobox, {
 $.widget('ui.feedback_details',  $.ui.infobox, {
     _create: function() {
         this.options.fields = [
-            ["photo", new photo_output_field("Photo", get_settings().view_size, true)],
+            ["photo", new photo_output_field("Photo", get_settings().list_size, true)],
             ["rating", new integer_output_field("Rating")],
             ["user", new text_output_field("Name (verified)")],
             ["user_name", new text_output_field("Name (unverified)")],
@@ -150,6 +150,7 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
             ["user_url", new text_output_field("URL (unverified)")],
             ["parent", new html_output_field("In response to")],
             ["comment", new p_output_field("Response")],
+            ["ip_address", new text_output_field("IP Address")],
             ["is_public", new boolean_output_field("Is public")],
             ["is_removed", new boolean_output_field("Is removed")],
         ]
