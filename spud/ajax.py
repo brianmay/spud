@@ -2183,7 +2183,9 @@ def feedback_search_results(request):
             criteria["is_removed"] = value
 
     else:
-        feedback_list = feedback_list.filter(is_public=True, is_removed=False)
+        feedback_list = feedback_list.filter(is_public=True)
+        if q is not None:
+            feedback_list = feedback_list.filter(is_removed=False)
 
     check_params_empty(params)
 
