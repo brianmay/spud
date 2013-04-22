@@ -27,6 +27,7 @@ import django.contrib.auth
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models import Q
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 def _decode_int(title, string):
@@ -976,6 +977,7 @@ def logout(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def album_search_form(request):
     criteria = {}
@@ -1010,6 +1012,7 @@ def album_search_form(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def album_search_results(request):
     params = request.GET.copy()
@@ -1081,6 +1084,7 @@ def album_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def album(request, album_id):
     if request.method == "POST":
@@ -1185,6 +1189,7 @@ def album_finish(request, album):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def category_search_form(request):
     criteria = {}
@@ -1219,6 +1224,7 @@ def category_search_form(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def category_search_results(request):
     params = request.GET.copy()
@@ -1290,6 +1296,7 @@ def category_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def category(request, category_id):
     if request.method == "POST":
@@ -1395,6 +1402,7 @@ def category_finish(request, category):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def place_search_form(request):
     criteria = {}
@@ -1429,6 +1437,7 @@ def place_search_form(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def place_search_results(request):
     params = request.GET.copy()
@@ -1500,6 +1509,7 @@ def place_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def place(request, place_id):
     if request.method == "POST":
@@ -1634,6 +1644,7 @@ def place_finish(request, place):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def person_search_form(request):
     criteria = {}
@@ -1668,6 +1679,7 @@ def person_search_form(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def person_search_results(request):
     params = request.GET.copy()
@@ -1745,6 +1757,7 @@ def person_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def person(request, person_id):
     if request.method == "POST":
@@ -1943,6 +1956,7 @@ def person_finish(request, person):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def photo_relation(request, photo_relation_id):
     if request.method == "POST":
@@ -2048,6 +2062,7 @@ def photo_relation_finish(request, photo_relation):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def feedback_search_form(request):
     criteria = {}
@@ -2097,6 +2112,7 @@ def feedback_search_form(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def feedback_search_results(request):
     params = request.GET.copy()
@@ -2190,6 +2206,7 @@ def feedback_search_results(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def feedback(request, feedback_id):
     if request.method == "POST":
@@ -2334,6 +2351,7 @@ def feedback_finish(request, feedback):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def photo_search_form(request):
     params = request.GET.copy()
@@ -2351,6 +2369,7 @@ def photo_search_form(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 @check_errors
 def photo_search_results(request):
     params = request.GET.copy()
@@ -2671,6 +2690,7 @@ def photo_search_change(request):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
+@ensure_csrf_cookie
 def photo(request, photo_id):
     value = get_object_or_404(spud.models.photo, pk=photo_id)
     resp = {
