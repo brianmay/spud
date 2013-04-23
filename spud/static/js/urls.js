@@ -64,6 +64,11 @@ function photo_url(photo) {
 }
 
 
+function upload_url() {
+   return "/upload/"
+}
+
+
 // ****************
 // * AJAX LOADERS *
 // ****************

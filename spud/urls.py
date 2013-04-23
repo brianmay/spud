@@ -64,6 +64,8 @@ urlpatterns = patterns('',
     url(r'^a/photo/change/$', 'spud.ajax.photo_search_change', name='ajax_photo_search_change'),
     url(r'^a/photo/(?P<photo_id>\d+)/$', 'spud.ajax.photo', name='ajax_photo'),
 
+    url(r'^a/upload/$', 'spud.upload.ajax', name='ajax_upload'),
+
     url(r'^$', 'spud.views.root', name='static_root'),
     url(r'^login/$', 'spud.views.login', name='static_login'),
     url(r'^logout/$', 'spud.views.logout', name='static_logout'),
@@ -79,6 +81,7 @@ urlpatterns = patterns('',
     url(r'^feedback/(?P<feedback_id>\d+)/$', 'spud.views.feedback_detail', name='static_feedback_detail'),
     url(r'^photo/$', 'spud.views.photo_search_results', name='static_photo_search_results'),
     url(r'^photo/(?P<photo_id>\d+)/$', 'spud.views.photo_detail', name='static_photo_detail'),
+    url(r'^upload/$', 'spud.views.upload', name='static_upload'),
 
     url(r'^ajax/', include('ajax_select.urls')),
 

@@ -258,6 +258,10 @@ table#change-history tbody th { width:16em; }
 .prevslide:active, .nextslide:active{ margin-top:-19px; }
 .prevslide:hover, .nextslide:hover{ cursor:pointer; }
 
+/* Fading */
+.fade{opacity:0;-webkit-transition:opacity 0.15s linear;-moz-transition:opacity 0.15s linear;-o-transition:opacity 0.15s linear;transition:opacity 0.15s linear;}
+.fade.in{opacity:1;}
+
 /* OTHER */
 .loading { background:#ccc; }
 label { font-weight:normal; color:#666; font-size:12px; }

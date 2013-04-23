@@ -349,10 +349,10 @@ $.widget('ui.feedback_list_menu', $.ui.spud_menu, {
     set: function(search, results) {
         this.element.empty()
         if (results.can_moderate) {
-            var criteria = $.extend({}, search.criteria, {
+            var criteria = $.extend({}, {
                 is_public: true,
                 is_removed: false,
-            })
+            }, search.criteria)
             this.add_item(feedbacks.search_form_a(criteria, "Extended search"))
         } else {
             this.add_item(feedbacks.search_form_a(search.criteria))

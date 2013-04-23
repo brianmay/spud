@@ -21,6 +21,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 
 import json
+import uuid
 
 from spud import models
 
@@ -244,3 +245,10 @@ def photo_search_results(request):
             'title': 'Photo search results',
             'onload': "do_photo_search_results(%s, %d)" % (js, page),
         }, context_instance=RequestContext(request))
+
+
+def upload(request):
+    return render_to_response('spud/static.html', {
+        'title': 'Upload files',
+        'onload': "do_upload(%s)" % (json.dumps(str(uuid.uuid4())))
+    }, context_instance=RequestContext(request))

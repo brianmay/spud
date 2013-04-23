@@ -276,6 +276,8 @@ window.onpopstate = function(event) {
             do_photo_search_item(state.search, state.n, state.photo_id, false)
         } else if (state.type == 'display_photo_search_results') {
             do_photo_search_results(state.search, state.page, false)
+        } else if (state.type == 'display_upload') {
+            do_upload(state.uid, false)
         } else {
             display_error("We don't understand our state")
         }
@@ -1138,4 +1140,174 @@ function do_photo_search_item(search, n, photo_id, push_history) {
 function do_settings_form(push_history) {
     close_all_dialog()
     display_settings()
+}
+
+function display_uploads(params) {
+    return $.map(params.files, function(file, i){
+        var tr = $('<tr class="template-upload fade"></tr>')
+            .append('<td class="preview"><span class="fade"></span></td>')
+            .append($('<td class="name"/>').text(file.name))
+            .append($('<td class="size"/>').text(params.formatFileSize(file.size)))
+        if (file.error) {
+            tr.append($('<td class="erroronote" colspan="2"/>').text(file.error))
+        } else if (params.files.valid && i == 0) {
+            $("<td></td>")
+                .append($('<div class="fade progress"></div>').progressbar({value: 0}))
+                .appendTo(tr)
+
+            var td = $("<td></td>")
+            if (!params.options.autoUpload) {
+                td.append($('<button class="btn btn-primary start">Start</button>').button())
+            }
+            td.append($('<button class="btn btn-warning cancel">Cancel</button>').button())
+            tr.append(td)
+        } else {
+            tr.append('<td colspan="2"></td>')
+            if (i==0) {
+                td.append($('<button class="btn btn-warning cancel">Cancel</button>').button())
+            }
+        }
+        return tr
+    })
+}
+
+function display_downloads(params) {
+    return $.map(params.files, function(file, i){
+        var tr = $('<tr class="template-download fade"></tr>')
+
+        if (file.error) {
+            tr
+                .append('<td></td>')
+                .append($('<td class="name"/>').text(file.name))
+                .append($('<td class="size"/>').text(params.formatFileSize(file.size)))
+                .append($('<td class="errornote" colspan="2"/>').text(file.error))
+        } else {
+            var td = $('<td class="preview"></td>')
+                .append($("<img/>").image({photo: file.photo, size: get_settings().list_size}))
+
+//            if (file.thumbnail_url) {
+//                $("<a>")
+//                    .attr("href", file.url)
+//                    .attr("title", file.name)
+//                    .attr("download", file.name)
+//                    .append($("<img/>").attr("src", file.thumbnail_url))
+//                    .appendTo(td)
+//            }
+            tr.append(td)
+
+            var td = $('<td class="name"></td>')
+                .append(photo_a(file.photo))
+
+            $("<a>")
+                .attr("href", file.url)
+                .attr("title", file.name)
+                .attr("download", file.name)
+                .append(file.name)
+                .appendTo(td)
+
+            tr
+                .append(td)
+                .append($('<td class="size"/>').text(params.formatFileSize(file.size)))
+                .append('<td></td>')
+        }
+        var td = $('<td></td>')
+//            .append($('<button class="btn btn-danger delete"/>')
+//                    .data('type', file.delete_type)
+//                    .data('url', file.delete_url)
+//                    .text("Delete")
+//                    .button())
+//            .append('<input type="checkbox" name="delete" value="1" class="toggle"/>')
+            .appendTo(tr)
+
+        tr.append(td)
+        return tr
+    })
+}
+
+function do_upload(uid, push_history) {
+    close_all_dialog()
+    replace_links()
+    update_history(push_history,
+        upload_url(), {
+            type: 'display_upload',
+            uid: uid,
+        })
+    var cm = $("#content-main")
+        .empty()
+
+    'use strict';
+
+    var form = $("<form></form>")
+
+    $('<div class="row fileupload-buttonbar"></div>')
+        .append($('<span class="btn btn-success fileinput-button">Add files<input type="file" name="files[]" multiple="multiple"/></span>').button())
+        .append($('<button type="submit" class="btn btn-primary start">Start upload</button>').button())
+        .append($('<button type="reset" class="btn btn-warning cancel">Cancel upload</button>').button())
+//        .append($('<button type="button" class="btn btn-danger delete">Delete</button>').button())
+//        .append('<input type="checkbox" class="toggle"/>')
+        .append('<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="bar" style="width:0%;"></div></div>')
+        .append('<div class="progress-extended"></div>')
+        .appendTo(form)
+
+    var progress_node = $('<div></div>').progressbar({value: false})
+    var progress_extended_node = $('<div class="progress-extended"></div>')
+
+    div = $('<div class="fileupload-progress fade"></div>')
+        .append(progress_node)
+        .append(progress_extended_node)
+        .appendTo(form)
+
+    form
+        .append('<div class="fileupload-loading"></div>')
+        .appendTo(cm)
+
+    $('<table role="presentation" class="table table-striped"/>')
+        .append('<thead><th>Preview</th><th>Filename</th><th>Size</th><th>Progress</th><th>Ops</th></thead>')
+        .append('<tbody class="files"></tbody>')
+        .appendTo(form)
+
+    // Initialize the jQuery File Upload widget:
+    form.fileupload({
+        formData: [
+            { name: "uid", value: uid },
+        ],
+        // Uncomment the following to send cross-domain cookies:
+        //xhrFields: {withCredentials: true},
+        url: '/a/upload/',
+        uploadTemplate: display_uploads,
+        downloadTemplate: display_downloads,
+
+        send: function (e, data) {
+            if (data.context) {
+                data.context.find('.progress').addClass("in")
+            }
+            $.blueimp.fileupload.prototype.options.send.call(this, e, data)
+        },
+
+        progress: function (e, data) {
+            if (data.context) {
+                var progress = Math.floor(data.loaded / data.total * 100);
+                data.context.find('.progress').progressbar("option", "value", progress)
+            }
+            $.blueimp.fileupload.prototype.options.progress.call(this, e, data)
+        },
+
+        progressall: function (e, data) {
+            var progress = Math.floor(data.loaded / data.total * 100)
+            progress_node.progressbar("option", "value", progress)
+            $.blueimp.fileupload.prototype.options.progressall.call(this, e, data)
+        },
+
+    });
+
+    // Enable iframe cross-domain access via redirect option:
+    form.fileupload(
+        'option',
+        'redirect',
+        window.location.href.replace(
+            /\/[^\/]*$/,
+            '/cors/result.html?%s'
+        )
+    );
+
 }
