@@ -293,16 +293,17 @@ def ajax(request):
                 # close the file
             destination.close()
 
-            album, _ = models.album.objects.get_or_create(album="Uploads")
-#            album, _ = album.children.get_or_create(album=uid)
-            photo = import_photo(
-                filename,
-                {'albums': [album]},
-                {'filename': file.name, 'dryrun': True}
-            )
-            response_data['photo'] = spud.ajax._json_photo(request.user, photo)
-
-            os.unlink(filename)
+            try:
+                album, _ = models.album.objects.get_or_create(album="Uploads")
+    #            album, _ = album.children.get_or_create(album=uid)
+                photo = import_photo(
+                    filename,
+                    {'albums': [album]},
+                    {'filename': file.name, 'dryrun': True}
+                )
+                response_data['photo'] = spud.ajax._json_photo(request.user, photo)
+            finally:
+                os.unlink(filename)
 
             # here you can add the file to a database,
             #                           move it around,
