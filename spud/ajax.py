@@ -624,7 +624,7 @@ def _json_feedback(user, feedback, seen=None):
 
     seen.add(feedback.pk)
 
-    if not feedback.is_public and not user.is_staff:
+    if not feedback.is_public and not user.has_perm('spud.can_moderate'):
         return None
 
     d = {
@@ -636,7 +636,7 @@ def _json_feedback(user, feedback, seen=None):
         'can_add': user.has_perm('spud.add_feedback'),
         'can_change': user.has_perm('spud.change_feedback'),
         'can_delete': user.has_perm('spud.delete_feedback'),
-        'can_moderate': user.is_staff,
+        'can_moderate': user.has_perm('spud.can_moderate'),
         'children': [],
     }
 
@@ -647,7 +647,7 @@ def _json_feedback(user, feedback, seen=None):
         del child_json
         del child
 
-    if not feedback.is_removed or user.is_staff:
+    if not feedback.is_removed or user.has_perm('spud.can_moderate'):
         d.update({
             'rating': feedback.rating,
             'comment': feedback.comment,
@@ -660,7 +660,7 @@ def _json_feedback(user, feedback, seen=None):
             'photo': _json_photo(user, feedback.photo),
         })
 
-    if user.is_staff:
+    if user.has_perm('spud.can_moderate'):
         d.update({
             'ip_address': feedback.ip_address,
         })
@@ -2090,7 +2090,7 @@ def feedback_search_form(request):
     if root_only:
         criteria["root_only"] = True
 
-    if request.user.is_staff:
+    if request.user.has_perm('spud.can_moderate'):
         value = _pop_boolean(params, "is_public")
         if value is not None:
             criteria["is_public"] = value
@@ -2107,7 +2107,7 @@ def feedback_search_form(request):
         'session': _json_session(request),
 
         'can_add': request.user.has_perm('spud.add_feedback'),
-        'can_moderate': request.user.is_staff,
+        'can_moderate': request.user.has_perm('spud.can_moderate').
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2171,7 +2171,7 @@ def feedback_search_results(request):
         feedback_list = feedback_list.filter(parent=None)
         criteria["root_only"] = True
 
-    if request.user.is_staff:
+    if request.user.has_perm('spud.can_moderate'):
         value = _pop_boolean(params, "is_public")
         if value is not None:
             feedback_list = feedback_list.filter(is_public=value)
@@ -2203,7 +2203,7 @@ def feedback_search_results(request):
         'last': first + number_returned - 1,
         'session': _json_session(request),
         'can_add': request.user.has_perm('spud.add_feedback'),
-        'can_moderate': request.user.is_staff,
+        'can_moderate': request.user.has_perm('spud.can_moderate'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2319,7 +2319,7 @@ def feedback_finish(request, feedback):
             feedback.user_url = value
             updated = True
 
-        if request.user.is_staff:
+        if request.user.has_perm('spud.can_moderate'):
             value = _pop_boolean(params, "is_public")
             if value is not None:
                 feedback.is_public = value

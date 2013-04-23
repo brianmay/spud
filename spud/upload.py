@@ -210,7 +210,7 @@ def ajax(request):
         # PROJECT_ROOT is from the settings file
         temp_path = "/tmp/spud"
 
-        if not request.user.is_staff:
+        if not request.user.has_perm('spud.add_photo')
             return HttpResponseForbidden('You do not have rights to upload files')
 
         # if 'f' query parameter is not specified
@@ -341,7 +341,7 @@ def ajax(request):
         response_data = {
             'type': "upload_form",
             'uid': uuid.uuid4(),
-            'can_upload': request.user.is_staff
+            'can_upload': request.user.has_perm('spud.add_photo')
         }
         response_data = json.dumps({'files': [response_data]})
         response_type = "application/json"

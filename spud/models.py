@@ -947,3 +947,6 @@ class feedback_ascendant(base_model):
 
     class Meta:
         ordering = ['position']
+        permissions = (
+            ("can_moderate", "Can moderate")
+        )
