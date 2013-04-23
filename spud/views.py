@@ -250,5 +250,5 @@ def photo_search_results(request):
 def upload(request):
     return render_to_response('spud/static.html', {
         'title': 'Upload files',
-        'onload': "do_upload(%s)" % (json.dumps(str(uuid.uuid4())))
+        'onload': "display_upload_form()"
     }, context_instance=RequestContext(request))

@@ -336,5 +336,12 @@ def ajax(request):
             return HttpResponseBadRequest('Delete not supported')
 
     else: #GET
-        return HttpResponseBadRequest('Must be a POST request')
+        response_data = {
+            'type': "upload_form",
+            'uid': uuid.uuid4(),
+            'can_upload': request.user.is_staff
+        }
+        response_data = json.dumps({'files': [response_data]})
+        response_type = "application/json"
+        return HttpResponse(response_data, mimetype=response_type)
 

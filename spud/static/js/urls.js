@@ -240,3 +240,12 @@ function load_photo(photo_id, success, error) {
         error: error,
     })
 }
+
+function load_upload_form(success, error) {
+    ajax({
+        url: '/a/upload/',
+        type: "POST",
+        success: success,
+        error: error,
+    })
+}
