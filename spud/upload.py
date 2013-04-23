@@ -1,6 +1,5 @@
 # imports
 
-from django.core.urlresolvers import reverse
 # for HTTP response
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 # for os manipulations
