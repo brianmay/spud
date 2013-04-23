@@ -2,7 +2,7 @@
 
 from django.core.urlresolvers import reverse
 # for HTTP response
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 # for os manipulations
 import os
 
@@ -210,6 +210,9 @@ def ajax(request):
         # figure out the path where files will be uploaded to
         # PROJECT_ROOT is from the settings file
         temp_path = "/tmp/spud"
+
+        if not request.user.is_staff:
+            return HttpResponseForbidden('You do not have rights to upload files')
 
         # if 'f' query parameter is not specified
         # file is being uploaded
