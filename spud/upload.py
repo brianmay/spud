@@ -301,6 +301,7 @@ def ajax(request):
                     {'albums': [album]},
                     {'filename': file.name, 'dryrun': True}
                 )
+                photo.generate_thumbnails(overwrite=False)
                 response_data['photo'] = spud.ajax._json_photo(request.user, photo)
             finally:
                 os.unlink(filename)
