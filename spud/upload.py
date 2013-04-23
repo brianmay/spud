@@ -1,8 +1,6 @@
 # imports
 
 from django.core.urlresolvers import reverse
-# for generating json
-from django.utils import simplejson
 # for HTTP response
 from django.http import HttpResponse, HttpResponseBadRequest
 # for os manipulations
@@ -11,6 +9,7 @@ import os
 import datetime
 import shutil
 import pytz
+import json
 
 from django.conf import settings
 from django.db import transaction
@@ -268,7 +267,7 @@ def ajax(request):
                 # append error message
                 response_data["error"] = error
                 # generate json
-                response_data = simplejson.dumps({'files': [response_data]})
+                response_data = json.dumps({'files': [response_data]})
                 # return response to uploader with error
                 # so it can display error message
                 return HttpResponse(response_data, mimetype='application/json')
@@ -312,7 +311,7 @@ def ajax(request):
             # or not include that information at all in the response...
 
             # generate the json data
-            response_data = simplejson.dumps({'files': [response_data]})
+            response_data = json.dumps({'files': [response_data]})
             # response type
             response_type = "application/json"
 
