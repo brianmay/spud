@@ -146,8 +146,7 @@ $.widget('spud.category_menu', $.spud.spud_menu, {
             $("<a href=''>Slideshow</a>")
             .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
             .on("click", function() {
-                set_slideshow_mode()
-                do_photo_search_item({ criteria: criteria }, 0, null, true);
+                do_photo_search_item({ criteria: criteria, photo_mode: "slideshow" }, 0, null, true);
                 return false;
             }))
 
