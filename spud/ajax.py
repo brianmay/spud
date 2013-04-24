@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-import spud.models
 import os.path
 import pytz
 import datetime
@@ -30,6 +29,9 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from django.db.models import Q
 from django.views.decorators.csrf import ensure_csrf_cookie
+
+import spud.models
+import spud.upload
 
 
 def _decode_int(title, string):
