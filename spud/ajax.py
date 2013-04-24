@@ -56,19 +56,9 @@ def _decode_boolean(title, string):
         raise ErrorBadRequest("%s got non-boolean" % title)
 
 
-def _decode_datetime(title, value, timezone):
-    if value is None:
-        return None
-
-    index = value.find(" +")
-    if index == -1:
-        index = value.find(" -")
-    if index != -1:
-        value, sign, offset = (
-            value[0:index].strip(),
-            value[index+1:index+2],
-            value[index+2:]
-        )
+def _decode_timezone(title, value):
+    if value[0] == "+" or value[0] == "-":
+        sign, offset = (value[0], value[1:])
         if len(offset) == 2:
             offset = _decode_int(title, offset) * 60
         elif len(offset) == 4:
@@ -81,21 +71,26 @@ def _decode_datetime(title, value, timezone):
             offset = -offset
         timezone = pytz.FixedOffset(offset)
         offset = None
-    index = None
+
+    else:
+        try:
+            timezone = pytz.timezone(value)
+        except pytz.UnknownTimeZoneError:
+            raise ErrorBadRequest("%s unknown timezone" % title)
+
+    return timezone
+
+
+def _decode_datetime(title, value, timezone):
+    if value is None:
+        return None
 
     value = value.split(" ")
-    new_value = []
-    for v in value:
-        index = v.find("/")
-        if index == -1:
-            new_value.append(v)
-        else:
-            try:
-                timezone = pytz.timezone(v)
-            except pytz.UnknownTimeZoneError:
-                raise ErrorBadRequest("%s unknown timezone" % title)
-    value = " ".join(new_value)
-    new_value = None
+    if value[-1].find("/") != -1 or value[-1][0] == '+' or value[-1][0] == '-':
+        timezone = _decode_timezone(title, value[-1])
+        del value[-1]
+
+    value = " ".join(value)
 
     dt = None
 
