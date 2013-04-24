@@ -16,10 +16,10 @@ ul.ui-autocomplete { z-index: 200; }
 .photo-K { background:#DDEEDD; color:#333333; }
 .photo-selected { background: #DDDDDD; }
 
-.photo_article { border:1px solid #dddddd; }
+.photo_article { border:1px solid #000; }
 
 .photo_block { display:inline-block; vertical-align:top; padding:10px; width:200px; min-height:420px; } 
-.photo_block { border:1px solid #777777; margin:5px; }
+.photo_block { border:1px solid #ddd; margin:5px; }
 .photo_block h2 { margin:0 0 .5em 0; }
 .photo_block ul  { padding-left: 20px; }
 .photo_block label { display:block; font-weight:bold; margin-top:4px; }
@@ -44,9 +44,12 @@ ul.ui-autocomplete { z-index: 200; }
 
 /* FEEDBACK LIST */
 .feedback_item { border:1px solid #dddddd; }
-.feedback_item:HOVER { border:1px solid #000; }
 .feedback_item .title { font-weight:bold; }
 .feedback_item img { float: right; }
+.feedback_item.public { background:#fff; }
+.feedback_item.not_public { background:#ddd; }
+.feedback_item.removed { text-decoration: line-through; color: #999; }
+.feedback_item.not_removed { text-decoration: none; color: #333; }
 
 .feedback_list { border:1px solid #333; margin-bottom: 10px; }
 .feedback_list .feedback_ul { padding: 0; }
@@ -64,7 +67,7 @@ ul.ui-autocomplete { z-index: 200; }
 .paginator a:hover { color:white; background:#5b80b2; border-color:#036; }
 
 /* Children list */
-.infobox { border:1px solid #dddddd; padding:10px; margin-bottom:10px; }
+.infobox { border:1px solid #000; padding:10px; margin-bottom:10px; }
 .infobox dl { margin-right: 10px; max-width:500px; }
 .infobox dt { clear:left; float:left; width:20%; margin:0; padding:5px; border-top: 1px solid #999; font-weight: bold; }
 .infobox dd { float:left; width: 70%; margin: 0; padding: 5px; border-top: 1px solid #999; }
