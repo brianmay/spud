@@ -275,7 +275,6 @@ def _json_photo_detail(user, photo):
             _json_person(user, p) for p in
             photo.persons.order_by("photo_person__position").all()],
 
-        'thumb': {},
         'related': [],
     })
 
