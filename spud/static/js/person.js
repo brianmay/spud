@@ -140,6 +140,7 @@ $.widget('spud.person_list', $.spud.photo_list_base, {
     set: function(person_list) {
         var mythis = this
         this.empty()
+        this.element.toggle(person_list.length > 0)
         $.each(person_list, function(j, person) {
             var photo = person.cover_photo
             var sort=""

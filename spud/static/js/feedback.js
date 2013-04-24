@@ -297,6 +297,7 @@ $.widget('spud.feedback_list', $.spud.list_base, {
     set: function(feedback_list) {
         var mythis = this
         this.empty()
+        this.element.toggle(feedback_list.length > 0)
         $.each(feedback_list, function(j, feedback) {
             mythis.append_item(_feedback_html(feedback, mythis.options.include_children, true, true))
         })
