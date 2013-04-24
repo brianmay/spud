@@ -29,7 +29,7 @@ function _change_feedback(feedback, updates) {
     )
 }
 
-function _feedback_html(feedback, include_children, include_photo) {
+function _feedback_html(feedback, include_children, include_photo, include_links) {
     if (feedback == null) {
         return null;
     }
@@ -74,45 +74,46 @@ function _feedback_html(feedback, include_children, include_photo) {
             .appendTo(div)
     }
 
-    if (feedback.can_add) {
+    if (include_links) {
+        if (feedback.can_add) {
+            div
+                .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
+                .append(" / ")
+        }
+        if (feedback.can_moderate) {
+            if (feedback.is_public) {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_public: false }); return false; })
+                    .text("Set private")
+                    .appendTo(div)
+            } else {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_public: true }); return false; })
+                    .text("Set public")
+                    .appendTo(div)
+            }
+            div.append(" / ")
+            if (feedback.is_removed) {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_removed: false }); return false; })
+                    .text("Undelete")
+                    .appendTo(div)
+            } else {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_removed: true }); return false; })
+                    .text("Delete")
+                    .appendTo(div)
+            }
+            div.append(" / ")
+        }
+
         div
-            .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
-            .append(" / ")
+            .append(photo_a(feedback.photo, "Goto photo"))
     }
-    if (feedback.can_moderate) {
-        if (feedback.is_public) {
-            $("<a></a>")
-                .attr("href", "#")
-                .on("click", function() { _change_feedback(feedback, { is_public: false }); return false; })
-                .text("Set private")
-                .appendTo(div)
-        } else {
-            $("<a></a>")
-                .attr("href", "#")
-                .on("click", function() { _change_feedback(feedback, { is_public: true }); return false; })
-                .text("Set public")
-                .appendTo(div)
-        }
-        div.append(" / ")
-        if (feedback.is_removed) {
-            $("<a></a>")
-                .attr("href", "#")
-                .on("click", function() { _change_feedback(feedback, { is_removed: false }); return false; })
-                .text("Undelete")
-                .appendTo(div)
-        } else {
-            $("<a></a>")
-                .attr("href", "#")
-                .on("click", function() { _change_feedback(feedback, { is_removed: true }); return false; })
-                .text("Delete")
-                .appendTo(div)
-        }
-        div.append(" / ")
-    }
-
-
-    div
-        .append(photo_a(feedback.photo, "Goto photo"))
 
     if (include_children && feedback.children.length > 0) {
         var ul = $("<ul></ul>")
@@ -121,7 +122,7 @@ function _feedback_html(feedback, include_children, include_photo) {
 
         $.each(feedback.children, function(j, child) {
             $("<li></li>")
-                .append(_feedback_html(child, include_children, include_photo))
+                .append(_feedback_html(child, include_children, include_photo, include_links))
                 .appendTo(ul)
         })
 
@@ -259,7 +260,7 @@ $.widget('spud.feedback_details',  $.spud.infobox, {
 
     set: function(initial) {
         this._super(initial);
-        this.set_value("parent", _feedback_html(initial.parent, false, false))
+        this.set_value("parent", _feedback_html(initial.parent, false, false, false))
     },
 
     _destroy: function() {
@@ -291,7 +292,7 @@ $.widget('spud.feedback_list', $.spud.list_base, {
         var mythis = this
         this.empty()
         $.each(feedback_list, function(j, feedback) {
-            mythis.append_item(_feedback_html(feedback, true, true))
+            mythis.append_item(_feedback_html(feedback, true, true, true))
         })
         return this
     }
