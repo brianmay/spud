@@ -526,7 +526,7 @@ class photo(base_model):
             n = n + 1
             rating = rating + feedback.rating
 
-        self.rating = rating
+        self.rating = rating / n
         self.save()
 
     def get_orig_path(self):
