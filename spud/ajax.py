@@ -569,7 +569,7 @@ def _json_feedback(user, feedback, seen=None):
         })
 
     if feedback.user is not None:
-        d['user'] = feedback.user.get_full_name()
+        d['user'] = feedback.user.get_full_name() or feedback.user.username
 
     if user.has_perm('spud.can_moderate'):
         d.update({
