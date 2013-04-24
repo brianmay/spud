@@ -29,6 +29,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from django.db.models import Q
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.core.mail import mail_admins
 
 import spud.models
 import spud.upload
@@ -2186,6 +2187,8 @@ def feedback_delete(request, feedback_id):
 
 def feedback_finish(request, feedback):
     if request.method == "POST":
+        new_feedback = (feedback.pk == None)
+
         params = request.POST.copy()
         _pop_string(params, "_")
 
@@ -2262,6 +2265,13 @@ def feedback_finish(request, feedback):
 
         if updated_rating:
             feedback.photo.fix_rating()
+
+        if new_feedback:
+            mail_admins(
+                u"SPUD: New feedback received",
+                u"You received new feedback for the %d photo titled %s" % (
+                feedback.photo.pk, feedback.photo)
+            )
 
     resp = {
         'type': 'feedback_get',
