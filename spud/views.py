@@ -97,9 +97,10 @@ def photo_detail(request, photo_id):
             'onload': "do_photo_search_item(%s, %d, %d)" % (js, n, photo_id),
         }, context_instance=RequestContext(request))
     else:
+        js = json.dumps({'criteria': request.GET})
         return render_to_response('spud/static.html', {
             'title': 'Photo detail',
-            'onload': "do_photo(%d)" % photo_id,
+            'onload': "do_photo(%d,%s)" % (photo_id, js),
         }, context_instance=RequestContext(request))
 
 

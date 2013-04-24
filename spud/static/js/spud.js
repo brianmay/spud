@@ -56,7 +56,8 @@ function logout_a(title) {
 }
 
 
-function photo_a(photo, title) {
+function photo_a(photo, search, title) {
+    search_defaults(search)
     if (photo == null) {
         return ""
     }
@@ -64,8 +65,8 @@ function photo_a(photo, title) {
         title = photo.title
     }
     var a = $('<a/>')
-        .attr('href', photo_url(photo))
-        .on('click', function() { do_photo(photo.id, true); return false; })
+        .attr('href', photo_url(photo, search))
+        .on('click', function() { do_photo(photo.id, search, true); return false; })
         .data('photo', photo)
         .text(title)
     return a
@@ -80,7 +81,7 @@ function photo_change_a(photo, fn, title) {
         title = "Change "+photo.title
     }
     var a = $('<a/>')
-        .attr('href', photo_url(photo))
+        .attr('href', "#")
         .on('click', function() { fn(photo, { photos: photo.id }, 1); return false; })
         .text(title)
     return a
@@ -141,6 +142,7 @@ function photo_search_form_a(criteria, title) {
 
 
 function photo_search_results_a(search, page, title) {
+    search_defaults(search)
     if (title == null) {
         title = "Photos"
     }
@@ -153,6 +155,7 @@ function photo_search_results_a(search, page, title) {
 
 
 function photo_search_item_a(search, n, photo, title) {
+    search_defaults(search)
     if (title == null) {
         title = "Photo "+n
     }
@@ -263,7 +266,7 @@ window.onpopstate = function(event) {
         if (state.type == 'display_root') {
             do_root(false)
         } else if (state.type == 'display_photo') {
-            do_photo(state.photo_id, false)
+            do_photo(state.photo_id, state.search, false)
         } else if (state.type == 'display_search_results') {
             get_doer(state.object_type).do_search_results(state.search, state.page, false)
         } else if (state.type == 'display') {
@@ -325,6 +328,15 @@ function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
+
+
+function search_defaults(search) {
+    if (search.results_per_page == null)
+        search.results_per_page = get_settings().photos_per_page
+    if (search.photo_mode == null)
+        search.photo_mode = "article"
+}
+
 
 // ****************
 // * HTML helpers *
@@ -475,12 +487,14 @@ function display_root() {
 
 function display_photo(photo, search, results, n) {
     reset_display()
-    var mode = get_photo_mode()
+    var mode = search.photo_mode
 
     if (mode == "slideshow") {
         display_photo_slideshow(photo, search, results, n)
     } else if (mode == "article") {
         display_photo_article(photo, search, results, n)
+    } else {
+        $("#content-main").html("")
     }
 }
 
@@ -504,13 +518,26 @@ function display_photo_article(photo, search, results, n) {
         photo_change_keyboard(photo, { photos: photo.id }, 1)
     }
 
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append(escapeHTML(photo.title))
+    if (results != null) {
+        // preload next/prev photos
+        var size = get_settings().view_size
+        if (results.prev_photo) {
+            var image = results.prev_photo.thumb[size]
+            if (image) {
+                var img = new Image()
+                img.src = image.url
+            }
+        }
+        if (results.next_photo) {
+            var image = results.next_photo.thumb[size]
+            if (image) {
+                var img = new Image()
+                img.src = image.url
+            }
+        }
+    }
 
-    if (search != null) {
+    if (n != null) {
         var last_page = results.number_results-1
 
         var html_page = function(page, text) {
@@ -526,25 +553,6 @@ function display_photo_article(photo, search, results, n) {
             })
             .appendTo("#content-main")
 
-        // preload next/prev photos
-        if (results != null) {
-            var size = get_settings().view_size
-            if (results.prev_photo) {
-                var image = results.prev_photo.thumb[size]
-                if (image) {
-                    var img = new Image()
-                    img.src = image.url
-                }
-            }
-            if (results.next_photo) {
-                var image = results.next_photo.thumb[size]
-                if (image) {
-                    var img = new Image()
-                    img.src = image.url
-                }
-            }
-        }
-
         if (n > 0) {
             photo_search_item_a(search, n-1, null, "")
                 .addClass("prevslide")
@@ -556,7 +564,23 @@ function display_photo_article(photo, search, results, n) {
                 .addClass("nextslide")
                 .appendTo(cm)
         }
+
+        var page = Math.floor(n / search.results_per_page)
+        $(".breadcrumbs")
+            .html("")
+            .append(root_a())
+            .append(" › ")
+            .append(photo_search_results_a(search, page, null))
+            .append(" › ")
+            .append(escapeHTML(results.photo.title))
+    } else {
+        $(".breadcrumbs")
+            .html("")
+            .append(root_a())
+            .append(" › ")
+            .append(escapeHTML(photo.title))
     }
+
 
     var pl = $("<div/>")
     pl
@@ -574,7 +598,7 @@ function display_photo_article(photo, search, results, n) {
      this.display_feedback(pl, photo, 0);
 
     var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, results: results, })
+        .photo_menu({ photo: photo, search: search, results: results, n: n })
     append_action_links(ul)
 }
 
@@ -639,7 +663,7 @@ function display_photo_slideshow(photo, search, results, n) {
         }
     }
 
-    if (search != null) {
+    if (n != null) {
         if (n > 0) {
             photo_search_item_a(search, n-1, null, "")
                 .attr('accesskey', "p")
@@ -677,21 +701,6 @@ function display_photo_slideshow(photo, search, results, n) {
         .addClass("overlapped")
 
     $("body").css("overflow", "hidden");
-}
-
-
-function display_photo_search_item(search, results, n) {
-    display_photo(results.photo, search, results, n)
-
-    var page = Math.floor(n / search.results_per_page)
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append(photo_search_results_a(search, page, null))
-        .append(" › ")
-        .append(escapeHTML(results.photo.title))
 }
 
 
@@ -1059,17 +1068,20 @@ function do_logout() {
 }
 
 
-function do_photo(photo_id, push_history) {
+function do_photo(photo_id, search, push_history) {
+    search_defaults(search)
+
     display_loading()
     load_photo(photo_id,
         function(data) {
             hide_loading()
             replace_links()
-            update_history(push_history, photo_url(data.photo), {
+            update_history(push_history, photo_url(data.photo, search), {
                 type: 'display_photo',
                 photo_id: data.photo.id,
+                search: search,
             });
-            display_photo(data.photo)
+            display_photo(data.photo, search)
         },
 
         display_error
@@ -1131,8 +1143,7 @@ function do_photo_search_form(criteria, push_history) {
 
 
 function do_photo_search_results(search, page, push_history, success) {
-    if (search.results_per_page == null)
-        search.results_per_page = get_settings().photos_per_page
+    search_defaults(search)
 
     display_loading()
     load_photo_search_results(search, page,
@@ -1156,8 +1167,11 @@ function do_photo_search_results(search, page, push_history, success) {
 
 
 function do_photo_search_item(search, n, photo_id, push_history) {
-    if (search.results_per_page == null)
-        search.results_per_page = get_settings().photos_per_page
+    if (n==null) {
+        return do_photo(photo_id, search, push_history)
+    }
+
+    search_defaults(search)
 
     display_loading()
     load_photo_search_item(search, n,
@@ -1173,9 +1187,9 @@ function do_photo_search_item(search, n, photo_id, push_history) {
                         photo_id: photo_id,
                     }
                 );
-                display_photo_search_item(search, data, n)
+                display_photo(data.photo, search, data, n)
             } else {
-                do_photo(photo_id, push_history)
+                do_photo(photo_id, search, push_history)
             }
         },
 

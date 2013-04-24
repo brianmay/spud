@@ -259,8 +259,8 @@ photo_output_field.prototype.set = function(value) {
             .removeAttr("href")
         if (value != null) {
             this.a
-                .attr('href', photo_url(value))
-                .on('click', function() { do_photo(value.id, true); return false; })
+                .attr('href', photo_url(value, {}))
+                .on('click', function() { do_photo(value.id, {}, true); return false; })
         }
     }
 }

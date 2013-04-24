@@ -59,8 +59,9 @@ function photo_search_item_url(search, n, photo) {
 }
 
 
-function photo_url(photo) {
-   return "/photo/"+photo.id+"/"
+function photo_url(photo, search) {
+    var params = jQuery.extend({}, search.criteria)
+   return "/photo/"+photo.id+"/?" + jQuery.param(params)
 }
 
 

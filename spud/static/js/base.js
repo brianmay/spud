@@ -62,22 +62,6 @@ function is_photo_selected(photo) {
 }
 
 
-function set_slideshow_mode() {
-    $(document).data("photo_mode", "slideshow")
-}
-
-function set_article_mode() {
-    $(document).data("photo_mode", "article")
-}
-
-function get_photo_mode() {
-    if ($(document).data("photo_mode") == null) {
-        return "article"
-    } else {
-        return $(document).data("photo_mode")
-    }
-}
-
 // ****************
 // * COMMON STUFF *
 // ****************
@@ -790,7 +774,7 @@ function object_a(object) {
     if (object == null) {
         return $("<span>None</span>")
     } else if (object.type == "photo") {
-        return photo_a(object)
+        return photo_a(object, {})
     } else if (object.type == "album") {
         return albums.a(object)
     } else if (object.type == "category") {

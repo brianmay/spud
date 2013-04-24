@@ -112,7 +112,7 @@ function _feedback_html(feedback, include_children, include_photo, include_links
         }
 
         div
-            .append(photo_a(feedback.photo, "Goto photo"))
+            .append(photo_a(feedback.photo, {}, "Goto photo"))
     }
 
     if (include_children && feedback.children.length > 0) {

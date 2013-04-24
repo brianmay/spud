@@ -71,7 +71,7 @@ function display_downloads(params) {
             tr.append(td)
 
             var td = $('<td class="name"></td>')
-                .append(photo_a(file.photo))
+                .append(photo_a(file.photo, {}))
 
             $("<a>")
                 .attr("href", file.url)

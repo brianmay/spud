@@ -478,7 +478,7 @@ $.widget('spud.photo_details',  $.spud.infobox, {
         this.set_edit_value(
             "related", $.map(photo.related, function(r) {
                 return [[
-                    photo_a(r.photo, r.title),
+                    photo_a(r.photo, {}, r.title),
                     can_change ? photo_relation_change_a({ id: r.id }, "[edit]") : null,
                     can_change ? photo_relation_delete_a({ id: r.id }, "[del]") : null,
                 ]]
@@ -621,20 +621,19 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.search)
+            this.set(this.options.photo, this.options.search, this.options.n)
         }
     },
 
-    set: function(photo, search) {
+    set: function(photo, search, n) {
         this.element.empty()
 
-        var photo_mode = get_photo_mode()
+        var photo_mode = search.photo_mode
         if (photo_mode != "slideshow") {
             this.add_item(
                 $("<a href='#'>Slideshow</a>")
                 .on("click", function() {
-                    set_slideshow_mode()
-                    reload_page()
+                    do_photo_search_item($.extend({}, search, { photo_mode: "slideshow" }), n, photo.id, true)
                     return false;
                 }))
         }
@@ -643,8 +642,7 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
             this.add_item(
                 $("<a href='#'>Article</a>")
                 .on("click", function() {
-                    set_article_mode()
-                    reload_page()
+                    do_photo_search_item($.extend({}, search, { photo_mode: "article" }), n, photo.id, true)
                     return false;
                 }))
         }
