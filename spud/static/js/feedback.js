@@ -58,6 +58,10 @@ function _feedback_html(feedback, include_children, include_photo, include_links
         if (include_photo) {
             var img = $("<img />")
                 .image({ photo: feedback.photo, size: get_settings().list_size })
+
+            photo_a(feedback.photo, {}, "")
+                .data('photo', null)  // remove mouseover as it looks yuck.
+                .html(img)
                 .appendTo(div)
         }
 
