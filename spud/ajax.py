@@ -222,39 +222,19 @@ def _json_photo(user, photo):
         'type': 'photo',
         'id': photo.photo_id,
         'title': unicode(photo),
-#        'photographer': photo.photographer,
-#        'place': photo.location,
         'view': photo.view,
         'rating': photo.rating,
         'description': photo.description,
         'localtime': _json_datetime(photo.datetime, photo.utc_offset),
         'utctime': _json_datetime(photo.datetime, 0),
-#        'camera_make': photo.camera_make,
-#        'camera_model': photo.camera_model,
-#        'flash_used': photo.flash_used,
-#        'focal_length': photo.focal_length,
-#        'exposure': photo.exposure,
-#        'compression': photo.compression,
-#        'aperture': photo.aperture,
-#        'level': photo.level,
-#        'iso_equiv': photo.iso_equiv,
-#        'metering_mode': photo.metering_mode,
-#        'focus_dist': photo.focus_dist,
-#        'ccd_width': photo.ccd_width,
-#        'comment': photo.comment,
         'action': photo.action,
 #        'timestamp': photo.timestamp,
-#        'albums': photo.albums,
-#        'categorys': photo.categorys,
-#        'persons': photo.persons,
-#        'relations': photo.relations,
-
         'thumb': {},
-#        'orig': photo.get_orig_url(),
 
         'can_add': user.has_perm('spud.add_photo'),
         'can_change': user.has_perm('spud.change_photo'),
         'can_delete': user.has_perm('spud.delete_photo'),
+        'can_add_feedback': user.has_perm('spud.add_feedback'),
     }
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -273,18 +253,12 @@ def _json_photo_detail(user, photo):
     if photo is None:
         return None
 
-    resp = {
-        'type': 'photo',
-        'id': photo.photo_id,
-        'title': unicode(photo),
+    resp = _json_photo(user, photo)
+
+    resp.update({
         'name': photo.name,
         'photographer': _json_person(user, photo.photographer),
         'place': _json_place(user, photo.location),
-        'view': photo.view,
-        'rating': photo.rating,
-        'description': photo.description,
-        'localtime': _json_datetime(photo.datetime, photo.utc_offset),
-        'utctime': _json_datetime(photo.datetime, 0),
         'camera_make': photo.camera_make,
         'camera_model': photo.camera_model,
         'flash_used': photo.flash_used,
@@ -297,26 +271,15 @@ def _json_photo_detail(user, photo):
         'metering_mode': photo.metering_mode,
         'focus_dist': photo.focus_dist,
         'ccd_width': photo.ccd_width,
-#        'comment': photo.comment,
-        'action': photo.action,
-#        'timestamp': photo.timestamp,
         'albums': [_json_album(user, a) for a in photo.albums.all()],
         'categorys': [_json_category(user, c) for c in photo.categorys.all()],
         'persons': [
             _json_person(user, p) for p in
             photo.persons.order_by("photo_person__position").all()],
-#        'relations': photo.relations,
 
         'thumb': {},
-
         'related': [],
-
-        'can_add': user.has_perm('spud.add_photo'),
-        'can_change': user.has_perm('spud.change_photo'),
-        'can_delete': user.has_perm('spud.delete_photo'),
-
-        'can_add_feedback': user.has_perm('spud.add_feedback'),
-    }
+    })
 
     for pr in photo.relations_1.all():
         resp['related'].append({
@@ -331,15 +294,6 @@ def _json_photo_detail(user, photo):
             'title': pr.desc_1,
             'photo': _json_photo(user, pr.photo_1),
         })
-
-    (shortname, _) = os.path.splitext(photo.name)
-
-    for pt in photo.photo_thumb_set.all():
-        resp['thumb'][pt.size] = {
-            'width': pt.width,
-            'height': pt.height,
-            'url': pt.get_url(),
-        }
 
     if user.is_staff:
         resp['orig'] = photo.get_orig_url()
@@ -364,7 +318,6 @@ def _json_album(user, album):
         'can_add': user.has_perm('spud.add_album'),
         'can_change': user.has_perm('spud.change_album'),
         'can_delete': user.has_perm('spud.delete_album'),
-#        'parent_album': album.parent_album,
     }
     return d
 
@@ -373,22 +326,12 @@ def _json_album_detail(user, album):
     if album is None:
         return None
 
-    d = {
-        'type': 'album',
-        'id': album.album_id,
-        'title': album.album,
-        'description': album.album_description,
-        'cover_photo': _json_photo(user, album.cover_photo),
-        'sortname': album.sortname,
-        'sortorder': album.sortorder,
-        'revised': unicode(album.revised),
+    d = _json_album(user, album)
+
+    d.update({
         'parent': _json_album(user, album.parent_album),
         'ancestors': [],
-        'can_add': user.has_perm('spud.add_album'),
-        'can_change': user.has_perm('spud.change_album'),
-        'can_delete': user.has_perm('spud.delete_album'),
-#        'parent_album': _json_album(user, album.parent_album),
-    }
+    })
 
     for ancestor in album.get_ascendants(include_self=False):
         d['ancestors'].insert(0, _json_album(user, ancestor))
@@ -411,7 +354,6 @@ def _json_category(user, category):
         'can_add': user.has_perm('spud.add_category'),
         'can_change': user.has_perm('spud.change_category'),
         'can_delete': user.has_perm('spud.delete_category'),
-#        'parent_category': category.parent_category,
     }
     return d
 
@@ -420,21 +362,12 @@ def _json_category_detail(user, category):
     if category is None:
         return None
 
-    d = {
-        'type': 'category',
-        'id': category.category_id,
-        'title': category.category,
-        'description': category.category_description,
-        'cover_photo': _json_photo(user, category.cover_photo),
-        'sortname': category.sortname,
-        'sortorder': category.sortorder,
+    d = _json_category(user, category)
+
+    d.update({
         'parent': _json_category(user, category.parent_category),
         'ancestors': [],
-        'can_add': user.has_perm('spud.add_category'),
-        'can_change': user.has_perm('spud.change_category'),
-        'can_delete': user.has_perm('spud.delete_category'),
-#        'parent_category': category.parent_category,
-    }
+    })
 
     for ancestor in category.get_ascendants(include_self=False):
         d['ancestors'].insert(0, _json_category(user, ancestor))
@@ -463,7 +396,6 @@ def _json_place(user, place):
         'can_add': user.has_perm('spud.add_place'),
         'can_change': user.has_perm('spud.change_place'),
         'can_delete': user.has_perm('spud.delete_place'),
-#        'parent': place.parent_place,
     }
     return d
 
@@ -472,27 +404,12 @@ def _json_place_detail(user, place):
     if place is None:
         return None
 
-    d = {
-        'type': 'place',
-        'id': place.place_id,
+    d = _json_place(user, place)
+
+    d.update({
         'parent': _json_place(user, place.parent_place),
         'ancestors': [],
-        'title': place.title,
-        'address': place.address,
-        'address2': place.address2,
-        'city': place.city,
-        'state': place.state,
-        'zip': place.zip,
-        'country': place.country,
-        'url': place.url,
-        'urldesc': place.urldesc,
-        'cover_photo': _json_photo(user, place.cover_photo),
-        'notes': place.notes,
-        'parents': [],
-        'can_add': user.has_perm('spud.add_place'),
-        'can_change': user.has_perm('spud.change_place'),
-        'can_delete': user.has_perm('spud.delete_place'),
-    }
+    })
 
     for ancestor in place.get_ascendants(include_self=False):
         d['ancestors'].insert(0, _json_place(user, ancestor))
@@ -539,19 +456,7 @@ def _json_person_detail(user, person):
     if person is None:
         return None
 
-    d = {
-        'type': 'person',
-        'id': person.person_id,
-        'title': unicode(person),
-        'first_name': person.first_name,
-        'last_name': person.last_name,
-        'middle_name': person.middle_name,
-        'called': person.called,
-        'cover_photo': _json_photo(user, person.cover_photo),
-        'can_add': user.has_perm('spud.add_person'),
-        'can_change': user.has_perm('spud.change_person'),
-        'can_delete': user.has_perm('spud.delete_person'),
-    }
+    d = _json_person(user, person)
 
     if user.is_staff:
         d.update({
@@ -578,6 +483,8 @@ def _json_person_detail(user, person):
             'notes': person.notes,
             'email': person.email,
             'ancestors': [],
+            'dob': None,
+            'dod': None,
         })
 
         if person.dob:
