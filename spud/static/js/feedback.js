@@ -272,6 +272,10 @@ $.widget('spud.feedback_details',  $.spud.infobox, {
 
 
 $.widget('spud.feedback_list', $.spud.list_base, {
+    options: {
+        include_children: false,
+    },
+
     _create: function() {
         this.element.addClass("feedback_list")
         this._super()
@@ -292,7 +296,7 @@ $.widget('spud.feedback_list', $.spud.list_base, {
         var mythis = this
         this.empty()
         $.each(feedback_list, function(j, feedback) {
-            mythis.append_item(_feedback_html(feedback, true, true, true))
+            mythis.append_item(_feedback_html(feedback, mythis.options.include_children, true, true))
         })
         return this
     }

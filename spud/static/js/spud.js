@@ -560,13 +560,15 @@ function display_photo_article(photo, search, results, n) {
 
     var pl = $("<div/>")
     pl
-        .feedback_list({ html_page:
-            function(page, text) {
-                return $("<a/>")
-                    .text(text)
-                    .attr("href", "#")
-                    .on("click", function() { display_feedback(pl, photo, page); return false; })
-            }
+        .feedback_list({
+            html_page:
+                function(page, text) {
+                    return $("<a/>")
+                        .text(text)
+                        .attr("href", "#")
+                        .on("click", function() { display_feedback(pl, photo, page); return false; })
+                },
+        include_children: true,
         })
         .appendTo(cm)
      this.display_feedback(pl, photo, 0);
