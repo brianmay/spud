@@ -33,6 +33,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 import spud.models
 import spud.upload
 
+_can_add_feedback = True
+
 
 def _decode_int(title, string):
     if string is None:
@@ -234,7 +236,7 @@ def _json_photo(user, photo):
         'can_add': user.has_perm('spud.add_photo'),
         'can_change': user.has_perm('spud.change_photo'),
         'can_delete': user.has_perm('spud.delete_photo'),
-        'can_add_feedback': user.has_perm('spud.add_feedback'),
+        'can_add_feedback': _can_add_feedback,
     }
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -544,7 +546,7 @@ def _json_feedback(user, feedback, seen=None):
         'id': feedback.pk,
         'is_public': feedback.is_public,
         'is_removed': feedback.is_removed,
-        'can_add': user.has_perm('spud.add_feedback'),
+        'can_add': _can_add_feedback,
         'can_change': user.has_perm('spud.change_feedback'),
         'can_delete': user.has_perm('spud.delete_feedback'),
         'can_moderate': user.has_perm('spud.can_moderate'),
@@ -562,7 +564,7 @@ def _json_feedback(user, feedback, seen=None):
         d.update({
             'rating': feedback.rating,
             'comment': feedback.comment,
-            'user': feedback.user.get_full_name(),
+            'user': None,
             'user_name': feedback.user_name,
             'user_email': feedback.user_email,
             'user_url': feedback.user_url,
@@ -570,6 +572,9 @@ def _json_feedback(user, feedback, seen=None):
                 feedback.submit_datetime, feedback.utc_offset),
             'photo': _json_photo(user, feedback.photo),
         })
+
+    if feedback.user is not None:
+        d['user'] = feedback.user.get_full_name()
 
     if user.has_perm('spud.can_moderate'):
         d.update({
@@ -580,7 +585,13 @@ def _json_feedback(user, feedback, seen=None):
 
 
 def _json_feedback_detail(user, feedback):
+    if feedback is None:
+        return None
+
     d = _json_feedback(user, feedback)
+    if d is None:
+        return None
+
     d.update({
         'parent': _json_feedback(user, feedback.parent),
         'ancestors': [],
@@ -2017,7 +2028,7 @@ def feedback_search_form(request):
         'criteria': criteria,
         'session': _json_session(request),
 
-        'can_add': request.user.has_perm('spud.add_feedback'),
+        'can_add': _can_add_feedback,
         'can_moderate': request.user.has_perm('spud.can_moderate'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2113,7 +2124,7 @@ def feedback_search_results(request):
         'first': first,
         'last': first + number_returned - 1,
         'session': _json_session(request),
-        'can_add': request.user.has_perm('spud.add_feedback'),
+        'can_add': _can_add_feedback,
         'can_moderate': request.user.has_perm('spud.can_moderate'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2135,7 +2146,7 @@ def feedback_add(request):
     if request.method != "POST":
         raise ErrorBadRequest("Only POST is supported")
     if request.method == "POST":
-        if not request.user.has_perm('spud.add_feedback'):
+        if not _can_add_feedback:
             raise ErrorForbidden("No rights to add feedbacks")
 
     if 'photo' not in request.POST or request.POST['photo'] is None:
@@ -2145,7 +2156,8 @@ def feedback_add(request):
         raise ErrorBadRequest("Rating must be specified")
 
     feedback = spud.models.feedback()
-    feedback.user = request.user
+    if request.user.is_authenticated():
+        feedback.user = request.user
     feedback.ip_address = request.META.get("REMOTE_ADDR", None)
     feedback.is_public = False
     feedback.is_removed = False

@@ -74,10 +74,12 @@ function _feedback_html(feedback, include_children, include_photo) {
             .appendTo(div)
     }
 
-    if (feedback.can_moderate) {
+    if (feedback.can_add) {
         div
             .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
             .append(" / ")
+    }
+    if (feedback.can_moderate) {
         if (feedback.is_public) {
             $("<a></a>")
                 .attr("href", "#")
