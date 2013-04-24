@@ -526,7 +526,7 @@ $.widget('spud.paginator', {
             // links at either end of the list of pages, and there are always
             // ON_EACH_SIDE links at either end of the "current page" link.
             if (page > (ON_EACH_SIDE + ON_ENDS)) {
-                this._range(0, ON_ENDS-1)
+                this._range(page, 0, ON_ENDS-1)
                 this.element.append('<span class="dots">...</span>')
                 this._range(page, page - ON_EACH_SIDE, page-1)
             } else {
