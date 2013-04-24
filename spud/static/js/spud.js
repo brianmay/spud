@@ -686,7 +686,7 @@ function display_photo_slideshow(photo, search, results, n) {
         .append(escapeHTML(photo.title))
 
     var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, })
+        .photo_menu({ photo: photo, search: search, n: n })
     append_action_links(ul)
 
     pdp = $('<div class="module"/>')
