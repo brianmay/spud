@@ -456,6 +456,7 @@ $.widget('spud.main_menu', $.spud.spud_menu, {
         this.add_item(categorys.search_results_a(search, 0, "Categories"))
         this.add_item(places.search_results_a(search, 0, "Places"))
         this.add_item(persons.search_results_a(search, 0, "People"))
+        this.add_item(feedbacks.search_results_a(search, 0, "Feedback"))
         this.add_item(photo_search_results_a({}, 0))
     },
 })
