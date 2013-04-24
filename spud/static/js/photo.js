@@ -878,6 +878,38 @@ $.widget('spud.change_photo_datetime_dialog',  $.spud.change_photo_attribute_dia
 })
 
 
+$.widget('spud.change_photo_datetime_offset_dialog',  $.spud.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "time offset"
+        this.options.fields = [
+            ["datetime_offset", new text_input_field("time offset", true)],
+        ]
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { adj_datetime: values.datetime_offset }
+        this._super(values);
+    },
+})
+
+
+$.widget('spud.change_photo_timezone_dialog',  $.spud.change_photo_attribute_dialog, {
+    _create: function() {
+        this.options.title = "timezone"
+        this.options.fields = [
+            ["timezone", new text_input_field("timezone", true)],
+        ]
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        values = { set_timezone: values.timezone }
+        this._super(values);
+    },
+})
+
+
 $.widget('spud.change_photo_action_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "action"

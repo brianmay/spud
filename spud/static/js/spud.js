@@ -753,6 +753,18 @@ var operations = [
         fn: display_change_photo_datetime,
     },
     {
+        pk: "datetime_offset",
+        label: "Change datetime offset",
+        desc: "Change the photo's date/time by offset",
+        fn: display_change_photo_datetime_offset,
+    },
+    {
+        pk: "timezone",
+        label: "Change timezone",
+        desc: "Change the photo's timezone",
+        fn: display_change_photo_timezone,
+    },
+    {
         pk: "action",
         label: "Change action",
         desc: "Change the photo's action",
@@ -846,6 +858,26 @@ function display_change_photo_comment(photo, criteria, number_results) {
 function display_change_photo_datetime(photo, criteria, number_results) {
     $("<div id='dialog'></div>")
         .change_photo_datetime_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
+}
+
+
+function display_change_photo_datetime_offset(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_datetime_offset_dialog({
+            initial: photo,
+            criteria: criteria,
+            number_results: number_results
+        })
+}
+
+
+function display_change_photo_timezone(photo, criteria, number_results) {
+    $("<div id='dialog'></div>")
+        .change_photo_timezone_dialog({
             initial: photo,
             criteria: criteria,
             number_results: number_results

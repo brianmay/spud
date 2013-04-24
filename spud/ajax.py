@@ -2421,6 +2421,7 @@ def photo_search_change(request):
 
     for key in params.keys():
         if (not key.startswith("set_") and
+           not key.startswith("adj_") and
            not key.startswith("add_") and
            not key.startswith("del_")):
             raise ErrorBadRequest("We got a bad parameter '%s'" % key)
@@ -2456,6 +2457,47 @@ def photo_search_change(request):
                               utc_offset=utc_offset, datetime=dt)
             del utc_offset
             del dt
+
+        value = _pop_string(params, "adj_datetime")
+        if value is not None:
+            sign = 1
+            if value[0] == '+':
+                value = value[1:]
+            elif value[0] == '-':
+                sign = -1
+                value = value[1:]
+
+            value = value.split(":")
+            if len(value) != 3:
+                raise ErrorBadRequest("Cannot decode adjust datetime value")
+
+            hh = _decode_int("adj_datetime", value[0])
+            mm = _decode_int("adj_datetime", value[1])
+            ss = _decode_int("adj_datetime", value[2])
+
+            for photo in photo_list:
+                adjust = datetime.timedelta(hours=hh, minutes=mm, seconds=ss)
+                adjust = adjust * sign
+                photo.datetime = photo.datetime + adjust
+                photo.save()
+                del adjust
+                del photo
+
+            del hh
+            del mm
+            del ss
+
+        value = _pop_string(params, "set_timezone")
+        if value is not None:
+            tz = _decode_timezone("set_timezone", value)
+            for photo in photo_list:
+                dt = pytz.utc.localize(photo.datetime)
+                dt = dt.astimezone(tz)
+                photo.utc_offset = dt.utcoffset().total_seconds() / 60
+                photo.save()
+                del dt
+                del photo
+            del tz
 
         value = _pop_string(params, "set_action")
         if value is not None:
