@@ -32,6 +32,7 @@ output_field.prototype.to_html = function(id) {
         .text(this.title)
     this.dd = $("<dd/>")
         .append(html)
+    this.visible = true
 
     return [this.dt, this.dd]
 }
@@ -53,16 +54,19 @@ output_field.prototype.append_a = function(html) {
 output_field.prototype.toggle = function(show) {
     this.dt.toggle(show)
     this.dd.toggle(show)
+    this.visible = show
 }
 
 output_field.prototype.hide = function() {
     this.dt.hide()
     this.dd.hide()
+    this.visible = false
 }
 
 output_field.prototype.show = function() {
     this.dt.show()
     this.dd.show()
+    this.visible = true
 }
 
 // define text_output_field
@@ -314,9 +318,12 @@ $.widget('spud.infobox', {
 
     set: function(values) {
         var mythis = this
+        var visible = false
         $.each(mythis.fields, function(id, field) {
             mythis.set_value(id, values[id])
+            if (field.visible) visible = true
         })
+        this.element.toggle(visible)
         return this
     },
 
