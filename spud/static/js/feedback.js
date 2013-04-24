@@ -561,6 +561,16 @@ feedback_doer.prototype.list = function(feedbacks, page, last_page, html_page, d
     }, div)
 }
 
+feedback_doer.prototype.list_children = function(feedbacks, page, last_page, html_page, div) {
+    $.spud.feedback_list({
+        feedbacks: feedbacks,
+        page: page,
+        last_page: last_page,
+        html_page: html_page,
+        include_children: true,
+    }, div)
+}
+
 feedback_doer.prototype.search_dialog = function(criteria, dialog) {
     $.spud.feedback_search_dialog({ criteria: criteria }, dialog)
 }

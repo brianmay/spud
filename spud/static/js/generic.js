@@ -172,6 +172,14 @@ generic_doer.prototype.delete_a = function(object, title) {
     return a
 }
 
+generic_doer.prototype.list_results = function(feedbacks, page, last_page, html_page, div) {
+    this.list(feedbacks, page, last_page, html_page, div)
+}
+
+generic_doer.prototype.list_children = function(feedbacks, page, last_page, html_page, div) {
+    this.list(feedbacks, page, last_page, html_page, div)
+}
+
 generic_doer.prototype.display_search_form = function(criteria) {
     var dialog = $("<div id='dialog'></div>")
     this.search_dialog(criteria, dialog)
@@ -202,7 +210,7 @@ generic_doer.prototype.display_search_results = function(search, results) {
     this.search_details(results.criteria, div)
 
     var div = $("<div/>").appendTo(cm)
-    this.list(this.get_objects(results), page, last_page, html_page, div)
+    this.list_results(this.get_objects(results), page, last_page, html_page, div)
 
     var ul = $('<ul class="menu"/>')
     this.list_menu(search, results, ul)
@@ -239,7 +247,7 @@ generic_doer.prototype.display = function(object) {
         var al = $("<div class='children' />")
             .appendTo(cm)
 
-        this.list(
+        this.list_children(
             null, null, null,
             function(page, text) {
                     return $("<a/>")
