@@ -86,7 +86,7 @@ click_sizes = [
 ]
 
 
-$.widget('ui.settings_dialog',  $.ui.form_dialog, {
+$.widget('spud.settings_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["photos_per_page", new integer_input_field("Photos per page", true)],
@@ -122,7 +122,7 @@ $.widget('ui.settings_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.login_dialog',  $.ui.form_dialog, {
+$.widget('spud.login_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["username", new text_input_field("Username", true)],

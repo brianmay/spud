@@ -56,7 +56,7 @@ function get_photo_style(data) {
 }
 
 
-$.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
+$.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Photo search"
         this.options.description = "Please search for a photo."
@@ -253,7 +253,7 @@ $.widget('ui.photo_search_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.photo_search_details',  $.ui.infobox, {
+$.widget('spud.photo_search_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["first_id", new text_output_field("id >=")],
@@ -293,7 +293,7 @@ $.widget('ui.photo_search_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.photo_summary',  {
+$.widget('spud.photo_summary',  {
     _create: function() {
         this.element
             .addClass("photo_summary")
@@ -341,7 +341,7 @@ $.widget('ui.photo_summary',  {
 })
 
 
-$.widget('ui.photo_image',  {
+$.widget('spud.photo_image',  {
     _create: function() {
         this.element
             .addClass("photo_image_block")
@@ -387,7 +387,7 @@ $.widget('ui.photo_image',  {
 })
 
 
-$.widget('ui.photo_details',  $.ui.infobox, {
+$.widget('spud.photo_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["title", new text_output_field("Title")],
@@ -496,7 +496,7 @@ $.widget('ui.photo_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.camera_details',  $.ui.infobox, {
+$.widget('spud.camera_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["camera_make", new text_output_field("Camera make")],
@@ -523,7 +523,7 @@ $.widget('ui.camera_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.photo_article',  {
+$.widget('spud.photo_article',  {
     _create: function() {
         this.element
                 .addClass("photo_article")
@@ -570,7 +570,7 @@ $.widget('ui.photo_article',  {
 })
 
 
-$.widget('ui.photo_slideshow',  {
+$.widget('spud.photo_slideshow',  {
     _create: function() {
         this.element
                 .addClass("slideshow")
@@ -617,7 +617,7 @@ $.widget('ui.photo_slideshow',  {
 })
 
 
-$.widget('ui.photo_menu', $.ui.spud_menu, {
+$.widget('spud.photo_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.photo != null) {
@@ -699,7 +699,7 @@ $.widget('ui.photo_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.photo_list', $.ui.photo_list_base, {
+$.widget('spud.photo_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         this.ul.myselectable({
@@ -736,7 +736,7 @@ $.widget('ui.photo_list', $.ui.photo_list_base, {
 })
 
 
-$.widget('ui.photo_list_menu', $.ui.spud_menu, {
+$.widget('spud.photo_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
@@ -770,7 +770,7 @@ $.widget('ui.photo_list_menu', $.ui.spud_menu, {
     },
 })
 
-$.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
+$.widget('spud.change_photo_attribute_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.description = "Please change the " + this.options.title + ". " +
             this.options.number_results + " photos will be altered."
@@ -799,7 +799,7 @@ $.widget('ui.change_photo_attribute_dialog',  $.ui.form_dialog, {
 
 
 
-$.widget('ui.change_photo_title_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_title_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "title"
         this.options.fields = [
@@ -815,7 +815,7 @@ $.widget('ui.change_photo_title_dialog',  $.ui.change_photo_attribute_dialog, {
 })
 
 
-$.widget('ui.change_photo_description_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_description_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "description"
         this.options.fields = [
@@ -830,7 +830,7 @@ $.widget('ui.change_photo_description_dialog',  $.ui.change_photo_attribute_dial
     },
 })
 
-$.widget('ui.change_photo_view_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_view_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "view"
         this.options.fields = [
@@ -846,7 +846,7 @@ $.widget('ui.change_photo_view_dialog',  $.ui.change_photo_attribute_dialog, {
 })
 
 
-$.widget('ui.change_photo_comment_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_comment_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "comment"
         this.options.fields = [
@@ -862,7 +862,7 @@ $.widget('ui.change_photo_comment_dialog',  $.ui.change_photo_attribute_dialog, 
 })
 
 
-$.widget('ui.change_photo_datetime_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_datetime_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "datetime"
         this.options.fields = [
@@ -878,7 +878,7 @@ $.widget('ui.change_photo_datetime_dialog',  $.ui.change_photo_attribute_dialog,
 })
 
 
-$.widget('ui.change_photo_action_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_action_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "action"
         this.options.fields = [
@@ -904,7 +904,7 @@ $.widget('ui.change_photo_action_dialog',  $.ui.change_photo_attribute_dialog, {
 })
 
 
-$.widget('ui.change_photo_photographer_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_photographer_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "photographer"
         this.options.fields = [
@@ -920,7 +920,7 @@ $.widget('ui.change_photo_photographer_dialog',  $.ui.change_photo_attribute_dia
 })
 
 
-$.widget('ui.change_photo_place_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_place_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "place"
         this.options.fields = [
@@ -936,7 +936,7 @@ $.widget('ui.change_photo_place_dialog',  $.ui.change_photo_attribute_dialog, {
 })
 
 
-$.widget('ui.change_photo_albums_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_albums_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "album"
         var initial = this.options.initial
@@ -979,7 +979,7 @@ $.widget('ui.change_photo_albums_dialog',  $.ui.change_photo_attribute_dialog, {
 })
 
 
-$.widget('ui.change_photo_categorys_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_categorys_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "category"
         var initial = this.options.initial
@@ -1021,7 +1021,7 @@ $.widget('ui.change_photo_categorys_dialog',  $.ui.change_photo_attribute_dialog
     },
 })
 
-$.widget('ui.change_photo_persons_dialog',  $.ui.change_photo_attribute_dialog, {
+$.widget('spud.change_photo_persons_dialog',  $.spud.change_photo_attribute_dialog, {
     _create: function() {
         this.options.title = "person"
         var initial = this.options.initial
@@ -1064,7 +1064,7 @@ $.widget('ui.change_photo_persons_dialog',  $.ui.change_photo_attribute_dialog, 
     },
 })
 
-$.widget('ui.change_photo_relation_dialog',  $.ui.form_dialog, {
+$.widget('spud.change_photo_relation_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["photo_1", new photo_select_field("Photo", true)],
@@ -1107,7 +1107,7 @@ $.widget('ui.change_photo_relation_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.delete_photo_relation_dialog',  $.ui.form_dialog, {
+$.widget('spud.delete_photo_relation_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete relationship"
         this.options.button = "Delete"
@@ -1136,7 +1136,7 @@ $.widget('ui.delete_photo_relation_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.change_photos_dialog',  $.ui.form_dialog, {
+$.widget('spud.change_photos_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["action", new quick_select_field("Action")],

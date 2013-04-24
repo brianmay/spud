@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$.widget('ui.category_search_dialog',  $.ui.form_dialog, {
+$.widget('spud.category_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
@@ -61,7 +61,7 @@ $.widget('ui.category_search_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.category_search_details',  $.ui.infobox, {
+$.widget('spud.category_search_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
@@ -79,7 +79,7 @@ $.widget('ui.category_search_details',  $.ui.infobox, {
 
 
 
-$.widget('ui.category_details',  $.ui.infobox, {
+$.widget('spud.category_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["title", new text_output_field("Title")],
@@ -103,7 +103,7 @@ $.widget('ui.category_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.category_list', $.ui.photo_list_base, {
+$.widget('spud.category_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.categorys != null) {
@@ -127,7 +127,7 @@ $.widget('ui.category_list', $.ui.photo_list_base, {
 })
 
 
-$.widget('ui.category_menu', $.ui.spud_menu, {
+$.widget('spud.category_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.category != null) {
@@ -171,7 +171,7 @@ $.widget('ui.category_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.category_list_menu', $.ui.spud_menu, {
+$.widget('spud.category_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
@@ -192,7 +192,7 @@ $.widget('ui.category_list_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.category_change_dialog',  $.ui.form_dialog, {
+$.widget('spud.category_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -241,7 +241,7 @@ $.widget('ui.category_change_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.category_delete_dialog',  $.ui.form_dialog, {
+$.widget('spud.category_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete category"
         this.options.button = "Delete"
@@ -305,20 +305,20 @@ category_doer.prototype.get_objects = function(results) {
 }
 
 category_doer.prototype.details = function(category, div) {
-    $.ui.category_details({category: category}, div)
+    $.spud.category_details({category: category}, div)
 }
 
 category_doer.prototype.list_menu = function(search, results, div) {
-    $.ui.category_list_menu({search: search, results: results}, div)
+    $.spud.category_list_menu({search: search, results: results}, div)
 }
 
 
 category_doer.prototype.menu = function(category, div) {
-    $.ui.category_menu({category: category}, div)
+    $.spud.category_menu({category: category}, div)
 }
 
 category_doer.prototype.list = function(categorys, page, last_page, html_page, div) {
-    $.ui.category_list({
+    $.spud.category_list({
         categorys: categorys,
         page: page,
         last_page: last_page,
@@ -327,19 +327,19 @@ category_doer.prototype.list = function(categorys, page, last_page, html_page, d
 }
 
 category_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.ui.category_search_dialog({ criteria: criteria }, dialog)
+    $.spud.category_search_dialog({ criteria: criteria }, dialog)
 }
 
 category_doer.prototype.search_details = function(criteria, dialog) {
-    $.ui.category_search_details({ criteria: criteria }, dialog)
+    $.spud.category_search_details({ criteria: criteria }, dialog)
 }
 
 category_doer.prototype.change_dialog = function(category, dialog) {
-    $.ui.category_change_dialog({ category: category }, dialog)
+    $.spud.category_change_dialog({ category: category }, dialog)
 }
 
 category_doer.prototype.delete_dialog = function(category, dialog) {
-    $.ui.category_delete_dialog({ category: category }, dialog)
+    $.spud.category_delete_dialog({ category: category }, dialog)
 }
 
 categorys = new category_doer()

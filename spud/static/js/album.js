@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$.widget('ui.album_search_dialog',  $.ui.form_dialog, {
+$.widget('spud.album_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
@@ -61,7 +61,7 @@ $.widget('ui.album_search_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.album_search_details',  $.ui.infobox, {
+$.widget('spud.album_search_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
@@ -79,7 +79,7 @@ $.widget('ui.album_search_details',  $.ui.infobox, {
 
 
 
-$.widget('ui.album_details',  $.ui.infobox, {
+$.widget('spud.album_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["title", new text_output_field("Title")],
@@ -103,7 +103,7 @@ $.widget('ui.album_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.album_list', $.ui.photo_list_base, {
+$.widget('spud.album_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.albums != null) {
@@ -127,7 +127,7 @@ $.widget('ui.album_list', $.ui.photo_list_base, {
 })
 
 
-$.widget('ui.album_menu', $.ui.spud_menu, {
+$.widget('spud.album_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.album != null) {
@@ -171,7 +171,7 @@ $.widget('ui.album_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.album_list_menu', $.ui.spud_menu, {
+$.widget('spud.album_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
@@ -192,7 +192,7 @@ $.widget('ui.album_list_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.album_change_dialog',  $.ui.form_dialog, {
+$.widget('spud.album_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -241,7 +241,7 @@ $.widget('ui.album_change_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.album_delete_dialog',  $.ui.form_dialog, {
+$.widget('spud.album_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete album"
         this.options.button = "Delete"
@@ -304,20 +304,20 @@ album_doer.prototype.get_objects = function(results) {
 }
 
 album_doer.prototype.details = function(album, div) {
-    $.ui.album_details({album: album}, div)
+    $.spud.album_details({album: album}, div)
 }
 
 album_doer.prototype.list_menu = function(search, results, div) {
-    $.ui.album_list_menu({search: search, results: results}, div)
+    $.spud.album_list_menu({search: search, results: results}, div)
 }
 
 
 album_doer.prototype.menu = function(album, div) {
-    $.ui.album_menu({album: album}, div)
+    $.spud.album_menu({album: album}, div)
 }
 
 album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
-    $.ui.album_list({
+    $.spud.album_list({
         albums: albums,
         page: page,
         last_page: last_page,
@@ -326,19 +326,19 @@ album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
 }
 
 album_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.ui.album_search_dialog({ criteria: criteria }, dialog)
+    $.spud.album_search_dialog({ criteria: criteria }, dialog)
 }
 
 album_doer.prototype.search_details = function(criteria, dialog) {
-    $.ui.album_search_details({ criteria: criteria }, dialog)
+    $.spud.album_search_details({ criteria: criteria }, dialog)
 }
 
 album_doer.prototype.change_dialog = function(album, dialog) {
-    $.ui.album_change_dialog({ album: album }, dialog)
+    $.spud.album_change_dialog({ album: album }, dialog)
 }
 
 album_doer.prototype.delete_dialog = function(album, dialog) {
-    $.ui.album_delete_dialog({ album: album }, dialog)
+    $.spud.album_delete_dialog({ album: album }, dialog)
 }
 
 albums = new album_doer()

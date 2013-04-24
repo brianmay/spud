@@ -270,7 +270,7 @@ photo_output_field.prototype.destroy = function() {
     output_field.prototype.destroy.call(this)
 }
 
-$.widget('ui.infobox', {
+$.widget('spud.infobox', {
     _create: function(){
         var options = this.options
 

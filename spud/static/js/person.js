@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$.widget('ui.person_search_dialog',  $.ui.form_dialog, {
+$.widget('spud.person_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
@@ -61,7 +61,7 @@ $.widget('ui.person_search_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.person_search_details',  $.ui.infobox, {
+$.widget('spud.person_search_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
@@ -79,7 +79,7 @@ $.widget('ui.person_search_details',  $.ui.infobox, {
 
 
 
-$.widget('ui.person_details',  $.ui.infobox, {
+$.widget('spud.person_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["title", new text_output_field("Title")],
@@ -129,7 +129,7 @@ $.widget('ui.person_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.person_list', $.ui.photo_list_base, {
+$.widget('spud.person_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.persons != null) {
@@ -153,7 +153,7 @@ $.widget('ui.person_list', $.ui.photo_list_base, {
 })
 
 
-$.widget('ui.person_menu', $.ui.spud_menu, {
+$.widget('spud.person_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.person != null) {
@@ -197,7 +197,7 @@ $.widget('ui.person_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.person_list_menu', $.ui.spud_menu, {
+$.widget('spud.person_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
@@ -218,7 +218,7 @@ $.widget('ui.person_list_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.person_change_dialog',  $.ui.form_dialog, {
+$.widget('spud.person_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields2 = [
         ]
@@ -313,7 +313,7 @@ $.widget('ui.person_change_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.person_delete_dialog',  $.ui.form_dialog, {
+$.widget('spud.person_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete person"
         this.options.button = "Delete"
@@ -377,20 +377,20 @@ person_doer.prototype.get_objects = function(results) {
 }
 
 person_doer.prototype.details = function(person, div) {
-    $.ui.person_details({person: person}, div)
+    $.spud.person_details({person: person}, div)
 }
 
 person_doer.prototype.list_menu = function(search, results, div) {
-    $.ui.person_list_menu({search: search, results: results}, div)
+    $.spud.person_list_menu({search: search, results: results}, div)
 }
 
 
 person_doer.prototype.menu = function(person, div) {
-    $.ui.person_menu({person: person}, div)
+    $.spud.person_menu({person: person}, div)
 }
 
 person_doer.prototype.list = function(persons, page, last_page, html_page, div) {
-    $.ui.person_list({
+    $.spud.person_list({
         persons: persons,
         page: page,
         last_page: last_page,
@@ -399,19 +399,19 @@ person_doer.prototype.list = function(persons, page, last_page, html_page, div) 
 }
 
 person_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.ui.person_search_dialog({ criteria: criteria }, dialog)
+    $.spud.person_search_dialog({ criteria: criteria }, dialog)
 }
 
 person_doer.prototype.search_details = function(criteria, dialog) {
-    $.ui.person_search_details({ criteria: criteria }, dialog)
+    $.spud.person_search_details({ criteria: criteria }, dialog)
 }
 
 person_doer.prototype.change_dialog = function(person, dialog) {
-    $.ui.person_change_dialog({ person: person }, dialog)
+    $.spud.person_change_dialog({ person: person }, dialog)
 }
 
 person_doer.prototype.delete_dialog = function(person, dialog) {
-    $.ui.person_delete_dialog({ person: person }, dialog)
+    $.spud.person_delete_dialog({ person: person }, dialog)
 }
 
 persons = new person_doer()

@@ -544,7 +544,7 @@ photo_select_field.prototype.validate = function() {
 
 
 // define dialog
-$.widget('ui.form_dialog',  $.ui.dialog, {
+$.widget('spud.form_dialog',  $.ui.dialog, {
     _create: function() {
         var mythis = this
         var options = this.options

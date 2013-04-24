@@ -122,7 +122,7 @@ $.fn.append_csv = function(list){
 // * BASE WIDGETS *
 // ****************
 
-$.widget('ui.myselectable', $.ui.selectable, {
+$.widget('spud.myselectable', $.ui.selectable, {
     _mouseStart: function(event) {
         if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
             this._super( event );
@@ -131,7 +131,7 @@ $.widget('ui.myselectable', $.ui.selectable, {
 });
 
 
-$.widget('ui.autocompletehtml', $.ui.autocomplete, {
+$.widget('spud.autocompletehtml', $.ui.autocomplete, {
     _create: function(){
         this._super();
         this.sizeul = true
@@ -150,7 +150,7 @@ $.widget('ui.autocompletehtml', $.ui.autocomplete, {
 });
 
 
-$.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
+$.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     options: {
     },
 
@@ -250,7 +250,7 @@ $.widget('ui.ajaxautocomplete',  $.ui.autocompletehtml, {
 })
 
 
-$.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
+$.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
     set: function(initial) {
         if (initial.length > 0) {
             var value = $.map(initial, function(v){ return v.pk });
@@ -294,7 +294,7 @@ $.widget('ui.ajaxautocompletemultiple',  $.ui.ajaxautocomplete, {
 })
 
 
-$.widget('ui.quickautocomplete', $.ui.ajaxautocomplete, {
+$.widget('spud.quickautocomplete', $.spud.ajaxautocomplete, {
     _create: function(){
         delete this.options.type
         this.options.source = operations,
@@ -353,7 +353,7 @@ $.widget('ui.quickautocomplete', $.ui.ajaxautocomplete, {
 });
 
 
-$.widget('ui.photo_select',  $.ui.ajaxautocomplete, {
+$.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
     _create: function(){
         this.img = $("<img></img>")
             .image({size: get_settings().list_size})
@@ -394,7 +394,7 @@ $.widget('ui.photo_select',  $.ui.ajaxautocomplete, {
 })
 
 
-$.widget('ui.ajaxautocompletesorted',  $.ui.ajaxautocompletemultiple, {
+$.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
     _create: function(){
         this._super()
         this.deck
@@ -417,7 +417,7 @@ $.widget('ui.ajaxautocompletesorted',  $.ui.ajaxautocompletemultiple, {
 })
 
 
-$.widget('ui.spud_menu', {
+$.widget('spud.spud_menu', {
     _create: function() {
 
         this.element
@@ -443,7 +443,7 @@ $.widget('ui.spud_menu', {
 })
 
 
-$.widget('ui.main_menu', $.ui.spud_menu, {
+$.widget('spud.main_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         this.set()
@@ -461,7 +461,7 @@ $.widget('ui.main_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.selection_menu', $.ui.spud_menu, {
+$.widget('spud.selection_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.selection != null) {
@@ -487,7 +487,7 @@ $.widget('ui.selection_menu', $.ui.spud_menu, {
     },
 })
 
-$.widget('ui.paginator', {
+$.widget('spud.paginator', {
     _create: function() {
         this.element
             .addClass("paginator")
@@ -560,7 +560,7 @@ $.widget('ui.paginator', {
 })
 
 
-$.widget('ui.image', {
+$.widget('spud.image', {
     _create: function() {
         if (this.options.photo != null) {
             this.set(this.options.photo)
@@ -655,7 +655,7 @@ $.widget('ui.image', {
 })
 
 
-$.widget('ui.list_base',  {
+$.widget('spud.list_base',  {
     _create: function() {
         this.ul = $("<ul></ul")
             .appendTo(this.element)
@@ -712,7 +712,7 @@ $.widget('ui.list_base',  {
 })
 
 
-$.widget('ui.photo_list_base',  $.ui.list_base, {
+$.widget('spud.photo_list_base',  $.spud.list_base, {
     _create: function() {
         this.element
             .addClass("photo_list")

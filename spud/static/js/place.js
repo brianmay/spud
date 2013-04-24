@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$.widget('ui.place_search_dialog',  $.ui.form_dialog, {
+$.widget('spud.place_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
@@ -61,7 +61,7 @@ $.widget('ui.place_search_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.place_search_details',  $.ui.infobox, {
+$.widget('spud.place_search_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
@@ -79,7 +79,7 @@ $.widget('ui.place_search_details',  $.ui.infobox, {
 
 
 
-$.widget('ui.place_details',  $.ui.infobox, {
+$.widget('spud.place_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["title", new text_output_field("Title")],
@@ -120,7 +120,7 @@ $.widget('ui.place_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.place_list', $.ui.photo_list_base, {
+$.widget('spud.place_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.places != null) {
@@ -144,7 +144,7 @@ $.widget('ui.place_list', $.ui.photo_list_base, {
 })
 
 
-$.widget('ui.place_menu', $.ui.spud_menu, {
+$.widget('spud.place_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.place != null) {
@@ -188,7 +188,7 @@ $.widget('ui.place_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.place_list_menu', $.ui.spud_menu, {
+$.widget('spud.place_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
@@ -209,7 +209,7 @@ $.widget('ui.place_list_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.place_change_dialog',  $.ui.form_dialog, {
+$.widget('spud.place_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -263,7 +263,7 @@ $.widget('ui.place_change_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.place_delete_dialog',  $.ui.form_dialog, {
+$.widget('spud.place_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete place"
         this.options.button = "Delete"
@@ -327,20 +327,20 @@ place_doer.prototype.get_objects = function(results) {
 }
 
 place_doer.prototype.details = function(place, div) {
-    $.ui.place_details({place: place}, div)
+    $.spud.place_details({place: place}, div)
 }
 
 place_doer.prototype.list_menu = function(search, results, div) {
-    $.ui.place_list_menu({search: search, results: results}, div)
+    $.spud.place_list_menu({search: search, results: results}, div)
 }
 
 
 place_doer.prototype.menu = function(place, div) {
-    $.ui.place_menu({place: place}, div)
+    $.spud.place_menu({place: place}, div)
 }
 
 place_doer.prototype.list = function(places, page, last_page, html_page, div) {
-    $.ui.place_list({
+    $.spud.place_list({
         places: places,
         page: page,
         last_page: last_page,
@@ -349,19 +349,19 @@ place_doer.prototype.list = function(places, page, last_page, html_page, div) {
 }
 
 place_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.ui.place_search_dialog({ criteria: criteria }, dialog)
+    $.spud.place_search_dialog({ criteria: criteria }, dialog)
 }
 
 place_doer.prototype.search_details = function(criteria, dialog) {
-    $.ui.place_search_details({ criteria: criteria }, dialog)
+    $.spud.place_search_details({ criteria: criteria }, dialog)
 }
 
 place_doer.prototype.change_dialog = function(place, dialog) {
-    $.ui.place_change_dialog({ place: place }, dialog)
+    $.spud.place_change_dialog({ place: place }, dialog)
 }
 
 place_doer.prototype.delete_dialog = function(place, dialog) {
-    $.ui.place_delete_dialog({ place: place }, dialog)
+    $.spud.place_delete_dialog({ place: place }, dialog)
 }
 
 places = new place_doer()

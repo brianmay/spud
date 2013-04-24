@@ -133,7 +133,7 @@ function _feedback_html(feedback, include_children, include_photo) {
     return div
 }
 
-$.widget('ui.feedback_search_dialog',  $.ui.form_dialog, {
+$.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
@@ -212,7 +212,7 @@ $.widget('ui.feedback_search_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.feedback_search_details',  $.ui.infobox, {
+$.widget('spud.feedback_search_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
@@ -233,7 +233,7 @@ $.widget('ui.feedback_search_details',  $.ui.infobox, {
 
 
 
-$.widget('ui.feedback_details',  $.ui.infobox, {
+$.widget('spud.feedback_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["photo", new photo_output_field("Photo", get_settings().list_size, true)],
@@ -268,7 +268,7 @@ $.widget('ui.feedback_details',  $.ui.infobox, {
 })
 
 
-$.widget('ui.feedback_list', $.ui.list_base, {
+$.widget('spud.feedback_list', $.spud.list_base, {
     _create: function() {
         this.element.addClass("feedback_list")
         this._super()
@@ -296,7 +296,7 @@ $.widget('ui.feedback_list', $.ui.list_base, {
 })
 
 
-$.widget('ui.feedback_menu', $.ui.spud_menu, {
+$.widget('spud.feedback_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.feedback != null) {
@@ -338,7 +338,7 @@ $.widget('ui.feedback_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.feedback_list_menu', $.ui.spud_menu, {
+$.widget('spud.feedback_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
@@ -362,7 +362,7 @@ $.widget('ui.feedback_list_menu', $.ui.spud_menu, {
 })
 
 
-$.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
+$.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["rating", new select_input_field("Rating", [
@@ -448,7 +448,7 @@ $.widget('ui.feedback_change_dialog',  $.ui.form_dialog, {
 })
 
 
-$.widget('ui.feedback_delete_dialog',  $.ui.form_dialog, {
+$.widget('spud.feedback_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete feedback"
         this.options.button = "Delete"
@@ -533,20 +533,20 @@ feedback_doer.prototype.get_objects = function(results) {
 }
 
 feedback_doer.prototype.details = function(feedback, div) {
-    $.ui.feedback_details({feedback: feedback}, div)
+    $.spud.feedback_details({feedback: feedback}, div)
 }
 
 feedback_doer.prototype.list_menu = function(search, results, div) {
-    $.ui.feedback_list_menu({search: search, results: results}, div)
+    $.spud.feedback_list_menu({search: search, results: results}, div)
 }
 
 
 feedback_doer.prototype.menu = function(feedback, div) {
-    $.ui.feedback_menu({feedback: feedback}, div)
+    $.spud.feedback_menu({feedback: feedback}, div)
 }
 
 feedback_doer.prototype.list = function(feedbacks, page, last_page, html_page, div) {
-    $.ui.feedback_list({
+    $.spud.feedback_list({
         feedbacks: feedbacks,
         page: page,
         last_page: last_page,
@@ -555,19 +555,19 @@ feedback_doer.prototype.list = function(feedbacks, page, last_page, html_page, d
 }
 
 feedback_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.ui.feedback_search_dialog({ criteria: criteria }, dialog)
+    $.spud.feedback_search_dialog({ criteria: criteria }, dialog)
 }
 
 feedback_doer.prototype.search_details = function(criteria, dialog) {
-    $.ui.feedback_search_details({ criteria: criteria }, dialog)
+    $.spud.feedback_search_details({ criteria: criteria }, dialog)
 }
 
 feedback_doer.prototype.change_dialog = function(feedback, dialog) {
-    $.ui.feedback_change_dialog({ feedback: feedback }, dialog)
+    $.spud.feedback_change_dialog({ feedback: feedback }, dialog)
 }
 
 feedback_doer.prototype.delete_dialog = function(feedback, dialog) {
-    $.ui.feedback_delete_dialog({ feedback: feedback }, dialog)
+    $.spud.feedback_delete_dialog({ feedback: feedback }, dialog)
 }
 
 feedbacks = new feedback_doer()
