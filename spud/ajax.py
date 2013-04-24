@@ -616,7 +616,8 @@ def _json_datetime(value, utc_offset):
 
     return {
         'type': 'datetime',
-        'title': u"%s %s %s" % (local.date(), local.time(), tz_string),
+        'title': u"%s %s %s" % (
+            local.date(), local.time().strftime("%H:%M:%S"), tz_string),
         'date': unicode(local.date()),
         'time': unicode(local.time()),
         'timezone': tz_string
