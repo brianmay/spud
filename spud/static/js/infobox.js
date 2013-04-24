@@ -323,7 +323,14 @@ $.widget('spud.infobox', {
             mythis.set_value(id, values[id])
             if (field.visible) visible = true
         })
-        this.element.toggle(visible)
+
+        // we can't use this.element.toggle as it would set display:block which
+        // is sometimes wrong.
+        if (visible) {
+            this.element.attr("style", "")
+        } else {
+            this.element.attr("style", "display: none")
+        }
         return this
     },
 
