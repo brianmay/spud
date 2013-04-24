@@ -450,7 +450,7 @@ class feedback(hierarchy_model):
     is_removed = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ('submit_datetime',)
+        ordering = ('-submit_datetime',)
         permissions = (
             ("can_moderate", "Can moderate"),
         )
