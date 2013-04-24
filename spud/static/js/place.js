@@ -103,7 +103,7 @@ $.widget('spud.place_details',  $.spud.infobox, {
 
     set: function(initial) {
         this._super(initial)
-        if (url) {
+        if (initial.url) {
             this.set_value("url", $("<a></a>")
                 .attr("href", initial.url)
                 .text(initial.urldesc))
