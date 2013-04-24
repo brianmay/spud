@@ -64,7 +64,7 @@ function photo_url(photo) {
 }
 
 
-function upload_url() {
+function upload_form_url() {
    return "/upload/"
 }
 
@@ -106,7 +106,7 @@ function ajax(settings) {
         )
         .fail(
             function(jqXHR, textStatus, errorThrown) {
-                error(textStatus + " " + textStatus)
+                error(errorThrown)
             }
         )
 }
@@ -243,7 +243,7 @@ function load_photo(photo_id, success, error) {
 
 function load_upload_form(success, error) {
     ajax({
-        url: '/a/upload/',
+        url: '/a/upload/form/',
         type: "POST",
         success: success,
         error: error,

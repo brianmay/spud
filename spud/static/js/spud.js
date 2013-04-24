@@ -1157,7 +1157,7 @@ function do_settings_form(push_history) {
 
 function do_upload_form(push_history) {
     display_loading()
-    load_upload(
+    load_upload_form(
         function(data) {
             hide_loading()
             replace_links()

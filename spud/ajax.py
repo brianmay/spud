@@ -20,6 +20,7 @@ import os.path
 import pytz
 import datetime
 import re
+import uuid
 
 import django.db.transaction
 import django.conf
@@ -745,7 +746,7 @@ def _json_search(user, params):
 
     value = _pop_datetime(params, "first_date", timezone)
     if value is not None:
-        utc_value = value.astimezone(pytz.utc).replace(tzinfo=none)
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
         criteria["first_date"] = _json_datetime(
             utc_value, value.utcoffset().total_seconds() / 60)
         search = search & Q(datetime__gte=utc_value)
@@ -2107,7 +2108,7 @@ def feedback_search_form(request):
         'session': _json_session(request),
 
         'can_add': request.user.has_perm('spud.add_feedback'),
-        'can_moderate': request.user.has_perm('spud.can_moderate').
+        'can_moderate': request.user.has_perm('spud.can_moderate'),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2701,3 +2702,15 @@ def photo(request, photo_id):
         'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
+
+
+def upload_form(request):
+    response_data = {
+        'type': "upload_form",
+        'uid': str(uuid.uuid4()),
+        'can_upload': request.user.has_perm('spud.add_photo'),
+        'session': _json_session(request),
+    }
+    response_data = json.dumps(response_data)
+    response_type = "application/json"
+    return HttpResponse(response_data, mimetype=response_type)

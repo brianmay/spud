@@ -148,7 +148,7 @@ function display_upload_form(data) {
         ],
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
-        url: '/a/upload/',
+        url: '/a/upload/file/',
         uploadTemplate: display_uploads,
         downloadTemplate: display_downloads,
         limitConcurrentUploads: 1,

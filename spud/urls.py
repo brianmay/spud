@@ -64,7 +64,8 @@ urlpatterns = patterns('',
     url(r'^a/photo/change/$', 'spud.ajax.photo_search_change', name='ajax_photo_search_change'),
     url(r'^a/photo/(?P<photo_id>\d+)/$', 'spud.ajax.photo', name='ajax_photo'),
 
-    url(r'^a/upload/$', 'spud.upload.ajax', name='ajax_upload'),
+    url(r'^a/upload/form/$', 'spud.ajax.upload_form', name='ajax_upload_form'),
+    url(r'^a/upload/file/$', 'spud.upload.ajax', name='ajax_upload_file'),
 
     url(r'^$', 'spud.views.root', name='static_root'),
     url(r'^login/$', 'spud.views.login', name='static_login'),
