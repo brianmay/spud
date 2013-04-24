@@ -266,7 +266,7 @@ table#change-history tbody th { width:16em; }
 .fade.in{opacity:1;}
 
 /* OTHER */
-.loading { background:#ccc; }
+.loading * { visibility: hidden; }
 label { font-weight:normal; color:#666; font-size:12px; }
 .required label, label.required { font-weight:bold; color:#333; }
 

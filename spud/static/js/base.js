@@ -681,7 +681,6 @@ $.widget('spud.list_base',  {
     },
 
     display_loading: function() {
-        this.empty()
         this.element.addClass("loading")
     },
 
@@ -752,16 +751,6 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
     clear_status: function() {
         this.element.removeClass("loading")
         this.element.removeClass("errors")
-    },
-
-    display_loading: function() {
-        this.empty()
-        this.element.addClass("loading")
-    },
-
-    display_error: function() {
-        this.empty()
-        this.element.addClass("errors")
     },
 
     _destroy: function() {
