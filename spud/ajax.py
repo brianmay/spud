@@ -643,7 +643,7 @@ def _json_feedback(user, feedback, seen=None):
 
     for child in feedback.children.all():
         child_json = _json_feedback(user, child, seen)
-        if json is not None:
+        if child_json is not None:
             d['children'].append(child_json)
         del child_json
         del child
