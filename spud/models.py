@@ -451,6 +451,9 @@ class feedback(hierarchy_model):
 
     class Meta:
         ordering = ('submit_datetime',)
+        permissions = (
+            ("can_moderate", "Can moderate"),
+        )
 
     def save(self, *args, **kwargs):
         if self.submit_datetime is None:
@@ -947,6 +950,3 @@ class feedback_ascendant(base_model):
 
     class Meta:
         ordering = ['position']
-        permissions = (
-            ("can_moderate", "Can moderate")
-        )
