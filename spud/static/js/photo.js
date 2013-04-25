@@ -746,13 +746,15 @@ $.widget('spud.photo_list_menu', $.spud.spud_menu, {
     set: function(search, results) {
         this.element.empty()
 
-        this.add_item(
-            $("<a href=''>Slideshow</a>")
-            .attr("href", photo_search_item_url(search, 0, null))
-            .on("click", function() {
-                do_photo_search_item($.extend({}, search, { photo_mode: "slideshow" }), 0, null, true)
-                return false;
-            }))
+        if (results.photos.length > 0) {
+            this.add_item(
+                $("<a href=''>Slideshow</a>")
+                .attr("href", photo_search_item_url(search, 0, null))
+                .on("click", function() {
+                    do_photo_search_item($.extend({}, search, { photo_mode: "slideshow" }), 0, null, true)
+                    return false;
+                }))
+        }
 
         if (results.can_change) {
             this.add_item(

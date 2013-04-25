@@ -160,13 +160,15 @@ $.widget('spud.place_menu', $.spud.spud_menu, {
 
         this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
 
-        this.add_item(
-            $("<a href=''>Slideshow</a>")
-            .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
-            .on("click", function() {
-                do_photo_search_item({ criteria: criteria, photo_mode: "slideshow" }, 0, null, true);
-                return false;
-            }))
+        if (place.num_photos > 0) {
+            this.add_item(
+                $("<a href=''>Slideshow</a>")
+                .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
+                .on("click", function() {
+                    do_photo_search_item({ criteria: criteria, photo_mode: "slideshow" }, 0, null, true);
+                    return false;
+                }))
+        }
 
         this.add_item(photo_search_form_a(criteria))
         this.add_item(places.search_form_a({ instance: place.id }))
