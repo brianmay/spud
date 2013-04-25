@@ -83,7 +83,6 @@ $.widget('spud.person_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["title", new text_output_field("Title")],
-            ["cover_photo", new photo_output_field("Photo", get_settings().view_size)],
             ["first_name", new text_output_field("First name")],
             ["middle_name", new text_output_field("Middle name")],
             ["last_name", new text_output_field("Last name")],
@@ -105,6 +104,11 @@ $.widget('spud.person_details',  $.spud.infobox, {
             ["nephews_nieces", new link_list_output_field("Nephews and Nieces")],
             ["grandchildren", new link_list_output_field("Grand children")],
         ]
+
+        this.img = $("<div></div>")
+            .image({size: get_settings().view_size, include_link: true})
+            .appendTo(this.element)
+
         this._super();
 
         if (this.options.person != null) {
@@ -114,6 +118,7 @@ $.widget('spud.person_details',  $.spud.infobox, {
 
     set: function(initial) {
         this._super(initial)
+        this.img.image("set", initial.cover_photo)
         if (initial.gender == "1") {
             this.set_value("gender", "Male")
         } else if (initial.gender == "2") {

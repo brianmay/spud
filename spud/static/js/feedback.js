@@ -56,13 +56,8 @@ function _feedback_html(feedback, include_children, include_photo, include_links
             .text(feedback.submit_datetime.title)
 
         if (include_photo) {
-            var img = $("<img />")
-                .image({ photo: feedback.photo, size: get_settings().list_size })
-
-            photo_a(feedback.photo, {}, "")
-                .data('photo', null)  // remove mouseover as it looks yuck.
-                .html(img)
-                .appendTo(div)
+            var img = $("<div />")
+                .image({ photo: feedback.photo, size: get_settings().list_size, include_link: true })
         }
 
         $("<div></div>")

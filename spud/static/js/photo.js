@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 function get_photo_action(action) {
     if (action == null)
-        r = "None"
+        r = null
     else if (action == 'D')
         r = 'delete'
     else if (action == 'S')
@@ -348,7 +348,7 @@ $.widget('spud.photo_image',  {
 
         this._super();
 
-        this.img = $("<img id='photo' />")
+        this.img = $("<div id='photo' />")
             .image({ size: get_settings().view_size })
             .appendTo(this.element)
 
@@ -473,7 +473,7 @@ $.widget('spud.photo_details',  $.spud.infobox, {
             can_change, photo_change_a(photo, display_change_photo_photographer, "[edit]")
         )
 
-        this.set_value("rating", photo.rating ? photo.rating : "None")
+        this.set_value("rating", photo.rating)
 
         this.set_edit_value(
             "related", $.map(photo.related, function(r) {
@@ -578,7 +578,7 @@ $.widget('spud.photo_slideshow',  {
         this.pd = $("<div class='photo'></div>")
             .appendTo(this.element)
 
-        this.img = $("<img />")
+        this.img = $("<div />")
             .image({size: get_settings().click_size})
             .appendTo(this.pd)
 

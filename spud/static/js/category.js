@@ -83,16 +83,25 @@ $.widget('spud.category_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["title", new text_output_field("Title")],
-            ["cover_photo", new photo_output_field("Photo", get_settings().view_size)],
             ["sortname", new text_output_field("Sort Name")],
             ["sortorder", new text_output_field("Sort Order")],
             ["description", new p_output_field("Description")],
         ]
+
+        this.img = $("<div></div>")
+            .image({size: get_settings().view_size, include_link: true})
+            .appendTo(this.element)
+
         this._super();
 
         if (this.options.category != null) {
             this.set(this.options.category)
         }
+    },
+
+    set: function(initial) {
+        this._super(initial)
+        this.img.image("set", initial.cover_photo)
     },
 
     _destroy: function() {

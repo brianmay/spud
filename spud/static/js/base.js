@@ -339,7 +339,7 @@ $.widget('spud.quickautocomplete', $.spud.ajaxautocomplete, {
 
 $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
     _create: function(){
-        this.img = $("<img></img>")
+        this.img = $("<div></div>")
             .image({size: get_settings().list_size})
             .appendTo(this.element)
 
@@ -549,24 +549,39 @@ $.widget('spud.paginator', {
 
 $.widget('spud.image', {
     _create: function() {
+        this.element.addClass("image")
+
+        this.img = $("<img></img>")
+
+        if (this.options.include_link) {
+            this.a = $("<a></a>")
+                .html(this.img)
+                .appendTo(this.element)
+        } else {
+            this.img.appendTo(this.element)
+        }
+
         if (this.options.photo != null) {
             this.set(this.options.photo)
         }
     },
 
     _clear: function() {
-        this.element
-            .removeClass("photo-D")
-            .removeClass("photo-R")
-            .removeAttr("id")
+        this.img
             .removeAttr("src")
             .removeAttr("class")
             .removeAttr("alt")
             .removeAttr("width")
             .removeAttr("height")
+        if (this.a) {
+            this.a
+                .removeAttr("href")
+                .off("click")
+        }
     },
 
     _destroy: function() {
+        this.element.removeClass("image")
         this._clear()
     },
 
@@ -578,16 +593,22 @@ $.widget('spud.image', {
 
         if (image != null) {
             this._clear()
-            this.element
+            this.img
                 .attr('src', image.url)
                 .attr('width', image.width)
                 .attr('height', image.height)
                 .attr('alt', photo.title)
+            if (this.a != null) {
+                this.a
+                    .attr('href', photo_url(photo, {}))
+                    .off('click')
+                    .on('click', function() { do_photo(photo.id, {}, true); return false; })
+            }
             this.width = image.width
             this.height = image.height
         } else {
             this._clear()
-            this.element
+            this.img
                 .attr('width', 120)
                 .attr("src", media_url("img/none.jpg"))
             this.width = 227
@@ -597,12 +618,12 @@ $.widget('spud.image', {
 
     set_error: function() {
         this._clear()
-        this.element.attr("src", media_url("img/error.png"))
+        this.img.attr("src", media_url("img/error.png"))
     },
 
     set_loading: function() {
         this._clear()
-        this.element.attr("src", media_url("img/ajax-loader.gif"))
+        this.img.attr("src", media_url("img/ajax-loader.gif"))
     },
 
     resize: function(enlarge) {
@@ -718,7 +739,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
 
         if (photo != null) {
             var style = get_photo_style(photo)
-            $("<img />")
+            $("<div />")
                 .image({ photo: photo, size: get_settings().list_size })
                 .appendTo(a)
         }

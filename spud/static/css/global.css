@@ -18,9 +18,10 @@ ul.ui-autocomplete { z-index: 200; }
 
 .photo_article { border:1px solid #000; margin-bottom: 10px; }
 
-.photo_block { display:inline-block; vertical-align:top; padding:10px; width:200px; min-height:420px; }
+.photo_block { display:inline-block; vertical-align:top; width:200px; min-height:420px; }
 .photo_block { border:1px solid #ddd; margin:5px; }
-.photo_block h2 { margin:0 0 .5em 0; }
+.photo_block .photo_summary { margin: 5px; }
+.photo_block h2 { margin: 5px; }
 .photo_block ul  { padding-left: 20px; }
 .photo_block label { display:block; font-weight:bold; margin-top:4px; }
 .photo_block input[type="text"] { width:192px; }
@@ -41,6 +42,8 @@ ul.ui-autocomplete { z-index: 200; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:150px; margin:10px; padding-top:10px; text-align: center; width:170px; }
 .photo_list .photo_item .desc { float:left; display:none; }
 .photo_list .photo_item:HOVER .desc { display:inline; background:#ddd; color:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
+
+.children { border:1px solid #f00; }
 
 /* FEEDBACK LIST */
 .feedback_item { border:1px solid #dddddd; }
@@ -66,13 +69,16 @@ ul.ui-autocomplete { z-index: 200; }
 .paginator .this-page { padding:2px 6px; font-weight:bold; vertical-align:top; }
 .paginator a:hover { color:white; background:#5b80b2; border-color:#036; }
 
-/* Children list */
+/* INFO BOX */
 .infobox { border:1px solid #000; padding:10px; margin-bottom:10px; }
-.infobox dl { margin-right: 10px; max-width:500px; }
-.infobox dt { clear:left; float:left; width:20%; margin:0; padding:5px; border-top: 1px solid #999; font-weight: bold; }
-.infobox dd { float:left; width: 70%; margin: 0; padding: 5px; border-top: 1px solid #999; }
+.infobox .image { float: left; }
+.infobox .def_list .item { border:1px solid #ddd; display: inline-block; width:200px; height:200px; margin:5px; vertical-align: top;}
+.infobox .def_list .term { margin:0; padding:5px; background: #000; color: #fff; text-align: center; font-weight: bold; }
+.infobox .def_list .definition { margin: 0; padding: 5px; border-top: 1px solid #999; padding: 5px; }
 
-.children { border:1px solid #f00; }
+.photo_block .def_list .item { margin-bottom: 10px; }
+.photo_block .def_list .term { background: #ddd; color: #333; text-align: left; font-weight: bold; padding: 5px; }
+.photo_block .def_list .definition { padding: 5px; }
 
 /* LINKS */
 a:link, a:visited { color: #5b80b2; text-decoration:none; }

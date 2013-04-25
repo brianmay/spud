@@ -314,19 +314,9 @@ $(document)
             items: "a",
             content: function() {
                 var photo = $(this).data('photo')
-                var image = null
                 if (photo != null) {
-                    var size = get_settings().list_size
-                    var style = get_photo_style(photo)
-                    var image = photo.thumb[size]
-                }
-                if (image != null) {
-                    return $("<img />")
-                        .attr("class", style)
-                        .attr("src", image.url)
-                        .attr("alt", photo.title)
-                        .attr("width", image.width)
-                        .attr("height", image.height)
+                    return $("<div></div>")
+                        .image({size: get_settings().list_size, photo: photo})
                 }
                 return null
             },
@@ -410,7 +400,7 @@ function handle_error(message, push_history) {
     // if we are not pushing history, we need
     // to replace the current page
     if (!push_history) {
-        var img = $("<img></img>")
+        var img = $("<div></div>")
             .image()
             .image("set_error")
         var cm = $("#content-main")

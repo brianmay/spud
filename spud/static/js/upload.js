@@ -58,7 +58,7 @@ function display_downloads(params) {
                 .append($('<td class="errornote" colspan="2"/>').text(file.error))
         } else {
             var td = $('<td class="preview"></td>')
-                .append($("<img/>").image({photo: file.photo, size: get_settings().list_size}))
+                .append($("<div/>").image({photo: file.photo, size: get_settings().list_size}))
 
 //            if (file.thumbnail_url) {
 //                $("<a>")

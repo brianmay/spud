@@ -28,13 +28,18 @@ function output_field(title) {
 output_field.prototype.to_html = function(id) {
     html = this.create(id)
 
-    this.dt = $("<dt/>")
+    this.dt = $("<div class='term'/>")
         .text(this.title)
-    this.dd = $("<dd/>")
+    this.dd = $("<div class='definition'/>")
         .append(html)
+
+    this.item = $("<div class='item'/>")
+        .append(this.dt)
+        .append(this.dd)
+
     this.visible = true
 
-    return [this.dt, this.dd]
+    return this.item
 }
 
 output_field.prototype.create = function(id) {
@@ -42,8 +47,7 @@ output_field.prototype.create = function(id) {
 }
 
 output_field.prototype.destroy = function() {
-    this.dt.remove()
-    this.dd.remove()
+    this.item.remove()
 }
 
 output_field.prototype.append_a = function(html) {
@@ -52,20 +56,17 @@ output_field.prototype.append_a = function(html) {
 }
 
 output_field.prototype.toggle = function(show) {
-    this.dt.toggle(show)
-    this.dd.toggle(show)
+    this.item.toggle(show)
     this.visible = show
 }
 
 output_field.prototype.hide = function() {
-    this.dt.hide()
-    this.dd.hide()
+    this.item.hide()
     this.visible = false
 }
 
 output_field.prototype.show = function() {
-    this.dt.show()
-    this.dd.show()
+    this.item.show()
     this.visible = true
 }
 
@@ -243,30 +244,13 @@ photo_output_field.prototype = new output_field()
 photo_output_field.constructor = photo_output_field
 
 photo_output_field.prototype.create = function(id) {
-    this.output = $('<img />').image({ size: this.size })
-    if (this.do_link) {
-        this.a = $("<a></a>")
-            .append(this.output)
-        return this.a
-    } else {
-        this.a = null
-        return this.output
-    }
+    this.output = $('<div />').image({ size: this.size, include_link: this.do_link })
+    return this.output
 }
 
 photo_output_field.prototype.set = function(value) {
     this.output.image('set', value)
     this.toggle(value != null)
-    if (this.a) {
-        this.a
-            .off('click')
-            .removeAttr("href")
-        if (value != null) {
-            this.a
-                .attr('href', photo_url(value, {}))
-                .on('click', function() { do_photo(value.id, {}, true); return false; })
-        }
-    }
 }
 
 photo_output_field.prototype.destroy = function() {
@@ -286,7 +270,7 @@ $.widget('spud.infobox', {
                 .appendTo(this.element)
         }
 
-        this.dl = $("<dl></dl>")
+        this.dl = $("<div class='def_list'></div>")
             .appendTo(this.element)
 
         $("<div class='clear'></div>")
@@ -327,7 +311,7 @@ $.widget('spud.infobox', {
         // we can't use this.element.toggle as it would set display:block which
         // is sometimes wrong.
         if (visible) {
-            this.element.attr("style", "")
+            this.element.removeAttr("style")
         } else {
             this.element.attr("style", "display: none")
         }
