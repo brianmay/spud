@@ -2268,8 +2268,8 @@ def feedback_finish(request, feedback):
         if new_feedback:
             mail_admins(
                 u"SPUD: New feedback received",
-                u"You received new feedback for the %d photo titled %s" % (
-                feedback.photo.pk, feedback.photo)
+                u"You received new feedback %d for the photo titled %s." % (
+                feedback.pk, feedback.photo)
             )
 
     resp = {
