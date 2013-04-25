@@ -246,7 +246,6 @@ function get_doer(type) {
     } else if (type == "feedback") {
         return feedbacks
     } else {
-        display_error("We stuffed up")
         return null
     }
 }
@@ -268,9 +267,19 @@ window.onpopstate = function(event) {
         } else if (state.type == 'display_photo') {
             do_photo(state.photo_id, state.search, false)
         } else if (state.type == 'display_search_results') {
-            get_doer(state.object_type).do_search_results(state.search, state.page, false)
+            var doer = get_doer(state.object_type)
+            if (doer != null) {
+                doer.do_search_results(state.search, state.page, false)
+            } else {
+                handle_error("doer not found", false)
+            }
         } else if (state.type == 'display') {
-            get_doer(state.object_type).do(state.object_id, false)
+            var doer = get_doer(state.object_type)
+            if (doer != null) {
+                doer.do(state.object_id, false)
+            } else {
+                handle_error("doer not found", false)
+            }
         } else if (state.type == 'display_album_search_results') {
             do_album_search_results(state.search, state.page, false)
         } else if (state.type == 'display_album') {
@@ -294,7 +303,7 @@ window.onpopstate = function(event) {
         } else if (state.type == 'display_upload_form') {
             do_upload_form(false)
         } else {
-            display_error("We don't understand our state")
+            handle_error("We don't understand our state", false)
         }
     }
 };
@@ -395,6 +404,21 @@ function display_error(data) {
 
     $.blockUI({ message: message })
 }
+
+
+function handle_error(message, push_history) {
+    // if we are not pushing history, we need
+    // to replace the current page
+    if (!push_history) {
+        var img = $("<img></img>")
+            .image()
+            .image("set_error")
+        var cm = $("#content-main")
+            .html(img)
+    }
+    display_error(message)
+}
+
 
 
 function hide_loading()
@@ -1063,7 +1087,9 @@ function do_logout() {
             }
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -1084,7 +1110,9 @@ function do_photo(photo_id, search, push_history) {
             display_photo(data.photo, search)
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -1097,7 +1125,9 @@ function do_change_photo_relation(photo_relation_id, push_history) {
             display_change_photo_relation(data.photo_relation)
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -1122,7 +1152,9 @@ function do_photo_relation_delete(photo_relation_id, push_history) {
             display_photo_relation_delete(data.photo_relation)
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -1137,7 +1169,9 @@ function do_photo_search_form(criteria, push_history) {
             display_photo_search_form(data.criteria)
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -1161,7 +1195,9 @@ function do_photo_search_results(search, page, push_history, success) {
             if (success) { success() }
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -1193,7 +1229,9 @@ function do_photo_search_item(search, n, photo_id, push_history) {
             }
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -1215,7 +1253,9 @@ function do_upload_form(push_history) {
             display_upload_form(data)
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
