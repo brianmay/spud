@@ -630,7 +630,7 @@ $.widget('spud.image', {
         var width = this.width
         var height = this.height
 
-        var img = this.element
+        var img = this.img
         var aspect = width/height
 
         var innerWidth = window.innerWidth
