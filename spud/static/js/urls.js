@@ -87,11 +87,11 @@ function ajax(settings) {
     delete settings.error
 
     if (success==null) {
-        bark_loudly_like_a_dog()
+        throw new Error("success is not defined")
     }
 
     if (error==null) {
-        bark_loudly_like_a_dog()
+        throw new Error("error is not defined")
     }
 
     $.ajax(settings)
