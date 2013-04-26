@@ -727,7 +727,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
     },
 
     empty: function() {
-        this.element.find("img")
+        this.element.find(".image")
             .image("destroy")
         this._super()
     },
@@ -767,11 +767,6 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
             .appendTo(this.ul)
 
         return li
-    },
-
-    clear_status: function() {
-        this.element.removeClass("loading")
-        this.element.removeClass("errors")
     },
 
     _destroy: function() {
