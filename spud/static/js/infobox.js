@@ -79,7 +79,11 @@ text_output_field.prototype = new output_field()
 text_output_field.constructor = text_output_field
 
 text_output_field.prototype.set = function(value) {
-    this.output.text(value)
+    if (value != null) {
+        this.output.text(value)
+    } else {
+        this.output.text("None")
+    }
     this.toggle(Boolean(value))
 }
 
@@ -216,7 +220,7 @@ link_list_output_field.prototype.create = function(id) {
 link_list_output_field.prototype.set = function(value) {
     this.output.empty()
 
-    if (value==null) {
+    if (value==null || value.length==0) {
         this.hide()
         return
     }
