@@ -401,7 +401,7 @@ $.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
 })
 
 
-$.widget('spud.spud_menu', {
+$.widget('spud.spud_menu', $.ui.menu, {
     _create: function() {
 
         this.element
@@ -419,6 +419,7 @@ $.widget('spud.spud_menu', {
 
     add_item: function(a) {
         var li = $("<li/>")
+            .addClass("ui-menu-item")
             .html(a)
             .on("click", function(ev) { a.trigger('click'); })
             .appendTo(this.element)
