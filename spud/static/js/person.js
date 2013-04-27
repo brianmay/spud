@@ -82,7 +82,6 @@ $.widget('spud.person_search_details',  $.spud.infobox, {
 $.widget('spud.person_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
-            ["title", new text_output_field("Title")],
             ["first_name", new text_output_field("First name")],
             ["middle_name", new text_output_field("Middle name")],
             ["last_name", new text_output_field("Last name")],

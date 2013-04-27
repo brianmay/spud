@@ -82,10 +82,8 @@ $.widget('spud.album_search_details',  $.spud.infobox, {
 $.widget('spud.album_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
-            ["title", new text_output_field("Title")],
             ["sortname", new text_output_field("Sort Name")],
             ["sortorder", new text_output_field("Sort Order")],
-            ["description", new p_output_field("Description")],
         ]
 
         this.img = $("<div></div>")
@@ -94,6 +92,9 @@ $.widget('spud.album_details',  $.spud.infobox, {
 
         this._super();
 
+        this.description = $("<p></p>")
+            .appendTo(this.element)
+
         if (this.options.album != null) {
             this.set(this.options.album)
         }
@@ -101,6 +102,7 @@ $.widget('spud.album_details',  $.spud.infobox, {
 
     set: function(initial) {
         this._super(initial)
+        this.description.p(initial.description)
         this.img.image("set", initial.cover_photo)
     },
 

@@ -82,7 +82,6 @@ $.widget('spud.place_search_details',  $.spud.infobox, {
 $.widget('spud.place_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
-            ["title", new text_output_field("Title")],
             ["address", new text_output_field("Address")],
             ["address2", new text_output_field("Address(ctd)")],
             ["city", new text_output_field("City")],
