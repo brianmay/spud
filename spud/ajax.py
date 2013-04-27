@@ -806,6 +806,9 @@ def _json_search(user, params):
         criteria["name"] = value
         search = search & Q(name=value)
 
+    if not user.is_staff:
+        search = search & Q(action__isnull=True)
+
     photo_list = photo_list.filter(search)
     return photo_list, criteria
 
