@@ -2,7 +2,8 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 
 /* AUTO COMPLETE */
 .ui-autocomplete-input { width:99%; }
-.ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; max-width:340px; z-index: 200; }
+.ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; max-width:340px; }
+.ui-autocomplete.ui-front { z-index: 200; }
 .ui-autocomplete .ui-menu-item { padding-top:4px; padding-bottom:4px; }
 .ui-autocomplete .ui-menu-item a { border: 1px solid #ffffff; margin: -1px; }
 .ui-autocomplete .ui-menu-item img { float:left; }
