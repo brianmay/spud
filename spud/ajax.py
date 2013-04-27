@@ -323,11 +323,13 @@ def _json_album(user, album):
         'cover_photo': _json_photo(user, album.cover_photo),
         'sortname': album.sortname,
         'sortorder': album.sortorder,
-        'revised': unicode(album.revised),
+        'revised': None,
         'can_add': user.has_perm('spud.add_album'),
         'can_change': user.has_perm('spud.change_album'),
         'can_delete': user.has_perm('spud.delete_album'),
     }
+    if album.revised is not None and user.is_staff:
+        d['revised'] = _json_datetime(album.revised, 0)
     return d
 
 
@@ -938,6 +940,10 @@ def album_search_form(request):
     if root_only:
         criteria["root_only"] = True
 
+    needs_revision = _pop_boolean(params, "needs_revision")
+    if needs_revision:
+        criteria["needs_revision"] = True
+
     check_params_empty(params)
 
     resp = {
@@ -1001,6 +1007,13 @@ def album_search_results(request):
     if root_only:
         album_list = album_list.filter(parent_album=None)
         criteria["root_only"] = True
+
+    needs_revision = _pop_boolean(params, "needs_revision")
+    if needs_revision:
+        dt = datetime.datetime.utcnow()-datetime.timedelta(days=365)
+        album_list = album_list.filter(Q(revised__lt=dt) | Q(revised__isnull=True))
+        album_list = album_list.order_by('revised','-pk')
+        criteria["needs_revision"] = True
 
     check_params_empty(params)
 
@@ -1109,6 +1122,16 @@ def album_finish(request, album):
                 album.parent_album = value
             updated = True
             updated_parent = True
+
+        value = _pop_string(params, "revised")
+        if value is not None:
+            timezone = django.conf.settings.TIME_ZONE
+            timezone = pytz.timezone(timezone)
+            dt = _decode_datetime("revised", value, timezone)
+            # utc_offset = dt.utcoffset().total_seconds() / 60
+            dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
+            album.revised = dt
+            # album.revised_offset = utc_offset
 
         check_params_empty(params)
 

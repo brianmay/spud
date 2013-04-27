@@ -25,6 +25,7 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
             ["mode", new select_input_field("Mode",
                 [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
             ["root_only", new boolean_input_field("Root only", false)],
+            ["needs_revision", new boolean_input_field("Needs revision", false)],
         ]
         this.options.title = "Search albums"
         this.options.description = "Please search for an album."
@@ -51,6 +52,9 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
         var v = values.root_only
         if (v) { criteria.root_only = v }
 
+        var v = values.needs_revision
+        if (v) { criteria.needs_revision = v }
+
         var search = {
             criteria: criteria
         }
@@ -68,6 +72,7 @@ $.widget('spud.album_search_details',  $.spud.infobox, {
             ["instance", new link_output_field("Album")],
             ["mode", new text_output_field("Mode")],
             ["root_only", new boolean_output_field("Root Only")],
+            ["needs_revision", new boolean_output_field("Needs revision")],
         ]
         this._super();
 
@@ -84,6 +89,7 @@ $.widget('spud.album_details',  $.spud.infobox, {
         this.options.fields = [
             ["sortname", new text_output_field("Sort Name")],
             ["sortorder", new text_output_field("Sort Order")],
+            ["revised", new datetime_output_field("Revised")],
         ]
 
         this.img = $("<div></div>")
@@ -214,6 +220,7 @@ $.widget('spud.album_change_dialog',  $.spud.form_dialog, {
             ["sortname", new text_input_field("Sort Name", false)],
             ["sortorder", new text_input_field("Sort Order", false)],
             ["parent", new ajax_select_field("Parent", "album", false)],
+            ["revised", new datetime_input_field("Revised", false)],
         ]
 
         this.options.title = "Change album"
