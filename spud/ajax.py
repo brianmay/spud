@@ -2228,7 +2228,7 @@ def feedback_delete(request, feedback_id):
 
 def feedback_finish(request, feedback):
     if request.method == "POST":
-        new_feedback = (feedback.pk == None)
+        new_feedback = (feedback.pk is None)
 
         params = request.POST.copy()
         _pop_string(params, "_")
