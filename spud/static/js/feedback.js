@@ -42,8 +42,8 @@ function _feedback_html(feedback, include_children, include_photo, include_links
 
     var div = $("<div></div>")
         .addClass("feedback_item")
-        .addClass(feedback.is_removed ? "removed" : "not_removed")
-        .addClass(feedback.is_public ? "public" : "not_public")
+        .addClass(feedback.is_removed ? "removed" : "")
+        .addClass(feedback.is_public ? "public" : "")
 
     if (feedback.is_removed && !feedback.can_moderate) {
         $("<p></p>")

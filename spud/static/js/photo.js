@@ -42,17 +42,13 @@ function get_photo_action(action) {
 }
 
 
-function get_photo_style(data) {
-    if (data.action==null)
-        return ""
-    else if (data.action=="D")
-        return "photo-D"
-    else if (data.action=="R"
-            || data.action=="M"
-            || data.action=="auto"
-            || data.action=="90" || data.action=="180" || data.action=="270")
-        return "photo-R"
-    return ""
+function set_photo_style(node, photo) {
+    if (photo == null) {
+        return
+    }
+    node
+        .toggleClass("removed", photo.action == "D")
+        .toggleClass("regenerate", photo.action != null && photo.action != "D")
 }
 
 
@@ -546,13 +542,12 @@ $.widget('spud.photo_article',  {
     },
 
     set: function(photo) {
-        var style = get_photo_style(photo)
-
         this.element
-            .removeClass("photo-D")
-            .removeClass("photo-R")
-            .addClass(style)
-            .toggleClass("photo-selected", is_photo_selected(photo))
+            .toggleClass("ui-selected", is_photo_selected(photo))
+
+        set_photo_style(this.pi, photo)
+        set_photo_style(this.pd, photo)
+        set_photo_style(this.cd, photo)
 
         this.pi.photo_image("set", photo)
         this.pd.photo_details("set", photo)
@@ -588,13 +583,8 @@ $.widget('spud.photo_slideshow',  {
     },
 
     set: function(photo) {
-        var style = get_photo_style(photo)
-
-        this.pd
-            .removeClass("photo-D")
-            .removeClass("photo-R")
-            .addClass(style)
-            .toggleClass("photo-selected", is_photo_selected(photo))
+        set_photo_style(this.pd, photo)
+        this.pd.toggleClass("ui-selected", is_photo_selected(photo))
 
         var img = this.img
         img

@@ -739,8 +739,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
                 .empty()
 
         if (photo != null) {
-            var style = get_photo_style(photo)
-            $("<div />")
+            var div = $("<div />")
                 .image({ photo: photo, size: get_settings().list_size })
                 .appendTo(a)
         }
@@ -762,11 +761,11 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
 
         li = $("<li />")
             .attr('class', "photo_item")
-            .addClass(style)
             .append(a)
             .on("click", function(ev) { a.trigger('click'); })
             .appendTo(this.ul)
 
+        set_photo_style(li, photo)
         return li
     },
 
