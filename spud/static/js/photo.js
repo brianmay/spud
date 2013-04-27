@@ -711,7 +711,7 @@ $.widget('spud.photo_list', $.spud.photo_list_base, {
     set: function(search, results) {
         var mythis = this
         this.empty()
-        this.element.toggle(results.photos.length > 0)
+        this.element.toggleClass("hidden", results.photos.length == 0)
         $.each(results.photos, function(j, photo) {
             var n = results.first + Number(j)
             mythis.append_photo(

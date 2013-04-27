@@ -125,7 +125,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
     set: function(album_list) {
         var mythis = this
         this.empty()
-        this.element.toggle(album_list.length > 0)
+        this.element.toggleClass("hidden", album_list.length == 0)
         $.each(album_list, function(j, album) {
             var photo = album.cover_photo
             var sort=""

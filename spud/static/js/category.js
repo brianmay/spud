@@ -125,7 +125,7 @@ $.widget('spud.category_list', $.spud.photo_list_base, {
     set: function(category_list) {
         var mythis = this
         this.empty()
-        this.element.toggle(category_list.length > 0)
+        this.element.toggleClass("hidden", category_list.length == 0)
         $.each(category_list, function(j, category) {
             var photo = category.cover_photo
             var sort=""

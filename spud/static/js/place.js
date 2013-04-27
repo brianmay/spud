@@ -135,7 +135,7 @@ $.widget('spud.place_list', $.spud.photo_list_base, {
     set: function(place_list) {
         var mythis = this
         this.empty()
-        this.element.toggle(place_list.length > 0)
+        this.element.toggleClass("hidden", place_list.length == 0)
         $.each(place_list, function(j, place) {
             var photo = place.cover_photo
             var sort=""

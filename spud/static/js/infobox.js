@@ -56,17 +56,17 @@ output_field.prototype.append_a = function(html) {
 }
 
 output_field.prototype.toggle = function(show) {
-    this.item.toggle(show)
+    this.item.toggleClass("hidden", !show)
     this.visible = show
 }
 
 output_field.prototype.hide = function() {
-    this.item.hide()
+    this.item.addClass("hidden")
     this.visible = false
 }
 
 output_field.prototype.show = function() {
-    this.item.show()
+    this.item.removeClass("hidden")
     this.visible = true
 }
 
@@ -312,13 +312,7 @@ $.widget('spud.infobox', {
             if (field.visible) visible = true
         })
 
-        // we can't use this.element.toggle as it would set display:block which
-        // is sometimes wrong.
-        if (visible) {
-            this.element.removeAttr("style")
-        } else {
-            this.element.attr("style", "display: none")
-        }
+        this.element.toggleClass("hidden", !visible)
         return this
     },
 
