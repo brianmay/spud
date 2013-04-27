@@ -1041,7 +1041,7 @@ function display_settings(data) {
 
 
 function display_login(push_history) {
-    var dialog = $("<div></div>")
+    var dialog = $("<div id='dialog'></div>")
         .login_dialog()
 }
 
