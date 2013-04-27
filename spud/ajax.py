@@ -140,6 +140,18 @@ def _decode_object(title, model, pk):
         raise ErrorBadRequest("%s does not exist" % title)
 
 
+def _has_changed(title, obj, value):
+    """ Compare the current object with the given value. If no value given
+    return false. Otherwise return true if and only if values differ."""
+    if value is None:
+        return False
+    if obj is None and value == "":
+        return False
+    if obj is not None and obj.pk == _decode_int(title, value):
+        return False
+    return True
+
+
 def _pop_string(params, key):
     value = params.pop(key, None)
     if value is None:
@@ -1089,7 +1101,7 @@ def album_finish(request, album):
             updated = True
 
         value = _pop_string(params, "parent")
-        if value is not None:
+        if _has_changed("parent", album.parent_album, value):
             if value == "":
                 album.parent_album = None
             else:
@@ -1302,7 +1314,7 @@ def category_finish(request, category):
             updated = True
 
         value = _pop_string(params, "parent")
-        if 'parent' in request.POST:
+        if _has_changed("parent", category.parent_category, value):
             if request.POST['parent'] == "":
                 category.parent_category = None
             else:
@@ -1544,7 +1556,7 @@ def place_finish(request, place):
             updated = True
 
         value = _pop_string(params, "parent")
-        if value is not None:
+        if _has_changed("parent", place.parent_place, value):
             if value == "":
                 place.parent_place = None
             else:
@@ -1831,7 +1843,7 @@ def person_finish(request, person):
             updated = True
 
         value = _pop_string(params, "mother")
-        if value is not None:
+        if _has_changed("mother", person.mother, value):
             if not request.user.is_staff:
                 raise ErrorForbidden("No rights to change mother")
             if value == "":
@@ -1843,7 +1855,7 @@ def person_finish(request, person):
             updated_parent = True
 
         value = _pop_string(params, "father")
-        if value is not None:
+        if _has_changed("father", person.father, value):
             if not request.user.is_staff:
                 raise ErrorForbidden("No rights to change father")
             if value == "":
@@ -2211,7 +2223,7 @@ def feedback_finish(request, feedback):
             updated = True
 
         value = _pop_string(params, "parent")
-        if value is not None:
+        if _has_changed("parent", feedback.parent, value):
             if value == "":
                 feedback.parent = None
             else:
