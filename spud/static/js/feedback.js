@@ -56,8 +56,9 @@ function _feedback_html(feedback, include_children, include_photo, include_links
             .text(feedback.submit_datetime.title)
 
         if (include_photo) {
-            var img = $("<div />")
+            $("<div />")
                 .image({ photo: feedback.photo, size: get_settings().list_size, include_link: true })
+                .appendTo(div)
         }
 
         $("<div></div>")
