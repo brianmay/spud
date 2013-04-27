@@ -203,7 +203,7 @@ def _pop_object_array(params, key, model):
     return result
 
 
-def check_params_empty(params):
+def _check_params_empty(params):
     if len(params) > 0:
         raise ErrorBadRequest("Unknown parameters %s" % params)
 
@@ -944,7 +944,7 @@ def album_search_form(request):
     if needs_revision:
         criteria["needs_revision"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     resp = {
         'type': 'album_search_form',
@@ -1015,7 +1015,7 @@ def album_search_results(request):
         album_list = album_list.order_by('revised','-pk')
         criteria["needs_revision"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     number_results = album_list.count()
     album_list = album_list[first:first+count]
@@ -1133,7 +1133,7 @@ def album_finish(request, album):
             album.revised = dt
             # album.revised_offset = utc_offset
 
-        check_params_empty(params)
+        _check_params_empty(params)
 
         if updated:
             album.save()
@@ -1173,7 +1173,7 @@ def category_search_form(request):
     if root_only:
         criteria["root_only"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     resp = {
         'type': 'category_search_form',
@@ -1237,7 +1237,7 @@ def category_search_results(request):
         category_list = category_list.filter(parent_category=None)
         criteria["root_only"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     number_results = category_list.count()
     category_list = category_list[first:first+count]
@@ -1346,7 +1346,7 @@ def category_finish(request, category):
             updated = True
             updated_parent = True
 
-        check_params_empty(params)
+        _check_params_empty(params)
 
         if updated is not None:
             category.save()
@@ -1386,7 +1386,7 @@ def place_search_form(request):
     if root_only:
         criteria["root_only"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     resp = {
         'type': 'place_search_form',
@@ -1450,7 +1450,7 @@ def place_search_results(request):
         place_list = place_list.filter(parent_place=None)
         criteria["root_only"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     number_results = place_list.count()
     place_list = place_list[first:first+count]
@@ -1588,7 +1588,7 @@ def place_finish(request, place):
             updated = True
             updated_parent = True
 
-        check_params_empty(params)
+        _check_params_empty(params)
 
         if updated:
             place.save()
@@ -1628,7 +1628,7 @@ def person_search_form(request):
     if root_only:
         criteria["root_only"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     resp = {
         'type': 'person_search_form',
@@ -1698,7 +1698,7 @@ def person_search_results(request):
         person_list = person_list.filter(mother=None, father=None)
         criteria["root_only"] = True
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     number_results = person_list.count()
     person_list = person_list[first:first+count]
@@ -1900,7 +1900,7 @@ def person_finish(request, person):
                 person.spouse = value
             updated = True
 
-        check_params_empty(params)
+        _check_params_empty(params)
 
         if updated:
             person.save()
@@ -2008,7 +2008,7 @@ def photo_relation_finish(request, photo_relation):
             photo_relation.photo_2 = value
             updated = True
 
-        check_params_empty(params)
+        _check_params_empty(params)
 
         if updated:
             photo_relation.save()
@@ -2059,7 +2059,7 @@ def feedback_search_form(request):
         if value is not None:
             criteria["is_removed"] = value
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     resp = {
         'type': 'feedback_search_form',
@@ -2147,7 +2147,7 @@ def feedback_search_results(request):
         if q is not None:
             feedback_list = feedback_list.filter(is_removed=False)
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     number_results = feedback_list.count()
     feedback_list = feedback_list[first:first+count]
@@ -2293,7 +2293,7 @@ def feedback_finish(request, feedback):
                 feedback.is_removed = value
                 updated = True
 
-        check_params_empty(params)
+        _check_params_empty(params)
 
         if updated:
             feedback.save()
@@ -2331,7 +2331,7 @@ def photo_search_form(request):
 
     photo_list, criteria = _json_search(request.user, params)
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     resp = {
         'type': 'search_form',
@@ -2365,7 +2365,7 @@ def photo_search_results(request):
 
     photo_list, criteria = _json_search(request.user, params)
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     number_results = photo_list.count()
     photos = photo_list[first:first+count]
@@ -2390,7 +2390,7 @@ def photo_search_item(request, params, number):
     photo_list, criteria = _json_search(request.user, params)
     number_results = photo_list.count()
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     try:
         photo = photo_list[number]
@@ -2692,7 +2692,7 @@ def photo_search_change(request):
                 _set_persons(photo, pa_list, new_values)
                 del photo
 
-    check_params_empty(params)
+    _check_params_empty(params)
 
     resp = {
         'type': 'photo_search_change',
