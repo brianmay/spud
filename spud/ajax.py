@@ -724,14 +724,14 @@ def _json_search(user, params):
     if value is not None:
         utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
         criteria["first_date"] = _json_datetime(
-            utc_value, value.utcoffset().total_seconds() / 60)
+            utc_value, value.utcoffset().seconds / 60)
         search = search & Q(datetime__gte=utc_value)
 
     value = _pop_datetime(params, "last_date", timezone)
     if value is not None:
         utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
         criteria["last_date"] = _json_datetime(
-            utc_value, value.utcoffset().total_seconds() / 60)
+            utc_value, value.utcoffset().seconds / 60)
         search = search & Q(datetime__lt=utc_value)
 
     value = _pop_int(params, "lower_rating")
@@ -1172,7 +1172,7 @@ def album_finish(request, album):
             timezone = django.conf.settings.TIME_ZONE
             timezone = pytz.timezone(timezone)
             dt = _decode_datetime("revised", value, timezone)
-            # utc_offset = dt.utcoffset().total_seconds() / 60
+            # utc_offset = dt.utcoffset().seconds / 60
             dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
             album.revised = dt
             # album.revised_offset = utc_offset
@@ -2554,7 +2554,7 @@ def photo_search_change(request):
         value = _pop_string(params, "set_datetime")
         if value is not None:
             dt = _decode_datetime("set_datetime", value, timezone)
-            utc_offset = dt.utcoffset().total_seconds() / 60
+            utc_offset = dt.utcoffset().seconds / 60
             dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
             photo_list.update(action="M",
                               utc_offset=utc_offset, datetime=dt)
@@ -2596,7 +2596,7 @@ def photo_search_change(request):
             for photo in photo_list:
                 dt = pytz.utc.localize(photo.datetime)
                 dt = dt.astimezone(tz)
-                photo.utc_offset = dt.utcoffset().total_seconds() / 60
+                photo.utc_offset = dt.utcoffset().seconds / 60
                 photo.save()
                 del dt
                 del photo
