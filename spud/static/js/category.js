@@ -114,6 +114,9 @@ $.widget('spud.category_details',  $.spud.infobox, {
         this._super(category)
         this.description.p(category.description)
         this.img.image("set", category.cover_photo)
+        if (category.cover_photo != null || category.description != "") {
+            this.element.removeClass("hidden")
+        }
     },
 
     _destroy: function() {

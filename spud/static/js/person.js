@@ -132,6 +132,9 @@ $.widget('spud.person_details',  $.spud.infobox, {
         } else if (person.gender == "2") {
             this.set_value("gender", "Female")
         }
+        if (person.cover_photo != null) {
+            this.element.removeClass("hidden")
+        }
     },
 
     _destroy: function() {

@@ -124,6 +124,9 @@ $.widget('spud.album_details',  $.spud.infobox, {
         this._super(album)
         this.description.p(album.description)
         this.img.image("set", album.cover_photo)
+        if (album.cover_photo != null || album.description != "") {
+            this.element.removeClass("hidden")
+        }
     },
 
     _destroy: function() {

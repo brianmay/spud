@@ -123,6 +123,9 @@ $.widget('spud.place_details',  $.spud.infobox, {
         } else {
             this.set_value("url", null)
         }
+        if (place.cover_photo != null) {
+            this.element.removeClass("hidden")
+        }
     },
 
     _destroy: function() {
