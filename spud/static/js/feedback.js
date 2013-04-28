@@ -258,7 +258,7 @@ $.widget('spud.feedback_details',  $.spud.infobox, {
 
     set: function(feedback, rights) {
         this._super(feedback);
-        this.set_value("parent", _feedback_html(initial.parent, rights, false, false, false))
+        this.set_value("parent", _feedback_html(feedback.parent, rights, false, false, false))
     },
 
     _destroy: function() {
