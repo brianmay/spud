@@ -48,7 +48,7 @@ def photo_thumb_redirect(request, object_id, size):
     return HttpResponseRedirect(url)
 
 
-def photo_detail(request, object_id, size):
+def old_photo_detail(request, object_id, size):
     instance = get_object_or_404(models.photo, pk=object_id)
 
     try:

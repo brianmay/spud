@@ -94,7 +94,7 @@ urlpatterns = patterns('',
     url(r'^account/password_change/done/$', 'django.contrib.auth.views.password_change_done', name='password_change_done'),
 
     # backward compatability
-    url(r'^photo/(?P<object_id>\d+)/size/(?P<size>\w+)/$', 'spud.views.photo_detail', name='photo_detail'),
+    url(r'^photo/(?P<object_id>\d+)/size/(?P<size>\w+)/$', 'spud.views.old_photo_detail', name='old_photo_detail'),
 #    url(r'^photo/(?P<object_id>\d+)/orig/$', 'spud.views.photo_orig_redirect', name='photo_orig_redirect'),
 
 )
