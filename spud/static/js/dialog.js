@@ -206,7 +206,7 @@ datetime_input_field.prototype.get = function() {
     var time = this.time.val().trim()
     var timezone = this.timezone.val().trim()
 
-    result = []
+    var result = []
     if (date != "") {
         result.push(date)
     }
