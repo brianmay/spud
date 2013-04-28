@@ -244,12 +244,13 @@ $.widget('spud.feedback_details',  $.spud.infobox, {
             ["user_email", new text_output_field("E-Mail (unverified)")],
             ["user_url", new text_output_field("URL (unverified)")],
             ["parent", new html_output_field("In response to")],
-            ["comment", new p_output_field("Response")],
             ["ip_address", new text_output_field("IP Address")],
             ["is_public", new boolean_output_field("Is public")],
             ["is_removed", new boolean_output_field("Is removed")],
         ]
         this._super();
+        this.feedback_node = $("<div></div>")
+            .appendTo(this.element)
 
         if (this.options.feedback != null) {
             this.set(this.options.feedback, this.options.rights)
@@ -259,6 +260,7 @@ $.widget('spud.feedback_details',  $.spud.infobox, {
     set: function(feedback, rights) {
         this._super(feedback);
         this.set_value("parent", _feedback_html(feedback.parent, rights, false, false, false))
+        this.feedback_node.html(_feedback_html(feedback, rights, false, false, true))
     },
 
     _destroy: function() {
@@ -318,15 +320,15 @@ $.widget('spud.feedback_menu', $.spud.spud_menu, {
         }
         this.add_item(feedbacks.search_form_a(criteria))
 
-        if (feedback.can_add) {
+        if (rights.can_add) {
             this.add_item(feedbacks.add_a(feedback.photo, feedback, "Reply"))
         }
 
-        if (feedback.can_change) {
+        if (rights.can_change) {
             this.add_item(feedbacks.change_a(feedback))
         }
 
-        if (feedback.can_delete) {
+        if (rights.can_delete) {
             this.add_item(feedbacks.delete_a(feedback))
         }
 
@@ -420,7 +422,7 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
             this.remove_field("is_public")
             this.remove_field("is_removed")
         }
-        this.details.feedback_details("set", feedback)
+        this.details.feedback_details("set", feedback, rights)
         return this._super(feedback);
     },
 
