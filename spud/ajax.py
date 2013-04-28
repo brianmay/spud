@@ -224,6 +224,65 @@ def _json_session(request):
     return session
 
 
+def album_rights(user):
+    return {
+        'can_add': user.has_perm('spud.add_album'),
+        'can_change': user.has_perm('spud.change_album'),
+        'can_delete': user.has_perm('spud.delete_album'),
+        'can_unrestricted_search': user.is_staff,
+    }
+
+
+def category_rights(user):
+    return {
+        'can_add': user.has_perm('spud.add_category'),
+        'can_change': user.has_perm('spud.change_category'),
+        'can_delete': user.has_perm('spud.delete_category'),
+    }
+
+
+def place_rights(user):
+    return {
+        'can_add': user.has_perm('spud.add_place'),
+        'can_change': user.has_perm('spud.change_place'),
+        'can_delete': user.has_perm('spud.delete_place'),
+    }
+
+
+def person_rights(user):
+    return {
+        'can_add': user.has_perm('spud.add_person'),
+        'can_change': user.has_perm('spud.change_person'),
+        'can_delete': user.has_perm('spud.delete_person'),
+    }
+
+
+def feedback_rights(user):
+    return {
+        'can_add': _can_add_feedback,
+        'can_change': user.has_perm('spud.change_feedback'),
+        'can_delete': user.has_perm('spud.delete_feedback'),
+        'can_moderate': user.has_perm('spud.can_moderate'),
+    }
+
+
+def photo_relation_rights(user):
+    return {
+        'can_add': user.has_perm('spud.add_photo_relation'),
+        'can_change': user.has_perm('spud.change_photo_relation'),
+        'can_delete': user.has_perm('spud.delete_photo_relation'),
+    }
+
+
+def photo_rights(user):
+    return {
+        'can_add': user.has_perm('spud.add_photo'),
+        'can_change': user.has_perm('spud.change_photo'),
+        'can_delete': user.has_perm('spud.delete_photo'),
+        'can_add_feedback': _can_add_feedback,
+    }
+
+
 def _json_photo(user, photo):
     if photo is None:
         return None
@@ -240,11 +299,6 @@ def _json_photo(user, photo):
         'action': photo.action,
 #        'timestamp': photo.timestamp,
         'thumb': {},
-
-        'can_add': user.has_perm('spud.add_photo'),
-        'can_change': user.has_perm('spud.change_photo'),
-        'can_delete': user.has_perm('spud.delete_photo'),
-        'can_add_feedback': _can_add_feedback,
     }
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -324,9 +378,6 @@ def _json_album(user, album):
         'sortname': album.sortname,
         'sortorder': album.sortorder,
         'revised': None,
-        'can_add': user.has_perm('spud.add_album'),
-        'can_change': user.has_perm('spud.change_album'),
-        'can_delete': user.has_perm('spud.delete_album'),
     }
     if album.revised is not None and user.is_staff:
         d['revised'] = _json_datetime(album.revised, 0)
@@ -363,9 +414,6 @@ def _json_category(user, category):
         'cover_photo': _json_photo(user, category.cover_photo),
         'sortname': category.sortname,
         'sortorder': category.sortorder,
-        'can_add': user.has_perm('spud.add_category'),
-        'can_change': user.has_perm('spud.change_category'),
-        'can_delete': user.has_perm('spud.delete_category'),
     }
     return d
 
@@ -406,9 +454,6 @@ def _json_place(user, place):
         'urldesc': place.urldesc,
         'cover_photo': _json_photo(user, place.cover_photo),
         'notes': place.notes,
-        'can_add': user.has_perm('spud.add_place'),
-        'can_change': user.has_perm('spud.change_place'),
-        'can_delete': user.has_perm('spud.delete_place'),
     }
     return d
 
@@ -459,9 +504,6 @@ def _json_person(user, person):
 #        'spouse': person.spouse,
 #        'notes': person.notes,
 #        'email': person.email,
-        'can_add': user.has_perm('spud.add_person'),
-        'can_change': user.has_perm('spud.change_person'),
-        'can_delete': user.has_perm('spud.delete_person'),
     }
     return d
 
@@ -559,10 +601,6 @@ def _json_feedback(user, feedback, seen=None):
         'id': feedback.pk,
         'is_public': feedback.is_public,
         'is_removed': feedback.is_removed,
-        'can_add': _can_add_feedback,
-        'can_change': user.has_perm('spud.change_feedback'),
-        'can_delete': user.has_perm('spud.delete_feedback'),
-        'can_moderate': user.has_perm('spud.can_moderate'),
         'children': [],
     }
 
@@ -940,17 +978,18 @@ def album_search_form(request):
     if root_only:
         criteria["root_only"] = True
 
-    needs_revision = _pop_boolean(params, "needs_revision")
-    if needs_revision:
-        criteria["needs_revision"] = True
+    if request.user.is_staff:
+        needs_revision = _pop_boolean(params, "needs_revision")
+        if needs_revision:
+            criteria["needs_revision"] = True
 
     _check_params_empty(params)
 
     resp = {
         'type': 'album_search_form',
         'criteria': criteria,
-        'can_add': request.user.has_perm('spud.add_album'),
         'session': _json_session(request),
+        'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1008,12 +1047,13 @@ def album_search_results(request):
         album_list = album_list.filter(parent_album=None)
         criteria["root_only"] = True
 
-    needs_revision = _pop_boolean(params, "needs_revision")
-    if needs_revision:
-        dt = datetime.datetime.utcnow()-datetime.timedelta(days=365)
-        album_list = album_list.filter(Q(revised__lt=dt) | Q(revised__isnull=True))
-        album_list = album_list.order_by('revised','-pk')
-        criteria["needs_revision"] = True
+    if request.user.is_staff:
+        needs_revision = _pop_boolean(params, "needs_revision")
+        if needs_revision:
+            dt = datetime.datetime.utcnow()-datetime.timedelta(days=365)
+            album_list = album_list.filter(Q(revised__lt=dt) | Q(revised__isnull=True))
+            album_list = album_list.order_by('revised','-pk')
+            criteria["needs_revision"] = True
 
     _check_params_empty(params)
 
@@ -1029,7 +1069,7 @@ def album_search_results(request):
         'first': first,
         'last': first + number_returned - 1,
         'session': _json_session(request),
-        'can_add': request.user.has_perm('spud.add_album'),
+        'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1072,6 +1112,7 @@ def album_delete(request, album_id):
     resp = {
         'type': 'album_delete',
         'session': _json_session(request),
+        'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1145,6 +1186,7 @@ def album_finish(request, album):
         'type': 'album_get',
         'album': _json_album_detail(request.user, album),
         'session': _json_session(request),
+        'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1178,8 +1220,8 @@ def category_search_form(request):
     resp = {
         'type': 'category_search_form',
         'criteria': criteria,
-        'can_add': request.user.has_perm('spud.add_category'),
         'session': _json_session(request),
+        'rights': category_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1251,7 +1293,7 @@ def category_search_results(request):
         'first': first,
         'last': first + number_returned - 1,
         'session': _json_session(request),
-        'can_add': request.user.has_perm('spud.add_category'),
+        'rights': category_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1294,6 +1336,7 @@ def category_delete(request, category_id):
     resp = {
         'type': 'category_delete',
         'session': _json_session(request),
+        'rights': category_rights(request.user),
     }
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1358,6 +1401,7 @@ def category_finish(request, category):
         'type': 'category_get',
         'category': _json_category_detail(request.user, category),
         'session': _json_session(request),
+        'rights': category_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1391,8 +1435,8 @@ def place_search_form(request):
     resp = {
         'type': 'place_search_form',
         'criteria': criteria,
-        'can_add': request.user.has_perm('spud.add_place'),
         'session': _json_session(request),
+        'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1464,7 +1508,7 @@ def place_search_results(request):
         'first': first,
         'last': first + number_returned - 1,
         'session': _json_session(request),
-        'can_add': request.user.has_perm('spud.add_place'),
+        'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1507,6 +1551,7 @@ def place_delete(request, place_id):
     resp = {
         'type': 'place_delete',
         'session': _json_session(request),
+        'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1600,6 +1645,7 @@ def place_finish(request, place):
         'type': 'place_get',
         'place': _json_place_detail(request.user, place),
         'session': _json_session(request),
+        'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1633,7 +1679,6 @@ def person_search_form(request):
     resp = {
         'type': 'person_search_form',
         'criteria': criteria,
-        'can_add': request.user.has_perm('spud.add_person'),
         'session': _json_session(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1712,7 +1757,7 @@ def person_search_results(request):
         'first': first,
         'last': first + number_returned - 1,
         'session': _json_session(request),
-        'can_add': request.user.has_perm('spud.add_person'),
+        'rights': person_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1755,6 +1800,7 @@ def person_delete(request, person_id):
     resp = {
         'type': 'person_delete',
         'session': _json_session(request),
+        'rights': person_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1912,6 +1958,7 @@ def person_finish(request, person):
         'type': 'person_get',
         'person': _json_person_detail(request.user, person),
         'session': _json_session(request),
+        'rights': person_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1966,6 +2013,7 @@ def photo_relation_delete(request, photo_relation_id):
     resp = {
         'type': 'photo_relation_delete',
         'session': _json_session(request),
+        'rights': photo_relation_rights(request.user),
     }
 
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2018,6 +2066,7 @@ def photo_relation_finish(request, photo_relation):
         'photo_relation': _json_photo_relation_detail(request.user,
                                                       photo_relation),
         'session': _json_session(request),
+        'rights': photo_relation_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2065,9 +2114,7 @@ def feedback_search_form(request):
         'type': 'feedback_search_form',
         'criteria': criteria,
         'session': _json_session(request),
-
-        'can_add': _can_add_feedback,
-        'can_moderate': request.user.has_perm('spud.can_moderate'),
+        'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2162,8 +2209,7 @@ def feedback_search_results(request):
         'first': first,
         'last': first + number_returned - 1,
         'session': _json_session(request),
-        'can_add': _can_add_feedback,
-        'can_moderate': request.user.has_perm('spud.can_moderate'),
+        'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2222,6 +2268,7 @@ def feedback_delete(request, feedback_id):
     resp = {
         'type': 'feedback_delete',
         'session': _json_session(request),
+        'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2319,6 +2366,7 @@ def feedback_finish(request, feedback):
         'feedback': _json_feedback_detail(
             request.user, feedback),
         'session': _json_session(request),
+        'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2337,6 +2385,7 @@ def photo_search_form(request):
         'type': 'search_form',
         'criteria': criteria,
         'session': _json_session(request),
+        'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2379,9 +2428,7 @@ def photo_search_results(request):
         'first': first,
         'last': first + number_returned - 1,
         'session': _json_session(request),
-        'can_add': request.user.has_perm('spud.add_photo'),
-        'can_change': request.user.has_perm('spud.change_photo'),
-        'can_delete': request.user.has_perm('spud.delete_photo'),
+        'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2403,6 +2450,7 @@ def photo_search_item(request, params, number):
         'photo': _json_photo_detail(request.user, photo),
         'number_results': number_results,
         'session': _json_session(request),
+        'rights': photo_rights(request.user),
     }
 
     if number > 1:
@@ -2699,7 +2747,7 @@ def photo_search_change(request):
         'criteria': criteria,
         'number_results': number_results,
         'session': _json_session(request),
-        'can_add': request.user.has_perm('spud.add_photo'),
+        'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2711,6 +2759,7 @@ def photo(request, photo_id):
         'type': 'photo_get',
         'photo': _json_photo_detail(request.user, value),
         'session': _json_session(request),
+        'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -2719,8 +2768,8 @@ def upload_form(request):
     response_data = {
         'type': "upload_form",
         'uid': str(uuid.uuid4()),
-        'can_upload': request.user.has_perm('spud.add_photo'),
         'session': _json_session(request),
+        'rights': photo_rights(request.user),
     }
     response_data = json.dumps(response_data)
     response_type = "application/json"

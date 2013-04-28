@@ -33,8 +33,12 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.feedback)
         }
+    },
+
+    set: function(criteria, rights) {
+        this._super(criteria)
     },
 
     _submit_values: function(values) {
@@ -73,9 +77,14 @@ $.widget('spud.category_search_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.rights)
         }
     },
+
+    set: function(criteria, rights) {
+        this._super(criteria)
+    },
+
 })
 
 
@@ -97,14 +106,14 @@ $.widget('spud.category_details',  $.spud.infobox, {
             .appendTo(this.element)
 
         if (this.options.category != null) {
-            this.set(this.options.category)
+            this.set(this.options.category, this.options.rights)
         }
     },
 
-    set: function(initial) {
-        this._super(initial)
-        this.description.p(initial.description)
-        this.img.image("set", initial.cover_photo)
+    set: function(category, rights) {
+        this._super(category)
+        this.description.p(category.description)
+        this.img.image("set", category.cover_photo)
     },
 
     _destroy: function() {
@@ -119,11 +128,11 @@ $.widget('spud.category_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.categorys != null) {
-            this.set(this.options.categorys)
+            this.set(this.options.categorys, this.options.rights)
         }
     },
 
-    set: function(category_list) {
+    set: function(category_list, rights) {
         var mythis = this
         this.empty()
         this.element.toggleClass("hidden", category_list.length == 0)
@@ -144,11 +153,11 @@ $.widget('spud.category_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.category != null) {
-            this.set(this.options.category)
+            this.set(this.options.category, this.options.rights)
         }
     },
 
-    set: function(category) {
+    set: function(category, rights) {
         this.element.empty()
 
         var criteria = { categorys: category.id }
@@ -168,15 +177,15 @@ $.widget('spud.category_menu', $.spud.spud_menu, {
         this.add_item(photo_search_form_a(criteria))
         this.add_item(categorys.search_form_a({ instance: category.id }))
 
-        if (category.can_add) {
+        if (rights.can_add) {
             this.add_item(categorys.add_a(category))
         }
 
-        if (category.can_change) {
+        if (rights.can_change) {
             this.add_item(categorys.change_a(category))
         }
 
-        if (category.can_delete) {
+        if (rights.can_delete) {
             this.add_item(categorys.delete_a(category))
         }
 
@@ -189,15 +198,15 @@ $.widget('spud.category_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.results)
+            this.set(this.options.rights, this.options.search, this.options.results)
         }
     },
 
-    set: function(search, results) {
+    set: function(rights, search, results) {
         this.element.empty()
         this.add_item(categorys.search_form_a(search.criteria))
 
-        if (results.can_add) {
+        if (rights.can_add) {
             this.add_item(categorys.add_a(null))
         }
 
@@ -222,11 +231,11 @@ $.widget('spud.category_change_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.category != null) {
-            this.set(this.options.category)
+            this.set(this.options.category, this.options.rights)
         }
     },
 
-    set: function(category) {
+    set: function(category, rights) {
         this.category_id = category.id
         if (category.id != null) {
             this.set_title("Change category")
@@ -318,42 +327,43 @@ category_doer.prototype.get_objects = function(results) {
     return results.categorys
 }
 
-category_doer.prototype.details = function(category, div) {
-    $.spud.category_details({category: category}, div)
+category_doer.prototype.details = function(category, rights, div) {
+    $.spud.category_details({category: category, rights: rights}, div)
 }
 
-category_doer.prototype.list_menu = function(search, results, div) {
-    $.spud.category_list_menu({search: search, results: results}, div)
+category_doer.prototype.list_menu = function(rights, search, results, div) {
+    $.spud.category_list_menu({rights: rights, search: search, results: results}, div)
 }
 
 
-category_doer.prototype.menu = function(category, div) {
-    $.spud.category_menu({category: category}, div)
+category_doer.prototype.menu = function(category, rights, div) {
+    $.spud.category_menu({category: category, rights: rights}, div)
 }
 
-category_doer.prototype.list = function(categorys, page, last_page, html_page, div) {
+category_doer.prototype.list = function(categorys, rights, page, last_page, html_page, div) {
     $.spud.category_list({
         categorys: categorys,
+        rights: rights,
         page: page,
         last_page: last_page,
         html_page: html_page,
     }, div)
 }
 
-category_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.spud.category_search_dialog({ criteria: criteria }, dialog)
+category_doer.prototype.search_dialog = function(criteria, rights, dialog) {
+    $.spud.category_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-category_doer.prototype.search_details = function(criteria, dialog) {
-    $.spud.category_search_details({ criteria: criteria }, dialog)
+category_doer.prototype.search_details = function(criteria, rights, dialog) {
+    $.spud.category_search_details({ criteria: criteria, rights: rights }, dialog)
 }
 
-category_doer.prototype.change_dialog = function(category, dialog) {
-    $.spud.category_change_dialog({ category: category }, dialog)
+category_doer.prototype.change_dialog = function(category, rights, dialog) {
+    $.spud.category_change_dialog({ category: category, rights: rights }, dialog)
 }
 
 category_doer.prototype.delete_dialog = function(category, dialog) {
     $.spud.category_delete_dialog({ category: category }, dialog)
 }
 
-categorys = new category_doer()
+var categorys = new category_doer()

@@ -30,7 +30,7 @@ function _change_feedback(feedback, updates) {
     )
 }
 
-function _feedback_html(feedback, include_children, include_photo, include_links) {
+function _feedback_html(feedback, rights, include_children, include_photo, include_links) {
     if (feedback == null) {
         return null;
     }
@@ -46,7 +46,7 @@ function _feedback_html(feedback, include_children, include_photo, include_links
         .addClass(feedback.is_removed ? "removed" : "")
         .addClass(feedback.is_public ? "public" : "")
 
-    if (feedback.is_removed && !feedback.can_moderate) {
+    if (feedback.is_removed && !rights.can_moderate) {
         $("<p></p>")
             .text(" feedback was deleted.")
             .prepend(feedbacks.a(feedback, "This"))
@@ -78,12 +78,12 @@ function _feedback_html(feedback, include_children, include_photo, include_links
     }
 
     if (include_links) {
-        if (feedback.can_add) {
+        if (rights.can_add) {
             div
                 .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
                 .append(" / ")
         }
-        if (feedback.can_moderate) {
+        if (rights.can_moderate) {
             if (feedback.is_public) {
                 $("<a></a>")
                     .attr("href", "#")
@@ -125,7 +125,7 @@ function _feedback_html(feedback, include_children, include_photo, include_links
 
         $.each(feedback.children, function(j, child) {
             $("<li></li>")
-                .append(_feedback_html(child, include_children, include_photo, include_links))
+                .append(_feedback_html(child, rights, include_children, include_photo, include_links))
                 .appendTo(ul)
         })
 
@@ -156,32 +156,22 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.rights)
         }
     },
 
-    set: function(initial) {
-        if (initial.is_public != null) {
+    set: function(criteria, rights) {
+        if (rights.can_moderate) {
             this.add_field("is_public",
                 new select_input_field("Is public", [ ["","Don't care"], ["true", "Yes"], ["false", "No" ] ], false))
-        } else {
-            this.remove_field("is_public")
-        }
-        if (initial.is_removed != null) {
             this.add_field("is_removed",
                 new select_input_field("Is removed", [ ["","Don't care"], ["true", "Yes"], ["false", "No" ] ], false))
         } else {
+            this.remove_field("is_public")
             this.remove_field("is_removed")
         }
 
-        this._super(initial);
-
-        if (initial.is_public != null) {
-            this.set_value("is_public", initial.is_public ? "true" : "false")
-        }
-        if (initial.is_removed != null) {
-            this.set_value("is_removed", initial.is_removed ? "true" : "false")
-        }
+        this._super(criteria);
     },
 
     _submit_values: function(values) {
@@ -232,9 +222,14 @@ $.widget('spud.feedback_search_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.rights)
         }
     },
+
+    set: function(criteria, rights) {
+        this._super(criteria);
+    },
+
 })
 
 
@@ -257,13 +252,13 @@ $.widget('spud.feedback_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.feedback != null) {
-            this.set(this.options.feedback)
+            this.set(this.options.feedback, this.options.rights)
         }
     },
 
-    set: function(initial) {
-        this._super(initial);
-        this.set_value("parent", _feedback_html(initial.parent, false, false, false))
+    set: function(feedback, rights) {
+        this._super(feedback);
+        this.set_value("parent", _feedback_html(initial.parent, rights, false, false, false))
     },
 
     _destroy: function() {
@@ -284,7 +279,7 @@ $.widget('spud.feedback_list', $.spud.list_base, {
         this._super()
         this.ul.addClass("feedback_ul")
         if (this.options.feedbacks != null) {
-            this.set(this.options.feedbacks)
+            this.set(this.options.feedbacks, this.options.rights)
         }
     },
 
@@ -295,12 +290,12 @@ $.widget('spud.feedback_list', $.spud.list_base, {
         this._super()
     },
 
-    set: function(feedback_list) {
+    set: function(feedback_list, rights) {
         var mythis = this
         this.empty()
         this.element.toggleClass("hidden", feedback_list.length == 0)
         $.each(feedback_list, function(j, feedback) {
-            mythis.append_item(_feedback_html(feedback, mythis.options.include_children, true, true))
+            mythis.append_item(_feedback_html(feedback, rights, mythis.options.include_children, true, true))
         })
         return this
     }
@@ -311,26 +306,17 @@ $.widget('spud.feedback_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.feedback != null) {
-            this.set(this.options.feedback)
+            this.set(this.options.feedback, this.options.rights)
         }
     },
 
-    set: function(feedback) {
+    set: function(feedback, rights) {
         this.element.empty()
 
-        if (feedback.can_moderate) {
-            var criteria = {
-                instance: feedback.id,
-                is_public: true,
-                is_removed: false,
-            }
-            this.add_item(feedbacks.search_form_a(criteria, "Extended search"))
-        } else {
-            var criteria = {
-                instance: feedback.id,
-            }
-            this.add_item(feedbacks.search_form_a(criteria))
+        var criteria = {
+            instance: feedback.id,
         }
+        this.add_item(feedbacks.search_form_a(criteria))
 
         if (feedback.can_add) {
             this.add_item(feedbacks.add_a(feedback.photo, feedback, "Reply"))
@@ -353,11 +339,11 @@ $.widget('spud.feedback_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.results)
+            this.set(this.options.rights, this.options.search, this.options.results)
         }
     },
 
-    set: function(search, results) {
+    set: function(rights, search, results) {
         this.element.empty()
         if (results.can_moderate) {
             var criteria = $.extend({}, {
@@ -404,7 +390,7 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
             .insertAfter(this.description)
 
         if (this.options.feedback != null) {
-            this.set(this.options.feedback)
+            this.set(this.options.feedback, this.options.rights)
         }
     },
 
@@ -413,7 +399,7 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
         this._super()
     },
 
-    set: function(feedback) {
+    set: function(feedback, rights) {
         this.feedback = feedback
         if (feedback.id != null) {
             this.set_title("Change feedback")
@@ -543,31 +529,33 @@ feedback_doer.prototype.get_objects = function(results) {
     return results.feedbacks
 }
 
-feedback_doer.prototype.details = function(feedback, div) {
-    $.spud.feedback_details({feedback: feedback}, div)
+feedback_doer.prototype.details = function(feedback, rights, div) {
+    $.spud.feedback_details({feedback: feedback, rights: rights}, div)
 }
 
-feedback_doer.prototype.list_menu = function(search, results, div) {
-    $.spud.feedback_list_menu({search: search, results: results}, div)
+feedback_doer.prototype.list_menu = function(rights, search, results, div) {
+    $.spud.feedback_list_menu({rights: rights, search: search, results: results}, div)
 }
 
 
-feedback_doer.prototype.menu = function(feedback, div) {
-    $.spud.feedback_menu({feedback: feedback}, div)
+feedback_doer.prototype.menu = function(feedback, rights, div) {
+    $.spud.feedback_menu({feedback: feedback, rights: rights}, div)
 }
 
-feedback_doer.prototype.list = function(feedbacks, page, last_page, html_page, div) {
+feedback_doer.prototype.list = function(feedbacks, rights, page, last_page, html_page, div) {
     $.spud.feedback_list({
         feedbacks: feedbacks,
+        rights: rights,
         page: page,
         last_page: last_page,
         html_page: html_page,
     }, div)
 }
 
-feedback_doer.prototype.list_children = function(feedbacks, page, last_page, html_page, div) {
+feedback_doer.prototype.list_children = function(feedbacks, rights, page, last_page, html_page, div) {
     $.spud.feedback_list({
         feedbacks: feedbacks,
+        rights: rights,
         page: page,
         last_page: last_page,
         html_page: html_page,
@@ -575,20 +563,20 @@ feedback_doer.prototype.list_children = function(feedbacks, page, last_page, htm
     }, div)
 }
 
-feedback_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.spud.feedback_search_dialog({ criteria: criteria }, dialog)
+feedback_doer.prototype.search_dialog = function(criteria, rights, dialog) {
+    $.spud.feedback_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-feedback_doer.prototype.search_details = function(criteria, dialog) {
-    $.spud.feedback_search_details({ criteria: criteria }, dialog)
+feedback_doer.prototype.search_details = function(criteria, rights, dialog) {
+    $.spud.feedback_search_details({ criteria: criteria, rights: rights }, dialog)
 }
 
-feedback_doer.prototype.change_dialog = function(feedback, dialog) {
-    $.spud.feedback_change_dialog({ feedback: feedback }, dialog)
+feedback_doer.prototype.change_dialog = function(feedback, rights, dialog) {
+    $.spud.feedback_change_dialog({ feedback: feedback, rights: rights }, dialog)
 }
 
 feedback_doer.prototype.delete_dialog = function(feedback, dialog) {
     $.spud.feedback_delete_dialog({ feedback: feedback }, dialog)
 }
 
-feedbacks = new feedback_doer()
+var feedbacks = new feedback_doer()

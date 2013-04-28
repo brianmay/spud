@@ -309,12 +309,12 @@ $.widget('spud.photo_summary',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo)
+            this.set(this.options.photo, this.options.rights)
         }
     },
 
-    set: function(photo) {
-        var can_change = is_edit_mode() && photo.can_change
+    set: function(photo, rights) {
+        var can_change = is_edit_mode() && rights.can_change
 
         this.title
             .empty()
@@ -356,14 +356,12 @@ $.widget('spud.photo_image',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo)
+            this.set(this.options.photo, this.options.rights)
         }
     },
 
-    set: function(photo) {
+    set: function(photo, rights) {
         var img = this.img
-
-        var can_change = is_edit_mode() && photo.can_change
 
         img
             .image("set", photo)
@@ -373,7 +371,7 @@ $.widget('spud.photo_image',  {
         $(window).on("resize", function() { img.image("resize", false) })
 
         this.summary
-            .photo_summary("set", photo)
+            .photo_summary("set", photo, rights)
     },
 
     _destroy: function() {
@@ -413,12 +411,12 @@ $.widget('spud.photo_details',  $.spud.infobox, {
         this.element.removeClass("infobox")
 
         if (this.options.photo != null) {
-            this.set(this.options.photo)
+            this.set(this.options.photo, this.options.rights)
         }
     },
 
-    set: function(photo) {
-        var can_change = is_edit_mode() && photo.can_change
+    set: function(photo, rights) {
+        var can_change = is_edit_mode() && rights.can_change
 
         this.set_edit_value(
             "title", photo.title,
@@ -516,8 +514,12 @@ $.widget('spud.camera_details',  $.spud.infobox, {
         this.element.removeClass("infobox")
 
         if (this.options.photo != null) {
-            this.set(this.options.photo)
+            this.set(this.options.photo, this.options.rights)
         }
+    },
+
+    set: function(photo, rights) {
+        this._super(photo)
     },
 })
 
@@ -540,11 +542,11 @@ $.widget('spud.photo_article',  {
             .appendTo(this.element)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo)
+            this.set(this.options.photo, this.options.rights)
         }
     },
 
-    set: function(photo) {
+    set: function(photo, rights) {
         this.element
             .toggleClass("ui-selected", is_photo_selected(photo))
 
@@ -552,9 +554,9 @@ $.widget('spud.photo_article',  {
         set_photo_style(this.pd, photo)
         set_photo_style(this.cd, photo)
 
-        this.pi.photo_image("set", photo)
-        this.pd.photo_details("set", photo)
-        this.cd.camera_details("set", photo)
+        this.pi.photo_image("set", photo, rights)
+        this.pd.photo_details("set", photo, rights)
+        this.cd.camera_details("set", photo, rights)
         return this
     },
 
@@ -581,11 +583,11 @@ $.widget('spud.photo_slideshow',  {
             .appendTo(this.pd)
 
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options)
+            this.set(this.options.photo, this.options.rights)
         }
     },
 
-    set: function(photo) {
+    set: function(photo, rights) {
         set_photo_style(this.pd, photo)
         this.pd.toggleClass("ui-selected", is_photo_selected(photo))
 
@@ -614,11 +616,11 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.search, this.options.n)
+            this.set(this.options.photo, this.options.rights, this.options.search, this.options.n)
         }
     },
 
-    set: function(photo, search, n) {
+    set: function(photo, rights, search, n) {
         this.element.empty()
 
         var photo_mode = search.photo_mode
@@ -640,7 +642,7 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
                 }))
         }
 
-        if (photo.can_change) {
+        if (rights.can_change) {
             this.add_item(
                 $("<a href='#'>Change photo</a>")
                 .on("click", function() {
@@ -674,7 +676,7 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
 
         this.add_item(photo_search_form_a(criteria))
 
-        if (photo.can_add_feedback) {
+        if (rights.can_add_feedback) {
             this.add_item(feedbacks.add_a(photo, null, null))
         }
 
@@ -700,7 +702,7 @@ $.widget('spud.photo_list', $.spud.photo_list_base, {
                 del_selection( $(ui.unselected).data('photo') ); },
         })
         if (this.options.search != null && this.options.results != null) {
-            this.set(this.options.search, this.options.results)
+            this.set(this.options.rights, this.options.search, this.options.results)
         }
     },
 
@@ -710,7 +712,7 @@ $.widget('spud.photo_list', $.spud.photo_list_base, {
         this._super()
     },
 
-    set: function(search, results) {
+    set: function(rights, search, results) {
         var mythis = this
         this.empty()
         this.element.toggleClass("hidden", results.photos.length == 0)
@@ -731,11 +733,11 @@ $.widget('spud.photo_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.results)
+            this.set(this.options.rights, this.options.search, this.options.results)
         }
     },
 
-    set: function(search, results) {
+    set: function(rights, search, results) {
         this.element.empty()
 
         if (results.photos.length > 0) {
@@ -748,7 +750,7 @@ $.widget('spud.photo_list_menu', $.spud.spud_menu, {
                 }))
         }
 
-        if (results.can_change) {
+        if (rights.can_change) {
             this.add_item(
                 $("<a href='#'>Change listed photos</a>")
                 .on("click", function() {

@@ -33,8 +33,12 @@ $.widget('spud.place_search_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.feedback)
         }
+    },
+
+    set: function(criteria, rights) {
+        this._super(criteria)
     },
 
     _submit_values: function(values) {
@@ -73,8 +77,12 @@ $.widget('spud.place_search_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.rights)
         }
+    },
+
+    set: function(criteria, rights) {
+        this._super(criteria)
     },
 })
 
@@ -101,17 +109,17 @@ $.widget('spud.place_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.place != null) {
-            this.set(this.options.place)
+            this.set(this.options.place, this.options.rights)
         }
     },
 
-    set: function(initial) {
-        this.img.image("set", initial.cover_photo)
-        this._super(initial)
-        if (initial.url) {
+    set: function(place, rights) {
+        this.img.image("set", place.cover_photo)
+        this._super(place)
+        if (place.url) {
             this.set_value("url", $("<a></a>")
-                .attr("href", initial.url)
-                .text(initial.urldesc))
+                .attr("href", place.url)
+                .text(place.urldesc))
         } else {
             this.set_value("url", null)
         }
@@ -129,11 +137,11 @@ $.widget('spud.place_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.places != null) {
-            this.set(this.options.places)
+            this.set(this.options.places, this.options.rights)
         }
     },
 
-    set: function(place_list) {
+    set: function(place_list, rights) {
         var mythis = this
         this.empty()
         this.element.toggleClass("hidden", place_list.length == 0)
@@ -154,11 +162,11 @@ $.widget('spud.place_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.place != null) {
-            this.set(this.options.place)
+            this.set(this.options.place, this.options.rights)
         }
     },
 
-    set: function(place) {
+    set: function(place, rights) {
         this.element.empty()
 
         var criteria = { place: place.id }
@@ -178,15 +186,15 @@ $.widget('spud.place_menu', $.spud.spud_menu, {
         this.add_item(photo_search_form_a(criteria))
         this.add_item(places.search_form_a({ instance: place.id }))
 
-        if (place.can_add) {
+        if (rights.can_add) {
             this.add_item(places.add_a(place))
         }
 
-        if (place.can_change) {
+        if (rights.can_change) {
             this.add_item(places.change_a(place))
         }
 
-        if (place.can_delete) {
+        if (rights.can_delete) {
             this.add_item(places.delete_a(place))
         }
 
@@ -199,15 +207,15 @@ $.widget('spud.place_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.results)
+            this.set(this.options.rights, this.options.search, this.options.results)
         }
     },
 
-    set: function(search, results) {
+    set: function(rights, search, results) {
         this.element.empty()
         this.add_item(places.search_form_a(search.criteria))
 
-        if (results.can_add) {
+        if (rights.can_add) {
             this.add_item(places.add_a(null))
         }
 
@@ -237,11 +245,11 @@ $.widget('spud.place_change_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.place != null) {
-            this.set(this.options.place)
+            this.set(this.options.place, this.options.rights)
         }
     },
 
-    set: function(place) {
+    set: function(place, rights) {
         this.place_id = place.id
         if (place.id != null) {
             this.set_title("Change place")
@@ -333,42 +341,43 @@ place_doer.prototype.get_objects = function(results) {
     return results.places
 }
 
-place_doer.prototype.details = function(place, div) {
-    $.spud.place_details({place: place}, div)
+place_doer.prototype.details = function(place, rights, div) {
+    $.spud.place_details({place: place, rights: rights}, div)
 }
 
-place_doer.prototype.list_menu = function(search, results, div) {
-    $.spud.place_list_menu({search: search, results: results}, div)
+place_doer.prototype.list_menu = function(rights, search, results, div) {
+    $.spud.place_list_menu({rights: rights, search: search, results: results}, div)
 }
 
 
-place_doer.prototype.menu = function(place, div) {
-    $.spud.place_menu({place: place}, div)
+place_doer.prototype.menu = function(place, rights, div) {
+    $.spud.place_menu({place: place, rights: rights}, div)
 }
 
-place_doer.prototype.list = function(places, page, last_page, html_page, div) {
+place_doer.prototype.list = function(places, rights, page, last_page, html_page, div) {
     $.spud.place_list({
         places: places,
+        rights: rights,
         page: page,
         last_page: last_page,
         html_page: html_page,
     }, div)
 }
 
-place_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.spud.place_search_dialog({ criteria: criteria }, dialog)
+place_doer.prototype.search_dialog = function(criteria, rights, dialog) {
+    $.spud.place_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-place_doer.prototype.search_details = function(criteria, dialog) {
-    $.spud.place_search_details({ criteria: criteria }, dialog)
+place_doer.prototype.search_details = function(criteria, rights, dialog) {
+    $.spud.place_search_details({ criteria: criteria, rights: rights }, dialog)
 }
 
-place_doer.prototype.change_dialog = function(place, dialog) {
-    $.spud.place_change_dialog({ place: place }, dialog)
+place_doer.prototype.change_dialog = function(place, rights, dialog) {
+    $.spud.place_change_dialog({ place: place, rights: rights }, dialog)
 }
 
 place_doer.prototype.delete_dialog = function(place, dialog) {
     $.spud.place_delete_dialog({ place: place }, dialog)
 }
 
-places = new place_doer()
+var places = new place_doer()

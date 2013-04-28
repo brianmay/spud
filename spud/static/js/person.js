@@ -33,8 +33,12 @@ $.widget('spud.person_search_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.feedback)
         }
+    },
+
+    set: function(criteria, rights) {
+        this._super(criteria)
     },
 
     _submit_values: function(values) {
@@ -73,8 +77,12 @@ $.widget('spud.person_search_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.rights)
         }
+    },
+
+    set: function(criteria, rights) {
+        this._super(criteria)
     },
 })
 
@@ -112,16 +120,16 @@ $.widget('spud.person_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.person != null) {
-            this.set(this.options.person)
+            this.set(this.options.person, this.options.rights)
         }
     },
 
-    set: function(initial) {
-        this._super(initial)
-        this.img.image("set", initial.cover_photo)
-        if (initial.gender == "1") {
+    set: function(person, rights) {
+        this._super(person)
+        this.img.image("set", person.cover_photo)
+        if (person.gender == "1") {
             this.set_value("gender", "Male")
-        } else if (initial.gender == "2") {
+        } else if (person.gender == "2") {
             this.set_value("gender", "Female")
         }
     },
@@ -138,11 +146,11 @@ $.widget('spud.person_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.persons != null) {
-            this.set(this.options.persons)
+            this.set(this.options.persons, this.options.rights)
         }
     },
 
-    set: function(person_list) {
+    set: function(person_list, rights) {
         var mythis = this
         this.empty()
         this.element.toggleClass("hidden", person_list.length == 0)
@@ -163,11 +171,11 @@ $.widget('spud.person_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.person != null) {
-            this.set(this.options.person)
+            this.set(this.options.person, this.options.rights)
         }
     },
 
-    set: function(person) {
+    set: function(person, rights) {
         this.element.empty()
 
         var criteria = { persons: person.id }
@@ -187,15 +195,15 @@ $.widget('spud.person_menu', $.spud.spud_menu, {
         this.add_item(photo_search_form_a(criteria))
         this.add_item(persons.search_form_a({ instance: person.id }))
 
-        if (person.can_add) {
+        if (rights.can_add) {
             this.add_item(persons.add_a(person))
         }
 
-        if (person.can_change) {
+        if (rights.can_change) {
             this.add_item(persons.change_a(person))
         }
 
-        if (person.can_delete) {
+        if (rights.can_delete) {
             this.add_item(persons.delete_a(person))
         }
 
@@ -208,15 +216,15 @@ $.widget('spud.person_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.results)
+            this.set(this.options.rights, this.options.search, this.options.results)
         }
     },
 
-    set: function(search, results) {
+    set: function(rights, search, results) {
         this.element.empty()
         this.add_item(persons.search_form_a(search.criteria))
 
-        if (results.can_add) {
+        if (rights.can_add) {
             this.add_item(persons.add_a(null))
         }
 
@@ -287,11 +295,11 @@ $.widget('spud.person_change_dialog',  $.spud.form_dialog, {
 
         old_table.replaceWith(tabs)
         if (this.options.person != null) {
-            this.set(this.options.person)
+            this.set(this.options.person, this.options.rights)
         }
     },
 
-    set: function(person) {
+    set: function(person, rights) {
         this.person_id = person.id
         if (person.id != null) {
             this.set_title("Change person")
@@ -383,42 +391,43 @@ person_doer.prototype.get_objects = function(results) {
     return results.persons
 }
 
-person_doer.prototype.details = function(person, div) {
-    $.spud.person_details({person: person}, div)
+person_doer.prototype.details = function(person, rights, div) {
+    $.spud.person_details({person: person, rights: rights}, div)
 }
 
-person_doer.prototype.list_menu = function(search, results, div) {
-    $.spud.person_list_menu({search: search, results: results}, div)
+person_doer.prototype.list_menu = function(rights, search, results, div) {
+    $.spud.person_list_menu({rights: rights, search: search, results: results}, div)
 }
 
 
-person_doer.prototype.menu = function(person, div) {
-    $.spud.person_menu({person: person}, div)
+person_doer.prototype.menu = function(person, rights, div) {
+    $.spud.person_menu({person: person, rights: rights}, div)
 }
 
-person_doer.prototype.list = function(persons, page, last_page, html_page, div) {
+person_doer.prototype.list = function(persons, rights, page, last_page, html_page, div) {
     $.spud.person_list({
         persons: persons,
+        rights: rights,
         page: page,
         last_page: last_page,
         html_page: html_page,
     }, div)
 }
 
-person_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.spud.person_search_dialog({ criteria: criteria }, dialog)
+person_doer.prototype.search_dialog = function(criteria, rights, dialog) {
+    $.spud.person_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-person_doer.prototype.search_details = function(criteria, dialog) {
-    $.spud.person_search_details({ criteria: criteria }, dialog)
+person_doer.prototype.search_details = function(criteria, rights, dialog) {
+    $.spud.person_search_details({ criteria: criteria, rights: rights }, dialog)
 }
 
-person_doer.prototype.change_dialog = function(person, dialog) {
-    $.spud.person_change_dialog({ person: person }, dialog)
+person_doer.prototype.change_dialog = function(person, rights, dialog) {
+    $.spud.person_change_dialog({ person: person, rights: rights }, dialog)
 }
 
 person_doer.prototype.delete_dialog = function(person, dialog) {
     $.spud.person_delete_dialog({ person: person }, dialog)
 }
 
-persons = new person_doer()
+var persons = new person_doer()

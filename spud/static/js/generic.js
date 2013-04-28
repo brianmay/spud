@@ -173,20 +173,20 @@ generic_doer.prototype.delete_a = function(object, title) {
     return a
 }
 
-generic_doer.prototype.list_results = function(feedbacks, page, last_page, html_page, div) {
-    this.list(feedbacks, page, last_page, html_page, div)
+generic_doer.prototype.list_results = function(feedbacks, rights, page, last_page, html_page, div) {
+    this.list(feedbacks, rights, page, last_page, html_page, div)
 }
 
-generic_doer.prototype.list_children = function(feedbacks, page, last_page, html_page, div) {
-    this.list(feedbacks, page, last_page, html_page, div)
+generic_doer.prototype.list_children = function(feedbacks, rights, page, last_page, html_page, div) {
+    this.list(feedbacks, rights, page, last_page, html_page, div)
 }
 
-generic_doer.prototype.display_search_form = function(criteria) {
+generic_doer.prototype.display_search_form = function(criteria, rights) {
     var dialog = $("<div id='dialog'></div>")
-    this.search_dialog(criteria, dialog)
+    this.search_dialog(criteria, rights, dialog)
 }
 
-generic_doer.prototype.display_search_results = function(search, results) {
+generic_doer.prototype.display_search_results = function(rights, search, results) {
     var mythis = this
 
     reset_display()
@@ -208,13 +208,13 @@ generic_doer.prototype.display_search_results = function(search, results) {
     }
 
     var div = $("<div/>").appendTo(cm)
-    this.search_details(results.criteria, div)
+    this.search_details(results.criteria, rights, div)
 
     var div = $("<div/>").appendTo(cm)
-    this.list_results(this.get_objects(results), page, last_page, html_page, div)
+    this.list_results(this.get_objects(results), rights, page, last_page, html_page, div)
 
     var ul = $('<ul class="menu"/>')
-    this.list_menu(search, results, ul)
+    this.list_menu(rights, search, results, ul)
 
     append_action_links(ul)
 
@@ -231,7 +231,7 @@ generic_doer.prototype.display_search_results = function(search, results) {
 }
 
 
-generic_doer.prototype.display = function(object) {
+generic_doer.prototype.display = function(object, rights) {
     reset_display()
     var cm = $("#content-main")
     cm.html("")
@@ -240,7 +240,7 @@ generic_doer.prototype.display = function(object) {
     cm.append("<h1>" + escapeHTML(object.title) +  "</h1>")
 
     var div = $("<div/>").appendTo(cm)
-    this.details(object, div)
+    this.details(object, rights, div)
 
     var mythis = this
 
@@ -249,7 +249,7 @@ generic_doer.prototype.display = function(object) {
             .appendTo(cm)
 
         this.list_children(
-            null, null, null,
+            null, null, null, null,
             function(page, text) {
                     return $("<a/>")
                         .text(text)
@@ -278,7 +278,7 @@ generic_doer.prototype.display = function(object) {
 
     var ul = $('<ul class="menu"/>')
 
-    this.menu(object, ul)
+    this.menu(object, rights, ul)
 
     append_action_links(ul)
 
@@ -319,7 +319,7 @@ generic_doer.prototype.display_children = function(element, object, page) {
         function(data) {
             element[mythis.list_type]("clear_status")
             var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
-            element[mythis.list_type]("set", mythis.get_objects(data))
+            element[mythis.list_type]("set", mythis.get_objects(data), data.rights)
             element[mythis.list_type]("set_paginator", page, last_page)
         },
         function(message) {
@@ -339,11 +339,11 @@ generic_doer.prototype.display_photos = function(element, object, page) {
         function(data) {
             element.photo_list("clear_status")
             var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
-            element.photo_list("set", search, data)
+            element.photo_list("set", data.rights, search, data)
             element.photo_list("set_paginator", page, last_page)
 
             cancel_keyboard()
-            if (data.can_change && is_edit_mode()) {
+            if (data.rights.can_change && is_edit_mode()) {
                 photo_change_keyboard(null, search.criteria, data.number_results)
             }
         },
@@ -355,9 +355,9 @@ generic_doer.prototype.display_photos = function(element, object, page) {
 }
 
 
-generic_doer.prototype.display_change = function(object) {
+generic_doer.prototype.display_change = function(object, rights) {
     var dialog = $("<div id='dialog'></div>")
-    this.change_dialog(object, dialog)
+    this.change_dialog(object, rights, dialog)
 }
 
 
@@ -375,7 +375,7 @@ generic_doer.prototype.do_search_form = function(criteria, push_history) {
     this.load_search_form(criteria,
         function(data) {
             hide_loading()
-            mythis.display_search_form(data.criteria)
+            mythis.display_search_form(data.criteria, data.rights)
         },
 
         function(message) {
@@ -401,7 +401,7 @@ generic_doer.prototype.do_search_results = function(search, page, push_history, 
                     search: search,
                     page: page,
                 });
-            mythis.display_search_results(search, data)
+            mythis.display_search_results(data.rights, search, data)
             if (success) { success() }
         },
 
@@ -428,7 +428,7 @@ generic_doer.prototype.do = function(object_id, push_history) {
                     object_id: mythis.get_object(data).id,
                 }
             );
-            mythis.display(mythis.get_object(data))
+            mythis.display(mythis.get_object(data), data.rights)
         },
 
         function(message) {
@@ -446,7 +446,7 @@ generic_doer.prototype.do_change = function(object_id, push_history) {
     this.load(object_id,
         function(data) {
             hide_loading()
-            mythis.display_change(mythis.get_object(data))
+            mythis.display_change(mythis.get_object(data), data.rights)
         },
 
         function(message) {
@@ -460,7 +460,9 @@ generic_doer.prototype.do_add = function(parent, push_history) {
     close_all_dialog()
 
     this.display_change(
-        this.get_new_object(parent)
+        this.get_new_object(parent),
+        // FIXME rights
+        {}
     )
 }
 

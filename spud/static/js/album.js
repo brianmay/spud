@@ -26,7 +26,6 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
             ["mode", new select_input_field("Mode",
                 [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
             ["root_only", new boolean_input_field("Root only", false)],
-            ["needs_revision", new boolean_input_field("Needs revision", false)],
         ]
         this.options.title = "Search albums"
         this.options.description = "Please search for an album."
@@ -34,8 +33,18 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.rights)
         }
+    },
+
+    set: function(criteria, rights) {
+        if (rights.can_unrestricted_search) {
+            this.add_field("needs_revision",
+                new boolean_input_field("Needs revision"))
+        } else {
+            this.remove_field("needs_revision")
+        }
+        this._super(criteria)
     },
 
     _submit_values: function(values) {
@@ -78,8 +87,12 @@ $.widget('spud.album_search_details',  $.spud.infobox, {
         this._super();
 
         if (this.options.criteria != null) {
-            this.set(this.options.criteria)
+            this.set(this.options.criteria, this.options.rights)
         }
+    },
+
+    set: function(criteria, rights) {
+        this._super(criteria)
     },
 })
 
@@ -103,14 +116,14 @@ $.widget('spud.album_details',  $.spud.infobox, {
             .appendTo(this.element)
 
         if (this.options.album != null) {
-            this.set(this.options.album)
+            this.set(this.options.album, this.options.rights)
         }
     },
 
-    set: function(initial) {
-        this._super(initial)
-        this.description.p(initial.description)
-        this.img.image("set", initial.cover_photo)
+    set: function(album, rights) {
+        this._super(album)
+        this.description.p(album.description)
+        this.img.image("set", album.cover_photo)
     },
 
     _destroy: function() {
@@ -125,11 +138,11 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
         if (this.options.albums != null) {
-            this.set(this.options.albums)
+            this.set(this.options.albums, this.options.rights)
         }
     },
 
-    set: function(album_list) {
+    set: function(album_list, rights) {
         var mythis = this
         this.empty()
         this.element.toggleClass("hidden", album_list.length == 0)
@@ -150,11 +163,11 @@ $.widget('spud.album_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.album != null) {
-            this.set(this.options.album)
+            this.set(this.options.album, this.options.rights)
         }
     },
 
-    set: function(album) {
+    set: function(album, rights) {
         this.element.empty()
 
         var criteria = { albums: album.id }
@@ -174,15 +187,15 @@ $.widget('spud.album_menu', $.spud.spud_menu, {
         this.add_item(photo_search_form_a(criteria))
         this.add_item(albums.search_form_a({ instance: album.id }))
 
-        if (album.can_add) {
+        if (rights.can_add) {
             this.add_item(albums.add_a(album))
         }
 
-        if (album.can_change) {
+        if (rights.can_change) {
             this.add_item(albums.change_a(album))
         }
 
-        if (album.can_delete) {
+        if (rights.can_delete) {
             this.add_item(albums.delete_a(album))
         }
 
@@ -195,15 +208,15 @@ $.widget('spud.album_list_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.search != null) {
-            this.set(this.options.search, this.options.results)
+            this.set(this.options.rights, this.options.search, this.options.results)
         }
     },
 
-    set: function(search, results) {
+    set: function(rights, search, results) {
         this.element.empty()
         this.add_item(albums.search_form_a(search.criteria))
 
-        if (results.can_add) {
+        if (rights.can_add) {
             this.add_item(albums.add_a(null))
         }
 
@@ -229,11 +242,11 @@ $.widget('spud.album_change_dialog',  $.spud.form_dialog, {
         this._super();
 
         if (this.options.album != null) {
-            this.set(this.options.album)
+            this.set(this.options.album, this.options.rights)
         }
     },
 
-    set: function(album) {
+    set: function(album, rights) {
         this.album_id = album.id
         if (album.id != null) {
             this.set_title("Change album")
@@ -324,42 +337,43 @@ album_doer.prototype.get_objects = function(results) {
     return results.albums
 }
 
-album_doer.prototype.details = function(album, div) {
-    $.spud.album_details({album: album}, div)
+album_doer.prototype.details = function(album, rights, div) {
+    $.spud.album_details({album: album, rights: rights}, div)
 }
 
-album_doer.prototype.list_menu = function(search, results, div) {
-    $.spud.album_list_menu({search: search, results: results}, div)
+album_doer.prototype.list_menu = function(rights, search, results, div) {
+    $.spud.album_list_menu({rights: rights, search: search, results: results}, div)
 }
 
 
-album_doer.prototype.menu = function(album, div) {
-    $.spud.album_menu({album: album}, div)
+album_doer.prototype.menu = function(album, rights, div) {
+    $.spud.album_menu({album: album, rights: rights}, div)
 }
 
-album_doer.prototype.list = function(albums, page, last_page, html_page, div) {
+album_doer.prototype.list = function(albums, rights, page, last_page, html_page, div) {
     $.spud.album_list({
         albums: albums,
+        rights: rights,
         page: page,
         last_page: last_page,
         html_page: html_page,
     }, div)
 }
 
-album_doer.prototype.search_dialog = function(criteria, dialog) {
-    $.spud.album_search_dialog({ criteria: criteria }, dialog)
+album_doer.prototype.search_dialog = function(criteria, rights, dialog) {
+    $.spud.album_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-album_doer.prototype.search_details = function(criteria, dialog) {
-    $.spud.album_search_details({ criteria: criteria }, dialog)
+album_doer.prototype.search_details = function(criteria, rights, dialog) {
+    $.spud.album_search_details({ criteria: criteria, rights: rights }, dialog)
 }
 
-album_doer.prototype.change_dialog = function(album, dialog) {
-    $.spud.album_change_dialog({ album: album }, dialog)
+album_doer.prototype.change_dialog = function(album, rights, dialog) {
+    $.spud.album_change_dialog({ album: album, rights: rights }, dialog)
 }
 
 album_doer.prototype.delete_dialog = function(album, dialog) {
     $.spud.album_delete_dialog({ album: album }, dialog)
 }
 
-albums = new album_doer()
+var albums = new album_doer()

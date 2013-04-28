@@ -500,36 +500,36 @@ function display_root() {
 }
 
 
-function display_photo(photo, search, results, n) {
+function display_photo(photo, rights, search, results, n) {
     reset_display()
     var mode = search.photo_mode
 
     if (mode == "slideshow") {
-        display_photo_slideshow(photo, search, results, n)
+        display_photo_slideshow(photo, rights, search, results, n)
     } else if (mode == "article") {
-        display_photo_article(photo, search, results, n)
+        display_photo_article(photo, rights, search, results, n)
     } else {
         $("#content-main").html("")
     }
 }
 
 
-function display_photo_article(photo, search, results, n) {
+function display_photo_article(photo, rights, search, results, n) {
     var cm = $("#content-main")
     cm.html("")
 
     var prefix = ""
-    if (photo.can_change && is_edit_mode()) {
+    if (rights.can_change && is_edit_mode()) {
         prefix = "Edit "
     }
     document.title = prefix + photo.title + " | Photo | Spud"
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
     $("<div></div>")
-        .photo_article({ photo: photo, })
+        .photo_article({ photo: photo, rights: rights, })
         .appendTo(cm)
 
-    if (photo.can_change && is_edit_mode()) {
+    if (rights.can_change && is_edit_mode()) {
         photo_change_keyboard(photo, { photos: photo.id }, 1)
     }
 
@@ -610,15 +610,15 @@ function display_photo_article(photo, search, results, n) {
         include_children: true,
         })
         .appendTo(cm)
-     this.display_feedback(pl, photo, 0);
+     display_feedback(pl, photo, 0);
 
     var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, results: results, n: n })
+        .photo_menu({ photo: photo, rights: rights, search: search, results: results, n: n })
     append_action_links(ul)
 }
 
 
-display_feedback = function(element, photo, page) {
+function display_feedback(element, photo, page) {
     var search = {
         results_per_page: get_settings().items_per_page,
         criteria: {
@@ -631,7 +631,7 @@ display_feedback = function(element, photo, page) {
         function(data) {
             var last_page = Math.ceil(data.number_results / search.results_per_page) - 1
             element.feedback_list("clear_status")
-            element.feedback_list("set", data.feedbacks)
+            element.feedback_list("set", data.feedbacks, data.rights)
             element.feedback_list("set_paginator", page, last_page)
         },
         function(message) {
@@ -641,21 +641,21 @@ display_feedback = function(element, photo, page) {
 }
 
 
-function display_photo_slideshow(photo, search, results, n) {
+function display_photo_slideshow(photo, rights, search, results, n) {
     var cm = $("#content-main")
     cm.html("")
 
     var div = $("<div></div>")
-        .photo_slideshow({ photo: photo, })
+        .photo_slideshow({ photo: photo, rights: rights, })
         .appendTo(cm)
 
     var prefix = ""
-    if (photo.can_change && is_edit_mode()) {
+    if (rights.can_change && is_edit_mode()) {
         prefix = "Edit "
     }
     document.title = prefix + photo.title + " | Photo | Spud"
 
-    if (photo.can_change && is_edit_mode()) {
+    if (rights.can_change && is_edit_mode()) {
         photo_change_keyboard(photo, { photos: photo.id }, 1)
     }
 
@@ -701,14 +701,14 @@ function display_photo_slideshow(photo, search, results, n) {
         .append(escapeHTML(photo.title))
 
     var ul = $('<ul/>')
-        .photo_menu({ photo: photo, search: search, n: n })
+        .photo_menu({ photo: photo, rights: rights, search: search, n: n })
     append_action_links(ul)
 
     pdp = $('<div class="module"/>')
         .append("<h2>Photo Details</h2>")
 
     $("<div></div>")
-        .photo_summary({ photo: photo, })
+        .photo_summary({ photo: photo, rights: rights, })
         .appendTo(pdp)
 
     $("#content-related")
@@ -993,7 +993,7 @@ function display_photo_search_form(criteria) {
 }
 
 
-function display_photo_search_results(search, results) {
+function display_photo_search_results(rights, search, results) {
     reset_display()
     var cm = $("#content-main")
     cm.html("")
@@ -1016,6 +1016,7 @@ function display_photo_search_results(search, results) {
 
     $("<div/>")
         .photo_list({
+            rights: rights,
             search: search,
             results: results,
             html_page: html_page,
@@ -1025,7 +1026,7 @@ function display_photo_search_results(search, results) {
         .appendTo(cm)
 
     var ul = $('<ul/>')
-        .photo_list_menu({ search: search, results: results, })
+        .photo_list_menu({ search: search, rights: rights, results: results, })
     append_action_links(ul)
 
     $(".breadcrumbs")
@@ -1098,7 +1099,7 @@ function do_photo(photo_id, search, push_history) {
                 photo_id: data.photo.id,
                 search: search,
             });
-            display_photo(data.photo, search)
+            display_photo(data.photo, data.rights, search)
         },
 
         function(message) {
@@ -1182,7 +1183,7 @@ function do_photo_search_results(search, page, push_history, success) {
                     page: page,
                 }
             );
-            display_photo_search_results(search, data)
+            display_photo_search_results(data.rights, search, data)
             if (success) { success() }
         },
 
@@ -1214,7 +1215,7 @@ function do_photo_search_item(search, n, photo_id, push_history) {
                         photo_id: photo_id,
                     }
                 );
-                display_photo(data.photo, search, data, n)
+                display_photo(data.photo, data.rights, search, data, n)
             } else {
                 do_photo(photo_id, search, push_history)
             }
