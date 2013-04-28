@@ -145,10 +145,13 @@ def _has_changed(title, obj, value):
     return false. Otherwise return true if and only if values differ."""
     if value is None:
         return False
-    if obj is None and value == "":
-        return False
-    if obj is not None and obj.pk == _decode_int(title, value):
-        return False
+    if obj is None:
+        return value != ""
+    else:
+        if value == "":
+            return True
+        if obj is not None and obj.pk == _decode_int(title, value):
+            return False
     return True
 
 
