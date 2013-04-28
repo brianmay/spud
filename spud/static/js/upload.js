@@ -103,7 +103,7 @@ function display_upload_form(data) {
     var cm = $("#content-main")
         .empty()
 
-    if (!data.can_upload) {
+    if (!data.rights.can_add) {
         cm
             .append("<h1>Permission denied</h1>")
             .append("<p>You do not have upload rights.</p>")
@@ -127,7 +127,7 @@ function display_upload_form(data) {
     var progress_node = $('<div></div>').progressbar({value: false})
     var progress_extended_node = $('<div class="progress-extended"></div>')
 
-    div = $('<div class="fileupload-progress fade"></div>')
+    var div = $('<div class="fileupload-progress fade"></div>')
         .append(progress_node)
         .append(progress_extended_node)
         .appendTo(form)
