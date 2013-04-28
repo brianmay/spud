@@ -504,13 +504,7 @@ function display_photo(photo, rights, search, results, n) {
     reset_display()
     var mode = search.photo_mode
 
-    if (mode == "slideshow") {
-        display_photo_slideshow(photo, rights, search, results, n)
-    } else if (mode == "article") {
-        display_photo_article(photo, rights, search, results, n)
-    } else {
-        $("#content-main").html("")
-    }
+    display_photo_article(photo, rights, search, results, n)
 }
 
 
@@ -525,8 +519,8 @@ function display_photo_article(photo, rights, search, results, n) {
     document.title = prefix + photo.title + " | Photo | Spud"
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
-    $("<div></div>")
-        .photo_article({ photo: photo, rights: rights, })
+    var pa = $("<div></div>")
+        .photo_article({ photo: photo, rights: rights, photo_mode: search.photo_mode, })
         .appendTo(cm)
 
     if (rights.can_change && is_edit_mode()) {
@@ -566,18 +560,18 @@ function display_photo_article(photo, rights, search, results, n) {
                 last_page: last_page,
                 html_page: html_page,
             })
-            .appendTo("#content-main")
+            .appendTo(pa)
 
         if (n > 0) {
             photo_search_item_a(search, n-1, null, "")
                 .addClass("prevslide")
-                .appendTo(cm)
+                .appendTo(pa)
         }
 
         if (n < results.number_results-1) {
             photo_search_item_a(search, n+1, null, "")
                 .addClass("nextslide")
-                .appendTo(cm)
+                .appendTo(pa)
         }
 
         var page = Math.floor(n / search.results_per_page)
@@ -615,6 +609,11 @@ function display_photo_article(photo, rights, search, results, n) {
     var ul = $('<ul/>')
         .photo_menu({ photo: photo, rights: rights, search: search, results: results, n: n })
     append_action_links(ul)
+
+    if (search.photo_mode == "slideshow") {
+        $("#content-related").addClass("overlapped")
+        $("body").css("overflow", "hidden");
+    }
 }
 
 
@@ -638,84 +637,6 @@ function display_feedback(element, photo, page) {
             element.feedback_list("display_error")
         }
     )
-}
-
-
-function display_photo_slideshow(photo, rights, search, results, n) {
-    var cm = $("#content-main")
-    cm.html("")
-
-    var div = $("<div></div>")
-        .photo_slideshow({ photo: photo, rights: rights, })
-        .appendTo(cm)
-
-    var prefix = ""
-    if (rights.can_change && is_edit_mode()) {
-        prefix = "Edit "
-    }
-    document.title = prefix + photo.title + " | Photo | Spud"
-
-    if (rights.can_change && is_edit_mode()) {
-        photo_change_keyboard(photo, { photos: photo.id }, 1)
-    }
-
-    // preload next/prev photos
-    if (results != null) {
-        var size = get_settings().click_size
-        if (results.prev_photo) {
-            var image = results.prev_photo.thumb[size]
-            if (image) {
-                var img = new Image()
-                img.src = image.url
-            }
-        }
-        if (results.next_photo) {
-            var image = results.next_photo.thumb[size]
-            if (image) {
-                var img = new Image()
-                img.src = image.url
-            }
-        }
-    }
-
-    if (n != null) {
-        if (n > 0) {
-            photo_search_item_a(search, n-1, null, "")
-                .attr('accesskey', "p")
-                .addClass("prevslide")
-                .appendTo(div)
-        }
-
-        if (n < results.number_results-1) {
-            photo_search_item_a(search, n+1, null, "")
-                .attr('accesskey', "n")
-                .addClass("nextslide")
-                .appendTo(div)
-        }
-    }
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › ")
-        .append(escapeHTML(photo.title))
-
-    var ul = $('<ul/>')
-        .photo_menu({ photo: photo, rights: rights, search: search, n: n })
-    append_action_links(ul)
-
-    pdp = $('<div class="module"/>')
-        .append("<h2>Photo Details</h2>")
-
-    $("<div></div>")
-        .photo_summary({ photo: photo, rights: rights, })
-        .appendTo(pdp)
-
-    $("#content-related")
-        .append(pdp)
-        .addClass("overlapped")
-
-    $("body").css("overflow", "hidden");
 }
 
 

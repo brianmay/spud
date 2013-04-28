@@ -19,9 +19,9 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .photo_article .regenerate { background:#CCE; color:#333; }
 .photo_article .ui-selected { background: #F39814; }
 
-.slideshow .photo.removed { background:#999; color:#333; }
-.slideshow .photo.regenerate { background:#CCE; color:#333; }
-.slideshow .photo.ui-selected { background: #F39814; }
+.photo_slideshow .photo.removed { background:#999; color:#333; }
+.photo_slideshow .photo.regenerate { background:#CCE; color:#333; }
+.photo_slideshow .photo.ui-selected { background: #F39814; }
 
 /* PHOTO DETAILS */
 .photo_article { border:1px solid #000; margin-bottom: 10px; }
@@ -164,19 +164,25 @@ div.system-message p.system-message-title { padding:4px 5px 4px 25px; margin:0; 
 div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px repeat-x; padding:2px 8px 3px 8px; color:#999;  border-top:1px solid white; border-bottom:1px solid #ccc; text-align:left; }
 
 /* SLIDE SHOW */
-.slideshow {
+.photo_slideshow {
     position: absolute;
     left: 0;
     top: 0;
     display: block;
 }
-.slideshow .photo {
+.photo_slideshow .photo_image_block {
     width: 100%;
     height: 100%;
     display: block;
     background: #000;
     color: #aaa;
+    margin: 0;
+    border: none;
 }
+.photo_slideshow .photo_summary { position: absolute; top:10px; right:10px; width:18em; border: 1px solid #ccc; padding: 5px; }
+.photo_slideshow .photo_details_block { display: none; }
+.photo_slideshow .camera_details_block { display: none; }
+
 
 .overlapped h2 {
     display: none;
@@ -190,9 +196,13 @@ div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px 
     display: none;
 }
 
+.overlapped .menu  { background: transparent; border: none; }
 
-#content-related.overlapped {
+.colSM #content-related.overlapped {
     position: absolute;
+    float: none;
+    margin: 0;
+    left: 10px;
     top: 10px;
     display: block;
     color: #aaa;
@@ -204,7 +214,7 @@ div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px 
 }
 
 /* ARROWS */
-.slideshow .prevslide, .slideshow .nextslide { top:50%; }
+.photo_slideshow .prevslide, .photo_slideshow .nextslide { top:50%; }
 .prevslide, .nextslide{ position:absolute; height:43px; width:43px; bottom:0; margin-top:-21px; opacity:0.6; }
 .prevslide{ left:10px; background:url('../img/back.png'); }
 .nextslide{ right:10px; background:url('../img/forward.png'); }

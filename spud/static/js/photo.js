@@ -362,13 +362,14 @@ $.widget('spud.photo_image',  {
 
     set: function(photo, rights) {
         var img = this.img
+        var enlarge = Boolean(this.options.enlarge)
 
         img
             .image("set", photo)
-            .image("resize", false)
+            .image("resize", enlarge)
 
         $(window).off("resize")
-        $(window).on("resize", function() { img.image("resize", false) })
+        $(window).on("resize", function() { img.image("resize", enlarge) })
 
         this.summary
             .photo_summary("set", photo, rights)
@@ -527,10 +528,10 @@ $.widget('spud.camera_details',  $.spud.infobox, {
 $.widget('spud.photo_article',  {
     _create: function() {
         this.element
-                .addClass("photo_article")
+                .addClass("photo_" + this.options.photo_mode)
 
         this.pi = $("<div class='photo_block' />")
-            .photo_image()
+            .photo_image({ enlarge: this.options.photo_mode == "slideshow" })
             .appendTo(this.element)
 
         this.pd = $("<div class='photo_block' />")
@@ -566,48 +567,6 @@ $.widget('spud.photo_article',  {
         this.pd.photo_details("destroy")
         this.cd.camera_details("destroy")
         this.element.empty()
-        this._super()
-    },
-})
-
-
-$.widget('spud.photo_slideshow',  {
-    _create: function() {
-        this.element
-                .addClass("slideshow")
-
-        this.pd = $("<div class='photo'></div>")
-            .appendTo(this.element)
-
-        this.img = $("<div />")
-            .image({size: get_settings().click_size})
-            .appendTo(this.pd)
-
-        if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.rights)
-        }
-    },
-
-    set: function(photo, rights) {
-        set_photo_style(this.pd, photo)
-        this.pd.toggleClass("ui-selected", is_photo_selected(photo))
-
-        var img = this.img
-        img
-            .image("set", photo)
-            .image("resize", true)
-
-        $(window).off("resize")
-        $(window).on("resize", function() { img.image("resize", true) })
-        return this
-    },
-
-    _destroy: function() {
-        $(window).off("resize")
-        this.img.image("destroy")
-        this.element
-            .removeAttr("slideshow")
-            .empty()
         this._super()
     },
 })
