@@ -109,29 +109,40 @@ class hierarchy_model(base_model):
             for i in self.ascendant_set.filter(position__gt=0):
                 yield i.ascendant
 
+
     def _ascendants_glue(self, instance, position, seen, cache, parent_attributes):
         glue = []
         if instance is None:
             return glue
 
         if instance.pk in cache:
-            print "glue0", instance.pk,  [(i[0].pk, self.pk, i[2]+position) for i in cache[instance.pk]]
-            return [(i[0], self, i[2]+position) for i in cache[instance.pk]]
+            print "<--- getting", instance.pk,  [(i[0], i[1]+position) for i in cache[instance.pk]]
+            return [(i[0], i[1]+position) for i in cache[instance.pk]]
 
         if instance.pk in seen:
+            print "<--- loop detected", instance.pk
             return glue
 
-        glue.append((instance, self, position))
-        print "glue1", instance.pk,  [(i[0].pk, i[1].pk, i[2]) for i in glue]
+        glue.append((instance.pk, position))
 
         seen[instance.pk] = True
         for attr in parent_attributes:
             parent = getattr(instance, attr)
-            glue.extend(self._ascendants_glue(
-                parent, position+1, seen, cache, parent_attributes))
+            if parent is not None:
+                print "descending", instance.pk, parent.pk
+            new_glue = self._ascendants_glue(
+                parent, position+1, seen, cache, parent_attributes)
+            # make sure there are no duplicates
+            # duplicates can happen if ancestors appear more then once in tree,
+            # e.g. if cousins marry.
+            for item in new_glue:
+                if item not in glue:
+                    glue.append(item)
 
-        print "glue2", instance.pk,  [(i[0].pk, i[1].pk, i[2]) for i in glue]
+        print "---> caching", instance.pk, [(i[0], i[1]-position) for i in glue]
+        cache[instance.pk] = [(i[0], i[1]-position) for i in glue]
         return glue
+
 
     def _fix_ascendants(self, parent_attributes, glue_class, cache, do_descendants):
         if cache is None:
@@ -150,31 +161,31 @@ class hierarchy_model(base_model):
         print "((("
         for instance in instance_list:
             new_glue = instance._ascendants_glue(instance, 0, {}, cache, parent_attributes)
-            cache[instance.pk] = new_glue
             print "----"
             print instance, instance.pk
-            print "ng", [(i[0].pk, i[1].pk, i[2]) for i in new_glue]
+            print "ng", [(i[0], i[1]) for i in new_glue]
             print "cache", cache.keys()
 
             old_glue = [
-                (i.ascendant, i.descendant, i.position)
+                (i.ascendant.pk, i.position)
                 for i in instance.ascendant_set.all()]
-            print "og", [(i[0].pk, i[1].pk, i[2]) for i in old_glue]
+
+            print "og1", old_glue
+
             for glue in new_glue:
-                print glue[0].pk, glue[1].pk, glue[2]
                 if glue in old_glue:
-                    print "found"
+                    print "nothing", glue
                     old_glue.remove(glue)
                 else:
-                    print "not found found"
+                    print "adding", glue
+                    ascendant = type(self).objects.get(pk=glue[0])
                     glue_class.objects.create(
-                        ascendant=glue[0], descendant=glue[1], position=glue[2])
+                        ascendant=ascendant, descendant=self, position=glue[1])
 
-            print "og", [(i[0].pk, i[1].pk, i[2]) for i in old_glue]
             for glue in old_glue:
-                print glue[0].pk, glue[1].pk, glue[2]
+                print "removing", glue
                 glue_class.objects.filter(
-                    ascendant=glue[0], descendant=glue[1], position=glue[2]
+                    ascendant__pk=glue[0], descendant=self, position=glue[1]
                 ).delete()
         print ")))"
 
