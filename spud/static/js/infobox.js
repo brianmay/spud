@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+"use strict";
 
 // **************
 // * INFO BOXES *
@@ -26,7 +27,7 @@ function output_field(title) {
 }
 
 output_field.prototype.to_html = function(id) {
-    html = this.create(id)
+    var html = this.create(id)
 
     this.dt = $("<div class='term'/>")
         .text(this.title)

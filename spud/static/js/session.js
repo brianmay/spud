@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+"use strict";
 
 function get_settings() {
     var a = []
@@ -69,17 +69,17 @@ function is_edit_mode() {
     return ($(document).data("mode") == "edit")
 }
 
-list_sizes = [
+var list_sizes = [
     ["thumb", "Thumb"]
 ]
 
-view_sizes = [
+var view_sizes = [
     ["thumb", "Thumb"],
     ["mid", "Medium"],
     ["large", "Large"],
 ]
 
-click_sizes = [
+var click_sizes = [
     ["thumb", "Thumb"],
     ["mid", "Medium"],
     ["large", "Large"],
@@ -157,7 +157,7 @@ $.widget('spud.login_dialog',  $.spud.form_dialog, {
 
 
 function update_session(session) {
-    ut = $("#user-tools")
+    var ut = $("#user-tools")
         .html("")
 
     ut.append("Welcome, ")

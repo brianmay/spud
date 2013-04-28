@@ -15,8 +15,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+"use strict";
 
 function get_photo_action(action) {
+    var r
+
     if (action == null)
         r = null
     else if (action == 'D')
@@ -664,9 +667,8 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
                 }))
         }
 
-        if (search == null) {
-            criteria = { }
-        } else {
+        var criteria = {}
+        if (search != null) {
             criteria = search.criteria
         }
 

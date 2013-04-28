@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+"use strict";
 
 function _change_feedback(feedback, updates) {
     display_loading()
@@ -184,7 +185,7 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
     },
 
     _submit_values: function(values) {
-        criteria = {}
+        var criteria = {}
 
         var v = values.q
         if (v) { criteria.q = v }

@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+"use strict";
 
 // ****************
 // * STATE SAVING *
@@ -435,13 +436,13 @@ $.widget('spud.main_menu', $.spud.spud_menu, {
     },
 
     set: function() {
-        search = { criteria: { root_only: true} }
+        var search = { criteria: { root_only: true} }
         this.element.empty()
         this.add_item(albums.search_results_a(search, 0, "Albums"))
         this.add_item(categorys.search_results_a(search, 0, "Categories"))
         this.add_item(places.search_results_a(search, 0, "Places"))
 
-        search = { criteria: { root_only: false} }
+        var search = { criteria: { root_only: false} }
         this.add_item(persons.search_results_a(search, 0, "People"))
         this.add_item(feedbacks.search_results_a(search, 0, "Feedback"))
         this.add_item(photo_search_results_a({}, 0))
@@ -691,7 +692,7 @@ $.widget('spud.list_base',  {
     },
 
     append_item: function(html) {
-        li = $("<li />")
+        var li = $("<li />")
             .append(html)
             .appendTo(this.ul)
         return li
@@ -759,7 +760,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
                 .appendTo(a)
         }
 
-        li = $("<li />")
+        var li = $("<li />")
             .attr('class', "photo_item")
             .append(a)
             .on("click", function(ev) { a.trigger('click'); })

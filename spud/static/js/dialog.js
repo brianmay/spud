@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+"use strict";
 
 // ****************
 // * DIALOG BOXES *
@@ -27,7 +28,7 @@ function input_field(title, required) {
 }
 
 input_field.prototype.to_html = function(id) {
-    html = this.create(id)
+    var html = this.create(id)
 
     var th = $("<th/>")
     $("<label/>")
@@ -55,7 +56,7 @@ input_field.prototype.get = function() {
 }
 
 input_field.prototype.validate = function() {
-    value = this.input.val().trim()
+    var value = this.input.val().trim()
     if (this.required && !value) {
         return "This value is required"
     }
@@ -296,7 +297,7 @@ integer_input_field.prototype = new text_input_field()
 integer_input_field.constructor = integer_input_field
 
 integer_input_field.prototype.validate = function() {
-    value = this.input.val().trim()
+    var value = this.input.val().trim()
     var intRegex = /^\d+$/;
     if (value && !intRegex.test(value)) {
         return "Value must be integer"
@@ -535,7 +536,7 @@ photo_select_field.prototype.get = function() {
 }
 
 photo_select_field.prototype.validate = function() {
-    value = this.input.photo_select("get")
+    var value = this.input.photo_select("get")
     if (this.required && !value) {
         return "This value is required"
     }

@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+"use strict";
 
 // *********
 // * LINKS *
@@ -251,7 +252,7 @@ function get_doer(type) {
 }
 
 function close_all_dialog() {
-    close = $("#dialog").data("close")
+    var close = $("#dialog").data("close")
     if (close != null) {
         close()
     }
@@ -441,7 +442,7 @@ function replace_links() {
 
 
 function update_selection() {
-    selection = get_selection()
+    var selection = get_selection()
 
     var ul = $('<ul class="menu"/>')
         .selection_menu({ selection: selection })
