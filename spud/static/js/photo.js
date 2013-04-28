@@ -547,8 +547,9 @@ $.widget('spud.photo_article',  {
     },
 
     set: function(photo, rights) {
-        this.element
-            .toggleClass("ui-selected", is_photo_selected(photo))
+        this.pi.toggleClass("ui-selected", is_photo_selected(photo))
+        this.pd.toggleClass("ui-selected", is_photo_selected(photo))
+        this.cd.toggleClass("ui-selected", is_photo_selected(photo))
 
         set_photo_style(this.pi, photo)
         set_photo_style(this.pd, photo)
