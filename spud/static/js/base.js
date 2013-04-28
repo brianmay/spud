@@ -260,7 +260,7 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
     },
 
     _receiveResult: function(ev, ui) {
-        prev = this.input.val();
+        var prev = this.input.val();
 
         if (prev.indexOf("|"+ui.item.pk+"|") == -1) {
                 this.input.val((prev ? prev : "|") + ui.item.pk + "|");
