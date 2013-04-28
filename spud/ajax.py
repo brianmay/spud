@@ -27,7 +27,7 @@ import django.contrib.auth
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.mail import mail_admins
 
@@ -1052,7 +1052,7 @@ def album_search_results(request):
         if needs_revision:
             dt = datetime.datetime.utcnow()-datetime.timedelta(days=365)
             album_list = album_list.filter(Q(revised__lt=dt) | Q(revised__isnull=True))
-            album_list = album_list.order_by('revised','-pk')
+            album_list = album_list.annotate(null_revised=Count('revised')).order_by('null_revised', 'revised','-pk')
             criteria["needs_revision"] = True
 
     _check_params_empty(params)
