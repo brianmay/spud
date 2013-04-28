@@ -378,7 +378,9 @@ generic_doer.prototype.do_search_form = function(criteria, push_history) {
             mythis.display_search_form(data.criteria)
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -403,7 +405,9 @@ generic_doer.prototype.do_search_results = function(search, page, push_history, 
             if (success) { success() }
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -427,7 +431,9 @@ generic_doer.prototype.do = function(object_id, push_history) {
             mythis.display(mythis.get_object(data))
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -443,7 +449,9 @@ generic_doer.prototype.do_change = function(object_id, push_history) {
             mythis.display_change(mythis.get_object(data))
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
@@ -468,7 +476,9 @@ generic_doer.prototype.do_delete = function(object_id, push_history) {
             mythis.display_delete(mythis.get_object(data))
         },
 
-        display_error
+        function(message) {
+            handle_error(message, push_history)
+        }
     )
 }
 
