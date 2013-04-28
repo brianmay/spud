@@ -318,6 +318,7 @@ $.widget('spud.infobox', {
     },
 
     add_field: function(id, field) {
+        this.remove_field(id, field)
         var html = field.to_html(id)
         this.dl.append(html)
         this.fields[id] = field
