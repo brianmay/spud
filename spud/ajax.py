@@ -2311,6 +2311,7 @@ def feedback_finish(request, feedback):
                 raise ErrorBadRequest("Invalid rating")
             feedback.rating = value
             updated = True
+            updated_rating = True
 
         value = _pop_string(params, "comment")
         if value is not None:
@@ -2342,6 +2343,7 @@ def feedback_finish(request, feedback):
             if value is not None:
                 feedback.is_removed = value
                 updated = True
+                updated_rating = True
 
         _check_params_empty(params)
 

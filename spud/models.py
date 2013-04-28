@@ -524,10 +524,11 @@ class photo(base_model):
                 return self.title
 
     def fix_rating(self):
-        feedbacks = self.feedbacks.all()
+        feedbacks = self.feedbacks.filter(is_removed=False)
         if len(feedbacks) == 0:
             self.rating = None
             self.save()
+            return
 
         rating = 0
         n = 0
