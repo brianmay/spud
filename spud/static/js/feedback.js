@@ -212,7 +212,7 @@ $.widget('spud.feedback_search_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
             ["q", new text_output_field("Search for")],
-            ["photo", new photo_output_field("Photo", get_settings().list_size)],
+            ["photo", new photo_output_field("Photo", get_settings().list_size, true)],
             ["instance", new link_output_field("Feedback")],
             ["mode", new text_output_field("Mode")],
             ["root_only", new boolean_output_field("Root Only")],
