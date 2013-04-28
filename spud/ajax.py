@@ -2862,7 +2862,7 @@ def upload_file(request):
             #       files to be recognized as a single batch of files a unique
             #       id for each session will do the job
             if "uid" not in request.POST:
-                raise HttpResponseBadRequest("UID not specified.")
+                return HttpResponseBadRequest("UID not specified.")
 
             # if here, uid has been specified, so record it
             uid = request.POST[u"uid"]
@@ -2926,20 +2926,27 @@ def upload_file(request):
                 # close the file
             destination.close()
 
+            photo = None
             try:
                 album, _ = spud.models.album.objects.get_or_create(
                     album="Uploads")
 
-    #            album, _ = album.children.get_or_create(album=uid)
+                album, _ = album.children.get_or_create(album=uid)
 
                 photo = spud.upload.import_photo(
                     filename,
                     {'albums': [album]},
-                    {'filename': file.name, 'dryrun': True}
+                    {'filename': file.name}
                 )
                 photo.generate_thumbnails(overwrite=False)
                 response_data['photo'] = _json_photo(
                     request.user, photo)
+            except spud.models.photo_already_exists_error:
+                response_data['error'] = "Photo already exists"
+            except:
+                if photo is not None:
+                    photo.delete()
+                raise
             finally:
                 os.unlink(filename)
 

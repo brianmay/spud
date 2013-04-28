@@ -59,26 +59,10 @@ function display_downloads(params) {
         } else {
             var td = $('<td class="preview"></td>')
                 .append($("<div/>").image({photo: file.photo, size: get_settings().list_size}))
-
-//            if (file.thumbnail_url) {
-//                $("<a>")
-//                    .attr("href", file.url)
-//                    .attr("title", file.name)
-//                    .attr("download", file.name)
-//                    .append($("<img/>").attr("src", file.thumbnail_url))
-//                    .appendTo(td)
-//            }
             tr.append(td)
 
             var td = $('<td class="name"></td>')
                 .append(photo_a(file.photo, {}))
-
-            $("<a>")
-                .attr("href", file.url)
-                .attr("title", file.name)
-                .attr("download", file.name)
-                .append(file.name)
-                .appendTo(td)
 
             tr
                 .append(td)

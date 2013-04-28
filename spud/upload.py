@@ -138,7 +138,7 @@ def import_photo(file, d, options):
     dst = photo.get_orig_path()
 
     # don't do anything in dryrun mode
-    if options['dryrun']:
+    if 'dryrun' in options and options['dryrun']:
         print "would import %s to %s/%s (%s)" % (file, path, name, dt)
         return photo
 
@@ -148,13 +148,19 @@ def import_photo(file, d, options):
     umask = os.umask(0022)
     if not os.path.lexists(os.path.dirname(dst)):
         os.makedirs(os.path.dirname(dst), 0755)
-    shutil.copyfile(file, dst)
 
-    photo.save()
-    set_album_list(photo, albums)
-    set_category_list(photo, d['categorys'])
+    try:
+        shutil.copyfile(file, dst)
+        photo.save()
+        set_album_list(photo, albums)
+        if 'categorys' in d:
+            set_category_list(photo, d['categorys'])
 
-    os.umask(umask)
+        os.umask(umask)
+    except:
+        print "An exception occcured importing photo."
+        photo.delete()
+        raise
 
     print "imported  %s to %s/%s as %d" % (file, path, name, photo.pk)
 
