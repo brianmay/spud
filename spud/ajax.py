@@ -2603,13 +2603,16 @@ def photo_search_change(request):
         if value is not None:
             action = value
             found = False
-            for a in spud.models.PHOTO_ACTION:
-                if a[0] == action:
-                    found = True
-            if not found:
-                raise ErrorBadRequest("Unknown action")
+            if action == "":
+                action = None
+            else:
+                for a in spud.models.PHOTO_ACTION:
+                    if a[0] == action:
+                        found = True
+                    del a
+                if not found:
+                    raise ErrorBadRequest("Unknown action")
             photo_list.update(action=action)
-            del a
             del action
             del found
 
