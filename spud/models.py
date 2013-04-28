@@ -458,10 +458,8 @@ class feedback(hierarchy_model):
     def save(self, *args, **kwargs):
         if self.submit_datetime is None:
             value = datetime.datetime.now(dateutil.tz.tzlocal())
-            print value
             self.submit_datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
             self.utc_offset = value.utcoffset().total_seconds() / 60
-            print self.submit_datetime, self.utc_offset
         super(feedback, self).save(*args, **kwargs)
 
     def fix_ascendants(self, cache=None, do_descendants=True):
