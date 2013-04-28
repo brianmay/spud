@@ -4,49 +4,109 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-def _ascendants_glue(self, parent, position, seen, parent_attributes):
+
+def _ascendants_glue(instance, position, seen, cache, parent_attributes):
     glue = []
-    while parent is not None and parent.pk not in seen:
-        glue.append((parent, self, position))
-        seen[parent.pk] = True
-        for attr in parent_attributes:
-            parent = getattr(parent, attr)
-            glue.extend(_ascendants_glue(self, parent, position+1, seen, parent_attributes))
+    if instance is None:
+        return glue
+
+    if instance.pk in cache:
+        print "<--- getting", instance.pk,  [(i[0], i[1]+position) for i in cache[instance.pk]]
+        return [(i[0], i[1]+position) for i in cache[instance.pk]]
+
+    if instance.pk in seen:
+        print "<--- loop detected", instance.pk
+        return glue
+
+    glue.append((instance.pk, position))
+
+    seen[instance.pk] = True
+    for attr in parent_attributes:
+        parent = getattr(instance, attr)
+        if parent is not None:
+            print "descending", instance.pk, parent.pk
+        new_glue = _ascendants_glue(
+            parent, position+1, seen, cache, parent_attributes)
+        # make sure there are no duplicates
+        # duplicates can happen if ancestors appear more then once in tree,
+        # e.g. if cousins marry.
+        for item in new_glue:
+            if item not in glue:
+                glue.append(item)
+
+    print "---> caching", instance.pk, [(i[0], i[1]-position) for i in glue]
+    cache[instance.pk] = [(i[0], i[1]-position) for i in glue]
     return glue
 
 
-def _fix_ascendants(orm, self, parent_attributes):
-    new_glue = _ascendants_glue(self, self, 0, {}, parent_attributes)
-    print self, new_glue
+def _fix_ascendants(self, parent_attributes, glue_class, cache, do_descendants):
+    if cache is None:
+        cache={}
 
-    old_glue = [
-        (i.ascendant, i.descendant, i.position)
-        for i in self.ascendant_set.all()]
-    for glue in new_glue:
-        if glue in old_glue:
-            old_glue.remove(glue)
-        else:
-            print "Add ",glue
-            orm.album_ascendant.objects.create(
-                ascendant=glue[0], descendant=glue[1], position=glue[2])
+    if do_descendants:
+        instance_list = list(self.get_descendants(True))
+        # if descendants list is length 0 it is invalid,
+        # should include self
+        if len(instance_list) == 0:
+            instance_list = [self]
+            instance_list.extend(self.children.all())
+    else:
+        instance_list = [self]
 
-    for glue in old_glue:
-        print "Del ",glue
-        orm.album_ascendant.objects.get(
-            ascendant=glue[0], descendant=glue[1], position=glue[2]
-        ).delete()
+    print "((("
+    for instance in instance_list:
+        new_glue = _ascendants_glue(instance, 0, {}, cache, parent_attributes)
+        print "----"
+        print instance, instance.pk
+        print "ng", [(i[0], i[1]) for i in new_glue]
+        print "cache", cache.keys()
+
+        old_glue = [
+            (i.ascendant.pk, i.position)
+            for i in instance.ascendant_set.all()]
+
+        print "og1", old_glue
+
+        for glue in new_glue:
+            if glue in old_glue:
+                print "nothing", glue
+                old_glue.remove(glue)
+            else:
+                print "adding", glue
+                ascendant = type(self).objects.get(pk=glue[0])
+                glue_class.objects.create(
+                    ascendant=ascendant, descendant=self, position=glue[1])
+
+        for glue in old_glue:
+            print "removing", glue
+            glue_class.objects.filter(
+                ascendant__pk=glue[0], descendant=self, position=glue[1]
+            ).delete()
+    print ")))"
+
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
+        cache = {}
         for album in orm.album.objects.all():
-            _fix_ascendants(orm, album, ["parent_album"])
+            _fix_ascendants(
+                album, ["parent_album"], orm.album_ascendant, cache, False)
+
+        cache = {}
         for category in orm.category.objects.all():
-            _fix_ascendants(orm, category, ["parent_category"])
+            _fix_ascendants(
+                category, ["parent_category"], orm.category_ascendant, cache, False)
+
+        cache = {}
         for place in orm.place.objects.all():
-            _fix_ascendants(orm, place, ["parent_place"])
+            _fix_ascendants(
+                place, ["parent_place"], orm.place_ascendant, cache, False)
+
+        cache = {}
         for person in orm.person.objects.all():
-            _fix_ascendants(orm, person, ["mother", "father"])
+            _fix_ascendants(
+                person, ["mother", "father"], orm.person_ascendant, cache, False)
 
 
 
