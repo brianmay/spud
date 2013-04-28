@@ -126,4 +126,6 @@ DEFAULT_DTOFFSET = {}
 
 DEFAULT_CONTENT_TYPE = "application/xhtml+xml"
 
+# required for django versions earlier then 1.5
+AUTH_USER_MODEL = 'auth.User'
 execfile("/etc/spud/settings.py")
