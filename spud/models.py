@@ -257,6 +257,7 @@ class album(hierarchy_model):
     sort_name = models.CharField(max_length=96, blank=True)
     sort_order = models.CharField(max_length=96, blank=True)
     revised = models.DateTimeField(null=True, blank=True)
+    revised_utc_offset = models.IntegerField()
 
     class Meta:
         ordering = [ 'sort_name', 'sort_order', 'title' ]

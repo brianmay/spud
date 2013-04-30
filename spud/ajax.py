@@ -383,7 +383,7 @@ def _json_album(user, album):
         'revised': None,
     }
     if album.revised is not None and user.is_staff:
-        d['revised'] = _json_datetime(album.revised, 0)
+        d['revised'] = _json_datetime(album.revised, album.revised_utc_offset)
     return d
 
 
@@ -1172,10 +1172,10 @@ def album_finish(request, album):
             timezone = django.conf.settings.TIME_ZONE
             timezone = pytz.timezone(timezone)
             dt = _decode_datetime("revised", value, timezone)
-            # utc_offset = dt.utcoffset().seconds / 60
+            utc_offset = dt.utcoffset().seconds / 60
             dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
             album.revised = dt
-            # album.revised_offset = utc_offset
+            album.revised_utc_offset = utc_offset
 
         _check_params_empty(params)
 
