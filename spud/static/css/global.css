@@ -84,7 +84,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 /* LIST INFO BOX */
 .infobox { border:1px solid #000; padding:10px; margin-bottom:10px; }
 .infobox .image { display:inline-block; }
-.infobox .def_list { width:500px; display: inline-block; vertical-align:top; margin-left: 5px; }
+.infobox .def_list { max-width:500px; display: inline-block; vertical-align:top; margin-left: 5px; }
 .infobox .def_list .item { border-top:1px solid #ddd; margin-bottom: 5px; }
 .infobox .def_list .term { margin:0; padding:5px; background:#ddd; color:#333; text-align:center; font-weight:bold; display: inline-block; width:100px; vertical-align: top; }
 .infobox .def_list .definition { margin:0; padding:5px; padding:5px; display:inline; vertical-align:top;}
@@ -237,6 +237,15 @@ label { font-weight:normal; color:#666; font-size:12px; }
 
 /* MOBILE */
 @media screen and (max-width: 700px) {
+div#content { margin: 0px; }
+.colSM div#content-main { float: none; margin: 0px; }
+.colSM div#content-related { float: none; margin: 0px; width:100%; }
+#content-related .module { margin: 0px 1px 5px; 1px; }
+#content-related .ui-menu-item { padding: 5px 0px 0px; 0px; }
+.overlapped .module { display: none; }
+.photo_article { border:none; }
+.photo_block { border:none; min-height:0; margin:0; width:100%; }
+/*
 .menu { padding:0 10px; margin:0; }
 .menu li { list-style:none; border-top: 1px solid #777; padding: 20px 0; margin: 0; }
 .menu li:active { border: 1px solid #000; }
@@ -250,4 +259,5 @@ label { font-weight:normal; color:#666; font-size:12px; }
 .paginator { line-height:42px; }
 .paginator a.relative { display:inline; }
 .paginator a, .paginator span { padding:12px 16px; display:none; }
+*/
 }
