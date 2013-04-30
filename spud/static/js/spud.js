@@ -591,21 +591,6 @@ function display_photo_article(photo, rights, search, results, n) {
     }
 
 
-    var pl = $("<div/>")
-    pl
-        .feedback_list({
-            html_page:
-                function(page, text) {
-                    return $("<a/>")
-                        .text(text)
-                        .attr("href", "#")
-                        .on("click", function() { display_feedback(pl, photo, page); return false; })
-                },
-        include_children: true,
-        })
-        .appendTo(cm)
-     display_feedback(pl, photo, 0);
-
     var ul = $('<ul/>')
         .photo_menu({ photo: photo, rights: rights, search: search, results: results, n: n })
     append_action_links(ul)
@@ -613,6 +598,21 @@ function display_photo_article(photo, rights, search, results, n) {
     if (search.photo_mode == "slideshow") {
         $("#content-related").addClass("overlapped")
         $("body").css("overflow", "hidden");
+    } else {
+        var pl = $("<div/>")
+        pl
+            .feedback_list({
+                html_page:
+                    function(page, text) {
+                        return $("<a/>")
+                            .text(text)
+                            .attr("href", "#")
+                            .on("click", function() { display_feedback(pl, photo, page); return false; })
+                    },
+            include_children: true,
+            })
+            .appendTo(cm)
+         display_feedback(pl, photo, 0);
     }
 }
 
