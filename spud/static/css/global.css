@@ -244,6 +244,7 @@ div#content.colSM { margin: 0px; }
 #content-related .ui-menu-item { padding: 5px 0px 0px; 0px; }
 .overlapped .module { display: none; }
 .photo_article { border:none; }
+.feedback_list { border:none; }
 .photo_block { border:none; min-height:0; margin:0; width:100%; }
 /*
 .menu { padding:0 10px; margin:0; }
