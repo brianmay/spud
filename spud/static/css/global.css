@@ -197,7 +197,8 @@ div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px 
     display: none;
 }
 
-.overlapped .menu  { background: transparent; border: none; }
+.overlapped .menu { background: transparent; border: none; }
+.overlapped .menu .ui-menu-item a { color: #aaa; }
 
 .colSM #content-related.overlapped {
     position: absolute;
