@@ -242,7 +242,7 @@ $.widget('spud.feedback_search_details',  $.spud.infobox, {
 $.widget('spud.feedback_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
-            ["photo", new photo_output_field("Photo", get_settings().list_size, true)],
+            ["photo", new photo_output_field("Photo", get_settings().view_size, true)],
             ["rating", new integer_output_field("Rating")],
             ["user", new text_output_field("Name (verified)")],
             ["user_name", new text_output_field("Name (unverified)")],

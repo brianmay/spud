@@ -83,10 +83,11 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 
 /* LIST INFO BOX */
 .infobox { border:1px solid #000; padding:10px; margin-bottom:10px; }
-.infobox .image { float: left; }
-.infobox .def_list .item { border:1px solid #ddd; display: inline-block; width:200px; height:200px; margin:5px; vertical-align: top;}
-.infobox .def_list .term { margin:0; padding:5px; background: #000; color: #fff; text-align: center; font-weight: bold; }
-.infobox .def_list .definition { margin: 0; padding: 5px; border-top: 1px solid #999; padding: 5px; }
+.infobox .image { display:inline-block; }
+.infobox .def_list { width:500px; display: inline-block; vertical-align:top; margin-left: 5px; }
+.infobox .def_list .item { border-top:1px solid #ddd; margin-bottom: 5px; }
+.infobox .def_list .term { margin:0; padding:5px; background:#ddd; color:#333; text-align:center; font-weight:bold; display: inline-block; width:100px; vertical-align: top; }
+.infobox .def_list .definition { margin:0; padding:5px; padding:5px; display:inline; vertical-align:top;}
 
 /* PHOTO INFO BOX */
 .photo_block .def_list .item { margin-bottom: 10px; }
