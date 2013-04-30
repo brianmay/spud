@@ -53,8 +53,13 @@ function _feedback_html(feedback, rights, include_children, include_photo, inclu
             .appendTo(div)
 
     } else {
-        var datetime = feedbacks.a(feedback, "")
-            .text(feedback.submit_datetime.title)
+        var datetime
+        if (include_links) {
+            datetime = feedbacks.a(feedback, "")
+        } else {
+            datetime = $("<span></span>")
+        }
+        datetime.text(feedback.submit_datetime.title)
 
         if (include_photo) {
             $("<div />")
@@ -365,17 +370,17 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["rating", new select_input_field("Rating", [
-                ["5", "Acceptable"],
-                ["6", "Good"],
-                ["7", "Excellent"],
-                ["8", "Sell it"],
-                ["9", "Perfect"],
+                ["5", "5: Acceptable"],
+                ["6", "6: Good"],
+                ["7", "7: Excellent"],
+                ["8", "8: Sell it"],
+                ["9", "9: Perfect"],
 
-                ["0", "Delete it"],
-                ["1", "Disgusting"],
-                ["2", "Very bad"],
-                ["3", "Bad"],
-                ["4", "Not acceptable"],
+                ["0", "0: Delete it"],
+                ["1", "1: Disgusting"],
+                ["2", "2: Very bad"],
+                ["3", "3: Bad"],
+                ["4", "4: Not acceptable"],
             ])],
             ["user_name", new text_input_field("Name", true)],
             ["user_email", new text_input_field("E-Mail", false)],
@@ -388,7 +393,6 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
         this._super();
 
         this.details = $("<div></div>")
-            .feedback_details()
             .insertAfter(this.description)
 
         if (this.options.feedback != null) {
@@ -422,7 +426,12 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
             this.remove_field("is_public")
             this.remove_field("is_removed")
         }
-        this.details.feedback_details("set", feedback, rights)
+        if (feedback.parent != null) {
+            this.details.html("<div>You are responding to the following message:</div>")
+            this.details.append(_feedback_html(feedback.parent, rights, false, false, false))
+        } else {
+            this.details.empty()
+        }
         return this._super(feedback);
     },
 
@@ -439,7 +448,11 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
             function(data) {
                 hide_loading()
                 mythis.close()
-                reload_page()
+                if (data.feedback==null) {
+                    alert("You feedback has been submitted for moderation. Thank you for your contribution.")
+                } else {
+                    reload_page()
+                }
             },
             display_error
         )
