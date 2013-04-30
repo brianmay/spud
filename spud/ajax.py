@@ -375,11 +375,11 @@ def _json_album(user, album):
     d = {
         'type': 'album',
         'id': album.album_id,
-        'title': album.album,
-        'description': album.album_description,
+        'title': album.title,
+        'description': album.description,
         'cover_photo': _json_photo(user, album.cover_photo),
-        'sortname': album.sortname,
-        'sortorder': album.sortorder,
+        'sort_name': album.sort_name,
+        'sort_order': album.sort_order,
         'revised': None,
     }
     if album.revised is not None and user.is_staff:
@@ -394,7 +394,7 @@ def _json_album_detail(user, album):
     d = _json_album(user, album)
 
     d.update({
-        'parent': _json_album(user, album.parent_album),
+        'parent': _json_album(user, album.parent),
         'ancestors': [],
         'num_photos': album.photos.count(),
     })
@@ -412,11 +412,11 @@ def _json_category(user, category):
     d = {
         'type': 'category',
         'id': category.category_id,
-        'title': category.category,
-        'description': category.category_description,
+        'title': category.title,
+        'description': category.description,
         'cover_photo': _json_photo(user, category.cover_photo),
-        'sortname': category.sortname,
-        'sortorder': category.sortorder,
+        'sort_name': category.sort_name,
+        'sort_order': category.sort_order,
     }
     return d
 
@@ -428,7 +428,7 @@ def _json_category_detail(user, category):
     d = _json_category(user, category)
 
     d.update({
-        'parent': _json_category(user, category.parent_category),
+        'parent': _json_category(user, category.parent),
         'ancestors': [],
         'num_photos': category.photos.count(),
     })
@@ -451,7 +451,7 @@ def _json_place(user, place):
         'address2': place.address2,
         'city': place.city,
         'state': place.state,
-        'zip': place.zip,
+        'postcode': place.postcode,
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
@@ -468,7 +468,7 @@ def _json_place_detail(user, place):
     d = _json_place(user, place)
 
     d.update({
-        'parent': _json_place(user, place.parent_place),
+        'parent': _json_place(user, place.parent),
         'ancestors': [],
         'num_photos': place.photos.count(),
     })
@@ -1021,7 +1021,7 @@ def album_search_results(request):
     q = _pop_string(params, "q")
     if q is not None:
         album_list = album_list.filter(
-            Q(album__icontains=q) | Q(album_description__icontains=q))
+            Q(title__icontains=q) | Q(description__icontains=q))
         criteria['q'] = q
 
     mode = _pop_string(params, "mode")
@@ -1033,7 +1033,7 @@ def album_search_results(request):
     if instance is not None:
         criteria['instance'] = _json_album(request.user, instance)
         if mode == "children":
-            album_list = album_list.filter(parent_album=instance)
+            album_list = album_list.filter(parent=instance)
         elif mode == "ascendants":
             album_list = album_list.filter(
                 descendant_set__descendant=instance,
@@ -1047,7 +1047,7 @@ def album_search_results(request):
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
-        album_list = album_list.filter(parent_album=None)
+        album_list = album_list.filter(parent=None)
         criteria["root_only"] = True
 
     if request.user.is_staff:
@@ -1130,12 +1130,12 @@ def album_finish(request, album):
 
         value = _pop_string(params, "title")
         if value is not None:
-            album.album = value
+            album.title = value
             updated = True
 
         value = _pop_string(params, "description")
         if value is not None:
-            album.album_description = value
+            album.description = value
             updated = True
 
         value = _pop_string(params, "cover_photo")
@@ -1147,23 +1147,23 @@ def album_finish(request, album):
                 album.cover_photo = value
             updated = True
 
-        value = _pop_string(params, "sortname")
+        value = _pop_string(params, "sort_name")
         if value is not None:
-            album.sortname = value
+            album.sort_name = value
             updated = True
 
-        value = _pop_string(params, "sortorder")
+        value = _pop_string(params, "sort_order")
         if value is not None:
-            album.sortorder = value
+            album.sort_order = value
             updated = True
 
         value = _pop_string(params, "parent")
-        if _has_changed("parent", album.parent_album, value):
+        if _has_changed("parent", album.parent, value):
             if value == "":
-                album.parent_album = None
+                album.parent = None
             else:
                 value = _decode_object("parent", spud.models.album, value)
-                album.parent_album = value
+                album.parent = value
             updated = True
             updated_parent = True
 
@@ -1253,7 +1253,7 @@ def category_search_results(request):
     q = _pop_string(params, "q")
     if q is not None:
         category_list = category_list.filter(
-            Q(category__icontains=q) | Q(category_description__icontains=q))
+            Q(title__icontains=q) | Q(description__icontains=q))
         criteria['q'] = q
 
     mode = _pop_string(params, "mode")
@@ -1265,7 +1265,7 @@ def category_search_results(request):
     if instance is not None:
         criteria['instance'] = _json_category(request.user, instance)
         if mode == "children":
-            category_list = category_list.filter(parent_category=instance)
+            category_list = category_list.filter(parent=instance)
         elif mode == "ascendants":
             category_list = category_list.filter(
                 descendant_set__descendant=instance,
@@ -1279,7 +1279,7 @@ def category_search_results(request):
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
-        category_list = category_list.filter(parent_category=None)
+        category_list = category_list.filter(parent=None)
         criteria["root_only"] = True
 
     _check_params_empty(params)
@@ -1355,12 +1355,12 @@ def category_finish(request, category):
 
         value = _pop_string(params, "title")
         if value is None:
-            category.category = value
+            category.title = value
             updated = True
 
         value = _pop_string(params, "description")
         if value is not None:
-            category.category_description = value
+            category.description = value
             updated = True
 
         value = _pop_string(params, "cover_photo")
@@ -1372,23 +1372,23 @@ def category_finish(request, category):
                 category.cover_photo = value
             updated = True
 
-        value = _pop_string(params, "sortname")
+        value = _pop_string(params, "sort_name")
         if value is not None:
-            category.sortname = value
+            category.sort_name = value
             updated = True
 
-        value = _pop_string(params, "sortorder")
+        value = _pop_string(params, "sort_order")
         if value is not None:
-            category.sortorder = value
+            category.sort_order = value
             updated = True
 
         value = _pop_string(params, "parent")
-        if _has_changed("parent", category.parent_category, value):
+        if _has_changed("parent", category.parent, value):
             if request.POST['parent'] == "":
-                category.parent_category = None
+                category.parent = None
             else:
                 value = _decode_object("parent", spud.models.category, value)
-                category.parent_category = value
+                category.parent = value
             updated = True
             updated_parent = True
 
@@ -1480,7 +1480,7 @@ def place_search_results(request):
     if instance is not None:
         criteria['instance'] = _json_place(request.user, instance)
         if mode == "children":
-            place_list = place_list.filter(parent_place=instance)
+            place_list = place_list.filter(parent=instance)
         elif mode == "ascendants":
             place_list = place_list.filter(
                 descendant_set__descendant=instance,
@@ -1494,7 +1494,7 @@ def place_search_results(request):
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
-        place_list = place_list.filter(parent_place=None)
+        place_list = place_list.filter(parent=None)
         criteria["root_only"] = True
 
     _check_params_empty(params)
@@ -1592,9 +1592,9 @@ def place_finish(request, place):
             place.state = value
             updated = True
 
-        value = _pop_string(params, "zip")
+        value = _pop_string(params, "postcode")
         if value is not None:
-            place.zip = value
+            place.postcode = value
             updated = True
 
         value = _pop_string(params, "country")
@@ -1627,12 +1627,12 @@ def place_finish(request, place):
             updated = True
 
         value = _pop_string(params, "parent")
-        if _has_changed("parent", place.parent_place, value):
+        if _has_changed("parent", place.parent, value):
             if value == "":
-                place.parent_place = None
+                place.parent = None
             else:
                 value = _decode_object("parent", spud.models.place, value)
-                place.parent_place = value
+                place.parent = value
             updated = True
             updated_parent = True
 

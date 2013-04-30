@@ -197,13 +197,13 @@ class hierarchy_model(base_model):
 
 class place(hierarchy_model):
     place_id = models.AutoField(primary_key=True)
-    parent_place = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
     title = models.CharField(max_length=192, db_index=True)
     address = models.CharField(max_length=192, blank=True)
     address2 = models.CharField(max_length=192, blank=True)
     city = models.CharField(max_length=96, blank=True)
     state = models.CharField(max_length=96, blank=True)
-    zip = models.CharField(max_length=30, blank=True)
+    postcode = models.CharField(max_length=30, blank=True)
     country = models.CharField(max_length=96, blank=True)
     url = models.CharField(max_length=3072, blank=True)
     urldesc = models.CharField(max_length=96, blank=True)
@@ -217,7 +217,7 @@ class place(hierarchy_model):
         return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["parent_place"], place_ascendant, cache, do_descendants)
+        self._fix_ascendants(["parent"], place_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -250,22 +250,22 @@ class place(hierarchy_model):
 
 class album(hierarchy_model):
     album_id = models.AutoField(primary_key=True)
-    parent_album = models.ForeignKey('self', related_name='children', null=True, blank=True)
-    album = models.CharField(max_length=96, db_index=True)
-    album_description = models.TextField(blank=True)
+    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    title = models.CharField(max_length=96, db_index=True)
+    description = models.TextField(blank=True)
     cover_photo = models.ForeignKey('photo', related_name='album_cover_of', null=True, blank=True)
-    sortname = models.CharField(max_length=96, blank=True)
-    sortorder = models.CharField(max_length=96, blank=True)
+    sort_name = models.CharField(max_length=96, blank=True)
+    sort_order = models.CharField(max_length=96, blank=True)
     revised = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering = [ 'sortname', 'sortorder', 'album' ]
+        ordering = [ 'sort_name', 'sort_order', 'title' ]
 
     def __unicode__(self):
-        return self.album
+        return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["parent_album"], album_ascendant, cache, do_descendants)
+        self._fix_ascendants(["parent"], album_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -289,21 +289,21 @@ class album(hierarchy_model):
 
 class category(hierarchy_model):
     category_id = models.AutoField(primary_key=True)
-    parent_category = models.ForeignKey('self', related_name='children', null=True, blank=True)
-    category = models.CharField(max_length=96, db_index=True)
-    category_description = models.TextField(blank=True)
+    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    title = models.CharField(max_length=96, db_index=True)
+    description = models.TextField(blank=True)
     cover_photo = models.ForeignKey('photo', related_name='category_cover_of', null=True, blank=True)
-    sortname = models.CharField(max_length=96, blank=True)
-    sortorder = models.CharField(max_length=96, blank=True)
+    sort_name = models.CharField(max_length=96, blank=True)
+    sort_order = models.CharField(max_length=96, blank=True)
 
     class Meta:
-        ordering = [ 'sortname', 'sortorder', 'category' ]
+        ordering = [ 'sort_name', 'sort_order', 'title' ]
 
     def __unicode__(self):
-        return self.category
+        return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["parent_category"], category_ascendant, cache, do_descendants)
+        self._fix_ascendants(["parent"], category_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []

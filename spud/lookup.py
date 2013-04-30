@@ -110,7 +110,7 @@ class album_lookup(LookupChannel):
 
     def get_query(self,q,request):
         """ return a query set.  you also have access to request.user if needed """
-        return models.album.objects.filter(Q(album__istartswith=q))
+        return models.album.objects.filter(Q(title__istartswith=q))
 
     def format_item_display(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
@@ -118,7 +118,7 @@ class album_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        return format_match(object, description=object.album_description)
+        return format_match(object, description=object.description)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.
@@ -131,7 +131,7 @@ class category_lookup(LookupChannel):
 
     def get_query(self,q,request):
         """ return a query set.  you also have access to request.user if needed """
-        return models.category.objects.filter(Q(category__istartswith=q))
+        return models.category.objects.filter(Q(title__istartswith=q))
 
     def format_item_display(self,object):
         """ simple display of an object when it is displayed in the list of selected objects """
@@ -139,7 +139,7 @@ class category_lookup(LookupChannel):
 
     def format_match(self,object):
         """ (HTML) formatted item for display in the dropdown """
-        return format_match(object, description=object.category_description)
+        return format_match(object, description=object.description)
 
     def get_objects(self,ids):
         """ given a list of ids, return the objects ordered as you would like them on the admin page.

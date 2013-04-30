@@ -92,8 +92,8 @@ $.widget('spud.category_search_details',  $.spud.infobox, {
 $.widget('spud.category_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
-            ["sortname", new text_output_field("Sort Name")],
-            ["sortorder", new text_output_field("Sort Order")],
+            ["sort_name", new text_output_field("Sort Name")],
+            ["sort_order", new text_output_field("Sort Order")],
         ]
 
         this.img = $("<div></div>")
@@ -142,8 +142,8 @@ $.widget('spud.category_list', $.spud.photo_list_base, {
         $.each(category_list, function(j, category) {
             var photo = category.cover_photo
             var sort=""
-            if  (category.sortorder || category.sortname) {
-                sort = category.sortname + " " + category.sortorder
+            if  (category.sort_order || category.sort_name) {
+                sort = category.sort_name + " " + category.sort_order
             }
             mythis.append_photo(photo, category.title, sort, category.description, categorys.a(category, null))
         })
@@ -224,8 +224,8 @@ $.widget('spud.category_change_dialog',  $.spud.form_dialog, {
             ["title", new text_input_field("Title", true)],
             ["description", new p_input_field("Description", false)],
             ["cover_photo", new photo_select_field("Photo", false)],
-            ["sortname", new text_input_field("Sort Name", false)],
-            ["sortorder", new text_input_field("Sort Order", false)],
+            ["sort_name", new text_input_field("Sort Name", false)],
+            ["sort_order", new text_input_field("Sort Order", false)],
             ["parent", new ajax_select_field("Parent", "category", false)],
         ]
 

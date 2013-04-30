@@ -101,8 +101,8 @@ $.widget('spud.album_search_details',  $.spud.infobox, {
 $.widget('spud.album_details',  $.spud.infobox, {
     _create: function() {
         this.options.fields = [
-            ["sortname", new text_output_field("Sort Name")],
-            ["sortorder", new text_output_field("Sort Order")],
+            ["sort_name", new text_output_field("Sort Name")],
+            ["sort_order", new text_output_field("Sort Order")],
             ["revised", new datetime_output_field("Revised")],
         ]
 
@@ -152,8 +152,8 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         $.each(album_list, function(j, album) {
             var photo = album.cover_photo
             var sort=""
-            if  (album.sortorder || album.sortname) {
-                sort = album.sortname + " " + album.sortorder
+            if  (album.sort_order || album.sort_name) {
+                sort = album.sort_name + " " + album.sort_order
             }
             mythis.append_photo(photo, album.title, sort, album.description, albums.a(album, null))
         })
@@ -234,8 +234,8 @@ $.widget('spud.album_change_dialog',  $.spud.form_dialog, {
             ["title", new text_input_field("Title", true)],
             ["description", new p_input_field("Description", false)],
             ["cover_photo", new photo_select_field("Photo", false)],
-            ["sortname", new text_input_field("Sort Name", false)],
-            ["sortorder", new text_input_field("Sort Order", false)],
+            ["sort_name", new text_input_field("Sort Name", false)],
+            ["sort_order", new text_input_field("Sort Order", false)],
             ["parent", new ajax_select_field("Parent", "album", false)],
             ["revised", new datetime_input_field("Revised", false)],
         ]

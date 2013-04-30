@@ -95,7 +95,7 @@ $.widget('spud.place_details',  $.spud.infobox, {
             ["address2", new text_output_field("Address(ctd)")],
             ["city", new text_output_field("City")],
             ["state", new text_output_field("State")],
-            ["zip", new text_output_field("zip")],
+            ["postcode", new text_output_field("Postcode")],
             ["url", new html_output_field("URL")],
             ["home_of", new link_list_output_field("Home of")],
             ["work_of", new link_list_output_field("Work of")],
@@ -151,8 +151,8 @@ $.widget('spud.place_list', $.spud.photo_list_base, {
         $.each(place_list, function(j, place) {
             var photo = place.cover_photo
             var sort=""
-            if  (place.sortorder || place.sortname) {
-                sort = place.sortname + " " + place.sortorder
+            if  (place.sort_order || place.sort_name) {
+                sort = place.sort_name + " " + place.sort_order
             }
             mythis.append_photo(photo, place.title, sort, place.notes, places.a(place, null))
         })
@@ -236,7 +236,7 @@ $.widget('spud.place_change_dialog',  $.spud.form_dialog, {
             ["address2", new text_input_field("Address(ctd)", false)],
             ["city", new text_input_field("City", false)],
             ["state", new text_input_field("State", false)],
-            ["zip", new text_input_field("Zip", false)],
+            ["postcode", new text_input_field("Postcode", false)],
             ["url", new text_input_field("URL", false)],
             ["urldesc", new text_input_field("URL desc", false)],
             ["notes", new p_input_field("Notes", false)],
