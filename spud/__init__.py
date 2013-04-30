@@ -27,7 +27,6 @@ def update_permissions_after_migration(app, **kwargs):
     from django.db.models import get_app, get_models
     from django.contrib.auth.management import create_permissions
 
-    print "mooo"
     create_permissions(get_app(app), get_models(), 2 if settings.DEBUG else 0)
 
 post_migrate.connect(update_permissions_after_migration)
