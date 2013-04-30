@@ -7,8 +7,8 @@
 #footer { clear:both; padding:10px; }
 
 /*  COLUMN TYPES  */
-.colMS { margin-right:20em; }
-.colSM { margin-left:20em; }
+#content.colMS { margin-right:20em; }
+#content.colSM { margin-left:20em; }
 .colSM #content-related { float:left; margin-right:0; margin-left:-19em; }
 .colSM #content-main { float:right; }
 .popup .colM { width:95%; }
