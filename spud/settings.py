@@ -65,7 +65,6 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     'spud',
-    'spud.comments',
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',
@@ -91,8 +90,6 @@ AJAX_LOOKUP_CHANNELS = {
 }
 AJAX_SELECT_BOOTSTRAP = False
 AJAX_SELECT_INLINES = None
-
-COMMENTS_APP = "spud.comments"
 
 IMAGE_CHECK_EXISTS=True
 IMAGE_SIZES = {
