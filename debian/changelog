@@ -1,3 +1,10 @@
+spud (1.1-0) unstable; urgency=low
+
+  * Various bugs fixed.
+  * Improvements to style sheets.
+
+ -- Brian May <bam@debian.org>  Tue, 30 Apr 2013 15:47:37 +1000
+
 spud (1.0-1) unstable; urgency=low
 
   * Major rewrite in AJAX/Javascript.
