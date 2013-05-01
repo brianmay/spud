@@ -55,7 +55,7 @@ def old_photo_detail(request, object_id, size):
     except models.photo_thumb.DoesNotExist:
         raise Http404("Thumb for size '%s' does not exist" % (size))
 
-    url = reverse("static_photo_detail", kwargs={'photo_id': object_id})
+    url = reverse("photo_detail", kwargs={'photo_id': object_id})
     return HttpResponseRedirect(url)
 
 
