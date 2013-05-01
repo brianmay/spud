@@ -21,7 +21,6 @@ from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 
 import json
-import uuid
 
 from spud import models
 
