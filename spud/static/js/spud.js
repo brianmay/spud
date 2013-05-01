@@ -519,8 +519,12 @@ function display_photo_article(photo, rights, search, results, n) {
     document.title = prefix + photo.title + " | Photo | Spud"
     cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
 
+    var size = get_settings().view_size
+    if (search.photo_mode == "slideshow")
+        size = get_settings().slideshow_size
+
     var pa = $("<div></div>")
-        .photo_article({ photo: photo, rights: rights, photo_mode: search.photo_mode, })
+        .photo_article({ photo: photo, rights: rights, photo_mode: search.photo_mode, photo_size: size})
         .appendTo(cm)
 
     if (rights.can_change && is_edit_mode()) {
@@ -529,7 +533,6 @@ function display_photo_article(photo, rights, search, results, n) {
 
     if (results != null) {
         // preload next/prev photos
-        var size = get_settings().view_size
         if (results.prev_photo) {
             var image = results.prev_photo.thumb[size]
             if (image) {

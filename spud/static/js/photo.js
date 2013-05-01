@@ -348,7 +348,7 @@ $.widget('spud.photo_image',  {
         this._super();
 
         this.img = $("<div id='photo' />")
-            .image({ size: get_settings().view_size })
+            .image({ size: this.options.size })
             .appendTo(this.element)
 
         this.summary = $("<div></div>")
@@ -531,7 +531,7 @@ $.widget('spud.photo_article',  {
                 .addClass("photo_" + this.options.photo_mode)
 
         this.pi = $("<div class='photo_block' />")
-            .photo_image({ enlarge: this.options.photo_mode == "slideshow" })
+            .photo_image({ enlarge: this.options.photo_mode == "slideshow", size: this.options.photo_size })
             .appendTo(this.element)
 
         this.pd = $("<div class='photo_block' />")

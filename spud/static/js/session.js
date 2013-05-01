@@ -30,7 +30,7 @@ function get_settings() {
             items_per_page: 10,
             list_size: "thumb",
             view_size: "mid",
-            click_size: "large",
+            slideshow_size: "large",
         }
     } else {
         settings = {
@@ -38,7 +38,7 @@ function get_settings() {
             items_per_page: Number(a[1]),
             list_size: a[2],
             view_size: a[3],
-            click_size: a[4],
+            slideshow_size: a[4],
         }
     }
     return settings
@@ -51,7 +51,7 @@ function set_settings(settings) {
         settings.items_per_page,
         settings.list_size,
         settings.view_size,
-        settings.click_size,
+        settings.slideshow_size,
     ]
     localStorage.settings = a.join(",")
 }
@@ -79,8 +79,7 @@ var view_sizes = [
     ["large", "Large"],
 ]
 
-var click_sizes = [
-    ["thumb", "Thumb"],
+var slideshow_sizes = [
     ["mid", "Medium"],
     ["large", "Large"],
 ]
@@ -93,7 +92,7 @@ $.widget('spud.settings_dialog',  $.spud.form_dialog, {
             ["items_per_page", new integer_input_field("Items per page", true)],
             ["list_size", new select_input_field("List size", list_sizes, true)],
             ["view_size", new select_input_field("View size", view_sizes, true)],
-            ["click_size", new select_input_field("Click size", click_sizes, true)],
+            ["slideshow_size", new select_input_field("Slideshow size", slideshow_sizes, true)],
         ]
 
         if (this.options.initial == null) {
@@ -112,7 +111,7 @@ $.widget('spud.settings_dialog',  $.spud.form_dialog, {
         settings.items_per_page = Number(values.items_per_page)
         settings.list_size = values.list_size
         settings.view_size = values.view_size
-        settings.click_size = values.click_size
+        settings.slideshow_size = values.slideshow_size
 
         set_settings(settings)
 
