@@ -1,3 +1,9 @@
+spud (1.3-1) unstable; urgency=low
+
+  * Version 1.2 was missing be5492b897743334a841d923c1377a784cea0d58. Retry.
+
+ -- Brian May <bam@debian.org>  Wed, 01 May 2013 11:06:30 +1000
+
 spud (1.2-1) unstable; urgency=low
 
   * Schema updates.
