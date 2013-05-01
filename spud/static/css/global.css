@@ -180,7 +180,7 @@ div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px 
     margin: 0;
     border: none;
 }
-.photo_slideshow .photo_summary { position: absolute; top:10px; right:10px; width:18em; border: 1px solid #ccc; padding: 5px; }
+.photo_slideshow .photo_summary { position: absolute; top:10px; right:10px; width:18em; border: 1px solid #ccc; padding: 5px; margin:0; background: url('../img/bg-black.png'); }
 .photo_slideshow .photo_details_block { display: none; }
 .photo_slideshow .camera_details_block { display: none; }
 .photo_slideshow .paginator { display: none; }
@@ -214,6 +214,7 @@ div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px 
 
 .overlapped .module {
     background: transparent;
+    margin: 0;
 }
 
 /* ARROWS */
