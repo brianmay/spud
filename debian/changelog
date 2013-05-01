@@ -1,3 +1,10 @@
+spud (1.2-1) unstable; urgency=low
+
+  * Schema updates.
+  * Fixes for slideshow mode.
+
+ -- Brian May <bam@debian.org>  Wed, 01 May 2013 10:15:04 +1000
+
 spud (1.1-1) unstable; urgency=low
 
   * Various bugs fixed.
