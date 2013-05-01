@@ -70,7 +70,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'django.contrib.comments',
     'django.contrib.staticfiles',
     'ajax_select',
     'south',
