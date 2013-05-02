@@ -183,7 +183,6 @@ div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px 
 .photo_slideshow .photo_summary { position: absolute; top:10px; right:10px; width:18em; border: 1px solid #ccc; padding: 5px; margin:0; background: url('../img/bg-black.png'); }
 .photo_slideshow .photo_details_block { display: none; }
 .photo_slideshow .camera_details_block { display: none; }
-.photo_slideshow .paginator { display: none; }
 
 
 .overlapped h2 {
@@ -218,6 +217,7 @@ div.breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px 
 }
 
 /* ARROWS */
+.paginator .prevslide, .paginator .nextslide { padding:0; border:none; }
 .photo_slideshow .prevslide, .photo_slideshow .nextslide { top:50%; }
 .prevslide, .nextslide{ position:absolute; height:43px; width:43px; bottom:0; margin-top:-21px; opacity:0.6; }
 .prevslide{ left:10px; background:url('../img/back.png'); }

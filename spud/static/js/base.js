@@ -510,6 +510,18 @@ $.widget('spud.paginator', {
         this.element.empty()
 
         if (page > 0) {
+            html_page(page-1, "")
+                .addClass("prevslide")
+                .appendTo(this.element)
+        }
+
+        if (page < last_page) {
+            html_page(page+1, "")
+                .addClass("nextslide")
+                .appendTo(this.element)
+        }
+
+        if (page > 0) {
             this.element.append(html_page(page-1, '<').attr("accesskey", "p"))
             this.element.append(" ")
         }

@@ -491,6 +491,7 @@ function reset_display() {
 }
 
 function display_root() {
+    replace_links()
     $("#content-main")
         .html("")
 
@@ -500,32 +501,112 @@ function display_root() {
 }
 
 
-function display_photo(photo, rights, search, results, n) {
-    reset_display()
-    var mode = search.photo_mode
+function setup_photo(photo_mode) {
+    var state = window.history.state
+    if (state.type == "display_photo" && state.search.photo_photo == photo_mode) {
+        // nothing to do, exit
+    }
 
-    display_photo_article(photo, rights, search, results, n)
+    replace_links()
+    reset_display()
+    var cm = $("#content-main")
+    cm.html("")
+
+    document.title = "Loading | Photo | Spud"
+    cm.append("<h1 id='title'>Loading</h1>")
+
+    var size = get_settings().view_size
+    if (photo_mode == "slideshow")
+        size = get_settings().slideshow_size
+
+    var pa = $("<div id='photo_article'></div>")
+        .photo_article({ photo_mode: photo_mode, photo_size: size})
+        .appendTo(cm)
+
+    var paginator
+
+    paginator = $("<p id='paginator'></p>")
+        .paginator()
+        .appendTo(pa)
+
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+
+    var ul = $("<ul id='photo_menu'/>")
+        .photo_menu()
+    append_action_links(ul)
+
+    if (photo_mode == "slideshow") {
+        $("#content-related").addClass("overlapped")
+        $("body").css("overflow", "hidden");
+        var elem = pa[0]
+        if (elem.requestFullscreen) {
+              elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+              elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen();
+        }
+    } else {
+        var pl = $("<div id='feedback_list'/>")
+            .feedback_list({
+                include_children: true,
+            })
+            .appendTo(cm)
+    }
 }
 
 
-function display_photo_article(photo, rights, search, results, n) {
-    var cm = $("#content-main")
-    cm.html("")
+function display_photo(photo, rights, search, results, n) {
+    setup_photo(search.photo_mode)
 
     var prefix = ""
     if (rights.can_change && is_edit_mode()) {
         prefix = "Edit "
     }
+
+    var last_page = 0
+    if (results != null) {
+        last_page = results.number_results-1
+    }
+
     document.title = prefix + photo.title + " | Photo | Spud"
-    cm.append("<h1>" + escapeHTML(prefix + photo.title) +  "</h1>")
+    $("#title").text(prefix + photo.title)
 
-    var size = get_settings().view_size
-    if (search.photo_mode == "slideshow")
-        size = get_settings().slideshow_size
 
-    var pa = $("<div></div>")
-        .photo_article({ photo: photo, rights: rights, photo_mode: search.photo_mode, photo_size: size})
-        .appendTo(cm)
+    $("#photo_article").photo_article("set", photo, rights)
+    $("#paginator")
+        .paginator("option", "html_page",
+            function(page, text) {
+                return $("<a></a>")
+                    .text(text)
+                    .attr("href",  photo_search_item_url(search, page, null))
+                    .on("click", function() {
+                        do_photo_search_item(search, page, null, true)
+                        return false;
+                    })
+            }
+        )
+        .paginator("set", n, last_page)
+    $("#photo_menu").photo_menu("set", photo, rights, search, results, n)
+
+    if (search !=null && n != null) {
+        var page = Math.floor(n / search.results_per_page)
+        $(".breadcrumbs")
+            .html("")
+            .append(root_a())
+            .append(" › ")
+            .append(photo_search_results_a(search, page, null))
+            .append(" › ")
+            .append(escapeHTML(photo.title))
+    } else {
+        $(".breadcrumbs")
+            .html("")
+            .append(root_a())
+            .append(" › ")
+            .append(escapeHTML(photo.title))
+    }
 
     if (rights.can_change && is_edit_mode()) {
         photo_change_keyboard(photo, { photos: photo.id }, 1)
@@ -534,6 +615,7 @@ function display_photo_article(photo, rights, search, results, n) {
     if (results != null) {
         // preload next/prev photos
         if (results.prev_photo) {
+            var size = $("#photo_article").photo_article("option", "photo_size")
             var image = results.prev_photo.thumb[size]
             if (image) {
                 var img = new Image()
@@ -549,73 +631,17 @@ function display_photo_article(photo, rights, search, results, n) {
         }
     }
 
-    if (n != null) {
-        var last_page = results.number_results-1
-
-        var html_page = function(page, text) {
-            var photo = null
-            return photo_search_item_a(search, page, photo, text)
-        }
-
-        $("<p></p>")
-            .paginator({
-                page: n,
-                last_page: last_page,
-                html_page: html_page,
-            })
-            .appendTo(pa)
-
-        if (n > 0) {
-            photo_search_item_a(search, n-1, null, "")
-                .addClass("prevslide")
-                .appendTo(pa)
-        }
-
-        if (n < results.number_results-1) {
-            photo_search_item_a(search, n+1, null, "")
-                .addClass("nextslide")
-                .appendTo(pa)
-        }
-
-        var page = Math.floor(n / search.results_per_page)
-        $(".breadcrumbs")
-            .html("")
-            .append(root_a())
-            .append(" › ")
-            .append(photo_search_results_a(search, page, null))
-            .append(" › ")
-            .append(escapeHTML(results.photo.title))
-    } else {
-        $(".breadcrumbs")
-            .html("")
-            .append(root_a())
-            .append(" › ")
-            .append(escapeHTML(photo.title))
-    }
-
-
-    var ul = $('<ul/>')
-        .photo_menu({ photo: photo, rights: rights, search: search, results: results, n: n })
-    append_action_links(ul)
-
-    if (search.photo_mode == "slideshow") {
-        $("#content-related").addClass("overlapped")
-        $("body").css("overflow", "hidden");
-    } else {
-        var pl = $("<div/>")
-        pl
-            .feedback_list({
-                html_page:
-                    function(page, text) {
-                        return $("<a/>")
-                            .text(text)
-                            .attr("href", "#")
-                            .on("click", function() { display_feedback(pl, photo, page); return false; })
-                    },
-            include_children: true,
-            })
-            .appendTo(cm)
-         display_feedback(pl, photo, 0);
+    if (search.photo_mode != "slideshow") {
+        var fl = $("#feedback_list")
+        fl.feedback_list("option", "html_page",
+            function(page, text) {
+                return $("<a/>")
+                    .text(text)
+                    .attr("href", "#")
+                    .on("click", function() { display_feedback(fl, photo, page); return false; })
+            }
+        )
+        display_feedback(fl, photo, 0);
     }
 }
 
@@ -918,6 +944,7 @@ function display_photo_search_form(criteria) {
 
 
 function display_photo_search_results(rights, search, results) {
+    replace_links()
     reset_display()
     var cm = $("#content-main")
     cm.html("")
@@ -978,7 +1005,6 @@ function display_login(push_history) {
 
 
 function do_root(push_history) {
-    replace_links()
     update_history(push_history, root_url(), {
         type: 'display_root',
     });
@@ -1017,7 +1043,6 @@ function do_photo(photo_id, search, push_history) {
     load_photo(photo_id,
         function(data) {
             hide_loading()
-            replace_links()
             update_history(push_history, photo_url(data.photo, search), {
                 type: 'display_photo',
                 photo_id: data.photo.id,
@@ -1099,7 +1124,6 @@ function do_photo_search_results(search, page, push_history, success) {
     load_photo_search_results(search, page,
         function(data) {
             hide_loading()
-            replace_links()
             update_history(push_history,
                 photo_search_results_url(search, page), {
                     type: 'display_photo_search_results',
@@ -1130,7 +1154,6 @@ function do_photo_search_item(search, n, photo_id, push_history) {
         function(data) {
             hide_loading()
             if (photo_id == null || data.photo.id == photo_id) {
-                replace_links()
                 update_history(push_history,
                     photo_search_item_url(search, n, data.photo), {
                         type: 'display_photo_search_item',
@@ -1162,7 +1185,6 @@ function do_upload_form(push_history) {
     load_upload_form(
         function(data) {
             hide_loading()
-            replace_links()
             update_history(push_history, upload_form_url(), {
                 type: 'display_upload_form',
             });

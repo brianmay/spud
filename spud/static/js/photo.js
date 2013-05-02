@@ -576,11 +576,11 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
     _create: function() {
         this._super()
         if (this.options.photo != null) {
-            this.set(this.options.photo, this.options.rights, this.options.search, this.options.n)
+            this.set(this.options.photo, this.options.rights, this.options.search, this.options.results, this.options.n)
         }
     },
 
-    set: function(photo, rights, search, n) {
+    set: function(photo, rights, search, results, n) {
         this.element.empty()
 
         var photo_mode = search.photo_mode
@@ -588,7 +588,7 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
             this.add_item(
                 $("<a href='#'>Slideshow</a>")
                 .on("click", function() {
-                    do_photo_search_item($.extend({}, search, { photo_mode: "slideshow" }), n, photo.id, true)
+                    display_photo(photo, rights, $.extend({}, search, { photo_mode: "slideshow" }), results, n)
                     return false;
                 }))
         }
@@ -598,6 +598,15 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
                 $("<a href='#'>Article</a>")
                 .on("click", function() {
                     do_photo_search_item($.extend({}, search, { photo_mode: "article" }), n, photo.id, true)
+                    return false;
+                }))
+        }
+
+        if (photo_mode == "slideshow") {
+            this.add_item(
+                $("<a href='#'>Fullscreen</a>")
+                .on("click", function() {
+                    display_photo(photo, rights, $.extend({}, search, { photo_mode: "slideshow" }), results, n)
                     return false;
                 }))
         }

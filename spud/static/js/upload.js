@@ -84,6 +84,8 @@ function display_downloads(params) {
 }
 
 function display_upload_form(data) {
+    replace_links()
+
     var cm = $("#content-main")
         .empty()
 
