@@ -86,8 +86,8 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .infobox .image { display:inline-block; }
 .infobox .def_list { max-width:500px; display: inline-block; vertical-align:top; margin-left: 5px; }
 .infobox .def_list .item { border-top:1px solid #ddd; margin-bottom: 5px; }
-.infobox .def_list .term { margin:0; padding:5px; background:#ddd; color:#333; text-align:center; font-weight:bold; display: inline-block; width:100px; vertical-align: top; }
-.infobox .def_list .definition { margin:0; padding:5px; padding:5px; display:inline; vertical-align:top;}
+.infobox .def_list .term { margin:0; padding:5px; background:#ddd; color:#333; text-align:right; font-weight:bold; position:absolute; width:100px; vertical-align: top; }
+.infobox .def_list .definition { margin-left:110px; padding:5px; display:inline-block; vertical-align:top;}
 
 /* PHOTO INFO BOX */
 .photo_block .def_list .item { margin-bottom: 10px; }
