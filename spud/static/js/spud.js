@@ -541,7 +541,7 @@ function setup_photo(photo_mode) {
         size = get_settings().slideshow_size
 
     var pa = $("<div id='photo_article'></div>")
-        .photo_article({ photo_mode: photo_mode, photo_size: size})
+        .photo_article({ enlarge: photo_mode == "slideshow", photo_size: size})
         .appendTo(cm)
 
     var paginator

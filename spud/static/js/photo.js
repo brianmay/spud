@@ -531,7 +531,7 @@ $.widget('spud.photo_article',  {
                 .addClass("photo_article")
 
         this.pi = $("<div class='photo_block' />")
-            .photo_image({ enlarge: this.options.photo_mode == "slideshow", size: this.options.photo_size })
+            .photo_image({ enlarge: this.options.enlarge, size: this.options.photo_size })
             .appendTo(this.element)
 
         this.pd = $("<div class='photo_block' />")
