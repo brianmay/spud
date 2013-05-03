@@ -33,6 +33,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .photo_slideshow .photo.ui-selected { background: #F39814; }
 .photo_slideshow .prevslide { top:50%; display:block; }
 .photo_slideshow .nextslide { top:50%; display:block; }
+.photo_slideshow .paginator .page { display:none; }
 
 #header.slideshow { display:none; }
 .breadcrumbs.slideshow { display:none; }
