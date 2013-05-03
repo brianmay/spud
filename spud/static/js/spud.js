@@ -561,6 +561,7 @@ function setup_photo(photo_mode) {
     if (photo_mode == "slideshow") {
         $("#content").addClass("slideshow")
         $("#header").addClass("slideshow")
+        $("#footer").addClass("slideshow")
         $(".breadcrumbs").addClass("slideshow")
         $("body").css("overflow", "hidden");
     } else {

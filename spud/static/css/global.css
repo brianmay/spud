@@ -23,7 +23,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .photo_article .nextslide { display:block; }
 
 /* SLIDE SHOW */
-.slideshow .photo_article { display:block; }
+.slideshow .photo_article { display:block; margin:0; border:none; }
 .slideshow .photo_article .photo_image_block { width:100%; height:100%; display:block; background:#000; color:#aaa; margin:0; border:none; }
 .slideshow .photo_article .photo_summary { position: absolute; top:10px; right:10px; width:18em; border: 1px solid #ccc; padding: 5px; margin:0; background: url('../img/bg-black.png'); }
 .slideshow .photo_article .photo_details_block { display: none; }
@@ -31,16 +31,20 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .slideshow .photo_article .photo.removed { background:#999; color:#333; }
 .slideshow .photo_article .photo.regenerate { background:#CCE; color:#333; }
 .slideshow .photo_article .photo.ui-selected { background: #F39814; }
-.slideshow .photo_article .prevslide { top:50%; display:block; }
-.slideshow .photo_article .nextslide { top:50%; display:block; }
+.slideshow .photo_article .paginator { width:0; height:0; padding:0; margin:0; }
+.slideshow .photo_article .paginator .prevslide { top:50%; display:block; }
+.slideshow .photo_article .paginator .nextslide { top:50%; display:block; }
 .slideshow .photo_article .paginator .page { display:none; }
+.slideshow .photo_article .paginator .this-page { display:none; }
+.slideshow .photo_article .paginator .dots { display:none; }
 
 #header.slideshow { display:none; }
+#footer.slideshow { display:none; }
 .breadcrumbs.slideshow { display:none; }
-.slideshow { margin:0 !IMPORTANT; }
-.slideshow #content-main { float:none; }
-.slideshow #content-main h1 { display:none; }
-.slideshow.colSM #content-related { float: none; margin: 0; position: absolute; top:10px; left:10px;  color:#aaa; background:url('../img/bg-black.png'); }
+#content.slideshow.colSM { margin:0; }
+#content.slideshow.colSM #content-main { float:none; }
+#content.slideshow.colSM #content-main h1 { display:none; }
+#content.slideshow.colSM #content-related { float: none; margin: 0; position: absolute; top:10px; left:10px;  color:#aaa; background:url('../img/bg-black.png'); }
 .slideshow #content-related h2 { display:none; }
 .slideshow #content-related .main_menu  { display:none; }
 .slideshow #content-related .selection_menu  { display:none; }
