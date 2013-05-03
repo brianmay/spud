@@ -502,10 +502,12 @@ function display_root() {
 
 
 function setup_photo(photo_mode) {
-    var state = window.history.state
-    if (state.type == "display_photo" && state.search.photo_photo == photo_mode) {
+    if (window.spud_type == "display_photo" && window.spud_mode == photo_mode) {
         // nothing to do, exit
+        return
     }
+    window.spud_type = "display_photo"
+    window.spud_mode = photo_mode
 
     replace_links()
     reset_display()
