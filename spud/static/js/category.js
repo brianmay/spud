@@ -303,6 +303,10 @@ function category_doer() {
     this.type = "category"
     this.display_type = "category"
     this.display_plural = "categories"
+    this.menu_type = "category_menu"
+    this.list_menu_type = "category_list_menu"
+    this.details_type = "category_details"
+    this.search_details_type = "category_search_details"
     this.list_type = "category_list"
     generic_doer.call(this)
 }
@@ -330,35 +334,28 @@ category_doer.prototype.get_objects = function(results) {
     return results.categorys
 }
 
-category_doer.prototype.details = function(category, rights, div) {
-    $.spud.category_details({category: category, rights: rights}, div)
+category_doer.prototype.details = function(div) {
+    $.spud.category_details({}, div)
 }
 
-category_doer.prototype.list_menu = function(rights, search, results, div) {
-    $.spud.category_list_menu({rights: rights, search: search, results: results}, div)
+category_doer.prototype.list_menu = function(div) {
+    $.spud.category_list_menu({}, div)
 }
 
-
-category_doer.prototype.menu = function(category, rights, div) {
-    $.spud.category_menu({category: category, rights: rights}, div)
+category_doer.prototype.menu = function(div) {
+    $.spud.category_menu({}, div)
 }
 
-category_doer.prototype.list = function(categorys, rights, page, last_page, page_a, div) {
-    $.spud.category_list({
-        categorys: categorys,
-        rights: rights,
-        page: page,
-        last_page: last_page,
-        page_a: page_a,
-    }, div)
+category_doer.prototype.list = function(div) {
+    $.spud.category_list({}, div)
 }
 
 category_doer.prototype.search_dialog = function(criteria, rights, dialog) {
     $.spud.category_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-category_doer.prototype.search_details = function(criteria, rights, dialog) {
-    $.spud.category_search_details({ criteria: criteria, rights: rights }, dialog)
+category_doer.prototype.search_details = function(dialog) {
+    $.spud.category_search_details({}, dialog)
 }
 
 category_doer.prototype.change_dialog = function(category, rights, dialog) {

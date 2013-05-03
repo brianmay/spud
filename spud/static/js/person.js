@@ -364,6 +364,10 @@ function person_doer() {
     this.type = "person"
     this.display_type = "person"
     this.display_plural = "persons"
+    this.menu_type = "person_menu"
+    this.list_menu_type = "person_list_menu"
+    this.details_type = "person_details"
+    this.search_details_type = "person_search_details"
     this.list_type = "person_list"
     generic_doer.call(this)
     this.has_ancestors = false
@@ -391,35 +395,28 @@ person_doer.prototype.get_objects = function(results) {
     return results.persons
 }
 
-person_doer.prototype.details = function(person, rights, div) {
-    $.spud.person_details({person: person, rights: rights}, div)
+person_doer.prototype.details = function(div) {
+    $.spud.person_details({}, div)
 }
 
-person_doer.prototype.list_menu = function(rights, search, results, div) {
-    $.spud.person_list_menu({rights: rights, search: search, results: results}, div)
+person_doer.prototype.list_menu = function(div) {
+    $.spud.person_list_menu({}, div)
 }
 
-
-person_doer.prototype.menu = function(person, rights, div) {
-    $.spud.person_menu({person: person, rights: rights}, div)
+person_doer.prototype.menu = function(div) {
+    $.spud.person_menu({}, div)
 }
 
-person_doer.prototype.list = function(persons, rights, page, last_page, page_a, div) {
-    $.spud.person_list({
-        persons: persons,
-        rights: rights,
-        page: page,
-        last_page: last_page,
-        page_a: page_a,
-    }, div)
+person_doer.prototype.list = function(div) {
+    $.spud.person_list({}, div)
 }
 
 person_doer.prototype.search_dialog = function(criteria, rights, dialog) {
     $.spud.person_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-person_doer.prototype.search_details = function(criteria, rights, dialog) {
-    $.spud.person_search_details({ criteria: criteria, rights: rights }, dialog)
+person_doer.prototype.search_details = function(dialog) {
+    $.spud.person_search_details({}, dialog)
 }
 
 person_doer.prototype.change_dialog = function(person, rights, dialog) {

@@ -496,6 +496,10 @@ function feedback_doer() {
     this.type = "feedback"
     this.display_type = "feedback"
     this.display_plural = "feedbacks"
+    this.menu_type = "feedback_menu"
+    this.list_menu_type = "feedback_list_menu"
+    this.details_type = "feedback_details"
+    this.search_details_type = "feedback_search_details"
     this.list_type = "feedback_list"
     generic_doer.call(this)
     this.has_photos = false
@@ -544,36 +548,25 @@ feedback_doer.prototype.get_objects = function(results) {
     return results.feedbacks
 }
 
-feedback_doer.prototype.details = function(feedback, rights, div) {
-    $.spud.feedback_details({feedback: feedback, rights: rights}, div)
+feedback_doer.prototype.details = function(div) {
+    $.spud.feedback_details({}, div)
 }
 
-feedback_doer.prototype.list_menu = function(rights, search, results, div) {
-    $.spud.feedback_list_menu({rights: rights, search: search, results: results}, div)
+feedback_doer.prototype.list_menu = function(div) {
+    $.spud.feedback_list_menu({}, div)
 }
 
 
-feedback_doer.prototype.menu = function(feedback, rights, div) {
-    $.spud.feedback_menu({feedback: feedback, rights: rights}, div)
+feedback_doer.prototype.menu = function(div) {
+    $.spud.feedback_menu({}, div)
 }
 
-feedback_doer.prototype.list = function(feedbacks, rights, page, last_page, page_a, div) {
+feedback_doer.prototype.list = function(div) {
+    $.spud.feedback_list({}, div)
+}
+
+feedback_doer.prototype.list_children = function(div) {
     $.spud.feedback_list({
-        feedbacks: feedbacks,
-        rights: rights,
-        page: page,
-        last_page: last_page,
-        page_a: page_a,
-    }, div)
-}
-
-feedback_doer.prototype.list_children = function(feedbacks, rights, page, last_page, page_a, div) {
-    $.spud.feedback_list({
-        feedbacks: feedbacks,
-        rights: rights,
-        page: page,
-        last_page: last_page,
-        page_a: page_a,
         include_children: true,
     }, div)
 }
@@ -582,8 +575,8 @@ feedback_doer.prototype.search_dialog = function(criteria, rights, dialog) {
     $.spud.feedback_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-feedback_doer.prototype.search_details = function(criteria, rights, dialog) {
-    $.spud.feedback_search_details({ criteria: criteria, rights: rights }, dialog)
+feedback_doer.prototype.search_details = function(dialog) {
+    $.spud.feedback_search_details({}, dialog)
 }
 
 feedback_doer.prototype.change_dialog = function(feedback, rights, dialog) {

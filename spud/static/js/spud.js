@@ -503,6 +503,16 @@ function display_root() {
 
 function setup_photo(photo_mode) {
     if (window.spud_type == "display_photo" && window.spud_mode == photo_mode) {
+        if (photo_mode == "slideshow") {
+            var elem = $("#photo_article")[0]
+            if (elem.requestFullscreen) {
+                  elem.requestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                  elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) {
+                  elem.webkitRequestFullscreen();
+            }
+        }
         // nothing to do, exit
         return
     }

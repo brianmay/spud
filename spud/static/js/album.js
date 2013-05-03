@@ -314,6 +314,10 @@ function album_doer() {
     this.type = "album"
     this.display_type = "album"
     this.display_plural = "albums"
+    this.menu_type = "album_menu"
+    this.list_menu_type = "album_list_menu"
+    this.details_type = "album_details"
+    this.search_details_type = "album_search_details"
     this.list_type = "album_list"
     generic_doer.call(this)
 }
@@ -340,35 +344,28 @@ album_doer.prototype.get_objects = function(results) {
     return results.albums
 }
 
-album_doer.prototype.details = function(album, rights, div) {
-    $.spud.album_details({album: album, rights: rights}, div)
+album_doer.prototype.details = function(div) {
+    $.spud.album_details({}, div)
 }
 
-album_doer.prototype.list_menu = function(rights, search, results, div) {
-    $.spud.album_list_menu({rights: rights, search: search, results: results}, div)
+album_doer.prototype.list_menu = function(div) {
+    $.spud.album_list_menu({}, div)
 }
 
-
-album_doer.prototype.menu = function(album, rights, div) {
-    $.spud.album_menu({album: album, rights: rights}, div)
+album_doer.prototype.menu = function(div) {
+    $.spud.album_menu({}, div)
 }
 
-album_doer.prototype.list = function(albums, rights, page, last_page, page_a, div) {
-    $.spud.album_list({
-        albums: albums,
-        rights: rights,
-        page: page,
-        last_page: last_page,
-        page_a: page_a,
-    }, div)
+album_doer.prototype.list = function(div) {
+    $.spud.album_list({}, div)
 }
 
 album_doer.prototype.search_dialog = function(criteria, rights, dialog) {
     $.spud.album_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-album_doer.prototype.search_details = function(criteria, rights, dialog) {
-    $.spud.album_search_details({ criteria: criteria, rights: rights }, dialog)
+album_doer.prototype.search_details = function(dialog) {
+    $.spud.album_search_details({}, dialog)
 }
 
 album_doer.prototype.change_dialog = function(album, rights, dialog) {

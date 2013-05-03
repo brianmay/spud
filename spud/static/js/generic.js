@@ -173,12 +173,12 @@ generic_doer.prototype.delete_a = function(object, title) {
     return a
 }
 
-generic_doer.prototype.list_results = function(feedbacks, rights, page, last_page, html_page, div) {
-    this.list(feedbacks, rights, page, last_page, html_page, div)
+generic_doer.prototype.list_results = function(div) {
+    this.list(div)
 }
 
-generic_doer.prototype.list_children = function(feedbacks, rights, page, last_page, html_page, div) {
-    this.list(feedbacks, rights, page, last_page, html_page, div)
+generic_doer.prototype.list_children = function(div) {
+    this.list(div)
 }
 
 generic_doer.prototype.display_search_form = function(criteria, rights) {
@@ -186,36 +186,31 @@ generic_doer.prototype.display_search_form = function(criteria, rights) {
     this.search_dialog(criteria, rights, dialog)
 }
 
-generic_doer.prototype.display_search_results = function(rights, search, results) {
+generic_doer.prototype.setup_search_results = function() {
+    if (window.spud_type == this.type+"_search_results") {
+        // nothing to do, exit
+        return
+    }
+    window.spud_type = this.type+"_search_results"
+
     var mythis = this
 
+    replace_links()
     reset_display()
     var cm = $("#content-main")
     cm.html("")
 
-    var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
+    document.title = "Loading | " + this.display_type + " | Spud"
+    cm.append("<h1 id='title'>Loading</h1>")
 
-    document.title = this.display_type + " list " + (page+1) + "/" + (last_page+1) + " | " + this.display_type + " | Spud"
+    var div = $("<div id='search_details'/>").appendTo(cm)
+    this.search_details(div)
 
-    $("<h1></h1>")
-        .text(this.display_type + " list " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1))
-        .appendTo(cm)
+    var div = $("<div id='list_results'/>").appendTo(cm)
+    this.list_results(div)
 
-
-    var html_page = function(page, text) {
-        return mythis.search_results_a(search, page, text)
-    }
-
-    var div = $("<div/>").appendTo(cm)
-    this.search_details(results.criteria, rights, div)
-
-    var div = $("<div/>").appendTo(cm)
-    this.list_results(this.get_objects(results), rights, page, last_page, html_page, div)
-
-    var ul = $('<ul class="menu"/>')
-    this.list_menu(rights, search, results, ul)
-
+    var ul = $("<ul id='menu' class='menu'/>")
+    this.list_menu(ul)
     append_action_links(ul)
 
     append_jump(this.type, this.type,
@@ -227,59 +222,72 @@ generic_doer.prototype.display_search_results = function(rights, search, results
     $(".breadcrumbs")
         .html("")
         .append(root_a())
+}
+
+generic_doer.prototype.display_search_results = function(rights, search, results) {
+    this.setup_search_results()
+
+    var mythis = this
+
+    var page = Math.floor(results.first / search.results_per_page)
+    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
+
+    document.title = this.display_type + " list " + (page+1) + "/" + (last_page+1) + " | " + this.display_type + " | Spud"
+    $("#title").text(this.display_type + " list " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1))
+
+    var page_a = function(page, text) {
+        return mythis.search_results_a(search, page, text)
+    }
+
+    $("#search_details")[this.search_details_type]("set", results.criteria, rights)
+
+    $("#list_results")[mythis.list_type]("option", "page_a", page_a)
+    $("#list_results")[mythis.list_type]("set", this.get_objects(results), rights)
+    $("#list_results")[mythis.list_type]("set_paginator", page, last_page)
+
+    $("#menu")[this.list_menu_type]("set", rights, search, results)
+
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
         .append(" › " + this.display_plural)
 }
 
 
-generic_doer.prototype.display = function(object, rights) {
+generic_doer.prototype.setup = function() {
+    if (window.spud_type == this.type+"_display") {
+        // nothing to do, exit
+        return
+    }
+    window.spud_type = this.type+"_display"
+
+    replace_links()
     reset_display()
     var cm = $("#content-main")
     cm.html("")
 
-    document.title = object.title + " | " + this.display_type + " | Spud"
-    cm.append("<h1>" + escapeHTML(object.title) +  "</h1>")
+    document.title = "Loading | " + this.display_type + " | Spud"
+    cm.append("<h1 id='title'>Loading</h1>")
 
-    var div = $("<div/>").appendTo(cm)
-    this.details(object, rights, div)
+    var div = $("<div id='details'/>").appendTo(cm)
+    this.details(div)
 
     var mythis = this
 
     if (this.has_children) {
-        var al = $("<div class='children' />")
+        var node = $("<div id='children' class='children' />")
             .appendTo(cm)
-
-        this.list_children(
-            null, null, null, null,
-            function(page, text) {
-                    return $("<a/>")
-                        .text(text)
-                        .attr("href", "#")
-                        .on("click", function() { mythis.display_children(al, object, page); return false; })
-                },
-            al)
-        this.display_children(al, object, 0);
+        this.list_children(node)
     }
-
 
     if (this.has_photos) {
-        var pl = $("<div/>")
-        pl
-            .photo_list({ html_page:
-                function(page, text) {
-                    return $("<a/>")
-                        .text(text)
-                        .attr("href", "#")
-                        .on("click", function() { mythis.display_photos(pl, object, page); return false; })
-                }
-            })
+        $("<div id='photos'/>")
+            .photo_list()
             .appendTo(cm)
-         this.display_photos(pl, object, 0);
     }
 
-    var ul = $('<ul class="menu"/>')
-
-    this.menu(object, rights, ul)
-
+    var ul = $("<ul id='menu' class='menu'/>")
+    this.menu(ul)
     append_action_links(ul)
 
     var mythis = this
@@ -288,6 +296,52 @@ generic_doer.prototype.display = function(object, rights) {
             mythis.do(item.pk, true)
         }
     )
+
+    var bc = $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+        .append(" › ")
+        .append(this.search_results_a({}, 0, null))
+}
+
+generic_doer.prototype.display = function(object, rights) {
+    this.setup()
+
+    document.title = object.title + " | " + this.display_type + " | Spud"
+    $("#title").text(object.title)
+
+    $("#details")[this.details_type]("set", object, rights)
+
+    if (this.has_children) {
+        var mythis = this
+        var children_node = $("#children")
+        children_node[this.list_type](
+            "option", "page_a",
+            function(page, text) {
+                    return $("<a/>")
+                        .text(text)
+                        .attr("href", "#")
+                        .on("click", function() { mythis.display_children(children_node, object, page); return false; })
+                }
+            )
+        this.display_children(children_node, object, 0);
+    }
+
+    if (this.has_photos) {
+        var mythis = this
+        var photos_node = $("#photos")
+            .photo_list("option", "page_a",
+                function(page, text) {
+                    return $("<a/>")
+                        .text(text)
+                        .attr("href", "#")
+                        .on("click", function() { mythis.display_photos(photos_node, object, page); return false; })
+                }
+            )
+         this.display_photos(photos_node, object, 0);
+    }
+
+    $("#menu")[this.menu_type]("set", object, rights)
 
     var bc = $(".breadcrumbs")
         .html("")
@@ -314,7 +368,7 @@ generic_doer.prototype.display_children = function(element, object, page) {
         criteria: { instance: object.id, mode: "children", },
     }
     var mythis = this
-    element[mythis.list_type]("display_loading")
+    element[this.list_type]("display_loading")
     this.load_search_results(search, page,
         function(data) {
             element[mythis.list_type]("clear_status")
@@ -393,7 +447,6 @@ generic_doer.prototype.do_search_results = function(search, page, push_history, 
     this.load_search_results(search, page,
         function(data) {
             hide_loading()
-            replace_links()
             update_history(push_history,
                 mythis.search_results_url(search, page), {
                     type: "display_search_results",
@@ -418,7 +471,6 @@ generic_doer.prototype.do = function(object_id, push_history) {
     this.load(object_id,
         function(data) {
             hide_loading()
-            replace_links()
             var object = mythis.get_object(data)
             update_history(
                 push_history,

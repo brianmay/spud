@@ -97,7 +97,7 @@ boolean_output_field.prototype = new output_field()
 boolean_output_field.constructor = boolean_output_field
 
 boolean_output_field.prototype.set = function(value) {
-    this.output.p(value ? "True" : " False")
+    this.output.text(value ? "True" : " False")
     this.toggle(value != null)
 }
 

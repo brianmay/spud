@@ -317,6 +317,10 @@ function place_doer() {
     this.type = "place"
     this.display_type = "place"
     this.display_plural = "places"
+    this.menu_type = "place_menu"
+    this.list_menu_type = "place_list_menu"
+    this.details_type = "place_details"
+    this.search_details_type = "place_search_details"
     this.list_type = "place_list"
     generic_doer.call(this)
 }
@@ -344,35 +348,28 @@ place_doer.prototype.get_objects = function(results) {
     return results.places
 }
 
-place_doer.prototype.details = function(place, rights, div) {
-    $.spud.place_details({place: place, rights: rights}, div)
+place_doer.prototype.details = function(div) {
+    $.spud.place_details({}, div)
 }
 
-place_doer.prototype.list_menu = function(rights, search, results, div) {
-    $.spud.place_list_menu({rights: rights, search: search, results: results}, div)
+place_doer.prototype.list_menu = function(div) {
+    $.spud.place_list_menu({}, div)
 }
 
-
-place_doer.prototype.menu = function(place, rights, div) {
-    $.spud.place_menu({place: place, rights: rights}, div)
+place_doer.prototype.menu = function(div) {
+    $.spud.place_menu({}, div)
 }
 
-place_doer.prototype.list = function(places, rights, page, last_page, page_a, div) {
-    $.spud.place_list({
-        places: places,
-        rights: rights,
-        page: page,
-        last_page: last_page,
-        page_a: page_a,
-    }, div)
+place_doer.prototype.list = function(div) {
+    $.spud.place_list({}, div)
 }
 
 place_doer.prototype.search_dialog = function(criteria, rights, dialog) {
     $.spud.place_search_dialog({ criteria: criteria, rights: rights }, dialog)
 }
 
-place_doer.prototype.search_details = function(criteria, rights, dialog) {
-    $.spud.place_search_details({ criteria: criteria, rights: rights }, dialog)
+place_doer.prototype.search_details = function(dialog) {
+    $.spud.place_search_details({}, dialog)
 }
 
 place_doer.prototype.change_dialog = function(place, rights, dialog) {

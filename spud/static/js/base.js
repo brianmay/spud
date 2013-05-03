@@ -81,7 +81,7 @@ $.fn.p = function(text){
     }
     var converter = new Showdown.converter()
     var text = converter.makeHtml(text)
-    this.append(text)
+    this.html(text)
     return this
 }
 
@@ -496,10 +496,13 @@ $.widget('spud.paginator', {
      _range: function(page, first, last) {
         var page_a = this.options.page_a
         for (var i=first; i<=last; i++) {
-            if (i == page)
+            if (i == page) {
                 this.element.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
-            else
-                this.element.append(page_a(i, i+1))
+            } else {
+                page_a(i, i+1)
+                    .addClass("page")
+                    .appendTo(this.element)
+            }
             this.element.append(" ")
         }
     },
@@ -522,11 +525,17 @@ $.widget('spud.paginator', {
         }
 
         if (page > 0) {
-            this.element.append(page_a(page-1, '<').attr("accesskey", "p"))
+            page_a(page-1, '<')
+                .attr("accesskey", "p")
+                .addClass("page")
+                .appendTo(this.element)
             this.element.append(" ")
         }
         if (page < last_page) {
-            this.element.append(page_a(page+1, '>').attr("accesskey", "n"))
+            page_a(page+1, '>')
+                .attr("accesskey", "n")
+                .addClass("page")
+                .appendTo(this.element)
             this.element.append(" ")
         }
 
