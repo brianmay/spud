@@ -512,8 +512,8 @@ function setup_photo(photo_mode) {
               elem.webkitRequestFullscreen();
         }
     } else {
-        if (document.cancelFullScreen) {
-              document.cancelFullScreen();
+        if (document.exitFullScreen) {
+              document.exitFullScreen();
         } else if (document.mozCancelFullScreen) {
               document.mozCancelFullScreen();
         } else if (document.webkitCancelFullScreen) {
