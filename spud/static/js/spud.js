@@ -579,7 +579,7 @@ function display_photo(photo, rights, search, results, n) {
 
     $("#photo_article").photo_article("set", photo, rights)
     $("#paginator")
-        .paginator("option", "html_page",
+        .paginator("option", "page_a",
             function(page, text) {
                 return $("<a></a>")
                     .text(text)
@@ -635,7 +635,7 @@ function display_photo(photo, rights, search, results, n) {
 
     if (search.photo_mode != "slideshow") {
         var fl = $("#feedback_list")
-        fl.feedback_list("option", "html_page",
+        fl.feedback_list("option", "page_a",
             function(page, text) {
                 return $("<a/>")
                     .text(text)
@@ -961,7 +961,7 @@ function display_photo_search_results(rights, search, results) {
         .photo_search_details({ criteria: results.criteria })
         .appendTo(cm)
 
-    var html_page = function(page, text) {
+    var page_a = function(page, text) {
         return photo_search_results_a(search, page, text)
     }
 

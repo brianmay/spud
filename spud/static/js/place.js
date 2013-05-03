@@ -357,13 +357,13 @@ place_doer.prototype.menu = function(place, rights, div) {
     $.spud.place_menu({place: place, rights: rights}, div)
 }
 
-place_doer.prototype.list = function(places, rights, page, last_page, html_page, div) {
+place_doer.prototype.list = function(places, rights, page, last_page, page_a, div) {
     $.spud.place_list({
         places: places,
         rights: rights,
         page: page,
         last_page: last_page,
-        html_page: html_page,
+        page_a: page_a,
     }, div)
 }
 

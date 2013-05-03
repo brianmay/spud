@@ -343,13 +343,13 @@ category_doer.prototype.menu = function(category, rights, div) {
     $.spud.category_menu({category: category, rights: rights}, div)
 }
 
-category_doer.prototype.list = function(categorys, rights, page, last_page, html_page, div) {
+category_doer.prototype.list = function(categorys, rights, page, last_page, page_a, div) {
     $.spud.category_list({
         categorys: categorys,
         rights: rights,
         page: page,
         last_page: last_page,
-        html_page: html_page,
+        page_a: page_a,
     }, div)
 }
 

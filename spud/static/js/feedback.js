@@ -557,23 +557,23 @@ feedback_doer.prototype.menu = function(feedback, rights, div) {
     $.spud.feedback_menu({feedback: feedback, rights: rights}, div)
 }
 
-feedback_doer.prototype.list = function(feedbacks, rights, page, last_page, html_page, div) {
+feedback_doer.prototype.list = function(feedbacks, rights, page, last_page, page_a, div) {
     $.spud.feedback_list({
         feedbacks: feedbacks,
         rights: rights,
         page: page,
         last_page: last_page,
-        html_page: html_page,
+        page_a: page_a,
     }, div)
 }
 
-feedback_doer.prototype.list_children = function(feedbacks, rights, page, last_page, html_page, div) {
+feedback_doer.prototype.list_children = function(feedbacks, rights, page, last_page, page_a, div) {
     $.spud.feedback_list({
         feedbacks: feedbacks,
         rights: rights,
         page: page,
         last_page: last_page,
-        html_page: html_page,
+        page_a: page_a,
         include_children: true,
     }, div)
 }

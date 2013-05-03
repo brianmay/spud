@@ -353,13 +353,13 @@ album_doer.prototype.menu = function(album, rights, div) {
     $.spud.album_menu({album: album, rights: rights}, div)
 }
 
-album_doer.prototype.list = function(albums, rights, page, last_page, html_page, div) {
+album_doer.prototype.list = function(albums, rights, page, last_page, page_a, div) {
     $.spud.album_list({
         albums: albums,
         rights: rights,
         page: page,
         last_page: last_page,
-        html_page: html_page,
+        page_a: page_a,
     }, div)
 }
 

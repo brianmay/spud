@@ -494,39 +494,39 @@ $.widget('spud.paginator', {
     },
 
      _range: function(page, first, last) {
-        var html_page = this.options.html_page
+        var page_a = this.options.page_a
         for (var i=first; i<=last; i++) {
             if (i == page)
                 this.element.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
             else
-                this.element.append(html_page(i, i+1))
+                this.element.append(page_a(i, i+1))
             this.element.append(" ")
         }
     },
 
     set: function(page, last_page) {
-        var html_page = this.options.html_page
+        var page_a = this.options.page_a
 
         this.element.empty()
 
         if (page > 0) {
-            html_page(page-1, "")
+            page_a(page-1, "")
                 .addClass("prevslide")
                 .appendTo(this.element)
         }
 
         if (page < last_page) {
-            html_page(page+1, "")
+            page_a(page+1, "")
                 .addClass("nextslide")
                 .appendTo(this.element)
         }
 
         if (page > 0) {
-            this.element.append(html_page(page-1, '<').attr("accesskey", "p"))
+            this.element.append(page_a(page-1, '<').attr("accesskey", "p"))
             this.element.append(" ")
         }
         if (page < last_page) {
-            this.element.append(html_page(page+1, '>').attr("accesskey", "n"))
+            this.element.append(page_a(page+1, '>').attr("accesskey", "n"))
             this.element.append(" ")
         }
 
@@ -684,7 +684,7 @@ $.widget('spud.list_base',  {
 
         this.p = $("<p></p>")
             .paginator({
-                html_page: this.options.html_page
+                page_a: this.options.page_a
             })
             .appendTo(this.element)
 

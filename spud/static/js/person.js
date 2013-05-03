@@ -404,13 +404,13 @@ person_doer.prototype.menu = function(person, rights, div) {
     $.spud.person_menu({person: person, rights: rights}, div)
 }
 
-person_doer.prototype.list = function(persons, rights, page, last_page, html_page, div) {
+person_doer.prototype.list = function(persons, rights, page, last_page, page_a, div) {
     $.spud.person_list({
         persons: persons,
         rights: rights,
         page: page,
         last_page: last_page,
-        html_page: html_page,
+        page_a: page_a,
     }, div)
 }
 
