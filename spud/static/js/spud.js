@@ -502,17 +502,26 @@ function display_root() {
 
 
 function setup_photo(photo_mode) {
-    if (window.spud_type == "display_photo" && window.spud_mode == photo_mode) {
-        if (photo_mode == "slideshow") {
-            var elem = $("#content")[0]
-            if (elem.requestFullscreen) {
-                  elem.requestFullscreen();
-            } else if (elem.mozRequestFullScreen) {
-                  elem.mozRequestFullScreen();
-            } else if (elem.webkitRequestFullscreen) {
-                  elem.webkitRequestFullscreen();
-            }
+    var elem = $("#content")[0]
+    if (photo_mode == "slideshow") {
+        if (elem.requestFullscreen) {
+              elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+              elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen();
         }
+    } else {
+        if (document.cancelFullScreen) {
+              document.cancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+              document.webkitCancelFullScreen();
+        }
+    }
+
+    if (window.spud_type == "display_photo" && window.spud_mode == photo_mode) {
         // nothing to do, exit
         return
     }
@@ -554,14 +563,6 @@ function setup_photo(photo_mode) {
         $("#header").addClass("slideshow")
         $(".breadcrumbs").addClass("slideshow")
         $("body").css("overflow", "hidden");
-        var elem = $("#content")[0]
-        if (elem.requestFullscreen) {
-              elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen) {
-              elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen) {
-              elem.webkitRequestFullscreen();
-        }
     } else {
         var pl = $("<div id='feedback_list'/>")
             .feedback_list({
