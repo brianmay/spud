@@ -528,7 +528,7 @@ $.widget('spud.camera_details',  $.spud.infobox, {
 $.widget('spud.photo_article',  {
     _create: function() {
         this.element
-                .addClass("photo_" + this.options.photo_mode)
+                .addClass("photo_article")
 
         this.pi = $("<div class='photo_block' />")
             .photo_image({ enlarge: this.options.photo_mode == "slideshow", size: this.options.photo_size })
