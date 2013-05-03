@@ -693,14 +693,23 @@ $.widget('spud.list_base',  {
         }
     },
 
+    option: function(key, value) {
+        if (key == "page_a") {
+            this.p.paginator("option", key, value)
+        }
+        return this._super(key, value)
+    },
+
     set_paginator: function(page, last_page) {
         this.p.paginator("set", page, last_page)
+        return this
     },
 
     empty: function() {
         this.ul.empty()
         this.element.removeClass("loading")
         this.element.removeClass("errors")
+        return this
     },
 
     append_item: function(html) {
@@ -713,15 +722,18 @@ $.widget('spud.list_base',  {
     clear_status: function() {
         this.element.removeClass("loading")
         this.element.removeClass("errors")
+        return this
     },
 
     display_loading: function() {
         this.element.addClass("loading")
+        return this
     },
 
     display_error: function() {
         this.empty()
         this.element.addClass("errors")
+        return this
     },
 
     _destroy: function() {
