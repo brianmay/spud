@@ -374,7 +374,7 @@ function display_loading() {
 
     message.append("<br/>Loading. Please Wait.<br/>")
 
-    $.blockUI({ message: message })
+    $("#content").block({ message: message })
 }
 
 
@@ -393,7 +393,7 @@ function display_error(data) {
         .click(function() { $.unblockUI() })
         .appendTo(message)
 
-    $.blockUI({ message: message })
+    $("#content").block({ message: message })
 }
 
 
@@ -414,7 +414,7 @@ function handle_error(message, push_history) {
 
 function hide_loading()
 {
-    $.unblockUI()
+    $("#content").unblock()
 }
 
 
@@ -485,7 +485,7 @@ function append_jump(id, type, onadded) {
 // *******************
 
 function reset_display() {
-    $("#content-related").removeClass("overlapped")
+    $("#content").removeClass("slideshow")
     $("body").css("overflow", "auto");
     $(window).off("resize")
 }
@@ -504,7 +504,7 @@ function display_root() {
 function setup_photo(photo_mode) {
     if (window.spud_type == "display_photo" && window.spud_mode == photo_mode) {
         if (photo_mode == "slideshow") {
-            var elem = $("#photo_article")[0]
+            var elem = $("#content")[0]
             if (elem.requestFullscreen) {
                   elem.requestFullscreen();
             } else if (elem.mozRequestFullScreen) {
@@ -550,9 +550,11 @@ function setup_photo(photo_mode) {
     append_action_links(ul)
 
     if (photo_mode == "slideshow") {
-        $("#content-related").addClass("overlapped")
+        $("#content").addClass("slideshow")
+        $("#header").addClass("slideshow")
+        $(".breadcrumbs").addClass("slideshow")
         $("body").css("overflow", "hidden");
-        var elem = pa[0]
+        var elem = $("#content")[0]
         if (elem.requestFullscreen) {
               elem.requestFullscreen();
         } else if (elem.mozRequestFullScreen) {
