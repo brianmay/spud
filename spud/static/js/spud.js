@@ -945,21 +945,48 @@ function display_photo_search_form(criteria) {
 }
 
 
-function display_photo_search_results(rights, search, results) {
+function setup_photo_search_results() {
+    if (window.spud_type == "display_photo_search_results") {
+        // nothing to do, exit
+        return
+    }
+    window.spud_type = "display_photo_search_results"
+
     replace_links()
     reset_display()
     var cm = $("#content-main")
     cm.html("")
 
+    cm.append("<h1 id='title'></h1>")
+
+    $("<div id='photo_search_details'/>")
+        .photo_search_details()
+        .appendTo(cm)
+
+    $("<div id='photo_list'/>")
+        .photo_list()
+        .appendTo(cm)
+
+    var ul = $("<ul id='photo_list_menu'/>")
+        .photo_list_menu()
+    append_action_links(ul)
+
+    $(".breadcrumbs")
+        .html("")
+        .append(root_a())
+        .append(" › Photos")
+}
+
+function display_photo_search_results(rights, search, results) {
+    setup_photo_search_results()
+
     var page = Math.floor(results.first / search.results_per_page)
     var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
 
     document.title = "Photo List " + (page+1) + "/" + (last_page+1) + " | Photos | Spud"
-    cm.append("<h1>Photo List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1) + "</h1>")
+    $("#title").text("Photo List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1))
 
-    $("<div/>")
-        .photo_search_details({ criteria: results.criteria })
-        .appendTo(cm)
+    $("#photo_search_details").photo_search_details("set", results.criteria)
 
     var page_a = function(page, text) {
         return photo_search_results_a(search, page, text)
@@ -967,25 +994,12 @@ function display_photo_search_results(rights, search, results) {
 
     photo_change_keyboard(null, search.criteria, results.number_results)
 
-    $("<div/>")
-        .photo_list({
-            rights: rights,
-            search: search,
-            results: results,
-            html_page: html_page,
-            page: page,
-            last_page: last_page,
-        })
-        .appendTo(cm)
+    $("#photo_list")
+        .photo_list("option", "page_a", page_a)
+        .photo_list("set_paginator", page, last_page)
+        .photo_list("set", rights, search, results)
 
-    var ul = $('<ul/>')
-        .photo_list_menu({ search: search, rights: rights, results: results, })
-    append_action_links(ul)
-
-    $(".breadcrumbs")
-        .html("")
-        .append(root_a())
-        .append(" › Photos")
+    $("#photo_list_menu").photo_list_menu("set", rights, search, results)
 }
 
 
