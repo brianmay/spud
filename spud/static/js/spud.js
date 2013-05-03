@@ -495,7 +495,7 @@ function display_root() {
     $("#content-main")
         .html("")
 
-    $(".breadcrumbs")
+    $("#breadcrumbs")
         .html("")
         .append("Home")
 }
@@ -550,7 +550,7 @@ function setup_photo(photo_mode) {
         .paginator()
         .appendTo(pa)
 
-    $(".breadcrumbs")
+    $("#breadcrumbs")
         .html("")
         .append(root_a())
 
@@ -562,7 +562,7 @@ function setup_photo(photo_mode) {
         $("#content").addClass("slideshow")
         $("#header").addClass("slideshow")
         $("#footer").addClass("slideshow")
-        $(".breadcrumbs").addClass("slideshow")
+        $("#breadcrumbs").addClass("slideshow")
         $("body").css("overflow", "hidden");
     } else {
         var pl = $("<div id='feedback_list'/>")
@@ -609,7 +609,7 @@ function display_photo(photo, rights, search, results, n) {
 
     if (search !=null && n != null) {
         var page = Math.floor(n / search.results_per_page)
-        $(".breadcrumbs")
+        $("#breadcrumbs")
             .html("")
             .append(root_a())
             .append(" › ")
@@ -617,7 +617,7 @@ function display_photo(photo, rights, search, results, n) {
             .append(" › ")
             .append(escapeHTML(photo.title))
     } else {
-        $(".breadcrumbs")
+        $("#breadcrumbs")
             .html("")
             .append(root_a())
             .append(" › ")
@@ -985,7 +985,7 @@ function setup_photo_search_results() {
         .photo_list_menu()
     append_action_links(ul)
 
-    $(".breadcrumbs")
+    $("#breadcrumbs")
         .html("")
         .append(root_a())
         .append(" › Photos")
