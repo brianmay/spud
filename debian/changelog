@@ -1,3 +1,10 @@
+spud (1.5-1) unstable; urgency=low
+
+  * Bugs fixed.
+  * Minor schema change.
+
+ -- Brian May <bam@debian.org>  Sat, 04 May 2013 12:01:20 +1000
+
 spud (1.4-1) unstable; urgency=low
 
   * Fullscreen mode.
