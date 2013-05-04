@@ -219,7 +219,7 @@ generic_doer.prototype.setup_search_results = function() {
         }
     )
 
-    $(".breadcrumbs")
+    $("#breadcrumbs")
         .html("")
         .append(root_a())
 }
@@ -247,7 +247,7 @@ generic_doer.prototype.display_search_results = function(rights, search, results
 
     $("#menu")[this.list_menu_type]("set", rights, search, results)
 
-    $(".breadcrumbs")
+    $("#breadcrumbs")
         .html("")
         .append(root_a())
         .append(" › " + this.display_plural)
@@ -297,7 +297,7 @@ generic_doer.prototype.setup = function() {
         }
     )
 
-    var bc = $(".breadcrumbs")
+    var bc = $("#breadcrumbs")
         .html("")
         .append(root_a())
         .append(" › ")
@@ -343,7 +343,7 @@ generic_doer.prototype.display = function(object, rights) {
 
     $("#menu")[this.menu_type]("set", object, rights)
 
-    var bc = $(".breadcrumbs")
+    var bc = $("#breadcrumbs")
         .html("")
         .append(root_a())
         .append(" › ")
