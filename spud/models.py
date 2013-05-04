@@ -256,8 +256,8 @@ class album(hierarchy_model):
     cover_photo = models.ForeignKey('photo', related_name='album_cover_of', null=True, blank=True)
     sort_name = models.CharField(max_length=96, blank=True)
     sort_order = models.CharField(max_length=96, blank=True)
-    revised = models.DateTimeField(null=True, blank=True)
-    revised_utc_offset = models.IntegerField()
+    revised = models.DateTimeField(null=True)
+    revised_utc_offset = models.IntegerField(null=True)
 
     class Meta:
         ordering = [ 'sort_name', 'sort_order', 'title' ]

@@ -2931,9 +2931,9 @@ def upload_file(request):
             photo = None
             try:
                 album, _ = spud.models.album.objects.get_or_create(
-                    album="Uploads")
+                    title="Uploads")
 
-                album, _ = album.children.get_or_create(album=uid)
+                album, _ = album.children.get_or_create(title=uid)
 
                 photo = spud.upload.import_photo(
                     filename,

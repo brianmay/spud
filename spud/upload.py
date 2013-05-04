@@ -87,7 +87,7 @@ def import_photo(file, d, options):
         split.pop()
 
         for i in split:
-            album, c = album.children.get_or_create(album=i)
+            album, c = album.children.get_or_create(title=i)
         albums = [album]
 
     # get time
