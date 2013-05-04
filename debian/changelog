@@ -1,3 +1,11 @@
+spud (1.4-1) unstable; urgency=low
+
+  * Fullscreen mode.
+  * Style changes.
+  * Bugs fixed.
+
+ -- Brian May <bam@debian.org>  Sat, 04 May 2013 11:31:30 +1000
+
 spud (1.3-1) unstable; urgency=low
 
   * Version 1.2 was missing be5492b897743334a841d923c1377a784cea0d58. Retry.
