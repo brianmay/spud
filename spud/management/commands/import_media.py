@@ -111,7 +111,7 @@ class Command(BaseCommand):
             if options['album'] is None:
                 options['album'] = []
             for album in options['album']:
-                d['albums'].append(models.album.objects.get(album=album))
+                d['albums'].append(models.album.objects.get(title=album))
             d['parse_name'] = options['parse_name']
             if options['parse_name'] and len(album) != 1:
                 CommandError("Need exactly one album for parse_names option")
@@ -121,7 +121,7 @@ class Command(BaseCommand):
                 options['category'] = []
             for category in options['category']:
                 d['categorys'].append(
-                    models.category.objects.get(category=category).pk)
+                    models.category.objects.get(title=category).pk)
 
             if options['src_timezone'] is not None:
                 d['src_timezone'] = pytz.timezone(options['src_timezone'])
