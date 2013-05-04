@@ -105,7 +105,7 @@ $.widget('spud.settings_dialog',  $.spud.form_dialog, {
     },
 
     _submit_values: function(values) {
-        settings = get_settings()
+        var settings = get_settings()
 
         settings.photos_per_page = Number(values.photos_per_page)
         settings.items_per_page = Number(values.items_per_page)
@@ -114,6 +114,9 @@ $.widget('spud.settings_dialog',  $.spud.form_dialog, {
         settings.slideshow_size = values.slideshow_size
 
         set_settings(settings)
+
+        // force page to be redrawn
+        window.spud_type = null
 
         this.close()
         reload_page()
