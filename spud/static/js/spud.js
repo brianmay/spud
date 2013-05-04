@@ -486,6 +486,9 @@ function append_jump(id, type, onadded) {
 
 function reset_display() {
     $("#content").removeClass("slideshow")
+    $("#header").removeClass("slideshow")
+    $("#footer").removeClass("slideshow")
+    $("#breadcrumbs").removeClass("slideshow")
     $("body").css("overflow", "auto");
     $(window).off("resize")
 }
