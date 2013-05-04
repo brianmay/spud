@@ -517,6 +517,10 @@ def _json_person_detail(user, person):
 
     d = _json_person(user, person)
 
+    d.update({
+        'num_photos': person.photos.count(),
+    })
+
     if user.is_staff:
         d.update({
             'gender': person.gender,
@@ -544,7 +548,6 @@ def _json_person_detail(user, person):
             'ancestors': [],
             'dob': None,
             'dod': None,
-            'num_photos': person.photos.count(),
         })
 
         if person.dob:
