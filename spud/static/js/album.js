@@ -177,7 +177,7 @@ $.widget('spud.album_menu', $.spud.spud_menu, {
 
         this.add_item(photo_search_results_a({ criteria: criteria }, 0, "Show photos"))
 
-        if (album.num_photos > 0) {
+        if (album.number_photos > 0) {
             this.add_item(
                 $("<a href=''>Slideshow</a>")
                 .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
