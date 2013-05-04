@@ -322,6 +322,7 @@ $.widget('spud.photo_summary',  {
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_title, "[edit title]"))
 
         this.persons
+            .empty()
             .append_csv($.map(photo.persons, function(person) { return persons.a(person); } ))
             .conditional_append(can_change, photo_change_a(photo, display_change_photo_persons, "[edit people]"))
 
