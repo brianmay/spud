@@ -1200,7 +1200,11 @@ function do_photo_search_item(search, n, photo_id, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            if (photo_id != null) {
+                do_photo(photo_id, search, push_history)
+            } else {
+                handle_error(message, push_history)
+            }
         }
     )
 }
