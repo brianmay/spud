@@ -547,9 +547,7 @@ function setup_photo(photo_mode) {
         .photo_article({ enlarge: photo_mode == "slideshow", photo_size: size})
         .appendTo(cm)
 
-    var paginator
-
-    paginator = $("<p id='paginator'></p>")
+    var paginator = $("<p id='paginator'></p>")
         .paginator()
         .appendTo(pa)
 
