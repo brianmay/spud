@@ -849,10 +849,13 @@ def _json_search(user, params):
     if value is not None:
         if value == "none":
             search = search & Q(action__isnull=True)
+            criteria["action"] = "none"
+        elif value == "set":
+            search = search & Q(action__isnull=False)
+            criteria["action"] = "set"
         else:
             search = search & Q(action=value)
-        value = spud.models.action_to_string(value)
-        criteria["action"] = value
+            criteria["action"] = spud.models.action_to_string(value)
 
     value = _pop_string(params, "path")
     if value is not None:
