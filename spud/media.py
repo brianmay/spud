@@ -63,16 +63,19 @@ class media:
     def _create_thumbnail(self, dst_path, max_size, image):
         (width,height) = image.size
 
-        if width > max_size or height > max_size:
-            thumb_width = max_size
-            thumb_height = max_size
+        if width > max_size['size'] or height > max_size['size']:
+            thumb_width = max_size['size']
+            thumb_height = max_size['size']
 
             if width > height:
-                thumb_height = int(max_size*1.0/width * height)
+                thumb_height = int(max_size['size']*1.0/width * height)
             else:
-                thumb_width = int(max_size*1.0/height * width)
+                thumb_width = int(max_size['size']*1.0/height * width)
 
-            image.thumbnail((thumb_width,thumb_height),Image.ANTIALIAS)
+            if max_size['draft']:
+                image.thumbnail((thumb_width,thumb_height),Image.ANTIALIAS)
+            else:
+                image = image.resize((thumb_width,thumb_height),Image.ANTIALIAS)
             thumb_width, thumb_height = image.size
         else:
             thumb_width = width

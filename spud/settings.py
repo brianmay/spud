@@ -92,9 +92,9 @@ AJAX_SELECT_INLINES = None
 
 IMAGE_CHECK_EXISTS=True
 IMAGE_SIZES = {
-    'thumb': 120,
-    'mid': 480,
-    'large': 960,
+    'thumb': {'size': 120, 'draft': True},
+    'mid': {'size': 480, 'draft': True},
+    'large': {'size': 960, 'draft': False},
 }
 
 LIST_SIZES = (
