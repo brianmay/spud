@@ -583,7 +583,7 @@ function display_photo(photo, rights, search, results, n) {
         prefix = "Edit "
     }
 
-    var last_page = 0
+    var last_page = -1
     if (results != null) {
         last_page = results.number_results-1
     }
