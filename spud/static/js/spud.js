@@ -374,7 +374,7 @@ function display_loading() {
 
     message.append("<br/>Loading. Please Wait.<br/>")
 
-    $("#content").block({ message: message })
+    $.blockUI({ message: message })
 }
 
 
@@ -393,7 +393,7 @@ function display_error(data) {
         .click(function() { $.unblockUI() })
         .appendTo(message)
 
-    $("#content").block({ message: message })
+    $.blockUI({ message: message })
 }
 
 
@@ -414,7 +414,7 @@ function handle_error(message, push_history) {
 
 function hide_loading()
 {
-    $("#content").unblock()
+    $.unblockUI()
 }
 
 
@@ -505,7 +505,7 @@ function display_root() {
 
 
 function setup_photo(photo_mode) {
-    var elem = $("#content")[0]
+    var elem = document.body
     if (photo_mode == "slideshow") {
         if (elem.requestFullscreen) {
               elem.requestFullscreen();
