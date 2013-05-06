@@ -396,7 +396,7 @@ def _json_album_detail(user, album):
     d.update({
         'parent': _json_album(user, album.parent),
         'ancestors': [],
-        'number_photos': album.photos.count(),
+        'number_photos': album.photos.filter(action__isnull=True).count(),
     })
 
     for ancestor in album.get_ascendants(include_self=False):
@@ -430,7 +430,7 @@ def _json_category_detail(user, category):
     d.update({
         'parent': _json_category(user, category.parent),
         'ancestors': [],
-        'number_photos': category.photos.count(),
+        'number_photos': category.photos.filter(action__isnull=True).count(),
     })
 
     for ancestor in category.get_ascendants(include_self=False):
@@ -470,7 +470,7 @@ def _json_place_detail(user, place):
     d.update({
         'parent': _json_place(user, place.parent),
         'ancestors': [],
-        'number_photos': place.photos.count(),
+        'number_photos': place.photos.filter(action__isnull=True).count(),
     })
 
     for ancestor in place.get_ascendants(include_self=False):
@@ -518,7 +518,7 @@ def _json_person_detail(user, person):
     d = _json_person(user, person)
 
     d.update({
-        'number_photos': person.photos.count(),
+        'number_photos': person.photos.filter(action__isnull=True).count(),
     })
 
     if user.is_staff:
