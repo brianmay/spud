@@ -1,3 +1,9 @@
+spud (1.6-1) unstable; urgency=low
+
+  * More bug fixes.
+
+ -- Brian May <bam@debian.org>  Mon, 06 May 2013 15:40:42 +1000
+
 spud (1.5-1) unstable; urgency=low
 
   * Bugs fixed.
