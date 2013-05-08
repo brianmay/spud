@@ -24,12 +24,7 @@ class Command(NoArgsCommand):
 
         def handle_noargs(self, **options):
 
-            while True:
-                try:
-                    p = models.photo.objects.filter(action__isnull=False).order_by()[0]
-                except IndexError, e:
-                    exit(0)
-
+            for p in models.photo.objects.filter(action__isnull=False).order_by("pk"):
                 if p.action == "D":
                     print "delete '%s'."%(p.get_orig_path())
                     p.delete()
