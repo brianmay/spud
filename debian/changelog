@@ -1,3 +1,11 @@
+spud (1.6-2) unstable; urgency=low
+
+  * Transition to dh_python2. See
+    http://wiki.debian.org/Python/TransitionToDHPython2.
+  * Add recommends for dcraw.
+
+ -- Brian May <bam@debian.org>  Thu, 09 May 2013 11:21:14 +1000
+
 spud (1.6-1) unstable; urgency=low
 
   * More bug fixes.
