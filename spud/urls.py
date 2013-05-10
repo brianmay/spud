@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.conf.urls import url, include, patterns
+from django.conf import settings
 
 from django.contrib import admin
 admin.autodiscover()
@@ -98,3 +99,10 @@ urlpatterns = patterns('',
 #    url(r'^photo/(?P<object_id>\d+)/orig/$', 'spud.views.photo_orig_redirect', name='photo_orig_redirect'),
 
 )
+
+if settings.DEBUG:
+    urlpatterns += patterns(
+        '',
+        url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.IMAGE_PATH}),
+    )
