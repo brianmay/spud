@@ -540,20 +540,29 @@ class photo(base_model):
         self.rating = rating / n
         self.save()
 
+    # Internal functions for creating new photos
+
+    @classmethod
+    def _get_thumb_path(cls, size, path, name):
+        if size in settings.IMAGE_SIZES:
+            (shortname, _) = os.path.splitext(name)
+            return u"%sthumb/%s/%s/%s.jpg" % (
+                settings.IMAGE_PATH, size, path, shortname)
+        else:
+            raise RuntimeError("unknown image size %s" % (size))
+
+    @classmethod
+    def _get_orig_path(cls, path, name):
+        return u"%sorig/%s/%s" % (settings.IMAGE_PATH, path, name)
+
+    # Public methods
+
     def get_orig_path(self):
-        return u"%sorig/%s/%s" % (settings.IMAGE_PATH, self.path, self.name)
+        return self._get_orig_path(self.path, self.name)
 
     def get_orig_url(self):
         return iri_to_uri(u"%sorig/%s/%s" % (
             settings.IMAGE_URL, urlquote(self.path), urlquote(self.name)))
-
-    def get_thumb_path(self, size):
-        if size in settings.IMAGE_SIZES:
-            (shortname, _) = os.path.splitext(self.name)
-            return u"%sthumb/%s/%s/%s.jpg" % (
-                settings.IMAGE_PATH, size, self.path, shortname)
-        else:
-            raise RuntimeError("unknown image size %s" % (size))
 
     def get_thumb(self, size):
         if size not in settings.IMAGE_SIZES:
@@ -587,8 +596,8 @@ class photo(base_model):
         self.category_cover_of.clear()
         self.person_cover_of.clear()
         os.unlink(self.get_orig_path())
-        for size in settings.IMAGE_SIZES:
-            path = self.get_thumb_path(size)
+        for pt in self.photo_thumb_set.all():
+            path = pt.get_path()
             if os.path.lexists(path):
                 os.unlink(path)
         super(photo, self).delete()
@@ -606,22 +615,22 @@ class photo(base_model):
         return
     rotate.alters_data = True
 
-    def generate_thumbnails(self,overwrite):
+    def generate_thumbnails(self, overwrite):
         m = media.get_media(self.get_orig_path())
         umask = os.umask(0022)
 
         for size, max in settings.IMAGE_SIZES.iteritems():
-            dst = self.get_thumb_path(size)
+            dst = self._get_thumb_path(size, self.path, self.name)
             if not os.path.lexists(os.path.dirname(dst)):
-                os.makedirs(os.path.dirname(dst),0755)
+                os.makedirs(os.path.dirname(dst), 0755)
             if overwrite or not os.path.lexists(dst):
-                xysize = m.create_thumbnail(dst,max)
+                xysize = m.create_thumbnail(dst, max)
             else:
                 mt = media.get_media(dst)
                 xysize = mt.get_size()
-            pt,_ = photo_thumb.objects.get_or_create(photo=self,size=size)
-            pt.width=xysize[0]
-            pt.height=xysize[1]
+            pt, _ = photo_thumb.objects.get_or_create(photo=self, size=size)
+            pt.width = xysize[0]
+            pt.height = xysize[1]
             pt.save()
 
         os.umask(umask)
@@ -629,13 +638,12 @@ class photo(base_model):
     generate_thumbnails.alters_data = True
 
     def update_size(self):
-        for size, max in settings.IMAGE_SIZES.iteritems():
-            dst = self.get_thumb_path(size)
+        for pt in self.photo_thumb_set.all():
+            dst = pt.get_path()
             mt = media.get_media(dst)
             xysize = mt.get_size()
-            pt,_ = photo_thumb.objects.get_or_create(photo=self,size=size)
-            pt.width=xysize[0]
-            pt.height=xysize[1]
+            pt.width = xysize[0]
+            pt.height = xysize[1]
             pt.save()
         return
     update_size.alters_data = True
@@ -740,29 +748,29 @@ class photo(base_model):
     def get_conflicts(cls, new_path, new_name):
         # check for conflicts or errors
         (shortname, extension) = os.path.splitext(new_name)
-        dups = photo.objects.filter(path=new_path,name__startswith="%s."%(shortname))
+        dups = photo.objects.filter(
+            path=new_path, name__startswith="%s." % (shortname))
         count = dups.count()
         if count > 0:
             return dups, count
 
-        p = photo()
-        p.path = new_path
-        p.name = new_name
-
-        full_path = p.get_orig_path()
+        full_path = cls._get_orig_path(new_path, new_name)
         if os.path.lexists(full_path):
-            raise RuntimeError("file already exists at %s but has no db entry"%full_path)
+            raise RuntimeError(
+                u"file already exists at %s but has no db entry" % full_path)
 
         for size in settings.IMAGE_SIZES:
-            full_path = p.get_thumb_path(size)
+            full_path = cls._get_thumb_path(size, new_path, new_name)
             if os.path.lexists(full_path):
-                raise RuntimeError("file already exists at %s but has no db entry"%full_path)
+                raise RuntimeError(
+                    u"file already exists at %s but has no db entry" %
+                    full_path)
 
         return [], 0
 
     @classmethod
     def get_new_name(cls, old_file, new_path, new_name):
-        append = [ '', 'a', 'b', 'c', 'd', ]
+        append = ['', 'a', 'b', 'c', 'd']
 
         for a in append:
             (shortname, extension) = os.path.splitext(new_name)
@@ -771,76 +779,72 @@ class photo(base_model):
             if count == 0:
                 return new_path, tmp_name
             elif count > 1:
-                raise RuntimeError("Multiple DB entries exist for %s/%s"%(new_path,tmp_name))
+                raise RuntimeError(
+                    u"Multiple DB entries exist for %s/%s" %
+                    (new_path, tmp_name))
 
             dupfile = dups[0].get_orig_path()
             if filecmp.cmp(old_file, dupfile):
-                raise photo_already_exists_error("same photo %d already exists at %s/%s as %s/%s"%(dups[0].pk,new_path,new_name,dups[0].path,dups[0].name))
+                raise photo_already_exists_error(
+                    u"same photo %d already exists at %s/%s as %s/%s" %
+                    (dups[0].pk, new_path, new_name,
+                    dups[0].path, dups[0].name))
 
-        raise RuntimeError("Cannot get non-conflicting filename for %s/%s"%(new_path, new_name))
+        raise RuntimeError(
+            u"Cannot get non-conflicting filename for %s/%s" %
+            (new_path, new_name))
 
-    def move(self,new_name=None):
+    def move(self, new_name=None):
+        move_list = []
+
+        # get current path
+        old_orig_path = self.get_orig_path()
+        if not os.path.lexists(old_orig_path):
+            raise RuntimeError(
+                "Source '%s' not already exists" % (old_orig_path))
+
         # Work out new path
         from_tz = pytz.utc
         to_tz = pytz.FixedOffset(self.utc_offset)
-        to_offset =  datetime.timedelta(minutes=self.utc_offset)
-
+        to_offset = datetime.timedelta(minutes=self.utc_offset)
         local = from_tz.localize(self.datetime)
         local = (local + to_offset).replace(tzinfo=to_tz)
-
-        new_path = "%04d/%02d/%02d"%(local.year,local.month,local.day)
-
-        # Work out new name
         if new_name is None:
             new_name = self.name
-
-        # Get current paths
-        old_path = { }
-        for size in settings.IMAGE_SIZES:
-            old_path[size] = self.get_thumb_path(size)
-        old_orig_path = self.get_orig_path()
+        new_path = "%04d/%02d/%02d" % (local.year, local.month, local.day)
 
         # Check that something has changed
         if self.path == new_path and self.name == new_name:
             # nothing to do, good bye cruel world
             return
 
-        new_path, new_name = photo.get_new_name(old_orig_path, new_path, new_name)
+        # generate new non-conflicting name
+        new_path, new_name = photo.get_new_name(
+            old_orig_path, new_path, new_name)
 
-        # First pass, check for anything that could go wrong before doing anything
-        for size in settings.IMAGE_SIZES:
-            src = old_path[size]
+        # create move list
+        move_list.append(
+            (old_orig_path, self._get_orig_path(new_path, new_name))
+        )
+        for pt in self.photo_thumb_set.all():
+            src = pt.get_path()
             if not os.path.lexists(src):
-                raise RuntimeError("Source '%s' not already exists"%(src))
+                raise RuntimeError("Source '%s' not already exists" % (src))
+            move_list.append(
+                (src, self._get_thumb_path(pt.size, new_path, new_name))
+            )
 
-        src = old_orig_path
-        if not os.path.lexists(src):
-            raise RuntimeError("Source '%s' not already exists"%(src))
-
-        # Update the values so we get new paths
-        self.path = new_path
-        self.name = new_name
-
-        # Second pass. Nothing can go wrong go wrong go wrong go wrong go wrong
-        for size in settings.IMAGE_SIZES:
-            src = old_path[size]
-            dst = self.get_thumb_path(size)
-
+        # move the files
+        for src, dst in move_list:
             if src != dst:
-                print "Moving '%s' to '%s'"%(src,dst)
+                print "Moving '%s' to '%s'" % (src, dst)
                 if not os.path.lexists(os.path.dirname(dst)):
-                    os.makedirs(os.path.dirname(dst),0755)
-                shutil.move(src,dst)
-
-        src = old_orig_path
-        dst = self.get_orig_path()
-        if src != dst:
-            print  "Moving '%s' to '%s'"%(src,dst)
-            if not os.path.lexists(os.path.dirname(dst)):
-                os.makedirs(os.path.dirname(dst),0755)
-            shutil.move(src,dst)
+                    os.makedirs(os.path.dirname(dst), 0755)
+                shutil.move(src, dst)
 
         # Hurry! Save the new path and name before we forgot
+        self.path = new_path
+        self.name = new_name
         # ... err what did we just do?
         self.save()
         return
@@ -852,16 +856,20 @@ class photo(base_model):
         if settings.IMAGE_CHECK_EXISTS:
             dst = self.get_orig_path()
             if not os.path.lexists(dst):
-                error_list.append("Original file '%s' is missing"%(dst))
+                error_list.append(u"Original file '%s' is missing" % (dst))
 
-            for size in settings.IMAGE_SIZES:
-                dst = self.get_thumb_path(size)
+            for pt in self.photo_thumb_set.all():
+                dst = pt.get_path()
                 if not os.path.lexists(dst):
-                    error_list.append("Thumb file '%s' for size '%s' is missing"%(dst, size))
+                    error_list.append(
+                        u"Thumb file '%s' for size '%s' is missing" %
+                        (dst, pt.size))
 
-        duplicates = photo.objects.filter(path=self.path, name=self.name).exclude(pk=self.pk)
+        duplicates = photo.objects.filter(
+            path=self.path, name=self.name).exclude(pk=self.pk)
         if duplicates.count() > 0:
-            error_list.append(u"photo path %s/%s is duplicated"%(self.path, self.name))
+            error_list.append(
+                u"photo path %s/%s is duplicated" % (self.path, self.name))
 
         return error_list
 
