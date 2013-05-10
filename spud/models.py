@@ -565,9 +565,6 @@ class photo(base_model):
             settings.IMAGE_URL, urlquote(self.path), urlquote(self.name)))
 
     def get_thumb(self, size):
-        if size not in settings.IMAGE_SIZES:
-            return None
-
         try:
             return self.photo_thumb_set.get(size=size)
         except photo_thumb.DoesNotExist:
