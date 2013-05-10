@@ -656,17 +656,17 @@ class photo(base_model):
         self.size = size
 
         try:
-            self.camera_make = exif['Exif.Image.Make'].value
+            self.camera_make = exif['EXIF:Make']
         except KeyError:
             pass
 
         try:
-            self.camera_model = exif['Exif.Image.Model'].value
+            self.camera_model = exif['EXIF:Model']
         except KeyError:
             pass
 
         try:
-            if exif['Exif.Photo.Flash'].value & 1:
+            if int(exif['EXIF:Flash']) & 1:
                 self.flash_used = 'Y'
             else:
                 self.flash_used = 'N'
@@ -674,13 +674,13 @@ class photo(base_model):
             pass
 
         try:
-            focallength = exif['Exif.Photo.FocalLength'].value
+            focallength = exif['EXIF:FocalLength']
             self.focal_length = "%.1f mm"%(focallength.numerator*1.0/focallength.denominator)
         except KeyError:
             pass
 
         try:
-            self.exposure = exif['Exif.Photo.ExposureTime'].value
+            self.exposure = exif['EXIF:ExposureTime']
         except KeyError:
             pass
 
@@ -690,32 +690,33 @@ class photo(base_model):
             pass
 
         try:
-            fnumber = exif['Exif.Photo.FNumber'].value
-            self.aperture = "F%.1f"%(fnumber.numerator*1.0/fnumber.denominator)
+            fnumber = exif['EXIF:FNumber']
+            self.aperture = "F%.1f" % (fnumber)
         except KeyError:
             pass
 
         try:
-            self.iso_equiv = exif['Exif.Photo.ISOSpeedRatings'].value
+            self.iso_equiv = exif['EXIF:ISO']
         except KeyError:
             pass
 
         try:
-            if exif['Exif.Photo.MeteringMode'].value == 0:
+            value = int(exif['EXIF:MeteringMode'])
+            if value == 0:
                 self.metering_mode = "unknown"
-            elif exif['Exif.Photo.MeteringMode'].value == 1:
+            elif value == 1:
                 self.metering_mode = "average"
-            elif exif['Exif.Photo.MeteringMode'].value == 2:
+            elif value == 2:
                 self.metering_mode = "center weighted average"
-            elif exif['Exif.Photo.MeteringMode'].value == 3:
+            elif value == 3:
                 self.metering_mode = "spot"
-            elif exif['Exif.Photo.MeteringMode'].value == 4:
+            elif value == 4:
                 self.metering_mode = "multi spot"
-            elif exif['Exif.Photo.MeteringMode'].value == 5:
+            elif value == 5:
                 self.metering_mode = "pattern"
-            elif exif['Exif.Photo.MeteringMode'].value == 6:
+            elif value == 6:
                 self.metering_mode = "partial"
-            elif exif['Exif.Photo.MeteringMode'].value == 255:
+            elif value == 255:
                 self.metering_mode = "other"
             else:
                 self.metering_mode = "reserved"
@@ -723,7 +724,7 @@ class photo(base_model):
             pass
 
         try:
-            self.focus_dist = exif['Exif.CanonSi.SubjectDistance'].value
+            self.focus_dist = exif['Composite:HyperfocalDistance']
         except KeyError:
             pass
 

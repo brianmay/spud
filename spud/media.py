@@ -17,7 +17,7 @@
 import tempfile
 import subprocess
 import os
-import pyexiv2
+import spud.exif
 import Image
 import datetime
 
@@ -36,18 +36,18 @@ class media:
         return os.path.getsize(self.src_full)
 
     def get_exif(self):
-        exif = pyexiv2.ImageMetadata(self.src_full)
-        exif.read()
-        return exif
+        with spud.exif.ExifTool() as e:
+            exif = e.get_metadata(self.src_full)
+        assert(len(exif)==1)
+        return exif[0]
 
     def get_datetime(self):
         exif = self.get_exif()
         try:
-            value = exif['Exif.Photo.DateTimeOriginal'].value
+            value = exif['EXIF:DateTimeOriginal']
             if isinstance(value, str):
-                value = exif['Exif.Photo.DateTimeDigitized'].value
-            if isinstance(value, str):
-                value = None
+                value = exif['EXIF:DateTimeDigitized']
+            value = datetime.datetime.strptime(value, "%Y:%m:%d %H:%M:%S")
         except KeyError:
             value = None
 
