@@ -108,12 +108,15 @@ class media_jpeg(media):
 class media_video(media):
 
     def create_thumbnail(self, dst_path, max_size):
-        import pyffmpeg
-        mp=pyffmpeg.FFMpegReader()
-        mp.open(self.src_full,track_selector=pyffmpeg.TS_VIDEO_PIL)
-        video = mp.get_tracks()[0]
-        image = video.get_current_frame()[2]
+        import ffvideo
+        vs = ffvideo.VideoStream(self.src_full)
+        image = vs.get_frame_at_sec(0).image()
         return self._create_thumbnail(dst_path, max_size, image)
+
+    def get_size(self):
+        import ffvideo
+        vs = ffvideo.VideoStream(self.src_full)
+        return vs.frame_width, vs.frame_height
 
 class media_raw(media):
 
