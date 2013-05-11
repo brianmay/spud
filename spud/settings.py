@@ -90,7 +90,9 @@ AJAX_LOOKUP_CHANNELS = {
 AJAX_SELECT_BOOTSTRAP = False
 AJAX_SELECT_INLINES = None
 
-IMAGE_CHECK_EXISTS=True
+IMAGE_URL="/images/"
+IMAGE_PATH=None
+
 IMAGE_SIZES = {
     'thumb': {'size': 120, 'draft': True},
     'mid': {'size': 480, 'draft': True},
@@ -106,25 +108,6 @@ VIDEO_FORMATS = {
     'video/webm': {'extension': 'webm'},
     'video/ogg': {'extension': 'ogv'},
 }
-
-LIST_SIZES = (
-    ('thumb', 'Thumb'),
-)
-DEFAULT_LIST_SIZE='thumb'
-
-VIEW_SIZES = (
-    ('thumb', 'Thumb'),
-    ('mid', 'Medium'),
-    ('large', 'Large'),
-)
-DEFAULT_VIEW_SIZE='mid'
-
-CLICK_SIZES = (
-    ('thumb', 'Thumb'),
-    ('mid', 'Medium'),
-    ('large', 'Large'),
-)
-DEFAULT_CLICK_SIZE='large'
 
 DEFAULT_TIMEZONE = {}
 DEFAULT_DTOFFSET = {}
