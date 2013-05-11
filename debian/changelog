@@ -1,3 +1,9 @@
+spud (1.7-1) unstable; urgency=low
+
+  * Preliminary support for video files.
+
+ -- Brian May <bam@debian.org>  Sat, 11 May 2013 16:51:05 +1000
+
 spud (1.6-2) unstable; urgency=low
 
   * Transition to dh_python2. See
