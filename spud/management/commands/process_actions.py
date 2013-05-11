@@ -32,6 +32,7 @@ class Command(NoArgsCommand):
                 elif p.action == "R":
                     print "regenerate thumbnail '%s'" % (p.get_orig_path())
                     p.generate_thumbnails(overwrite=True)
+                elif p.action == "V":
                     print "regenerate video '%s'" % (p.get_orig_path())
                     p.generate_videos(overwrite=True)
                 elif p.action == "S":
