@@ -2865,6 +2865,10 @@ def upload_file(request):
         # PROJECT_ROOT is from the settings file
         temp_path = "/tmp/spud"
 
+        if django.conf.settings.IMAGE_PATH is None:
+            return HttpResponseBadRequest(
+                'This site does not support uploads')
+
         if not request.user.has_perm('spud.add_photo'):
             return HttpResponseForbidden(
                 'You do not have rights to upload files')
