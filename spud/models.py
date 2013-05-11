@@ -954,7 +954,7 @@ class photo_thumb(base_model):
         (shortname, _) = os.path.splitext(photo.name)
         return u"%sthumb/%s/%s/%s.jpg" % (
             settings.IMAGE_PATH, self.size,
-            photo.path, self.shortname)
+            photo.path, shortname)
 
     def get_url(self):
         photo = self.photo
@@ -977,7 +977,7 @@ class photo_video(base_model):
         (shortname, _) = os.path.splitext(photo.name)
         return u"%svideo/%s/%s/%s.%s" % (
             settings.IMAGE_PATH, self.size,
-            photo.path, self.shortname, self.extension)
+            photo.path, shortname, self.extension)
 
     def get_url(self):
         photo = self.photo
