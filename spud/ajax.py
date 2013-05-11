@@ -2843,7 +2843,7 @@ def upload_file(request):
     #   and check validity late in the code
     options = {
         # the maximum file size (must be in bytes)
-        "maxfilesize": 10 * 2 ** 20,  # 10 Mb
+        "maxfilesize": 1000 * 2 ** 20,  # 1000 Mb
         # the minimum file size (must be in bytes)
         "minfilesize": 1 * 2 ** 10,  # 1 Kb
         # the file types which are going to be allowed for upload
@@ -2851,6 +2851,10 @@ def upload_file(request):
         "acceptedformats": (
             "image/jpeg",
             "image/png",
+            "video/mp4",
+            "video/ogg",
+            "video/webm",
+            "video/quicktime",
         )
     }
 
@@ -2955,7 +2959,7 @@ def upload_file(request):
                 photo = spud.upload.import_photo(
                     filename,
                     {'albums': [album]},
-                    {'filename': file.name}
+                    {'filename': file.name, 'action': 'V', }
                 )
                 photo.generate_thumbnails(overwrite=False)
                 response_data['photo'] = _json_photo(

@@ -196,7 +196,7 @@ def get_media(file):
     extension = extension.lower()
     if extension == ".jpg" or extension == ".tif":
         return media_jpeg(file)
-    elif extension == ".avi" or extension == ".mov":
+    elif extension == ".avi" or extension == ".mov" or extension == ".ogv" or extension == ".webm" or extension == ".mp4":
         return media_video(file)
     elif extension == ".png":
         return media(file)
