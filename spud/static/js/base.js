@@ -640,9 +640,10 @@ $.widget('spud.image', {
                 this.height = image.height
             } else {
                 this._clear()
-                this.img
+                this.img = $("<img></img>")
                     .attr('width', 120)
                     .attr("src", media_url("img/none.jpg"))
+                    .appendTo(this.element)
                 this.width = 227
                 this.height = 222
             }
