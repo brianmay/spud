@@ -345,6 +345,7 @@ def _json_photo_detail(user, photo):
             photo.persons.order_by("photo_person__position").all()],
 
         'related': [],
+        'video': {},
     })
 
     for pr in photo.relations_1.all():
@@ -360,6 +361,16 @@ def _json_photo_detail(user, photo):
             'title': pr.desc_1,
             'photo': _json_photo(user, pr.photo_1),
         })
+
+    for pt in photo.photo_video_set.all():
+        if pt.size not in resp['video']:
+            resp['video'][pt.size] = {}
+
+        resp['video'][pt.size][pt.format] = {
+            'width': pt.width,
+            'height': pt.height,
+            'url': pt.get_url(),
+        }
 
     if user.is_staff:
         resp['orig'] = photo.get_orig_url()

@@ -88,6 +88,10 @@ class media:
     def rotate(self,amount):
         raise RuntimeError("rotate not implemented")
 
+    def is_video(self):
+        return False
+
+
 class media_jpeg(media):
     def rotate(self,amount):
         if amount == "auto":
@@ -113,10 +117,50 @@ class media_video(media):
         image = vs.get_frame_at_sec(0).image()
         return self._create_thumbnail(dst_path, max_size, image)
 
+    def create_video(self, dst_path, size, format):
+        width, height = self.get_size()
+
+        subst = {
+            'w': size['size'] * width/height,
+            'h': size['size'],
+        }
+
+#        filter = "scale=iw*min(%(w)s/iw\,%(h)s/ih):ih*min(%(w)s/iw\,%(h)s/ih), " % subst
+#        filter += "pad=%(w)s:%(h)s:(%(w)s-iw*min(%(w)s/iw\,%(h)s/ih))/2:(%(h)s-ih*min(%(w)s/iw\,%(h)s/ih))/2" % subst
+
+        cmd = [
+            "avconv", "-y", "-i", self.get_path(),
+            "-filter:v", "scale=%(w)s:%(h)s" % subst
+        ]
+
+        if format == "video/ogg":
+            cmd.extend(["-f", "ogg"])
+            cmd.extend(["-codec:a", "libvorbis"])
+        elif format == "video/mp4":
+            cmd.extend(["-f", "mp4"])
+            cmd.extend(["-strict", "experimental", "-b:a", "32k"])
+        elif format == "video/webm":
+            cmd.extend(["-f", "webm"])
+        else:
+            raise RuntimeError("Unknown format %s" % format)
+
+        cmd.append(dst_path)
+
+        print cmd
+        try:
+            subprocess.check_call(cmd)
+            return subst['w'], subst['h']
+        except subprocess.CalledProcessError:
+            os.unlink(dst_path)
+            return None
+
     def get_size(self):
         import ffvideo
         vs = ffvideo.VideoStream(self.src_full)
         return vs.frame_width, vs.frame_height
+
+    def is_video(self):
+        return True
 
 class media_raw(media):
 
@@ -152,7 +196,7 @@ def get_media(file):
     extension = extension.lower()
     if extension == ".jpg" or extension == ".tif":
         return media_jpeg(file)
-    elif extension == ".avi":
+    elif extension == ".avi" or extension == ".mov":
         return media_video(file)
     elif extension == ".png":
         return media(file)

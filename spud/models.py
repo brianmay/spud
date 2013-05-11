@@ -552,6 +552,15 @@ class photo(base_model):
             raise RuntimeError("unknown image size %s" % (size))
 
     @classmethod
+    def _get_video_path(cls, size, path, name, extension):
+        if size in settings.VIDEO_SIZES:
+            (shortname, _) = os.path.splitext(name)
+            return u"%svideo/%s/%s/%s.%s" % (
+                settings.IMAGE_PATH, size, path, shortname, extension)
+        else:
+            raise RuntimeError("unknown image size %s" % (size))
+
+    @classmethod
     def _get_orig_path(cls, path, name):
         return u"%sorig/%s/%s" % (settings.IMAGE_PATH, path, name)
 
@@ -567,6 +576,12 @@ class photo(base_model):
     def get_thumb(self, size):
         try:
             return self.photo_thumb_set.get(size=size)
+        except photo_thumb.DoesNotExist:
+            return None
+
+    def get_video(self, size, format):
+        try:
+            return self.photo_video_set.get(size=size, format=format)
         except photo_thumb.DoesNotExist:
             return None
 
@@ -597,15 +612,21 @@ class photo(base_model):
             path = pt.get_path()
             if os.path.lexists(path):
                 os.unlink(path)
+        for pt in self.photo_video_set.all():
+            path = pt.get_path()
+            if os.path.lexists(path):
+                os.unlink(path)
         super(photo, self).delete()
     delete.alters_data = True
 
-    def rotate(self,amount):
+    def rotate(self, amount):
         m = media.get_media(self.get_orig_path())
         m.rotate(amount)
 
-        (width,height) = m.get_size()
+        (width, height) = m.get_size()
         size = m.get_bytes()
+
+        #FIXME
         self.width = width
         self.height = height
         self.size = size
@@ -616,12 +637,12 @@ class photo(base_model):
         m = media.get_media(self.get_orig_path())
         umask = os.umask(0022)
 
-        for size, max in settings.IMAGE_SIZES.iteritems():
+        for size, s in settings.IMAGE_SIZES.iteritems():
             dst = self._get_thumb_path(size, self.path, self.name)
             if not os.path.lexists(os.path.dirname(dst)):
                 os.makedirs(os.path.dirname(dst), 0755)
             if overwrite or not os.path.lexists(dst):
-                xysize = m.create_thumbnail(dst, max)
+                xysize = m.create_thumbnail(dst, s)
             else:
                 mt = media.get_media(dst)
                 xysize = mt.get_size()
@@ -634,8 +655,43 @@ class photo(base_model):
         return
     generate_thumbnails.alters_data = True
 
+    def generate_videos(self, overwrite):
+        m = media.get_media(self.get_orig_path())
+        umask = os.umask(0022)
+
+        if m.is_video():
+            for size, s in settings.VIDEO_SIZES.iteritems():
+                for format, f in settings.VIDEO_FORMATS.iteritems():
+                    dst = self._get_video_path(
+                        size, self.path, self.name, f['extension'])
+                    if not os.path.lexists(os.path.dirname(dst)):
+                        os.makedirs(os.path.dirname(dst), 0755)
+                    if overwrite or not os.path.lexists(dst):
+                        xysize = m.create_video(dst, s, format)
+                    else:
+                        mt = media.get_media(dst)
+                        xysize = mt.get_size()
+                    if xysize is not None:
+                        pt, _ = photo_video.objects.get_or_create(
+                            photo=self, size=size, format=format)
+                        pt.extension = f['extension']
+                        pt.width = xysize[0]
+                        pt.height = xysize[1]
+                        pt.save()
+
+        os.umask(umask)
+        return
+    generate_videos.alters_data = True
+
     def update_size(self):
         for pt in self.photo_thumb_set.all():
+            dst = pt.get_path()
+            mt = media.get_media(dst)
+            xysize = mt.get_size()
+            pt.width = xysize[0]
+            pt.height = xysize[1]
+            pt.save()
+        for pt in self.photo_video_set.all():
             dst = pt.get_path()
             mt = media.get_media(dst)
             xysize = mt.get_size()
@@ -656,6 +712,7 @@ class photo(base_model):
         (width,height) = m.get_size()
         size = m.get_bytes()
 
+        # FIXME
         self.width = width
         self.height = height
         self.size = size
@@ -679,8 +736,7 @@ class photo(base_model):
             pass
 
         try:
-            focallength = exif['EXIF:FocalLength']
-            self.focal_length = "%.1f mm"%(focallength.numerator*1.0/focallength.denominator)
+            self.focal_length = exif['EXIF:FocalLength']
         except KeyError:
             pass
 
@@ -830,6 +886,14 @@ class photo(base_model):
             move_list.append(
                 (src, self._get_thumb_path(pt.size, new_path, new_name))
             )
+        for pt in self.photo_video_set.all():
+            src = pt.get_path()
+            if not os.path.lexists(src):
+                raise RuntimeError("Source '%s' not already exists" % (src))
+            move_list.append(
+                (src, self._get_video_path(
+                    pt.size, new_path, new_name, pt.extension))
+            )
 
         # move the files
         for src, dst in move_list:
@@ -862,6 +926,13 @@ class photo(base_model):
                         u"Thumb file '%s' for size '%s' is missing" %
                         (dst, pt.size))
 
+            for pt in self.photo_video_set.all():
+                dst = pt.get_path()
+                if not os.path.lexists(dst):
+                    error_list.append(
+                        u"Video file '%s' for size '%s' is missing" %
+                        (dst, pt.size))
+
         duplicates = photo.objects.filter(
             path=self.path, name=self.name).exclude(pk=self.pk)
         if duplicates.count() > 0:
@@ -891,6 +962,30 @@ class photo_thumb(base_model):
         return iri_to_uri(u"%sthumb/%s/%s/%s.jpg" % (
             settings.IMAGE_URL, urlquote(self.size),
             urlquote(photo.path), urlquote(shortname)))
+
+
+class photo_video(base_model):
+    photo = models.ForeignKey(photo)
+    size = models.CharField(max_length=10, db_index=True)
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
+    format = models.CharField(max_length=20)
+    extension = models.CharField(max_length=4)
+
+    def get_path(self):
+        photo = self.photo
+        (shortname, _) = os.path.splitext(photo.name)
+        return u"%svideo/%s/%s/%s.%s" % (
+            settings.IMAGE_PATH, self.size,
+            photo.path, self.shortname, self.extension)
+
+    def get_url(self):
+        photo = self.photo
+        (shortname, _) = os.path.splitext(photo.name)
+        return iri_to_uri(u"%svideo/%s/%s/%s.%s" % (
+            settings.IMAGE_URL, urlquote(self.size),
+            urlquote(photo.path), urlquote(shortname),
+            urlquote(self.extension)))
 
 
 class photo_album(base_model):

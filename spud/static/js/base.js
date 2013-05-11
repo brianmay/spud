@@ -574,33 +574,13 @@ $.widget('spud.image', {
     _create: function() {
         this.element.addClass("image")
 
-        this.img = $("<img></img>")
-
-        if (this.options.include_link) {
-            this.a = $("<a></a>")
-                .html(this.img)
-                .appendTo(this.element)
-        } else {
-            this.img.appendTo(this.element)
-        }
-
         if (this.options.photo != null) {
             this.set(this.options.photo)
         }
     },
 
     _clear: function() {
-        this.img
-            .removeAttr("src")
-            .removeAttr("class")
-            .removeAttr("alt")
-            .removeAttr("width")
-            .removeAttr("height")
-        if (this.a) {
-            this.a
-                .removeAttr("href")
-                .off("click")
-        }
+        this.element.empty()
     },
 
     _destroy: function() {
@@ -609,44 +589,78 @@ $.widget('spud.image', {
     },
 
     set: function(photo) {
-        var image = null
-        if (photo != null) {
-            var image = photo.thumb[this.options.size]
-        }
+        this._clear()
 
-        if (image != null) {
-            this._clear()
-            this.img
-                .attr('src', image.url)
-                .attr('width', image.width)
-                .attr('height', image.height)
-                .attr('alt', photo.title)
-            if (this.a != null) {
-                this.a
-                    .attr('href', photo_url(photo, {}))
-                    .off('click')
-                    .on('click', function() { do_photo(photo.id, {}, true); return false; })
-            }
-            this.width = image.width
-            this.height = image.height
+        if (this.options.do_video && Object.keys(photo.video).length > 0) {
+            var img = $("<video controls='controls'/>")
+
+            var size = "320"
+            $.each(photo.video[size], function(format, video){
+                img
+                    .attr("width", video.width)
+                    .attr("height", video.height)
+
+                $("<source/>")
+                    .attr("src", video.url)
+                    .attr("type", format)
+                    .appendTo(img)
+            })
+
+            img.appendTo(this.element)
+
+            this.img = img
+
         } else {
-            this._clear()
-            this.img
-                .attr('width', 120)
-                .attr("src", media_url("img/none.jpg"))
-            this.width = 227
-            this.height = 222
+
+            var image = null
+            if (photo != null) {
+                var image = photo.thumb[this.options.size]
+            }
+
+            if (image != null) {
+                this.img = $("<img></img>")
+                    .attr('src', image.url)
+                    .attr('width', image.width)
+                    .attr('height', image.height)
+                    .attr('alt', photo.title)
+
+                if (this.options.include_link) {
+                    this.a = $("<a></a>")
+                        .html(this.img)
+                        .attr('href', photo_url(photo, {}))
+                        .off('click')
+                        .on('click', function() { do_photo(photo.id, {}, true); return false; })
+                        .appendTo(this.element)
+                } else {
+                    this.img.appendTo(this.element)
+                }
+
+
+                this.width = image.width
+                this.height = image.height
+            } else {
+                this._clear()
+                this.img
+                    .attr('width', 120)
+                    .attr("src", media_url("img/none.jpg"))
+                this.width = 227
+                this.height = 222
+            }
         }
     },
 
     set_error: function() {
         this._clear()
-        this.img.attr("src", media_url("img/error.png"))
+        $("<img></img>")
+            .attr("src", media_url("img/error.png"))
+            .appendTo(this.element)
     },
 
     set_loading: function() {
         this._clear()
-        this.img.attr("src", media_url("img/ajax-loader.gif"))
+        $("<img></img>")
+            .attr("src", media_url("img/ajax-loader.gif"))
+            .appendTo(this.element)
     },
 
     resize: function(enlarge) {

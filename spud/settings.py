@@ -97,6 +97,16 @@ IMAGE_SIZES = {
     'large': {'size': 960, 'draft': False},
 }
 
+VIDEO_SIZES = {
+    '320': {'size': 320},
+}
+
+VIDEO_FORMATS = {
+#    'video/mp4': {'extension': 'mp4'},
+    'video/webm': {'extension': 'webm'},
+    'video/ogg': {'extension': 'ogv'},
+}
+
 LIST_SIZES = (
     ('thumb', 'Thumb'),
 )

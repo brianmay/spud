@@ -349,7 +349,7 @@ $.widget('spud.photo_image',  {
         this._super();
 
         this.img = $("<div id='photo' />")
-            .image({ size: this.options.size })
+            .image({ size: this.options.size, do_video: true })
             .appendTo(this.element)
 
         this.summary = $("<div></div>")

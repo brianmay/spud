@@ -15,64 +15,57 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.core.management.base import NoArgsCommand, CommandError
-
+from django.core.management.base import NoArgsCommand
 from spud import models
+
 
 class Command(NoArgsCommand):
         help = 'Process pending actions in spud'
 
         def handle_noargs(self, **options):
 
-            for p in models.photo.objects.filter(action__isnull=False).order_by("pk"):
+            for p in models.photo.objects.filter(
+                    action__isnull=False).order_by("pk"):
                 if p.action == "D":
-                    print "delete '%s'."%(p.get_orig_path())
+                    print "delete '%s'." % (p.get_orig_path())
                     p.delete()
                 elif p.action == "R":
-                    print "regenerate thumbnail '%s'."%(p.get_orig_path())
+                    print "regenerate thumbnail '%s'" % (p.get_orig_path())
                     p.generate_thumbnails(overwrite=True)
-                    p.move()
-                    p.action = None
-                    p.save()
+                    print "regenerate video '%s'" % (p.get_orig_path())
+                    p.generate_videos(overwrite=True)
                 elif p.action == "S":
-                    print "regenerate size '%s'."%(p.get_orig_path())
+                    print "regenerate size '%s'" % (p.get_orig_path())
                     p.update_size()
-                    p.move()
-                    p.action = None
-                    p.save()
                 elif p.action == "auto":
-                    print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-                    p.move()
+                    print "rotate '%s' by '%s'" % (p.get_orig_path(), p.action)
                     p.rotate(p.action)
+                    print "regenerate thumbnail '%s'" % (p.get_orig_path())
                     p.generate_thumbnails(overwrite=True)
-                    p.action = None
-                    p.save()
                 elif p.action == "90":
-                    print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-                    p.move()
+                    print "rotate '%s' by '%s'" % (p.get_orig_path(), p.action)
                     p.rotate(p.action)
+                    print "regenerate thumbnail '%s'" % (p.get_orig_path())
                     p.generate_thumbnails(overwrite=True)
-                    p.action = None
-                    p.save()
                 elif p.action == "180":
-                    print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-                    p.move()
+                    print "rotate '%s' by '%s'" % (p.get_orig_path(), p.action)
                     p.rotate(p.action)
+                    print "regenerate thumbnail '%s'" % (p.get_orig_path())
                     p.generate_thumbnails(overwrite=True)
-                    p.action = None
-                    p.save()
                 elif p.action == "270":
-                    print "rotate '%s' by '%s'."%(p.get_orig_path(),p.action)
-                    p.move()
+                    print "rotate '%s' by '%s'" % (p.get_orig_path(), p.action)
                     p.rotate(p.action)
+                    print "regenerate thumbnail '%s'" % (p.get_orig_path())
                     p.generate_thumbnails(overwrite=True)
-                    p.action = None
-                    p.save()
                 elif p.action == "M":
-                    print "move '%s'."%(p.get_orig_path())
+                    pass
+                else:
+                    raise RuntimeError(
+                        "Uknown action '%s' for '%s'" %
+                        (p.action, p.get_orig_path()))
+
+                if p.action != "D":
+                    print "move '%s'." % (p.get_orig_path())
                     p.move()
                     p.action = None
                     p.save()
-                else:
-                    raise RuntimeError("Uknown action '%s' for '%s'"%(p.action,p.get_orig_path()))
-
