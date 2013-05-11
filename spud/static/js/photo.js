@@ -836,7 +836,7 @@ $.widget('spud.change_photo_datetime_dialog',  $.spud.change_photo_attribute_dia
     },
 
     _submit_values: function(values) {
-        values = { set_datetime: values.datetime }
+        values = { set_datetime: values.localtime }
         this._super(values);
     },
 })
