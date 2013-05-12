@@ -595,14 +595,14 @@ $.widget('spud.image', {
             var img = $("<video controls='controls'/>")
 
             var size = "320"
-            $.each(photo.video[size], function(format, video){
+            $.each(photo.video[size], function(priority, video){
                 img
                     .attr("width", video.width)
                     .attr("height", video.height)
 
                 $("<source/>")
                     .attr("src", video.url)
-                    .attr("type", format)
+                    .attr("type", video.format)
                     .appendTo(img)
             })
 

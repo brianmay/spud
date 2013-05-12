@@ -365,15 +365,28 @@ def _json_photo_detail(user, photo):
             'photo': _json_photo(user, pr.photo_1),
         })
 
+    video = {}
     for pt in photo.photo_video_set.all():
-        if pt.size not in resp['video']:
-            resp['video'][pt.size] = {}
+        priority = 999
+        VIDEO_FORMATS = django.conf.settings.VIDEO_FORMATS
 
-        resp['video'][pt.size][pt.format] = {
+        if pt.format in VIDEO_FORMATS:
+            priority = VIDEO_FORMATS[pt.format]['priority']
+
+        if pt.size not in video:
+            video[pt.size] = []
+
+        video[pt.size].append({
+            'priority': priority,
+            'format': pt.format,
             'width': pt.width,
             'height': pt.height,
             'url': pt.get_url(),
-        }
+        })
+
+    for size in video.keys():
+        print video[size]
+        resp['video'][size] = sorted(video[size], key=lambda k: k['priority'])
 
     if user.is_staff:
         resp['orig'] = photo.get_orig_url()
