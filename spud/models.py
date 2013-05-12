@@ -964,6 +964,11 @@ class photo_thumb(base_model):
             settings.IMAGE_URL, urlquote(self.size),
             urlquote(photo.path), urlquote(shortname)))
 
+    def delete(self):
+        path = self.get_path()
+        if os.path.lexists(path):
+            os.unlink(path)
+
 
 class photo_video(base_model):
     photo = models.ForeignKey(photo)
@@ -987,6 +992,11 @@ class photo_video(base_model):
             settings.IMAGE_URL, urlquote(self.size),
             urlquote(photo.path), urlquote(shortname),
             urlquote(self.extension)))
+
+    def delete(self):
+        path = self.get_path()
+        if os.path.lexists(path):
+            os.unlink(path)
 
 
 class photo_album(base_model):
