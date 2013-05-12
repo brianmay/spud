@@ -403,6 +403,7 @@ $.widget('spud.photo_details',  $.spud.infobox, {
             ["localtime", new link_output_field("Date & time")],
             ["photographer", new link_output_field("Photographer")],
             ["rating", new text_output_field("Rating")],
+            ["videos", new text_output_field("Videos")],
             ["related", new html_list_output_field("Related")],
             ["action", new text_output_field("Action")],
         ],
@@ -475,6 +476,19 @@ $.widget('spud.photo_details',  $.spud.infobox, {
         )
 
         this.set_value("rating", photo.rating)
+
+        var videos = ""
+        var sep = ""
+        $.each(photo.video, function(size, list) {
+            videos = videos + size + ": "
+            sep = ""
+            $.each(list, function(i, v) {
+                videos = videos + sep + v.format
+                sep = ", "
+            })
+            videos = videos + "\n"
+        })
+        this.set_value("videos", videos)
 
         this.set_edit_value(
             "related", $.map(photo.related, function(r) {
