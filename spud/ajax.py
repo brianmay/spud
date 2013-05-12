@@ -86,6 +86,9 @@ def _decode_datetime(title, value, timezone):
     if value is None:
         return None
 
+    if value == "":
+        raise ErrorBadRequest("%s date/time is empty string" % title)
+
     value = value.split(" ")
     if value[-1].find("/") != -1 or value[-1][0] == '+' or value[-1][0] == '-':
         timezone = _decode_timezone(title, value[-1])
@@ -125,7 +128,7 @@ def _decode_datetime(title, value, timezone):
         try:
             dt = datetime.datetime.strptime(value, "%Y-%m-%d")
         except ValueError:
-            raise ErrorBadRequest("%s can't parse date/time", title)
+            raise ErrorBadRequest("%s can't parse date/time" % title)
 
     dt = timezone.localize(dt)
     return dt
@@ -1186,13 +1189,17 @@ def album_finish(request, album):
 
         value = _pop_string(params, "revised")
         if value is not None:
-            timezone = django.conf.settings.TIME_ZONE
-            timezone = pytz.timezone(timezone)
-            dt = _decode_datetime("revised", value, timezone)
-            utc_offset = dt.utcoffset().seconds / 60
-            dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
-            album.revised = dt
-            album.revised_utc_offset = utc_offset
+            if value == "":
+                album.revised = None
+                album.revised_utc_offset = None
+            else:
+                timezone = django.conf.settings.TIME_ZONE
+                timezone = pytz.timezone(timezone)
+                dt = _decode_datetime("revised", value, timezone)
+                utc_offset = dt.utcoffset().seconds / 60
+                dt = dt.astimezone(pytz.utc).replace(tzinfo=None)
+                album.revised = dt
+                album.revised_utc_offset = utc_offset
 
         _check_params_empty(params)
 
