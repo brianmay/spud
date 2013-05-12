@@ -99,6 +99,8 @@ IMAGE_SIZES = {
     'large': {'size': 960, 'draft': False},
 }
 
+DEFAULT_LIST_SIZE='thumb'
+
 VIDEO_SIZES = {
     '320': {'size': 320},
 }
