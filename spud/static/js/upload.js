@@ -32,14 +32,14 @@ function display_uploads(params) {
 
             var td = $("<td></td>")
             if (!params.options.autoUpload) {
-                td.append($('<button class="btn btn-primary start">Start</button>').button())
+                td.append($('<button class="start">Start</button>').button())
             }
-            td.append($('<button class="btn btn-warning cancel">Cancel</button>').button())
+            td.append($('<button class="cancel">Cancel</button>').button())
             tr.append(td)
         } else {
             tr.append('<td colspan="2"></td>')
             if (i==0) {
-                td.append($('<button class="btn btn-warning cancel">Cancel</button>').button())
+                td.append($('<button class="cancel">Cancel</button>').button())
             }
         }
         return tr
@@ -70,7 +70,7 @@ function display_downloads(params) {
                 .append('<td></td>')
         }
         var td = $('<td></td>')
-//            .append($('<button class="btn btn-danger delete"/>')
+//            .append($('<button class="delete"/>')
 //                    .data('type', file.delete_type)
 //                    .data('url', file.delete_url)
 //                    .text("Delete")
@@ -102,10 +102,10 @@ function display_upload_form(data) {
     var form = $("<form></form>")
 
     $('<div class="row fileupload-buttonbar"></div>')
-        .append($('<span class="btn btn-success fileinput-button">Add files<input type="file" name="files[]" multiple="multiple"/></span>').button())
-        .append($('<button type="submit" class="btn btn-primary start">Start upload</button>').button())
-        .append($('<button type="reset" class="btn btn-warning cancel">Cancel upload</button>').button())
-//        .append($('<button type="button" class="btn btn-danger delete">Delete</button>').button())
+        .append($('<span class="fileinput-button">Add files<input type="file" name="files[]" multiple="multiple"/></span>').button())
+        .append($('<button type="submit" class="start">Start upload</button>').button())
+        .append($('<button type="reset" class="cancel">Cancel upload</button>').button())
+//        .append($('<button type="button" class="delete">Delete</button>').button())
 //        .append('<input type="checkbox" class="toggle"/>')
         .append('<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="bar" style="width:0%;"></div></div>')
         .append('<div class="progress-extended"></div>')
