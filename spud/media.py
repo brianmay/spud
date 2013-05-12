@@ -136,6 +136,7 @@ class media_video(media):
 
         cmd = [
             "avconv", "-y", "-i", self.get_path(),
+            "-b:v", "300k",
             "-filter:v", "scale=%(w)s:%(h)s" % subst
         ]
 
