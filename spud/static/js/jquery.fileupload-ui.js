@@ -585,7 +585,7 @@
                 template = button.closest('.template-upload'),
                 data = template.data('data');
             if (data && data.submit && !data.jqXHR && data.submit()) {
-                button.prop('disabled', true);
+                button.button('option', 'disabled', true);
             }
         },
 
@@ -701,13 +701,13 @@
 
         _enableFileInputButton: function () {
             this.element.find('.fileinput-button input')
-                .prop('disabled', false)
+                .button('option', 'disabled', false)
                 .parent().removeClass('disabled');
         },
 
         _disableFileInputButton: function () {
             this.element.find('.fileinput-button input')
-                .prop('disabled', true)
+                .button('option', 'disabled', true)
                 .parent().addClass('disabled');
         },
 
@@ -793,14 +793,14 @@
             }
             this._super();
             if (wasDisabled) {
-                this.element.find('input, button').prop('disabled', false);
+                this.element.find('input, button').button('option', 'disabled', false);
                 this._enableFileInputButton();
             }
         },
 
         disable: function () {
             if (!this.options.disabled) {
-                this.element.find('input, button').prop('disabled', true);
+                this.element.find('input, button').button('option', 'disabled', true);
                 this._disableFileInputButton();
             }
             this._super();
