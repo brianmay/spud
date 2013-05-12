@@ -120,10 +120,16 @@ class media_video(media):
     def create_video(self, dst_path, size, format):
         width, height = self.get_size()
 
-        subst = {
-            'w': size['size'] * width/height,
-            'h': size['size'],
-        }
+        if height > size['size']:
+            subst = {
+                'w': size['size'] * width/height,
+                'h': size['size'],
+            }
+        else:
+            subst = {
+                'w': width,
+                'h': height,
+            }
 
 #        filter = "scale=iw*min(%(w)s/iw\,%(h)s/ih):ih*min(%(w)s/iw\,%(h)s/ih), " % subst
 #        filter += "pad=%(w)s:%(h)s:(%(w)s-iw*min(%(w)s/iw\,%(h)s/ih))/2:(%(h)s-ih*min(%(w)s/iw\,%(h)s/ih))/2" % subst
