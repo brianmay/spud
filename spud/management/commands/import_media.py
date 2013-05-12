@@ -78,18 +78,20 @@ class Command(BaseCommand):
 
             io['dryrun'] = options['dryrun']
 
-            io['action'] = "R"
+            io['action'] = "V"
+
+            rotate = None
             if options['rotate']:
                 if options['rotate'] == "0":
-                    io['action'] = "R"
+                    pass
                 elif options['rotate'] == "auto":
-                    io['action'] = "auto"
+                    rotate = "auto"
                 elif options['rotate'] == "90":
-                    io['action'] = "90"
+                    rotate = "90"
                 elif options['rotate'] == "180":
-                    io['action'] = "180"
+                    rotate = "180"
                 elif options['rotate'] == "270":
-                    io['action'] = "270"
+                    rotate = "270"
                 else:
                     raise CommandError(
                         "unknown value '%s' for rotate" % (options['rotate']))
@@ -153,7 +155,9 @@ class Command(BaseCommand):
             warnings = 0
             for arg in args:
                 try:
-                    spud.upload.import_photo(arg, d, io)
+                    photo = spud.upload.import_photo(arg, d, io)
+                    photo.rotate(rotate)
+                    photo.generate_thumbnails(overwrite=False)
                 except models.photo_already_exists_error, e:
                     warnings = warnings + 1
                     sys.stderr.write("Skipping %s due to %s\n" % (arg, e))
