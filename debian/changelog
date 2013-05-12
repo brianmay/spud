@@ -1,3 +1,10 @@
+spud (1.8-1) unstable; urgency=low
+
+  * Various bug fixes.
+  * Improve quality for video support.
+
+ -- Brian May <bam@debian.org>  Sun, 12 May 2013 11:22:48 +1000
+
 spud (1.7-1) unstable; urgency=low
 
   * Preliminary support for video files.
