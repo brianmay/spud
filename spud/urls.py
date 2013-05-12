@@ -100,7 +100,7 @@ urlpatterns = patterns('',
 
 )
 
-if settings.DEBUG:
+if settings.DEBUG and settings.IMAGE_PATH is not None:
     urlpatterns += patterns(
         '',
         url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
