@@ -1390,7 +1390,7 @@ def category_finish(request, category):
         updated_parent = False
 
         value = _pop_string(params, "title")
-        if value is None:
+        if value is not None:
             category.title = value
             updated = True
 
