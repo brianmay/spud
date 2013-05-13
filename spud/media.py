@@ -145,7 +145,7 @@ class media_video(media):
             cmd.extend(["-codec:a", "libvorbis"])
         elif format == "video/mp4":
             cmd.extend(["-f", "mp4"])
-            cmd.extend(["-strict", "experimental", "-b:a", "32k"])
+            cmd.extend(["-strict", "experimental"])
         elif format == "video/webm":
             cmd.extend(["-f", "webm"])
         else:
