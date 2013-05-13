@@ -1007,7 +1007,9 @@ function display_photo_search_results(rights, search, results) {
         return photo_search_results_a(search, page, text)
     }
 
-    photo_change_keyboard(null, search.criteria, results.number_results)
+    if (rights.can_change && is_edit_mode()) {
+        photo_change_keyboard(null, search.criteria, results.number_results)
+    }
 
     $("#photo_list")
         .photo_list("option", "page_a", page_a)
