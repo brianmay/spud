@@ -385,7 +385,6 @@ def _json_photo_detail(user, photo):
         })
 
     for size in video.keys():
-        print video[size]
         resp['video'][size] = sorted(video[size], key=lambda k: k['priority'])
 
     if user.is_staff:
