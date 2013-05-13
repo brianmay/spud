@@ -51,9 +51,15 @@ output_field.prototype.destroy = function() {
     this.item.remove()
 }
 
-output_field.prototype.append_a = function(html) {
-    this.dd.append(" ")
-    this.dd.append(html)
+output_field.prototype.set_edit_value = function(html) {
+    html.addClass("edit")
+    var edit = this.dd.find(".edit")
+    if (edit.length > 0) {
+        edit.replaceWith(html)
+    } else {
+        this.dd.append(" ")
+        this.dd.append(html)
+    }
 }
 
 output_field.prototype.toggle = function(show) {
@@ -360,7 +366,7 @@ $.widget('spud.infobox', {
         this.fields[id].set(value)
         if (can_change) {
             this.fields[id].show()
-            this.fields[id].append_a(a)
+            this.fields[id].set_edit_value(a)
         }
     },
 })
