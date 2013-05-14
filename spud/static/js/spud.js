@@ -463,7 +463,7 @@ function append_action_links(ul) {
 }
 
 
-function append_jump(id, type, onadded) {
+function append_jump(id, type, on_jump) {
     var f = $("<form method='get' />")
 
     var ac = $("<span/>")
@@ -471,7 +471,10 @@ function append_jump(id, type, onadded) {
         .attr("id", "id_" + id)
         .appendTo(f)
         .ajaxautocomplete({ type: type })
-        .on('ajaxautocompleteadded', onadded)
+        .on('ajaxautocompleteadded', function(ev, item) {
+            ac.ajaxautocomplete("set", null)
+            on_jump(ev, item)
+        })
 
     var module = $('<div class="module"/>')
         .append("<h2>Jump</h2>")
