@@ -375,6 +375,11 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
             }
         )
         return false
+    },
+
+    _kill: function(item, div) {
+        this._super(item, div);
+        this.img.image("set_none")
     }
 })
 
@@ -639,13 +644,7 @@ $.widget('spud.image', {
                 this.width = image.width
                 this.height = image.height
             } else {
-                this._clear()
-                this.img = $("<img></img>")
-                    .attr('width', 120)
-                    .attr("src", media_url("img/none.jpg"))
-                    .appendTo(this.element)
-                this.width = 227
-                this.height = 222
+                this.set_none()
             }
         }
     },
@@ -655,6 +654,16 @@ $.widget('spud.image', {
         $("<img></img>")
             .attr("src", media_url("img/error.png"))
             .appendTo(this.element)
+    },
+
+    set_none: function() {
+        this._clear()
+        this.img = $("<img></img>")
+            .attr('width', 120)
+            .attr("src", media_url("img/none.jpg"))
+            .appendTo(this.element)
+        this.width = 227
+        this.height = 222
     },
 
     set_loading: function() {
