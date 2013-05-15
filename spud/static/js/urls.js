@@ -21,22 +21,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // * URLS *
 // ********
 function media_url(file) {
-   return media_prefix + file
+   return window.__media_prefix + file
 }
 
 
 function root_url() {
-   return "/"
+   return window.__root_prefix
 }
 
 
 function login_url() {
-   return "/login/"
+   return window.__root_prefix + "login/"
 }
 
 
 function logout_url() {
-   return "/logout/"
+   return window.__root_prefix + "logout/"
 }
 
 
@@ -44,7 +44,7 @@ function photo_search_results_url(search, page) {
     var params = jQuery.extend({}, search.criteria, {
         page: page
     })
-    return "/photo/?" + jQuery.param(params)
+    return window.__root_prefix + "photo/?" + jQuery.param(params)
 }
 
 
@@ -53,21 +53,21 @@ function photo_search_item_url(search, n, photo) {
         n: n
     })
     if (photo != null) {
-        return "/photo/" + photo.id + "/?" + jQuery.param(params)
+        return window.__root_prefix + "photo/" + photo.id + "/?" + jQuery.param(params)
     } else {
-        return "/photo/?" + jQuery.param(params)
+        return window.__root_prefix + "photo/?" + jQuery.param(params)
     }
 }
 
 
 function photo_url(photo, search) {
     var params = jQuery.extend({}, search.criteria)
-   return "/photo/"+photo.id+"/?" + jQuery.param(params)
+   return window.__root_prefix + "photo/"+photo.id+"/?" + jQuery.param(params)
 }
 
 
 function upload_form_url() {
-   return "/upload/"
+   return window.__root_prefix + "upload/"
 }
 
 

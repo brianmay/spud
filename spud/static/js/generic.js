@@ -27,17 +27,17 @@ generic_doer.prototype.search_results_url = function(search, page) {
     var params = jQuery.extend({}, search.criteria, {
         page: page
     })
-    return "/"+ this.type + "/?" + jQuery.param(params)
+    return window.__root_prefix + this.type + "/?" + jQuery.param(params)
 }
 
 generic_doer.prototype.url = function(object) {
-   return "/" + this.type + "/" + object.id + "/"
+   return window.__root_prefix + this.type + "/" + object.id + "/"
 }
 
 
 generic_doer.prototype.load_search_form = function(criteria, success, error) {
     ajax({
-        url: "/a/" + this.type + "/form/",
+        url: window.__root_prefix + "a/" + this.type + "/form/",
         data: criteria,
         success: success,
         error: error,
@@ -53,7 +53,7 @@ generic_doer.prototype.load_search_results = function(search, page, success, err
     })
 
     ajax({
-        url: "/a/" + this.type + "/results/",
+        url: window.__root_prefix + "a/" + this.type + "/results/",
         data: params,
         success: success,
         error: error,
@@ -62,16 +62,16 @@ generic_doer.prototype.load_search_results = function(search, page, success, err
 
 generic_doer.prototype.load = function(object_id, success, error) {
     ajax({
-        url: "/a/" + this.type + "/" + object_id + "/",
+        url: window.__root_prefix + "a/" + this.type + "/" + object_id + "/",
         success: success,
         error: error,
     })
 }
 
 generic_doer.prototype.load_change = function(object_id, updates, success, error) {
-    var url = "/a/" + this.type + "/add/"
+    var url = window.__root_prefix + "a/" + this.type + "/add/"
     if (object_id != null) {
-        url = "/a/" + this.type + "/"+object_id+"/"
+        url = window.__root_prefix + "a/" + this.type + "/"+object_id+"/"
     }
     ajax({
         url: url,
@@ -84,7 +84,7 @@ generic_doer.prototype.load_change = function(object_id, updates, success, error
 
 generic_doer.prototype.load_delete = function(object_id, success, error) {
     ajax({
-        url: "/a/" + this.type + "/" + object_id + "/delete/",
+        url: window.__root_prefix + "a/" + this.type + "/" + object_id + "/delete/",
         success: success,
         error: error,
         type: "POST",
