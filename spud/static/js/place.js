@@ -151,11 +151,11 @@ $.widget('spud.place_list', $.spud.photo_list_base, {
         this.element.toggleClass("hidden", place_list.length == 0)
         $.each(place_list, function(j, place) {
             var photo = place.cover_photo
-            var sort=""
+            var details = []
             if  (place.sort_order || place.sort_name) {
-                sort = place.sort_name + " " + place.sort_order
+                details.push($("<div/>").text(place.sort_name + " " + place.sort_order))
             }
-            mythis.append_photo(photo, place.title, sort, place.notes, places.a(place, null))
+            mythis.append_photo(photo, place.title, details, place.notes, places.a(place, null))
         })
         return this
     }

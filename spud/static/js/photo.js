@@ -708,8 +708,13 @@ $.widget('spud.photo_list', $.spud.photo_list_base, {
         this.element.toggleClass("hidden", results.photos.length == 0)
         $.each(results.photos, function(j, photo) {
             var n = results.first + Number(j)
+            var details = []
+            details.push($("<div/>").text(photo.localtime.date + " " + photo.localtime.time))
+            if (photo.place != null) {
+                details.push($("<div/>").text(photo.place.title))
+            }
             mythis.append_photo(
-                photo, photo.title, photo.localtime.date + " " + photo.localtime.time,
+                photo, photo.title, details,
                 photo.description, photo_search_item_a(search, n, photo))
                 .data("photo", photo)
                 .toggleClass("ui-selected", is_photo_selected(photo))

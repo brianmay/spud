@@ -159,8 +159,8 @@ $.widget('spud.person_list', $.spud.photo_list_base, {
         this.element.toggleClass("hidden", person_list.length == 0)
         $.each(person_list, function(j, person) {
             var photo = person.cover_photo
-            var sort = null
-            mythis.append_photo(photo, person.title, sort, person.notes, persons.a(person, null))
+            var details = null
+            mythis.append_photo(photo, person.title, details, person.notes, persons.a(person, null))
         })
         return this
     }

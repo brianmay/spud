@@ -305,6 +305,7 @@ def _json_photo(user, photo):
         'action': photo.action,
 #        'timestamp': photo.timestamp,
         'thumb': {},
+        'place': _json_place(user, photo.location),
     }
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -328,7 +329,6 @@ def _json_photo_detail(user, photo):
     resp.update({
         'name': photo.name,
         'photographer': _json_person(user, photo.photographer),
-        'place': _json_place(user, photo.location),
         'camera_make': photo.camera_make,
         'camera_model': photo.camera_model,
         'flash_used': photo.flash_used,

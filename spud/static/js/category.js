@@ -141,11 +141,11 @@ $.widget('spud.category_list', $.spud.photo_list_base, {
         this.element.toggleClass("hidden", category_list.length == 0)
         $.each(category_list, function(j, category) {
             var photo = category.cover_photo
-            var sort=""
+            var details = []
             if  (category.sort_order || category.sort_name) {
-                sort = category.sort_name + " " + category.sort_order
+                details.push($("<div/>").text(category.sort_name + " " + category.sort_order))
             }
-            mythis.append_photo(photo, category.title, sort, category.description, categorys.a(category, null))
+            mythis.append_photo(photo, category.title, details, category.description, categorys.a(category, null))
         })
         return this
     }

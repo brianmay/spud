@@ -791,7 +791,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
         this._super()
     },
 
-    append_photo: function(photo, title, sort, description, a) {
+    append_photo: function(photo, title, details, description, a) {
         a
                 .data("photo", null)
                 .empty()
@@ -806,9 +806,9 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
             .text(title)
             .appendTo(a)
 
-        if (sort) {
-            $("<div class='sort'></div>")
-                .text(sort)
+        if (details && details.length > 0) {
+            $("<div class='details'></div>")
+                .html(details)
                 .appendTo(a)
         }
         if (description) {
