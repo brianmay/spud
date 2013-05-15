@@ -214,7 +214,7 @@ def _check_params_empty(params):
         raise ErrorBadRequest("Unknown parameters %s" % params)
 
 
-def _json_session(request):
+def _json_session_brief(request):
     is_authenticated = request.user.is_authenticated()
 
     session = {
@@ -289,7 +289,7 @@ def photo_rights(user):
     }
 
 
-def _json_photo(user, photo):
+def _json_photo_brief(user, photo):
     if photo is None:
         return None
 
@@ -300,8 +300,8 @@ def _json_photo(user, photo):
         'view': photo.view,
         'rating': photo.rating,
         'description': photo.description,
-        'localtime': _json_datetime(photo.datetime, photo.utc_offset),
-        'utctime': _json_datetime(photo.datetime, 0),
+        'localtime': _json_datetime_brief(photo.datetime, photo.utc_offset),
+        'utctime': _json_datetime_brief(photo.datetime, 0),
         'action': photo.action,
 #        'timestamp': photo.timestamp,
         'thumb': {},
@@ -324,11 +324,11 @@ def _json_photo_detail(user, photo):
     if photo is None:
         return None
 
-    resp = _json_photo(user, photo)
+    resp = _json_photo_brief(user, photo)
 
     resp.update({
         'name': photo.name,
-        'photographer': _json_person(user, photo.photographer),
+        'photographer': _json_person_brief(user, photo.photographer),
         'camera_make': photo.camera_make,
         'camera_model': photo.camera_model,
         'flash_used': photo.flash_used,
@@ -341,10 +341,10 @@ def _json_photo_detail(user, photo):
         'metering_mode': photo.metering_mode,
         'focus_dist': photo.focus_dist,
         'ccd_width': photo.ccd_width,
-        'albums': [_json_album(user, a) for a in photo.albums.all()],
-        'categorys': [_json_category(user, c) for c in photo.categorys.all()],
+        'albums': [_json_album_brief(user, a) for a in photo.albums.all()],
+        'categorys': [_json_category_brief(user, c) for c in photo.categorys.all()],
         'persons': [
-            _json_person(user, p) for p in
+            _json_person_brief(user, p) for p in
             photo.persons.order_by("photo_person__position").all()],
 
         'related': [],
@@ -355,14 +355,14 @@ def _json_photo_detail(user, photo):
         resp['related'].append({
             'id': pr.pk,
             'title': pr.desc_2,
-            'photo': _json_photo(user, pr.photo_2),
+            'photo': _json_photo_brief(user, pr.photo_2),
         })
 
     for pr in photo.relations_2.all():
         resp['related'].append({
             'id': pr.pk,
             'title': pr.desc_1,
-            'photo': _json_photo(user, pr.photo_1),
+            'photo': _json_photo_brief(user, pr.photo_1),
         })
 
     video = {}
@@ -394,7 +394,7 @@ def _json_photo_detail(user, photo):
     return resp
 
 
-def _json_album(user, album):
+def _json_album_brief(user, album):
     if album is None:
         return None
 
@@ -403,13 +403,13 @@ def _json_album(user, album):
         'id': album.album_id,
         'title': album.title,
         'description': album.description,
-        'cover_photo': _json_photo(user, album.cover_photo),
+        'cover_photo': _json_photo_brief(user, album.cover_photo),
         'sort_name': album.sort_name,
         'sort_order': album.sort_order,
         'revised': None,
     }
     if album.revised is not None and user.is_staff:
-        d['revised'] = _json_datetime(album.revised, album.revised_utc_offset)
+        d['revised'] = _json_datetime_brief(album.revised, album.revised_utc_offset)
     return d
 
 
@@ -417,21 +417,21 @@ def _json_album_detail(user, album):
     if album is None:
         return None
 
-    d = _json_album(user, album)
+    d = _json_album_brief(user, album)
 
     d.update({
-        'parent': _json_album(user, album.parent),
+        'parent': _json_album_brief(user, album.parent),
         'ancestors': [],
         'number_photos': album.photos.filter(action__isnull=True).count(),
     })
 
     for ancestor in album.get_ascendants(include_self=False):
-        d['ancestors'].insert(0, _json_album(user, ancestor))
+        d['ancestors'].insert(0, _json_album_brief(user, ancestor))
 
     return d
 
 
-def _json_category(user, category):
+def _json_category_brief(user, category):
     if category is None:
         return None
 
@@ -440,7 +440,7 @@ def _json_category(user, category):
         'id': category.category_id,
         'title': category.title,
         'description': category.description,
-        'cover_photo': _json_photo(user, category.cover_photo),
+        'cover_photo': _json_photo_brief(user, category.cover_photo),
         'sort_name': category.sort_name,
         'sort_order': category.sort_order,
     }
@@ -451,21 +451,21 @@ def _json_category_detail(user, category):
     if category is None:
         return None
 
-    d = _json_category(user, category)
+    d = _json_category_brief(user, category)
 
     d.update({
-        'parent': _json_category(user, category.parent),
+        'parent': _json_category_brief(user, category.parent),
         'ancestors': [],
         'number_photos': category.photos.filter(action__isnull=True).count(),
     })
 
     for ancestor in category.get_ascendants(include_self=False):
-        d['ancestors'].insert(0, _json_category(user, ancestor))
+        d['ancestors'].insert(0, _json_category_brief(user, ancestor))
 
     return d
 
 
-def _json_place(user, place):
+def _json_place_brief(user, place):
     if place is None:
         return None
 
@@ -481,7 +481,7 @@ def _json_place(user, place):
         'country': place.country,
         'url': place.url,
         'urldesc': place.urldesc,
-        'cover_photo': _json_photo(user, place.cover_photo),
+        'cover_photo': _json_photo_brief(user, place.cover_photo),
         'notes': place.notes,
     }
     return d
@@ -491,26 +491,26 @@ def _json_place_detail(user, place):
     if place is None:
         return None
 
-    d = _json_place(user, place)
+    d = _json_place_brief(user, place)
 
     d.update({
-        'parent': _json_place(user, place.parent),
+        'parent': _json_place_brief(user, place.parent),
         'ancestors': [],
         'number_photos': place.photos.filter(action__isnull=True).count(),
     })
 
     for ancestor in place.get_ascendants(include_self=False):
-        d['ancestors'].insert(0, _json_place(user, ancestor))
+        d['ancestors'].insert(0, _json_place_brief(user, ancestor))
 
     if user.is_staff:
         d.update({
-            'work_of': [_json_person(user, p) for p in place.work_of.all()],
-            'home_of': [_json_person(user, p) for p in place.home_of.all()],
+            'work_of': [_json_person_brief(user, p) for p in place.work_of.all()],
+            'home_of': [_json_person_brief(user, p) for p in place.home_of.all()],
         })
     return d
 
 
-def _json_person(user, person):
+def _json_person_brief(user, person):
     if person is None:
         return None
 
@@ -522,7 +522,7 @@ def _json_person(user, person):
         'last_name': person.last_name,
         'middle_name': person.middle_name,
         'called': person.called,
-        'cover_photo': _json_photo(user, person.cover_photo),
+        'cover_photo': _json_photo_brief(user, person.cover_photo),
 #        'gender': person.gender,
 #        'dob': unicode(person.dob),
 #        'dod': unicode(person.dod),
@@ -541,7 +541,7 @@ def _json_person_detail(user, person):
     if person is None:
         return None
 
-    d = _json_person(user, person)
+    d = _json_person_brief(user, person)
 
     d.update({
         'number_photos': person.photos.filter(action__isnull=True).count(),
@@ -552,23 +552,23 @@ def _json_person_detail(user, person):
             'gender': person.gender,
             'dob': None,
             'dod': None,
-            'home': _json_place(user, person.home),
-            'work': _json_place(user, person.work),
-            'father': _json_person(user, person.father),
-            'mother': _json_person(user, person.mother),
+            'home': _json_place_brief(user, person.home),
+            'work': _json_place_brief(user, person.work),
+            'father': _json_person_brief(user, person.father),
+            'mother': _json_person_brief(user, person.mother),
             'spouses': [],
             'grandparents': [
-                _json_person(user, p) for p in person.grandparents()],
+                _json_person_brief(user, p) for p in person.grandparents()],
             'uncles_aunts': [
-                _json_person(user, p) for p in person.uncles_aunts()],
-            'parents': [_json_person(user, p) for p in person.parents()],
-            'siblings': [_json_person(user, p) for p in person.siblings()],
-            'cousins': [_json_person(user, p) for p in person.cousins()],
-            'children': [_json_person(user, p) for p in person.children()],
+                _json_person_brief(user, p) for p in person.uncles_aunts()],
+            'parents': [_json_person_brief(user, p) for p in person.parents()],
+            'siblings': [_json_person_brief(user, p) for p in person.siblings()],
+            'cousins': [_json_person_brief(user, p) for p in person.cousins()],
+            'children': [_json_person_brief(user, p) for p in person.children()],
             'nephews_nieces': [
-                _json_person(user, p) for p in person.nephews_nieces()],
+                _json_person_brief(user, p) for p in person.nephews_nieces()],
             'grandchildren': [
-                _json_person(user, p) for p in person.grandchildren()],
+                _json_person_brief(user, p) for p in person.grandchildren()],
             'notes': person.notes,
             'email': person.email,
             'ancestors': [],
@@ -583,16 +583,16 @@ def _json_person_detail(user, person):
             d['dod'] = unicode(person.dod)
 
         if person.spouse:
-            d['spouses'].append(_json_person(user, person.spouse))
+            d['spouses'].append(_json_person_brief(user, person.spouse))
 
         for p in person.reverse_spouses.all():
             if person.spouse is None:
-                d['spouses'].append(_json_person(user, p))
+                d['spouses'].append(_json_person_brief(user, p))
             elif p.person_id != person.spouse.person_id:
-                d['spouses'].append(_json_person(user, p))
+                d['spouses'].append(_json_person_brief(user, p))
 
         for ancestor in person.get_ascendants(include_self=False):
-            d['ancestors'].insert(0, _json_person(user, ancestor))
+            d['ancestors'].insert(0, _json_person_brief(user, ancestor))
 
     return d
 
@@ -604,15 +604,15 @@ def _json_photo_relation_detail(user, photo_relation):
     d = {
         'type': 'photo_relation',
         'id': photo_relation.pk,
-        'photo_1': _json_photo(user, photo_relation.photo_1),
+        'photo_1': _json_photo_brief(user, photo_relation.photo_1),
         'desc_1': photo_relation.desc_1,
-        'photo_2': _json_photo(user, photo_relation.photo_2),
+        'photo_2': _json_photo_brief(user, photo_relation.photo_2),
         'desc_2': photo_relation.desc_2,
     }
     return d
 
 
-def _json_feedback(user, feedback, seen=None):
+def _json_feedback_brief(user, feedback, seen=None):
     if feedback is None:
         return None
 
@@ -637,7 +637,7 @@ def _json_feedback(user, feedback, seen=None):
     }
 
     for child in feedback.children.all():
-        child_json = _json_feedback(user, child, seen)
+        child_json = _json_feedback_brief(user, child, seen)
         if child_json is not None:
             d['children'].append(child_json)
         del child_json
@@ -651,9 +651,9 @@ def _json_feedback(user, feedback, seen=None):
             'user_name': feedback.user_name,
             'user_email': feedback.user_email,
             'user_url': feedback.user_url,
-            'submit_datetime': _json_datetime(
+            'submit_datetime': _json_datetime_brief(
                 feedback.submit_datetime, feedback.utc_offset),
-            'photo': _json_photo(user, feedback.photo),
+            'photo': _json_photo_brief(user, feedback.photo),
         })
 
     if feedback.user is not None:
@@ -671,21 +671,21 @@ def _json_feedback_detail(user, feedback):
     if feedback is None:
         return None
 
-    d = _json_feedback(user, feedback)
+    d = _json_feedback_brief(user, feedback)
     if d is None:
         return None
 
     d.update({
-        'parent': _json_feedback(user, feedback.parent),
+        'parent': _json_feedback_brief(user, feedback.parent),
         'ancestors': [],
     })
 
     for ancestor in feedback.get_ascendants(include_self=False):
-        d['ancestors'].insert(0, _json_feedback(user, ancestor))
+        d['ancestors'].insert(0, _json_feedback_brief(user, ancestor))
     return d
 
 
-def _json_datetime(value, utc_offset):
+def _json_datetime_brief(value, utc_offset):
     from_tz = pytz.utc
     to_tz = pytz.FixedOffset(utc_offset)
     to_offset = datetime.timedelta(minutes=utc_offset)
@@ -712,7 +712,7 @@ def _json_datetime(value, utc_offset):
     }
 
 
-def _json_search(user, params):
+def _json_search_brief(user, params):
     criteria = {}
 
     search = Q()
@@ -752,14 +752,14 @@ def _json_search(user, params):
     value = _pop_datetime(params, "first_date", timezone)
     if value is not None:
         utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-        criteria["first_date"] = _json_datetime(
+        criteria["first_date"] = _json_datetime_brief(
             utc_value, value.utcoffset().seconds / 60)
         search = search & Q(datetime__gte=utc_value)
 
     value = _pop_datetime(params, "last_date", timezone)
     if value is not None:
         utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-        criteria["last_date"] = _json_datetime(
+        criteria["last_date"] = _json_datetime_brief(
             utc_value, value.utcoffset().seconds / 60)
         search = search & Q(datetime__lt=utc_value)
 
@@ -790,12 +790,12 @@ def _json_search(user, params):
 
     value = _pop_object(params, "photographer", spud.models.person)
     if value is not None:
-        criteria["photographer"] = _json_person(user, value)
+        criteria["photographer"] = _json_person_brief(user, value)
         search = search & Q(photographer=value)
 
     value = _pop_object(params, "place", spud.models.place)
     if value is not None:
-        criteria["place"] = _json_place(user, value)
+        criteria["place"] = _json_place_brief(user, value)
         if ld:
             search = search & Q(location__ascendant_set__ascendant=value)
         else:
@@ -807,7 +807,7 @@ def _json_search(user, params):
     if values is not None:
         criteria["persons"] = []
         for value in values:
-            criteria["persons"].append(_json_person(user, value))
+            criteria["persons"].append(_json_person_brief(user, value))
             if pd:
                 photo_list = photo_list.filter(
                     persons__ascendant_set__ascendant=value)
@@ -818,7 +818,7 @@ def _json_search(user, params):
     if values is not None:
         criteria["albums"] = []
         for value in values:
-            criteria["albums"].append(_json_album(user, value))
+            criteria["albums"].append(_json_album_brief(user, value))
             if ad:
                 photo_list = photo_list.filter(
                     albums__ascendant_set__ascendant=value)
@@ -829,7 +829,7 @@ def _json_search(user, params):
     if values is not None:
         criteria["categorys"] = []
         for value in values:
-            criteria["categorys"].append(_json_category(user, value))
+            criteria["categorys"].append(_json_category_brief(user, value))
             if cd:
                 photo_list = photo_list.filter(
                     categorys__ascendant_set__ascendant=value)
@@ -841,7 +841,7 @@ def _json_search(user, params):
         criteria["photos"] = []
         q = Q()
         for value in values:
-            criteria["photos"].append(_json_photo(user, value))
+            criteria["photos"].append(_json_photo_brief(user, value))
             q = q | Q(pk=value.pk)
         photo_list = photo_list.filter(q)
 
@@ -927,7 +927,7 @@ def check_errors(func):
             resp = {
                 'type': 'error',
                 'message': unicode(e),
-                'session': _json_session(request),
+                'session': _json_session_brief(request),
             }
             return HttpResponse(json.dumps(resp), mimetype="application/json")
         except ErrorBadRequest, e:
@@ -935,7 +935,7 @@ def check_errors(func):
             resp = {
                 'type': 'error',
                 'message': "Bad request: " + unicode(e),
-                'session': _json_session(request),
+                'session': _json_session_brief(request),
             }
             return HttpResponse(json.dumps(resp), mimetype="application/json")
         except ErrorForbidden, e:
@@ -943,7 +943,7 @@ def check_errors(func):
             resp = {
                 'type': 'error',
                 'message': "Access Forbidden: " + unicode(e),
-                'session': _json_session(request),
+                'session': _json_session_brief(request),
             }
             return HttpResponse(json.dumps(resp), mimetype="application/json")
     return wrapper
@@ -975,7 +975,7 @@ def login(request):
             raise ErrorUser("Account is disabled")
     else:
         raise ErrorUser("Invalid login")
-    resp['session'] = _json_session(request)
+    resp['session'] = _json_session_brief(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -985,7 +985,7 @@ def logout(request):
         raise ErrorBadRequest("Only POST is supported")
     django.contrib.auth.logout(request)
     resp = {'type': 'logout'}
-    resp['session'] = _json_session(request)
+    resp['session'] = _json_session_brief(request)
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
@@ -1007,7 +1007,7 @@ def album_search_form(request):
 
     instance = _pop_object(params, "instance", spud.models.album)
     if instance is not None:
-        criteria['instance'] = _json_album(request.user, instance)
+        criteria['instance'] = _json_album_brief(request.user, instance)
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
@@ -1023,7 +1023,7 @@ def album_search_form(request):
     resp = {
         'type': 'album_search_form',
         'criteria': criteria,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1063,7 +1063,7 @@ def album_search_results(request):
 
     instance = _pop_object(params, "instance", spud.models.album)
     if instance is not None:
-        criteria['instance'] = _json_album(request.user, instance)
+        criteria['instance'] = _json_album_brief(request.user, instance)
         if mode == "children":
             album_list = album_list.filter(parent=instance)
         elif mode == "ascendants":
@@ -1099,11 +1099,11 @@ def album_search_results(request):
     resp = {
         'type': 'album_search_results',
         'criteria': criteria,
-        'albums': [_json_album(request.user, p) for p in album_list],
+        'albums': [_json_album_brief(request.user, p) for p in album_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1146,7 +1146,7 @@ def album_delete(request, album_id):
 
     resp = {
         'type': 'album_delete',
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1224,7 +1224,7 @@ def album_finish(request, album):
     resp = {
         'type': 'album_get',
         'album': _json_album_detail(request.user, album),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1248,7 +1248,7 @@ def category_search_form(request):
 
     instance = _pop_object(params, "instance", spud.models.category)
     if instance is not None:
-        criteria['instance'] = _json_category(request.user, instance)
+        criteria['instance'] = _json_category_brief(request.user, instance)
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
@@ -1259,7 +1259,7 @@ def category_search_form(request):
     resp = {
         'type': 'category_search_form',
         'criteria': criteria,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': category_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1299,7 +1299,7 @@ def category_search_results(request):
 
     instance = _pop_object(params, "instance", spud.models.category)
     if instance is not None:
-        criteria['instance'] = _json_category(request.user, instance)
+        criteria['instance'] = _json_category_brief(request.user, instance)
         if mode == "children":
             category_list = category_list.filter(parent=instance)
         elif mode == "ascendants":
@@ -1327,11 +1327,11 @@ def category_search_results(request):
     resp = {
         'type': 'category_search_results',
         'criteria': criteria,
-        'categorys': [_json_category(request.user, p) for p in category_list],
+        'categorys': [_json_category_brief(request.user, p) for p in category_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': category_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1374,7 +1374,7 @@ def category_delete(request, category_id):
 
     resp = {
         'type': 'category_delete',
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': category_rights(request.user),
     }
 
@@ -1439,7 +1439,7 @@ def category_finish(request, category):
     resp = {
         'type': 'category_get',
         'category': _json_category_detail(request.user, category),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': category_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1463,7 +1463,7 @@ def place_search_form(request):
 
     instance = _pop_object(params, "instance", spud.models.place)
     if instance is not None:
-        criteria['instance'] = _json_place(request.user, instance)
+        criteria['instance'] = _json_place_brief(request.user, instance)
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
@@ -1474,7 +1474,7 @@ def place_search_form(request):
     resp = {
         'type': 'place_search_form',
         'criteria': criteria,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1514,7 +1514,7 @@ def place_search_results(request):
 
     instance = _pop_object(params, "instance", spud.models.place)
     if instance is not None:
-        criteria['instance'] = _json_place(request.user, instance)
+        criteria['instance'] = _json_place_brief(request.user, instance)
         if mode == "children":
             place_list = place_list.filter(parent=instance)
         elif mode == "ascendants":
@@ -1542,11 +1542,11 @@ def place_search_results(request):
     resp = {
         'type': 'place_search_results',
         'criteria': criteria,
-        'places': [_json_place(request.user, p) for p in place_list],
+        'places': [_json_place_brief(request.user, p) for p in place_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1589,7 +1589,7 @@ def place_delete(request, place_id):
 
     resp = {
         'type': 'place_delete',
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1683,7 +1683,7 @@ def place_finish(request, place):
     resp = {
         'type': 'place_get',
         'place': _json_place_detail(request.user, place),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1707,7 +1707,7 @@ def person_search_form(request):
 
     instance = _pop_object(params, "instance", spud.models.person)
     if instance is not None:
-        criteria['instance'] = _json_person(request.user, instance)
+        criteria['instance'] = _json_person_brief(request.user, instance)
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
@@ -1718,7 +1718,7 @@ def person_search_form(request):
     resp = {
         'type': 'person_search_form',
         'criteria': criteria,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
@@ -1758,7 +1758,7 @@ def person_search_results(request):
 
     instance = _pop_object(params, "instance", spud.models.person)
     if instance is not None:
-        criteria['instance'] = _json_person(request.user, instance)
+        criteria['instance'] = _json_person_brief(request.user, instance)
         if mode == "children":
             person_list = person_list.filter(
                 Q(mother=instance) | Q(father=instance))
@@ -1791,11 +1791,11 @@ def person_search_results(request):
     resp = {
         'type': 'person_search_results',
         'criteria': criteria,
-        'persons': [_json_person(request.user, p) for p in person_list],
+        'persons': [_json_person_brief(request.user, p) for p in person_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': person_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1838,7 +1838,7 @@ def person_delete(request, person_id):
 
     resp = {
         'type': 'person_delete',
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': person_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -1996,7 +1996,7 @@ def person_finish(request, person):
     resp = {
         'type': 'person_get',
         'person': _json_person_detail(request.user, person),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': person_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2051,7 +2051,7 @@ def photo_relation_delete(request, photo_relation_id):
 
     resp = {
         'type': 'photo_relation_delete',
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_relation_rights(request.user),
     }
 
@@ -2104,7 +2104,7 @@ def photo_relation_finish(request, photo_relation):
         'type': 'photo_relation_get',
         'photo_relation': _json_photo_relation_detail(request.user,
                                                       photo_relation),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_relation_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2128,11 +2128,11 @@ def feedback_search_form(request):
 
     instance = _pop_object(params, "instance", spud.models.feedback)
     if instance is not None:
-        criteria['instance'] = _json_feedback(request.user, instance)
+        criteria['instance'] = _json_feedback_brief(request.user, instance)
 
     instance = _pop_object(params, "photo", spud.models.photo)
     if instance is not None:
-        criteria['photo'] = _json_photo(request.user, instance)
+        criteria['photo'] = _json_photo_brief(request.user, instance)
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
@@ -2152,7 +2152,7 @@ def feedback_search_form(request):
     resp = {
         'type': 'feedback_search_form',
         'criteria': criteria,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2192,7 +2192,7 @@ def feedback_search_results(request):
 
     instance = _pop_object(params, "instance", spud.models.feedback)
     if instance is not None:
-        criteria['instance'] = _json_feedback(request.user, instance)
+        criteria['instance'] = _json_feedback_brief(request.user, instance)
         if mode == "children":
             feedback_list = feedback_list.filter(
                 parent=instance)
@@ -2210,7 +2210,7 @@ def feedback_search_results(request):
     instance = _pop_object(params, "photo", spud.models.photo)
     if instance is not None:
         feedback_list = feedback_list.filter(photo=instance)
-        criteria['photo'] = _json_photo(request.user, instance)
+        criteria['photo'] = _json_photo_brief(request.user, instance)
 
     root_only = _pop_boolean(params, "root_only")
     if root_only:
@@ -2243,11 +2243,11 @@ def feedback_search_results(request):
         'type': 'feedback_search_results',
         'criteria': criteria,
         'feedbacks': [
-            _json_feedback(request.user, p) for p in feedback_list],
+            _json_feedback_brief(request.user, p) for p in feedback_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2306,7 +2306,7 @@ def feedback_delete(request, feedback_id):
 
     resp = {
         'type': 'feedback_delete',
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2406,7 +2406,7 @@ def feedback_finish(request, feedback):
         'type': 'feedback_get',
         'feedback': _json_feedback_detail(
             request.user, feedback),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2418,14 +2418,14 @@ def photo_search_form(request):
     params = request.GET.copy()
     _pop_string(params, "_")
 
-    photo_list, criteria = _json_search(request.user, params)
+    photo_list, criteria = _json_search_brief(request.user, params)
 
     _check_params_empty(params)
 
     resp = {
         'type': 'search_form',
         'criteria': criteria,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2453,7 +2453,7 @@ def photo_search_results(request):
     if count < 0:
         raise ErrorBadRequest("count is negative")
 
-    photo_list, criteria = _json_search(request.user, params)
+    photo_list, criteria = _json_search_brief(request.user, params)
 
     _check_params_empty(params)
 
@@ -2464,18 +2464,18 @@ def photo_search_results(request):
     resp = {
         'type': 'photo_search_results',
         'criteria': criteria,
-        'photos': [_json_photo(request.user, p) for p in photos],
+        'photos': [_json_photo_brief(request.user, p) for p in photos],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
 def photo_search_item(request, params, number):
-    photo_list, criteria = _json_search(request.user, params)
+    photo_list, criteria = _json_search_brief(request.user, params)
     number_results = photo_list.count()
 
     _check_params_empty(params)
@@ -2490,15 +2490,15 @@ def photo_search_item(request, params, number):
         'criteria': criteria,
         'photo': _json_photo_detail(request.user, photo),
         'number_results': number_results,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
 
     if number > 1:
-        resp['prev_photo'] = _json_photo(request.user, photo_list[number-1])
+        resp['prev_photo'] = _json_photo_brief(request.user, photo_list[number-1])
 
     try:
-        resp['next_photo'] = _json_photo(request.user, photo_list[number+1])
+        resp['next_photo'] = _json_photo_brief(request.user, photo_list[number+1])
     except IndexError:
         pass
 
@@ -2552,7 +2552,7 @@ def photo_search_change(request):
     if expected_results is None:
         raise ErrorBadRequest("didn't get expected number_results")
 
-    photo_list, criteria = _json_search(request.user, params)
+    photo_list, criteria = _json_search_brief(request.user, params)
     number_results = photo_list.count()
 
     if number_results != expected_results:
@@ -2790,7 +2790,7 @@ def photo_search_change(request):
         'type': 'photo_search_change',
         'criteria': criteria,
         'number_results': number_results,
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2802,7 +2802,7 @@ def photo(request, photo_id):
     resp = {
         'type': 'photo_get',
         'photo': _json_photo_detail(request.user, value),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), mimetype="application/json")
@@ -2812,7 +2812,7 @@ def upload_form(request):
     response_data = {
         'type': "upload_form",
         'uid': str(uuid.uuid4()),
-        'session': _json_session(request),
+        'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
     response_data = json.dumps(response_data)
@@ -2985,7 +2985,7 @@ def upload_file(request):
                     {'filename': file.name, 'action': 'V', }
                 )
                 photo.generate_thumbnails(overwrite=False)
-                response_data['photo'] = _json_photo(
+                response_data['photo'] = _json_photo_brief(
                     request.user, photo)
             except spud.models.photo_already_exists_error:
                 response_data['error'] = "Photo already exists"
