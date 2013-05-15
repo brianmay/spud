@@ -289,7 +289,7 @@ def photo_rights(user):
     }
 
 
-def _json_photo_brief(user, photo):
+def _json_photo(user, photo):
     if photo is None:
         return None
 
@@ -305,7 +305,6 @@ def _json_photo_brief(user, photo):
         'action': photo.action,
 #        'timestamp': photo.timestamp,
         'thumb': {},
-        'place': _json_place(user, photo.location),
     }
 
     (shortname, _) = os.path.splitext(photo.name)
@@ -320,15 +319,32 @@ def _json_photo_brief(user, photo):
     return resp
 
 
+def _json_photo_brief(user, photo):
+    if photo is None:
+        return None
+
+    resp = _json_photo(user, photo)
+
+    # add cut down version of place, otherwise we might end up with infinite
+    # recusion
+    # photo --> photo.place --> place --> place.cover_photo --> photo --> etc
+    resp.update({
+        'place': {'title': unicode(photo.location)},
+    })
+
+    return resp
+
+
 def _json_photo_detail(user, photo):
     if photo is None:
         return None
 
-    resp = _json_photo_brief(user, photo)
+    resp = _json_photo(user, photo)
 
     resp.update({
         'name': photo.name,
         'photographer': _json_person_brief(user, photo.photographer),
+        'place': _json_place_brief(user, photo.location),
         'camera_make': photo.camera_make,
         'camera_model': photo.camera_model,
         'flash_used': photo.flash_used,
