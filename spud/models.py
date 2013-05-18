@@ -159,10 +159,13 @@ class hierarchy_model(base_model):
         else:
             instance_list = [self]
 
+        print instance_list
+
         print "((("
         for instance in instance_list:
+            print "----", instance.pk
             new_glue = instance._ascendants_glue(instance, 0, {}, cache, parent_attributes)
-            print "----"
+            print "----", instance.pk
             print instance, instance.pk
             print "ng", [(i[0], i[1]) for i in new_glue]
             print "cache", cache.keys()
