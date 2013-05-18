@@ -88,6 +88,8 @@ def import_photo(file, d, options):
 
         for i in split:
             album, c = album.children.get_or_create(title=i)
+            if c:
+                album.fix_ascendants()
         albums = [album]
 
     # get time
