@@ -181,12 +181,12 @@ class hierarchy_model(base_model):
                     print "adding", glue
                     ascendant = type(self).objects.get(pk=glue[0])
                     glue_class.objects.create(
-                        ascendant=ascendant, descendant=self, position=glue[1])
+                        ascendant=ascendant, descendant=instance, position=glue[1])
 
             for glue in old_glue:
                 print "removing", glue
                 glue_class.objects.filter(
-                    ascendant__pk=glue[0], descendant=self, position=glue[1]
+                    ascendant__pk=glue[0], descendant=instance, position=glue[1]
                 ).delete()
         print ")))"
 
