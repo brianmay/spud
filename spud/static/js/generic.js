@@ -225,12 +225,21 @@ generic_doer.prototype.setup_search_results = function() {
 }
 
 generic_doer.prototype.display_search_results = function(rights, search, results) {
+    var page = Math.floor(results.first / search.results_per_page)
+    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
+
+    update_history(
+        this.search_results_url(search, page), {
+            type: "display_search_results",
+            object_type: this.type,
+            search: search,
+            page: page,
+        });
+
     this.setup_search_results()
 
     var mythis = this
 
-    var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
 
     document.title = this.display_type + " list " + (page+1) + "/" + (last_page+1) + " | " + this.display_type + " | Spud"
     $("#title").text(this.display_type + " list " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1))
@@ -305,6 +314,14 @@ generic_doer.prototype.setup = function() {
 }
 
 generic_doer.prototype.display = function(object, rights) {
+    update_history(
+        this.url(object), {
+            type: "display",
+            object_type: this.type,
+            object_id: object.id,
+        }
+    );
+
     this.setup()
 
     document.title = object.title + " | " + this.display_type + " | Spud"
@@ -447,13 +464,6 @@ generic_doer.prototype.do_search_results = function(search, page, success) {
     this.load_search_results(search, page,
         function(data) {
             hide_loading()
-            update_history(
-                mythis.search_results_url(search, page), {
-                    type: "display_search_results",
-                    object_type: mythis.type,
-                    search: search,
-                    page: page,
-                });
             mythis.display_search_results(data.rights, search, data)
             if (success) { success() }
         },
@@ -472,13 +482,6 @@ generic_doer.prototype.do = function(object_id) {
         function(data) {
             hide_loading()
             var object = mythis.get_object(data)
-            update_history(
-                mythis.url(object), {
-                    type: "display",
-                    object_type: mythis.type,
-                    object_id: mythis.get_object(data).id,
-                }
-            );
             mythis.display(mythis.get_object(data), data.rights)
         },
 

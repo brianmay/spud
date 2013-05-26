@@ -498,6 +498,9 @@ function reset_display() {
 }
 
 function display_root() {
+    update_history(root_url(), {
+        type: 'display_root',
+    });
     replace_links()
     $("#content-main")
         .html("")
@@ -580,6 +583,25 @@ function setup_photo(photo_mode) {
 
 
 function display_photo(photo, rights, search, results, n) {
+    if (n == null) {
+        update_history(
+            photo_url(data.photo, search), {
+                type: 'display_photo',
+                photo_id: photo.id,
+                search: search,
+            }
+        );
+    } else {
+        update_history(
+            photo_search_item_url(search, n, photo), {
+                type: 'display_photo_search_item',
+                search: search,
+                n: n,
+                photo_id: photo.id,
+            }
+        );
+    }
+
     setup_photo(search.photo_mode)
 
     var prefix = ""
@@ -997,6 +1019,14 @@ function setup_photo_search_results() {
 }
 
 function display_photo_search_results(rights, search, results) {
+    update_history(
+        photo_search_results_url(search, page), {
+            type: 'display_photo_search_results',
+            search: search,
+            page: page,
+        }
+    );
+
     setup_photo_search_results()
 
     var page = Math.floor(results.first / search.results_per_page)
@@ -1042,9 +1072,6 @@ function display_login() {
 
 
 function do_root() {
-    update_history(root_url(), {
-        type: 'display_root',
-    });
     display_root()
 }
 
@@ -1080,12 +1107,7 @@ function do_photo(photo_id, search) {
     load_photo(photo_id,
         function(data) {
             hide_loading()
-            update_history(photo_url(data.photo, search), {
-                type: 'display_photo',
-                photo_id: data.photo.id,
-                search: search,
-            });
-            display_photo(data.photo, data.rights, search)
+            display_photo(data.photo, data.rights, search, null, null)
         },
 
         function(message) {
@@ -1161,13 +1183,6 @@ function do_photo_search_results(search, page, success) {
     load_photo_search_results(search, page,
         function(data) {
             hide_loading()
-            update_history(
-                photo_search_results_url(search, page), {
-                    type: 'display_photo_search_results',
-                    search: search,
-                    page: page,
-                }
-            );
             display_photo_search_results(data.rights, search, data)
             if (success) { success() }
         },
@@ -1191,14 +1206,6 @@ function do_photo_search_item(search, n, photo_id) {
         function(data) {
             hide_loading()
             if (photo_id == null || data.photo.id == photo_id) {
-                update_history(
-                    photo_search_item_url(search, n, data.photo), {
-                        type: 'display_photo_search_item',
-                        search: search,
-                        n: n,
-                        photo_id: photo_id,
-                    }
-                );
                 display_photo(data.photo, data.rights, search, data, n)
             } else {
                 do_photo(photo_id, search)
@@ -1226,9 +1233,6 @@ function do_upload_form() {
     load_upload_form(
         function(data) {
             hide_loading()
-            update_history(upload_form_url(), {
-                type: 'display_upload_form',
-            });
             display_upload_form(data)
         },
 

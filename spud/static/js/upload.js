@@ -84,6 +84,10 @@ function display_downloads(params) {
 }
 
 function display_upload_form(data) {
+    update_history(upload_form_url(), {
+        type: 'display_upload_form',
+    });
+
     window.spud_type = "upload"
     replace_links()
 
