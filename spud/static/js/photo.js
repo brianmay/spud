@@ -618,7 +618,7 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
             this.add_item(
                 $("<a href='#'>Article</a>")
                 .on("click", function() {
-                    do_photo_search_item($.extend({}, search, { photo_mode: "article" }), n, photo.id)
+                    display_photo(photo, rights, $.extend({}, search, { photo_mode: "article" }), results, n)
                     return false;
                 }))
         }
