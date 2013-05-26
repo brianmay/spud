@@ -27,7 +27,7 @@ function root_a(title) {
     }
     var a = $('<a/>')
         .attr('href', root_url())
-        .on('click', function() { do_root(true); return false; })
+        .on('click', function() { do_root(); return false; })
         .text(title)
     return a
 }
@@ -39,7 +39,7 @@ function login_a(title) {
     }
     var a = $('<a/>')
         .attr('href', login_url())
-        .on('click', function() { do_login(true); return false; })
+        .on('click', function() { do_login(); return false; })
         .text(title)
     return a
 }
@@ -67,7 +67,7 @@ function photo_a(photo, search, title) {
     }
     var a = $('<a/>')
         .attr('href', photo_url(photo, search))
-        .on('click', function() { do_photo(photo.id, search, true); return false; })
+        .on('click', function() { do_photo(photo.id, search); return false; })
         .data('photo', photo)
         .text(title)
     return a
@@ -98,7 +98,7 @@ function photo_relation_change_a(photo_relation, title) {
     }
     var a = $('<a/>')
         .attr('href', '#')
-        .on('click', function() { do_change_photo_relation(photo_relation.id, true); return false; })
+        .on('click', function() { do_change_photo_relation(photo_relation.id); return false; })
         .data('photo', photo_relation.cover_photo)
         .text(title)
     return a
@@ -111,7 +111,7 @@ function photo_relation_add_a(photo, title) {
     }
     var a = $('<a/>')
         .attr('href', '#')
-        .on('click', function() { do_photo_relation_add(photo, true); return false; })
+        .on('click', function() { do_photo_relation_add(photo); return false; })
         .text(title)
     return a
 }
@@ -123,7 +123,7 @@ function photo_relation_delete_a(photo_relation, title) {
     }
     var a = $('<a/>')
         .attr('href', '#')
-        .on('click', function() { do_photo_relation_delete(photo_relation.id, true); return false; })
+        .on('click', function() { do_photo_relation_delete(photo_relation.id); return false; })
         .data('photo', photo_relation.cover_photo)
         .text(title)
     return a
@@ -136,7 +136,7 @@ function photo_search_form_a(criteria, title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { do_photo_search_form(criteria, true); return false; })
+        .on('click', function() { do_photo_search_form(criteria); return false; })
         .text(title)
     return a
 }
@@ -149,7 +149,7 @@ function photo_search_results_a(search, page, title) {
     }
     var a = $('<a/>')
         .attr('href', photo_search_results_url(search, page))
-        .on('click', function() { do_photo_search_results(search, page, true); return false; })
+        .on('click', function() { do_photo_search_results(search, page); return false; })
         .text(title)
     return a
 }
@@ -167,7 +167,7 @@ function photo_search_item_a(search, n, photo, title) {
 
     var a = $('<a/>')
         .attr('href', photo_search_item_url(search, n, photo))
-        .on('click', function() { do_photo_search_item(search, n, id, true); return false; })
+        .on('click', function() { do_photo_search_item(search, n, id); return false; })
         .data('photo', photo)
         .text(title)
 
@@ -181,7 +181,7 @@ function settings_a(title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { do_settings_form(true); return false; })
+        .on('click', function() { do_settings_form(); return false; })
         .text(title)
     return a
 }
@@ -207,7 +207,7 @@ function upload_form_a(title) {
     }
     var a = $('<a/>')
         .attr('href', upload_url())
-        .on('click', function() { do_upload(true); return false; })
+        .on('click', function() { do_upload(); return false; })
         .text(title)
     return a
 }
@@ -217,10 +217,12 @@ function upload_form_a(title) {
 // * HELPERS *
 // ***********
 
-function update_history(push_history, url, state) {
-    if (push_history) {
+function update_history(url, state) {
+    if (window.history.state != null && !is_equal_objects(window.history.state, state)) {
+        // if state has changed, push new state
         window.history.pushState(state, document.title, url);
-    } else {
+    } else if (state==null) {
+        // otherwise just update if state wasn't set before
         window.history.replaceState(state, document.title, url);
     }
 }
@@ -264,47 +266,49 @@ window.onpopstate = function(event) {
     if (state != null) {
 //        alert("location: " + document.location + ", state: " + JSON.stringify(event.state));
         if (state.type == 'display_root') {
-            do_root(false)
+            do_root()
         } else if (state.type == 'display_photo') {
-            do_photo(state.photo_id, state.search, false)
+            do_photo(state.photo_id, state.search)
         } else if (state.type == 'display_search_results') {
             var doer = get_doer(state.object_type)
             if (doer != null) {
-                doer.do_search_results(state.search, state.page, false)
+                doer.do_search_results(state.search, state.page)
             } else {
-                handle_error("doer not found", false)
+                display_error("doer not found")
             }
         } else if (state.type == 'display') {
             var doer = get_doer(state.object_type)
             if (doer != null) {
                 doer.do(state.object_id, false)
             } else {
-                handle_error("doer not found", false)
+                display_error("doer not found")
             }
         } else if (state.type == 'display_album_search_results') {
-            do_album_search_results(state.search, state.page, false)
+            do_album_search_results(state.search, state.page)
         } else if (state.type == 'display_album') {
-            do_album(state.album_id, false)
+            do_album(state.album_id)
         } else if (state.type == 'display_category_search_results') {
-            do_category_search_results(state.search, state.page, false)
+            do_category_search_results(state.search, state.page)
         } else if (state.type == 'display_category') {
-            do_category(state.category_id, false)
+            do_category(state.category_id)
         } else if (state.type == 'display_place_search_results') {
-            do_place_search_results(state.search, state.page, false)
+            do_place_search_results(state.search, state.page)
         } else if (state.type == 'display_place') {
-            do_place(state.place_id, false)
+            do_place(state.place_id)
         } else if (state.type == 'display_person_search_results') {
-            do_person_search_results(state.search, state.page, false)
+            do_person_search_results(state.search, state.page)
         } else if (state.type == 'display_person') {
-            do_person(state.person_id, false)
+            do_person(state.person_id)
         } else if (state.type == 'display_photo_search_item') {
-            do_photo_search_item(state.search, state.n, state.photo_id, false)
+            do_photo_search_item(state.search, state.n, state.photo_id)
         } else if (state.type == 'display_photo_search_results') {
-            do_photo_search_results(state.search, state.page, false)
+            do_photo_search_results(state.search, state.page)
         } else if (state.type == 'display_upload_form') {
-            do_upload_form(false)
+            do_upload_form()
+        } else if (state.type == 'display_error') {
+            display_error(state.message)
         } else {
-            handle_error("We don't understand our state", false)
+            display_error("We don't understand our state")
         }
     }
 };
@@ -378,7 +382,7 @@ function display_loading() {
 }
 
 
-function display_error(data) {
+function _display_error(data) {
     var message = $("<div></div>")
 
     $("<img/>")
@@ -395,21 +399,6 @@ function display_error(data) {
 
     $.blockUI({ message: message })
 }
-
-
-function handle_error(message, push_history) {
-    // if we are not pushing history, we need
-    // to replace the current page
-    if (!push_history) {
-        var img = $("<div></div>")
-            .image()
-            .image("set_error")
-        var cm = $("#content-main")
-            .html(img)
-    }
-    display_error(message)
-}
-
 
 
 function hide_loading()
@@ -486,6 +475,18 @@ function append_jump(id, type, on_jump) {
 // *******************
 // * HTML generators *
 // *******************
+
+function display_error(message) {
+    update_history(root_url(), { type: 'display_error', message: message })
+
+    _display_error(message)
+    var img = $("<div></div>")
+        .image()
+        .image("set_error")
+    var cm = $("#content-main")
+        .html(img)
+}
+
 
 function reset_display() {
     $("#content").removeClass("slideshow")
@@ -603,7 +604,7 @@ function display_photo(photo, rights, search, results, n) {
                     .text(text)
                     .attr("href",  photo_search_item_url(search, page, null))
                     .on("click", function() {
-                        do_photo_search_item(search, page, null, true)
+                        do_photo_search_item(search, page, null)
                         return false;
                     })
             }
@@ -1029,7 +1030,7 @@ function display_settings(data) {
 }
 
 
-function display_login(push_history) {
+function display_login() {
     var dialog = $("<div id='dialog'></div>")
         .login_dialog()
 }
@@ -1040,8 +1041,8 @@ function display_login(push_history) {
 // ********************
 
 
-function do_root(push_history) {
-    update_history(push_history, root_url(), {
+function do_root() {
+    update_history(root_url(), {
         type: 'display_root',
     });
     display_root()
@@ -1059,27 +1060,27 @@ function do_logout() {
         function(data) {
             hide_loading()
             if (window.history.state==null) {
-                do_root(false)
+                do_root()
             } else {
                 reload_page()
             }
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-function do_photo(photo_id, search, push_history) {
+function do_photo(photo_id, search) {
     search_defaults(search)
 
     display_loading()
     load_photo(photo_id,
         function(data) {
             hide_loading()
-            update_history(push_history, photo_url(data.photo, search), {
+            update_history(photo_url(data.photo, search), {
                 type: 'display_photo',
                 photo_id: data.photo.id,
                 search: search,
@@ -1088,13 +1089,13 @@ function do_photo(photo_id, search, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-function do_change_photo_relation(photo_relation_id, push_history) {
+function do_change_photo_relation(photo_relation_id) {
     display_loading()
     load_photo_relation(photo_relation_id,
         function(data) {
@@ -1103,13 +1104,13 @@ function do_change_photo_relation(photo_relation_id, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-function do_photo_relation_add(photo, push_history) {
+function do_photo_relation_add(photo) {
     display_change_photo_relation({
         id: null,
         type: "photo_relation",
@@ -1121,7 +1122,7 @@ function do_photo_relation_add(photo, push_history) {
 }
 
 
-function do_photo_relation_delete(photo_relation_id, push_history) {
+function do_photo_relation_delete(photo_relation_id) {
     display_loading()
     load_photo_relation(photo_relation_id,
         function(data) {
@@ -1130,13 +1131,13 @@ function do_photo_relation_delete(photo_relation_id, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-function do_photo_search_form(criteria, push_history) {
+function do_photo_search_form(criteria) {
     close_all_dialog()
 
     display_loading()
@@ -1147,20 +1148,20 @@ function do_photo_search_form(criteria, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-function do_photo_search_results(search, page, push_history, success) {
+function do_photo_search_results(search, page, success) {
     search_defaults(search)
 
     display_loading()
     load_photo_search_results(search, page,
         function(data) {
             hide_loading()
-            update_history(push_history,
+            update_history(
                 photo_search_results_url(search, page), {
                     type: 'display_photo_search_results',
                     search: search,
@@ -1172,15 +1173,15 @@ function do_photo_search_results(search, page, push_history, success) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-function do_photo_search_item(search, n, photo_id, push_history) {
+function do_photo_search_item(search, n, photo_id) {
     if (n==null) {
-        return do_photo(photo_id, search, push_history)
+        return do_photo(photo_id, search)
     }
 
     search_defaults(search)
@@ -1190,7 +1191,7 @@ function do_photo_search_item(search, n, photo_id, push_history) {
         function(data) {
             hide_loading()
             if (photo_id == null || data.photo.id == photo_id) {
-                update_history(push_history,
+                update_history(
                     photo_search_item_url(search, n, data.photo), {
                         type: 'display_photo_search_item',
                         search: search,
@@ -1200,39 +1201,39 @@ function do_photo_search_item(search, n, photo_id, push_history) {
                 );
                 display_photo(data.photo, data.rights, search, data, n)
             } else {
-                do_photo(photo_id, search, push_history)
+                do_photo(photo_id, search)
             }
         },
 
         function(message) {
             if (photo_id != null) {
-                do_photo(photo_id, search, push_history)
+                do_photo(photo_id, search)
             } else {
-                handle_error(message, push_history)
+                display_error(message)
             }
         }
     )
 }
 
-function do_settings_form(push_history) {
+function do_settings_form() {
     close_all_dialog()
     display_settings()
 }
 
 
-function do_upload_form(push_history) {
+function do_upload_form() {
     display_loading()
     load_upload_form(
         function(data) {
             hide_loading()
-            update_history(push_history, upload_form_url(), {
+            update_history(upload_form_url(), {
                 type: 'display_upload_form',
             });
             display_upload_form(data)
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }

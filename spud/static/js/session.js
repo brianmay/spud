@@ -147,7 +147,7 @@ $.widget('spud.login_dialog',  $.spud.form_dialog, {
                 hide_loading()
                 mythis.close()
                 if (window.history.state==null) {
-                    do_root(false)
+                    do_root()
                 } else {
                     reload_page()
                 }

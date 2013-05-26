@@ -99,7 +99,7 @@ generic_doer.prototype.search_form_a = function(criteria, title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { mythis.do_search_form(criteria, true); return false; })
+        .on('click', function() { mythis.do_search_form(criteria); return false; })
         .text(title)
     return a
 }
@@ -111,7 +111,7 @@ generic_doer.prototype.search_results_a = function(search, page, title) {
     }
     var a = $('<a/>')
         .attr('href', this.search_results_url(search, page))
-        .on('click', function() { mythis.do_search_results(search, page, true); return false; })
+        .on('click', function() { mythis.do_search_results(search, page); return false; })
         .text(title)
     return a
 }
@@ -142,7 +142,7 @@ generic_doer.prototype.change_a = function(object, title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { mythis.do_change(object.id, true); return false; })
+        .on('click', function() { mythis.do_change(object.id); return false; })
         .data('photo', object.cover_photo)
         .text(title)
     return a
@@ -155,7 +155,7 @@ generic_doer.prototype.add_a = function(parent, title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { mythis.do_add(parent, true); return false; })
+        .on('click', function() { mythis.do_add(parent); return false; })
         .text(title)
     return a
 }
@@ -167,7 +167,7 @@ generic_doer.prototype.delete_a = function(object, title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { mythis.do_delete(object.id, true); return false; })
+        .on('click', function() { mythis.do_delete(object.id); return false; })
         .data('photo', object.cover_photo)
         .text(title)
     return a
@@ -421,7 +421,7 @@ generic_doer.prototype.display_delete = function(object, dialog) {
 }
 
 
-generic_doer.prototype.do_search_form = function(criteria, push_history) {
+generic_doer.prototype.do_search_form = function(criteria) {
     var mythis = this
     close_all_dialog()
 
@@ -433,12 +433,12 @@ generic_doer.prototype.do_search_form = function(criteria, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
-generic_doer.prototype.do_search_results = function(search, page, push_history, success) {
+generic_doer.prototype.do_search_results = function(search, page, success) {
     if (search.results_per_page == null)
         search.results_per_page = get_settings().items_per_page
 
@@ -447,7 +447,7 @@ generic_doer.prototype.do_search_results = function(search, page, push_history, 
     this.load_search_results(search, page,
         function(data) {
             hide_loading()
-            update_history(push_history,
+            update_history(
                 mythis.search_results_url(search, page), {
                     type: "display_search_results",
                     object_type: mythis.type,
@@ -459,13 +459,13 @@ generic_doer.prototype.do_search_results = function(search, page, push_history, 
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-generic_doer.prototype.do = function(object_id, push_history) {
+generic_doer.prototype.do = function(object_id) {
     var mythis = this
     display_loading()
     this.load(object_id,
@@ -473,7 +473,6 @@ generic_doer.prototype.do = function(object_id, push_history) {
             hide_loading()
             var object = mythis.get_object(data)
             update_history(
-                push_history,
                 mythis.url(object), {
                     type: "display",
                     object_type: mythis.type,
@@ -484,13 +483,13 @@ generic_doer.prototype.do = function(object_id, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-generic_doer.prototype.do_change = function(object_id, push_history) {
+generic_doer.prototype.do_change = function(object_id) {
     var mythis = this
     close_all_dialog()
 
@@ -502,13 +501,13 @@ generic_doer.prototype.do_change = function(object_id, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }
 
 
-generic_doer.prototype.do_add = function(parent, push_history) {
+generic_doer.prototype.do_add = function(parent) {
     close_all_dialog()
 
     this.display_change(
@@ -519,7 +518,7 @@ generic_doer.prototype.do_add = function(parent, push_history) {
 }
 
 
-generic_doer.prototype.do_delete = function(object_id, push_history) {
+generic_doer.prototype.do_delete = function(object_id) {
     close_all_dialog()
 
     var mythis = this
@@ -531,7 +530,7 @@ generic_doer.prototype.do_delete = function(object_id, push_history) {
         },
 
         function(message) {
-            handle_error(message, push_history)
+            display_error(message)
         }
     )
 }

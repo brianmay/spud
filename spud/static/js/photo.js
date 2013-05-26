@@ -249,7 +249,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
         }
 
         var mythis = this
-        do_photo_search_results(search, 0, true, function() { mythis.close() })
+        do_photo_search_results(search, 0, function() { mythis.close() })
     },
 })
 
@@ -618,7 +618,7 @@ $.widget('spud.photo_menu', $.spud.spud_menu, {
             this.add_item(
                 $("<a href='#'>Article</a>")
                 .on("click", function() {
-                    do_photo_search_item($.extend({}, search, { photo_mode: "article" }), n, photo.id, true)
+                    do_photo_search_item($.extend({}, search, { photo_mode: "article" }), n, photo.id)
                     return false;
                 }))
         }
@@ -740,7 +740,7 @@ $.widget('spud.photo_list_menu', $.spud.spud_menu, {
                 $("<a href=''>Slideshow</a>")
                 .attr("href", photo_search_item_url(search, 0, null))
                 .on("click", function() {
-                    do_photo_search_item($.extend({}, search, { photo_mode: "slideshow" }), 0, null, true)
+                    do_photo_search_item($.extend({}, search, { photo_mode: "slideshow" }), 0, null)
                     return false;
                 }))
         }

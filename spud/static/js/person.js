@@ -61,7 +61,7 @@ $.widget('spud.person_search_dialog',  $.spud.form_dialog, {
         }
 
         var mythis = this
-        persons.do_search_results(search, 0, true, function() { mythis.close() })
+        persons.do_search_results(search, 0, function() { mythis.close() })
     },
 })
 
@@ -187,7 +187,7 @@ $.widget('spud.person_menu', $.spud.spud_menu, {
                 $("<a href=''>Slideshow</a>")
                 .attr("href", photo_search_item_url({ criteria: criteria }, 0, null))
                 .on("click", function() {
-                    do_photo_search_item({ criteria: criteria, photo_mode: "slideshow" }, 0, null, true);
+                    do_photo_search_item({ criteria: criteria, photo_mode: "slideshow" }, 0, null);
                     return false;
                 }))
         }

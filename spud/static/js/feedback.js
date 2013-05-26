@@ -208,7 +208,7 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
         }
 
         var mythis = this
-        feedbacks.do_search_results(search, 0, true, function() { mythis.close() })
+        feedbacks.do_search_results(search, 0, function() { mythis.close() })
     },
 })
 
@@ -520,7 +520,7 @@ feedback_doer.prototype.get_new_object = function(photo, parent) {
     }
 }
 
-feedback_doer.prototype.do_add = function(photo, parent, push_history) {
+feedback_doer.prototype.do_add = function(photo, parent) {
     close_all_dialog()
 
     this.display_change(
@@ -535,7 +535,7 @@ feedback_doer.prototype.add_a = function(photo, parent, title) {
     }
     var a = $('<a/>')
         .attr('href', "#")
-        .on('click', function() { mythis.do_add(photo, parent, true); return false; })
+        .on('click', function() { mythis.do_add(photo, parent); return false; })
         .text(title)
     return a
 }

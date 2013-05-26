@@ -103,6 +103,42 @@ $.fn.append_csv = function(list){
 }
 
 
+function is_equal_objects(x, y)
+{
+  var p;
+  if (x == null) {
+      return false;
+  }
+  for(p in x) {
+      if(typeof(y[p])=='undefined') {return false;}
+  }
+  if (y == null) {
+      return false;
+  }
+  for(p in y) {
+      if(typeof(x[p])=='undefined') {return false;}
+  }
+
+  for(p in y) {
+      if (y[p]) {
+          switch(typeof(y[p])) {
+              case 'object':
+                  if (!is_equal_objects(x[p], y[p])) { return false; } break;
+              case 'function':
+                  break;
+              default:
+                  if (y[p] != x[p]) { return false; }
+          }
+      } else {
+          if (x[p])
+              return false;
+      }
+  }
+
+  return true;
+}
+
+
 // ****************
 // * BASE WIDGETS *
 // ****************
@@ -634,7 +670,7 @@ $.widget('spud.image', {
                         .html(this.img)
                         .attr('href', photo_url(photo, {}))
                         .off('click')
-                        .on('click', function() { do_photo(photo.id, {}, true); return false; })
+                        .on('click', function() { do_photo(photo.id, {}); return false; })
                         .appendTo(this.element)
                 } else {
                     this.img.appendTo(this.element)
