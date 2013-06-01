@@ -1,3 +1,9 @@
+spud (1.11-1) unstable; urgency=low
+
+  * Various bug fixes.
+
+ -- Brian May <bam@debian.org>  Sat, 01 Jun 2013 12:41:57 +1000
+
 spud (1.10-1) unstable; urgency=low
 
   * Improvements for video.
