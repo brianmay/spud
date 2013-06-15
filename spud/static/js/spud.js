@@ -221,7 +221,7 @@ function update_history(url, state) {
     if (window.history.state != null && !is_equal_objects(window.history.state, state)) {
         // if state has changed, push new state
         window.history.pushState(state, document.title, url);
-    } else if (state==null) {
+    } else if (window.history.state==null) {
         // otherwise just update if state wasn't set before
         window.history.replaceState(state, document.title, url);
     }
