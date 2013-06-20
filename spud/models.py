@@ -461,7 +461,7 @@ class feedback(hierarchy_model):
     # Metadata about the comment
     submit_datetime = models.DateTimeField()
     utc_offset = models.IntegerField()
-    ip_address = models.IPAddressField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True, unpack_ipv4=True)
     is_public = models.BooleanField(default=True)
     is_removed = models.BooleanField(default=False)
 
