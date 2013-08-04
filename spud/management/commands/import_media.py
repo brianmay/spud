@@ -80,10 +80,10 @@ class Command(BaseCommand):
 
             io['action'] = "V"
 
-            rotate = None
+            rotate = "0"
             if options['rotate']:
                 if options['rotate'] == "0":
-                    pass
+                    rotate = "0"
                 elif options['rotate'] == "auto":
                     rotate = "auto"
                 elif options['rotate'] == "90":
@@ -156,11 +156,13 @@ class Command(BaseCommand):
             for arg in args:
                 try:
                     photo = spud.upload.import_photo(arg, d, io)
-                    photo.rotate(rotate)
-                    photo.generate_thumbnails(overwrite=False)
                 except models.photo_already_exists_error, e:
                     warnings = warnings + 1
                     sys.stderr.write("Skipping %s due to %s\n" % (arg, e))
+                else:
+                    if not options['dryrun']:
+                        photo.rotate(rotate)
+                        photo.generate_thumbnails(overwrite=False)
 
             if warnings > 0:
                 sys.stderr.write("%d warnings found\n" % (warnings))
