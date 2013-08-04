@@ -43,18 +43,30 @@ class media:
 
     def get_datetime(self):
         exif = self.get_exif()
-        try:
-            value = exif['EXIF:DateTimeOriginal']
-            if isinstance(value, str):
-                value = exif['EXIF:DateTimeDigitized']
-            value = datetime.datetime.strptime(value, "%Y:%m:%d %H:%M:%S")
-        except KeyError:
+        dt = None
+
+        value = exif.get('EXIF:DateTimeOriginal', None)
+        if value == '    :  :     :  :  ':
             value = None
 
         if value is None:
-            value = datetime.datetime.fromtimestamp(os.path.getmtime(self.src_full))
+            value = exif.get('EXIF:DateTimeDigitized', None)
+        if value == '    :  :     :  :  ':
+            value = None
 
-        return value
+        if value is None:
+            value =  exif.get('EXIF:CreateDate', None)
+        if value == '    :  :     :  :  ':
+            value = None
+
+        if value is not None:
+            dt = datetime.datetime.strptime(value, "%Y:%m:%d %H:%M:%S")
+        del value
+
+        if dt is None:
+            dt = datetime.datetime.fromtimestamp(os.path.getmtime(self.src_full))
+
+        return dt
 
     def create_thumbnail(self, dst_path, max_size):
         image = Image.open(self.src_full)
