@@ -1019,6 +1019,9 @@ function setup_photo_search_results() {
 }
 
 function display_photo_search_results(rights, search, results) {
+    var page = Math.floor(results.first / search.results_per_page)
+    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
+
     update_history(
         photo_search_results_url(search, page), {
             type: 'display_photo_search_results',
@@ -1028,9 +1031,6 @@ function display_photo_search_results(rights, search, results) {
     );
 
     setup_photo_search_results()
-
-    var page = Math.floor(results.first / search.results_per_page)
-    var last_page = Math.ceil(results.number_results / search.results_per_page) - 1
 
     document.title = "Photo List " + (page+1) + "/" + (last_page+1) + " | Photos | Spud"
     $("#title").text("Photo List " + escapeHTML(page+1) + "/" + escapeHTML(last_page+1))
