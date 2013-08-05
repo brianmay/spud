@@ -2724,7 +2724,7 @@ def photo_search_change(request):
             for photo in photo_list:
                 for value in values:
                     spud.models.photo_album.objects.filter(
-                        photo=photo, album=album
+                        photo=photo, album=value
                     ).delete()
                     del value
                 del photo
