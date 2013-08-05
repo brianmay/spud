@@ -77,6 +77,7 @@ $.fn.conditional_append = function(condition, content) {
 
 $.fn.p = function(text){
     if (!text) {
+        this.empty()
         return this
     }
     var converter = new Showdown.converter()
