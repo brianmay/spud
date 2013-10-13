@@ -477,6 +477,8 @@ function append_jump(id, type, on_jump) {
 // *******************
 
 function display_error(message) {
+    window.spud_type = "display_error"
+
     update_history(root_url(), { type: 'display_error', message: message })
 
     _display_error(message)
