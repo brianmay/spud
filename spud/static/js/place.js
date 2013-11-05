@@ -277,7 +277,7 @@ $.widget('spud.place_change_dialog',  $.spud.form_dialog, {
                 mythis.close()
                 reload_page()
             },
-            display_error
+            popup_error
         )
     },
 })
@@ -309,7 +309,7 @@ $.widget('spud.place_delete_dialog',  $.spud.form_dialog, {
                 hide_loading()
                 window.history.go(-1)
             },
-            display_error
+            popup_error
         )
     },
 })

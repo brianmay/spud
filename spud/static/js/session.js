@@ -152,7 +152,7 @@ $.widget('spud.login_dialog',  $.spud.form_dialog, {
                     reload_page()
                 }
             },
-            display_error
+            popup_error
         )
     },
 })

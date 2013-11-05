@@ -382,7 +382,7 @@ function display_loading() {
 }
 
 
-function _display_error(data) {
+function popup_error(data) {
     var message = $("<div></div>")
 
     $("<img/>")
@@ -481,7 +481,7 @@ function display_error(message) {
 
     update_history(root_url(), { type: 'display_error', message: message })
 
-    _display_error(message)
+    popup_error(message)
     var img = $("<div></div>")
         .image()
         .image("set_error")

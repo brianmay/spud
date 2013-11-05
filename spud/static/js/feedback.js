@@ -26,7 +26,7 @@ function _change_feedback(feedback, updates) {
             hide_loading()
             reload_page()
         },
-        display_error
+        popup_error
     )
 }
 
@@ -454,7 +454,7 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
                     reload_page()
                 }
             },
-            display_error
+            popup_error
         )
     },
 })
@@ -486,7 +486,7 @@ $.widget('spud.feedback_delete_dialog',  $.spud.form_dialog, {
                 hide_loading()
                 window.history.go(-1)
             },
-            display_error
+            popup_error
         )
     },
 })
