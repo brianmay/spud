@@ -1132,7 +1132,7 @@ def album(request, album_id):
         if not request.user.has_perm('spud.change_album'):
             raise ErrorForbidden("No rights to change albums")
     album = get_object_or_404(spud.models.album, pk=album_id)
-    return album_finish(request, album)
+    return album_finish(request, album, False)
 
 
 @check_errors
@@ -1143,7 +1143,7 @@ def album_add(request):
         if not request.user.has_perm('spud.add_album'):
             raise ErrorForbidden("No rights to add albums")
     album = spud.models.album()
-    return album_finish(request, album)
+    return album_finish(request, album, True)
 
 
 @check_errors
@@ -1168,7 +1168,7 @@ def album_delete(request, album_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def album_finish(request, album):
+def album_finish(request, album, created):
     if request.method == "POST":
         params = request.POST.copy()
         _pop_string(params, "_")
@@ -1231,10 +1231,10 @@ def album_finish(request, album):
 
         _check_params_empty(params)
 
-        if updated:
+        if updated or created:
             album.save()
 
-        if updated_parent:
+        if updated_parent or created:
             album.fix_ascendants()
 
     resp = {
@@ -1360,7 +1360,7 @@ def category(request, category_id):
         if not request.user.has_perm('spud.change_category'):
             raise ErrorForbidden("No rights to change categorys")
     category = get_object_or_404(spud.models.category, pk=category_id)
-    return category_finish(request, category)
+    return category_finish(request, category, False)
 
 
 @check_errors
@@ -1371,7 +1371,7 @@ def category_add(request):
         if not request.user.has_perm('spud.add_category'):
             raise ErrorForbidden("No rights to add categorys")
     category = spud.models.category()
-    return category_finish(request, category)
+    return category_finish(request, category, True)
 
 
 @check_errors
@@ -1397,7 +1397,7 @@ def category_delete(request, category_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def category_finish(request, category):
+def category_finish(request, category, created):
     if request.method == "POST":
         params = request.POST.copy()
         _pop_string(params, "_")
@@ -1446,10 +1446,10 @@ def category_finish(request, category):
 
         _check_params_empty(params)
 
-        if updated is not None:
+        if updated or created:
             category.save()
 
-        if updated_parent:
+        if updated_parent or created:
             category.fix_ascendants()
 
     resp = {
@@ -1575,7 +1575,7 @@ def place(request, place_id):
         if not request.user.has_perm('spud.change_place'):
             raise ErrorForbidden("No rights to change places")
     place = get_object_or_404(spud.models.place, pk=place_id)
-    return place_finish(request, place)
+    return place_finish(request, place, False)
 
 
 @check_errors
@@ -1586,7 +1586,7 @@ def place_add(request):
         if not request.user.has_perm('spud.add_place'):
             raise ErrorForbidden("No rights to add places")
     place = spud.models.place()
-    return place_finish(request, place)
+    return place_finish(request, place, True)
 
 
 @check_errors
@@ -1611,7 +1611,7 @@ def place_delete(request, place_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def place_finish(request, place):
+def place_finish(request, place, created):
     if request.method == "POST":
         params = request.POST.copy()
         _pop_string(params, "_")
@@ -1690,10 +1690,10 @@ def place_finish(request, place):
 
         _check_params_empty(params)
 
-        if updated:
+        if updated or created:
             place.save()
 
-        if updated_parent:
+        if updated_parent or created:
             place.fix_ascendants()
 
     resp = {
@@ -1824,7 +1824,7 @@ def person(request, person_id):
         if not request.user.has_perm('spud.change_person'):
             raise ErrorForbidden("No rights to change persons")
     person = get_object_or_404(spud.models.person, pk=person_id)
-    return person_finish(request, person)
+    return person_finish(request, person, False)
 
 
 @check_errors
@@ -1835,7 +1835,7 @@ def person_add(request):
         if not request.user.has_perm('spud.add_person'):
             raise ErrorForbidden("No rights to add persons")
     person = spud.models.person()
-    return person_finish(request, person)
+    return person_finish(request, person, True)
 
 
 @check_errors
@@ -1860,7 +1860,7 @@ def person_delete(request, person_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def person_finish(request, person):
+def person_finish(request, person, created):
     if request.method == "POST":
         params = request.POST.copy()
         _pop_string(params, "_")
@@ -2003,10 +2003,10 @@ def person_finish(request, person):
 
         _check_params_empty(params)
 
-        if updated:
+        if updated or created:
             person.save()
 
-        if updated_parent:
+        if updated_parent or created:
             person.fix_ascendants()
 
     resp = {
@@ -2026,7 +2026,7 @@ def photo_relation(request, photo_relation_id):
             raise ErrorForbidden("No rights to change photo_relations")
     photo_relation = get_object_or_404(
         spud.models.photo_relation, pk=photo_relation_id)
-    return photo_relation_finish(request, photo_relation)
+    return photo_relation_finish(request, photo_relation, False)
 
 
 @check_errors
@@ -2047,7 +2047,7 @@ def photo_relation_add(request):
         raise ErrorBadRequest("desc_2 must be given")
 
     photo_relation = spud.models.photo_relation()
-    return photo_relation_finish(request, photo_relation)
+    return photo_relation_finish(request, photo_relation, True)
 
 
 @check_errors
@@ -2074,7 +2074,7 @@ def photo_relation_delete(request, photo_relation_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def photo_relation_finish(request, photo_relation):
+def photo_relation_finish(request, photo_relation, created):
     if request.method == "POST":
         params = request.POST.copy()
         _pop_string(params, "_")
@@ -2113,7 +2113,7 @@ def photo_relation_finish(request, photo_relation):
 
         _check_params_empty(params)
 
-        if updated:
+        if updated or created:
             photo_relation.save()
 
     resp = {
@@ -2277,7 +2277,7 @@ def feedback(request, feedback_id):
             raise ErrorForbidden("No rights to change feedbacks")
     feedback = get_object_or_404(
         spud.models.feedback, pk=feedback_id)
-    return feedback_finish(request, feedback)
+    return feedback_finish(request, feedback, False)
 
 
 @check_errors
@@ -2300,7 +2300,7 @@ def feedback_add(request):
     feedback.ip_address = request.META.get("REMOTE_ADDR", None)
     feedback.is_public = False
     feedback.is_removed = False
-    return feedback_finish(request, feedback)
+    return feedback_finish(request, feedback, True)
 
 
 @check_errors
@@ -2328,7 +2328,7 @@ def feedback_delete(request, feedback_id):
     return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
-def feedback_finish(request, feedback):
+def feedback_finish(request, feedback, created):
     if request.method == "POST":
         new_feedback = (feedback.pk is None)
 
@@ -2399,16 +2399,16 @@ def feedback_finish(request, feedback):
 
         _check_params_empty(params)
 
-        if updated:
+        if updated or created:
             feedback.save()
 
-        if updated_parent:
+        if updated_parent or created:
             feedback.fix_ascendants()
 
         if old_photo is not None:
             old_photo.fix_rating()
 
-        if updated_rating:
+        if updated_rating or created:
             feedback.photo.fix_rating()
 
         if new_feedback:
