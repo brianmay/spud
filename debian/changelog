@@ -1,3 +1,9 @@
+spud (1.13-1) unstable; urgency=low
+
+  * Fix various bugs.
+
+ -- Brian May <bam@debian.org>  Tue, 05 Nov 2013 11:44:17 +1100
+
 spud (1.12-1) unstable; urgency=low
 
   * Fix various bugs.
