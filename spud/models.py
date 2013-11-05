@@ -96,8 +96,14 @@ class hierarchy_model(base_model):
 
     def get_descendants(self, include_self):
         if include_self:
+            results = 0
             for i in self.descendant_set.all():
+                results = results + 1
                 yield i.descendant
+            # if descendants list is length 0 it is invalid,
+            # should include self
+            if results == 0:
+                yield self
         else:
             for i in self.descendant_set.filter(position__gt=0):
                 yield i.descendant
@@ -151,11 +157,6 @@ class hierarchy_model(base_model):
 
         if do_descendants:
             instance_list = list(self.get_descendants(True))
-            # if descendants list is length 0 it is invalid,
-            # should include self
-            if len(instance_list) == 0:
-                instance_list = [self]
-                instance_list.extend(self.children.all())
         else:
             instance_list = [self]
 
