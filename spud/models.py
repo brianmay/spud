@@ -156,7 +156,7 @@ class hierarchy_model(base_model):
             cache={}
 
         if do_descendants:
-            instance_list = list(self.get_descendants(True))
+            instance_list = self.get_descendants(True)
         else:
             instance_list = [self]
 
