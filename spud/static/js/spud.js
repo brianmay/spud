@@ -587,7 +587,7 @@ function setup_photo(photo_mode) {
 function display_photo(photo, rights, search, results, n) {
     if (n == null) {
         update_history(
-            photo_url(data.photo, search), {
+            photo_url(photo, search), {
                 type: 'display_photo',
                 photo_id: photo.id,
                 search: search,
