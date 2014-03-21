@@ -464,7 +464,7 @@ ajax_select_multiple_field.prototype.set = function(value) {
     var value_arr = []
     if (value != null) {
         var value_arr = $.map(value,
-            function(value){ return { pk: value.id, repr: value.title, } }
+            function(v){ return { pk: v.id, repr: v.title, } }
         );
     }
     this.input.ajaxautocompletemultiple("set", value_arr)
