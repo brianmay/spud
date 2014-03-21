@@ -713,6 +713,9 @@ $.widget('spud.photo_list', $.spud.photo_list_base, {
             if (photo.place != null) {
                 details.push($("<div/>").text(photo.place.title))
             }
+            if (photo.persons.length > 0) {
+                details.push($("<div/>").text(photo.persons.join(", ")))
+            }
             mythis.append_photo(
                 photo, photo.title, details,
                 photo.description, photo_search_item_a(search, n, photo))

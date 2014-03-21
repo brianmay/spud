@@ -330,6 +330,8 @@ def _json_photo_brief(user, photo):
     # photo --> photo.place --> place --> place.cover_photo --> photo --> etc
     resp.update({
         'place': {'title': unicode(photo.location)},
+        'persons': [ unicode(p) for p in
+                        photo.persons.order_by("photo_person__position").all()],
     })
 
     return resp
