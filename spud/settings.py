@@ -57,9 +57,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'spud.urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
     "/etc/spud/templates",
 )
 
@@ -80,18 +77,18 @@ LOGIN_REDIRECT_URL = "/spud/"
 LOGOUT_URL = "/spud/account/login/"
 
 AJAX_LOOKUP_CHANNELS = {
-    'person' : ('spud.lookup', 'person_lookup'),
-    'place' : ('spud.lookup', 'place_lookup'),
-    'album' : ('spud.lookup', 'album_lookup'),
-    'category' : ('spud.lookup', 'category_lookup'),
-    'feedback' : ('spud.lookup', 'feedback_lookup'),
-    'photo' : ('spud.lookup', 'photo_lookup'),
+    'person': ('spud.lookup', 'person_lookup'),
+    'place': ('spud.lookup', 'place_lookup'),
+    'album': ('spud.lookup', 'album_lookup'),
+    'category': ('spud.lookup', 'category_lookup'),
+    'feedback': ('spud.lookup', 'feedback_lookup'),
+    'photo': ('spud.lookup', 'photo_lookup'),
 }
 AJAX_SELECT_BOOTSTRAP = False
 AJAX_SELECT_INLINES = None
 
-IMAGE_URL="/images/"
-IMAGE_PATH=None
+IMAGE_URL = "/images/"
+IMAGE_PATH = None
 
 IMAGE_SIZES = {
     'thumb': {'size': 120, 'draft': True},
@@ -99,7 +96,7 @@ IMAGE_SIZES = {
     'large': {'size': 960, 'draft': False},
 }
 
-DEFAULT_LIST_SIZE='thumb'
+DEFAULT_LIST_SIZE = 'thumb'
 
 VIDEO_SIZES = {
     '320': {'size': 320},

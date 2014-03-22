@@ -303,7 +303,6 @@ def _json_photo(user, photo):
         'localtime': _json_datetime_brief(photo.datetime, photo.utc_offset),
         'utctime': _json_datetime_brief(photo.datetime, 0),
         'action': photo.action,
-#        'timestamp': photo.timestamp,
         'thumb': {},
     }
 
@@ -363,7 +362,8 @@ def _json_photo_detail(user, photo):
         'focus_dist': photo.focus_dist,
         'ccd_width': photo.ccd_width,
         'albums': [_json_album_brief(user, a) for a in photo.albums.all()],
-        'categorys': [_json_category_brief(user, c) for c in photo.categorys.all()],
+        'categorys': [_json_category_brief(user, c)
+                      for c in photo.categorys.all()],
         'persons': [
             _json_person_brief(user, p) for p in
             photo.persons.order_by("photo_person__position").all()],
@@ -430,7 +430,8 @@ def _json_album_brief(user, album):
         'revised': None,
     }
     if album.revised is not None and user.is_staff:
-        d['revised'] = _json_datetime_brief(album.revised, album.revised_utc_offset)
+        d['revised'] = _json_datetime_brief(
+            album.revised, album.revised_utc_offset)
     return d
 
 
@@ -525,8 +526,10 @@ def _json_place_detail(user, place):
 
     if user.is_staff:
         d.update({
-            'work_of': [_json_person_brief(user, p) for p in place.work_of.all()],
-            'home_of': [_json_person_brief(user, p) for p in place.home_of.all()],
+            'work_of': [
+                _json_person_brief(user, p) for p in place.work_of.all()],
+            'home_of': [
+                _json_person_brief(user, p) for p in place.home_of.all()],
         })
     return d
 
@@ -544,16 +547,6 @@ def _json_person_brief(user, person):
         'middle_name': person.middle_name,
         'called': person.called,
         'cover_photo': _json_photo_brief(user, person.cover_photo),
-#        'gender': person.gender,
-#        'dob': unicode(person.dob),
-#        'dod': unicode(person.dod),
-#        'home': person.home,
-#        'work': person.work,
-#        'father': person.father,
-#        'mother': person.mother,
-#        'spouse': person.spouse,
-#        'notes': person.notes,
-#        'email': person.email,
     }
     return d
 
@@ -583,9 +576,11 @@ def _json_person_detail(user, person):
             'uncles_aunts': [
                 _json_person_brief(user, p) for p in person.uncles_aunts()],
             'parents': [_json_person_brief(user, p) for p in person.parents()],
-            'siblings': [_json_person_brief(user, p) for p in person.siblings()],
+            'siblings': [
+                _json_person_brief(user, p) for p in person.siblings()],
             'cousins': [_json_person_brief(user, p) for p in person.cousins()],
-            'children': [_json_person_brief(user, p) for p in person.children()],
+            'children': [
+                _json_person_brief(user, p) for p in person.children()],
             'nephews_nieces': [
                 _json_person_brief(user, p) for p in person.nephews_nieces()],
             'grandchildren': [
@@ -1107,8 +1102,10 @@ def album_search_results(request):
         needs_revision = _pop_boolean(params, "needs_revision")
         if needs_revision:
             dt = datetime.datetime.utcnow()-datetime.timedelta(days=365)
-            album_list = album_list.filter(Q(revised__lt=dt) | Q(revised__isnull=True))
-            album_list = album_list.annotate(null_revised=Count('revised')).order_by('null_revised', 'revised','-pk')
+            album_list = album_list.filter(
+                Q(revised__lt=dt) | Q(revised__isnull=True))
+            album_list = album_list.annotate(null_revised=Count('revised')) \
+                .order_by('null_revised', 'revised', '-pk')
             criteria["needs_revision"] = True
 
     _check_params_empty(params)
@@ -1348,7 +1345,8 @@ def category_search_results(request):
     resp = {
         'type': 'category_search_results',
         'criteria': criteria,
-        'categorys': [_json_category_brief(request.user, p) for p in category_list],
+        'categorys': [
+            _json_category_brief(request.user, p) for p in category_list],
         'number_results': number_results,
         'first': first,
         'last': first + number_returned - 1,
@@ -2420,7 +2418,7 @@ def feedback_finish(request, feedback, created):
             mail_admins(
                 u"SPUD: New feedback received",
                 u"You received new feedback %d for the photo titled %s." % (
-                feedback.pk, feedback.photo)
+                    feedback.pk, feedback.photo)
             )
 
     resp = {
@@ -2516,10 +2514,12 @@ def photo_search_item(request, params, number):
     }
 
     if number > 1:
-        resp['prev_photo'] = _json_photo_brief(request.user, photo_list[number-1])
+        resp['prev_photo'] = \
+            _json_photo_brief(request.user, photo_list[number-1])
 
     try:
-        resp['next_photo'] = _json_photo_brief(request.user, photo_list[number+1])
+        resp['next_photo'] = \
+            _json_photo_brief(request.user, photo_list[number+1])
     except IndexError:
         pass
 

@@ -21,8 +21,9 @@ import spud.exif
 import Image
 import datetime
 
+
 class media:
-    def __init__(self,src_full):
+    def __init__(self, src_full):
         self.src_full = src_full
 
     def get_path(self):
@@ -38,7 +39,7 @@ class media:
     def get_exif(self):
         with spud.exif.ExifTool() as e:
             exif = e.get_metadata(self.src_full)
-        assert(len(exif)==1)
+        assert(len(exif) == 1)
         return exif[0]
 
     def get_datetime(self):
@@ -55,7 +56,7 @@ class media:
             value = None
 
         if value is None:
-            value =  exif.get('EXIF:CreateDate', None)
+            value = exif.get('EXIF:CreateDate', None)
         if value == '    :  :     :  :  ':
             value = None
 
@@ -64,7 +65,8 @@ class media:
         del value
 
         if dt is None:
-            dt = datetime.datetime.fromtimestamp(os.path.getmtime(self.src_full))
+            dt = datetime.datetime.fromtimestamp(
+                os.path.getmtime(self.src_full))
 
         return dt
 
@@ -73,7 +75,7 @@ class media:
         return self._create_thumbnail(dst_path, max_size, image)
 
     def _create_thumbnail(self, dst_path, max_size, image):
-        (width,height) = image.size
+        (width, height) = image.size
 
         if width > max_size['size'] or height > max_size['size']:
             thumb_width = max_size['size']
@@ -85,9 +87,11 @@ class media:
                 thumb_width = int(max_size['size']*1.0/height * width)
 
             if max_size['draft']:
-                image.thumbnail((thumb_width,thumb_height),Image.ANTIALIAS)
+                image.thumbnail(
+                    (thumb_width, thumb_height), Image.ANTIALIAS)
             else:
-                image = image.resize((thumb_width,thumb_height),Image.ANTIALIAS)
+                image = image.resize(
+                    (thumb_width, thumb_height), Image.ANTIALIAS)
             thumb_width, thumb_height = image.size
         else:
             thumb_width = width
@@ -95,9 +99,9 @@ class media:
 
         image.save(dst_path)
 
-        return (thumb_width,thumb_height)
+        return (thumb_width, thumb_height)
 
-    def rotate(self,amount):
+    def rotate(self, amount):
         raise RuntimeError("rotate not implemented")
 
     def is_video(self):
@@ -105,7 +109,7 @@ class media:
 
 
 class media_jpeg(media):
-    def rotate(self,amount):
+    def rotate(self, amount):
         if amount == "auto":
             arg = "-a"
         elif amount == "0":
@@ -117,9 +121,10 @@ class media_jpeg(media):
         elif amount == "270":
             arg = "-2"
         else:
-            raise RuntimeError("rotate amount %s unknown"%(amount))
+            raise RuntimeError("rotate amount %s unknown" % (amount))
 
-        subprocess.check_call(["exiftran","-i",arg,self.get_path()])
+        subprocess.check_call(["exiftran", "-i", arg, self.get_path()])
+
 
 class media_video(media):
 
@@ -142,9 +147,6 @@ class media_video(media):
                 'w': width,
                 'h': height,
             }
-
-#        filter = "scale=iw*min(%(w)s/iw\,%(h)s/ih):ih*min(%(w)s/iw\,%(h)s/ih), " % subst
-#        filter += "pad=%(w)s:%(h)s:(%(w)s-iw*min(%(w)s/iw\,%(h)s/ih))/2:(%(h)s-ih*min(%(w)s/iw\,%(h)s/ih))/2" % subst
 
         cmd = [
             "avconv", "-y", "-i", self.get_path(),
@@ -181,15 +183,16 @@ class media_video(media):
     def is_video(self):
         return True
 
+
 class media_raw(media):
 
     def create_thumbnail(self, dst_path, max_size):
-        cmd = ["dcraw","-T","-c",self.src_full]
+        cmd = ["dcraw", "-T", "-c", self.src_full]
         t = tempfile.TemporaryFile()
-        p = subprocess.Popen(cmd,stdout=t)
+        p = subprocess.Popen(cmd, stdout=t)
         rc = p.wait()
         if rc != 0:
-            raise subprocess.CalledProcessError(rc,cmd)
+            raise subprocess.CalledProcessError(rc, cmd)
 
         t.seek(0)
         image = Image.open(t)
@@ -198,28 +201,31 @@ class media_raw(media):
         return xysize
 
     def get_size(self):
-        cmd = ["dcraw","-T","-c",self.src_full]
+        cmd = ["dcraw", "-T", "-c", self.src_full]
         t = tempfile.TemporaryFile()
-        p = subprocess.Popen(cmd,stdout=t)
+        p = subprocess.Popen(cmd, stdout=t)
         rc = p.wait()
         if rc != 0:
-            raise subprocess.CalledProcessError(rc,cmd)
+            raise subprocess.CalledProcessError(rc, cmd)
 
         t.seek(0)
         image = Image.open(t)
         t.close()
         return image.size
 
+
 def get_media(file):
-    (_,extension) = os.path.splitext(file)
+    (_, extension) = os.path.splitext(file)
     extension = extension.lower()
     if extension == ".jpg" or extension == ".tif":
         return media_jpeg(file)
-    elif extension == ".avi" or extension == ".mov" or extension == ".ogv" or extension == ".webm" or extension == ".mp4":
+    elif extension == ".avi" or extension == ".mov" \
+            or extension == ".ogv" or extension == ".webm" \
+            or extension == ".mp4":
         return media_video(file)
     elif extension == ".png":
         return media(file)
     elif extension == ".cr2":
         return media_raw(file)
     else:
-        raise RuntimeError("unknown media type for %s"%(file))
+        raise RuntimeError("unknown media type for %s" % (file))

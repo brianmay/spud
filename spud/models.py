@@ -116,14 +116,15 @@ class hierarchy_model(base_model):
             for i in self.ascendant_set.filter(position__gt=0):
                 yield i.ascendant
 
-
-    def _ascendants_glue(self, instance, position, seen, cache, parent_attributes):
+    def _ascendants_glue(
+            self, instance, position, seen, cache, parent_attributes):
         glue = []
         if instance is None:
             return glue
 
         if instance.pk in cache:
-            print "<--- getting", instance.pk,  [(i[0], i[1]+position) for i in cache[instance.pk]]
+            print "<--- getting", instance.pk, \
+                [(i[0], i[1]+position) for i in cache[instance.pk]]
             return [(i[0], i[1]+position) for i in cache[instance.pk]]
 
         if instance.pk in seen:
@@ -146,14 +147,15 @@ class hierarchy_model(base_model):
                 if item not in glue:
                     glue.append(item)
 
-        print "---> caching", instance.pk, [(i[0], i[1]-position) for i in glue]
+        print "---> caching", instance.pk, \
+            [(i[0], i[1]-position) for i in glue]
         cache[instance.pk] = [(i[0], i[1]-position) for i in glue]
         return glue
 
-
-    def _fix_ascendants(self, parent_attributes, glue_class, cache, do_descendants):
+    def _fix_ascendants(
+            self, parent_attributes, glue_class, cache, do_descendants):
         if cache is None:
-            cache={}
+            cache = {}
 
         if do_descendants:
             instance_list = self.get_descendants(True)
@@ -165,7 +167,8 @@ class hierarchy_model(base_model):
         print "((("
         for instance in instance_list:
             print "----", instance.pk
-            new_glue = instance._ascendants_glue(instance, 0, {}, cache, parent_attributes)
+            new_glue = instance._ascendants_glue(
+                instance, 0, {}, cache, parent_attributes)
             print "----", instance.pk
             print instance, instance.pk
             print "ng", [(i[0], i[1]) for i in new_glue]
@@ -185,16 +188,16 @@ class hierarchy_model(base_model):
                     print "adding", glue
                     ascendant = type(self).objects.get(pk=glue[0])
                     glue_class.objects.create(
-                        ascendant=ascendant, descendant=instance, position=glue[1])
+                        ascendant=ascendant, descendant=instance,
+                        position=glue[1])
 
             for glue in old_glue:
                 print "removing", glue
                 glue_class.objects.filter(
-                    ascendant__pk=glue[0], descendant=instance, position=glue[1]
+                    ascendant__pk=glue[0], descendant=instance,
+                    position=glue[1]
                 ).delete()
         print ")))"
-
-
 
 
 # ---------------------------------------------------------------------------
@@ -202,7 +205,8 @@ class hierarchy_model(base_model):
 
 class place(hierarchy_model):
     place_id = models.AutoField(primary_key=True)
-    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    parent = models.ForeignKey(
+        'self', related_name='children', null=True, blank=True)
     title = models.CharField(max_length=192, db_index=True)
     address = models.CharField(max_length=192, blank=True)
     address2 = models.CharField(max_length=192, blank=True)
@@ -212,17 +216,19 @@ class place(hierarchy_model):
     country = models.CharField(max_length=96, blank=True)
     url = models.CharField(max_length=3072, blank=True)
     urldesc = models.CharField(max_length=96, blank=True)
-    cover_photo = models.ForeignKey('photo', related_name='place_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey(
+        'photo', related_name='place_cover_of', null=True, blank=True)
     notes = models.TextField(blank=True)
 
     class Meta:
-        ordering = [ 'title' ]
+        ordering = ['title']
 
     def __unicode__(self):
         return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["parent"], place_ascendant, cache, do_descendants)
+        self._fix_ascendants(
+            ["parent"], place_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -255,23 +261,26 @@ class place(hierarchy_model):
 
 class album(hierarchy_model):
     album_id = models.AutoField(primary_key=True)
-    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    parent = models.ForeignKey(
+        'self', related_name='children', null=True, blank=True)
     title = models.CharField(max_length=96, db_index=True)
     description = models.TextField(blank=True)
-    cover_photo = models.ForeignKey('photo', related_name='album_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey(
+        'photo', related_name='album_cover_of', null=True, blank=True)
     sort_name = models.CharField(max_length=96, blank=True)
     sort_order = models.CharField(max_length=96, blank=True)
     revised = models.DateTimeField(null=True)
     revised_utc_offset = models.IntegerField(null=True)
 
     class Meta:
-        ordering = [ 'sort_name', 'sort_order', 'title' ]
+        ordering = ['sort_name', 'sort_order', 'title']
 
     def __unicode__(self):
         return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["parent"], album_ascendant, cache, do_descendants)
+        self._fix_ascendants(
+            ["parent"], album_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -295,21 +304,24 @@ class album(hierarchy_model):
 
 class category(hierarchy_model):
     category_id = models.AutoField(primary_key=True)
-    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    parent = models.ForeignKey(
+        'self', related_name='children', null=True, blank=True)
     title = models.CharField(max_length=96, db_index=True)
     description = models.TextField(blank=True)
-    cover_photo = models.ForeignKey('photo', related_name='category_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey(
+        'photo', related_name='category_cover_of', null=True, blank=True)
     sort_name = models.CharField(max_length=96, blank=True)
     sort_order = models.CharField(max_length=96, blank=True)
 
     class Meta:
-        ordering = [ 'sort_name', 'sort_order', 'title' ]
+        ordering = ['sort_name', 'sort_order', 'title']
 
     def __unicode__(self):
         return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["parent"], category_ascendant, cache, do_descendants)
+        self._fix_ascendants(
+            ["parent"], category_ascendant, cache, do_descendants)
 
     def check_delete(self):
         errorlist = []
@@ -340,26 +352,32 @@ class person(hierarchy_model):
     gender = models.CharField(max_length=1, blank=True, choices=SEX_CHOICES)
     dob = models.DateField(null=True, blank=True)
     dod = models.DateField(null=True, blank=True)
-    home = models.ForeignKey(place, null=True, blank=True, related_name="home_of")
-    work = models.ForeignKey(place, null=True, blank=True, related_name="work_of")
-    father = models.ForeignKey('self', null=True, blank=True, related_name='father_of')
-    mother = models.ForeignKey('self', null=True, blank=True, related_name='mother_of')
-    spouse = models.ForeignKey('self', null=True, blank=True, related_name='reverse_spouses')
+    home = models.ForeignKey(
+        place, null=True, blank=True, related_name="home_of")
+    work = models.ForeignKey(
+        place, null=True, blank=True, related_name="work_of")
+    father = models.ForeignKey(
+        'self', null=True, blank=True, related_name='father_of')
+    mother = models.ForeignKey(
+        'self', null=True, blank=True, related_name='mother_of')
+    spouse = models.ForeignKey(
+        'self', null=True, blank=True, related_name='reverse_spouses')
     notes = models.TextField(blank=True)
-    cover_photo = models.ForeignKey('photo', related_name='person_cover_of', null=True, blank=True)
+    cover_photo = models.ForeignKey(
+        'photo', related_name='person_cover_of', null=True, blank=True)
     email = models.CharField(max_length=192, blank=True)
 
     class Meta:
-        ordering = [ 'last_name', 'first_name' ]
+        ordering = ['last_name', 'first_name']
 
     def __unicode__(self):
-        result = u"%s"%(self.first_name)
-        if self.middle_name is not None and self.middle_name!="":
-            result += u" %s"%(self.middle_name)
-        if self.called is not None and self.called!="":
-            result += u" (%s)"%(self.called)
-        if self.last_name is not None and self.last_name!="":
-            result += u" %s"%(self.last_name)
+        result = u"%s" % (self.first_name)
+        if self.middle_name is not None and self.middle_name != "":
+            result += u" %s" % (self.middle_name)
+        if self.called is not None and self.called != "":
+            result += u" (%s)" % (self.called)
+        if self.last_name is not None and self.last_name != "":
+            result += u" %s" % (self.last_name)
         return result
 
     def check_delete(self):
@@ -384,21 +402,25 @@ class person(hierarchy_model):
         super(person, self).delete()
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["mother", "father" ], person_ascendant, cache, do_descendants)
-
+        self._fix_ascendants(
+            ["mother", "father"], person_ascendant, cache, do_descendants)
 
     # grand parents generation
 
     def grandparents(self):
         parents = self.parents()
-        return person.objects.filter(Q(father_of__in=parents) | Q(mother_of__in=parents))
+        return person.objects.filter(
+            Q(father_of__in=parents)
+            | Q(mother_of__in=parents))
 
     # parents generation
 
     def uncles_aunts(self):
-        parents = [ i.pk for i in self.parents() ]
+        parents = [i.pk for i in self.parents()]
         grandparents = self.grandparents()
-        return person.objects.filter(Q(father__in=grandparents) | Q(mother__in=grandparents)).exclude(pk__in=parents)
+        return person.objects.filter(
+            Q(father__in=grandparents)
+            | Q(mother__in=grandparents)).exclude(pk__in=parents)
 
     def parents(self):
         results = []
@@ -412,11 +434,13 @@ class person(hierarchy_model):
 
     def siblings(self):
         parents = self.parents()
-        return person.objects.filter(Q(father__in=parents) | Q(mother__in=parents)).exclude(pk=self.pk)
+        return person.objects.filter(
+            Q(father__in=parents) | Q(mother__in=parents)).exclude(pk=self.pk)
 
     def cousins(self):
         parents = self.uncles_aunts()
-        return person.objects.filter(Q(father__in=parents) | Q(mother__in=parents))
+        return person.objects.filter(
+            Q(father__in=parents) | Q(mother__in=parents))
 
     # next generation
 
@@ -425,13 +449,15 @@ class person(hierarchy_model):
 
     def nephews_nieces(self):
         parents = self.siblings()
-        return person.objects.filter(Q(father__in=parents) | Q(mother__in=parents))
+        return person.objects.filter(
+            Q(father__in=parents) | Q(mother__in=parents))
 
     # grand children generation
 
     def grandchildren(self):
         children = self.children()
-        return person.objects.filter(Q(father__in=children) | Q(mother__in=children))
+        return person.objects.filter(
+            Q(father__in=children) | Q(mother__in=children))
 
     def get_cover_photo(self):
         photo = None
@@ -447,7 +473,8 @@ class person(hierarchy_model):
 
 class feedback(hierarchy_model):
     photo = models.ForeignKey('photo', related_name="feedbacks")
-    parent = models.ForeignKey('self', related_name='children', null=True, blank=True)
+    parent = models.ForeignKey(
+        'self', related_name='children', null=True, blank=True)
     rating = models.IntegerField()
     comment = models.TextField(blank=True)
 
@@ -462,7 +489,8 @@ class feedback(hierarchy_model):
     # Metadata about the comment
     submit_datetime = models.DateTimeField()
     utc_offset = models.IntegerField()
-    ip_address = models.GenericIPAddressField(blank=True, null=True, unpack_ipv4=True)
+    ip_address = models.GenericIPAddressField(
+        blank=True, null=True, unpack_ipv4=True)
     is_public = models.BooleanField(default=True)
     is_removed = models.BooleanField(default=False)
 
@@ -475,12 +503,14 @@ class feedback(hierarchy_model):
     def save(self, *args, **kwargs):
         if self.submit_datetime is None:
             value = datetime.datetime.now(dateutil.tz.tzlocal())
-            self.submit_datetime = value.astimezone(pytz.utc).replace(tzinfo=None)
+            self.submit_datetime = value.astimezone(pytz.utc) \
+                .replace(tzinfo=None)
             self.utc_offset = value.utcoffset().seconds / 60
         super(feedback, self).save(*args, **kwargs)
 
     def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(["parent"], feedback_ascendant, cache, do_descendants)
+        self._fix_ascendants(
+            ["parent"], feedback_ascendant, cache, do_descendants)
 
 
 # ---------------------------------------------------------------------------
@@ -492,8 +522,10 @@ class photo(base_model):
     path = models.CharField(max_length=255, blank=True, db_index=True)
     size = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=64, blank=True, db_index=True)
-    photographer = models.ForeignKey(person, null=True, blank=True, related_name='photographed')
-    location = models.ForeignKey(place, null=True, blank=True, related_name='photos')
+    photographer = models.ForeignKey(
+        person, null=True, blank=True, related_name='photographed')
+    location = models.ForeignKey(
+        place, null=True, blank=True, related_name='photos')
     view = models.CharField(max_length=64, blank=True)
     rating = models.FloatField(null=True, blank=True, db_index=True)
     description = models.TextField(blank=True)
@@ -512,19 +544,25 @@ class photo(base_model):
     focus_dist = models.CharField(max_length=16, blank=True)
     ccd_width = models.CharField(max_length=16, blank=True)
     comment = models.TextField(blank=True)
-    action = models.CharField(max_length=4, null=True, blank=True, choices=PHOTO_ACTION, db_index=True)
+    action = models.CharField(
+        max_length=4, null=True, blank=True,
+        choices=PHOTO_ACTION, db_index=True)
     timestamp = models.DateTimeField()
 
-    albums = models.ManyToManyField(album, through='photo_album', related_name='photos')
-    categorys = models.ManyToManyField(category, through='photo_category', related_name='photos')
-    persons = models.ManyToManyField(person, through='photo_person', related_name='photos')
-    relations = models.ManyToManyField('self', through='photo_relation',symmetrical=False)
+    albums = models.ManyToManyField(
+        album, through='photo_album', related_name='photos')
+    categorys = models.ManyToManyField(
+        category, through='photo_category', related_name='photos')
+    persons = models.ManyToManyField(
+        person, through='photo_person', related_name='photos')
+    relations = models.ManyToManyField(
+        'self', through='photo_relation', symmetrical=False)
 
     class Meta:
-        ordering = [ 'datetime', 'photo_id' ]
+        ordering = ['datetime', 'photo_id']
 
     def __unicode__(self):
-        if self.title is None or self.title=="":
+        if self.title is None or self.title == "":
                 return self.name
         else:
                 return self.title
@@ -593,12 +631,14 @@ class photo(base_model):
     def get_style(self):
         if self.action is None:
             return ""
-        elif self.action=="D":
+        elif self.action == "D":
             return "photo_D"
-        elif (self.action=="R"
-                or self.action=="M"
-                or self.action=="auto"
-                or self.action=="90" or self.action=="180" or self.action=="270"):
+        elif (self.action == "R"
+                or self.action == "M"
+                or self.action == "auto"
+                or self.action == "90"
+                or self.action == "180"
+                or self.action == "270"):
             return "photo_R"
         return ""
 
@@ -714,7 +754,7 @@ class photo(base_model):
 
         exif = m.get_exif()
 
-        (width,height) = m.get_size()
+        (width, height) = m.get_size()
         size = m.get_bytes()
 
         # FIXME
@@ -846,7 +886,7 @@ class photo(base_model):
                 raise photo_already_exists_error(
                     u"same photo %d already exists at %s/%s as %s/%s" %
                     (dups[0].pk, new_path, new_name,
-                    dups[0].path, dups[0].name))
+                        dups[0].path, dups[0].name))
 
         raise RuntimeError(
             u"Cannot get non-conflicting filename for %s/%s" %
@@ -946,7 +986,9 @@ class photo(base_model):
 
         return error_list
 
+
 # ---------------------------------------------------------------------------
+
 
 class photo_thumb(base_model):
     photo = models.ForeignKey(photo)
@@ -1017,18 +1059,21 @@ class photo_person(base_model):
     photo = models.ForeignKey(photo)
     person = models.ForeignKey(person)
     position = models.IntegerField(null=True, blank=True)
+
     class Meta:
-        ordering = [ 'position' ]
+        ordering = ['position']
 
 
 class photo_relation(base_model):
-    photo_1 = models.ForeignKey(photo, db_column="photo_id_1", related_name="relations_1")
-    photo_2 = models.ForeignKey(photo, db_column="photo_id_2", related_name="relations_2")
+    photo_1 = models.ForeignKey(
+        photo, db_column="photo_id_1", related_name="relations_1")
+    photo_2 = models.ForeignKey(
+        photo, db_column="photo_id_2", related_name="relations_2")
     desc_1 = models.CharField(max_length=384)
     desc_2 = models.CharField(max_length=384)
 
     def __unicode__(self):
-        return "relationship '%s' to '%s'"%(self.photo_1,self.photo_2)
+        return "relationship '%s' to '%s'" % (self.photo_1, self.photo_2)
 
 
 # ---------------------------------------------------------------------------
