@@ -1,0 +1,7 @@
+include *.txt
+include *.py
+include MANIFEST.in
+recursive-include spud *
+recursive-include bin *
+recursive-include conf *
+recursive-include experimental *
