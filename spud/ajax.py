@@ -328,11 +328,14 @@ def _json_photo_brief(user, photo):
     # add cut down version of place, otherwise we might end up with infinite
     # recusion
     # photo --> photo.place --> place --> place.cover_photo --> photo --> etc
-    resp.update({
-        'place': {'title': unicode(photo.location)},
-        'persons': [ unicode(p) for p in
-                        photo.persons.order_by("photo_person__position").all()],
-    })
+    if photo.location is not None:
+        resp['place'] = {'title': unicode(photo.location)}
+    else:
+        resp['place'] = None
+
+    resp['persons'] = [
+        unicode(p) for p in
+        photo.persons.order_by("photo_person__position").all()],
 
     return resp
 
