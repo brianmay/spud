@@ -13,6 +13,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
 
 import json
 import os.path
@@ -20,6 +23,7 @@ import pytz
 import datetime
 import re
 import uuid
+import six
 
 import django.db.transaction
 import django.conf
@@ -296,7 +300,7 @@ def _json_photo(user, photo):
     resp = {
         'type': 'photo',
         'id': photo.photo_id,
-        'title': unicode(photo),
+        'title': six.text_type(photo),
         'view': photo.view,
         'rating': photo.rating,
         'description': photo.description,
@@ -328,12 +332,12 @@ def _json_photo_brief(user, photo):
     # recusion
     # photo --> photo.place --> place --> place.cover_photo --> photo --> etc
     if photo.location is not None:
-        resp['place'] = {'title': unicode(photo.location)}
+        resp['place'] = {'title': six.text_type(photo.location)}
     else:
         resp['place'] = None
 
     resp['persons'] = [
-        unicode(p) for p in
+        six.text_type(p) for p in
         photo.persons.order_by("photo_person__position").all()],
 
     return resp
@@ -541,7 +545,7 @@ def _json_person_brief(user, person):
     d = {
         'type': 'person',
         'id': person.person_id,
-        'title': unicode(person),
+        'title': six.text_type(person),
         'first_name': person.first_name,
         'last_name': person.last_name,
         'middle_name': person.middle_name,
@@ -593,10 +597,10 @@ def _json_person_detail(user, person):
         })
 
         if person.dob:
-            d['dob'] = unicode(person.dob)
+            d['dob'] = six.text_type(person.dob)
 
         if person.dod:
-            d['dod'] = unicode(person.dod)
+            d['dod'] = six.text_type(person.dod)
 
         if person.spouse:
             d['spouses'].append(_json_person_brief(user, person.spouse))
@@ -645,7 +649,7 @@ def _json_feedback_brief(user, feedback, seen=None):
 
     d = {
         'type': "feedback",
-        'title': u"%s feedback" % unicode(feedback.photo),
+        'title': "%s feedback" % six.text_type(feedback.photo),
         'id': feedback.pk,
         'is_public': feedback.is_public,
         'is_removed': feedback.is_removed,
@@ -720,10 +724,10 @@ def _json_datetime_brief(value, utc_offset):
 
     return {
         'type': 'datetime',
-        'title': u"%s %s %s" % (
+        'title': "%s %s %s" % (
             local.date(), local.time().strftime("%H:%M:%S"), tz_string),
-        'date': unicode(local.date()),
-        'time': unicode(local.time()),
+        'date': six.text_type(local.date()),
+        'time': six.text_type(local.time()),
         'timezone': tz_string
     }
 
@@ -939,29 +943,32 @@ def check_errors(func):
     def wrapper(request, *args, **kwargs):
         try:
             return func(request, *args, **kwargs)
-        except ErrorUser, e:
+        except ErrorUser as e:
             resp = {
                 'type': 'error',
-                'message': unicode(e),
+                'message': six.text_type(e),
                 'session': _json_session_brief(request),
             }
-            return HttpResponse(json.dumps(resp), mimetype="application/json")
-        except ErrorBadRequest, e:
+            return HttpResponse(json.dumps(resp),
+                                content_type="application/json")
+        except ErrorBadRequest as e:
             django.db.transaction.rollback()
             resp = {
                 'type': 'error',
-                'message': "Bad request: " + unicode(e),
+                'message': "Bad request: " + six.text_type(e),
                 'session': _json_session_brief(request),
             }
-            return HttpResponse(json.dumps(resp), mimetype="application/json")
-        except ErrorForbidden, e:
+            return HttpResponse(json.dumps(resp),
+                                content_type="application/json")
+        except ErrorForbidden as e:
             django.db.transaction.rollback()
             resp = {
                 'type': 'error',
-                'message': "Access Forbidden: " + unicode(e),
+                'message': "Access Forbidden: " + six.text_type(e),
                 'session': _json_session_brief(request),
             }
-            return HttpResponse(json.dumps(resp), mimetype="application/json")
+            return HttpResponse(json.dumps(resp),
+                                content_type="application/json")
     return wrapper
 
 
@@ -992,7 +999,7 @@ def login(request):
     else:
         raise ErrorUser("Invalid login")
     resp['session'] = _json_session_brief(request)
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @check_errors
@@ -1002,7 +1009,7 @@ def logout(request):
     django.contrib.auth.logout(request)
     resp = {'type': 'logout'}
     resp['session'] = _json_session_brief(request)
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1042,7 +1049,7 @@ def album_search_form(request):
         'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1124,7 +1131,7 @@ def album_search_results(request):
         'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1167,7 +1174,7 @@ def album_delete(request, album_id):
         'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def album_finish(request, album, created):
@@ -1245,7 +1252,7 @@ def album_finish(request, album, created):
         'session': _json_session_brief(request),
         'rights': album_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1280,7 +1287,7 @@ def category_search_form(request):
         'session': _json_session_brief(request),
         'rights': category_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1353,7 +1360,7 @@ def category_search_results(request):
         'session': _json_session_brief(request),
         'rights': category_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1397,7 +1404,7 @@ def category_delete(request, category_id):
         'rights': category_rights(request.user),
     }
 
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def category_finish(request, category, created):
@@ -1461,7 +1468,7 @@ def category_finish(request, category, created):
         'session': _json_session_brief(request),
         'rights': category_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1496,7 +1503,7 @@ def place_search_form(request):
         'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1568,7 +1575,7 @@ def place_search_results(request):
         'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1611,7 +1618,7 @@ def place_delete(request, place_id):
         'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def place_finish(request, place, created):
@@ -1705,7 +1712,7 @@ def place_finish(request, place, created):
         'session': _json_session_brief(request),
         'rights': place_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1739,7 +1746,7 @@ def person_search_form(request):
         'criteria': criteria,
         'session': _json_session_brief(request),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1817,7 +1824,7 @@ def person_search_results(request):
         'session': _json_session_brief(request),
         'rights': person_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -1860,7 +1867,7 @@ def person_delete(request, person_id):
         'session': _json_session_brief(request),
         'rights': person_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def person_finish(request, person, created):
@@ -2018,7 +2025,7 @@ def person_finish(request, person, created):
         'session': _json_session_brief(request),
         'rights': person_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -2074,7 +2081,7 @@ def photo_relation_delete(request, photo_relation_id):
         'rights': photo_relation_rights(request.user),
     }
 
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def photo_relation_finish(request, photo_relation, created):
@@ -2126,7 +2133,7 @@ def photo_relation_finish(request, photo_relation, created):
         'session': _json_session_brief(request),
         'rights': photo_relation_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -2174,7 +2181,7 @@ def feedback_search_form(request):
         'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -2269,7 +2276,7 @@ def feedback_search_results(request):
         'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -2328,7 +2335,7 @@ def feedback_delete(request, feedback_id):
         'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def feedback_finish(request, feedback, created):
@@ -2416,8 +2423,8 @@ def feedback_finish(request, feedback, created):
 
         if new_feedback:
             mail_admins(
-                u"SPUD: New feedback received",
-                u"You received new feedback %d for the photo titled %s." % (
+                "SPUD: New feedback received",
+                "You received new feedback %d for the photo titled %s." % (
                     feedback.pk, feedback.photo)
             )
 
@@ -2428,7 +2435,7 @@ def feedback_finish(request, feedback, created):
         'session': _json_session_brief(request),
         'rights': feedback_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -2447,7 +2454,7 @@ def photo_search_form(request):
         'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -2490,7 +2497,7 @@ def photo_search_results(request):
         'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def photo_search_item(request, params, number):
@@ -2523,7 +2530,7 @@ def photo_search_item(request, params, number):
     except IndexError:
         pass
 
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def _set_persons(photo, pa_list, values):
@@ -2588,9 +2595,9 @@ def photo_search_change(request):
            not key.startswith("del_")):
             raise ErrorBadRequest("We got a bad parameter '%s'" % key)
 
-    print "updating"
-    print number_results
-    print params
+#    print("updating")
+#    print(number_results)
+#    print(params)
     if request.method == "POST":
         value = _pop_string(params, "set_title")
         if value is not None:
@@ -2814,7 +2821,7 @@ def photo_search_change(request):
         'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @ensure_csrf_cookie
@@ -2826,7 +2833,7 @@ def photo(request, photo_id):
         'session': _json_session_brief(request),
         'rights': photo_rights(request.user),
     }
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 def upload_form(request):
@@ -2838,7 +2845,7 @@ def upload_form(request):
     }
     response_data = json.dumps(response_data)
     response_type = "application/json"
-    return HttpResponse(response_data, mimetype=response_type)
+    return HttpResponse(response_data, content_type=response_type)
 
 
 def upload_file(request):
@@ -2887,7 +2894,7 @@ def upload_file(request):
         # the minimum file size (must be in bytes)
         "minfilesize": 1 * 2 ** 10,  # 1 Kb
         # the file types which are going to be allowed for upload
-        #   must be a mimetype
+        #   must be a content_type
         "acceptedformats": (
             "image/jpeg",
             "image/png",
@@ -2932,14 +2939,14 @@ def upload_file(request):
                 return HttpResponseBadRequest("UID not specified.")
 
             # if here, uid has been specified, so record it
-            uid = request.POST[u"uid"]
+            uid = request.POST["uid"]
 
             # update the temporary path by creating a sub-folder within
             # the upload folder with the uid name
             temp_path = os.path.join(temp_path, uid)
 
             # get the uploaded file
-            file = request.FILES[u'files[]']
+            file = request.FILES['files[]']
 
             # initialize the error
             # If error occurs, this will have the string error message so
@@ -2973,7 +2980,8 @@ def upload_file(request):
                 response_data = json.dumps({'files': [response_data]})
                 # return response to uploader with error
                 # so it can display error message
-                return HttpResponse(response_data, mimetype='application/json')
+                return HttpResponse(response_data,
+                                    content_type='application/json')
 
             # make temporary dir if not exists already
             if not os.path.exists(temp_path):
@@ -3038,7 +3046,7 @@ def upload_file(request):
                 response_type = "text/html"
 
             # return the data to the uploading plugin
-            return HttpResponse(response_data, mimetype=response_type)
+            return HttpResponse(response_data, content_type=response_type)
 
         else:  # file has to be deleted
             return HttpResponseBadRequest('Delete not supported')

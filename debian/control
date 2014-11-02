@@ -3,7 +3,8 @@ Section: python
 Priority: optional
 Maintainer: Brian May <bam@debian.org>
 Build-Depends: debhelper (>=8.1.0), dh-python,
- python-all (>= 2.6.6-3~), python-setuptools
+ python-all (>= 2.6.6-3~), python-setuptools, python-six,
+ python-ajax-select, python-dateutil, python-pil,
 Homepage: https://github.com/brianmay/spud
 Standards-Version: 3.9.5
 

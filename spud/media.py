@@ -13,12 +13,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
 
 import tempfile
 import subprocess
 import os
+from PIL import Image
 import spud.exif
-import Image
 import datetime
 
 
@@ -167,7 +170,7 @@ class media_video(media):
 
         cmd.append(dst_path)
 
-        print cmd
+        print(cmd)
         try:
             subprocess.check_call(cmd)
             return subst['w'], subst['h']

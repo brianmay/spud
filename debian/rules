@@ -5,3 +5,9 @@ export PYBUILD_NAME=spud
 
 %:
 	dh $@ --with python2 --buildsystem=pybuild
+
+.PHONY: override_dh_auto_test
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	./run_tests.sh
+endif

@@ -13,14 +13,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
-import dateutil.tz
+from django.utils.encoding import python_2_unicode_compatible
 
+import dateutil.tz
 import os
 import datetime
 import pytz
@@ -123,12 +127,12 @@ class hierarchy_model(base_model):
             return glue
 
         if instance.pk in cache:
-            print "<--- getting", instance.pk, \
-                [(i[0], i[1]+position) for i in cache[instance.pk]]
+#            print("<--- getting", instance.pk,
+#                [(i[0], i[1]+position) for i in cache[instance.pk]])
             return [(i[0], i[1]+position) for i in cache[instance.pk]]
 
         if instance.pk in seen:
-            print "<--- loop detected", instance.pk
+#            print "<--- loop detected", instance.pk
             return glue
 
         glue.append((instance.pk, position))
@@ -136,8 +140,8 @@ class hierarchy_model(base_model):
         seen[instance.pk] = True
         for attr in parent_attributes:
             parent = getattr(instance, attr)
-            if parent is not None:
-                print "descending", instance.pk, parent.pk
+#            if parent is not None:
+#                print("descending", instance.pk, parent.pk)
             new_glue = self._ascendants_glue(
                 parent, position+1, seen, cache, parent_attributes)
             # make sure there are no duplicates
@@ -147,8 +151,8 @@ class hierarchy_model(base_model):
                 if item not in glue:
                     glue.append(item)
 
-        print "---> caching", instance.pk, \
-            [(i[0], i[1]-position) for i in glue]
+#        print("---> caching", instance.pk,
+#            [(i[0], i[1]-position) for i in glue])
         cache[instance.pk] = [(i[0], i[1]-position) for i in glue]
         return glue
 
@@ -162,47 +166,48 @@ class hierarchy_model(base_model):
         else:
             instance_list = [self]
 
-        print instance_list
+#        print(instance_list)
 
-        print "((("
+#        print("(((")
         for instance in instance_list:
-            print "----", instance.pk
+#            print "----", instance.pk
             new_glue = instance._ascendants_glue(
                 instance, 0, {}, cache, parent_attributes)
-            print "----", instance.pk
-            print instance, instance.pk
-            print "ng", [(i[0], i[1]) for i in new_glue]
-            print "cache", cache.keys()
+#            print("----", instance.pk)
+#            print(instance, instance.pk)
+#            print("ng", [(i[0], i[1]) for i in new_glue])
+#            print("cache", cache.keys())
 
             old_glue = [
                 (i.ascendant.pk, i.position)
                 for i in instance.ascendant_set.all()]
 
-            print "og1", old_glue
+#            print("og1", old_glue)
 
             for glue in new_glue:
                 if glue in old_glue:
-                    print "nothing", glue
+#                    print("nothing", glue)
                     old_glue.remove(glue)
                 else:
-                    print "adding", glue
+#                    print("adding", glue)
                     ascendant = type(self).objects.get(pk=glue[0])
                     glue_class.objects.create(
                         ascendant=ascendant, descendant=instance,
                         position=glue[1])
 
             for glue in old_glue:
-                print "removing", glue
+#                print("removing", glue)
                 glue_class.objects.filter(
                     ascendant__pk=glue[0], descendant=instance,
                     position=glue[1]
                 ).delete()
-        print ")))"
+#        print(")))")
 
 
 # ---------------------------------------------------------------------------
 
 
+@python_2_unicode_compatible
 class place(hierarchy_model):
     place_id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
@@ -223,7 +228,7 @@ class place(hierarchy_model):
     class Meta:
         ordering = ['title']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
@@ -259,6 +264,7 @@ class place(hierarchy_model):
         return photo
 
 
+@python_2_unicode_compatible
 class album(hierarchy_model):
     album_id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
@@ -275,7 +281,7 @@ class album(hierarchy_model):
     class Meta:
         ordering = ['sort_name', 'sort_order', 'title']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
@@ -302,6 +308,7 @@ class album(hierarchy_model):
         return photo
 
 
+@python_2_unicode_compatible
 class category(hierarchy_model):
     category_id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
@@ -316,7 +323,7 @@ class category(hierarchy_model):
     class Meta:
         ordering = ['sort_name', 'sort_order', 'title']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def fix_ascendants(self, cache=None, do_descendants=True):
@@ -343,6 +350,7 @@ class category(hierarchy_model):
         return photo
 
 
+@python_2_unicode_compatible
 class person(hierarchy_model):
     person_id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=96, blank=True, db_index=True)
@@ -370,14 +378,14 @@ class person(hierarchy_model):
     class Meta:
         ordering = ['last_name', 'first_name']
 
-    def __unicode__(self):
-        result = u"%s" % (self.first_name)
+    def __str__(self):
+        result = "%s" % (self.first_name)
         if self.middle_name is not None and self.middle_name != "":
-            result += u" %s" % (self.middle_name)
+            result += " %s" % (self.middle_name)
         if self.called is not None and self.called != "":
-            result += u" (%s)" % (self.called)
+            result += " (%s)" % (self.called)
         if self.last_name is not None and self.last_name != "":
-            result += u" %s" % (self.last_name)
+            result += " %s" % (self.last_name)
         return result
 
     def check_delete(self):
@@ -516,6 +524,7 @@ class feedback(hierarchy_model):
 # ---------------------------------------------------------------------------
 
 
+@python_2_unicode_compatible
 class photo(base_model):
     photo_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=128, blank=True, db_index=True)
@@ -561,7 +570,7 @@ class photo(base_model):
     class Meta:
         ordering = ['datetime', 'photo_id']
 
-    def __unicode__(self):
+    def __str__(self):
         if self.title is None or self.title == "":
                 return self.name
         else:
@@ -589,7 +598,7 @@ class photo(base_model):
     def _get_thumb_path(cls, size, path, name):
         if size in settings.IMAGE_SIZES:
             (shortname, _) = os.path.splitext(name)
-            return u"%sthumb/%s/%s/%s.jpg" % (
+            return "%sthumb/%s/%s/%s.jpg" % (
                 settings.IMAGE_PATH, size, path, shortname)
         else:
             raise RuntimeError("unknown image size %s" % (size))
@@ -598,14 +607,14 @@ class photo(base_model):
     def _get_video_path(cls, size, path, name, extension):
         if size in settings.VIDEO_SIZES:
             (shortname, _) = os.path.splitext(name)
-            return u"%svideo/%s/%s/%s.%s" % (
+            return "%svideo/%s/%s/%s.%s" % (
                 settings.IMAGE_PATH, size, path, shortname, extension)
         else:
             raise RuntimeError("unknown image size %s" % (size))
 
     @classmethod
     def _get_orig_path(cls, path, name):
-        return u"%sorig/%s/%s" % (settings.IMAGE_PATH, path, name)
+        return "%sorig/%s/%s" % (settings.IMAGE_PATH, path, name)
 
     # Public methods
 
@@ -613,7 +622,7 @@ class photo(base_model):
         return self._get_orig_path(self.path, self.name)
 
     def get_orig_url(self):
-        return iri_to_uri(u"%sorig/%s/%s" % (
+        return iri_to_uri("%sorig/%s/%s" % (
             settings.IMAGE_URL, urlquote(self.path), urlquote(self.name)))
 
     def get_thumb(self, size):
@@ -666,12 +675,12 @@ class photo(base_model):
 
     def generate_thumbnails(self, overwrite):
         m = media.get_media(self.get_orig_path())
-        umask = os.umask(0022)
+        umask = os.umask(0o022)
 
         for size, s in settings.IMAGE_SIZES.iteritems():
             dst = self._get_thumb_path(size, self.path, self.name)
             if not os.path.lexists(os.path.dirname(dst)):
-                os.makedirs(os.path.dirname(dst), 0755)
+                os.makedirs(os.path.dirname(dst), 0o755)
             if overwrite or not os.path.lexists(dst):
                 xysize = m.create_thumbnail(dst, s)
             else:
@@ -688,7 +697,7 @@ class photo(base_model):
 
     def generate_videos(self, overwrite):
         m = media.get_media(self.get_orig_path())
-        umask = os.umask(0022)
+        umask = os.umask(0o022)
 
         if m.is_video():
             for size, s in settings.VIDEO_SIZES.iteritems():
@@ -696,7 +705,7 @@ class photo(base_model):
                     dst = self._get_video_path(
                         size, self.path, self.name, f['extension'])
                     if not os.path.lexists(os.path.dirname(dst)):
-                        os.makedirs(os.path.dirname(dst), 0755)
+                        os.makedirs(os.path.dirname(dst), 0o755)
                     if overwrite or not os.path.lexists(dst):
                         xysize = m.create_video(dst, s, format)
                     else:
@@ -841,13 +850,13 @@ class photo(base_model):
         full_path = cls._get_orig_path(new_path, new_name)
         if os.path.lexists(full_path):
             raise RuntimeError(
-                u"file already exists at %s but has no db entry" % full_path)
+                "file already exists at %s but has no db entry" % full_path)
 
         for size in settings.IMAGE_SIZES:
             full_path = cls._get_thumb_path(size, new_path, new_name)
             if os.path.lexists(full_path):
                 raise RuntimeError(
-                    u"file already exists at %s but has no db entry" %
+                    "file already exists at %s but has no db entry" %
                     full_path)
 
         return [], 0
@@ -864,18 +873,18 @@ class photo(base_model):
                 return new_path, tmp_name
             elif count > 1:
                 raise RuntimeError(
-                    u"Multiple DB entries exist for %s/%s" %
+                    "Multiple DB entries exist for %s/%s" %
                     (new_path, tmp_name))
 
             dupfile = dups[0].get_orig_path()
             if filecmp.cmp(old_file, dupfile):
                 raise photo_already_exists_error(
-                    u"same photo %d already exists at %s/%s as %s/%s" %
+                    "same photo %d already exists at %s/%s as %s/%s" %
                     (dups[0].pk, new_path, new_name,
                         dups[0].path, dups[0].name))
 
         raise RuntimeError(
-            u"Cannot get non-conflicting filename for %s/%s" %
+            "Cannot get non-conflicting filename for %s/%s" %
             (new_path, new_name))
 
     def move(self, new_name=None):
@@ -929,9 +938,9 @@ class photo(base_model):
         # move the files
         for src, dst in move_list:
             if src != dst:
-                print "Moving '%s' to '%s'" % (src, dst)
+                print("Moving '%s' to '%s'" % (src, dst))
                 if not os.path.lexists(os.path.dirname(dst)):
-                    os.makedirs(os.path.dirname(dst), 0755)
+                    os.makedirs(os.path.dirname(dst), 0o755)
                 shutil.move(src, dst)
 
         # Hurry! Save the new path and name before we forgot
@@ -948,27 +957,27 @@ class photo(base_model):
         if settings.IMAGE_CHECK_EXISTS:
             dst = self.get_orig_path()
             if not os.path.lexists(dst):
-                error_list.append(u"Original file '%s' is missing" % (dst))
+                error_list.append("Original file '%s' is missing" % (dst))
 
             for pt in self.photo_thumb_set.all():
                 dst = pt.get_path()
                 if not os.path.lexists(dst):
                     error_list.append(
-                        u"Thumb file '%s' for size '%s' is missing" %
+                        "Thumb file '%s' for size '%s' is missing" %
                         (dst, pt.size))
 
             for pt in self.photo_video_set.all():
                 dst = pt.get_path()
                 if not os.path.lexists(dst):
                     error_list.append(
-                        u"Video file '%s' for size '%s' is missing" %
+                        "Video file '%s' for size '%s' is missing" %
                         (dst, pt.size))
 
         duplicates = photo.objects.filter(
             path=self.path, name=self.name).exclude(pk=self.pk)
         if duplicates.count() > 0:
             error_list.append(
-                u"photo path %s/%s is duplicated" % (self.path, self.name))
+                "photo path %s/%s is duplicated" % (self.path, self.name))
 
         return error_list
 
@@ -985,14 +994,14 @@ class photo_thumb(base_model):
     def get_path(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return u"%sthumb/%s/%s/%s.jpg" % (
+        return "%sthumb/%s/%s/%s.jpg" % (
             settings.IMAGE_PATH, self.size,
             photo.path, shortname)
 
     def get_url(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return iri_to_uri(u"%sthumb/%s/%s/%s.jpg" % (
+        return iri_to_uri("%sthumb/%s/%s/%s.jpg" % (
             settings.IMAGE_URL, urlquote(self.size),
             urlquote(photo.path), urlquote(shortname)))
 
@@ -1013,14 +1022,14 @@ class photo_video(base_model):
     def get_path(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return u"%svideo/%s/%s/%s.%s" % (
+        return "%svideo/%s/%s/%s.%s" % (
             settings.IMAGE_PATH, self.size,
             photo.path, shortname, self.extension)
 
     def get_url(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return iri_to_uri(u"%svideo/%s/%s/%s.%s" % (
+        return iri_to_uri("%svideo/%s/%s/%s.%s" % (
             settings.IMAGE_URL, urlquote(self.size),
             urlquote(photo.path), urlquote(shortname),
             urlquote(self.extension)))
@@ -1050,6 +1059,7 @@ class photo_person(base_model):
         ordering = ['position']
 
 
+@python_2_unicode_compatible
 class photo_relation(base_model):
     photo_1 = models.ForeignKey(
         photo, db_column="photo_id_1", related_name="relations_1")
@@ -1058,7 +1068,7 @@ class photo_relation(base_model):
     desc_1 = models.CharField(max_length=384)
     desc_2 = models.CharField(max_length=384)
 
-    def __unicode__(self):
+    def __str__(self):
         return "relationship '%s' to '%s'" % (self.photo_1, self.photo_2)
 
 

@@ -29,6 +29,7 @@ import spud.upload
 
 import pytz
 
+
 class Command(BaseCommand):
         args = '<file file ...>'
         help = 'Imports photos into spud'

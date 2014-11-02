@@ -14,11 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import NoArgsCommand
 
 import os
 import re
 from random import choice
+
 
 class Command(NoArgsCommand):
         help = 'Update secret key in /etc/spud/settings.py'
@@ -28,8 +29,13 @@ class Command(NoArgsCommand):
             main_settings_file_tmp = "/etc/spud/settings.py.tmp"
 
             settings_contents = open(main_settings_file, 'r').read()
-            secret_key = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
-            settings_contents = re.sub(r"(?<=SECRET_KEY = ')[^']*'", secret_key + "'", settings_contents)
+            secret_key = ''.join([
+                choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
+                for i in range(50)
+            ])
+            settings_contents = re.sub(
+                r"(?<=SECRET_KEY = ')[^']*'",
+                secret_key + "'", settings_contents)
 
             fp = open(main_settings_file_tmp, 'w')
             fp.write(settings_contents)

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 with open('VERSION.txt', 'r') as f:
     version = f.readline().strip()
@@ -63,7 +63,8 @@ setup(
         "License :: OSI Approved :: GNU General Public License "
             " v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
-        "Programming Language :: Python"
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
     ],
     keywords="photo database",
     package_data={
@@ -75,9 +76,12 @@ setup(
             'conf/apache2.conf', 'conf/settings.py', 'conf/spud.wsgi']),
     ],
     install_requires=[
-        "python > 2.4",
+        "python > 2.6",
         "Django >= 1.6",
         "South >= 0.7",
         "django-ajax-selects >= 1.1.3",
+        "python-dateutil",
+        "Pillow",
+        "six",
     ],
 )

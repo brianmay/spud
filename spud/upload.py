@@ -13,6 +13,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
 
 import os
 import datetime
@@ -47,7 +50,7 @@ def set_category_list(photo, category_list):
 
 @transaction.commit_on_success
 def import_photo(file, d, options):
-    print
+    print()
 
     # check source file
     if not os.path.exists(file):
@@ -94,7 +97,7 @@ def import_photo(file, d, options):
 
     # get time
     dt = m.get_datetime()
-    print dt
+    print(dt)
 
     # adjust time for source timezone
     if photo.camera_model in settings.DEFAULT_TIMEZONE:
@@ -107,7 +110,7 @@ def import_photo(file, d, options):
             src_timezone = pytz.timezone(settings.TIME_ZONE)
 
     dt = src_timezone.localize(dt)
-    print dt
+    print(dt)
 
     # adjust time for destination timezone
     if 'dst_timezone' in d:
@@ -116,14 +119,14 @@ def import_photo(file, d, options):
         dst_timezone = pytz.timezone(settings.TIME_ZONE)
 
     dt = dt.astimezone(dst_timezone)
-    print dt
+    print(dt)
 
     # add manual offsets
     if 'offset' in d:
         dt += d['offset']
     if photo.camera_model in settings.DEFAULT_DTOFFSET:
         dt += settings.DEFAULT_DTOFFSET[photo.camera_model]
-    print dt
+    print(dt)
 
     # save the time
     photo.utc_offset = dt.utcoffset().total_seconds() / 60
@@ -141,15 +144,15 @@ def import_photo(file, d, options):
 
     # don't do anything in dryrun mode
     if 'dryrun' in options and options['dryrun']:
-        print "would import %s to %s/%s (%s)" % (file, path, name, dt)
+        print("would import %s to %s/%s (%s)" % (file, path, name, dt))
         return photo
 
     # Go ahead and do stuff
-    print "importing %s to %s/%s" % (file, path, name)
+    print("importing %s to %s/%s" % (file, path, name))
 
-    umask = os.umask(0022)
+    umask = os.umask(0o022)
     if not os.path.lexists(os.path.dirname(dst)):
-        os.makedirs(os.path.dirname(dst), 0755)
+        os.makedirs(os.path.dirname(dst), 0o755)
 
     try:
         shutil.copyfile(file, dst)
@@ -160,10 +163,10 @@ def import_photo(file, d, options):
 
         os.umask(umask)
     except:
-        print "An exception occcured importing photo."
+        print("An exception occcured importing photo.")
         photo.delete()
         raise
 
-    print "imported  %s to %s/%s as %d" % (file, path, name, photo.pk)
+    print("imported  %s to %s/%s as %d" % (file, path, name, photo.pk))
 
     return photo

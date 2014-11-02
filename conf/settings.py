@@ -4,19 +4,19 @@
 #TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-#    ('Name', 'email@example.org'),
+    # ('Name', 'email@example.org'),
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/var/lib/spud/spud.db', # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/var/lib/spud/spud.db',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -34,8 +34,8 @@ LANGUAGE_CODE = 'en-AU'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ''
 
-EMAIL_HOST="mail.example.org"
+EMAIL_HOST = "mail.example.org"
 DEFAULT_FROM_EMAIL = "Name <email@example.org>"
 
-IMAGE_URL="http://website.example.org/images/"
-IMAGE_PATH="/var/lib/spud/"
+IMAGE_URL = "http://website.example.org/images/"
+IMAGE_PATH = "/var/lib/spud/"
