@@ -628,20 +628,6 @@ class photo(base_model):
         except photo_thumb.DoesNotExist:
             return None
 
-    def get_style(self):
-        if self.action is None:
-            return ""
-        elif self.action == "D":
-            return "photo_D"
-        elif (self.action == "R"
-                or self.action == "M"
-                or self.action == "auto"
-                or self.action == "90"
-                or self.action == "180"
-                or self.action == "270"):
-            return "photo_R"
-        return ""
-
     # Other stuff
     def check_delete(self):
         errorlist = []
