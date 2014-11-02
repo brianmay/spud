@@ -16,14 +16,33 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from rest_framework import routers
+
 from django.conf.urls import url, include, patterns
 from django.conf import settings
-
 from django.contrib import admin
 admin.autodiscover()
 
+from . import views
+
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'groups', views.GroupViewSet)
+router.register(r'place', views.PlaceViewSet)
+router.register(r'album', views.AlbumViewSet)
+router.register(r'category', views.CategoryViewSet)
+router.register(r'person', views.PersonViewSet)
+router.register(r'photo', views.PhotoViewSet)
+router.register(r'photo_person', views.PhotoPersonViewSet)
+router.register(r'photo_thumb', views.PhotoThumbViewSet)
+router.register(r'photo_video', views.PhotoVideoViewSet)
+
 urlpatterns = patterns(
     '',
+    url(r'^api/', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls',
+        namespace='rest_framework')),
+
     url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$',
         'spud.views.photo_thumb_redirect', name='photo_thumb_redirect'),
 

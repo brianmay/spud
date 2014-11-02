@@ -71,6 +71,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'ajax_select',
+    'rest_framework',
 )
 
 # South not available for Python 3+ or Django 1.7+
@@ -126,3 +127,9 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 from socket import getfqdn
 ALLOWED_HOSTS = [getfqdn()]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    'PAGINATE_BY': 10
+}
+ANONYMOUS_USER_ID = -1

@@ -631,11 +631,17 @@ class photo(base_model):
         except photo_thumb.DoesNotExist:
             return None
 
+    def get_thumbs(self):
+        return list(self.photo_thumb_set.all())
+
     def get_video(self, size, format):
         try:
             return self.photo_video_set.get(size=size, format=format)
         except photo_thumb.DoesNotExist:
             return None
+
+    def get_videos(self):
+        return list(self.photo_video_set.all())
 
     # Other stuff
     def check_delete(self):

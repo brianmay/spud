@@ -16,16 +16,135 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import json
+
+from rest_framework import viewsets
+
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.contrib.auth.models import User, Group
 
-import json
+from . import models
+from . import serializers
 
-from spud import models
+
+#########################
+# Django-Rest-Framework #
+#########################
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all()
+    serializer_class = serializers.UserSerializer
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Group.objects.all()
+    serializer_class = serializers.GroupSerializer
+
+
+class PlaceViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.place.objects.all()
+    serializer_class = serializers.PlaceSerializer
+
+
+class AlbumViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.album.objects.all()
+    serializer_class = serializers.AlbumSerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.category.objects.all()
+    serializer_class = serializers.CategorySerializer
+
+
+class PersonViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.person.objects.all()
+    serializer_class = serializers.PersonSerializer
+
+
+class FeedbackViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.feedback.objects.all()
+    serializer_class = serializers.FeedbackSerializer
+
+
+class PhotoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.photo.objects.all()
+    serializer_class = serializers.PhotoSerializer
+
+
+class PhotoThumbViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.photo_thumb.objects.all()
+    serializer_class = serializers.PhotoThumbSerializer
+
+
+class PhotoVideoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.photo_video.objects.all()
+    serializer_class = serializers.PhotoVideoSerializer
+
+
+class PhotoAlbumViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.photo_album.objects.all()
+    serializer_class = serializers.PhotoAlbumSerializer
+
+
+class PhotoCategoryViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.photo_category.objects.all()
+    serializer_class = serializers.PhotoCategorySerializer
+
+
+class PhotoPersonViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.photo_person.objects.all()
+    serializer_class = serializers.PhotoPersonSerializer
+
+
+class PhotoRelationViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.photo_relation.objects.all()
+    serializer_class = serializers.PhotoRelationSerializer
 
 
 #########
