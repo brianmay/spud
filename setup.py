@@ -61,7 +61,7 @@ setup(
         "Framework :: Django",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License "
-            " v3 or later (GPLv3+)",
+            "v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
