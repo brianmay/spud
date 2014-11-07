@@ -68,7 +68,9 @@ setup(
     ],
     keywords="photo database",
     package_data={
-        '': ['*.css', '*.html', '*.js', '*.png', '*.gif', '*.map', '*.txt'],
+        '': [
+            '*.css', '*.html', '*.js',
+            '*.jpg', '*.png', '*.gif', '*.map', '*.txt'],
     },
     scripts=[
         'bin/spud',
