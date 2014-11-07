@@ -127,12 +127,12 @@ class hierarchy_model(base_model):
             return glue
 
         if instance.pk in cache:
-#            print("<--- getting", instance.pk,
-#                [(i[0], i[1]+position) for i in cache[instance.pk]])
+            # print("<--- getting", instance.pk,
+            #     [(i[0], i[1]+position) for i in cache[instance.pk]])
             return [(i[0], i[1]+position) for i in cache[instance.pk]]
 
         if instance.pk in seen:
-#            print "<--- loop detected", instance.pk
+            # print "<--- loop detected", instance.pk
             return glue
 
         glue.append((instance.pk, position))
@@ -140,8 +140,8 @@ class hierarchy_model(base_model):
         seen[instance.pk] = True
         for attr in parent_attributes:
             parent = getattr(instance, attr)
-#            if parent is not None:
-#                print("descending", instance.pk, parent.pk)
+            # if parent is not None:
+            #     print("descending", instance.pk, parent.pk)
             new_glue = self._ascendants_glue(
                 parent, position+1, seen, cache, parent_attributes)
             # make sure there are no duplicates
@@ -151,8 +151,8 @@ class hierarchy_model(base_model):
                 if item not in glue:
                     glue.append(item)
 
-#        print("---> caching", instance.pk,
-#            [(i[0], i[1]-position) for i in glue])
+        # print("---> caching", instance.pk,
+        #     [(i[0], i[1]-position) for i in glue])
         cache[instance.pk] = [(i[0], i[1]-position) for i in glue]
         return glue
 
@@ -166,42 +166,42 @@ class hierarchy_model(base_model):
         else:
             instance_list = [self]
 
-#        print(instance_list)
+        # print(instance_list)
 
-#        print("(((")
+        # print("(((")
         for instance in instance_list:
-#            print "----", instance.pk
+            # print "----", instance.pk
             new_glue = instance._ascendants_glue(
                 instance, 0, {}, cache, parent_attributes)
-#            print("----", instance.pk)
-#            print(instance, instance.pk)
-#            print("ng", [(i[0], i[1]) for i in new_glue])
-#            print("cache", cache.keys())
+            # print("----", instance.pk)
+            # print(instance, instance.pk)
+            # print("ng", [(i[0], i[1]) for i in new_glue])
+            # print("cache", cache.keys())
 
             old_glue = [
                 (i.ascendant.pk, i.position)
                 for i in instance.ascendant_set.all()]
 
-#            print("og1", old_glue)
+            # print("og1", old_glue)
 
             for glue in new_glue:
                 if glue in old_glue:
-#                    print("nothing", glue)
+                    # print("nothing", glue)
                     old_glue.remove(glue)
                 else:
-#                    print("adding", glue)
+                    # print("adding", glue)
                     ascendant = type(self).objects.get(pk=glue[0])
                     glue_class.objects.create(
                         ascendant=ascendant, descendant=instance,
                         position=glue[1])
 
             for glue in old_glue:
-#                print("removing", glue)
+                # print("removing", glue)
                 glue_class.objects.filter(
                     ascendant__pk=glue[0], descendant=instance,
                     position=glue[1]
                 ).delete()
-#        print(")))")
+        # print(")))")
 
 
 # ---------------------------------------------------------------------------
@@ -666,7 +666,7 @@ class photo(base_model):
         (width, height) = m.get_size()
         size = m.get_bytes()
 
-        #FIXME
+        # FIXME
         self.width = width
         self.height = height
         self.size = size

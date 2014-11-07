@@ -1,7 +1,7 @@
 # Django settings for photos project.
 
-#DEBUG = True
-#TEMPLATE_DEBUG = DEBUG
+# DEBUG = True
+# TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Name', 'email@example.org'),
