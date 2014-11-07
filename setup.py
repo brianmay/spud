@@ -86,5 +86,6 @@ setup(
         "python-dateutil",
         "Pillow",
         "six",
+        "pytz",
     ],
 )
