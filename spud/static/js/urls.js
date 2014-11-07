@@ -126,7 +126,7 @@ $.ajaxSetup({
 
 function load_login(username, password, success, error) {
     ajax({
-        url: '/a/login/',
+        url: window.__root_prefix + 'a/login/',
         type: "POST",
         success: success,
         error: error,
@@ -140,7 +140,7 @@ function load_login(username, password, success, error) {
 
 function load_logout(success, error) {
     ajax({
-        url: '/a/logout/',
+        url: window.__root_prefix + 'a/logout/',
         type: "POST",
         success: success,
         error: error,
@@ -150,7 +150,7 @@ function load_logout(success, error) {
 
 function load_photo_relation(place_id, success, error) {
     ajax({
-        url: '/a/relation/'+place_id+'/',
+        url: window.__root_prefix + 'a/relation/'+place_id+'/',
         success: success,
         error: error,
     })
@@ -158,9 +158,9 @@ function load_photo_relation(place_id, success, error) {
 
 
 function load_photo_relation_change(photo_relation_id, updates, success, error) {
-    var url = '/a/relation/add/'
+    var url = window.__root_prefix + 'a/relation/add/'
     if (photo_relation_id != null) {
-        url = '/a/relation/'+photo_relation_id+'/'
+        url = window.__root_prefix + 'a/relation/'+photo_relation_id+'/'
     }
     ajax({
         url: url,
@@ -174,7 +174,7 @@ function load_photo_relation_change(photo_relation_id, updates, success, error) 
 
 function load_photo_relation_delete(photo_relation_id, success, error) {
     ajax({
-        url: '/a/relation/'+photo_relation_id+'/delete/',
+        url: window.__root_prefix + 'a/relation/'+photo_relation_id+'/delete/',
         success: success,
         error: error,
         type: "POST",
@@ -184,7 +184,7 @@ function load_photo_relation_delete(photo_relation_id, success, error) {
 
 function load_photo_search_form(criteria, success, error) {
     ajax({
-        url: '/a/photo/form/',
+        url: window.__root_prefix + 'a/photo/form/',
         data: criteria,
         success: success,
         error: error,
@@ -202,7 +202,7 @@ function load_photo_search_results(search, page, success, error) {
     })
 
     ajax({
-        url: '/a/photo/results/',
+        url: window.__root_prefix + 'a/photo/results/',
         data: params,
         success: success,
         error: error,
@@ -213,7 +213,7 @@ function load_photo_search_results(search, page, success, error) {
 function load_photo_search_item(search, n, success, error) {
     var params = jQuery.extend({}, search.criteria, { number: n })
     ajax({
-        url: '/a/photo/results/',
+        url: window.__root_prefix + 'a/photo/results/',
         data: params,
         success: success,
         error: error,
@@ -226,7 +226,7 @@ function load_photo_search_change(criteria, updates, number_results, success, er
     var params = jQuery.extend({}, criteria, updates, { number_results: number_results })
 
     ajax({
-        url: '/a/photo/change/',
+        url: window.__root_prefix + 'a/photo/change/',
         data: params,
         success: success,
         error: error,
@@ -237,7 +237,7 @@ function load_photo_search_change(criteria, updates, number_results, success, er
 
 function load_photo(photo_id, success, error) {
     ajax({
-        url: '/a/photo/'+photo_id+'/',
+        url: window.__root_prefix + 'a/photo/'+photo_id+'/',
         success: success,
         error: error,
     })
@@ -245,7 +245,7 @@ function load_photo(photo_id, success, error) {
 
 function load_upload_form(success, error) {
     ajax({
-        url: '/a/upload/form/',
+        url: window.__root_prefix + 'a/upload/form/',
         type: "POST",
         success: success,
         error: error,
