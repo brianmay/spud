@@ -749,7 +749,7 @@ $.widget('spud.image', {
 
 $.widget('spud.list_base',  {
     _create: function() {
-        this.ul = $("<ul></ul")
+        this.ul = $("<ul></ul>")
             .appendTo(this.element)
 
         this.p = $("<p></p>")
