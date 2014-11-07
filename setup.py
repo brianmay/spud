@@ -77,7 +77,9 @@ setup(
     ],
     data_files=[
         ('/etc/spud', [
-            'conf/apache2.conf', 'conf/settings.py', 'conf/spud.wsgi']),
+            'conf/settings.py', 'conf/spud.wsgi']),
+        ('/etc/apache2/conf-available',
+            ['conf/spud.conf', ]),
     ],
     install_requires=[
         "python > 2.6",
