@@ -11,12 +11,13 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/var/lib/spud/spud.db',
+        'ENGINE': 'django.db.backends.dummy',
+        'NAME': '',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -38,4 +39,3 @@ EMAIL_HOST = "mail.example.org"
 DEFAULT_FROM_EMAIL = "Name <email@example.org>"
 
 IMAGE_URL = "http://website.example.org/images/"
-IMAGE_PATH = "/var/lib/spud/"

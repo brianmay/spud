@@ -25,12 +25,12 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-STATIC_ROOT = "/usr/share/spud/media"
+STATIC_ROOT = "/var/lib/spud/static"
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-STATIC_URL = '/spud/media/'
+STATIC_URL = '/spud/static/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -94,6 +94,7 @@ AJAX_LOOKUP_CHANNELS = {
 AJAX_SELECT_BOOTSTRAP = False
 AJAX_SELECT_INLINES = None
 
+IMAGE_PATH = "/var/lib/spud/images/"
 IMAGE_URL = "/images/"
 IMAGE_PATH = None
 
@@ -122,3 +123,6 @@ DEFAULT_CONTENT_TYPE = "application/xhtml+xml"
 
 # The name of the class to use for starting the test suite.
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+from socket import getfqdn
+ALLOWED_HOSTS = [getfqdn()]

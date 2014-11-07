@@ -19,7 +19,3 @@ from __future__ import unicode_literals
 from .defaults import *  # NOQA
 
 exec(open("/etc/spud/settings.py", "rb").read())
-
-import sys
-from .process import post_process
-post_process(sys.modules[__name__])
