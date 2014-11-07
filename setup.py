@@ -73,6 +73,7 @@ setup(
     scripts=[
         'bin/spud',
         'bin/spud_set_secret_key',
+        'bin/spud_migrate_south',
     ],
     data_files=[
         ('/etc/spud', [
