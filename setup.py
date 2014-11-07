@@ -70,7 +70,10 @@ setup(
     package_data={
         '': ['*.css', '*.html', '*.js', '*.png', '*.gif', '*.map', '*.txt'],
     },
-    scripts=['bin/spud'],
+    scripts=[
+        'bin/spud',
+        'bin/spud_set_secret_key',
+    ],
     data_files=[
         ('/etc/spud', [
             'conf/apache2.conf', 'conf/settings.py', 'conf/spud.wsgi']),
