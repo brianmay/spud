@@ -178,7 +178,8 @@ p img, h1 img, h2 img, h3 img, h4 img, td img { vertical-align:middle; }
 .module blockquote { margin-left:12px; }
 .module h3 { margin-top:.6em; }
 .module h2, .module caption, .inline-group h2 { margin:0; padding:2px 5px 3px 5px; text-align:left; font-weight:bold; background:#7CA0C7 url(../img/admin/default-bg.gif) top left repeat-x; color:white; }
-.module .menu { border: none; display: inline-block; float: none; width: calc(100% - 4px); }
+.module .menu { border:none; float:none; }
+.module .menu .ui-menu-item { float:none; clear:none; }
 
 /* MESSAGES & ERRORS */
 ul.messagelist { padding:0 0 5px 0; margin:0; }
