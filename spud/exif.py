@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import six
 import subprocess
 import os
 import json
@@ -40,7 +41,7 @@ class ExifTool(object):
 
     def execute(self, *args):
         args = args + ("-execute\n",)
-        self.process.stdin.write(str.join("\n", args))
+        self.process.stdin.write(six.text_type.join("\n", args))
         self.process.stdin.flush()
         output = ""
         fd = self.process.stdout.fileno()
