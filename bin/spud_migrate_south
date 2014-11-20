@@ -10,5 +10,5 @@ virtualenv --system-site-packages "$TMPDIR"
 pip install django==1.6.5
 pip install south
 
-CMD="$(command -v spud-manage)"
+CMD="$(command -v spud)"
 python "$CMD" migrate "$@"
