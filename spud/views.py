@@ -247,10 +247,3 @@ def photo_search_results(request):
             'title': 'Photo search results',
             'onload': "do_photo_search_results(%s, %d)" % (js, page),
         }, context_instance=RequestContext(request))
-
-
-def upload(request):
-    return render_to_response('spud/static.html', {
-        'title': 'Upload files',
-        'onload': "do_upload_form()"
-    }, context_instance=RequestContext(request))

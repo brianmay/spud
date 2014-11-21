@@ -66,11 +66,6 @@ function photo_url(photo, search) {
 }
 
 
-function upload_form_url() {
-   return window.__root_prefix + "upload/"
-}
-
-
 // ****************
 // * AJAX LOADERS *
 // ****************
@@ -238,15 +233,6 @@ function load_photo_search_change(criteria, updates, number_results, success, er
 function load_photo(photo_id, success, error) {
     ajax({
         url: window.__root_prefix + 'a/photo/'+photo_id+'/',
-        success: success,
-        error: error,
-    })
-}
-
-function load_upload_form(success, error) {
-    ajax({
-        url: window.__root_prefix + 'a/upload/form/',
-        type: "POST",
         success: success,
         error: error,
     })

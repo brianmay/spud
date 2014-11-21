@@ -22,7 +22,6 @@ import os.path
 import pytz
 import datetime
 import re
-import uuid
 import six
 
 import django.db.transaction
@@ -2834,18 +2833,6 @@ def photo(request, photo_id):
         'rights': photo_rights(request.user),
     }
     return HttpResponse(json.dumps(resp), content_type="application/json")
-
-
-def upload_form(request):
-    response_data = {
-        'type': "upload_form",
-        'uid': str(uuid.uuid4()),
-        'session': _json_session_brief(request),
-        'rights': photo_rights(request.user),
-    }
-    response_data = json.dumps(response_data)
-    response_type = "application/json"
-    return HttpResponse(response_data, content_type=response_type)
 
 
 def upload_file(request):

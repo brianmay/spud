@@ -201,18 +201,6 @@ function datetime_a(dt) {
 }
 
 
-function upload_form_a(title) {
-    if (title == null) {
-        title = "Home"
-    }
-    var a = $('<a/>')
-        .attr('href', upload_url())
-        .on('click', function() { do_upload(); return false; })
-        .text(title)
-    return a
-}
-
-
 // ***********
 // * HELPERS *
 // ***********
@@ -303,8 +291,6 @@ window.onpopstate = function(event) {
             do_photo_search_item(state.search, state.n, state.photo_id)
         } else if (state.type == 'display_photo_search_results') {
             do_photo_search_results(state.search, state.page)
-        } else if (state.type == 'display_upload_form') {
-            do_upload_form()
         } else if (state.type == 'display_error') {
             display_error(state.message)
         } else {
@@ -1228,19 +1214,3 @@ function do_settings_form() {
     close_all_dialog()
     display_settings()
 }
-
-
-function do_upload_form() {
-    display_loading()
-    load_upload_form(
-        function(data) {
-            hide_loading()
-            display_upload_form(data)
-        },
-
-        function(message) {
-            display_error(message)
-        }
-    )
-}
-

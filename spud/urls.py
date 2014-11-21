@@ -103,7 +103,6 @@ urlpatterns = patterns(
     url(r'^a/photo/(?P<photo_id>\d+)/$',
         'spud.ajax.photo', name='ajax_photo'),
 
-    url(r'^a/upload/form/$', 'spud.ajax.upload_form', name='ajax_upload_form'),
     url(r'^a/upload/file/$', 'spud.ajax.upload_file', name='ajax_upload_file'),
 
     url(r'^$',
@@ -136,8 +135,6 @@ urlpatterns = patterns(
         'spud.views.photo_search_results', name='photo_search_results'),
     url(r'^photo/(?P<photo_id>\d+)/$',
         'spud.views.photo_detail', name='photo_detail'),
-    url(r'^upload/$',
-        'spud.views.upload', name='upload'),
 
     url(r'^ajax/', include('ajax_select.urls')),
 
