@@ -21,6 +21,7 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 import json
 
@@ -61,6 +62,7 @@ def old_photo_detail(request, object_id, size):
     return HttpResponseRedirect(url)
 
 
+@ensure_csrf_cookie
 def root(request):
     return render_to_response('spud/static.html', {
         'title': 'Root',
@@ -68,6 +70,7 @@ def root(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def login(request):
     return render_to_response('spud/static.html', {
         'title': 'Login',
@@ -75,6 +78,7 @@ def login(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def logout(request):
     return render_to_response('spud/static.html', {
         'title': 'Login',
@@ -82,6 +86,7 @@ def logout(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def photo_detail(request, photo_id):
     photo_id = int(photo_id)
     if 'n' in request.GET:
@@ -105,6 +110,7 @@ def photo_detail(request, photo_id):
         }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def album_search_results(request):
     query = request.GET.copy()
     page = query.pop('page', [0])[-1]
@@ -120,6 +126,7 @@ def album_search_results(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def album_detail(request, album_id):
     album_id = int(album_id)
     return render_to_response('spud/static.html', {
@@ -128,6 +135,7 @@ def album_detail(request, album_id):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def category_search_results(request):
     query = request.GET.copy()
     page = query.pop('page', [0])[-1]
@@ -143,6 +151,7 @@ def category_search_results(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def category_detail(request, category_id):
     category_id = int(category_id)
     return render_to_response('spud/static.html', {
@@ -151,6 +160,7 @@ def category_detail(request, category_id):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def place_search_results(request):
     query = request.GET.copy()
     page = query.pop('page', [0])[-1]
@@ -166,6 +176,7 @@ def place_search_results(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def place_detail(request, place_id):
     place_id = int(place_id)
     return render_to_response('spud/static.html', {
@@ -174,6 +185,7 @@ def place_detail(request, place_id):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def person_search_results(request):
     query = request.GET.copy()
     page = query.pop('page', [0])[-1]
@@ -189,6 +201,7 @@ def person_search_results(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def person_detail(request, person_id):
     person_id = int(person_id)
     return render_to_response('spud/static.html', {
@@ -197,6 +210,7 @@ def person_detail(request, person_id):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def feedback_search_results(request):
     query = request.GET.copy()
     page = query.pop('page', [0])[-1]
@@ -212,6 +226,7 @@ def feedback_search_results(request):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def feedback_detail(request, feedback_id):
     feedback_id = int(feedback_id)
     return render_to_response('spud/static.html', {
@@ -220,6 +235,7 @@ def feedback_detail(request, feedback_id):
     }, context_instance=RequestContext(request))
 
 
+@ensure_csrf_cookie
 def photo_search_results(request):
     if 'n' in request.GET:
         query = request.GET.copy()
