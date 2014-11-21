@@ -14,7 +14,6 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  libapache2-mod-wsgi | httpd-wsgi,
  apache2 | httpd,
- libjs-jquery, libjs-jquery-ui,
  libimage-exiftool-perl, libav-tools
 Recommends: dcraw, python-ffvideo
 Suggests: python-psycopg2 | python-mysqldb | python-mysql.connector

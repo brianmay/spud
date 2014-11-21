@@ -13,22 +13,3 @@ override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	./run_tests.sh
 endif
-
-override_dh_auto_install:
-	dh_auto_install
-	
-	# Remove embedded Javascript libraries
-	set -e; for FILENAME in jquery.js; do \
-		find $(PREFIX) -name $$FILENAME -exec \
-			ln -sf /usr/share/javascript/jquery/$$FILENAME {} \;; \
-	done
-	
-	set -e; for FILENAME in jquery-ui.js; do \
-		find $(PREFIX) -name $$FILENAME -exec \
-			ln -sf /usr/share/javascript/jquery-ui/$$FILENAME {} \;; \
-	done
-	
-	set -e; for FILENAME in jquery-ui.css; do \
-		find $(PREFIX) -name $$FILENAME -exec \
-			ln -sf /usr/share/javascript/jquery-ui/css/smoothness/$$FILENAME {} \;; \
-	done
