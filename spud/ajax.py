@@ -1020,6 +1020,9 @@ def logout(request):
 @ensure_csrf_cookie
 @check_errors
 def album_search_form(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     criteria = {}
     params = request.GET.copy()
     _pop_string(params, "_")
@@ -1060,6 +1063,9 @@ def album_search_form(request):
 @ensure_csrf_cookie
 @check_errors
 def album_search_results(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     params = request.GET.copy()
     _pop_string(params, "_")
 
@@ -1263,6 +1269,9 @@ def album_finish(request, album, created):
 @ensure_csrf_cookie
 @check_errors
 def category_search_form(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     criteria = {}
     params = request.GET.copy()
     _pop_string(params, "_")
@@ -1298,6 +1307,9 @@ def category_search_form(request):
 @ensure_csrf_cookie
 @check_errors
 def category_search_results(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     params = request.GET.copy()
     _pop_string(params, "_")
 
@@ -1479,6 +1491,9 @@ def category_finish(request, category, created):
 @ensure_csrf_cookie
 @check_errors
 def place_search_form(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     criteria = {}
     params = request.GET.copy()
     _pop_string(params, "_")
@@ -1514,6 +1529,8 @@ def place_search_form(request):
 @ensure_csrf_cookie
 @check_errors
 def place_search_results(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
     params = request.GET.copy()
     _pop_string(params, "_")
 
@@ -1723,6 +1740,9 @@ def place_finish(request, place, created):
 @ensure_csrf_cookie
 @check_errors
 def person_search_form(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     criteria = {}
     params = request.GET.copy()
     _pop_string(params, "_")
@@ -1757,6 +1777,9 @@ def person_search_form(request):
 @ensure_csrf_cookie
 @check_errors
 def person_search_results(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     params = request.GET.copy()
     _pop_string(params, "_")
 
@@ -2144,6 +2167,9 @@ def photo_relation_finish(request, photo_relation, created):
 @ensure_csrf_cookie
 @check_errors
 def feedback_search_form(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     criteria = {}
     params = request.GET.copy()
     _pop_string(params, "_")
@@ -2192,6 +2218,9 @@ def feedback_search_form(request):
 @ensure_csrf_cookie
 @check_errors
 def feedback_search_results(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     params = request.GET.copy()
     _pop_string(params, "_")
 
@@ -2446,6 +2475,9 @@ def feedback_finish(request, feedback, created):
 @ensure_csrf_cookie
 @check_errors
 def photo_search_form(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     params = request.GET.copy()
     _pop_string(params, "_")
 
@@ -2465,6 +2497,9 @@ def photo_search_form(request):
 @ensure_csrf_cookie
 @check_errors
 def photo_search_results(request):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     params = request.GET.copy()
     _pop_string(params, "_")
 
@@ -2831,6 +2866,9 @@ def photo_search_change(request):
 
 @ensure_csrf_cookie
 def photo(request, photo_id):
+    if request.method != "GET":
+        raise ErrorBadRequest("Only GET is supported")
+
     value = get_object_or_404(models.photo, pk=photo_id)
     resp = {
         'type': 'photo_get',
