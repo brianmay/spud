@@ -23,6 +23,7 @@ import pytz
 import datetime
 import re
 import six
+import tempfile
 
 import django.db.transaction
 import django.conf
@@ -187,10 +188,18 @@ def _pop_datetime(params, key, timezone):
     return _decode_datetime(key, _pop_string(params, key), timezone)
 
 
+def _pop_string_array(params, key):
+    value = params.pop(key, [])
+    result = []
+    for v in value:
+        if v != "":
+            v = v.split(":")
+            result.extend(v)
+    return result
+
+
 def _pop_int_array(params, key):
-    value = params.pop(key, None)
-    if value is None:
-        return None
+    value = params.pop(key, [])
     result = []
     for v in value:
         if v != "":
@@ -200,9 +209,7 @@ def _pop_int_array(params, key):
 
 
 def _pop_object_array(params, key, model):
-    value = params.pop(key, None)
-    if value is None:
-        return None
+    value = params.pop(key, [])
     result = []
     for v in value:
         if v != "":
@@ -2835,42 +2842,6 @@ def photo(request, photo_id):
 
 
 def upload_file(request):
-    """
-
-    ## View for file uploads ##
-
-    It does the following actions:
-        - displays a template if no action have been specified
-        - upload a file into unique temporary directory
-                unique directory for an upload session
-                    meaning when user opens up an upload page, all upload
-                    actions while being on that page will be uploaded to unique
-                    directory.  as soon as user will reload, files will be
-                    uploaded to a different unique directory
-        - delete an uploaded file
-
-    ## How Single View Multi-functions ##
-
-    If the user just goes to a the upload url (e.g. '/upload/'), the
-    request.method will be "GET" Or you can think of it as request.method will
-    NOT be "POST" Therefore the view will always return the upload template
-
-    If on the other side the method is POST, that means some sort of upload
-    action has to be done. That could be either uploading a file or deleting a
-    file
-
-    For deleting files, there is the same url (e.g. '/upload/'), except it has
-    an extra query parameter. Meaning the url will have '?' in it.  In this
-    implementation the query will simply be
-    '?f=filename_of_the_file_to_be_removed'
-
-    If the request has no query parameters, file is being uploaded.
-
-    """
-
-    # used to generate random unique id
-    import uuid
-
     # settings for the file upload
     #   you can define other parameters here
     #   and check validity late in the code
@@ -2893,149 +2864,176 @@ def upload_file(request):
 
     # POST request
     #   meaning user has triggered an upload action
-    if request.method == 'POST':
-        # figure out the path where files will be uploaded to
-        # PROJECT_ROOT is from the settings file
-        temp_path = "/tmp/spud"
-
-        if django.conf.settings.IMAGE_PATH is None:
-            return HttpResponseBadRequest(
-                'This site does not support uploads')
-
-        if not request.user.has_perm('spud.add_photo'):
-            return HttpResponseForbidden(
-                'You do not have rights to upload files')
-
-        # if 'f' query parameter is not specified
-        # file is being uploaded
-        if not ("f" in request.GET.keys()):  # upload file
-
-            # make sure some files have been uploaded
-            if not request.FILES:
-                return HttpResponseBadRequest('Must upload a file')
-
-            # make sure unique id is specified - VERY IMPORTANT
-            # this is necessary because of the following:
-            #       we want users to upload to a unique directory however the
-            #       uploader will make independent requests to the server to
-            #       upload each file, so there has to be a method for all these
-            #       files to be recognized as a single batch of files a unique
-            #       id for each session will do the job
-            if "uid" not in request.POST:
-                return HttpResponseBadRequest("UID not specified.")
-
-            # if here, uid has been specified, so record it
-            uid = request.POST["uid"]
-
-            # update the temporary path by creating a sub-folder within
-            # the upload folder with the uid name
-            temp_path = os.path.join(temp_path, uid)
-
-            # get the uploaded file
-            file = request.FILES['files[]']
-
-            # initialize the error
-            # If error occurs, this will have the string error message so
-            # uploader can display the appropriate message
-            error = False
-
-            # check against options for errors
-
-            # file size
-            if file.size > options["maxfilesize"]:
-                error = "maxFileSize"
-            if file.size < options["minfilesize"]:
-                error = "minFileSize"
-                # allowed file type
-            if file.content_type not in options["acceptedformats"]:
-                error = "acceptFileTypes"
-
-            # the response data which will be returned to the uploader as json
-            response_data = {
-                "name": file.name,
-                "size": file.size,
-                "type": file.content_type
-            }
-
-            # if there was an error, add error message to response_data and
-            # return
-            if error:
-                # append error message
-                response_data["error"] = error
-                # generate json
-                response_data = json.dumps({'files': [response_data]})
-                # return response to uploader with error
-                # so it can display error message
-                return HttpResponse(response_data,
-                                    content_type='application/json')
-
-            # make temporary dir if not exists already
-            if not os.path.exists(temp_path):
-                os.makedirs(temp_path)
-
-            # get the absolute path of where the uploaded file will be saved
-            # all add some random data to the filename in order to avoid
-            # conflicts when user tries to upload two files with same filename
-            filename = os.path.join(temp_path, str(uuid.uuid4()) + file.name)
-            # open the file handler with write binary mode
-            destination = open(filename, "wb+")
-            # save file data into the disk
-            # use the chunk method in case the file is too big
-            # in order not to clutter the system memory
-            for chunk in file.chunks():
-                destination.write(chunk)
-                # close the file
-            destination.close()
-
-            photo = None
-            try:
-                album, _ = spud.models.album.objects.get_or_create(
-                    title="Uploads")
-                album.fix_ascendants()
-
-                album, _ = album.children.get_or_create(title=uid)
-                album.fix_ascendants()
-
-                photo = spud.upload.import_photo(
-                    filename,
-                    {'albums': [album]},
-                    {'filename': file.name, 'action': 'V', }
-                )
-                photo.generate_thumbnails(overwrite=False)
-                response_data['photo'] = _json_photo_brief(
-                    request.user, photo)
-            except spud.models.photo_already_exists_error:
-                response_data['error'] = "Photo already exists"
-            except:
-                if photo is not None:
-                    photo.delete()
-                raise
-            finally:
-                os.unlink(filename)
-
-            # generate the json data
-            response_data = json.dumps({'files': [response_data]})
-            # response type
-            response_type = "application/json"
-
-            # QUIRK HERE
-            # in jQuey uploader, when it falls back to uploading using iFrames
-            # the response content type has to be text/html
-            # if json will be send, error will occur
-            # if iframe is sending the request, it's headers are a little
-            # different compared
-            # to the jQuery ajax request
-            # they have different set of HTTP_ACCEPT values
-            # so if the text/html is present, file was uploaded using jFrame
-            # because # that value is not in the set when uploaded by XHR
-            if "text/html" in request.META["HTTP_ACCEPT"]:
-                response_type = "text/html"
-
-            # return the data to the uploading plugin
-            return HttpResponse(response_data, content_type=response_type)
-
-        else:  # file has to be deleted
-            return HttpResponseBadRequest('Delete not supported')
-
-    else:  # GET
+    if request.method != 'POST':
         return HttpResponseBadRequest('Must be a POST request')
+
+    # figure out the path where files will be uploaded to
+    # PROJECT_ROOT is from the settings file
+    temp_path = "/tmp/spud"
+
+    if django.conf.settings.IMAGE_PATH is None:
+        return HttpResponseBadRequest(
+            'This site does not support uploads')
+
+    if not request.user.has_perm('spud.add_photo'):
+        return HttpResponseForbidden(
+            'You do not have rights to upload files')
+
+    # make sure some files have been uploaded
+    if not request.FILES:
+        return HttpResponseBadRequest('Must upload a file')
+
+    # get the uploaded file
+    file = request.FILES['files[]']
+
+    # initialize the error
+    # If error occurs, this will have the string error message so
+    # uploader can display the appropriate message
+    error = False
+
+    # check against options for errors
+
+    # file size
+    if file.size > options["maxfilesize"]:
+        error = "maxFileSize"
+    if file.size < options["minfilesize"]:
+        error = "minFileSize"
+        # allowed file type
+    if file.content_type not in options["acceptedformats"]:
+        error = "acceptFileTypes"
+
+    # the response data which will be returned to the uploader as json
+    response_data = {
+        "name": file.name,
+        "size": file.size,
+        "type": file.content_type
+    }
+
+    # if there was an error, add error message to response_data and
+    # return
+    if error:
+        # append error message
+        response_data["error"] = error
+        # generate json
+        response_data = json.dumps({'files': [response_data]})
+        # return response to uploader with error
+        # so it can display error message
+        return HttpResponse(response_data,
+                            content_type='application/json')
+
+    params = request.POST.copy()
+
+    dryrun = _pop_boolean(params, 'dryrun')
+
+    photographer = None
+    if 'photographer' in params:
+        photographer = _pop_string(params, 'photographer')
+        (first_name, last_name) = photographer.split(" ")
+        photographer = models.person.objects.get(
+            first_name=first_name, last_name=last_name)
+
+    location = None
+    if 'location' in params:
+        location = _pop_string(params, 'location')
+        location = models.place.objects.get(title=location)
+
+    tmp_albums = _pop_string_array(params, 'albums')
+    albums = []
+    for album in tmp_albums:
+        split = album.split("/")
+        for i in split:
+            album, c = album.children.get_or_create(title=i)
+            if c:
+                album.fix_ascendants()
+        albums.append(album)
+
+    tmp_categorys = _pop_string_array(params, 'categories')
+    categorys = []
+    for category in tmp_categorys:
+        split = category.split("/")
+        for i in split:
+            category, c = category.children.get_or_create(title=i)
+            if c:
+                category.fix_ascendants()
+        categorys.append(category)
+
+    src_timezone = None
+    if 'src_timezone' in params:
+        src_timezone = _pop_string(params, 'src_timezone')
+        src_timezone = pytz.timezone(src_timezone)
+
+    if 'dst_timezone' in params:
+        dst_timezone = _pop_string(params, 'dst_timezone')
+        dst_timezone = pytz.timezone(dst_timezone)
+
+    offset = datetime.timedelta(hours=0, minutes=0, seconds=0)
+    if 'offset' in params:
+        offset = params.pop('offset')
+        if offset[0] == '+':
+            direction = 1
+            offset = offset[1:]
+        elif offset[0] == '-':
+            direction = -1
+            offset = offset[1:]
+        else:
+            direction = 1
+        (hh, mm, ss) = offset.split(":")
+
+        hh = int(hh)
+        mm = int(mm)
+        ss = int(ss)
+
+        offset = direction * datetime.timedelta(
+            hours=hh, minutes=mm, seconds=ss)
+
+    _check_params_empty(params)
+
+    # make temporary dir if not exists already
+    if not os.path.exists(temp_path):
+        os.makedirs(temp_path)
+
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        for chunk in file.chunks():
+            tmp_file.write(chunk)
+            # close the file
+
+        tmp_file.flush()
+        tmp_filename = tmp_file.name
+
+        photo = None
+        try:
+            photo = upload.import_photo(
+                tmp_filename, file.name,
+                photographer, location, albums, categorys,
+                src_timezone, dst_timezone, offset, dryrun, 'V',
+            )
+            photo.generate_thumbnails(overwrite=False)
+            response_data['photo'] = _json_photo_brief(
+                request.user, photo)
+        except models.photo_already_exists_error:
+            response_data['error'] = "Photo already exists"
+        except:
+            if photo is not None:
+                photo.delete()
+            raise
+
+    # generate the json data
+    response_data = json.dumps({'files': [response_data]})
+    # response type
+    response_type = "application/json"
+
+    # QUIRK HERE
+    # in jQuey uploader, when it falls back to uploading using iFrames
+    # the response content type has to be text/html
+    # if json will be send, error will occur
+    # if iframe is sending the request, it's headers are a little
+    # different compared
+    # to the jQuery ajax request
+    # they have different set of HTTP_ACCEPT values
+    # so if the text/html is present, file was uploaded using jFrame
+    # because # that value is not in the set when uploaded by XHR
+    if "text/html" in request.META["HTTP_ACCEPT"]:
+        response_type = "text/html"
+
+    # return the data to the uploading plugin
+    return HttpResponse(response_data, content_type=response_type)

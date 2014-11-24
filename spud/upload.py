@@ -49,7 +49,11 @@ def set_category_list(photo, category_list):
 
 
 @transaction.commit_on_success
-def import_photo(file, d, options):
+def import_photo(
+        tmp_filename, src_filename,
+        photographer, location, albums, categorys,
+        src_timezone, dst_timezone, offset, dryrun, action):
+
     print()
 
     # check source file
@@ -60,70 +64,37 @@ def import_photo(file, d, options):
     # set everything without commiting anything
     photo = spud.models.photo()
     photo.title = ''
-    if 'photographer' in d:
-        photo.photographer = d['photographer']
-    if 'location' in d:
-        photo.location = d['location']
+    photo.photographer = photographer
+    photo.location = location
     photo.view = ''
     photo.rating = None
     photo.description = ''
     photo.comment = ""
     photo.level = 1
-    if 'action' in options:
-        photo.action = options['action']
+    photo.action = action
     photo.timestamp = datetime.datetime.now()
 
     photo.update_from_source(media=m)
-
-    # get album
-    albums = d['albums']
-    if 'parse_name'in d and d['parse_name']:
-        assert len(albums) == 1
-        album = albums[0]
-
-        # remove initial .. components
-        split = file.split("/")
-        while split[0] == "..":
-            split.pop(0)
-
-        # remove filename componenent
-        split.pop()
-
-        for i in split:
-            album, c = album.children.get_or_create(title=i)
-            if c:
-                album.fix_ascendants()
-        albums = [album]
 
     # get time
     dt = m.get_datetime()
     print(dt)
 
-    # adjust time for source timezone
-    if photo.camera_model in settings.DEFAULT_TIMEZONE:
-        src_timezone = settings.DEFAULT_TIMEZONE[photo.camera_model]
-        src_timezone = timezone(src_timezone)
-    else:
-        if 'src_timezone' in d:
-            src_timezone = d['src_timezone']
-        else:
-            src_timezone = pytz.timezone(settings.TIME_ZONE)
+    if src_timezone is None:
+        src_timezone = pytz.timezone(settings.TIME_ZONE)
 
     dt = src_timezone.localize(dt)
     print(dt)
 
     # adjust time for destination timezone
-    if 'dst_timezone' in d:
-        dst_timezone = d['dst_timezone']
-    else:
+    if dst_timezone is None:
         dst_timezone = pytz.timezone(settings.TIME_ZONE)
 
     dt = dt.astimezone(dst_timezone)
     print(dt)
 
     # add manual offsets
-    if 'offset' in d:
-        dt += d['offset']
+    dt += offset
     if photo.camera_model in settings.DEFAULT_DTOFFSET:
         dt += settings.DEFAULT_DTOFFSET[photo.camera_model]
     print(dt)
@@ -134,32 +105,31 @@ def import_photo(file, d, options):
 
     # determine the destination path
     path = "%04d/%02d/%02d" % (dt.year, dt.month, dt.day)
-    name = os.path.basename(file)
-    if 'filename' in options:
-        name = options['filename']
-    path, name = spud.models.photo.get_new_name(file, path, name)
+    filename = os.path.basename(src_filename)
+    path, filename = spud.models.photo.get_new_name(
+        tmp_filename, path, filename)
     photo.path = path
-    photo.name = name
+    photo.name = filename
     dst = photo.get_orig_path()
 
     # don't do anything in dryrun mode
-    if 'dryrun' in options and options['dryrun']:
-        print("would import %s to %s/%s (%s)" % (file, path, name, dt))
+    if dryrun:
+        print("would import %s to %s/%s (%s)"
+              % (tmp_filename, path, filename, dt))
         return photo
 
     # Go ahead and do stuff
-    print("importing %s to %s/%s" % (file, path, name))
+    print("importing %s to %s/%s" % (tmp_filename, path, filename))
 
     umask = os.umask(0o022)
     if not os.path.lexists(os.path.dirname(dst)):
         os.makedirs(os.path.dirname(dst), 0o755)
 
     try:
-        shutil.copyfile(file, dst)
+        shutil.copyfile(tmp_filename, dst)
         photo.save()
         set_album_list(photo, albums)
-        if 'categorys' in d:
-            set_category_list(photo, d['categorys'])
+        set_category_list(photo, categorys)
 
         os.umask(umask)
     except:
@@ -167,6 +137,7 @@ def import_photo(file, d, options):
         photo.delete()
         raise
 
-    print("imported  %s to %s/%s as %d" % (file, path, name, photo.pk))
+    print("imported  %s to %s/%s as %d"
+          % (tmp_filename, path, filename, photo.pk))
 
     return photo
