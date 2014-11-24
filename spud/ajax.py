@@ -34,8 +34,7 @@ from django.db.models import Q, Count
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.mail import mail_admins
 
-import spud.models
-import spud.upload
+from spud import models, upload
 
 _can_add_feedback = True
 
@@ -735,7 +734,7 @@ def _json_search_brief(user, params):
     criteria = {}
 
     search = Q()
-    photo_list = spud.models.photo.objects.all()
+    photo_list = models.photo.objects.all()
 
     pd = _pop_boolean(params, "person_descendants")
     if pd:
@@ -807,12 +806,12 @@ def _json_search_brief(user, params):
         criteria["camera_model"] = value
         search = search & Q(camera_model__icontains=value)
 
-    value = _pop_object(params, "photographer", spud.models.person)
+    value = _pop_object(params, "photographer", models.person)
     if value is not None:
         criteria["photographer"] = _json_person_brief(user, value)
         search = search & Q(photographer=value)
 
-    value = _pop_object(params, "place", spud.models.place)
+    value = _pop_object(params, "place", models.place)
     if value is not None:
         criteria["place"] = _json_place_brief(user, value)
         if ld:
@@ -822,7 +821,7 @@ def _json_search_brief(user, params):
 
     del value
 
-    values = _pop_object_array(params, "persons", spud.models.person)
+    values = _pop_object_array(params, "persons", models.person)
     if values is not None:
         criteria["persons"] = []
         for value in values:
@@ -833,7 +832,7 @@ def _json_search_brief(user, params):
             else:
                 photo_list = photo_list.filter(persons=value)
 
-    values = _pop_object_array(params, "albums", spud.models.album)
+    values = _pop_object_array(params, "albums", models.album)
     if values is not None:
         criteria["albums"] = []
         for value in values:
@@ -844,7 +843,7 @@ def _json_search_brief(user, params):
             else:
                 photo_list = photo_list.filter(albums=value)
 
-    values = _pop_object_array(params, "categorys", spud.models.category)
+    values = _pop_object_array(params, "categorys", models.category)
     if values is not None:
         criteria["categorys"] = []
         for value in values:
@@ -855,7 +854,7 @@ def _json_search_brief(user, params):
             else:
                 photo_list = photo_list.filter(categorys=value)
 
-    values = _pop_object_array(params, "photos", spud.models.photo)
+    values = _pop_object_array(params, "photos", models.photo)
     if values is not None:
         criteria["photos"] = []
         q = Q()
@@ -900,7 +899,7 @@ def _json_search_brief(user, params):
             criteria["action"] = "set"
         else:
             search = search & Q(action=value)
-            criteria["action"] = spud.models.action_to_string(value)
+            criteria["action"] = models.action_to_string(value)
 
     value = _pop_string(params, "path")
     if value is not None:
@@ -1027,7 +1026,7 @@ def album_search_form(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.album)
+    instance = _pop_object(params, "instance", models.album)
     if instance is not None:
         criteria['instance'] = _json_album_brief(request.user, instance)
 
@@ -1069,7 +1068,7 @@ def album_search_results(request):
     if count < 0:
         raise ErrorBadRequest("count is negative")
 
-    album_list = spud.models.album.objects.all()
+    album_list = models.album.objects.all()
     criteria = {}
 
     q = _pop_string(params, "q")
@@ -1083,7 +1082,7 @@ def album_search_results(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.album)
+    instance = _pop_object(params, "instance", models.album)
     if instance is not None:
         criteria['instance'] = _json_album_brief(request.user, instance)
         if mode == "children":
@@ -1139,7 +1138,7 @@ def album(request, album_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_album'):
             raise ErrorForbidden("No rights to change albums")
-    album = get_object_or_404(spud.models.album, pk=album_id)
+    album = get_object_or_404(models.album, pk=album_id)
     return album_finish(request, album, False)
 
 
@@ -1150,7 +1149,7 @@ def album_add(request):
     if request.method == "POST":
         if not request.user.has_perm('spud.add_album'):
             raise ErrorForbidden("No rights to add albums")
-    album = spud.models.album()
+    album = models.album()
     return album_finish(request, album, True)
 
 
@@ -1160,7 +1159,7 @@ def album_delete(request, album_id):
         raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_album'):
         raise ErrorForbidden("No rights to delete albums")
-    album = get_object_or_404(spud.models.album, pk=album_id)
+    album = get_object_or_404(models.album, pk=album_id)
 
     errors = album.check_delete()
     if len(errors) > 0:
@@ -1199,7 +1198,7 @@ def album_finish(request, album, created):
             if value == "":
                 album.cover_photo = None
             else:
-                value = _decode_object("cover_photo", spud.models.photo, value)
+                value = _decode_object("cover_photo", models.photo, value)
                 album.cover_photo = value
             updated = True
 
@@ -1218,7 +1217,7 @@ def album_finish(request, album, created):
             if value == "":
                 album.parent = None
             else:
-                value = _decode_object("parent", spud.models.album, value)
+                value = _decode_object("parent", models.album, value)
                 album.parent = value
             updated = True
             updated_parent = True
@@ -1270,7 +1269,7 @@ def category_search_form(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.category)
+    instance = _pop_object(params, "instance", models.category)
     if instance is not None:
         criteria['instance'] = _json_category_brief(request.user, instance)
 
@@ -1307,7 +1306,7 @@ def category_search_results(request):
     if count < 0:
         raise ErrorBadRequest("count is negative")
 
-    category_list = spud.models.category.objects.all()
+    category_list = models.category.objects.all()
     criteria = {}
 
     q = _pop_string(params, "q")
@@ -1321,7 +1320,7 @@ def category_search_results(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.category)
+    instance = _pop_object(params, "instance", models.category)
     if instance is not None:
         criteria['instance'] = _json_category_brief(request.user, instance)
         if mode == "children":
@@ -1368,7 +1367,7 @@ def category(request, category_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_category'):
             raise ErrorForbidden("No rights to change categorys")
-    category = get_object_or_404(spud.models.category, pk=category_id)
+    category = get_object_or_404(models.category, pk=category_id)
     return category_finish(request, category, False)
 
 
@@ -1379,7 +1378,7 @@ def category_add(request):
     if request.method == "POST":
         if not request.user.has_perm('spud.add_category'):
             raise ErrorForbidden("No rights to add categorys")
-    category = spud.models.category()
+    category = models.category()
     return category_finish(request, category, True)
 
 
@@ -1389,7 +1388,7 @@ def category_delete(request, category_id):
         raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_category'):
         raise ErrorForbidden("No rights to delete categorys")
-    category = get_object_or_404(spud.models.category, pk=category_id)
+    category = get_object_or_404(models.category, pk=category_id)
 
     errors = category.check_delete()
     if len(errors) > 0:
@@ -1429,7 +1428,7 @@ def category_finish(request, category, created):
             if value == "":
                 category.cover_photo = None
             else:
-                value = _decode_object("cover_photo", spud.models.photo, value)
+                value = _decode_object("cover_photo", models.photo, value)
                 category.cover_photo = value
             updated = True
 
@@ -1448,7 +1447,7 @@ def category_finish(request, category, created):
             if request.POST['parent'] == "":
                 category.parent = None
             else:
-                value = _decode_object("parent", spud.models.category, value)
+                value = _decode_object("parent", models.category, value)
                 category.parent = value
             updated = True
             updated_parent = True
@@ -1486,7 +1485,7 @@ def place_search_form(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.place)
+    instance = _pop_object(params, "instance", models.place)
     if instance is not None:
         criteria['instance'] = _json_place_brief(request.user, instance)
 
@@ -1523,7 +1522,7 @@ def place_search_results(request):
     if count < 0:
         raise ErrorBadRequest("count is negative")
 
-    place_list = spud.models.place.objects.all()
+    place_list = models.place.objects.all()
     criteria = {}
 
     q = _pop_string(params, "q")
@@ -1537,7 +1536,7 @@ def place_search_results(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.place)
+    instance = _pop_object(params, "instance", models.place)
     if instance is not None:
         criteria['instance'] = _json_place_brief(request.user, instance)
         if mode == "children":
@@ -1583,7 +1582,7 @@ def place(request, place_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_place'):
             raise ErrorForbidden("No rights to change places")
-    place = get_object_or_404(spud.models.place, pk=place_id)
+    place = get_object_or_404(models.place, pk=place_id)
     return place_finish(request, place, False)
 
 
@@ -1594,7 +1593,7 @@ def place_add(request):
     if request.method == "POST":
         if not request.user.has_perm('spud.add_place'):
             raise ErrorForbidden("No rights to add places")
-    place = spud.models.place()
+    place = models.place()
     return place_finish(request, place, True)
 
 
@@ -1604,7 +1603,7 @@ def place_delete(request, place_id):
         raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_place'):
         raise ErrorForbidden("No rights to delete places")
-    place = get_object_or_404(spud.models.place, pk=place_id)
+    place = get_object_or_404(models.place, pk=place_id)
 
     errors = place.check_delete()
     if len(errors) > 0:
@@ -1683,7 +1682,7 @@ def place_finish(request, place, created):
             if value == "":
                 place.cover_photo = None
             else:
-                value = _decode_object("cover_photo", spud.models.photo, value)
+                value = _decode_object("cover_photo", models.photo, value)
                 place.cover_photo = value
             updated = True
 
@@ -1692,7 +1691,7 @@ def place_finish(request, place, created):
             if value == "":
                 place.parent = None
             else:
-                value = _decode_object("parent", spud.models.place, value)
+                value = _decode_object("parent", models.place, value)
                 place.parent = value
             updated = True
             updated_parent = True
@@ -1730,7 +1729,7 @@ def person_search_form(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.person)
+    instance = _pop_object(params, "instance", models.person)
     if instance is not None:
         criteria['instance'] = _json_person_brief(request.user, instance)
 
@@ -1766,7 +1765,7 @@ def person_search_results(request):
     if count < 0:
         raise ErrorBadRequest("count is negative")
 
-    person_list = spud.models.person.objects.all()
+    person_list = models.person.objects.all()
     criteria = {}
 
     q = _pop_string(params, "q")
@@ -1781,7 +1780,7 @@ def person_search_results(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.person)
+    instance = _pop_object(params, "instance", models.person)
     if instance is not None:
         criteria['instance'] = _json_person_brief(request.user, instance)
         if mode == "children":
@@ -1832,7 +1831,7 @@ def person(request, person_id):
     if request.method == "POST":
         if not request.user.has_perm('spud.change_person'):
             raise ErrorForbidden("No rights to change persons")
-    person = get_object_or_404(spud.models.person, pk=person_id)
+    person = get_object_or_404(models.person, pk=person_id)
     return person_finish(request, person, False)
 
 
@@ -1843,7 +1842,7 @@ def person_add(request):
     if request.method == "POST":
         if not request.user.has_perm('spud.add_person'):
             raise ErrorForbidden("No rights to add persons")
-    person = spud.models.person()
+    person = models.person()
     return person_finish(request, person, True)
 
 
@@ -1853,7 +1852,7 @@ def person_delete(request, person_id):
         raise ErrorBadRequest("Only POST is supported")
     if not request.user.has_perm('spud.delete_person'):
         raise ErrorForbidden("No rights to delete persons")
-    person = get_object_or_404(spud.models.person, pk=person_id)
+    person = get_object_or_404(models.person, pk=person_id)
 
     errors = person.check_delete()
     if len(errors) > 0:
@@ -1949,7 +1948,7 @@ def person_finish(request, person, created):
             if value == "":
                 person.cover_photo = None
             else:
-                value = _decode_object("cover_photo", spud.models.photo, value)
+                value = _decode_object("cover_photo", models.photo, value)
                 person.cover_photo = value
             updated = True
 
@@ -1960,7 +1959,7 @@ def person_finish(request, person, created):
             if value == "":
                 person.work = None
             else:
-                value = _decode_object("work",  spud.models.place, value)
+                value = _decode_object("work",  models.place, value)
                 person.work = value
             updated = True
 
@@ -1971,7 +1970,7 @@ def person_finish(request, person, created):
             if value == "":
                 person.home = None
             else:
-                value = _decode_object("home", spud.models.place, value)
+                value = _decode_object("home", models.place, value)
                 person.home = value
             updated = True
 
@@ -1982,7 +1981,7 @@ def person_finish(request, person, created):
             if value == "":
                 person.mother = None
             else:
-                value = _decode_object("mother", spud.models.person, value)
+                value = _decode_object("mother", models.person, value)
                 person.mother = value
             updated = True
             updated_parent = True
@@ -1994,7 +1993,7 @@ def person_finish(request, person, created):
             if value == "":
                 person.father = None
             else:
-                value = _decode_object("father", spud.models.person, value)
+                value = _decode_object("father", models.person, value)
                 person.father = value
             updated = True
             updated_parent = True
@@ -2006,7 +2005,7 @@ def person_finish(request, person, created):
             if value == "":
                 person.spouse = None
             else:
-                value = _decode_object("spouse", spud.models.person, value)
+                value = _decode_object("spouse", models.person, value)
                 person.spouse = value
             updated = True
 
@@ -2034,7 +2033,7 @@ def photo_relation(request, photo_relation_id):
         if not request.user.has_perm('spud.change_relation'):
             raise ErrorForbidden("No rights to change photo_relations")
     photo_relation = get_object_or_404(
-        spud.models.photo_relation, pk=photo_relation_id)
+        models.photo_relation, pk=photo_relation_id)
     return photo_relation_finish(request, photo_relation, False)
 
 
@@ -2055,7 +2054,7 @@ def photo_relation_add(request):
     if 'desc_2' not in request.POST:
         raise ErrorBadRequest("desc_2 must be given")
 
-    photo_relation = spud.models.photo_relation()
+    photo_relation = models.photo_relation()
     return photo_relation_finish(request, photo_relation, True)
 
 
@@ -2066,7 +2065,7 @@ def photo_relation_delete(request, photo_relation_id):
     if not request.user.has_perm('spud.delete_relation'):
         raise ErrorForbidden("No rights to delete photo_relations")
     photo_relation = get_object_or_404(
-        spud.models.photo_relation, pk=photo_relation_id)
+        models.photo_relation, pk=photo_relation_id)
 
     errors = photo_relation.check_delete()
     if len(errors) > 0:
@@ -2108,7 +2107,7 @@ def photo_relation_finish(request, photo_relation, created):
         if value is not None:
             if value == "":
                 raise ErrorBadRequest("photo_1 must be non-empty")
-            value = _decode_object("photo_1", spud.models.photo, value)
+            value = _decode_object("photo_1", models.photo, value)
             photo_relation.photo_1 = value
             updated = True
 
@@ -2116,7 +2115,7 @@ def photo_relation_finish(request, photo_relation, created):
         if value is not None:
             if value == "":
                 raise ErrorBadRequest("photo_2 must be non-empty")
-            value = _decode_object("photo_2", spud.models.photo, value)
+            value = _decode_object("photo_2", models.photo, value)
             photo_relation.photo_2 = value
             updated = True
 
@@ -2151,11 +2150,11 @@ def feedback_search_form(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.feedback)
+    instance = _pop_object(params, "instance", models.feedback)
     if instance is not None:
         criteria['instance'] = _json_feedback_brief(request.user, instance)
 
-    instance = _pop_object(params, "photo", spud.models.photo)
+    instance = _pop_object(params, "photo", models.photo)
     if instance is not None:
         criteria['photo'] = _json_photo_brief(request.user, instance)
 
@@ -2201,7 +2200,7 @@ def feedback_search_results(request):
     if count < 0:
         raise ErrorBadRequest("count is negative")
 
-    feedback_list = spud.models.feedback.objects.all()
+    feedback_list = models.feedback.objects.all()
     criteria = {}
 
     q = _pop_string(params, "q")
@@ -2215,7 +2214,7 @@ def feedback_search_results(request):
         mode = mode.lower()
         criteria['mode'] = mode
 
-    instance = _pop_object(params, "instance", spud.models.feedback)
+    instance = _pop_object(params, "instance", models.feedback)
     if instance is not None:
         criteria['instance'] = _json_feedback_brief(request.user, instance)
         if mode == "children":
@@ -2232,7 +2231,7 @@ def feedback_search_results(request):
         else:
             ErrorBadRequest("Unknown search mode")
 
-    instance = _pop_object(params, "photo", spud.models.photo)
+    instance = _pop_object(params, "photo", models.photo)
     if instance is not None:
         feedback_list = feedback_list.filter(photo=instance)
         criteria['photo'] = _json_photo_brief(request.user, instance)
@@ -2285,7 +2284,7 @@ def feedback(request, feedback_id):
         if not request.user.has_perm('spud.change_feedback'):
             raise ErrorForbidden("No rights to change feedbacks")
     feedback = get_object_or_404(
-        spud.models.feedback, pk=feedback_id)
+        models.feedback, pk=feedback_id)
     return feedback_finish(request, feedback, False)
 
 
@@ -2303,7 +2302,7 @@ def feedback_add(request):
     if 'rating' not in request.POST or request.POST['rating'] is None:
         raise ErrorBadRequest("Rating must be specified")
 
-    feedback = spud.models.feedback()
+    feedback = models.feedback()
     if request.user.is_authenticated():
         feedback.user = request.user
     feedback.ip_address = request.META.get("REMOTE_ADDR", None)
@@ -2319,7 +2318,7 @@ def feedback_delete(request, feedback_id):
     if not request.user.has_perm('spud.delete_feedback'):
         raise ErrorForbidden("No rights to delete feedbacks")
     feedback = get_object_or_404(
-        spud.models.feedback, pk=feedback_id)
+        models.feedback, pk=feedback_id)
 
     errors = feedback.check_delete()
     if len(errors) > 0:
@@ -2349,7 +2348,7 @@ def feedback_finish(request, feedback, created):
         updated_rating = False
         old_photo = None
 
-        value = _pop_object(params, "photo", spud.models.photo)
+        value = _pop_object(params, "photo", models.photo)
         if value is not None:
             if feedback.pk is not None:
                 old_photo = feedback.photo
@@ -2361,7 +2360,7 @@ def feedback_finish(request, feedback, created):
             if value == "":
                 feedback.parent = None
             else:
-                value = _decode_object("parent", spud.models.feedback, value)
+                value = _decode_object("parent", models.feedback, value)
                 feedback.parent = value
             updated = True
             updated_parent = True
@@ -2548,7 +2547,7 @@ def _set_persons(photo, pa_list, values):
     # for every value not already in pa_list
     for i in xrange(len(pa_list), len(values)):
         person = values[i]
-        spud.models.photo_person.objects.create(
+        models.photo_person.objects.create(
             photo=photo, person=person, position=position)
         position = position + 1
         del i
@@ -2674,7 +2673,7 @@ def photo_search_change(request):
             if action == "":
                 action = None
             else:
-                for a in spud.models.PHOTO_ACTION:
+                for a in models.PHOTO_ACTION:
                     if a[0] == action:
                         found = True
                     del a
@@ -2690,7 +2689,7 @@ def photo_search_change(request):
                 value = None
             else:
                 value = _decode_object(
-                    "set_photographer", spud.models.person, value)
+                    "set_photographer", models.person, value)
             photo_list.update(photographer=value)
 
         value = _pop_string(params, "set_place")
@@ -2698,12 +2697,12 @@ def photo_search_change(request):
             if value == "":
                 value = None
             else:
-                value = _decode_object("set_place", spud.models.place, value)
+                value = _decode_object("set_place", models.place, value)
             photo_list.update(location=value)
 
         value = None
 
-        values = _pop_object_array(params, "set_albums", spud.models.album)
+        values = _pop_object_array(params, "set_albums", models.album)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_album_set.all())
@@ -2714,34 +2713,34 @@ def photo_search_change(request):
                         pa.delete()
                     del pa
                 for value in values:
-                    spud.models.photo_album.objects.create(
+                    models.photo_album.objects.create(
                         photo=photo, album=value)
                     del value
                 del pa_list
                 del photo
 
-        values = _pop_object_array(params, "add_albums", spud.models.album)
+        values = _pop_object_array(params, "add_albums", models.album)
         if values is not None:
             for photo in photo_list:
                 for value in values:
-                    spud.models.photo_album.objects.get_or_create(
+                    models.photo_album.objects.get_or_create(
                         photo=photo, album=value
                     )
                     del value
                 del photo
 
-        values = _pop_object_array(params, "del_albums", spud.models.album)
+        values = _pop_object_array(params, "del_albums", models.album)
         if values is not None:
             for photo in photo_list:
                 for value in values:
-                    spud.models.photo_album.objects.filter(
+                    models.photo_album.objects.filter(
                         photo=photo, album=value
                     ).delete()
                     del value
                 del photo
 
         values = _pop_object_array(
-            params, "set_categorys", spud.models.category)
+            params, "set_categorys", models.category)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_category_set.all())
@@ -2752,35 +2751,35 @@ def photo_search_change(request):
                         pa.delete()
                     del pa
                 for value in values:
-                    spud.models.photo_category.objects.create(
+                    models.photo_category.objects.create(
                         photo=photo, category=value)
                     del value
                 del pa_list
                 del photo
 
         values = _pop_object_array(
-            params, "add_categorys", spud.models.category)
+            params, "add_categorys", models.category)
         if values is not None:
             for photo in photo_list:
                 for value in values:
-                    spud.models.photo_category.objects.get_or_create(
+                    models.photo_category.objects.get_or_create(
                         photo=photo, category=value
                     )
                     del value
                 del photo
 
         values = _pop_object_array(
-            params, "del_categorys", spud.models.category)
+            params, "del_categorys", models.category)
         if values is not None:
             for photo in photo_list:
                 for value in values:
-                    spud.models.photo_category.objects.filter(
+                    models.photo_category.objects.filter(
                         photo=photo, category=value
                     ).delete()
                     del value
                 del photo
 
-        values = _pop_object_array(params, "set_persons", spud.models.person)
+        values = _pop_object_array(params, "set_persons", models.person)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_person_set.all())
@@ -2788,7 +2787,7 @@ def photo_search_change(request):
                 del pa_list
                 del photo
 
-        values = _pop_object_array(params, "add_persons", spud.models.person)
+        values = _pop_object_array(params, "add_persons", models.person)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_person_set.all())
@@ -2800,7 +2799,7 @@ def photo_search_change(request):
                 del new_values
                 del photo
 
-        values = _pop_object_array(params, "del_persons", spud.models.person)
+        values = _pop_object_array(params, "del_persons", models.person)
         if values is not None:
             for photo in photo_list:
                 pa_list = list(photo.photo_person_set.all())
@@ -2825,7 +2824,7 @@ def photo_search_change(request):
 
 @ensure_csrf_cookie
 def photo(request, photo_id):
-    value = get_object_or_404(spud.models.photo, pk=photo_id)
+    value = get_object_or_404(models.photo, pk=photo_id)
     resp = {
         'type': 'photo_get',
         'photo': _json_photo_detail(request.user, value),
