@@ -3060,18 +3060,5 @@ def upload_file(request):
     # response type
     response_type = "application/json"
 
-    # QUIRK HERE
-    # in jQuey uploader, when it falls back to uploading using iFrames
-    # the response content type has to be text/html
-    # if json will be send, error will occur
-    # if iframe is sending the request, it's headers are a little
-    # different compared
-    # to the jQuery ajax request
-    # they have different set of HTTP_ACCEPT values
-    # so if the text/html is present, file was uploaded using jFrame
-    # because # that value is not in the set when uploaded by XHR
-    if "text/html" in request.META["HTTP_ACCEPT"]:
-        response_type = "text/html"
-
     # return the data to the uploading plugin
     return HttpResponse(response_data, content_type=response_type)
