@@ -556,7 +556,7 @@ class photo(base_model):
     action = models.CharField(
         max_length=4, null=True, blank=True,
         choices=PHOTO_ACTION, db_index=True)
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     albums = models.ManyToManyField(
         album, through='photo_album', related_name='photos')
@@ -575,6 +575,10 @@ class photo(base_model):
                 return self.name
         else:
                 return self.title
+
+    @property
+    def timezone(self):
+        return pytz.FixedOffset(self.utc_offset)
 
     def fix_rating(self):
         feedbacks = self.feedbacks.filter(is_removed=False)
@@ -598,8 +602,9 @@ class photo(base_model):
     def _get_thumb_path(cls, size, path, name):
         if size in settings.IMAGE_SIZES:
             (shortname, _) = os.path.splitext(name)
-            return "%sthumb/%s/%s/%s.jpg" % (
-                settings.IMAGE_PATH, size, path, shortname)
+            return os.path.join(
+                settings.IMAGE_PATH, "thumb",
+                size, path, shortname + ".jpg")
         else:
             raise RuntimeError("unknown image size %s" % (size))
 
@@ -607,14 +612,15 @@ class photo(base_model):
     def _get_video_path(cls, size, path, name, extension):
         if size in settings.VIDEO_SIZES:
             (shortname, _) = os.path.splitext(name)
-            return "%svideo/%s/%s/%s.%s" % (
-                settings.IMAGE_PATH, size, path, shortname, extension)
+            return os.path.join(
+                settings.IMAGE_PATH, "video",
+                size, path, shortname + extension)
         else:
             raise RuntimeError("unknown image size %s" % (size))
 
     @classmethod
     def _get_orig_path(cls, path, name):
-        return "%sorig/%s/%s" % (settings.IMAGE_PATH, path, name)
+        return os.path.join(settings.IMAGE_PATH, "orig", path, name)
 
     # Public methods
 
@@ -622,8 +628,9 @@ class photo(base_model):
         return self._get_orig_path(self.path, self.name)
 
     def get_orig_url(self):
-        return iri_to_uri("%sorig/%s/%s" % (
-            settings.IMAGE_URL, urlquote(self.path), urlquote(self.name)))
+        return iri_to_uri(os.path.join(
+            settings.IMAGE_URL, "orig",
+            urlquote(self.path), urlquote(self.name)))
 
     def get_thumb(self, size):
         try:
@@ -653,7 +660,8 @@ class photo(base_model):
         self.album_cover_of.clear()
         self.category_cover_of.clear()
         self.person_cover_of.clear()
-        os.unlink(self.get_orig_path())
+        if self.name:
+            os.unlink(self.get_orig_path())
         for pt in self.photo_thumb_set.all():
             path = pt.get_path()
             if os.path.lexists(path):
@@ -747,12 +755,8 @@ class photo(base_model):
         return
     update_size.alters_data = True
 
-    def update_from_source(self, media=None):
-        if media is None:
-            m = media.get_media(self.get_orig_path())
-        else:
-            m = media
-
+    def update_from_source(self):
+        m = media.get_media(self.get_orig_path())
         exif = m.get_exif()
 
         (width, height) = m.get_size()
@@ -1000,16 +1004,16 @@ class photo_thumb(base_model):
     def get_path(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return "%sthumb/%s/%s/%s.jpg" % (
-            settings.IMAGE_PATH, self.size,
-            photo.path, shortname)
+        return os.path.join(
+            settings.IMAGE_PATH, "thumb", self.size,
+            photo.path, shortname + ".jpg")
 
     def get_url(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return iri_to_uri("%sthumb/%s/%s/%s.jpg" % (
+        return iri_to_uri(os.path.join(
             settings.IMAGE_URL, urlquote(self.size),
-            urlquote(photo.path), urlquote(shortname)))
+            urlquote(photo.path), "thumb", urlquote(shortname + ".jpg")))
 
     def delete(self):
         path = self.get_path()
@@ -1028,17 +1032,17 @@ class photo_video(base_model):
     def get_path(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return "%svideo/%s/%s/%s.%s" % (
-            settings.IMAGE_PATH, self.size,
-            photo.path, shortname, self.extension)
+        return os.path.join(
+            settings.IMAGE_PATH, "video", self.size,
+            photo.path, shortname + self.extension)
 
     def get_url(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
-        return iri_to_uri("%svideo/%s/%s/%s.%s" % (
-            settings.IMAGE_URL, urlquote(self.size),
-            urlquote(photo.path), urlquote(shortname),
-            urlquote(self.extension)))
+        return iri_to_uri(os.path.join(
+            settings.IMAGE_URL, "video", urlquote(self.size),
+            urlquote(photo.path),
+            urlquote(shortname + self.extension)))
 
     def delete(self):
         path = self.get_path()

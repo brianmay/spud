@@ -16,9 +16,9 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import datetime
 import json
-
-from rest_framework import viewsets
+from rest_framework import viewsets, exceptions, parsers, negotiation
 
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
@@ -27,6 +27,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.models import User, Group
+from django.db.models import Q, Count
 
 from . import models
 from . import serializers
@@ -65,6 +66,91 @@ class AlbumViewSet(viewsets.ModelViewSet):
     """
     queryset = models.album.objects.all()
     serializer_class = serializers.AlbumSerializer
+
+    def get_queryset(self):
+        queryset = models.album.objects.all()
+        params = self.request.QUERY_PARAMS
+
+        name = params.get('name', None)
+        if name is not None:
+            split = name.split("/")
+
+            qtmp = models.album.objects.all()
+            first = split.pop(0)
+
+            if first == "":
+                qtmp = qtmp.filter(parent__isnull=True)
+                first = split.pop(0)
+            try:
+                album = qtmp.get(title=first)
+            except models.album.DoesNotExist:
+                raise exceptions.ParseError(
+                    "Cannot find album '%s'" % first)
+            except models.album.MultipleObjectsReturned:
+                raise exceptions.ParseError(
+                    "Multiple results returned for album '%s'" % first)
+
+            for search in split:
+                try:
+                    album = models.album.objects.get(
+                        parent=album,
+                        title=search)
+                except models.album.DoesNotExist:
+                    raise exceptions.ParseError(
+                        "Cannot find album '%s'" % search)
+                except models.album.MultipleObjectsReturned:
+                    raise exceptions.ParseError(
+                        "Multiple results returned for album '%s'" % search)
+
+            queryset = queryset.filter(pk=album.pk)
+
+        q = params.get('q', None)
+        if q is not None:
+            queryset = queryset.filter(
+                Q(title__icontains=q) | Q(description__icontains=q))
+
+        mode = params.get('mode', 'children')
+        mode = mode.lower()
+
+        try:
+            instance = params.get('instance')
+            if instance is not None:
+                instance = int(instance)
+                instance = models.album.objects.get(pk=instance)
+        except ValueError:
+            instance = None
+        except models.album.DoesNotExist:
+            instance = None
+
+        if instance is not None:
+            if mode == "children":
+                queryset = queryset.filter(parent=instance)
+            elif mode == "ascendants":
+                queryset = queryset.filter(
+                    descendant_set__descendant=instance,
+                    descendant_set__position__gt=0)
+            elif mode == "descendants":
+                queryset = queryset.filter(
+                    ascendant_set__ascendant=instance,
+                    ascendant_set__position__gt=0)
+            else:
+                instance = None
+
+        root_only = params.get('root_only', False)
+        if root_only:
+            queryset = queryset.filter(parent=None)
+
+        if self.request.user.is_staff:
+            needs_revision = params.get('needs_revision', False)
+            if needs_revision:
+                dt = datetime.datetime.utcnow()-datetime.timedelta(days=365)
+                queryset = queryset.filter(
+                    Q(revised__lt=dt) | Q(revised__isnull=True))
+                queryset = queryset \
+                    .annotate(null_revised=Count('revised')) \
+                    .order_by('null_revised', 'revised', '-pk')
+
+        return queryset
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

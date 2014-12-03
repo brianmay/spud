@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+# spud - keep track of photos
+# Copyright (C) 2008-2013 Brian May
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import argparse
+from hammock import Hammock
+from requests.auth import HTTPBasicAuth
+
+
+class Spud(Hammock):
+    def __init__(self, username, password, *args, **kwargs):
+        self._auth = HTTPBasicAuth(username, password)
+        super(Spud, self).__init__(*args, **kwargs)
+
+    def _request(self, *args, **kwargs):
+        if 'auth' not in kwargs:
+            kwargs['auth'] = self._auth
+        result = super(Spud, self)._request(*args, **kwargs)
+        if result.status_code == 400 or result.status_code == 403:
+            data = result.json()
+            raise RuntimeError(data)
+        with open("errors.html", "w") as f:
+            f.write(result.text)
+        result.raise_for_status()
+        data = result.json()
+        return data
+
+    def POST(self, *args, **kwargs):
+        cookies = self._session.cookies
+        if 'csrftoken' in cookies:
+            csrf_token = cookies['csrftoken']
+            if 'data' not in kwargs:
+                kwargs['data'] = {}
+            kwargs['data']['csrfmiddlewaretoken'] = csrf_token
+        return super(Spud, self).POST(*args, **kwargs)
+
+
+def get_albums(spud, albums):
+    results = []
+    for album in albums:
+        result = spud.album.GET(params={'name': album})
+        if result["count"] < 1:
+            raise RuntimeError("Cannot find album '%s'" % album)
+        if result["count"] > 1:
+            raise RuntimeError("Multiple matches for album '%s'" % album)
+        results.append(result["results"][0]["album_id"])
+    return results
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Upload photos to spud')
+    parser.add_argument(
+        '--albums', action="append", default=[],
+        help='Albums to add photos to')
+    args = parser.parse_args()
+
+    spud = Spud(
+        "brian", "1234",
+        "http://localhost:8000/api", append_slash=True)
+
+    print("")
+    print("get_albums")
+    print("---------")
+    albums = get_albums(spud, args.albums)
+    print(albums)
+
+    print("")
+    print("get_photos")
+    print("---------")
+    photos = spud.photo.GET()
+    print(photos)
+
+    print("")
+    print("patch_photo")
+    print("---------")
+    photos = spud.photo(3).PATCH(data={
+        'albums': albums,
+    })
+
+    print("")
+    print("post_photo")
+    print("---------")
+    result = spud.photo.POST(
+        data={
+            'level': 1,
+#            'datetime': '2012-12-12T10:22',
+            'src_timezone': 'Australia/Melbourne',
+            'timezone': 'Australia/Perth',
+#            'offset': '55',
+            'albums': albums,
+        },
+        files={
+            'photo':
+            open('/home/brian/ownCloud/photos/squirrel.jpg', 'rb')}
+    )
+    print(result)
+
+    return
+
+if __name__ == "__main__":
+    main()

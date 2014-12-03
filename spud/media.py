@@ -217,18 +217,20 @@ class media_raw(media):
         return image.size
 
 
-def get_media(file):
-    (_, extension) = os.path.splitext(file)
+def get_media(filename, orig_name=None):
+    if orig_name is None:
+        orig_name = filename
+    (_, extension) = os.path.splitext(orig_name)
     extension = extension.lower()
     if extension == ".jpg" or extension == ".tif":
-        return media_jpeg(file)
+        return media_jpeg(filename)
     elif extension == ".avi" or extension == ".mov" \
             or extension == ".ogv" or extension == ".webm" \
             or extension == ".mp4":
-        return media_video(file)
+        return media_video(filename)
     elif extension == ".png":
-        return media(file)
+        return media(filename)
     elif extension == ".cr2":
-        return media_raw(file)
+        return media_raw(filename)
     else:
-        raise RuntimeError("unknown media type for %s" % (file))
+        raise RuntimeError("unknown media type for %s" % (filename))
