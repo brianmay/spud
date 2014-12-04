@@ -61,12 +61,58 @@ def get_albums(spud, albums):
     return results
 
 
+def get_categorys(spud, categorys):
+    results = []
+    for category in categorys:
+        result = spud.category.GET(params={'name': category})
+        if result["count"] < 1:
+            raise RuntimeError("Cannot find category '%s'" % category)
+        if result["count"] > 1:
+            raise RuntimeError("Multiple matches for category '%s'" % category)
+        results.append(result["results"][0]["category_id"])
+    return results
+
+
+def get_place(spud, place):
+    result = spud.place.GET(params={'name': place})
+    if result["count"] < 1:
+        raise RuntimeError("Cannot find place '%s'" % place)
+    if result["count"] > 1:
+        raise RuntimeError("Multiple matches for place '%s'" % place)
+    return result["results"][0]["place_id"]
+
+
+def get_persons(spud, persons):
+    results = []
+    for person in persons:
+        if person == "unknown":
+            results.append("unknown")
+            continue
+
+        result = spud.person.GET(params={'q': person.split(" ")})
+        if result["count"] < 1:
+            raise RuntimeError("Cannot find person '%s'" % person)
+        if result["count"] > 1:
+            raise RuntimeError("Multiple matches for person '%s'" % person)
+        results.append(result["results"][0]["person_id"])
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Upload photos to spud')
     parser.add_argument(
-        '--albums', action="append", default=[],
-        help='Albums to add photos to')
+        '--album', action="append", default=[],
+        help='Add photos to album')
+    parser.add_argument(
+        '--category', action="append", default=[],
+        help='Add photos to category')
+    parser.add_argument(
+        '--place',
+        help='Add photos to place')
+    parser.add_argument(
+        '--person', action="append", default=[],
+        help='Add photos to person')
     args = parser.parse_args()
 
     spud = Spud(
@@ -74,10 +120,30 @@ def main():
         "http://localhost:8000/api", append_slash=True)
 
     print("")
-    print("get_albums")
+    print("get_album")
     print("---------")
-    albums = get_albums(spud, args.albums)
+    albums = get_albums(spud, args.album)
     print(albums)
+
+    print("")
+    print("get_category")
+    print("------------")
+    categorys = get_categorys(spud, args.category)
+    print(categorys)
+
+    place = None
+    if args.place:
+        print("")
+        print("get_place")
+        print("---------")
+        place = get_place(spud, args.place)
+        print(place)
+
+    print("")
+    print("get_persons")
+    print("------------")
+    persons = get_persons(spud, args.person)
+    print(persons)
 
     print("")
     print("get_photos")
@@ -89,7 +155,10 @@ def main():
     print("patch_photo")
     print("---------")
     photos = spud.photo(3).PATCH(data={
-        'albums': albums,
+        'albums_pk': albums,
+        'categorys_pk': categorys,
+        'location_pk': place,
+        'persons_pk': persons,
     })
 
     print("")
@@ -98,11 +167,31 @@ def main():
     result = spud.photo.POST(
         data={
             'level': 1,
-#            'datetime': '2012-12-12T10:22',
             'src_timezone': 'Australia/Melbourne',
             'timezone': 'Australia/Perth',
-#            'offset': '55',
-            'albums': albums,
+            'albums_pk': albums,
+            'categorys_pk': categorys,
+            'location_pk': place,
+            'persons_pk': persons,
+        },
+        files={
+            'photo':
+            open('/home/brian/ownCloud/photos/paris.jpg', 'rb')}
+    )
+    print(result)
+
+    print("")
+    print("post_photo")
+    print("---------")
+    result = spud.photo.POST(
+        data={
+            'level': 1,
+            'src_timezone': 'Australia/Melbourne',
+            'timezone': 'Australia/Perth',
+            'albums_pk': albums,
+            'categorys_pk': categorys,
+            'location_pk': place,
+            'persons_pk': persons,
         },
         files={
             'photo':

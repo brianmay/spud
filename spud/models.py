@@ -31,7 +31,8 @@ import pytz
 import shutil
 import filecmp
 
-from spud import media
+from . import media
+from . import managers
 
 SEX_CHOICES = (
     ('1', 'male'),
@@ -208,63 +209,6 @@ class hierarchy_model(base_model):
 
 
 @python_2_unicode_compatible
-class place(hierarchy_model):
-    place_id = models.AutoField(primary_key=True)
-    parent = models.ForeignKey(
-        'self', related_name='children', null=True, blank=True)
-    title = models.CharField(max_length=192, db_index=True)
-    address = models.CharField(max_length=192, blank=True)
-    address2 = models.CharField(max_length=192, blank=True)
-    city = models.CharField(max_length=96, blank=True)
-    state = models.CharField(max_length=96, blank=True)
-    postcode = models.CharField(max_length=30, blank=True)
-    country = models.CharField(max_length=96, blank=True)
-    url = models.CharField(max_length=3072, blank=True)
-    urldesc = models.CharField(max_length=96, blank=True)
-    cover_photo = models.ForeignKey(
-        'photo', related_name='place_cover_of', null=True, blank=True)
-    notes = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ['title']
-
-    def __str__(self):
-        return self.title
-
-    def fix_ascendants(self, cache=None, do_descendants=True):
-        self._fix_ascendants(
-            ["parent"], place_ascendant, cache, do_descendants)
-
-    def check_delete(self):
-        errorlist = []
-        if self.photos.all().count() > 0:
-            errorlist.append("Cannot delete place with photos")
-        if self.children.all().count() > 0:
-            errorlist.append("Cannot delete place with children")
-        if self.work_of.all().count() > 0:
-            errorlist.append("Cannot delete work")
-        if self.home_of.all().count() > 0:
-            errorlist.append("Cannot delete home")
-        return errorlist
-
-    def delete(self):
-        self.work_of.clear()
-        self.home_of.clear()
-        super(place, self).delete()
-
-    def get_cover_photo(self):
-        photo = None
-        if self.cover_photo is not None:
-            photo = self.cover_photo
-        else:
-            try:
-                photo = self.photos.exclude(action='D').reverse()[0]
-            except IndexError:
-                pass
-        return photo
-
-
-@python_2_unicode_compatible
 class album(hierarchy_model):
     album_id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
@@ -277,6 +221,7 @@ class album(hierarchy_model):
     sort_order = models.CharField(max_length=96, blank=True)
     revised = models.DateTimeField(null=True)
     revised_utc_offset = models.IntegerField(null=True)
+    objects = managers.HierarchyManager()
 
     class Meta:
         ordering = ['sort_name', 'sort_order', 'title']
@@ -319,6 +264,7 @@ class category(hierarchy_model):
         'photo', related_name='category_cover_of', null=True, blank=True)
     sort_name = models.CharField(max_length=96, blank=True)
     sort_order = models.CharField(max_length=96, blank=True)
+    objects = managers.HierarchyManager()
 
     class Meta:
         ordering = ['sort_name', 'sort_order', 'title']
@@ -337,6 +283,64 @@ class category(hierarchy_model):
         if self.children.all().count() > 0:
             errorlist.append("Cannot delete category object with children")
         return errorlist
+
+    def get_cover_photo(self):
+        photo = None
+        if self.cover_photo is not None:
+            photo = self.cover_photo
+        else:
+            try:
+                photo = self.photos.exclude(action='D').reverse()[0]
+            except IndexError:
+                pass
+        return photo
+
+
+@python_2_unicode_compatible
+class place(hierarchy_model):
+    place_id = models.AutoField(primary_key=True)
+    parent = models.ForeignKey(
+        'self', related_name='children', null=True, blank=True)
+    title = models.CharField(max_length=192, db_index=True)
+    address = models.CharField(max_length=192, blank=True)
+    address2 = models.CharField(max_length=192, blank=True)
+    city = models.CharField(max_length=96, blank=True)
+    state = models.CharField(max_length=96, blank=True)
+    postcode = models.CharField(max_length=30, blank=True)
+    country = models.CharField(max_length=96, blank=True)
+    url = models.CharField(max_length=3072, blank=True)
+    urldesc = models.CharField(max_length=96, blank=True)
+    cover_photo = models.ForeignKey(
+        'photo', related_name='place_cover_of', null=True, blank=True)
+    notes = models.TextField(blank=True)
+    objects = managers.HierarchyManager()
+
+    class Meta:
+        ordering = ['title']
+
+    def __str__(self):
+        return self.title
+
+    def fix_ascendants(self, cache=None, do_descendants=True):
+        self._fix_ascendants(
+            ["parent"], place_ascendant, cache, do_descendants)
+
+    def check_delete(self):
+        errorlist = []
+        if self.photos.all().count() > 0:
+            errorlist.append("Cannot delete place with photos")
+        if self.children.all().count() > 0:
+            errorlist.append("Cannot delete place with children")
+        if self.work_of.all().count() > 0:
+            errorlist.append("Cannot delete work")
+        if self.home_of.all().count() > 0:
+            errorlist.append("Cannot delete home")
+        return errorlist
+
+    def delete(self):
+        self.work_of.clear()
+        self.home_of.clear()
+        super(place, self).delete()
 
     def get_cover_photo(self):
         photo = None

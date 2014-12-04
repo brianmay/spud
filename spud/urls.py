@@ -32,10 +32,12 @@ router.register(r'place', views.PlaceViewSet)
 router.register(r'album', views.AlbumViewSet)
 router.register(r'category', views.CategoryViewSet)
 router.register(r'person', views.PersonViewSet)
+router.register(r'feedback', views.FeedbackViewSet)
+router.register(r'relation', views.PhotoRelationViewSet)
 router.register(r'photo', views.PhotoViewSet)
-router.register(r'photo_person', views.PhotoPersonViewSet)
-router.register(r'photo_thumb', views.PhotoThumbViewSet)
-router.register(r'photo_video', views.PhotoVideoViewSet)
+#router.register(r'photo_person', views.PhotoPersonViewSet)
+#router.register(r'photo_thumb', views.PhotoThumbViewSet)
+#router.register(r'photo_video', views.PhotoVideoViewSet)
 
 urlpatterns = patterns(
     '',

@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 
 import datetime
 import json
-from rest_framework import viewsets, exceptions, parsers, negotiation
+from rest_framework import viewsets, exceptions as drf_exceptions
 
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
@@ -31,6 +31,7 @@ from django.db.models import Q, Count
 
 from . import models
 from . import serializers
+from . import exceptions
 
 
 #########################
@@ -52,14 +53,6 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.GroupSerializer
 
 
-class PlaceViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = models.place.objects.all()
-    serializer_class = serializers.PlaceSerializer
-
-
 class AlbumViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -73,41 +66,18 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
         name = params.get('name', None)
         if name is not None:
-            split = name.split("/")
-
-            qtmp = models.album.objects.all()
-            first = split.pop(0)
-
-            if first == "":
-                qtmp = qtmp.filter(parent__isnull=True)
-                first = split.pop(0)
             try:
-                album = qtmp.get(title=first)
-            except models.album.DoesNotExist:
-                raise exceptions.ParseError(
-                    "Cannot find album '%s'" % first)
-            except models.album.MultipleObjectsReturned:
-                raise exceptions.ParseError(
-                    "Multiple results returned for album '%s'" % first)
-
-            for search in split:
-                try:
-                    album = models.album.objects.get(
-                        parent=album,
-                        title=search)
-                except models.album.DoesNotExist:
-                    raise exceptions.ParseError(
-                        "Cannot find album '%s'" % search)
-                except models.album.MultipleObjectsReturned:
-                    raise exceptions.ParseError(
-                        "Multiple results returned for album '%s'" % search)
+                album = models.album.objects.get_by_name(name)
+            except exceptions.NameDoesNotExist as e:
+                raise drf_exceptions.ParseError(
+                    "Cannot find album '%s': %s" % (name, e))
 
             queryset = queryset.filter(pk=album.pk)
 
-        q = params.get('q', None)
-        if q is not None:
+        q = params.getlist('q')
+        for r in q:
             queryset = queryset.filter(
-                Q(title__icontains=q) | Q(description__icontains=q))
+                Q(title__icontains=r) | Q(description__icontains=r))
 
         mode = params.get('mode', 'children')
         mode = mode.lower()
@@ -160,6 +130,118 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = models.category.objects.all()
     serializer_class = serializers.CategorySerializer
 
+    def get_queryset(self):
+        queryset = models.category.objects.all()
+        params = self.request.QUERY_PARAMS
+
+        name = params.get('name', None)
+        if name is not None:
+            try:
+                category = models.category.objects.get_by_name(name)
+            except exceptions.NameDoesNotExist as e:
+                raise drf_exceptions.ParseError(
+                    "Cannot find category '%s': %s" % (name, e))
+
+            queryset = queryset.filter(pk=category.pk)
+
+        q = params.getlist('q', [])
+        for r in q:
+            queryset = queryset.filter(
+                Q(title__icontains=r) | Q(description__icontains=r))
+
+        mode = params.get('mode', 'children')
+        mode = mode.lower()
+
+        try:
+            instance = params.get('instance')
+            if instance is not None:
+                instance = int(instance)
+                instance = models.category.objects.get(pk=instance)
+        except ValueError:
+            instance = None
+        except models.category.DoesNotExist:
+            instance = None
+
+        if instance is not None:
+            if mode == "children":
+                queryset = queryset.filter(parent=instance)
+            elif mode == "ascendants":
+                queryset = queryset.filter(
+                    descendant_set__descendant=instance,
+                    descendant_set__position__gt=0)
+            elif mode == "descendants":
+                queryset = queryset.filter(
+                    ascendant_set__ascendant=instance,
+                    ascendant_set__position__gt=0)
+            else:
+                instance = None
+
+        root_only = params.get('root_only', False)
+        if root_only:
+            queryset = queryset.filter(parent=None)
+
+        return queryset
+
+
+class PlaceViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = models.place.objects.all()
+    serializer_class = serializers.PlaceSerializer
+
+    def get_queryset(self):
+        queryset = models.place.objects.all()
+        params = self.request.QUERY_PARAMS
+
+        name = params.get('name', None)
+        if name is not None:
+            try:
+                place = models.place.objects.get_by_name(name)
+            except exceptions.NameDoesNotExist as e:
+                raise drf_exceptions.ParseError(
+                    "Cannot find place '%s': %s" % (name, e))
+
+            queryset = queryset.filter(pk=place.pk)
+
+        q = params.getlist('q', [])
+        for r in q:
+            queryset = queryset.filter(
+                Q(title__icontains=r) | Q(description__icontains=r))
+
+        mode = params.get('mode', 'children')
+        mode = mode.lower()
+
+        try:
+            instance = params.get('instance')
+            if instance is not None:
+                instance = int(instance)
+                instance = models.place.objects.get(pk=instance)
+        except ValueError:
+            instance = None
+        except models.place.DoesNotExist:
+            instance = None
+
+        if instance is not None:
+            if mode == "children":
+                queryset = queryset.filter(parent=instance)
+            elif mode == "ascendants":
+                queryset = queryset.filter(
+                    descendant_set__descendant=instance,
+                    descendant_set__position__gt=0)
+            elif mode == "descendants":
+                queryset = queryset.filter(
+                    ascendant_set__ascendant=instance,
+                    ascendant_set__position__gt=0)
+            else:
+                instance = None
+
+        root_only = params.get('root_only', False)
+        if root_only:
+            queryset = queryset.filter(parent=None)
+
+        return queryset
+
 
 class PersonViewSet(viewsets.ModelViewSet):
     """
@@ -167,6 +249,20 @@ class PersonViewSet(viewsets.ModelViewSet):
     """
     queryset = models.person.objects.all()
     serializer_class = serializers.PersonSerializer
+
+    def get_queryset(self):
+        queryset = models.person.objects.all()
+        params = self.request.QUERY_PARAMS
+
+        q = params.getlist('q', [])
+        for r in q:
+            queryset = queryset.filter(
+                Q(first_name__icontains=r) |
+                Q(middle_name__icontains=r) |
+                Q(last_name__icontains=r) |
+                Q(called__icontains=r))
+
+        return queryset
 
 
 class FeedbackViewSet(viewsets.ModelViewSet):
@@ -185,44 +281,44 @@ class PhotoViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.PhotoSerializer
 
 
-class PhotoThumbViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = models.photo_thumb.objects.all()
-    serializer_class = serializers.PhotoThumbSerializer
-
-
-class PhotoVideoViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = models.photo_video.objects.all()
-    serializer_class = serializers.PhotoVideoSerializer
-
-
-class PhotoAlbumViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = models.photo_album.objects.all()
-    serializer_class = serializers.PhotoAlbumSerializer
-
-
-class PhotoCategoryViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = models.photo_category.objects.all()
-    serializer_class = serializers.PhotoCategorySerializer
-
-
-class PhotoPersonViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = models.photo_person.objects.all()
-    serializer_class = serializers.PhotoPersonSerializer
+#class PhotoThumbViewSet(viewsets.ModelViewSet):
+#    """
+#    API endpoint that allows groups to be viewed or edited.
+#    """
+#    queryset = models.photo_thumb.objects.all()
+#    serializer_class = serializers.PhotoThumbSerializer
+#
+#
+#class PhotoVideoViewSet(viewsets.ModelViewSet):
+#    """
+#    API endpoint that allows groups to be viewed or edited.
+#    """
+#    queryset = models.photo_video.objects.all()
+#    serializer_class = serializers.PhotoVideoSerializer
+#
+#
+#class PhotoAlbumViewSet(viewsets.ModelViewSet):
+#    """
+#    API endpoint that allows groups to be viewed or edited.
+#    """
+#    queryset = models.photo_album.objects.all()
+#    serializer_class = serializers.PhotoAlbumSerializer
+#
+#
+#class PhotoCategoryViewSet(viewsets.ModelViewSet):
+#    """
+#    API endpoint that allows groups to be viewed or edited.
+#    """
+#    queryset = models.photo_category.objects.all()
+#    serializer_class = serializers.PhotoCategorySerializer
+#
+#
+#class PhotoPersonViewSet(viewsets.ModelViewSet):
+#    """
+#    API endpoint that allows groups to be viewed or edited.
+#    """
+#    queryset = models.photo_person.objects.all()
+#    serializer_class = serializers.PhotoPersonSerializer
 
 
 class PhotoRelationViewSet(viewsets.ModelViewSet):

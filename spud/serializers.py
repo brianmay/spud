@@ -62,18 +62,23 @@ class AlbumSerializer(serializers.ModelSerializer):
         model = models.album
 
 
-class AlbumListSerializer(serializers.ListSerializer):
-    child = AlbumSerializer()
-
-    def get_value(self, dictionary):
-        return dictionary.getlist(self.field_name)
-
-    def to_internal_value(self, data):
-        r = []
-        for pk in data:
-            instance = models.album.objects.get(pk=pk)
-            r.append(instance)
-        return r
+#class AlbumListSerializer(serializers.ListSerializer):
+#    child = serializers.PrimaryKeyRelatedField(
+#        queryset=models.album.objects.all())
+#
+#    def get_value(self, dictionary):
+#        return dictionary.getlist(self.field_name)
+#
+#    def to_internal_value(self, data):
+#        r = []
+#        for name in data:
+#            try:
+#                pk = int(name)
+#                instance = models.album.objects.get(pk=pk)
+#            except ValueError:
+#                instance = models.album.objects.get_by_name(name)
+#            r.append(instance)
+#        return r
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -81,9 +86,86 @@ class CategorySerializer(serializers.ModelSerializer):
         model = models.category
 
 
+#class CategoryListSerializer(serializers.ListSerializer):
+#    child = CategorySerializer()
+#
+#    def get_value(self, dictionary):
+#        return dictionary.getlist(self.field_name)
+#
+#    def to_internal_value(self, data):
+#        r = []
+#        for name in data:
+#            try:
+#                pk = int(name)
+#                instance = models.category.objects.get(pk=pk)
+#            except ValueError:
+#                instance = models.category.objects.get_by_name(name)
+#            r.append(instance)
+#        return r
+
+
 class PersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.person
+
+
+class PersonListSerializer(serializers.ListSerializer):
+    child = PersonSerializer()
+
+    def get_value(self, dictionary):
+        return dictionary.getlist(self.field_name)
+
+    def to_internal_value(self, data):
+        raise NotImplemented()
+
+    def to_representation(self, value):
+        result = []
+
+        position = 1
+        value = value.order_by("position")
+        for pp in value.order_by("position"):
+            if position < pp.position:
+                result.append(None)
+                position = position + 1
+
+            result.append(self.child.to_representation(pp.person))
+            position = position + 1
+        return result
+
+
+class PersonPkListSerializer(serializers.ListSerializer):
+    child = serializers.PrimaryKeyRelatedField(
+        queryset=models.person.objects.all())
+
+    def get_value(self, dictionary):
+        return dictionary.getlist(self.field_name)
+
+    def to_internal_value(self, data):
+        r = []
+        for index, pk in enumerate(data):
+            if pk is None or pk == "unknown":
+                continue
+
+            data = {
+                'person_id': pk,
+                'position': index + 1,
+            }
+            r.append(data)
+        return r
+
+    def to_representation(self, value):
+        result = []
+
+        position = 1
+        value = value.order_by("position")
+        for pp in value.order_by("position"):
+            if position < pp.position:
+                result.append(None)
+                position = position + 1
+
+            result.append(pp.person_id)
+            position = position + 1
+        return result
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
@@ -105,80 +187,146 @@ class PhotoVideoSerializer(serializers.ModelSerializer):
         model = models.photo_video
 
 
-class PhotoPersonSerializer(serializers.ModelSerializer):
+# class PhotoPersonSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = models.photo_person
+#         fields = ()
+
+
+# class PhotoPersonSerializerTmp(serializers.RelatedField):
+#     read_only = False
+#     many = True
+#
+#     def field_to_native(self, obj, field_name):
+#         if obj is None:
+#             return None
+#
+#         result = []
+#         persons = getattr(obj, field_name)
+#         for p in persons.order_by("photo_person__position").all():
+#             serializer = PersonSerializer(p)
+#             result.append(serializer.data)
+#         return result
+#
+#     def field_from_native(self, data, files, field_name, into):
+#         try:
+#             value = data.getlist(field_name)
+#             if value == []:
+#                 value = self.get_default_value()
+#         except AttributeError:
+#             value = data[field_name]
+#
+#         print value
+#
+#         pa_list = list(into.photo_person_set.all())
+#         position = 1
+#         for pa, person in zip(pa_list, value):
+#             if (pa.position != position or
+#                     pa.person.pk != person.pk):
+#                 pa.position = position
+#                 pa.person = person
+#                 pa.save()
+#             position = position + 1
+#             del pa
+#             del person
+#
+#         # for every value not already in pa_list
+#         for i in xrange(len(pa_list), len(value)):
+#             person = value[i]
+#             models.photo_person.objects.create(
+#                 photo=into, person=person, position=position)
+#             position = position + 1
+#             del i
+#             del person
+#         del position
+#
+#         # for every pa that was not included in values list
+#         for i in xrange(len(value), len(pa_list)):
+#             pa_list[i].delete()
+#             del i
+
+
+class PhotoRelationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.photo_person
-        fields = ()
+        model = models.photo_relation
 
 
-class PhotoPersonSerializerTmp(serializers.RelatedField):
-    read_only = False
-    many = True
+class PhotoRelationListSerializer(serializers.ListSerializer):
+    child = PhotoRelationSerializer()
 
-    def field_to_native(self, obj, field_name):
-        if obj is None:
-            return None
+    def get_attribute(self, obj):
+        return (obj.relations_1,  obj.relations_2)
 
+    def to_internal_value(self, data):
+        raise NotImplemented()
+
+    def to_representation(self, value):
         result = []
-        persons = getattr(obj, field_name)
-        for p in persons.order_by("photo_person__position").all():
-            serializer = PersonSerializer(p)
-            result.append(serializer.data)
+        relations_1, relations_2 = value
+
+        for pr in relations_1.all():
+            r = {
+                'id': pr.pk,
+                'description': pr.desc_2,
+                'photo': pr.photo_2.pk,
+            }
+            result.append(r)
+
+        for pr in relations_2.all():
+            r = {
+                'id': pr.pk,
+                'description': pr.desc_1,
+                'photo': pr.photo_1.pk,
+            }
+            result.append(r)
+
         return result
-
-    def field_from_native(self, data, files, field_name, into):
-        print data, files, "field_name", field_name, "into", into
-        try:
-            value = data.getlist(field_name)
-            if value == []:
-                value = self.get_default_value()
-        except AttributeError:
-            value = data[field_name]
-
-        print value
-
-        pa_list = list(into.photo_person_set.all())
-        position = 1
-        for pa, person in zip(pa_list, value):
-            if (pa.position != position or
-                    pa.person.pk != person.pk):
-                pa.position = position
-                pa.person = person
-                pa.save()
-            position = position + 1
-            del pa
-            del person
-
-        # for every value not already in pa_list
-        for i in xrange(len(pa_list), len(value)):
-            person = value[i]
-            models.photo_person.objects.create(
-                photo=into, person=person, position=position)
-            position = position + 1
-            del i
-            del person
-        del position
-
-        # for every pa that was not included in values list
-        for i in xrange(len(value), len(pa_list)):
-            pa_list[i].delete()
-            del i
 
 
 default_timezone = pytz.timezone(settings.TIME_ZONE)
 
 
 class PhotoSerializer(serializers.ModelSerializer):
-    # FIXME fields
+    src_timezone = TimezoneField(write_only=True)
+    timezone = TimezoneField(write_only=True)
+    offset = serializers.IntegerField(write_only=True, default=0)
+
+#    albums = AlbumListSerializer()
+#    categorys = CategoryListSerializer()
+
+    albums = AlbumSerializer(many=True, read_only=True)
+    albums_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.album.objects.all(), source="albums",
+        many=True, required=False)
+
+    categorys = CategorySerializer(many=True, read_only=True)
+    categorys_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.category.objects.all(), source="categorys",
+        many=True, required=False)
+
+    # albums = AlbumSerializer(many=True, read_only=True)
+    # albums_pk = AlbumListSerializer(source="albums", required=False)
+
+    # categorys = CategoryListSerializer(many=True, read_only=True)
+    # categorys_pk = CategoryListSerializer(source="categorys", required=False)
+
+    location = PlaceSerializer(read_only=True)
+    location_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.place.objects.all(), source="location",
+        required=False)
+
+    persons = PersonListSerializer(
+        source="photo_person_set", read_only=True)
+    persons_pk = PersonPkListSerializer(
+        source="photo_person_set", required=False)
+
+    feedbacks = FeedbackSerializer(many=True, read_only=True)
+    relations = PhotoRelationListSerializer(read_only=True)
+
     thumbs = PhotoThumbSerializer(
         source="get_thumbs", read_only=True, many=True)
     videos = PhotoVideoSerializer(
         source="get_videos", read_only=True, many=True)
-    photo_person_set = PhotoPersonSerializer(read_only=True, many=True)
-    persons = serializers.RelatedField(read_only=True, many=True)
-
-    albums = AlbumListSerializer(read_only=False, many=False)
-    categorys = CategorySerializer(many=True)
 
     def validate(self, attrs):
         if 'photo' not in self._initial_data:
@@ -301,44 +449,48 @@ class PhotoSerializer(serializers.ModelSerializer):
 
         print("imported  %s/%s" % (path, name))
 
-        categorys = validated_attrs.pop("categorys")
-        albums = validated_attrs.pop("albums")
+        albums = validated_attrs.pop("albums", [])
+        categorys = validated_attrs.pop("categorys", [])
+        persons = validated_attrs.pop("photo_person_set", [])
+        feedbacks = validated_attrs.pop("feedbacks", [])
 
         instance = models.photo.objects.create(**validated_attrs)
-
-        for category in categorys:
-            models.photo_category.objects.create(
-                photo=instance, category=category)
 
         for album in albums:
             models.photo_album.objects.create(
                 photo=instance, album=album)
 
+        for category in categorys:
+            models.photo_category.objects.create(
+                photo=instance, category=category)
+
+        for person in persons:
+            models.photo_person.objects.create(
+                photo=instance, **person)
+
+        for feedback in feedbacks:
+            models.feedback.objects.create(
+                photo=instance, **person)
+
         instance.update_from_source()
         instance.generate_thumbnails(overwrite=False)
+
+        # FIXME rotate???
+        # FIXME set actions correctly
+
         return instance
 
     def update(self, instance, validated_attrs):
-        categorys = validated_attrs.pop("categorys", None)
-        albums = validated_attrs.pop("albums", None)
+        albums = validated_attrs.pop("albums", [])
+        categorys = validated_attrs.pop("categorys", [])
+        persons = validated_attrs.pop("photo_person_set", [])
+        feedbacks = validated_attrs.pop("feedbacks", [])
+        print("albums", albums)
+        print("persons", persons)
 
         for attr, value in validated_attrs.items():
             setattr(instance, attr, value)
         instance.save()
-
-        if categorys is not None:
-            pc_list = list(instance.photo_category_set.all())
-            for pc in pc_list:
-                if pc.category in categorys:
-                    categorys.remove(pc.category)
-                else:
-                    pc.delete()
-                del pc
-            for value in categorys:
-                models.photo_category.objects.create(
-                    photo=instance, category=value)
-                del value
-            del pc_list
 
         if albums is not None:
             pa_list = list(instance.photo_album_set.all())
@@ -354,6 +506,44 @@ class PhotoSerializer(serializers.ModelSerializer):
                 del value
             del pa_list
 
+        if categorys is not None:
+            pc_list = list(instance.photo_category_set.all())
+            for pc in pc_list:
+                if pc.category in categorys:
+                    categorys.remove(pc.category)
+                else:
+                    pc.delete()
+                del pc
+            for value in categorys:
+                models.photo_category.objects.create(
+                    photo=instance, category=value)
+                del value
+            del pc_list
+
+        if persons is not None:
+            pp_list = list(instance.photo_person_set.all())
+
+            for pp in pp_list:
+                found = None
+                for index, person in enumerate(persons):
+                    if pp.position != person['position'] and \
+                            pp.person_id == person['person_id']:
+                        found = index
+                if found:
+                    persons.remove(index)
+                else:
+                    pp.delete()
+
+            for person in persons:
+                models.photo_person.objects.create(
+                    photo=instance, **person)
+                del person
+
+            del pp_list
+
+        # FIXME: feedbacks
+        print(feedbacks)
+
         return instance
 
     class Meta:
@@ -364,31 +554,22 @@ class PhotoSerializer(serializers.ModelSerializer):
             'name': {'read_only': True},
             'utc_offset': {'read_only': True},
             'timestamp': {'read_only': True},
-            'offset': {'read_only': True},
 
-            'src_timezone': {'write_only': True},
-            'timezone': {'write_only': True},
-
-            'action': {'required': False},
+            # 'action': {'required': False},
             'datetime': {'required': False},
         }
 
 
-class PhotoAlbumSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.photo_album
-
-
-class PhotoCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.photo_category
-
-
-class PhotoPersonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.photo_person
-
-
-class PhotoRelationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.photo_relation
+#class PhotoAlbumSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = models.photo_album
+#
+#
+#class PhotoCategorySerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = models.photo_category
+#
+#
+#class PhotoPersonSerializer(serializers.ModelSerializer):
+#    class Meta:
+#        model = models.photo_person
