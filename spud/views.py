@@ -19,12 +19,15 @@ from __future__ import unicode_literals
 import datetime
 import json
 from rest_framework import viewsets, exceptions as drf_exceptions
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
 
 from django.shortcuts import render_to_response
-from django.shortcuts import get_object_or_404
+#from django.shortcuts import get_object_or_404
 from django.template import RequestContext
-from django.http import HttpResponseRedirect, Http404
-from django.core.urlresolvers import reverse
+#from django.http import HttpResponseRedirect, Http404
+#from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.models import User, Group
 from django.db.models import Q, Count
@@ -38,6 +41,7 @@ from . import exceptions
 # Django-Rest-Framework #
 #########################
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
     """
     API endpoint that allows users to be viewed or edited.
     """
@@ -46,11 +50,37 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class GroupViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
     """
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = Group.objects.all()
     serializer_class = serializers.GroupSerializer
+
+
+def _get_session(request):
+    user = request.user
+
+    data = {
+        'perms': {
+            'can_add': user.is_authenticated(),
+            'can_change': user.is_authenticated(),
+            'can_delete': user.is_authenticated(),
+        },
+    }
+
+    if user.is_authenticated():
+        serializer = serializers.UserSerializer(
+            user, context={'request': request})
+        data['user'] = serializer.data
+
+    return data
+
+
+@api_view(['GET'])
+def session_detail(request):
+    data = _get_session(request)
+    return Response(data)
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
@@ -333,34 +363,34 @@ class PhotoRelationViewSet(viewsets.ModelViewSet):
 # PHOTO #
 #########
 
-def photo_orig_redirect(request, object_id):
-    instance = get_object_or_404(models.photo, pk=object_id)
-    url = instance.get_orig_url()
-    return HttpResponseRedirect(url)
-
-
-def photo_thumb_redirect(request, object_id, size):
-    instance = get_object_or_404(models.photo, pk=object_id)
-
-    try:
-        thumb = instance.photo_thumb_set.get(size=size)
-    except models.photo_thumb.DoesNotExist:
-        raise Http404("Thumb for size '%s' does not exist" % (size))
-
-    url = thumb.get_url()
-    return HttpResponseRedirect(url)
-
-
-def old_photo_detail(request, object_id, size):
-    instance = get_object_or_404(models.photo, pk=object_id)
-
-    try:
-        instance.photo_thumb_set.get(size=size)
-    except models.photo_thumb.DoesNotExist:
-        raise Http404("Thumb for size '%s' does not exist" % (size))
-
-    url = reverse("photo_detail", kwargs={'photo_id': object_id})
-    return HttpResponseRedirect(url)
+# def photo_orig_redirect(request, object_id):
+#     instance = get_object_or_404(models.photo, pk=object_id)
+#     url = instance.get_orig_url()
+#     return HttpResponseRedirect(url)
+#
+#
+# def photo_thumb_redirect(request, object_id, size):
+#     instance = get_object_or_404(models.photo, pk=object_id)
+#
+#     try:
+#         thumb = instance.photo_thumb_set.get(size=size)
+#     except models.photo_thumb.DoesNotExist:
+#         raise Http404("Thumb for size '%s' does not exist" % (size))
+#
+#     url = thumb.get_url()
+#     return HttpResponseRedirect(url)
+#
+#
+# def old_photo_detail(request, object_id, size):
+#     instance = get_object_or_404(models.photo, pk=object_id)
+#
+#     try:
+#         instance.photo_thumb_set.get(size=size)
+#     except models.photo_thumb.DoesNotExist:
+#         raise Http404("Thumb for size '%s' does not exist" % (size))
+#
+#     url = reverse("photo_detail", kwargs={'photo_id': object_id})
+#     return HttpResponseRedirect(url)
 
 
 @ensure_csrf_cookie
@@ -371,196 +401,198 @@ def root(request):
     }, context_instance=RequestContext(request))
 
 
-@ensure_csrf_cookie
-def login(request):
-    return render_to_response('spud/static.html', {
-        'title': 'Login',
-        'onload': "do_login()"
-    }, context_instance=RequestContext(request))
+# @ensure_csrf_cookie
+# def login(request):
+#     return render_to_response('spud/static.html', {
+#         'title': 'Login',
+#         'onload': "do_login()"
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def logout(request):
+#     return render_to_response('spud/static.html', {
+#         'title': 'Login',
+#         'onload': "do_logout()"
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def photo_detail(request, photo_id):
+#     photo_id = int(photo_id)
+#     if 'n' in request.GET:
+#         query = request.GET.copy()
+#         n = query.pop('n', [0])[-1]
+#         try:
+#             n = int(n)
+#         except ValueError:
+#             n = 0
+#
+#         js = json.dumps({'criteria': query})
+#         return render_to_response('spud/static.html', {
+#             'title': 'Photo detail',
+#             'onload': "do_photo_search_item(%s, %d, %d)" % (js, n, photo_id),
+#         }, context_instance=RequestContext(request))
+#     else:
+#         js = json.dumps({'criteria': request.GET})
+#         return render_to_response('spud/static.html', {
+#             'title': 'Photo detail',
+#             'onload': "do_photo(%d,%s)" % (photo_id, js),
+#         }, context_instance=RequestContext(request))
 
 
 @ensure_csrf_cookie
-def logout(request):
-    return render_to_response('spud/static.html', {
-        'title': 'Login',
-        'onload': "do_logout()"
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def photo_detail(request, photo_id):
-    photo_id = int(photo_id)
-    if 'n' in request.GET:
-        query = request.GET.copy()
-        n = query.pop('n', [0])[-1]
-        try:
-            n = int(n)
-        except ValueError:
-            n = 0
-
-        js = json.dumps({'criteria': query})
-        return render_to_response('spud/static.html', {
-            'title': 'Photo detail',
-            'onload': "do_photo_search_item(%s, %d, %d)" % (js, n, photo_id),
-        }, context_instance=RequestContext(request))
-    else:
-        js = json.dumps({'criteria': request.GET})
-        return render_to_response('spud/static.html', {
-            'title': 'Photo detail',
-            'onload': "do_photo(%d,%s)" % (photo_id, js),
-        }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def album_search_results(request):
+def album_list(request):
     query = request.GET.copy()
-    page = query.pop('page', [0])[-1]
+    scroll = query.pop('scroll', [0])[-1]
     try:
-        page = int(page)
+        scroll = int(scroll)
     except ValueError:
-        page = 0
+        scroll = 0
 
-    js = json.dumps({'criteria': query})
+    js_session = json.dumps(_get_session(request))
+    js_search = json.dumps(query)
     return render_to_response('spud/static.html', {
         'title': 'Person results',
-        'onload': "albums.do_search_results(%s, %d)" % (js, page),
+        'onload': "albums.do_list(%s, %s, %d)"
+                  % (js_session, js_search, scroll),
     }, context_instance=RequestContext(request))
 
 
-@ensure_csrf_cookie
-def album_detail(request, album_id):
-    album_id = int(album_id)
-    return render_to_response('spud/static.html', {
-        'title': 'Album detail',
-        'onload': "albums.do(%d)" % album_id,
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def category_search_results(request):
-    query = request.GET.copy()
-    page = query.pop('page', [0])[-1]
-    try:
-        page = int(page)
-    except ValueError:
-        page = 0
-
-    js = json.dumps({'criteria': query})
-    return render_to_response('spud/static.html', {
-        'title': 'Category results',
-        'onload': "categorys.do_search_results(%s, %d)" % (js, page),
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def category_detail(request, category_id):
-    category_id = int(category_id)
-    return render_to_response('spud/static.html', {
-        'title': 'Category detail',
-        'onload': "categorys.do(%d)" % category_id,
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def place_search_results(request):
-    query = request.GET.copy()
-    page = query.pop('page', [0])[-1]
-    try:
-        page = int(page)
-    except ValueError:
-        page = 0
-
-    js = json.dumps({'criteria': query})
-    return render_to_response('spud/static.html', {
-        'title': 'Place results',
-        'onload': "places.do_search_results(%s, %d)" % (js, page),
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def place_detail(request, place_id):
-    place_id = int(place_id)
-    return render_to_response('spud/static.html', {
-        'title': 'Place detail',
-        'onload': "places.do(%d)" % place_id,
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def person_search_results(request):
-    query = request.GET.copy()
-    page = query.pop('page', [0])[-1]
-    try:
-        page = int(page)
-    except ValueError:
-        page = 0
-
-    js = json.dumps({'criteria': query})
-    return render_to_response('spud/static.html', {
-        'title': 'Person results',
-        'onload': "persons.do_search_results(%s, %d)" % (js, page),
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def person_detail(request, person_id):
-    person_id = int(person_id)
-    return render_to_response('spud/static.html', {
-        'title': 'Person detail',
-        'onload': "persons.do(%d)" % person_id,
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def feedback_search_results(request):
-    query = request.GET.copy()
-    page = query.pop('page', [0])[-1]
-    try:
-        page = int(page)
-    except ValueError:
-        page = 0
-
-    js = json.dumps({'criteria': query})
-    return render_to_response('spud/static.html', {
-        'title': 'Feedback results',
-        'onload': "feedbacks.do_search_results(%s, %d)" % (js, page),
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def feedback_detail(request, feedback_id):
-    feedback_id = int(feedback_id)
-    return render_to_response('spud/static.html', {
-        'title': 'Feedback detail',
-        'onload': "feedbacks.do(%d)" % feedback_id,
-    }, context_instance=RequestContext(request))
-
-
-@ensure_csrf_cookie
-def photo_search_results(request):
-    if 'n' in request.GET:
-        query = request.GET.copy()
-        n = query.pop('n', [0])[-1]
-        try:
-            n = int(n)
-        except ValueError:
-            n = 0
-
-        js = json.dumps({'criteria': query})
-        return render_to_response('spud/static.html', {
-            'title': 'Photo detail',
-            'onload': "do_photo_search_item(%s, %d, %s)" % (js, n, "null"),
-        }, context_instance=RequestContext(request))
-    else:
-        query = request.GET.copy()
-        page = query.pop('page', [0])[-1]
-        try:
-            page = int(page)
-        except ValueError:
-            page = 0
-
-        js = json.dumps({'criteria': query})
-        return render_to_response('spud/static.html', {
-            'title': 'Photo search results',
-            'onload': "do_photo_search_results(%s, %d)" % (js, page),
-        }, context_instance=RequestContext(request))
+# @ensure_csrf_cookie
+# def album_detail(request, album_id):
+#     album_id = int(album_id)
+#     return render_to_response('spud/static.html', {
+#         'title': 'Album detail',
+#         'onload': "albums.do(%d)" % album_id,
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def category_search_results(request):
+#     query = request.GET.copy()
+#     page = query.pop('page', [0])[-1]
+#     try:
+#         page = int(page)
+#     except ValueError:
+#         page = 0
+#
+#     js = json.dumps({'criteria': query})
+#     return render_to_response('spud/static.html', {
+#         'title': 'Category results',
+#         'onload': "categorys.do_search_results(%s, %d)" % (js, page),
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def category_detail(request, category_id):
+#     category_id = int(category_id)
+#     return render_to_response('spud/static.html', {
+#         'title': 'Category detail',
+#         'onload': "categorys.do(%d)" % category_id,
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def place_search_results(request):
+#     query = request.GET.copy()
+#     page = query.pop('page', [0])[-1]
+#     try:
+#         page = int(page)
+#     except ValueError:
+#         page = 0
+#
+#     js = json.dumps({'criteria': query})
+#     return render_to_response('spud/static.html', {
+#         'title': 'Place results',
+#         'onload': "places.do_search_results(%s, %d)" % (js, page),
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def place_detail(request, place_id):
+#     place_id = int(place_id)
+#     return render_to_response('spud/static.html', {
+#         'title': 'Place detail',
+#         'onload': "places.do(%d)" % place_id,
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def person_search_results(request):
+#     query = request.GET.copy()
+#     page = query.pop('page', [0])[-1]
+#     try:
+#         page = int(page)
+#     except ValueError:
+#         page = 0
+#
+#     js = json.dumps({'criteria': query})
+#     return render_to_response('spud/static.html', {
+#         'title': 'Person results',
+#         'onload': "persons.do_search_results(%s, %d)" % (js, page),
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def person_detail(request, person_id):
+#     person_id = int(person_id)
+#     return render_to_response('spud/static.html', {
+#         'title': 'Person detail',
+#         'onload': "persons.do(%d)" % person_id,
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def feedback_search_results(request):
+#     query = request.GET.copy()
+#     page = query.pop('page', [0])[-1]
+#     try:
+#         page = int(page)
+#     except ValueError:
+#         page = 0
+#
+#     js = json.dumps({'criteria': query})
+#     return render_to_response('spud/static.html', {
+#         'title': 'Feedback results',
+#         'onload': "feedbacks.do_search_results(%s, %d)" % (js, page),
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def feedback_detail(request, feedback_id):
+#     feedback_id = int(feedback_id)
+#     return render_to_response('spud/static.html', {
+#         'title': 'Feedback detail',
+#         'onload': "feedbacks.do(%d)" % feedback_id,
+#     }, context_instance=RequestContext(request))
+#
+#
+# @ensure_csrf_cookie
+# def photo_search_results(request):
+#     if 'n' in request.GET:
+#         query = request.GET.copy()
+#         n = query.pop('n', [0])[-1]
+#         try:
+#             n = int(n)
+#         except ValueError:
+#             n = 0
+#
+#         js = json.dumps({'criteria': query})
+#         return render_to_response('spud/static.html', {
+#             'title': 'Photo detail',
+#             'onload': "do_photo_search_item(%s, %d, %s)" % (js, n, "null"),
+#         }, context_instance=RequestContext(request))
+#     else:
+#         query = request.GET.copy()
+#         page = query.pop('page', [0])[-1]
+#         try:
+#             page = int(page)
+#         except ValueError:
+#             page = 0
+#
+#         js = json.dumps({'criteria': query})
+#         return render_to_response('spud/static.html', {
+#             'title': 'Photo search results',
+#             'onload': "do_photo_search_results(%s, %d)" % (js, page),
+#         }, context_instance=RequestContext(request))

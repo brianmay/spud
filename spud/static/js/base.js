@@ -17,51 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-// ****************
-// * STATE SAVING *
-// ****************
-
-function get_selection() {
-    var selection = []
-    if (localStorage.selection != null)
-        if (localStorage.selection != "")
-            selection = localStorage.selection.split(",")
-    selection = $.map(selection, function(n){ return Number(n) });
-    return selection
-}
-
-
-function set_selection(selection) {
-    localStorage.selection = selection.join(",")
-    update_selection()
-}
-
-
-function add_selection(photo) {
-    var selection = get_selection()
-    if (selection.indexOf(photo.id) == -1) {
-        selection.push(photo.id)
-    }
-    set_selection(selection)
-}
-
-
-function del_selection(photo) {
-    var selection = get_selection()
-    var index = selection.indexOf(photo.id)
-    if (index != -1) {
-        selection.splice(index, 1);
-    }
-    set_selection(selection)
-}
-
-
-function is_photo_selected(photo) {
-    var selection = get_selection()
-    var index = selection.indexOf(photo.id)
-    return index != -1
-}
-
 
 // ****************
 // * COMMON STUFF *
@@ -518,98 +473,98 @@ $.widget('spud.selection_menu', $.spud.spud_menu, {
     },
 })
 
-$.widget('spud.paginator', {
-    _create: function() {
-        this.element
-            .addClass("paginator")
-
-        if (this.options.page != null) {
-            this.set(this.options.page, this.options.last_page)
-        }
-    },
-
-    _destroy: function() {
-        this.element
-            .empty()
-            .removeClass("paginator")
-        this._super()
-    },
-
-     _range: function(page, first, last) {
-        var page_a = this.options.page_a
-        for (var i=first; i<=last; i++) {
-            if (i == page) {
-                this.element.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
-            } else {
-                page_a(i, i+1)
-                    .addClass("page")
-                    .appendTo(this.element)
-            }
-            this.element.append(" ")
-        }
-    },
-
-    set: function(page, last_page) {
-        var page_a = this.options.page_a
-
-        this.element.empty()
-
-        if (page > 0) {
-            page_a(page-1, "")
-                .addClass("prevslide")
-                .appendTo(this.element)
-        }
-
-        if (page < last_page) {
-            page_a(page+1, "")
-                .addClass("nextslide")
-                .appendTo(this.element)
-        }
-
-        if (page > 0) {
-            page_a(page-1, '<')
-                .attr("accesskey", "p")
-                .addClass("page")
-                .appendTo(this.element)
-            this.element.append(" ")
-        }
-        if (page < last_page) {
-            page_a(page+1, '>')
-                .attr("accesskey", "n")
-                .addClass("page")
-                .appendTo(this.element)
-            this.element.append(" ")
-        }
-
-        var ON_EACH_SIDE = 3
-        var ON_ENDS = 2
-
-        // If there are 10 or fewer pages, display links to every page.
-        // Otherwise, do some fancy
-        if (last_page <= 10) {
-            this._range(page, 0, last_page)
-        } else {
-            // Insert "smart" pagination links, so that there are always ON_ENDS
-            // links at either end of the list of pages, and there are always
-            // ON_EACH_SIDE links at either end of the "current page" link.
-            if (page > (ON_EACH_SIDE + ON_ENDS)) {
-                this._range(page, 0, ON_ENDS-1)
-                this.element.append('<span class="dots">...</span>')
-                this._range(page, page - ON_EACH_SIDE, page-1)
-            } else {
-                this._range(page, 0, page-1)
-            }
-
-            if (page < (last_page - ON_EACH_SIDE - ON_ENDS)) {
-                this._range(page, page, page + ON_EACH_SIDE)
-                this.element.append('<span class="dots">...</span>')
-                this._range(page, last_page - ON_ENDS + 1, last_page)
-            } else {
-                this._range(page, page, last_page)
-            }
-        }
-    },
-})
+// $.widget('spud.paginator', {
+//     _create: function() {
+//         this.element
+//             .addClass("paginator")
+// 
+//         if (this.options.page != null) {
+//             this.set(this.options.page, this.options.last_page)
+//         }
+//     },
+// 
+//     _destroy: function() {
+//         this.element
+//             .empty()
+//             .removeClass("paginator")
+//         this._super()
+//     },
+// 
+//      _range: function(page, first, last) {
+//         var page_a = this.options.page_a
+//         for (var i=first; i<=last; i++) {
+//             if (i == page) {
+//                 this.element.append('<span class="this-page">' + escapeHTML(i+1) + '</span>')
+//             } else {
+//                 page_a(i, i+1)
+//                     .addClass("page")
+//                     .appendTo(this.element)
+//             }
+//             this.element.append(" ")
+//         }
+//     },
+// 
+//     set: function(page, last_page) {
+//         var page_a = this.options.page_a
+// 
+//         this.element.empty()
+// 
+//         if (page > 0) {
+//             page_a(page-1, "")
+//                 .addClass("prevslide")
+//                 .appendTo(this.element)
+//         }
+// 
+//         if (page < last_page) {
+//             page_a(page+1, "")
+//                 .addClass("nextslide")
+//                 .appendTo(this.element)
+//         }
+// 
+//         if (page > 0) {
+//             page_a(page-1, '<')
+//                 .attr("accesskey", "p")
+//                 .addClass("page")
+//                 .appendTo(this.element)
+//             this.element.append(" ")
+//         }
+//         if (page < last_page) {
+//             page_a(page+1, '>')
+//                 .attr("accesskey", "n")
+//                 .addClass("page")
+//                 .appendTo(this.element)
+//             this.element.append(" ")
+//         }
+// 
+//         var ON_EACH_SIDE = 3
+//         var ON_ENDS = 2
+// 
+//         // If there are 10 or fewer pages, display links to every page.
+//         // Otherwise, do some fancy
+//         if (last_page <= 10) {
+//             this._range(page, 0, last_page)
+//         } else {
+//             // Insert "smart" pagination links, so that there are always ON_ENDS
+//             // links at either end of the list of pages, and there are always
+//             // ON_EACH_SIDE links at either end of the "current page" link.
+//             if (page > (ON_EACH_SIDE + ON_ENDS)) {
+//                 this._range(page, 0, ON_ENDS-1)
+//                 this.element.append('<span class="dots">...</span>')
+//                 this._range(page, page - ON_EACH_SIDE, page-1)
+//             } else {
+//                 this._range(page, 0, page-1)
+//             }
+// 
+//             if (page < (last_page - ON_EACH_SIDE - ON_ENDS)) {
+//                 this._range(page, page, page + ON_EACH_SIDE)
+//                 this.element.append('<span class="dots">...</span>')
+//                 this._range(page, last_page - ON_ENDS + 1, last_page)
+//             } else {
+//                 this._range(page, page, last_page)
+//             }
+//         }
+//     },
+// })
 
 
 $.widget('spud.image', {
@@ -656,7 +611,7 @@ $.widget('spud.image', {
 
             var image = null
             if (photo != null) {
-                var image = photo.thumb[this.options.size]
+                var image = photo.thumbs[this.options.size]
             }
 
             if (image != null) {
@@ -753,31 +708,11 @@ $.widget('spud.list_base',  {
             .appendTo(this.element)
 
         this.p = $("<p></p>")
-            .paginator({
-                page_a: this.options.page_a
-            })
             .appendTo(this.element)
-
-        if (this.options.page != null) {
-            this.set_paginator(this.options.page, this.options.last_page)
-        }
-    },
-
-    option: function(key, value) {
-        if (key == "page_a") {
-            this.p.paginator("option", key, value)
-        }
-        return this._super(key, value)
-    },
-
-    set_paginator: function(page, last_page) {
-        this.p.paginator("set", page, last_page)
-        return this
     },
 
     empty: function() {
         this.ul.empty()
-        this.element.removeClass("loading")
         this.element.removeClass("errors")
         return this
     },
@@ -790,13 +725,7 @@ $.widget('spud.list_base',  {
     },
 
     clear_status: function() {
-        this.element.removeClass("loading")
         this.element.removeClass("errors")
-        return this
-    },
-
-    display_loading: function() {
-        this.element.addClass("loading")
         return this
     },
 
@@ -807,8 +736,6 @@ $.widget('spud.list_base',  {
     },
 
     _destroy: function() {
-        this.p
-            .paginator("destroy")
         this.empty()
         this._super()
     },
@@ -835,7 +762,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
 
         if (photo != null) {
             var div = $("<div />")
-                .image({ photo: photo, size: get_settings().list_size })
+                .image({ photo: photo, size: "thumb" })
                 .appendTo(a)
         }
 
@@ -860,7 +787,12 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
             .on("click", function(ev) { a.trigger('click'); })
             .appendTo(this.ul)
 
-        set_photo_style(li, photo)
+        if (photo != null) {
+            li
+                .toggleClass("removed", photo.action == "D")
+                .toggleClass("regenerate", photo.action != null && photo.action != "D")
+        }
+
         return li
     },
 
@@ -870,26 +802,3 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
         this._super()
     },
 })
-
-
-function object_a(object) {
-    if (object == null) {
-        return $("<span>None</span>")
-    } else if (object.type == "photo") {
-        return photo_a(object, {})
-    } else if (object.type == "album") {
-        return albums.a(object)
-    } else if (object.type == "category") {
-        return categorys.a(object)
-    } else if (object.type == "place") {
-        return places.a(object)
-    } else if (object.type == "person") {
-        return persons.a(object)
-    } else if (object.type == "datetime") {
-        return datetime_a(object)
-    } else {
-        return $("<span></span>")
-            .text(object.title + " (" + object.type + ")")
-    }
-}
-

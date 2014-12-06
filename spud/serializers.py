@@ -40,24 +40,70 @@ class TimezoneField(f.CharField):
         return str(value)
 
 
+class PhotoThumbSerializer(serializers.ModelSerializer):
+    url = f.URLField(source="get_url")
+
+    class Meta:
+        model = models.photo_thumb
+
+
+class PhotoThumbListSerializer(serializers.ListSerializer):
+    child = PhotoThumbSerializer()
+
+    def to_representation(self, value):
+        result = {}
+        for v in value:
+            result[v.size] = self.child.to_representation(v)
+        return result
+
+
+class PhotoVideoSerializer(serializers.ModelSerializer):
+    url = f.URLField(source="get_url")
+
+    class Meta:
+        model = models.photo_video
+
+
+class PhotoVideoListSerializer(serializers.ListSerializer):
+    child = PhotoVideoSerializer()
+
+    def to_representation(self, value):
+        result = {}
+        for v in value:
+            result[v.size] = self.child.to_representation(v)
+        return result
+
+
+class NestedPhotoSerializer(serializers.ModelSerializer):
+    thumbs = PhotoThumbListSerializer(
+        source="get_thumbs", read_only=True)
+    videos = PhotoVideoListSerializer(
+        source="get_videos", read_only=True)
+
+    class Meta:
+        model = models.photo
+        fields = (
+            'photo_id', 'title', 'description', 'location',
+            'thumbs', 'videos',
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('url', 'username', 'email', 'groups')
+        fields = (
+            'id', 'username', 'first_name', 'last_name', 'email', 'groups')
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ('url', 'name')
-
-
-class PlaceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.place
+        fields = ('id', 'name')
 
 
 class AlbumSerializer(serializers.ModelSerializer):
+    cover_photo = NestedPhotoSerializer(read_only=True)
+
     class Meta:
         model = models.album
 
@@ -102,6 +148,11 @@ class CategorySerializer(serializers.ModelSerializer):
 #                instance = models.category.objects.get_by_name(name)
 #            r.append(instance)
 #        return r
+
+
+class PlaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.place
 
 
 class PersonSerializer(serializers.ModelSerializer):
@@ -171,20 +222,6 @@ class PersonPkListSerializer(serializers.ListSerializer):
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.feedback
-
-
-class PhotoThumbSerializer(serializers.ModelSerializer):
-    file_url = f.URLField(source="get_url")
-
-    class Meta:
-        model = models.photo_thumb
-
-
-class PhotoVideoSerializer(serializers.ModelSerializer):
-    file_url = f.URLField(source="get_url")
-
-    class Meta:
-        model = models.photo_video
 
 
 # class PhotoPersonSerializer(serializers.ModelSerializer):
@@ -323,10 +360,10 @@ class PhotoSerializer(serializers.ModelSerializer):
     feedbacks = FeedbackSerializer(many=True, read_only=True)
     relations = PhotoRelationListSerializer(read_only=True)
 
-    thumbs = PhotoThumbSerializer(
-        source="get_thumbs", read_only=True, many=True)
-    videos = PhotoVideoSerializer(
-        source="get_videos", read_only=True, many=True)
+    thumbs = PhotoThumbListSerializer(
+        source="get_thumbs", read_only=True)
+    videos = PhotoVideoListSerializer(
+        source="get_videos", read_only=True)
 
     def validate(self, attrs):
         if 'photo' not in self._initial_data:

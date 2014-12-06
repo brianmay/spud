@@ -1016,8 +1016,8 @@ class photo_thumb(base_model):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
         return iri_to_uri(os.path.join(
-            settings.IMAGE_URL, urlquote(self.size),
-            urlquote(photo.path), "thumb", urlquote(shortname + ".jpg")))
+            settings.IMAGE_URL, "thumb", urlquote(self.size),
+            urlquote(photo.path), urlquote(shortname + ".jpg")))
 
     def delete(self):
         path = self.get_path()
@@ -1045,8 +1045,7 @@ class photo_video(base_model):
         (shortname, _) = os.path.splitext(photo.name)
         return iri_to_uri(os.path.join(
             settings.IMAGE_URL, "video", urlquote(self.size),
-            urlquote(photo.path),
-            urlquote(shortname + self.extension)))
+            urlquote(photo.path), urlquote(shortname + self.extension)))
 
     def delete(self):
         path = self.get_path()

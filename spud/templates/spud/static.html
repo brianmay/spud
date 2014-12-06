@@ -1,4 +1,4 @@
-{% extends "main.html" %}
+{% extends "base_site.html" %}
 {% load admin_static %}
 {% load i18n %}
 
@@ -19,23 +19,21 @@
 <script type="text/javascript" src="{% static 'js/jcookie.js' %}" />
 <script type="text/javascript" src="{% static 'js/showdown.js' %}" />
 
-<script type="text/javascript" src="{% static 'js/urls.js' %}" />
 <script type="text/javascript" src="{% static 'js/base.js' %}" />
-<script type="text/javascript" src="{% static 'js/dialog.js' %}" />
-<script type="text/javascript" src="{% static 'js/infobox.js' %}" />
-<script type="text/javascript" src="{% static 'js/session.js' %}" />
+<script type="text/javascript" src="{% static 'js/urls.js' %}" />
 <script type="text/javascript" src="{% static 'js/generic.js' %}" />
-<script type="text/javascript" src="{% static 'js/photo.js' %}" />
 <script type="text/javascript" src="{% static 'js/album.js' %}" />
-<script type="text/javascript" src="{% static 'js/category.js' %}" />
-<script type="text/javascript" src="{% static 'js/place.js' %}" />
-<script type="text/javascript" src="{% static 'js/person.js' %}" />
-<script type="text/javascript" src="{% static 'js/feedback.js' %}" />
 <script type="text/javascript" src="{% static 'js/spud.js' %}" />
 
 {% endblock %}
 
 {% block bodyattrs %}onload="{{ onload }}"{% endblock %}
+
+{% block nav-global %}
+<div id="menu">
+</div>
+{% endblock %}
+
 
 {% block content %}
 <div id="content-main">

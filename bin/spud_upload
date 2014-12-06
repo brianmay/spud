@@ -23,7 +23,8 @@ from requests.auth import HTTPBasicAuth
 
 class Spud(Hammock):
     def __init__(self, username, password, *args, **kwargs):
-        self._auth = HTTPBasicAuth(username, password)
+        if username:
+            self._auth = HTTPBasicAuth(username, password)
         super(Spud, self).__init__(*args, **kwargs)
 
     def _request(self, *args, **kwargs):
@@ -52,7 +53,7 @@ class Spud(Hammock):
 def get_albums(spud, albums):
     results = []
     for album in albums:
-        result = spud.album.GET(params={'name': album})
+        result = spud.albums.GET(params={'name': album})
         if result["count"] < 1:
             raise RuntimeError("Cannot find album '%s'" % album)
         if result["count"] > 1:
@@ -64,7 +65,7 @@ def get_albums(spud, albums):
 def get_categorys(spud, categorys):
     results = []
     for category in categorys:
-        result = spud.category.GET(params={'name': category})
+        result = spud.categorys.GET(params={'name': category})
         if result["count"] < 1:
             raise RuntimeError("Cannot find category '%s'" % category)
         if result["count"] > 1:
@@ -74,7 +75,7 @@ def get_categorys(spud, categorys):
 
 
 def get_place(spud, place):
-    result = spud.place.GET(params={'name': place})
+    result = spud.places.GET(params={'name': place})
     if result["count"] < 1:
         raise RuntimeError("Cannot find place '%s'" % place)
     if result["count"] > 1:
@@ -89,7 +90,7 @@ def get_persons(spud, persons):
             results.append("unknown")
             continue
 
-        result = spud.person.GET(params={'q': person.split(" ")})
+        result = spud.persons.GET(params={'q': person.split(" ")})
         if result["count"] < 1:
             raise RuntimeError("Cannot find person '%s'" % person)
         if result["count"] > 1:
@@ -115,9 +116,25 @@ def main():
         help='Add photos to person')
     args = parser.parse_args()
 
+    anonymous_spud = Spud(
+        None, None,
+        "http://localhost:8000/api", append_slash=True)
+
     spud = Spud(
         "brian", "1234",
         "http://localhost:8000/api", append_slash=True)
+
+    print("")
+    print("get_session (anonymous)")
+    print("-----------------------")
+    session = anonymous_spud.session.GET()
+    print(session)
+
+    print("")
+    print("get_session")
+    print("-----------")
+    session = spud.session.GET()
+    print(session)
 
     print("")
     print("get_album")
@@ -148,13 +165,14 @@ def main():
     print("")
     print("get_photos")
     print("---------")
-    photos = spud.photo.GET()
+    photos = spud.photos.GET()
     print(photos)
+    return
 
     print("")
     print("patch_photo")
     print("---------")
-    photos = spud.photo(3).PATCH(data={
+    photos = spud.photos(3).PATCH(data={
         'albums_pk': albums,
         'categorys_pk': categorys,
         'location_pk': place,
@@ -164,7 +182,7 @@ def main():
     print("")
     print("post_photo")
     print("---------")
-    result = spud.photo.POST(
+    result = spud.photos.POST(
         data={
             'level': 1,
             'src_timezone': 'Australia/Melbourne',
@@ -183,7 +201,7 @@ def main():
     print("")
     print("post_photo")
     print("---------")
-    result = spud.photo.POST(
+    result = spud.photos.POST(
         data={
             'level': 1,
             'src_timezone': 'Australia/Melbourne',
