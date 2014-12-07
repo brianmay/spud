@@ -146,7 +146,7 @@ datetime_output_field.constructor = datetime_output_field
 
 datetime_output_field.prototype.set = function(value) {
     if (value != null) {
-        this.output.text(value.title)
+        this.output.text(value)
         this.show()
     } else {
         this.output.text("")
