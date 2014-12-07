@@ -808,12 +808,7 @@ $.widget('spud.screen',  {
             .addClass("close_button")
             .text("[X]")
             .on("click", function(ev) {
-                mythis.disable();
-                mythis.element.remove();
-                $(".screen:last").each(function() {
-                    var screen = $(this).data('screen')
-                    screen.enable()
-                })
+                mythis.close()
                 return false;
             })
             .appendTo(this.element)
@@ -835,6 +830,15 @@ $.widget('spud.screen',  {
         this.div = $("<div/>")
             .addClass("screen_content")
             .appendTo(this.element)
+    },
+
+    close: function() {
+        this.disable();
+        this.element.remove();
+        $(".screen:last").each(function() {
+            var screen = $(this).data('screen')
+            screen.enable()
+        })
     },
 
     is_enabled: function() {

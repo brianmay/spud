@@ -87,10 +87,11 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
 $.widget('spud.album_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
-        this.page = 1
         if (this.options.criteria == null) {
             this.options.criteria = {}
         }
+        this.empty()
+        this.cache = {}
         if (this.options.disabled) {
             this.disable()
         } else {
@@ -101,7 +102,6 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         this.element.scroll(function() {
             mythis._load_if_required(mythis.options.criteria)
         })
-        this.cache = {}
     },
 
     _add_item: function(album) {
@@ -110,8 +110,15 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         if  (album.sort_order || album.sort_name) {
             details.push($("<div/>").text(album.sort_name + " " + album.sort_order))
         }
-        var a = album_a(album, this.cache)
+        var a = album_a(album, this.cache, this)
         this.append_photo(photo, album.title, details, album.description, a)
+
+        if (this.last_id) {
+            this.idmap[this.last_id].next = album.album_id
+        }
+        this.idmap[album.album_id] = Object()
+        this.idmap[album.album_id].prev = this.last_id
+        this.last_id = album.album_id
         return this
     },
 
@@ -121,6 +128,9 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         $.each(album_list, function(j, album) {
             mythis._add_item(album)
         })
+        if (this.event_update) {
+            this.event_update()
+        }
         return this
     },
 
@@ -195,7 +205,12 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
             return
         }
         this.page = 1
+        this.idmap = {}
+        this.last_id = null
         this._super()
+        if (this.event_update) {
+            this.event_update()
+        }
     },
 
     enable: function() {
@@ -205,6 +220,30 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
 
     disable: function() {
         this.element.addClass("disabled")
+    },
+
+    get_prev_id: function(obj_id) {
+        if (!this.idmap[obj_id]) {
+            return null
+        }
+        return this.idmap[obj_id].prev
+    },
+
+    get_next_id: function(obj_id) {
+        if (!this.idmap[obj_id]) {
+            return null
+        }
+        if (!this.idmap[obj_id].next && !this.loading) {
+            this._load()
+        }
+        return this.idmap[obj_id].next
+    },
+
+    close: function() {
+        if (this.event_close) {
+            this.event_close()
+        }
+        this._super()
     },
 })
 
@@ -321,23 +360,24 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         if (this.options.album != null) {
             this.set(this.options.album)
         } else if (this.options.obj_id != null) {
-            this._load()
+            this.load(this.options.obj_id)
         }
     },
 
     set: function(album) {
         this._super(album)
+        this.options.obj_id = album.album_id
         this.description.p(album.description)
         this.img.image("set", album.cover_photo)
         if (album.cover_photo != null || album.description != "") {
             this.element.removeClass("hidden")
         }
-        if (this.options.update) {
-            this.options.update(album)
+        if (this.options.event_update) {
+            this.options.event_update(album)
         }
     },
 
-    _load: function() {
+    load: function(obj_id) {
         if (this.loading) {
             return
         }
@@ -346,7 +386,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         var params = {}
         this.loading = true
         ajax({
-            url: window.__root_prefix + "api/albums/" + this.options.obj_id + "/",
+            url: window.__root_prefix + "api/albums/" + obj_id + "/",
             data: params,
             success: function(data) {
                 mythis.set(data)
@@ -357,6 +397,15 @@ $.widget('spud.album_detail',  $.spud.infobox, {
             },
         });
     },
+
+    _setOption: function( key, value ) {
+        if ( key === "obj_id" ) {
+            this.load(value)
+        } else {
+            this._super( key, value );
+        }
+    },
+
     _destroy: function() {
         this.img.image("destroy")
         this._super()
@@ -371,18 +420,92 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.options.title = "Album Detail"
         this._super()
 
+        if (this.options.controller) {
+            var controller = this.options.controller
+            controller.event_update = function() {
+                mythis._setup_buttons()
+            }
+            controller.event_close = function() {
+                mythis.options.controller = null
+                this.prev_button.button("disable")
+                this.next_button.button("disable")
+            }
+            this.prev_button = $("<input/>")
+                .attr('type', 'submit')
+                .attr('value', '<<')
+                .click(function() {
+                    var obj_id = controller.get_prev_id(mythis.options.obj_id)
+                    if (obj_id) {
+                        mythis.load(obj_id)
+                    }
+                })
+                .button()
+                .appendTo(this.div)
+            this.next_button = $("<input/>")
+                .attr('type', 'submit')
+                .attr('value', '>>')
+                .click(function() {
+                    var obj_id = controller.get_next_id(mythis.options.obj_id)
+                    if (obj_id) {
+                        mythis.load(obj_id)
+                    }
+                })
+                .button()
+                .appendTo(this.div)
+            this._setup_buttons()
+        }
+
         var params = {
             'obj_id': this.options.obj_id,
             'album': this.options.album,
-            'update': function(album) {
+            'event_update': function(album) {
+                mythis.options.obj_id = album.album_id
+                mythis._setup_buttons()
                 mythis._set_title("Album "+album.title)
             },
         }
+
         this.ad = $("<div/>").appendTo(this.div)
         $.spud.album_detail(params, this.ad)
     },
 
+    _setup_buttons: function() {
+        if (this.options.controller) {
+            var controller = this.options.controller
+            var prev_id = controller.get_prev_id(this.options.obj_id)
+            var next_id = controller.get_next_id(this.options.obj_id)
+
+            if (prev_id) {
+                this.prev_button.button("enable")
+            } else {
+                this.prev_button.button("disable")
+            }
+            if (next_id) {
+                this.next_button.button("enable")
+            } else {
+                this.next_button.button("disable")
+            }
+        }
+    },
+
     set: function(album) {
         this.ad.album_detail('set', album)
-    }
+        this.options.obj_id = album.album_id
+        this._setup_buttons()
+        this._set_title("Album "+album.title)
+    },
+
+    load: function(obj_id) {
+        this.ad.album_detail('load', obj_id)
+    },
+
+    close: function() {
+        if (this.options.controller) {
+            var controller = this.options.controller
+            controller.event_update = null
+            controller.event_close = null
+        }
+        this.ad.album_detail('option', 'event_update', null)
+        this._super()
+    },
 })
