@@ -622,11 +622,8 @@ $.widget('spud.image', {
                     .attr('alt', photo.title)
 
                 if (this.options.include_link) {
-                    this.a = $("<a></a>")
+                    this.a = photo_a(photo)
                         .html(this.img)
-                        .attr('href', photo_url(photo, {}))
-                        .off('click')
-                        .on('click', function() { do_photo(photo.id, {}); return false; })
                         .appendTo(this.element)
                 } else {
                     this.img.appendTo(this.element)
@@ -807,6 +804,25 @@ $.widget('spud.screen',  {
     _create: function() {
         var mythis = this
 
+        $("<div/>")
+            .addClass("close_button")
+            .text("[X]")
+            .on("click", function(ev) {
+                mythis.disable();
+                mythis.element.remove();
+                $(".screen:last").each(function() {
+                    var screen = $(this).data('screen')
+                    screen.enable()
+                })
+                return false;
+            })
+            .appendTo(this.element)
+
+        this.h1 = $("<h1/>")
+            .on("click", function(ev) { mythis.toggle() })
+            .appendTo(this.element)
+        this._set_title(this.options.title)
+
         if (this.options.disabled) {
             this.disable()
         } else {
@@ -816,11 +832,9 @@ $.widget('spud.screen',  {
         this.element.data('screen', this)
         this.element.addClass("screen")
 
-        this.h1 = $("<h1/>", {text: this.title})
-            .on("click", function(ev) { mythis.toggle() })
-            .prependTo(this.element)
-
-        this.div = $("<div/>").appendTo(this.element)
+        this.div = $("<div/>")
+            .addClass("screen_content")
+            .appendTo(this.element)
     },
 
     is_enabled: function() {
@@ -837,13 +851,16 @@ $.widget('spud.screen',  {
 
     enable: function() {
         this.disable_all()
-        $("head title").text(this.title)
         this.element.removeClass("disabled")
+        $("head title").text(this.title)
         return this
     },
 
     disable: function() {
         this.element.addClass("disabled")
+        if (this.is_enabled()) {
+            $("head title").text("SPUD")
+        }
         return this
     },
 
@@ -853,6 +870,28 @@ $.widget('spud.screen',  {
             screen.disable()
         })
         return this
+    },
+
+    _set_title: function(title) {
+        this.h1.text(title)
+        this.options.title = title
+        if (this.is_enabled()) {
+            $("head title").text(title)
+        }
+    },
+
+    _setOption: function( key, value ) {
+        if ( key === "title" ) {
+            this._set_title(value)
+        } else if (key === "disabled") {
+            if (value) {
+                this.enable()
+            } else {
+                this.disable()
+            }
+        } else {
+            this._super( key, value );
+        }
     },
 })
 

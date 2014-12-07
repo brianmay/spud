@@ -52,15 +52,24 @@ function photo_a(photo) {
     return a
 }
 
-function album_a(album) {
+function album_a(album, cache) {
+    if (!cache) {
+        cache = {}
+    }
+
     var title = album.title
     var a = $('<a/>')
         .attr('href', root_url() + "albums/" + album.album_id + "/")
         .on('click', function() {
-            var params = {
-                album: album,
+            if (!cache.ads || cache.ads.parents().length == 0) {
+                var params = {
+                    album: album,
+                }
+                cache.ads = add_screen($.spud.album_detail_screen, params)
+            } else {
+                cache.ads.album_detail_screen("set", album)
+                cache.ads.album_detail_screen("enable")
             }
-            add_screen($.spud.album_detail_screen, params)
             return false;
         })
         .data('photo', album.cover_photo)

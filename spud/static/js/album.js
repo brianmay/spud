@@ -101,6 +101,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         this.element.scroll(function() {
             mythis._load_if_required(mythis.options.criteria)
         })
+        this.cache = {}
     },
 
     _add_item: function(album) {
@@ -109,7 +110,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         if  (album.sort_order || album.sort_name) {
             details.push($("<div/>").text(album.sort_name + " " + album.sort_order))
         }
-        var a = album_a(album)
+        var a = album_a(album, this.cache)
         this.append_photo(photo, album.title, details, album.description, a)
         return this
     },
@@ -215,12 +216,13 @@ $.widget('spud.album_list_screen', $.spud.screen, {
             this.options.criteria = {}
         }
 
-        this.title = "Album List"
+        this.options.title = "Album List"
         this._super()
 
         var menu = $("<ul/>")
             .append(
                 $("<li/>")
+                    .text("Filter")
                     .on("click", function(ev) {
                         var params = {
                             criteria: mythis.options.criteria,
@@ -232,7 +234,6 @@ $.widget('spud.album_list_screen', $.spud.screen, {
                         var div = $("<div/>")
                         $.spud.album_search_dialog(params, div)
                     })
-                    .text("Filter")
             )
             .menu()
             .appendTo(this.div)
@@ -309,7 +310,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         ]
 
         this.img = $("<div></div>")
-            .image({size: "medium", include_link: true})
+            .image({size: "mid", include_link: true})
             .appendTo(this.element)
 
         this._super();
@@ -330,6 +331,9 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         this.img.image("set", album.cover_photo)
         if (album.cover_photo != null || album.description != "") {
             this.element.removeClass("hidden")
+        }
+        if (this.options.update) {
+            this.options.update(album)
         }
     },
 
@@ -364,14 +368,21 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
     _create: function() {
         var mythis = this
 
-        this.title = "Album Detail"
+        this.options.title = "Album Detail"
         this._super()
 
         var params = {
             'obj_id': this.options.obj_id,
             'album': this.options.album,
+            'update': function(album) {
+                mythis._set_title("Album "+album.title)
+            },
         }
         this.ad = $("<div/>").appendTo(this.div)
         $.spud.album_detail(params, this.ad)
     },
+
+    set: function(album) {
+        this.ad.album_detail('set', album)
+    }
 })

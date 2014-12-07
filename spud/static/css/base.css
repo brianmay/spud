@@ -21,6 +21,10 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 }
 
 /* SCREEN */
+.screen .close_button {
+    float: right;
+}
+
 .screen {
     margin: 5px;
     padding: 10px;
@@ -30,7 +34,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .screen h1 {
     color: #666;
 }
-.screen div {
+.screen .screen_content {
     display: block;
 }
 
@@ -40,7 +44,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .screen.disabled h1 {
     color: #ccc;
 }
-.screen.disabled div {
+.screen.disabled .screen_content {
     display: none;
 }
 
@@ -110,7 +114,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .photo_item .desc ul { text-align: left; }
 .photo_item .desc ol { text-align: left; }
 
-.photo_list { border:1px solid #666; margin-bottom: 10px; height: 400px; background: #eee; overflow-y: scroll; }
+.photo_list { border:1px solid #666; margin-bottom: 10px; height: 400px; overflow-y: scroll; }
 .photo_list > ul { padding:0; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:170px; margin:10px; padding-top:10px; text-align: center; width:140px; }
 .photo_list .photo_item .desc { float:left; display:none; }

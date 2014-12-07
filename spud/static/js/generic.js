@@ -112,18 +112,27 @@ function setup_menu(session) {
     menu.empty()
 
     $('<li/>')
-        .on('click', function() { alert("meow") })
         .text("Albums")
+        .on('click', function(ev) {
+            add_screen($.spud.album_list_screen, {})
+            return false
+        })
         .appendTo(menu)
 
     $('<li/>')
-        .on('click', function() { alert("meow") })
         .text("Categorys")
+        .on('click', function(ev) {
+            alert("meow")
+            return false
+        })
         .appendTo(menu)
 
     $('<li/>')
-        .on('click', function() { alert("meow") })
         .text("People")
+        .on('click', function(ev){
+            alert("meow")
+            return false
+        })
         .appendTo(menu)
 
     menu.menu()
@@ -155,7 +164,6 @@ function do_list(obj_type, session, params) {
     if (screen_class) {
         params = {
             criteria: params,
-            active: 1
         }
         add_screen(screen_class, params)
     }
@@ -170,7 +178,6 @@ function do_detail(obj_type, obj_id, session, params) {
     if (screen_class) {
         params = {
             obj_id: obj_id,
-            disabled: false,
         }
         add_screen(screen_class, params)
     }
