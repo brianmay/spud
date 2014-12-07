@@ -9,15 +9,41 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 #user-tools { position:absolute; top:0; right:0; padding:1.2em 10px; font-size:11px; text-align:right; }
 
 /* MENU */
-#menu .ui-menu {
+.ui-widget.ui-menu {
     border: 0;
+    background: #ddd; 
 }
 
-#menu .ui-menu .ui-menu-item {
+.ui-menu .ui-menu-item {
     display: inline-block;
     margin: 0;
     padding: 0 10px 10 0 10px;
 }
+
+/* SCREEN */
+.screen {
+    margin: 5px;
+    padding: 10px;
+    border-radius: 10px;
+    background: #ddd;
+}
+.screen h1 {
+    color: #666;
+}
+.screen div {
+    display: block;
+}
+
+.screen.disabled {
+    background: #eee;
+}
+.screen.disabled h1 {
+    color: #ccc;
+}
+.screen.disabled div {
+    display: none;
+}
+
 
 /* AUTO COMPLETE */
 .ui-autocomplete-input { width:99%; }
@@ -84,7 +110,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .photo_item .desc ul { text-align: left; }
 .photo_item .desc ol { text-align: left; }
 
-.photo_list { border:1px solid #333; margin-bottom: 10px; height: 400px; overflow-y: scroll; }
+.photo_list { border:1px solid #666; margin-bottom: 10px; height: 400px; background: #eee; overflow-y: scroll; }
 .photo_list > ul { padding:0; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:170px; margin:10px; padding-top:10px; text-align: center; width:140px; }
 .photo_list .photo_item .desc { float:left; display:none; }

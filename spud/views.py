@@ -26,6 +26,7 @@ from rest_framework.response import Response
 from django.shortcuts import render_to_response
 #from django.shortcuts import get_object_or_404
 from django.template import RequestContext
+from django.http import Http404
 #from django.http import HttpResponseRedirect, Http404
 #from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -395,9 +396,12 @@ class PhotoRelationViewSet(viewsets.ModelViewSet):
 
 @ensure_csrf_cookie
 def root(request):
+    js_session = json.dumps(_get_session(request))
+    js_params = json.dumps(request.GET)
     return render_to_response('spud/static.html', {
         'title': 'Root',
-        'onload': "do_root()"
+        'onload': "do_root(%s, %s)"
+                  % (js_session, js_params),
     }, context_instance=RequestContext(request))
 
 
@@ -441,21 +445,40 @@ def root(request):
 #         }, context_instance=RequestContext(request))
 
 
-@ensure_csrf_cookie
-def album_list(request):
-    query = request.GET.copy()
-    scroll = query.pop('scroll', [0])[-1]
-    try:
-        scroll = int(scroll)
-    except ValueError:
-        scroll = 0
+_types = {
+    'albums',
+}
 
+
+def _assert_type(obj_type):
+    if obj_type not in _types:
+        raise Http404("Unknown type '%s'" % obj_type)
+
+
+@ensure_csrf_cookie
+def obj_list(request, obj_type):
+    _assert_type(obj_type)
+    obj_type = json.dumps(obj_type)
     js_session = json.dumps(_get_session(request))
-    js_search = json.dumps(query)
+    js_params = json.dumps(request.GET)
     return render_to_response('spud/static.html', {
-        'title': 'Person results',
-        'onload': "albums.do_list(%s, %s, %d)"
-                  % (js_session, js_search, scroll),
+        'title': 'Object list',
+        'onload': "do_list(%s, %s, %s)"
+                  % (obj_type, js_session, js_params),
+    }, context_instance=RequestContext(request))
+
+
+@ensure_csrf_cookie
+def obj_detail(request, obj_type, obj_id):
+    _assert_type(obj_type)
+    obj_type = json.dumps(obj_type)
+    obj_id = int(obj_id)
+    js_session = json.dumps(_get_session(request))
+    js_params = json.dumps(request.GET)
+    return render_to_response('spud/static.html', {
+        'title': 'Object detail',
+        'onload': "do_detail(%s, %d, %s, %s)"
+                  % (obj_type, obj_id, js_session, js_params),
     }, context_instance=RequestContext(request))
 
 

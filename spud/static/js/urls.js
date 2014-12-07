@@ -25,6 +25,11 @@ function root_url() {
     return window.__root_prefix
 }
 
+function static_url(file) {
+   return window.__static_prefix + file
+}
+
+
 // *********
 // * LINKS *
 // *********
@@ -43,6 +48,22 @@ function photo_a(photo) {
         .attr('href', root_url() + "photo/" + photo.id + "/")
         .on('click', function() { do_photo(photo.id); return false; })
         .data('photo', photo)
+        .text(title)
+    return a
+}
+
+function album_a(album) {
+    var title = album.title
+    var a = $('<a/>')
+        .attr('href', root_url() + "albums/" + album.album_id + "/")
+        .on('click', function() {
+            var params = {
+                album: album,
+            }
+            add_screen($.spud.album_detail_screen, params)
+            return false;
+        })
+        .data('photo', album.cover_photo)
         .text(title)
     return a
 }
@@ -98,7 +119,7 @@ function ajax(settings) {
         )
         .fail(
             function(jqXHR, textStatus, errorThrown) {
-                error(errorThrown)
+                error(jqXHR.status, errorThrown)
             }
         )
 }

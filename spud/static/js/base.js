@@ -99,13 +99,13 @@ function is_equal_objects(x, y)
 // * BASE WIDGETS *
 // ****************
 
-$.widget('spud.myselectable', $.ui.selectable, {
-    _mouseStart: function(event) {
-        if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
-            this._super( event );
-        }
-    },
-});
+// $.widget('spud.myselectable', $.ui.selectable, {
+//     _mouseStart: function(event) {
+//         if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
+//             this._super( event );
+//         }
+//     },
+// });
 
 
 $.widget('spud.autocompletehtml', $.ui.autocomplete, {
@@ -227,269 +227,269 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 })
 
 
-$.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
-    set: function(initial) {
-        if (initial.length > 0) {
-            var value = $.map(initial, function(v){ return v.pk });
-            this.input.val("|" + value.join("|") + "|")
-        } else {
-            this.input.val("|")
-        }
-        this.deck.children().remove();
-        var mythis = this
-        $.each(initial, function(i, v) {
-            mythis._addKiller(v)
-        });
-    },
-
-    get: function() {
-        var value = this.input.val().slice(1,-1)
-        if (value != "") {
-            return value.split("|")
-        } else {
-            return []
-        }
-    },
-
-    _receiveResult: function(ev, ui) {
-        var prev = this.input.val();
-
-        if (prev.indexOf("|"+ui.item.pk+"|") == -1) {
-                this.input.val((prev ? prev : "|") + ui.item.pk + "|");
-                this.text.val('');
-                this._addKiller(ui.item);
-                this._trigger("added",  ev, ui.item);
-        }
-
-        return false;
-    },
-
-    _kill: function(item, div) {
-        this.input.val(this.input.val().replace("|" + item.pk + "|", "|"));
-        div.fadeOut().remove();
-    },
-})
-
-
-$.widget('spud.quickautocomplete', $.spud.ajaxautocomplete, {
-    _create: function(){
-        delete this.options.type
-        this.options.source = operations,
-        this._super();
-    },
-
-    _renderItem: function( ul, item ) {
-        return $( "<li>" )
-            .append( "<a>" + item.label + "<br/>" + item.desc + "</a>" )
-            .appendTo( ul );
-    },
-
-    _receiveResult: function(ev, ui) {
-        // same as _super() but this.text isn't cleared
-        if (this.input.val()) {
-            this._kill();
-        }
-        this.input.val(ui.item.pk);
-        this._addKiller(ui.item);
-        this._trigger("added", ev, ui.item);
-        return true;
-    },
-
-    _addKiller: function(item) {
-        // same as _super() but uses item.desc instead of item.repr
-        var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
-        var div = $("<div></div>")
-            .attr("id", this.id+'_on_deck_'+item.pk)
-            .append(killButton)
-            .append(item.desc)
-            .appendTo(this.deck)
-        killButton.on("click", $.proxy(
-            function(ev) {
-                this._kill(item, div);
-                return this._trigger("killed", ev, item)
-            },
-            this))
-    },
-
-    _suggest: function( items ) {
-        if (items.length != 1) {
-            this._super( items );
-            return
-        }
-        var item = items[0]
-        if ( false !== this._trigger( "select", null, { item: item } ) ) {
-            this._value( item.value );
-        }
-        // reset the term after the select event
-        // this allows custom select handling to work properly
-        this.term = this._value();
-
-        this.close();
-        this.selectedItem = item;
-    }
-});
-
-
-$.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
-    _create: function(){
-        this.img = $("<div></div>")
-            .image({size: get_settings().list_size})
-            .appendTo(this.element)
-
-        this.options.type = "photo"
-        this._super();
-    },
-
-    _destroy: function() {
-        this.img.image("destroy")
-        this._super();
-    },
-
-    set: function(photo) {
-        this.img.image("set", photo)
-        item = null
-        if (photo != null) {
-            var item = { pk: photo.id, repr: photo.title }
-        }
-        this._super(item);
-    },
-
-    _receiveResult: function(ev, ui) {
-        this._super(ev, ui);
-        var mythis = this
-        this.img.image("set_loading")
-        load_photo(ui.item.pk,
-            function(data) {
-                mythis.img.image("set", data.photo)
-            },
-            function(message) {
-                mythis.img.image("set_error")
-            }
-        )
-        return false
-    },
-
-    _kill: function(item, div) {
-        this._super(item, div);
-        this.img.image("set_none")
-    }
-})
-
-
-$.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
-    _create: function(){
-        this._super()
-        this.deck
-            .sortable()
-            .on("sortstop", $.proxy(
-                function() {
-                    var value = this.deck.sortable( "toArray" )
-                    value = $.map(value, function(id) {
-                        return id.match(/(.+)[\-=_](.+)/)[2]
-                    })
-                    if (value.length > 0) {
-                        this.input.val("|" + value.join("|") + "|")
-                    } else {
-                        this.input.val("|")
-                    }
-                },
-                this)
-            )
-    }
-})
-
-
-$.widget('spud.spud_menu', $.ui.menu, {
-    _create: function() {
-
-        this.element
-            .addClass("menu")
-
-        this._super()
-    },
-
-    _destroy: function() {
-        this.element
-            .empty()
-            .removeClass("menu")
-        this._super()
-    },
-
-    add_item: function(a) {
-        var li = $("<li/>")
-            .addClass("ui-menu-item")
-            .html(a)
-            .on("click", function(ev) { a.trigger('click'); })
-            .appendTo(this.element)
-        return this
-    },
-})
-
-
-$.widget('spud.main_menu', $.spud.spud_menu, {
-    _create: function() {
-        this._super()
-        this.set()
-    },
-
-    set: function() {
-        var search = { criteria: { root_only: true} }
-        this.element.empty()
-        this.add_item(albums.search_results_a(search, 0, "Albums"))
-        this.add_item(categorys.search_results_a(search, 0, "Categories"))
-        this.add_item(places.search_results_a(search, 0, "Places"))
-
-        var search = { criteria: { root_only: false} }
-        this.add_item(persons.search_results_a(search, 0, "People"))
-        this.add_item(feedbacks.search_results_a(search, 0, "Feedback"))
-        this.add_item(photo_search_results_a({}, 0))
-    },
-})
-
-
-$.widget('spud.selection_menu', $.spud.spud_menu, {
-    _create: function() {
-        this._super()
-        if (this.options.selection != null) {
-            this.set(this.options.selection)
-        }
-    },
-
-    set: function(selection) {
-        this.element.empty()
-        if (selection.length > 0) {
-            var search = {
-                criteria: {
-                    photos: selection.join(".")
-                }
-            }
-
-            this.add_item(photo_search_results_a(search, 0, "Show"))
-            this.add_item(
-                $("<a href='#'>Clear</a>")
-                .on("click", function() { set_selection([]); reload_page(); return false; })
-            )
-        }
-    },
-})
+// $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
+//     set: function(initial) {
+//         if (initial.length > 0) {
+//             var value = $.map(initial, function(v){ return v.pk });
+//             this.input.val("|" + value.join("|") + "|")
+//         } else {
+//             this.input.val("|")
+//         }
+//         this.deck.children().remove();
+//         var mythis = this
+//         $.each(initial, function(i, v) {
+//             mythis._addKiller(v)
+//         });
+//     },
+//
+//     get: function() {
+//         var value = this.input.val().slice(1,-1)
+//         if (value != "") {
+//             return value.split("|")
+//         } else {
+//             return []
+//         }
+//     },
+//
+//     _receiveResult: function(ev, ui) {
+//         var prev = this.input.val();
+//
+//         if (prev.indexOf("|"+ui.item.pk+"|") == -1) {
+//                 this.input.val((prev ? prev : "|") + ui.item.pk + "|");
+//                 this.text.val('');
+//                 this._addKiller(ui.item);
+//                 this._trigger("added",  ev, ui.item);
+//         }
+//
+//         return false;
+//     },
+//
+//     _kill: function(item, div) {
+//         this.input.val(this.input.val().replace("|" + item.pk + "|", "|"));
+//         div.fadeOut().remove();
+//     },
+// })
+//
+//
+// $.widget('spud.quickautocomplete', $.spud.ajaxautocomplete, {
+//     _create: function(){
+//         delete this.options.type
+//         this.options.source = operations,
+//         this._super();
+//     },
+//
+//     _renderItem: function( ul, item ) {
+//         return $( "<li>" )
+//             .append( "<a>" + item.label + "<br/>" + item.desc + "</a>" )
+//             .appendTo( ul );
+//     },
+//
+//     _receiveResult: function(ev, ui) {
+//         // same as _super() but this.text isn't cleared
+//         if (this.input.val()) {
+//             this._kill();
+//         }
+//         this.input.val(ui.item.pk);
+//         this._addKiller(ui.item);
+//         this._trigger("added", ev, ui.item);
+//         return true;
+//     },
+//
+//     _addKiller: function(item) {
+//         // same as _super() but uses item.desc instead of item.repr
+//         var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
+//         var div = $("<div></div>")
+//             .attr("id", this.id+'_on_deck_'+item.pk)
+//             .append(killButton)
+//             .append(item.desc)
+//             .appendTo(this.deck)
+//         killButton.on("click", $.proxy(
+//             function(ev) {
+//                 this._kill(item, div);
+//                 return this._trigger("killed", ev, item)
+//             },
+//             this))
+//     },
+//
+//     _suggest: function( items ) {
+//         if (items.length != 1) {
+//             this._super( items );
+//             return
+//         }
+//         var item = items[0]
+//         if ( false !== this._trigger( "select", null, { item: item } ) ) {
+//             this._value( item.value );
+//         }
+//         // reset the term after the select event
+//         // this allows custom select handling to work properly
+//         this.term = this._value();
+//
+//         this.close();
+//         this.selectedItem = item;
+//     }
+// });
+//
+//
+// $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
+//     _create: function(){
+//         this.img = $("<div></div>")
+//             .image({size: get_settings().list_size})
+//             .appendTo(this.element)
+//
+//         this.options.type = "photo"
+//         this._super();
+//     },
+//
+//     _destroy: function() {
+//         this.img.image("destroy")
+//         this._super();
+//     },
+//
+//     set: function(photo) {
+//         this.img.image("set", photo)
+//         item = null
+//         if (photo != null) {
+//             var item = { pk: photo.id, repr: photo.title }
+//         }
+//         this._super(item);
+//     },
+//
+//     _receiveResult: function(ev, ui) {
+//         this._super(ev, ui);
+//         var mythis = this
+//         this.img.image("set_loading")
+//         load_photo(ui.item.pk,
+//             function(data) {
+//                 mythis.img.image("set", data.photo)
+//             },
+//             function(message) {
+//                 mythis.img.image("set_error")
+//             }
+//         )
+//         return false
+//     },
+//
+//     _kill: function(item, div) {
+//         this._super(item, div);
+//         this.img.image("set_none")
+//     }
+// })
+//
+//
+// $.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
+//     _create: function(){
+//         this._super()
+//         this.deck
+//             .sortable()
+//             .on("sortstop", $.proxy(
+//                 function() {
+//                     var value = this.deck.sortable( "toArray" )
+//                     value = $.map(value, function(id) {
+//                         return id.match(/(.+)[\-=_](.+)/)[2]
+//                     })
+//                     if (value.length > 0) {
+//                         this.input.val("|" + value.join("|") + "|")
+//                     } else {
+//                         this.input.val("|")
+//                     }
+//                 },
+//                 this)
+//             )
+//     }
+// })
+//
+//
+// $.widget('spud.spud_menu', $.ui.menu, {
+//     _create: function() {
+//
+//         this.element
+//             .addClass("menu")
+//
+//         this._super()
+//     },
+//
+//     _destroy: function() {
+//         this.element
+//             .empty()
+//             .removeClass("menu")
+//         this._super()
+//     },
+//
+//     add_item: function(a) {
+//         var li = $("<li/>")
+//             .addClass("ui-menu-item")
+//             .html(a)
+//             .on("click", function(ev) { a.trigger('click'); })
+//             .appendTo(this.element)
+//         return this
+//     },
+// })
+//
+//
+// $.widget('spud.main_menu', $.spud.spud_menu, {
+//     _create: function() {
+//         this._super()
+//         this.set()
+//     },
+//
+//     set: function() {
+//         var search = { criteria: { root_only: true} }
+//         this.element.empty()
+//         this.add_item(albums.search_results_a(search, 0, "Albums"))
+//         this.add_item(categorys.search_results_a(search, 0, "Categories"))
+//         this.add_item(places.search_results_a(search, 0, "Places"))
+//
+//         var search = { criteria: { root_only: false} }
+//         this.add_item(persons.search_results_a(search, 0, "People"))
+//         this.add_item(feedbacks.search_results_a(search, 0, "Feedback"))
+//         this.add_item(photo_search_results_a({}, 0))
+//     },
+// })
+//
+//
+// $.widget('spud.selection_menu', $.spud.spud_menu, {
+//     _create: function() {
+//         this._super()
+//         if (this.options.selection != null) {
+//             this.set(this.options.selection)
+//         }
+//     },
+//
+//     set: function(selection) {
+//         this.element.empty()
+//         if (selection.length > 0) {
+//             var search = {
+//                 criteria: {
+//                     photos: selection.join(".")
+//                 }
+//             }
+//
+//             this.add_item(photo_search_results_a(search, 0, "Show"))
+//             this.add_item(
+//                 $("<a href='#'>Clear</a>")
+//                 .on("click", function() { set_selection([]); reload_page(); return false; })
+//             )
+//         }
+//     },
+// })
 
 // $.widget('spud.paginator', {
 //     _create: function() {
 //         this.element
 //             .addClass("paginator")
-// 
+//
 //         if (this.options.page != null) {
 //             this.set(this.options.page, this.options.last_page)
 //         }
 //     },
-// 
+//
 //     _destroy: function() {
 //         this.element
 //             .empty()
 //             .removeClass("paginator")
 //         this._super()
 //     },
-// 
+//
 //      _range: function(page, first, last) {
 //         var page_a = this.options.page_a
 //         for (var i=first; i<=last; i++) {
@@ -503,24 +503,24 @@ $.widget('spud.selection_menu', $.spud.spud_menu, {
 //             this.element.append(" ")
 //         }
 //     },
-// 
+//
 //     set: function(page, last_page) {
 //         var page_a = this.options.page_a
-// 
+//
 //         this.element.empty()
-// 
+//
 //         if (page > 0) {
 //             page_a(page-1, "")
 //                 .addClass("prevslide")
 //                 .appendTo(this.element)
 //         }
-// 
+//
 //         if (page < last_page) {
 //             page_a(page+1, "")
 //                 .addClass("nextslide")
 //                 .appendTo(this.element)
 //         }
-// 
+//
 //         if (page > 0) {
 //             page_a(page-1, '<')
 //                 .attr("accesskey", "p")
@@ -535,10 +535,10 @@ $.widget('spud.selection_menu', $.spud.spud_menu, {
 //                 .appendTo(this.element)
 //             this.element.append(" ")
 //         }
-// 
+//
 //         var ON_EACH_SIDE = 3
 //         var ON_ENDS = 2
-// 
+//
 //         // If there are 10 or fewer pages, display links to every page.
 //         // Otherwise, do some fancy
 //         if (last_page <= 10) {
@@ -554,7 +554,7 @@ $.widget('spud.selection_menu', $.spud.spud_menu, {
 //             } else {
 //                 this._range(page, 0, page-1)
 //             }
-// 
+//
 //             if (page < (last_page - ON_EACH_SIDE - ON_ENDS)) {
 //                 this._range(page, page, page + ON_EACH_SIDE)
 //                 this.element.append('<span class="dots">...</span>')
@@ -652,7 +652,7 @@ $.widget('spud.image', {
         this._clear()
         this.img = $("<img></img>")
             .attr('width', 120)
-            .attr("src", media_url("img/none.jpg"))
+            .attr("src", static_url("img/none.jpg"))
             .appendTo(this.element)
         this.width = 227
         this.height = 222
@@ -802,3 +802,57 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
         this._super()
     },
 })
+
+$.widget('spud.screen',  {
+    _create: function() {
+        var mythis = this
+
+        if (this.options.disabled) {
+            this.disable()
+        } else {
+            this.enable()
+        }
+
+        this.element.data('screen', this)
+        this.element.addClass("screen")
+
+        this.h1 = $("<h1/>", {text: this.title})
+            .on("click", function(ev) { mythis.toggle() })
+            .prependTo(this.element)
+
+        this.div = $("<div/>").appendTo(this.element)
+    },
+
+    is_enabled: function() {
+        return !this.element.hasClass("disabled")
+    },
+
+    toggle: function() {
+        if (this.is_enabled()) {
+            this.disable()
+        } else {
+            this.enable()
+        }
+    },
+
+    enable: function() {
+        this.disable_all()
+        $("head title").text(this.title)
+        this.element.removeClass("disabled")
+        return this
+    },
+
+    disable: function() {
+        this.element.addClass("disabled")
+        return this
+    },
+
+    disable_all: function() {
+        $(".screen:not(.active)").each(function() {
+            var screen = $(this).data('screen')
+            screen.disable()
+        })
+        return this
+    },
+})
+

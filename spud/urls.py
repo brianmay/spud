@@ -49,8 +49,11 @@ urlpatterns = patterns(
     url(r'^$',
         'spud.views.root', name='root'),
 
-    url(r'^albums/$',
-        'spud.views.album_list', name='album_list'),
+    url(r'^(?P<obj_type>\w+)/$',
+        'spud.views.obj_list', name='obj_list'),
+
+    url(r'^(?P<obj_type>\w+)/(?P<obj_id>\d+)/$',
+        'spud.views.obj_detail', name='obj_detail'),
 
     # url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$',
     #     'spud.views.photo_thumb_redirect', name='photo_thumb_redirect'),
