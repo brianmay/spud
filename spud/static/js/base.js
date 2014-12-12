@@ -132,39 +132,44 @@ $.widget('spud.autocompletehtml', $.ui.autocomplete, {
         this.source( { q: value }, this._response() );
     },
 
+    _normalize_item: function( item ) {
+        var div = $("<div/>")
+
+        if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
+            var photo = item.cover_photo.thumbs['thumb']
+            $("<img/>")
+                .attr("src", photo.url)
+                .attr("alt", "")
+                .appendTo(div)
+        }
+
+        $("<div/>")
+            .addClass("title")
+            .text(item.title)
+            .appendTo(div)
+
+        if (item.description) {
+            $("<div/>")
+                .addClass("desc")
+                .p(item.description)
+                .appendTo(div)
+        }
+
+        $("<div/>")
+            .addClass("clear")
+            .appendTo(div)
+
+        return {
+            label: div,
+            repr: item.title,
+            pk: item.album_id,
+        }
+    },
+
     _normalize: function( items ) {
+        var mythis = this
         var response = $.map( items.results, function( item ) {
-            var div = $("<div/>")
-
-            if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
-                var photo = item.cover_photo.thumbs['thumb']
-                $("<img/>")
-                    .attr("src", photo.url)
-                    .attr("alt", "")
-                    .appendTo(div)
-            }
-
-            $("<div/>")
-                .addClass("title")
-                .text(item.title)
-                .appendTo(div)
-
-            if (item.description) {
-                $("<div/>")
-                    .addClass("desc")
-                    .p(item.description)
-                    .appendTo(div)
-            }
-
-            $("<div/>")
-                .addClass("clear")
-                .appendTo(div)
-
-            return {
-                label: div,
-                repr: item.title,
-                pk: item.album_id,
-            }
+            return mythis._normalize_item(item)
          })
          return response
     },
@@ -222,11 +227,14 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         this._super();
     },
 
-    set: function(item) {
+    set: function(item, item_pk) {
         this.deck.children().remove();
         if (item != null) {
             this.input.val(item.pk)
             this._addKiller(item)
+        } else if (item_pk != null) {
+            this.input.val(item_pk)
+            this._addKiller(null, item_pk)
         }
     },
 
@@ -240,18 +248,40 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         }
         this.input.val(ui.item.pk);
         this.text.val('');
-        this._addKiller(ui.item);
+        this._addKiller(ui.item, null);
         this._trigger("added", ev, ui.item);
         return false;
     },
 
-    _addKiller: function(item) {
+    _addKiller: function(item, item_pk) {
+        if (item != null) {
+            item_pk = item.pk
+        }
+
+        var mythis = this
         var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
+        var repr = $("<div></div>").text("loading")
         var div = $("<div></div>")
-            .attr("id", this.id+'_on_deck_'+item.pk)
+            .attr("id", this.id+'_on_deck_'+item_pk)
             .append(killButton)
-            .append(item.repr)
+            .append(repr)
             .appendTo(this.deck)
+
+        if (item != null) {
+            repr.text(item.repr)
+        } else {
+            ajax({
+                url: window.__root_prefix + "api/albums/" + item_pk + "/",
+                success: function(data) {
+                    var item = mythis._normalize_item(data)
+                    repr.text(item.repr)
+                },
+                error: function(status, message) {
+                    repr.text("Error")
+                },
+            });
+        }
+
         killButton.on("click", $.proxy(
             function(ev) {
                 this._kill(item, div);

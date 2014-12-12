@@ -395,14 +395,14 @@ ajax_select_field.prototype.destroy = function() {
 }
 
 ajax_select_field.prototype.set = function(value) {
-    var item = null
-    if (value != null) {
-        item = {
-            pk: value.id,
-            repr: value.title,
-        }
-    }
-    this.input.ajaxautocomplete("set", item)
+//    var item = null
+//    if (value != null) {
+//        item = {
+//            pk: value.id,
+//            repr: value.title,
+//        }
+//    }
+    this.input.ajaxautocomplete("set", null, value)
 }
 
 ajax_select_field.prototype.get = function() {
