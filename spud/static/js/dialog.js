@@ -722,4 +722,8 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
     get_value: function(id) {
         return this.fields[id].get()
     },
+
+    get_uuid: function() {
+        return this.widgetName + ":" + this.uuid
+    },
 })

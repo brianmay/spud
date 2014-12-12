@@ -369,4 +369,8 @@ $.widget('spud.infobox', {
             this.fields[id].set_edit_value(a)
         }
     },
+
+    get_uuid: function() {
+        return this.widgetName + ":" + this.uuid
+    },
 })

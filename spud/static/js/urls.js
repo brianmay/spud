@@ -52,7 +52,7 @@ function photo_a(photo) {
     return a
 }
 
-function album_a(album, cache, controller) {
+function album_a(album, cache, album_loader) {
     if (!cache) {
         cache = {}
     }
@@ -64,11 +64,12 @@ function album_a(album, cache, controller) {
             if (!cache.ads || cache.ads.parents().length == 0) {
                 var params = {
                     album: album,
-                    controller: controller,
+                    album_loader: album_loader,
                 }
                 cache.ads = add_screen($.spud.album_detail_screen, params)
             } else {
-                cache.ads.album_detail_screen("set", album)
+                cache.ads.album_detail_screen("set_album", album)
+                cache.ads.album_detail_screen("set_loader", album_loader)
                 cache.ads.album_detail_screen("enable")
             }
             return false;

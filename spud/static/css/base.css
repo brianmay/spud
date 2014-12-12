@@ -9,15 +9,13 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 #user-tools { position:absolute; top:0; right:0; padding:1.2em 10px; font-size:11px; text-align:right; }
 
 /* MENU */
-.ui-widget.ui-menu {
+.menubar.ui-menu {
     border: 0;
     background: #ddd; 
 }
 
-.ui-menu .ui-menu-item {
+.menubar .ui-menu-item {
     display: inline-block;
-    margin: 0;
-    padding: 0 10px 10 0 10px;
 }
 
 /* SCREEN */
@@ -53,6 +51,10 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .ui-autocomplete-input { width:99%; }
 .ui-autocomplete { overflow-x:hidden; overflow-y:auto; max-height:500px; max-width:340px; }
 .ui-autocomplete.ui-front { z-index: 200; }
+.ui-autocomplete .desc {
+    max-height: 100px;
+    overflow-y: hidden;
+}
 
 /* PHOTO STATUS */
 .photo_list .removed { text-decoration: line-through; opacity:0.5; }

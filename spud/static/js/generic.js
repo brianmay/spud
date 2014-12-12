@@ -108,8 +108,8 @@ function setup_user_tools(session) {
 
 function setup_menu(session) {
     var menu = $("<ul/>")
-
-    menu.empty()
+        .addClass("menubar")
+        .empty()
 
     $('<li/>')
         .text("Albums")

@@ -59,40 +59,40 @@ $.fn.append_csv = function(list){
 }
 
 
-function is_equal_objects(x, y)
-{
-  var p;
-  if (x == null) {
-      return false;
-  }
-  for(p in x) {
-      if(typeof(y[p])=='undefined') {return false;}
-  }
-  if (y == null) {
-      return false;
-  }
-  for(p in y) {
-      if(typeof(x[p])=='undefined') {return false;}
-  }
-
-  for(p in y) {
-      if (y[p]) {
-          switch(typeof(y[p])) {
-              case 'object':
-                  if (!is_equal_objects(x[p], y[p])) { return false; } break;
-              case 'function':
-                  break;
-              default:
-                  if (y[p] != x[p]) { return false; }
-          }
-      } else {
-          if (x[p])
-              return false;
-      }
-  }
-
-  return true;
-}
+// function is_equal_objects(x, y)
+// {
+//   var p;
+//   if (x == null) {
+//       return false;
+//   }
+//   for(p in x) {
+//       if(typeof(y[p])=='undefined') {return false;}
+//   }
+//   if (y == null) {
+//       return false;
+//   }
+//   for(p in y) {
+//       if(typeof(x[p])=='undefined') {return false;}
+//   }
+//
+//   for(p in y) {
+//       if (y[p]) {
+//           switch(typeof(y[p])) {
+//               case 'object':
+//                   if (!is_equal_objects(x[p], y[p])) { return false; } break;
+//               case 'function':
+//                   break;
+//               default:
+//                   if (y[p] != x[p]) { return false; }
+//           }
+//       } else {
+//           if (x[p])
+//               return false;
+//       }
+//   }
+//
+//   return true;
+// }
 
 
 // ****************
@@ -121,8 +121,52 @@ $.widget('spud.autocompletehtml', $.ui.autocomplete, {
         }
         return $("<li></li>")
             .data("item.autocomplete", item)
-            .append("<a>" + item.match + "</a>")
+            .append( $("<a/>").html(item.label) )
             .appendTo(ul);
+    },
+
+    _search: function( value ) {
+        this.pending++;
+        this.element.addClass( "ui-autocomplete-loading" );
+        this.cancelSearch = false;
+        this.source( { q: value }, this._response() );
+    },
+
+    _normalize: function( items ) {
+        var response = $.map( items.results, function( item ) {
+            var div = $("<div/>")
+
+            if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
+                var photo = item.cover_photo.thumbs['thumb']
+                $("<img/>")
+                    .attr("src", photo.url)
+                    .attr("alt", "")
+                    .appendTo(div)
+            }
+
+            $("<div/>")
+                .addClass("title")
+                .text(item.title)
+                .appendTo(div)
+
+            if (item.description) {
+                $("<div/>")
+                    .addClass("desc")
+                    .p(item.description)
+                    .appendTo(div)
+            }
+
+            $("<div/>")
+                .addClass("clear")
+                .appendTo(div)
+
+            return {
+                label: div,
+                repr: item.title,
+                pk: item.album_id,
+            }
+         })
+         return response
     },
 });
 
@@ -162,7 +206,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         }
 
         if (options.type != null) {
-            options.source =  "/ajax/ajax_lookup/" + options.type
+            options.source =  "/api/" + options.type
             delete options.type
         }
 
@@ -696,6 +740,10 @@ $.widget('spud.image', {
         img.attr('width', width)
         img.attr('height', height)
     },
+
+    get_uuid: function() {
+        return this.widgetName + ":" + this.uuid
+    },
 })
 
 
@@ -735,6 +783,10 @@ $.widget('spud.list_base',  {
     _destroy: function() {
         this.empty()
         this._super()
+    },
+
+    get_uuid: function() {
+        return this.widgetName + ":" + this.uuid
     },
 })
 
@@ -896,6 +948,10 @@ $.widget('spud.screen',  {
         } else {
             this._super( key, value );
         }
+    },
+
+    get_uuid: function() {
+        return this.widgetName + ":" + this.uuid
     },
 })
 
