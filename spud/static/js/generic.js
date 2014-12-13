@@ -243,7 +243,7 @@ object_loader.prototype.load = function() {
     console.log("loading object", this._type, this._obj_id)
     this._loading = true
 
-    ajax({
+    this.xhr = ajax({
         url: window.__root_prefix + "api/" + this._type + "/" + this._obj_id + "/", 
         data: params,
         success: function(data) {
@@ -258,6 +258,12 @@ object_loader.prototype.load = function() {
             alert("Error " + status + " " + message)
         },
     });
+}
+
+object_loader.prototype.abort = function() {
+    if (this._loading) {
+        this.xhr.abort()
+    }
 }
 
 object_loader.prototype._got_item = function(obj) {
@@ -297,7 +303,7 @@ object_list_loader.prototype.load_next_page = function() {
     console.log("loading list", this._type, criteria, page)
     this._loading = true
 
-    ajax({
+    this.xhr = ajax({
         url: window.__root_prefix + "api/" + this._type + "/",
         data: params,
         success: function(data) {
@@ -317,9 +323,14 @@ object_list_loader.prototype.load_next_page = function() {
     });
 }
 
+object_list_loader.prototype.abort = function() {
+    if (this._loading) {
+        this.xhr.abort()
+    }
+}
+
 object_list_loader.prototype._get_object_id = function(obj) {
-    throw new Error("_get_object_id not implemented")
-    return obj.id
+    return null
 }
 
 object_list_loader.prototype._got_list = function(object_list) {
@@ -332,12 +343,14 @@ object_list_loader.prototype._got_list = function(object_list) {
 
 object_list_loader.prototype._got_item = function(obj) {
     var id = this._get_object_id(obj)
-    this._idmap[id] = Object()
-    if (this._last_id) {
-        this._idmap[this._last_id].next = id
-        this._idmap[id].prev = this._last_id
+    if (id != null) {
+        this._idmap[id] = Object()
+        if (this._last_id) {
+            this._idmap[this._last_id].next = id
+            this._idmap[id].prev = this._last_id
+        }
+        this._last_id = id
     }
-    this._last_id = id
     this.loaded_item.trigger(obj)
 }
 

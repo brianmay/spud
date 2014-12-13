@@ -370,6 +370,9 @@ $.widget('spud.infobox', {
         }
     },
 
+    close: function() {
+    },
+
     get_uuid: function() {
         return this.widgetName + ":" + this.uuid
     },

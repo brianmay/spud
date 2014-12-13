@@ -42,12 +42,12 @@ function album_list_loader(criteria) {
     object_list_loader.call(this, "albums", criteria)
 }
 
-object_list_loader.prototype._get_object_id = function(obj) {
-    return obj.album_id
-}
-
 album_list_loader.prototype = new object_list_loader()
 album_list_loader.constructor = album_list_loader
+
+album_list_loader.prototype._get_object_id = function(obj) {
+    return obj.album_id
+}
 
 $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
 
@@ -208,13 +208,6 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
 
     disable: function() {
         this.element.addClass("disabled")
-    },
-
-    get_prev_id: function(obj_id) {
-        if (!this.idmap[obj_id]) {
-            return null
-        }
-        return this.idmap[obj_id].prev
     },
 
     close: function() {
@@ -551,11 +544,6 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
     },
 
     close: function() {
-        if (this.options.album_list_loader) {
-            var controller = this.options.controller
-            controller.event_update = null
-            controller.event_close = null
-        }
         this.ad.album_detail('option', 'event_update', null)
         this.ad.album_detail('close')
 

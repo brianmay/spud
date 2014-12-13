@@ -196,6 +196,21 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         return this.input.val()
     },
 
+    _initSource: function() {
+        var mythis = this
+        this.source = function( request, response ) {
+            if (mythis.loader != null) {
+                mythis.loader.abort()
+            }
+            mythis.loader = new object_list_loader(this.options.type, request)
+            mythis.loader.loaded_list.add_listener(this, function(object_list) {
+                mythis.loader = null
+                response(object_list);
+            })
+            mythis.loader.load_next_page()
+        };
+    },
+
     _receiveResult: function(ev, ui) {
         if (this.input.val()) {
             this._kill();
@@ -224,12 +239,12 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         if (item != null) {
             repr.text(item.repr)
         } else {
-            this.loader = new object_loader(this.options.type, item_pk)
-            this.loader.loaded_item.add_listener(this, function(album) {
-                var item = mythis._normalize_item(album)
+            var kill_loader = new object_loader(this.options.type, item_pk)
+            kill_loader.loaded_item.add_listener(this, function(object) {
+                var item = mythis._normalize_item(object)
                 repr.text(item.repr)
             })
-            this.loader.load()
+            kill_loader.load()
         }
 
         killButton.on("click", $.proxy(
@@ -296,7 +311,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
     _normalize: function( items ) {
         var mythis = this
-        var response = $.map( items.results, function( item ) {
+        var response = $.map( items, function( item ) {
             return mythis._normalize_item(item)
          })
          return response

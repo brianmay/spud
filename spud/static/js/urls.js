@@ -118,7 +118,7 @@ function ajax(settings) {
         throw new Error("error is not defined")
     }
 
-    $.ajax(settings)
+    var xhr = $.ajax(settings)
         .done(
             function(data, textStatus, jqXHR) {
                 if (data.type == "error") {
@@ -133,16 +133,6 @@ function ajax(settings) {
                 error(jqXHR.status, errorThrown)
             }
         )
-}
 
-
-// ****************
-// * AJAX METHODS *
-// ****************
-function load_albums(success, error) {
-    ajax({
-        url: window.__root_prefix + 'api/album/',
-        success: success,
-        error: error,
-    })
+    return xhr
 }
