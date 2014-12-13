@@ -17,6 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
+window._album_created = new action()
+window._album_changed = new action()
+window._album_deleted = new action()
 
 // function album() {
 //     this.type = "album"
@@ -138,6 +141,14 @@ $.widget('spud.album_change_dialog',  $.spud.save_dialog, {
             this._save("POST", null, values)
         }
     },
+
+    _done: function(data) {
+        if (this.album_id != null) {
+            window._album_changed.trigger(data)
+        } else {
+            window._album_saved.trigger(data)
+        }
+    },
 })
 
 
@@ -159,6 +170,10 @@ $.widget('spud.album_delete_dialog',  $.spud.save_dialog, {
     _submit_values: function(values) {
         this._save("DELETE", this.album_id, {})
     },
+
+    _done: function(data) {
+        window._album_deleted.trigger(data)
+    }
 })
 
 
@@ -182,6 +197,13 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
 
         this.element.scroll(function() {
             mythis._load_if_required(mythis.options.criteria)
+        })
+
+        window._album_changed.add_listener(this, function(album) {
+            // FIXME
+        })
+        window._album_deleted.add_listener(this, function(album_pk) {
+            // FIXME
         })
     },
 
@@ -271,6 +293,8 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         if (this.loader) {
             this.loader.loaded_list.remove_listener(this)
         }
+        window._album_changed.remove_listener(this)
+        window._album_deleted.remove_listener(this)
         // No super to call
         // this._super()
     },
@@ -580,6 +604,17 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
 
         this.ad = $("<div/>").appendTo(this.div)
         $.spud.album_detail(params, this.ad)
+
+        window._album_changed.add_listener(this, function(album) {
+            if (album.album_id == this.options.obj_id) {
+                mythis.set_album(album)
+            }
+        })
+        window._album_deleted.add_listener(this, function(album_pk) {
+            if (album.album_id == this.options.obj_id) {
+                mythis.close()
+            }
+        })
     },
 
     _setup_loader: function() {
@@ -627,11 +662,13 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         }
 
         this.ad.album_detail('set', album)
-        this._setup_buttons()
-        this._set_title("Album "+album.title)
 
-        this.options.obj = album
-        this.options.obj_id = album.album_id
+        // above function will call event_update where the following
+        // will be done
+        // this._setup_buttons()
+        // this._set_title("Album "+album.title)
+        // this.options.obj = album
+        // this.options.obj_id = album.album_id
     },
 
     set_loader: function(album_list_loader) {
@@ -665,6 +702,9 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
 
         var album_list_loader = this.options.album_list_loader
         album_list_loader.loaded_list.remove_listener(this)
+
+        window._album_changed.remove_listener(this)
+        window._album_deleted.remove_listener(this)
 
         this._super()
     },

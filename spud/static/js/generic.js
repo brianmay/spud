@@ -387,6 +387,7 @@ $.widget('spud.save_dialog',  $.spud.form_dialog, {
             type: http_type,
             success: function(data) {
                 mythis._loading = false
+                mythis._done(data)
                 mythis.close()
             },
             error: function(status, message) {
@@ -395,6 +396,10 @@ $.widget('spud.save_dialog',  $.spud.form_dialog, {
                 mythis.uiDialogButtonPane.find(".ui-button").button("enable")
             },
         });
-    }
+    },
+
+    _done: function(data) {
+    },
+
 })
 
