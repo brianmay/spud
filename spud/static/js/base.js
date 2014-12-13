@@ -124,6 +124,10 @@ $.widget('spud.autocompletehtml', $.ui.autocomplete, {
             .append( $("<a/>").html(item.label) )
             .appendTo(ul);
     },
+
+    get_uuid: function() {
+        return this.widgetName + ":" + this.uuid
+    },
 });
 
 
@@ -220,17 +224,12 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         if (item != null) {
             repr.text(item.repr)
         } else {
-            var options = this.options
-            ajax({
-                url: window.__root_prefix + "api/" + options.type + "/" + item_pk + "/",
-                success: function(data) {
-                    var item = mythis._normalize_item(data)
-                    repr.text(item.repr)
-                },
-                error: function(status, message) {
-                    repr.text("Error")
-                },
-            });
+            this.loader = new object_loader(this.options.type, item_pk)
+            this.loader.loaded_item.add_listener(this, function(album) {
+                var item = mythis._normalize_item(album)
+                repr.text(item.repr)
+            })
+            this.loader.load()
         }
 
         killButton.on("click", $.proxy(
