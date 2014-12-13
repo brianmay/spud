@@ -185,14 +185,14 @@ function do_detail(obj_type, obj_id, session, params) {
 }
 
 ///////////////////////////////////////
-// ACTIONS
+// signals
 ///////////////////////////////////////
-function action() {
+function signal() {
     this.listeners = {}
     this.objects = {}
 }
 
-action.prototype.add_listener = function(obj, listener) {
+signal.prototype.add_listener = function(obj, listener) {
     var key = obj.get_uuid()
     if (this.listeners[key]) {
         this.remove_listener(key)
@@ -201,12 +201,12 @@ action.prototype.add_listener = function(obj, listener) {
     this.objects[key] = obj
 }
 
-action.prototype.remove_listener = function(obj) {
+signal.prototype.remove_listener = function(obj) {
     var key = obj.get_uuid()
     delete this.listeners[key]
 }
 
-action.prototype.trigger = function() {
+signal.prototype.trigger = function() {
     var mythis = this
     var fight = arguments
     $.each(this.listeners, function(uuid, listener) {
@@ -224,7 +224,7 @@ function object_loader(type, obj_id) {
     this._obj_id = obj_id
     this._loading = false
     this._finished = false
-    this.loaded_item = new action()
+    this.loaded_item = new signal()
 }
 
 
@@ -283,8 +283,8 @@ function object_list_loader(type, criteria) {
     this._last_id = null
     this._idmap = {}
     this._finished = false
-    this.loaded_list = new action()
-    this.loaded_item = new action()
+    this.loaded_list = new signal()
+    this.loaded_item = new signal()
 }
 
 

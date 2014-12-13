@@ -17,9 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window._album_created = new action()
-window._album_changed = new action()
-window._album_deleted = new action()
+window._album_created = new signal()
+window._album_changed = new signal()
+window._album_deleted = new signal()
 
 // function album() {
 //     this.type = "album"
