@@ -420,36 +420,36 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 //         this.selectedItem = item;
 //     }
 // });
-//
-//
-// $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
-//     _create: function(){
-//         this.img = $("<div></div>")
-//             .image({size: get_settings().list_size})
-//             .appendTo(this.element)
-//
-//         this.options.type = "photo"
-//         this._super();
-//     },
-//
-//     _destroy: function() {
-//         this.img.image("destroy")
-//         this._super();
-//     },
-//
-//     set: function(photo) {
-//         this.img.image("set", photo)
-//         item = null
-//         if (photo != null) {
-//             var item = { pk: photo.id, repr: photo.title }
-//         }
-//         this._super(item);
-//     },
-//
-//     _receiveResult: function(ev, ui) {
-//         this._super(ev, ui);
-//         var mythis = this
-//         this.img.image("set_loading")
+
+
+$.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
+    _create: function(){
+        this.img = $("<div></div>")
+            .image({size: 'thumb'})
+            .appendTo(this.element)
+
+        this.options.type = "photos"
+        this._super();
+    },
+
+    _destroy: function() {
+        this.img.image("destroy")
+        this._super();
+    },
+
+    set: function(photo) {
+        this.img.image("set", photo)
+        item = null
+        if (photo != null) {
+            var item = { pk: photo.id, repr: photo.title }
+        }
+        this._super(item);
+    },
+
+    _receiveResult: function(ev, ui) {
+        this._super(ev, ui);
+        var mythis = this
+        this.img.image("set_loading")
 //         load_photo(ui.item.pk,
 //             function(data) {
 //                 mythis.img.image("set", data.photo)
@@ -458,16 +458,16 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 //                 mythis.img.image("set_error")
 //             }
 //         )
-//         return false
-//     },
-//
-//     _kill: function(item, div) {
-//         this._super(item, div);
-//         this.img.image("set_none")
-//     }
-// })
-//
-//
+        return false
+    },
+
+    _kill: function(item, div) {
+        this._super(item, div);
+        this.img.image("set_none")
+    }
+})
+
+
 // $.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
 //     _create: function(){
 //         this._super()

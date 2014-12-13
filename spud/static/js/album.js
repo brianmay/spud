@@ -63,10 +63,6 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
         this.options.description = "Please search for an album."
         this.options.button = "Search"
         this._super();
-
-        if (this.options.criteria != null) {
-            this.set(this.options.criteria)
-        }
     },
 
     set: function(criteria) {
@@ -101,6 +97,58 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
         if (this.options.success(criteria)) {
             this.close()
         }
+    },
+})
+
+
+$.widget('spud.album_change_dialog',  $.spud.form_dialog, {
+    _create: function() {
+        this.options.fields = [
+            ["title", new text_input_field("Title", true)],
+            ["description", new p_input_field("Description", false)],
+            ["cover_photo", new photo_select_field("Photo", false)],
+            ["sort_name", new text_input_field("Sort Name", false)],
+            ["sort_order", new text_input_field("Sort Order", false)],
+            ["parent", new ajax_select_field("Parent", "albums", false)],
+            ["revised", new datetime_input_field("Revised", false)],
+        ]
+
+        this.options.title = "Change album"
+        this.options.button = "Save"
+        this._super();
+    },
+
+    set: function(album) {
+        this.album_id = album.album_id
+        if (album.album_id != null) {
+            this.set_title("Change album")
+            this.set_description("Please change album " + album.title + ".")
+        } else {
+            this.set_title("Add new album")
+            this.set_description("Please add new album.")
+        }
+        return this._super(album);
+    },
+
+    _submit_values: function(values) {
+    },
+})
+
+
+$.widget('spud.album_delete_dialog',  $.spud.form_dialog, {
+    _create: function() {
+        this.options.title = "Delete album"
+        this.options.button = "Delete"
+        this._super();
+    },
+
+    set: function(album) {
+        this.album_id = album.id
+        this.set_description("Are you absolutely positively sure you really want to delete " +
+            album.title + "? Go ahead join the dark side. There are cookies.")
+    },
+
+    _submit_values: function(values) {
     },
 })
 
@@ -237,7 +285,7 @@ $.widget('spud.album_list_screen', $.spud.screen, {
                     .text("Filter")
                     .on("click", function(ev) {
                         var params = {
-                            criteria: mythis.options.criteria,
+                            obj: mythis.options.criteria,
                             success: function(criteria) {
                                 mythis._filter(criteria)
                                 return true
@@ -333,18 +381,23 @@ $.widget('spud.album_detail',  $.spud.infobox, {
 
         this._super();
 
-        this.description = $("<p></p>")
-            .appendTo(this.element)
-
-        if (this.options.album != null) {
-            this.set(this.options.album)
+        if (this.options.obj != null) {
+            // no action
         } else if (this.options.obj_id != null) {
             this.load(this.options.obj_id)
         }
     },
 
+    _create_fields: function() {
+        this._super();
+        this.description = $("<p></p>")
+            .appendTo(this.element)
+    },
+
+
     set: function(album) {
         this._super(album)
+        this.options.obj = album
         this.options.obj_id = album.album_id
         this.description.p(album.description)
         this.img.image("set", album.cover_photo)
@@ -372,7 +425,9 @@ $.widget('spud.album_detail',  $.spud.infobox, {
     },
 
     _setOption: function( key, value ) {
-        if ( key === "obj_id" ) {
+        if ( key === "obj" ) {
+            this.set(value)
+        } else if ( key === "obj_id" ) {
             this.load(value)
         } else {
             this._super( key, value );
@@ -413,6 +468,48 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
                         add_screen(screen_class, params)
                     })
             )
+            .append(
+                $("<li/>")
+                    .text("Create")
+                    .on("click", function(ev) {
+                        if (mythis.options.obj != null) {
+                            var album = {
+                                parent: mythis.options.obj.album_id,
+                            }
+                            var params = {
+                                obj: album,
+                            }
+                            var div = $("<div/>")
+                            $.spud.album_change_dialog(params, div)
+                        }
+                    })
+            )
+            .append(
+                $("<li/>")
+                    .text("Change")
+                    .on("click", function(ev) {
+                        if (mythis.options.obj != null) {
+                            var params = {
+                                obj: mythis.options.obj,
+                            }
+                            var div = $("<div/>")
+                            $.spud.album_change_dialog(params, div)
+                        }
+                    })
+            )
+            .append(
+                $("<li/>")
+                    .text("Delete")
+                    .on("click", function(ev) {
+                        if (mythis.options.obj != null) {
+                            var params = {
+                                obj: mythis.options.obj,
+                            }
+                            var div = $("<div/>")
+                            $.spud.album_delete_dialog(params, div)
+                        }
+                    })
+            )
             .menu()
             .appendTo(this.div)
 
@@ -444,8 +541,8 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             .button()
             .appendTo(this.div)
 
-        if (this.options.album != null) {
-            var album = this.options.album
+        if (this.options.obj != null) {
+            var album = this.options.obj
             this.options.obj_id = album.album_id
             mythis._set_title("Album "+album.title)
         }
@@ -453,9 +550,10 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this._setup_buttons()
 
         var params = {
+            'obj': this.options.obj,
             'obj_id': this.options.obj_id,
-            'album': this.options.album,
             'event_update': function(album) {
+                mythis.options.obj = album
                 mythis.options.obj_id = album.album_id
                 mythis._set_title("Album "+album.title)
                 mythis._setup_buttons()
@@ -514,7 +612,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this._setup_buttons()
         this._set_title("Album "+album.title)
 
-        this.options.album = album
+        this.options.obj = album
         this.options.obj_id = album.album_id
     },
 

@@ -287,18 +287,12 @@ $.widget('spud.infobox', {
         $("<div class='clear'></div>")
             .appendTo(this.element)
 
-        this.fields = {}
-        if (options.fields != null) {
-            this.add_fields(options.fields)
-            delete options.fields
-        }
-
-        if (options.initial != null) {
-            this.set(options.initial)
-            delete options.initial
-        }
-
+        this._create_fields()
         this._super()
+
+        if (this.options.obj != null) {
+            this.set(this.options.obj)
+        }
     },
 
     _destroy: function() {
@@ -309,6 +303,14 @@ $.widget('spud.infobox', {
         })
         this.element.empty()
         this._super()
+    },
+
+
+    _create_fields: function() {
+        this.fields = {}
+        if (this.options.fields != null) {
+            this.add_fields(this.options.fields)
+        }
     },
 
     set: function(values) {

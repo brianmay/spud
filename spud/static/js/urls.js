@@ -63,7 +63,7 @@ function album_a(album, cache, album_list_loader) {
         .on('click', function() {
             if (!cache.ads || cache.ads.parents().length == 0) {
                 var params = {
-                    album: album,
+                    obj: album,
                     album_list_loader: album_list_loader,
                 }
                 cache.ads = add_screen($.spud.album_detail_screen, params)

@@ -519,41 +519,41 @@ ajax_select_field.prototype.get = function() {
 // ajax_select_sorted_field.prototype.get = function() {
 //     return this.input.ajaxautocompletesorted("get")
 // }
-//
-//
-// // define photo_select_field
-// function photo_select_field(title, required) {
-//     input_field.call(this, title, required)
-// }
-//
-// photo_select_field.prototype = new input_field()
-// photo_select_field.constructor = photo_select_field
-// photo_select_field.prototype.create = function(id) {
-//     return this.input = $("<span/>")
-//         .attr("name", id)
-//         .attr("id", "id_" + id)
-//         .photo_select()
-// }
-//
-// photo_select_field.prototype.destroy = function() {
-//     this.input.photo_select("destroy")
-// }
-//
-// photo_select_field.prototype.set = function(value) {
-//     this.input.photo_select("set", value)
-// }
-//
-// photo_select_field.prototype.get = function() {
-//     return this.input.photo_select("get")
-// }
-//
-// photo_select_field.prototype.validate = function() {
-//     var value = this.input.photo_select("get")
-//     if (this.required && !value) {
-//         return "This value is required"
-//     }
-//     return null
-// }
+
+
+// define photo_select_field
+function photo_select_field(title, required) {
+    input_field.call(this, title, required)
+}
+
+photo_select_field.prototype = new input_field()
+photo_select_field.constructor = photo_select_field
+photo_select_field.prototype.create = function(id) {
+    return this.input = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .photo_select()
+}
+
+photo_select_field.prototype.destroy = function() {
+    this.input.photo_select("destroy")
+}
+
+photo_select_field.prototype.set = function(value) {
+    this.input.photo_select("set", value)
+}
+
+photo_select_field.prototype.get = function() {
+    return this.input.photo_select("get")
+}
+
+photo_select_field.prototype.validate = function() {
+    var value = this.input.photo_select("get")
+    if (this.required && !value) {
+        return "This value is required"
+    }
+    return null
+}
 
 
 // define dialog
@@ -593,11 +593,7 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
             mythis.close()
         }
 
-        this.fields = {}
-        if (options.fields != null) {
-            this.add_fields(options.fields)
-            delete options.fields
-        }
+        this._create_fields()
 
         if (options.initial != null) {
             this.set(options.initial)
@@ -623,6 +619,10 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
                 mythis.destroy()
             }
         )
+
+        if (this.options.obj != null) {
+            this.set(this.options.obj)
+        }
     },
 
     _check_submit: function() {
@@ -641,6 +641,13 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
         })
         if (allok) {
             this._submit()
+        }
+    },
+
+    _create_fields: function() {
+        this.fields = {}
+        if (this.options.fields != null) {
+            this.add_fields(this.options.fields)
         }
     },
 
