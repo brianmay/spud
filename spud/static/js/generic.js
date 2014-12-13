@@ -140,6 +140,7 @@ function setup_menu(session) {
 }
 
 function setup_page(session) {
+    window.__perms = session.perms
     setup_user_tools(session)
     setup_menu(session)
 }
@@ -364,3 +365,36 @@ object_list_loader.prototype.get_meta = function(obj_id) {
     }
     return meta
 }
+
+///////////////////////////////////////
+// save_dialog
+///////////////////////////////////////
+$.widget('spud.save_dialog',  $.spud.form_dialog, {
+    _save: function(http_type, oject_id, values) {
+        var mythis = this
+        var type = this._type
+        this._loading = true
+        this.uiDialogButtonPane.find(".ui-button").button("disable")
+        var url
+        if (oject_id != null) {
+            url = window.__root_prefix + "api/" + type + "/" + oject_id + "/"
+        } else {
+            url = window.__root_prefix + "api/" + type + "/"
+        }
+        this.xhr = ajax({
+            url: url,
+            data: values,
+            type: http_type,
+            success: function(data) {
+                mythis._loading = false
+                mythis.close()
+            },
+            error: function(status, message) {
+                mythis._loading = false
+                alert("Error " + status + " " + message)
+                mythis.uiDialogButtonPane.find(".ui-button").button("enable")
+            },
+        });
+    }
+})
+

@@ -121,11 +121,7 @@ function ajax(settings) {
     var xhr = $.ajax(settings)
         .done(
             function(data, textStatus, jqXHR) {
-                if (data.type == "error") {
-                    error(data.message)
-                } else {
-                    success(data)
-                }
+                success(data)
             }
         )
         .fail(

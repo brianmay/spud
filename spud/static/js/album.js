@@ -100,8 +100,7 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-
-$.widget('spud.album_change_dialog',  $.spud.form_dialog, {
+$.widget('spud.album_change_dialog',  $.spud.save_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -115,6 +114,8 @@ $.widget('spud.album_change_dialog',  $.spud.form_dialog, {
 
         this.options.title = "Change album"
         this.options.button = "Save"
+
+        this._type = "albums"
         this._super();
     },
 
@@ -131,24 +132,32 @@ $.widget('spud.album_change_dialog',  $.spud.form_dialog, {
     },
 
     _submit_values: function(values) {
+        if (this.album_id != null) {
+            this._save("PATCH", this.album_id, values)
+        } else {
+            this._save("POST", null, values)
+        }
     },
 })
 
 
-$.widget('spud.album_delete_dialog',  $.spud.form_dialog, {
+$.widget('spud.album_delete_dialog',  $.spud.save_dialog, {
     _create: function() {
         this.options.title = "Delete album"
         this.options.button = "Delete"
+
+        this._type = "albums"
         this._super();
     },
 
     set: function(album) {
-        this.album_id = album.id
+        this.album_id = album.album_id
         this.set_description("Are you absolutely positively sure you really want to delete " +
             album.title + "? Go ahead join the dark side. There are cookies.")
     },
 
     _submit_values: function(values) {
+        this._save("DELETE", this.album_id, {})
     },
 })
 
@@ -468,48 +477,57 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
                         add_screen(screen_class, params)
                     })
             )
-            .append(
-                $("<li/>")
-                    .text("Create")
-                    .on("click", function(ev) {
-                        if (mythis.options.obj != null) {
-                            var album = {
-                                parent: mythis.options.obj.album_id,
-                            }
-                            var params = {
-                                obj: album,
-                            }
-                            var div = $("<div/>")
-                            $.spud.album_change_dialog(params, div)
+
+        var perms = window.__perms
+        if (perms.can_add) {
+            $("<li/>")
+                .text("Create")
+                .on("click", function(ev) {
+                    if (mythis.options.obj != null) {
+                        var album = {
+                            parent: mythis.options.obj.album_id,
                         }
-                    })
-            )
-            .append(
-                $("<li/>")
-                    .text("Change")
-                    .on("click", function(ev) {
-                        if (mythis.options.obj != null) {
-                            var params = {
-                                obj: mythis.options.obj,
-                            }
-                            var div = $("<div/>")
-                            $.spud.album_change_dialog(params, div)
+                        var params = {
+                            obj: album,
                         }
-                    })
-            )
-            .append(
-                $("<li/>")
-                    .text("Delete")
-                    .on("click", function(ev) {
-                        if (mythis.options.obj != null) {
-                            var params = {
-                                obj: mythis.options.obj,
-                            }
-                            var div = $("<div/>")
-                            $.spud.album_delete_dialog(params, div)
+                        var div = $("<div/>")
+                        $.spud.album_change_dialog(params, div)
+                    }
+                })
+                .appendTo(menu)
+        }
+
+        if (perms.can_change) {
+            $("<li/>")
+                .text("Change")
+                .on("click", function(ev) {
+                    if (mythis.options.obj != null) {
+                        var params = {
+                            obj: mythis.options.obj,
                         }
-                    })
-            )
+                        var div = $("<div/>")
+                        $.spud.album_change_dialog(params, div)
+                    }
+                })
+                .appendTo(menu)
+        }
+
+        if (perms.can_add) {
+            $("<li/>")
+                .text("Delete")
+                .on("click", function(ev) {
+                    if (mythis.options.obj != null) {
+                        var params = {
+                            obj: mythis.options.obj,
+                        }
+                        var div = $("<div/>")
+                        $.spud.album_delete_dialog(params, div)
+                    }
+                })
+                .appendTo(menu)
+        }
+
+        menu
             .menu()
             .appendTo(this.div)
 
