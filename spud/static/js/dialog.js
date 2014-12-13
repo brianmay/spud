@@ -346,6 +346,14 @@ select_input_field.prototype.set = function(value) {
     this.input.val(value)
 }
 
+select_input_field.prototype.validate = function() {
+    var value = this.input.val()
+    if (this.options[value] == null) {
+        return value +" is not valid option"
+    }
+    return null
+}
+
 
 // define boolean_input_field
 function boolean_input_field(title, options, required) {
