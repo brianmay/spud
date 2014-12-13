@@ -182,3 +182,172 @@ function do_detail(obj_type, obj_id, session, params) {
         add_screen(screen_class, params)
     }
 }
+
+///////////////////////////////////////
+// ACTIONS
+///////////////////////////////////////
+function action() {
+    this.listeners = {}
+    this.objects = {}
+}
+
+action.prototype.add_listener = function(obj, listener) {
+    var key = obj.get_uuid()
+    if (this.listeners[key]) {
+        this.remove_listener(key)
+    }
+    this.listeners[key] = listener
+    this.objects[key] = obj
+}
+
+action.prototype.remove_listener = function(obj) {
+    var key = obj.get_uuid()
+    delete this.listeners[key]
+}
+
+action.prototype.trigger = function() {
+    var mythis = this
+    var fight = arguments
+    $.each(this.listeners, function(uuid, listener) {
+        var obj = mythis.objects[uuid]
+        listener.apply(obj, fight)
+    })
+}
+
+
+///////////////////////////////////////
+// object_loader
+///////////////////////////////////////
+function object_loader(type, obj_id) {
+    this._type = type
+    this._obj_id = obj_id
+    this._loading = false
+    this._finished = false
+    this.loaded_item = new action()
+}
+
+
+object_loader.prototype.load = function() {
+    if (this._loading) {
+        return
+    }
+    if (this._finished) {
+        return
+    }
+
+    var mythis = this
+    var criteria = this._criteria
+    var page = this._page
+    var params = jQuery.extend({}, criteria, { 'page': page })
+
+    console.log("loading object", this._type, this._obj_id)
+    this._loading = true
+
+    ajax({
+        url: window.__root_prefix + "api/" + this._type + "/" + this._obj_id + "/", 
+        data: params,
+        success: function(data) {
+            console.log("got object", mythis._type, mythis._obj_id)
+            mythis._loading = false
+            mythis._finished = true
+
+            mythis._got_item(data)
+        },
+        error: function(status, message) {
+            mythis._loading = false
+            alert("Error " + status + " " + message)
+        },
+    });
+}
+
+object_loader.prototype._got_item = function(obj) {
+    this.loaded_item.trigger(obj)
+}
+
+
+///////////////////////////////////////
+// object_list_loader
+///////////////////////////////////////
+function object_list_loader(type, criteria) {
+    this._type = type
+    this._criteria = criteria
+    this._page = 1
+    this._loading = false
+    this._last_id = null
+    this._idmap = {}
+    this._finished = false
+    this.loaded_list = new action()
+    this.loaded_item = new action()
+}
+
+
+object_list_loader.prototype.load_next_page = function() {
+    if (this._loading) {
+        return
+    }
+    if (this._finished) {
+        return
+    }
+
+    var mythis = this
+    var criteria = this._criteria
+    var page = this._page
+    var params = jQuery.extend({}, criteria, { 'page': page })
+
+    console.log("loading list", this._type, criteria, page)
+    this._loading = true
+
+    ajax({
+        url: window.__root_prefix + "api/" + this._type + "/",
+        data: params,
+        success: function(data) {
+            console.log("got list", mythis._type, criteria, page)
+            mythis._loading = false
+            mythis._page = page + 1
+            if (!data.next) {
+                mythis._finished = true
+            }
+
+            mythis._got_list(data.results)
+        },
+        error: function(status, message) {
+            mythis._loading = false
+            alert("Error " + status + " " + message)
+        },
+    });
+}
+
+object_list_loader.prototype._get_object_id = function(obj) {
+    throw new Error("_get_object_id not implemented")
+    return obj.id
+}
+
+object_list_loader.prototype._got_list = function(object_list) {
+    var mythis = this
+    $.each(object_list, function(j, obj) {
+        mythis._got_item(obj)
+    })
+    this.loaded_list.trigger(object_list)
+}
+
+object_list_loader.prototype._got_item = function(obj) {
+    var id = this._get_object_id(obj)
+    this._idmap[id] = Object()
+    if (this._last_id) {
+        this._idmap[this._last_id].next = id
+        this._idmap[id].prev = this._last_id
+    }
+    this._last_id = id
+    this.loaded_item.trigger(obj)
+}
+
+object_list_loader.prototype.get_meta = function(obj_id) {
+    var meta = this._idmap[obj_id]
+    if (!meta) {
+        return null
+    }
+    if (!meta.next) {
+        this.load_next_page()
+    }
+    return meta
+}

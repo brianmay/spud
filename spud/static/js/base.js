@@ -124,55 +124,6 @@ $.widget('spud.autocompletehtml', $.ui.autocomplete, {
             .append( $("<a/>").html(item.label) )
             .appendTo(ul);
     },
-
-    _search: function( value ) {
-        this.pending++;
-        this.element.addClass( "ui-autocomplete-loading" );
-        this.cancelSearch = false;
-        this.source( { q: value }, this._response() );
-    },
-
-    _normalize_item: function( item ) {
-        var div = $("<div/>")
-
-        if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
-            var photo = item.cover_photo.thumbs['thumb']
-            $("<img/>")
-                .attr("src", photo.url)
-                .attr("alt", "")
-                .appendTo(div)
-        }
-
-        $("<div/>")
-            .addClass("title")
-            .text(item.title)
-            .appendTo(div)
-
-        if (item.description) {
-            $("<div/>")
-                .addClass("desc")
-                .p(item.description)
-                .appendTo(div)
-        }
-
-        $("<div/>")
-            .addClass("clear")
-            .appendTo(div)
-
-        return {
-            label: div,
-            repr: item.title,
-            pk: item.album_id,
-        }
-    },
-
-    _normalize: function( items ) {
-        var mythis = this
-        var response = $.map( items.results, function( item ) {
-            return mythis._normalize_item(item)
-         })
-         return response
-    },
 });
 
 
@@ -212,7 +163,6 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
         if (options.type != null) {
             options.source =  "/api/" + options.type
-            delete options.type
         }
 
         this.element.on(
@@ -270,8 +220,9 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         if (item != null) {
             repr.text(item.repr)
         } else {
+            var options = this.options
             ajax({
-                url: window.__root_prefix + "api/albums/" + item_pk + "/",
+                url: window.__root_prefix + "api/" + options.type + "/" + item_pk + "/",
                 success: function(data) {
                     var item = mythis._normalize_item(data)
                     repr.text(item.repr)
@@ -297,6 +248,59 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
     widget: function() {
         return this.uidiv
+    },
+
+    _search: function( value ) {
+        this.pending++;
+        this.element.addClass( "ui-autocomplete-loading" );
+        this.cancelSearch = false;
+        this.source( { q: value }, this._response() );
+    },
+
+    _normalize_item: function( item ) {
+        var div = $("<div/>")
+
+        if (this.options.type == "albums") {
+            if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
+                var photo = item.cover_photo.thumbs['thumb']
+                $("<img/>")
+                    .attr("src", photo.url)
+                    .attr("alt", "")
+                    .appendTo(div)
+            }
+
+            $("<div/>")
+                .addClass("title")
+                .text(item.title)
+                .appendTo(div)
+
+            if (item.description) {
+                $("<div/>")
+                    .addClass("desc")
+                    .p(item.description)
+                    .appendTo(div)
+            }
+
+            $("<div/>")
+                .addClass("clear")
+                .appendTo(div)
+
+            return {
+                label: div,
+                repr: item.title,
+                pk: item.album_id,
+            }
+        }
+
+        throw new Error("Unknown object type "+this.options.type);
+    },
+
+    _normalize: function( items ) {
+        var mythis = this
+        var response = $.map( items.results, function( item ) {
+            return mythis._normalize_item(item)
+         })
+         return response
     },
 })
 

@@ -411,141 +411,141 @@ ajax_select_field.prototype.get = function() {
 
 
 // define quick_select_field
-function quick_select_field(title, type, required) {
-    input_field.call(this, title, required)
-    this.type = type
-}
-
-quick_select_field.prototype = new input_field()
-quick_select_field.constructor = quick_select_field
-quick_select_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .quickautocomplete({type: this.type})
-}
-
-quick_select_field.prototype.destroy = function() {
-    this.input.quickautocomplete("destroy")
-}
-
-quick_select_field.prototype.set = function(value) {
-    var item = null
-    if (value != null) {
-        item = {
-            pk: value.id,
-            repr: value.title,
-        }
-    }
-    this.input.quickautocomplete("set", item)
-}
-
-quick_select_field.prototype.get = function() {
-    return this.input.quickautocomplete("get")
-}
-
-
-// define ajax_select_multiple_field
-function ajax_select_multiple_field(title, type, required) {
-    input_field.call(this, title, required)
-    this.type = type
-}
-
-ajax_select_multiple_field.prototype = new input_field()
-ajax_select_multiple_field.constructor = ajax_select_multiple_field
-ajax_select_multiple_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .ajaxautocompletemultiple({type: this.type})
-}
-
-ajax_select_multiple_field.prototype.destroy = function() {
-    this.input.ajaxautocompletemultiple("destroy")
-}
-
-ajax_select_multiple_field.prototype.set = function(value) {
-    var value_arr = []
-    if (value != null) {
-        var value_arr = $.map(value,
-            function(v){ return { pk: v.id, repr: v.title, } }
-        );
-    }
-    this.input.ajaxautocompletemultiple("set", value_arr)
-}
-
-ajax_select_multiple_field.prototype.get = function() {
-    return this.input.ajaxautocompletemultiple("get")
-}
-
-
-// define ajax_select_sorted_field
-function ajax_select_sorted_field(title, type, required) {
-    input_field.call(this, title, required)
-    this.type = type
-}
-
-ajax_select_sorted_field.prototype = new input_field()
-ajax_select_sorted_field.constructor = ajax_select_sorted_field
-ajax_select_sorted_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .ajaxautocompletesorted({type: this.type})
-}
-
-ajax_select_sorted_field.prototype.destroy = function() {
-    this.input.ajaxautocompletesorted("destroy")
-}
-
-ajax_select_sorted_field.prototype.set = function(value) {
-    var value_arr = []
-    if (value != null) {
-        var value_arr = $.map(value,
-            function(value){ return { pk: value.id, repr: value.title, } }
-        );
-    }
-    this.input.ajaxautocompletesorted("set", value_arr)
-}
-
-ajax_select_sorted_field.prototype.get = function() {
-    return this.input.ajaxautocompletesorted("get")
-}
-
-
-// define photo_select_field
-function photo_select_field(title, required) {
-    input_field.call(this, title, required)
-}
-
-photo_select_field.prototype = new input_field()
-photo_select_field.constructor = photo_select_field
-photo_select_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .photo_select()
-}
-
-photo_select_field.prototype.destroy = function() {
-    this.input.photo_select("destroy")
-}
-
-photo_select_field.prototype.set = function(value) {
-    this.input.photo_select("set", value)
-}
-
-photo_select_field.prototype.get = function() {
-    return this.input.photo_select("get")
-}
-
-photo_select_field.prototype.validate = function() {
-    var value = this.input.photo_select("get")
-    if (this.required && !value) {
-        return "This value is required"
-    }
-    return null
-}
+// function quick_select_field(title, type, required) {
+//     input_field.call(this, title, required)
+//     this.type = type
+// }
+//
+// quick_select_field.prototype = new input_field()
+// quick_select_field.constructor = quick_select_field
+// quick_select_field.prototype.create = function(id) {
+//     return this.input = $("<span/>")
+//         .attr("name", id)
+//         .attr("id", "id_" + id)
+//         .quickautocomplete({type: this.type})
+// }
+//
+// quick_select_field.prototype.destroy = function() {
+//     this.input.quickautocomplete("destroy")
+// }
+//
+// quick_select_field.prototype.set = function(value) {
+//     var item = null
+//     if (value != null) {
+//         item = {
+//             pk: value.id,
+//             repr: value.title,
+//         }
+//     }
+//     this.input.quickautocomplete("set", item)
+// }
+//
+// quick_select_field.prototype.get = function() {
+//     return this.input.quickautocomplete("get")
+// }
+//
+//
+// // define ajax_select_multiple_field
+// function ajax_select_multiple_field(title, type, required) {
+//     input_field.call(this, title, required)
+//     this.type = type
+// }
+//
+// ajax_select_multiple_field.prototype = new input_field()
+// ajax_select_multiple_field.constructor = ajax_select_multiple_field
+// ajax_select_multiple_field.prototype.create = function(id) {
+//     return this.input = $("<span/>")
+//         .attr("name", id)
+//         .attr("id", "id_" + id)
+//         .ajaxautocompletemultiple({type: this.type})
+// }
+//
+// ajax_select_multiple_field.prototype.destroy = function() {
+//     this.input.ajaxautocompletemultiple("destroy")
+// }
+//
+// ajax_select_multiple_field.prototype.set = function(value) {
+//     var value_arr = []
+//     if (value != null) {
+//         var value_arr = $.map(value,
+//             function(v){ return { pk: v.id, repr: v.title, } }
+//         );
+//     }
+//     this.input.ajaxautocompletemultiple("set", value_arr)
+// }
+//
+// ajax_select_multiple_field.prototype.get = function() {
+//     return this.input.ajaxautocompletemultiple("get")
+// }
+//
+//
+// // define ajax_select_sorted_field
+// function ajax_select_sorted_field(title, type, required) {
+//     input_field.call(this, title, required)
+//     this.type = type
+// }
+//
+// ajax_select_sorted_field.prototype = new input_field()
+// ajax_select_sorted_field.constructor = ajax_select_sorted_field
+// ajax_select_sorted_field.prototype.create = function(id) {
+//     return this.input = $("<span/>")
+//         .attr("name", id)
+//         .attr("id", "id_" + id)
+//         .ajaxautocompletesorted({type: this.type})
+// }
+//
+// ajax_select_sorted_field.prototype.destroy = function() {
+//     this.input.ajaxautocompletesorted("destroy")
+// }
+//
+// ajax_select_sorted_field.prototype.set = function(value) {
+//     var value_arr = []
+//     if (value != null) {
+//         var value_arr = $.map(value,
+//             function(value){ return { pk: value.id, repr: value.title, } }
+//         );
+//     }
+//     this.input.ajaxautocompletesorted("set", value_arr)
+// }
+//
+// ajax_select_sorted_field.prototype.get = function() {
+//     return this.input.ajaxautocompletesorted("get")
+// }
+//
+//
+// // define photo_select_field
+// function photo_select_field(title, required) {
+//     input_field.call(this, title, required)
+// }
+//
+// photo_select_field.prototype = new input_field()
+// photo_select_field.constructor = photo_select_field
+// photo_select_field.prototype.create = function(id) {
+//     return this.input = $("<span/>")
+//         .attr("name", id)
+//         .attr("id", "id_" + id)
+//         .photo_select()
+// }
+//
+// photo_select_field.prototype.destroy = function() {
+//     this.input.photo_select("destroy")
+// }
+//
+// photo_select_field.prototype.set = function(value) {
+//     this.input.photo_select("set", value)
+// }
+//
+// photo_select_field.prototype.get = function() {
+//     return this.input.photo_select("get")
+// }
+//
+// photo_select_field.prototype.validate = function() {
+//     var value = this.input.photo_select("get")
+//     if (this.required && !value) {
+//         return "This value is required"
+//     }
+//     return null
+// }
 
 
 // define dialog

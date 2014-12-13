@@ -28,114 +28,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // var albums = new album()
 
-function action() {
-    this.listeners = {}
-    this.objects = {}
+
+function album_loader(obj_id) {
+    object_loader.call(this, "albums", obj_id)
 }
 
-action.prototype.add_listener = function(obj, listener) {
-    var key = obj.get_uuid()
-    if (this.listeners[key]) {
-        this.remove_listener(key)
-    }
-    this.listeners[key] = listener
-    this.objects[key] = obj
+album_loader.prototype = new object_loader()
+album_loader.constructor = album_loader
+
+
+
+function album_list_loader(criteria) {
+    object_list_loader.call(this, "albums", criteria)
 }
 
-action.prototype.remove_listener = function(obj) {
-    var key = obj.get_uuid()
-    delete this.listeners[key]
+object_list_loader.prototype._get_object_id = function(obj) {
+    return obj.album_id
 }
 
-action.prototype.trigger = function() {
-    var mythis = this
-    var fight = arguments
-    $.each(this.listeners, function(uuid, listener) {
-        var obj = mythis.objects[uuid]
-        listener.apply(obj, fight)
-    })
-}
-
-
-function album_loader(criteria) {
-    this._criteria = criteria
-    this._page = 1
-    this._loading = false
-    this._last_id = null
-    this._idmap = {}
-    this._finished = false
-    this.loaded_list = new action()
-    this.loaded_item = new action()
-}
-
-
-album_loader.prototype.load_next_page = function() {
-    if (this._loading) {
-        return
-    }
-    if (this._finished) {
-        return
-    }
-
-    var mythis = this
-    var criteria = this._criteria
-    var page = this._page
-    var params = jQuery.extend({}, criteria, { 'page': page })
-
-    console.log("loading", page)
-    this._loading = true
-
-    ajax({
-        url: window.__root_prefix + "api/albums/",
-        data: params,
-        success: function(data) {
-            console.log("got", page)
-            mythis._loading = false
-            mythis._page = page + 1
-            if (!data.next) {
-                mythis._finished = true
-                console.log("finished", page)
-            }
-
-            mythis._got_list(data.results)
-        },
-        error: function(status, message) {
-            mythis._loading = false
-            alert("Error " + status + " " + message)
-        },
-    });
-}
-
-album_loader.prototype._got_list = function(album_list) {
-    var mythis = this
-    $.each(album_list, function(j, album) {
-        mythis._got_item(album)
-    })
-    this.loaded_list.trigger(album_list)
-    return this
-}
-
-album_loader.prototype._got_item = function(album) {
-    this._idmap[album.album_id] = Object()
-    if (this._last_id) {
-        this._idmap[this._last_id].next = album.album_id
-        this._idmap[album.album_id].prev = this._last_id
-    }
-    this._last_id = album.album_id
-    this.loaded_item.trigger(album)
-    return this
-}
-
-album_loader.prototype.get_meta = function(obj_id) {
-    var meta = this._idmap[obj_id]
-    if (!meta) {
-        return null
-    }
-    if (!meta.next) {
-        this.load_next_page()
-    }
-    return meta
-}
+album_list_loader.prototype = new object_list_loader()
+album_list_loader.constructor = album_list_loader
 
 $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
 
@@ -252,7 +164,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
     _filter: function(criteria) {
         var mythis = this
         this.empty()
-        this.loader = new album_loader(criteria)
+        this.loader = new album_list_loader(criteria)
         this.loader.loaded_list.add_listener(this, function(album_list) {
             mythis._add_list(album_list)
         })
@@ -420,6 +332,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
             ["sort_order", new text_output_field("Sort Order")],
             ["revised", new datetime_output_field("Revised")],
         ]
+        this.loader = null
 
         this.img = $("<div></div>")
             .image({size: "mid", include_link: true})
@@ -451,24 +364,18 @@ $.widget('spud.album_detail',  $.spud.infobox, {
     },
 
     load: function(obj_id) {
-        if (this.loading) {
+        var mythis = this
+
+        if (this.loader != null) {
             return
         }
 
-        var mythis = this
-        var params = {}
-        this.loading = true
-        ajax({
-            url: window.__root_prefix + "api/albums/" + obj_id + "/",
-            data: params,
-            success: function(data) {
-                mythis.set(data)
-                mythis.loading = false
-            },
-            error: function(status, message) {
-                alert(message)
-            },
-        });
+        this.loader = new album_loader(obj_id)
+        this.loader.loaded_item.add_listener(this, function(album) {
+            mythis.set(album)
+            mythis.loader = null
+        })
+        this.loader.load()
     },
 
     _setOption: function( key, value ) {
@@ -497,12 +404,31 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.options.title = "Album Detail"
         this._super()
 
+        var menu = $("<ul/>")
+            .addClass("menubar")
+            .append(
+                $("<li/>")
+                    .text("Children")
+                    .on("click", function(ev) {
+                        var screen_class = $.spud.album_list_screen
+                        params = {
+                            criteria: {
+                                instance: mythis.options.obj_id,
+                                mode: "children",
+                            }
+                        }
+                        add_screen(screen_class, params)
+                    })
+            )
+            .menu()
+            .appendTo(this.div)
+
         this.prev_button = $("<input/>")
             .attr('type', 'submit')
             .attr('value', '<<')
             .click(function() {
-                var album_loader = mythis.options.album_loader
-                var meta = album_loader.get_meta(mythis.options.obj_id)
+                var album_list_loader = mythis.options.album_list_loader
+                var meta = album_list_loader.get_meta(mythis.options.obj_id)
                 var obj_id = meta.prev
                 if (obj_id) {
                     mythis.load(obj_id)
@@ -515,8 +441,8 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             .attr('type', 'submit')
             .attr('value', '>>')
             .click(function() {
-                var album_loader = mythis.options.album_loader
-                var meta = album_loader.get_meta(mythis.options.obj_id)
+                var album_list_loader = mythis.options.album_list_loader
+                var meta = album_list_loader.get_meta(mythis.options.obj_id)
                 var obj_id = meta.next
                 if (obj_id) {
                     mythis.load(obj_id)
@@ -549,20 +475,20 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
 
     _setup_loader: function() {
         var mythis = this
-        if (this.options.album_loader != null) {
-            var album_loader = this.options.album_loader
-            album_loader.loaded_list.add_listener(this, function(album_list) {
+        if (this.options.album_list_loader != null) {
+            var album_list_loader = this.options.album_list_loader
+            album_list_loader.loaded_list.add_listener(this, function(album_list) {
                 mythis._setup_buttons()
             })
         }
     },
 
     _setup_buttons: function() {
-        if (this.options.album_loader) {
-            var album_loader = this.options.album_loader
+        if (this.options.album_list_loader) {
+            var album_list_loader = this.options.album_list_loader
             var meta = null
             if (this.options.obj_id) {
-                meta = album_loader.get_meta(this.options.obj_id)
+                meta = album_list_loader.get_meta(this.options.obj_id)
             }
 
             this.prev_button.show()
@@ -585,10 +511,10 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
     },
 
     set_album: function(album) {
-        var old_loader = this.options.album_loader
+        var old_loader = this.options.album_list_loader
         if (old_loader != null) {
             old_loader.loaded_list.remove_listener(this)
-            this.options.album_loader = null
+            this.options.album_list_loader = null
         }
 
         this.ad.album_detail('set', album)
@@ -599,12 +525,12 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.options.obj_id = album.album_id
     },
 
-    set_loader: function(album_loader) {
-        var old_loader = this.options.album_loader
+    set_loader: function(album_list_loader) {
+        var old_loader = this.options.album_list_loader
         if (old_loader != null) {
             old_loader.loaded_list.remove_listener(this)
         }
-        this.options.album_loader = album_loader
+        this.options.album_list_loader = album_list_loader
 
         this._setup_loader()
         this._setup_buttons()
@@ -613,7 +539,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
     _setOption: function( key, value ) {
         if ( key === "album" ) {
             this.set_album(value)
-        } else if ( key === "album_loader" ) {
+        } else if ( key === "album_list_loader" ) {
             this.set_loader(value)
         } else {
             this._super( key, value );
@@ -625,7 +551,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
     },
 
     close: function() {
-        if (this.options.album_loader) {
+        if (this.options.album_list_loader) {
             var controller = this.options.controller
             controller.event_update = null
             controller.event_close = null
@@ -633,8 +559,8 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.ad.album_detail('option', 'event_update', null)
         this.ad.album_detail('close')
 
-        var album_loader = this.options.album_loader
-        album_loader.loaded_list.remove_listener(this)
+        var album_list_loader = this.options.album_list_loader
+        album_list_loader.loaded_list.remove_listener(this)
 
         this._super()
     },
