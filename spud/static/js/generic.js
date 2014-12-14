@@ -88,6 +88,133 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // -------------------------------
 
+///////////////////////////////////////
+// signals
+///////////////////////////////////////
+function signal() {
+    this.listeners = {}
+    this.objects = {}
+}
+
+signal.prototype.add_listener = function(obj, listener) {
+    var key = "null"
+    if (obj != null) {
+        key = obj.get_uuid()
+    }
+    if (this.listeners[key]) {
+        this.remove_listener(key)
+    }
+    this.listeners[key] = listener
+    this.objects[key] = obj
+}
+
+signal.prototype.remove_listener = function(obj) {
+    var key = "null"
+    if (obj != null) {
+        key = obj.get_uuid()
+    }
+    delete this.listeners[key]
+    delete this.objects[key]
+}
+
+signal.prototype.trigger = function() {
+    var mythis = this
+    var fight = arguments
+    $.each(this.listeners, function(uuid, listener) {
+        var obj = null
+        if (uuid != "null") {
+            obj = mythis.objects[uuid]
+        }
+        listener.apply(obj, fight)
+    })
+}
+
+window._reload_all = new signal()
+window._perms_changed = new signal()
+window._session_changed = new signal()
+
+
+///////////////////////////////////////
+// save_dialog
+///////////////////////////////////////
+$.widget('spud.save_dialog',  $.spud.form_dialog, {
+    _save: function(http_type, oject_id, values) {
+        var mythis = this
+        var type = this._type
+        this._loading = true
+        this.uiDialogButtonPane.find(".ui-button").button("disable")
+        var url
+        if (oject_id != null) {
+            url = window.__root_prefix + "api/" + type + "/" + oject_id + "/"
+        } else {
+            url = window.__root_prefix + "api/" + type + "/"
+        }
+        this.xhr = ajax({
+            url: url,
+            data: values,
+            type: http_type,
+            success: function(data) {
+                mythis._loading = false
+                mythis._done(data)
+                mythis.close()
+            },
+            error: function(message) {
+                mythis._loading = false
+                alert("Error: " + message)
+                mythis.uiDialogButtonPane.find(".ui-button").button("enable")
+            },
+        });
+    },
+
+    _done: function(data) {
+    },
+
+})
+
+///////////////////////////////////////
+// sessions
+///////////////////////////////////////
+$.widget('spud.login_dialog',  $.spud.save_dialog, {
+    _create: function() {
+        this.options.fields = [
+            ["username", new text_input_field("Username", true)],
+            ["password", new password_input_field("Password", true)],
+        ],
+
+        this.options.title = "Login"
+        this.options.description = "Please login by typing in your username and password below."
+        this.options.button = "Login"
+        this._type = "session"
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        this._save("POST", "login", values)
+    },
+
+    _done: function(session) {
+        window._session_changed.trigger(session)
+    },
+})
+
+$.widget('spud.logout_dialog',  $.spud.save_dialog, {
+    _create: function() {
+        this.options.title = "Logout"
+        this.options.description = "Are you sure you want to logout?"
+        this.options.button = "Logout"
+        this._type = "session"
+        this._super();
+    },
+
+    _submit_values: function(values) {
+        this._save("POST", "logout", values)
+    },
+
+    _done: function(session) {
+        window._session_changed.trigger(session)
+    },
+})
+
 function setup_user_tools(session) {
     var ut = $("#user-tools")
 
@@ -96,13 +223,33 @@ function setup_user_tools(session) {
 
     if (session.user) {
         var user = session.user
-         $("<strong></strong")
-             .text(user.first_name + " " + user.last_name)
-             .appendTo(ut)
+        $("<strong></strong")
+            .text(user.first_name + " " + user.last_name)
+            .appendTo(ut)
+
+        ut.append(" / ")
+
+        $("<a/>")
+            .text("logout")
+            .on("click", function(ev) {
+                var div = $("<div/>")
+                $.spud.logout_dialog({}, div)
+            })
+            .appendTo(ut)
     } else {
-         $("<strong></strong")
-             .text("guest")
-             .appendTo(ut)
+        $("<strong></strong")
+            .text("guest")
+            .appendTo(ut)
+
+        ut.append(" / ")
+
+        $("<a/>")
+            .text("login")
+            .on("click", function(ev) {
+                var div = $("<div/>")
+                $.spud.login_dialog({}, div)
+            })
+            .appendTo(ut)
     }
 }
 
@@ -143,14 +290,21 @@ function setup_menu(session) {
         })
         .appendTo(menu)
     menu.menu()
-    $("#menu").append(menu)
+
+    $("#menu")
+        .empty()
+        .append(menu)
 }
 
-function setup_page(session) {
+window._session_changed.add_listener(null, function(session) {
     window._perms = session.perms
-    // window._perms_changed.trigger(session.perms)
+    window._perms_changed.trigger(session.perms)
     setup_user_tools(session)
     setup_menu(session)
+})
+
+function setup_page(session) {
+    window._session_changed.trigger(session)
 }
 
 function add_screen(screen_class, params) {
@@ -191,40 +345,6 @@ function do_detail(obj_type, obj_id, session, params) {
         add_screen(screen_class, params)
     }
 }
-
-///////////////////////////////////////
-// signals
-///////////////////////////////////////
-function signal() {
-    this.listeners = {}
-    this.objects = {}
-}
-
-signal.prototype.add_listener = function(obj, listener) {
-    var key = obj.get_uuid()
-    if (this.listeners[key]) {
-        this.remove_listener(key)
-    }
-    this.listeners[key] = listener
-    this.objects[key] = obj
-}
-
-signal.prototype.remove_listener = function(obj) {
-    var key = obj.get_uuid()
-    delete this.listeners[key]
-}
-
-signal.prototype.trigger = function() {
-    var mythis = this
-    var fight = arguments
-    $.each(this.listeners, function(uuid, listener) {
-        var obj = mythis.objects[uuid]
-        listener.apply(obj, fight)
-    })
-}
-
-window._reload_all = new signal()
-window._perms_changed = new signal()
 
 ///////////////////////////////////////
 // object_loader
@@ -375,41 +495,4 @@ object_list_loader.prototype.get_meta = function(obj_id) {
     }
     return meta
 }
-
-///////////////////////////////////////
-// save_dialog
-///////////////////////////////////////
-$.widget('spud.save_dialog',  $.spud.form_dialog, {
-    _save: function(http_type, oject_id, values) {
-        var mythis = this
-        var type = this._type
-        this._loading = true
-        this.uiDialogButtonPane.find(".ui-button").button("disable")
-        var url
-        if (oject_id != null) {
-            url = window.__root_prefix + "api/" + type + "/" + oject_id + "/"
-        } else {
-            url = window.__root_prefix + "api/" + type + "/"
-        }
-        this.xhr = ajax({
-            url: url,
-            data: values,
-            type: http_type,
-            success: function(data) {
-                mythis._loading = false
-                mythis._done(data)
-                mythis.close()
-            },
-            error: function(message) {
-                mythis._loading = false
-                alert("Error: " + message)
-                mythis.uiDialogButtonPane.find(".ui-button").button("enable")
-            },
-        });
-    },
-
-    _done: function(data) {
-    },
-
-})
 

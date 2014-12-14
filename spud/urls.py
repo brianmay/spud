@@ -42,6 +42,8 @@ router.register(r'photos', views.PhotoViewSet)
 urlpatterns = patterns(
     '',
     url(r'^api/session/$', views.session_detail),
+    url(r'^api/session/login/$', views.login),
+    url(r'^api/session/logout/$', views.logout),
     url(r'^api/', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls',
         namespace='rest_framework')),

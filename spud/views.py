@@ -23,6 +23,7 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
+import django.contrib.auth
 from django.shortcuts import render_to_response
 #from django.shortcuts import get_object_or_404
 from django.template import RequestContext
@@ -80,6 +81,37 @@ def _get_session(request):
 
 @api_view(['GET'])
 def session_detail(request):
+    data = _get_session(request)
+    return Response(data)
+
+
+@api_view(['POST'])
+def login(request):
+    username = request.POST.get("username", None)
+    password = request.POST.get("password", None)
+
+    if username is None:
+        raise drf_exceptions.PermissionDenied("username not supplied")
+    if password is None:
+        raise drf_exceptions.PermissionDenied("password not supplied")
+
+    user = django.contrib.auth.authenticate(
+        username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            django.contrib.auth.login(request, user)
+        else:
+            raise drf_exceptions.PermissionDenied("Account is disabled")
+    else:
+        raise drf_exceptions.PermissionDenied("Invalid login")
+
+    data = _get_session(request)
+    return Response(data)
+
+
+@api_view(['POST'])
+def logout(request):
+    django.contrib.auth.logout(request)
     data = _get_session(request)
     return Response(data)
 
