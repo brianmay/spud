@@ -64,7 +64,7 @@ def _get_session(request):
 
     data = {
         'perms': {
-            'can_add': user.is_authenticated(),
+            'can_create': user.is_authenticated(),
             'can_change': user.is_authenticated(),
             'can_delete': user.is_authenticated(),
         },

@@ -146,7 +146,7 @@ $.widget('spud.album_change_dialog',  $.spud.save_dialog, {
         if (this.album_id != null) {
             window._album_changed.trigger(data)
         } else {
-            window._album_saved.trigger(data)
+            window._album_created.trigger(data)
         }
     },
 })
@@ -502,54 +502,47 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
                     })
             )
 
-        var perms = window.__perms
-        if (perms.can_add) {
-            $("<li/>")
-                .text("Create")
-                .on("click", function(ev) {
-                    if (mythis.options.obj != null) {
-                        var album = {
-                            parent: mythis.options.obj.album_id,
-                        }
-                        var params = {
-                            obj: album,
-                        }
-                        var div = $("<div/>")
-                        $.spud.album_change_dialog(params, div)
+        this.create_item = $("<li/>")
+            .text("Create")
+            .on("click", function(ev) {
+                if (mythis.options.obj != null) {
+                    var album = {
+                        parent: mythis.options.obj.album_id,
                     }
-                })
-                .appendTo(menu)
-        }
+                    var params = {
+                        obj: album,
+                    }
+                    var div = $("<div/>")
+                    $.spud.album_change_dialog(params, div)
+                }
+            })
+            .appendTo(menu)
 
-        if (perms.can_change) {
-            $("<li/>")
-                .text("Change")
-                .on("click", function(ev) {
-                    if (mythis.options.obj != null) {
-                        var params = {
-                            obj: mythis.options.obj,
-                        }
-                        var div = $("<div/>")
-                        $.spud.album_change_dialog(params, div)
+        this.change_item = $("<li/>")
+            .text("Change")
+            .on("click", function(ev) {
+                if (mythis.options.obj != null) {
+                    var params = {
+                        obj: mythis.options.obj,
                     }
-                })
-                .appendTo(menu)
-        }
+                    var div = $("<div/>")
+                    $.spud.album_change_dialog(params, div)
+                }
+            })
+            .appendTo(menu)
 
-        if (perms.can_add) {
-            $("<li/>")
-                .text("Delete")
-                .on("click", function(ev) {
-                    if (mythis.options.obj != null) {
-                        var params = {
-                            obj: mythis.options.obj,
-                        }
-                        var div = $("<div/>")
-                        $.spud.album_delete_dialog(params, div)
+        this.delete_item = $("<li/>")
+            .text("Delete")
+            .on("click", function(ev) {
+                if (mythis.options.obj != null) {
+                    var params = {
+                        obj: mythis.options.obj,
                     }
-                })
-                .appendTo(menu)
-        }
+                    var div = $("<div/>")
+                    $.spud.album_delete_dialog(params, div)
+                }
+            })
+            .appendTo(menu)
 
         menu
             .menu()
@@ -605,6 +598,9 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.ad = $("<div/>").appendTo(this.div)
         $.spud.album_detail(params, this.ad)
 
+        this._setup_perms(window._perms)
+        window._perms_changed.add_listener(this, this._setup_perms)
+
         window._album_changed.add_listener(this, function(album) {
             if (album.album_id == this.options.obj_id) {
                 mythis.set_album(album)
@@ -624,6 +620,24 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             album_list_loader.loaded_list.add_listener(this, function(album_list) {
                 mythis._setup_buttons()
             })
+        }
+    },
+
+    _setup_perms: function(perms) {
+        if (perms.can_create) {
+            this.create_item.show()
+        } else {
+            this.create_item.hide()
+        }
+        if (perms.can_change) {
+            this.change_item.show()
+        } else {
+            this.change_item.hide()
+        }
+        if (perms.can_delete) {
+            this.delete_item.show()
+        } else {
+            this.delete_item.hide()
         }
     },
 

@@ -140,7 +140,8 @@ function setup_menu(session) {
 }
 
 function setup_page(session) {
-    window.__perms = session.perms
+    window._perms = session.perms
+    // window._perms_changed.trigger(session.perms)
     setup_user_tools(session)
     setup_menu(session)
 }
@@ -215,6 +216,7 @@ signal.prototype.trigger = function() {
     })
 }
 
+window._perms_changed = new signal()
 
 ///////////////////////////////////////
 // object_loader
