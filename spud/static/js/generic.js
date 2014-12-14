@@ -328,7 +328,9 @@ function do_list(obj_type, session, params) {
         params = {
             criteria: params,
         }
+        window._dont_push = true
         add_screen(screen_class, params)
+        window._dont_push = false
     }
 }
 
@@ -342,7 +344,60 @@ function do_detail(obj_type, obj_id, session, params) {
         params = {
             obj_id: obj_id,
         }
+        window._dont_push = true
         add_screen(screen_class, params)
+        window._dont_push = false
+    }
+}
+
+///////////////////////////////////////
+// state
+///////////////////////////////////////
+function get_state() {
+    var results = []
+    $.each($(".screen"), function(i, obj) {
+        var screen = $(obj).data('screen')
+        results[i] = {
+            options: screen.get_streamable_options(),
+            namespace: screen.namespace,
+            widgetName: screen.widgetName,
+        }
+    })
+    return results
+}
+
+function put_state(state) {
+    window._dont_push = true
+
+    $("#content").empty()
+    $.each(state, function(i, screen_state) {
+        var constructor = $[screen_state.namespace][screen_state.widgetName]
+        add_screen(constructor, screen_state.options)
+    })
+
+    window._dont_push = false
+}
+
+function push_state() {
+    if (window._dont_push) {
+        return
+    }
+
+    var state = get_state()
+    var active_screen = $(".screen:not(.disabled)").data("screen")
+    var title = active_screen.options.title
+    var url = active_screen.get_url()
+    console.log("push state", JSON.stringify(state), title, url)
+    history.pushState(state, title, url)
+}
+
+window.onpopstate = function(ev) {
+    if (ev.state != null) {
+        put_state(ev.state)
+        console.log("pop state1", JSON.stringify(ev.state))
+    } else {
+        put_state([])
+        console.log("pop state2", JSON.stringify([]))
     }
 }
 

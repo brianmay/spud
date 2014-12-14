@@ -373,6 +373,7 @@ $.widget('spud.album_list_screen', $.spud.screen, {
         }
         this.options.criteria = value
         this._update_criteria(value)
+        push_state()
         this.al.album_list("option", "criteria", value)
     },
 
@@ -403,6 +404,14 @@ $.widget('spud.album_list_screen', $.spud.screen, {
             this.al.album_list('disable')
         }
     },
+
+    get_url: function() {
+        var params = ""
+        if (!$.isEmptyObject(this.options.criteria)) {
+            params = "?" + $.param(this.options.criteria)
+        }
+        return root_url() + "albums/" + params
+    }
 })
 
 
@@ -423,7 +432,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         this._super();
 
         if (this.options.obj != null) {
-            // no action
+            this.options.obj_id = this.options.obj.album_id
         } else if (this.options.obj_id != null) {
             this.load(this.options.obj_id)
         }
@@ -474,6 +483,13 @@ $.widget('spud.album_detail',  $.spud.infobox, {
             this._super( key, value );
         }
     },
+
+    _destroy: function() {
+        if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
+            this.loader.abort()
+        }
+    },
 })
 
 
@@ -482,6 +498,13 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         var mythis = this
 
         this.options.title = "Album Detail"
+
+        if (this.options.obj != null) {
+            var album = this.options.obj
+            this.options.obj_id = album.album_id
+            this.options.title = "Album "+album.title
+        }
+
         this._super()
 
         var menu = $("<ul/>")
@@ -557,6 +580,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
                 if (obj_id) {
                     mythis.load(obj_id)
                 }
+                push_state()
             })
             .button()
             .appendTo(this.div)
@@ -571,14 +595,12 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
                 if (obj_id) {
                     mythis.load(obj_id)
                 }
+                push_state()
             })
             .button()
             .appendTo(this.div)
 
         if (this.options.obj != null) {
-            var album = this.options.obj
-            this.options.obj_id = album.album_id
-            mythis._set_title("Album "+album.title)
         }
         this._setup_loader()
         this._setup_buttons()
@@ -709,6 +731,8 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
     },
 
     load: function(obj_id) {
+        this.options.obj = null
+        this.options.obj_id = obj_id
         this.ad.album_detail('load', obj_id)
     },
 
@@ -723,5 +747,16 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         window._album_deleted.remove_listener(this)
 
         this._super()
+    },
+
+    get_url: function() {
+        return root_url() + "albums/" + this.options.obj_id + "/"
+    },
+
+    get_streamable_options: function() {
+        var options = this._super()
+        options = $.extend({}, options) // clone options so we can modify
+        delete options['album_list_loader']
+        return options
     },
 })

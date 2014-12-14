@@ -902,14 +902,14 @@ $.widget('spud.screen',  {
             .appendTo(this.element)
         this._set_title(this.options.title)
 
+        this.element.data('screen', this)
+        this.element.addClass("screen")
+
         if (this.options.disabled) {
             this.disable()
         } else {
             this.enable()
         }
-
-        this.element.data('screen', this)
-        this.element.addClass("screen")
 
         this.div = $("<div/>")
             .addClass("screen_content")
@@ -941,6 +941,7 @@ $.widget('spud.screen',  {
         this.disable_all()
         this.element.removeClass("disabled")
         $("head title").text(this.title)
+        push_state()
         return this
     },
 
@@ -980,6 +981,14 @@ $.widget('spud.screen',  {
         } else {
             this._super( key, value );
         }
+    },
+
+    get_url: function() {
+        throw Error("get_url not implemented")
+    },
+
+    get_streamable_options: function() {
+        return this.options
     },
 
     get_uuid: function() {

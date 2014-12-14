@@ -126,6 +126,9 @@ function ajax(settings) {
         )
         .fail(
             function(jqXHR, textStatus, errorThrown) {
+                if (textStatus=="abort") {
+                    return
+                }
                 if (jqXHR.responseJSON) {
                     error(jqXHR.responseJSON.detail)
                 } else {
