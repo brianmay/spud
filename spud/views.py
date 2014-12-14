@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 
 import datetime
 import json
-from rest_framework import viewsets, exceptions as drf_exceptions
+from rest_framework import viewsets, status, exceptions as drf_exceptions
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -153,6 +153,14 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        errors = instance.check_delete()
+        if len(errors) > 0:
+            raise drf_exceptions.PermissionDenied(", ".join(errors))
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -212,6 +220,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(parent=None)
 
         return queryset
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        errors = instance.check_delete()
+        if len(errors) > 0:
+            raise drf_exceptions.PermissionDenied(", ".join(errors))
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PlaceViewSet(viewsets.ModelViewSet):
@@ -273,6 +289,14 @@ class PlaceViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        errors = instance.check_delete()
+        if len(errors) > 0:
+            raise drf_exceptions.PermissionDenied(", ".join(errors))
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class PersonViewSet(viewsets.ModelViewSet):
     """
@@ -295,6 +319,14 @@ class PersonViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        errors = instance.check_delete()
+        if len(errors) > 0:
+            raise drf_exceptions.PermissionDenied(", ".join(errors))
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class FeedbackViewSet(viewsets.ModelViewSet):
     """
@@ -310,6 +342,14 @@ class PhotoViewSet(viewsets.ModelViewSet):
     """
     queryset = models.photo.objects.all()
     serializer_class = serializers.PhotoSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        errors = instance.check_delete()
+        if len(errors) > 0:
+            raise drf_exceptions.PermissionDenied(", ".join(errors))
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 #class PhotoThumbViewSet(viewsets.ModelViewSet):

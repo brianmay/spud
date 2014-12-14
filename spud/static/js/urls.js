@@ -126,7 +126,11 @@ function ajax(settings) {
         )
         .fail(
             function(jqXHR, textStatus, errorThrown) {
-                error(jqXHR.status, errorThrown)
+                if (jqXHR.responseJSON) {
+                    error(jqXHR.responseJSON.detail)
+                } else {
+                    error(jqXHR.status + " " + errorThrown)
+                }
             }
         )
 

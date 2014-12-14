@@ -256,9 +256,9 @@ object_loader.prototype.load = function() {
 
             mythis._got_item(data)
         },
-        error: function(status, message) {
+        error: function(message) {
             mythis._loading = false
-            alert("Error " + status + " " + message)
+            alert("Error: " + message)
         },
     });
 }
@@ -319,9 +319,9 @@ object_list_loader.prototype.load_next_page = function() {
 
             mythis._got_list(data.results)
         },
-        error: function(status, message) {
+        error: function(message) {
             mythis._loading = false
-            alert("Error " + status + " " + message)
+            alert("Error: " + message)
         },
     });
 }
@@ -392,9 +392,9 @@ $.widget('spud.save_dialog',  $.spud.form_dialog, {
                 mythis._done(data)
                 mythis.close()
             },
-            error: function(status, message) {
+            error: function(message) {
                 mythis._loading = false
-                alert("Error " + status + " " + message)
+                alert("Error: " + message)
                 mythis.uiDialogButtonPane.find(".ui-button").button("enable")
             },
         });

@@ -212,11 +212,13 @@ class hierarchy_model(base_model):
 class album(hierarchy_model):
     album_id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
-        'self', related_name='children', null=True, blank=True)
+        'self', related_name='children', null=True, blank=True,
+        on_delete=models.PROTECT)
     title = models.CharField(max_length=96, db_index=True)
     description = models.TextField(blank=True)
     cover_photo = models.ForeignKey(
-        'photo', related_name='album_cover_of', null=True, blank=True)
+        'photo', related_name='album_cover_of', null=True, blank=True,
+        on_delete=models.SET_NULL)
     sort_name = models.CharField(max_length=96, blank=True)
     sort_order = models.CharField(max_length=96, blank=True)
     revised = models.DateTimeField(null=True)
@@ -257,11 +259,13 @@ class album(hierarchy_model):
 class category(hierarchy_model):
     category_id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
-        'self', related_name='children', null=True, blank=True)
+        'self', related_name='children', null=True, blank=True,
+        on_delete=models.PROTECT)
     title = models.CharField(max_length=96, db_index=True)
     description = models.TextField(blank=True)
     cover_photo = models.ForeignKey(
-        'photo', related_name='category_cover_of', null=True, blank=True)
+        'photo', related_name='category_cover_of', null=True, blank=True,
+        on_delete=models.SET_NULL)
     sort_name = models.CharField(max_length=96, blank=True)
     sort_order = models.CharField(max_length=96, blank=True)
     objects = managers.HierarchyManager()
@@ -300,7 +304,8 @@ class category(hierarchy_model):
 class place(hierarchy_model):
     place_id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
-        'self', related_name='children', null=True, blank=True)
+        'self', related_name='children', null=True, blank=True,
+        on_delete=models.PROTECT)
     title = models.CharField(max_length=192, db_index=True)
     address = models.CharField(max_length=192, blank=True)
     address2 = models.CharField(max_length=192, blank=True)
@@ -311,7 +316,8 @@ class place(hierarchy_model):
     url = models.CharField(max_length=3072, blank=True)
     urldesc = models.CharField(max_length=96, blank=True)
     cover_photo = models.ForeignKey(
-        'photo', related_name='place_cover_of', null=True, blank=True)
+        'photo', related_name='place_cover_of', null=True, blank=True,
+        on_delete=models.SET_NULL)
     notes = models.TextField(blank=True)
     objects = managers.HierarchyManager()
 
@@ -337,11 +343,6 @@ class place(hierarchy_model):
             errorlist.append("Cannot delete home")
         return errorlist
 
-    def delete(self):
-        self.work_of.clear()
-        self.home_of.clear()
-        super(place, self).delete()
-
     def get_cover_photo(self):
         photo = None
         if self.cover_photo is not None:
@@ -365,18 +366,24 @@ class person(hierarchy_model):
     dob = models.DateField(null=True, blank=True)
     dod = models.DateField(null=True, blank=True)
     home = models.ForeignKey(
-        place, null=True, blank=True, related_name="home_of")
+        place, null=True, blank=True, related_name="home_of",
+        on_delete=models.SET_NULL)
     work = models.ForeignKey(
-        place, null=True, blank=True, related_name="work_of")
+        place, null=True, blank=True, related_name="work_of",
+        on_delete=models.SET_NULL)
     father = models.ForeignKey(
-        'self', null=True, blank=True, related_name='father_of')
+        'self', null=True, blank=True, related_name='father_of',
+        on_delete=models.SET_NULL)
     mother = models.ForeignKey(
-        'self', null=True, blank=True, related_name='mother_of')
+        'self', null=True, blank=True, related_name='mother_of',
+        on_delete=models.SET_NULL)
     spouse = models.ForeignKey(
-        'self', null=True, blank=True, related_name='reverse_spouses')
+        'self', null=True, blank=True, related_name='reverse_spouses',
+        on_delete=models.SET_NULL)
     notes = models.TextField(blank=True)
     cover_photo = models.ForeignKey(
-        'photo', related_name='person_cover_of', null=True, blank=True)
+        'photo', related_name='person_cover_of', null=True, blank=True,
+        on_delete=models.SET_NULL)
     email = models.CharField(max_length=192, blank=True)
 
     class Meta:
@@ -405,13 +412,6 @@ class person(hierarchy_model):
         if self.photographed.all().count() > 0:
             errorlist.append("Cannot delete person that is a photographer")
         return errorlist
-
-    def delete(self):
-        self.father_of.clear()
-        self.mother_of.clear()
-        self.reverse_spouses.clear()
-        self.photographed.clear()
-        super(person, self).delete()
 
     def fix_ascendants(self, cache=None, do_descendants=True):
         self._fix_ascendants(
@@ -484,16 +484,20 @@ class person(hierarchy_model):
 
 
 class feedback(hierarchy_model):
-    photo = models.ForeignKey('photo', related_name="feedbacks")
+    photo = models.ForeignKey(
+        'photo', related_name="feedbacks",
+        on_delete=models.CASCADE)
     parent = models.ForeignKey(
-        'self', related_name='children', null=True, blank=True)
+        'self', related_name='children', null=True, blank=True,
+        on_delete=models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField(blank=True)
 
     # Information about the user leaving the comment
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        blank=True, null=True, related_name="photos_feedbacks")
+        blank=True, null=True, related_name="photos_feedbacks",
+        on_delete=models.SET_NULL)
     user_name = models.CharField(max_length=50, blank=True)
     user_email = models.EmailField(blank=True)
     user_url = models.URLField(blank=True)
@@ -536,9 +540,11 @@ class photo(base_model):
     size = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=64, blank=True, db_index=True)
     photographer = models.ForeignKey(
-        person, null=True, blank=True, related_name='photographed')
+        person, null=True, blank=True, related_name='photographed',
+        on_delete=models.SET_NULL)
     location = models.ForeignKey(
-        place, null=True, blank=True, related_name='photos')
+        place, null=True, blank=True, related_name='photos',
+        on_delete=models.SET_NULL)
     view = models.CharField(max_length=64, blank=True)
     rating = models.FloatField(null=True, blank=True, db_index=True)
     description = models.TextField(blank=True)
@@ -660,10 +666,6 @@ class photo(base_model):
         return errorlist
 
     def delete(self):
-        self.place_cover_of.clear()
-        self.album_cover_of.clear()
-        self.category_cover_of.clear()
-        self.person_cover_of.clear()
         if self.name:
             os.unlink(self.get_orig_path())
         for pt in self.photo_thumb_set.all():
@@ -1000,7 +1002,7 @@ class photo(base_model):
 
 
 class photo_thumb(base_model):
-    photo = models.ForeignKey(photo)
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     size = models.CharField(max_length=10, db_index=True)
     width = models.IntegerField(null=True, blank=True)
     height = models.IntegerField(null=True, blank=True)
@@ -1026,7 +1028,7 @@ class photo_thumb(base_model):
 
 
 class photo_video(base_model):
-    photo = models.ForeignKey(photo)
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     size = models.CharField(max_length=10, db_index=True)
     width = models.IntegerField(null=True, blank=True)
     height = models.IntegerField(null=True, blank=True)
@@ -1054,18 +1056,18 @@ class photo_video(base_model):
 
 
 class photo_album(base_model):
-    photo = models.ForeignKey(photo)
-    album = models.ForeignKey(album)
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
+    album = models.ForeignKey(album, on_delete=models.CASCADE)
 
 
 class photo_category(base_model):
-    photo = models.ForeignKey(photo)
-    category = models.ForeignKey(category)
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
+    category = models.ForeignKey(category, on_delete=models.CASCADE)
 
 
 class photo_person(base_model):
-    photo = models.ForeignKey(photo)
-    person = models.ForeignKey(person)
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
+    person = models.ForeignKey(person, on_delete=models.CASCADE)
     position = models.IntegerField(null=True, blank=True)
 
     class Meta:
@@ -1075,9 +1077,11 @@ class photo_person(base_model):
 @python_2_unicode_compatible
 class photo_relation(base_model):
     photo_1 = models.ForeignKey(
-        photo, db_column="photo_id_1", related_name="relations_1")
+        photo, db_column="photo_id_1", related_name="relations_1",
+        on_delete=models.CASCADE)
     photo_2 = models.ForeignKey(
-        photo, db_column="photo_id_2", related_name="relations_2")
+        photo, db_column="photo_id_2", related_name="relations_2",
+        on_delete=models.CASCADE)
     desc_1 = models.CharField(max_length=384)
     desc_2 = models.CharField(max_length=384)
 
