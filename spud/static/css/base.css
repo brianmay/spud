@@ -86,7 +86,6 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 
 #header.slideshow { display:none; }
 #footer.slideshow { display:none; }
-#breadcrumbs.slideshow { display:none; }
 #content.slideshow.colSM { margin:0; }
 #content.slideshow.colSM #content-main { float:none; }
 #content.slideshow.colSM #content-main h1 { display:none; }
@@ -227,9 +226,6 @@ td ul.errorlist li { margin:0 !important; }
 div.system-message { background: #ffc; margin: 10px; padding: 6px 8px; }
 div.system-message p.system-message-title { padding:4px 5px 4px 25px; margin:0; color:red; background:#ffc url(../img/admin/icon_error.gif) 5px .3em no-repeat; }
 .description { padding:5px 0 0 12px; }
-
-/* BREADCRUMBS */
-div#breadcrumbs { background:white url(../img/admin/nav-bg-reverse.gif) 0 -10px repeat-x; padding:2px 8px 3px 8px; color:#999;  border-top:1px solid white; border-bottom:1px solid #ccc; text-align:left; }
 
 /* FADING */
 .fade{opacity:0;-webkit-transition:opacity 0.15s linear;-moz-transition:opacity 0.15s linear;-o-transition:opacity 0.15s linear;transition:opacity 0.15s linear;}
