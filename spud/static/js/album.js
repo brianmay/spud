@@ -172,7 +172,7 @@ $.widget('spud.album_delete_dialog',  $.spud.save_dialog, {
     },
 
     _done: function(data) {
-        window._album_deleted.trigger(data)
+        window._album_deleted.trigger(this.album_id)
     }
 })
 
@@ -592,8 +592,8 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
                 mythis.set_album(album)
             }
         })
-        window._album_deleted.add_listener(this, function(album_pk) {
-            if (album.album_id == this.options.obj_id) {
+        window._album_deleted.add_listener(this, function(album_id) {
+            if (album_id == this.options.obj_id) {
                 mythis.close()
             }
         })
