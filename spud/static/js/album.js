@@ -289,14 +289,14 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         this.element.addClass("disabled")
     },
 
-    close: function() {
+    _destroy: function() {
         if (this.loader) {
             this.loader.loaded_list.remove_listener(this)
         }
         window._album_changed.remove_listener(this)
         window._album_deleted.remove_listener(this)
-        // No super to call
-        // this._super()
+
+        this._super()
     },
 })
 
@@ -390,11 +390,6 @@ $.widget('spud.album_list_screen', $.spud.screen, {
             this.al.album_list('disable')
         }
     },
-
-    close: function() {
-        this.al.album_list("close")
-        this._super()
-    },
 })
 
 
@@ -465,15 +460,6 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         } else {
             this._super( key, value );
         }
-    },
-
-    close: function() {
-        this._super()
-    },
-
-    _destroy: function() {
-        this.img.image("destroy")
-        this._super()
     },
 })
 
@@ -710,9 +696,8 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.ad.album_detail('load', obj_id)
     },
 
-    close: function() {
+    _destroy: function() {
         this.ad.album_detail('option', 'event_update', null)
-        this.ad.album_detail('close')
 
         var album_list_loader = this.options.album_list_loader
         album_list_loader.loaded_list.remove_listener(this)

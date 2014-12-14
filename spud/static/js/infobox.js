@@ -301,7 +301,6 @@ $.widget('spud.infobox', {
         $.each(this.fields, function(id, field) {
             field.destroy()
         })
-        this.element.empty()
         this._super()
     },
 
@@ -370,9 +369,6 @@ $.widget('spud.infobox', {
             this.fields[id].show()
             this.fields[id].set_edit_value(a)
         }
-    },
-
-    close: function() {
     },
 
     get_uuid: function() {

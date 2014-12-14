@@ -176,11 +176,6 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         this._super();
     },
 
-    _destroy: function() {
-        this.element.empty()
-        this._super();
-    },
-
     set: function(item, item_pk) {
         this.deck.children().remove();
         if (item != null) {
@@ -672,11 +667,6 @@ $.widget('spud.image', {
         this.element.empty()
     },
 
-    _destroy: function() {
-        this.element.removeClass("image")
-        this._clear()
-    },
-
     set: function(photo) {
         this._clear()
 
@@ -828,11 +818,6 @@ $.widget('spud.list_base',  {
         return this
     },
 
-    _destroy: function() {
-        this.empty()
-        this._super()
-    },
-
     get_uuid: function() {
         return this.widgetName + ":" + this.uuid
     },
@@ -892,12 +877,6 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
 
         return li
     },
-
-    _destroy: function() {
-        this.element
-            .removeAttr("photo_list")
-        this._super()
-    },
 })
 
 $.widget('spud.screen',  {
@@ -933,8 +912,8 @@ $.widget('spud.screen',  {
     },
 
     close: function() {
-        this.disable();
-        this.element.remove();
+        this.disable()
+        this.element.remove()
         $(".screen:last").each(function() {
             var screen = $(this).data('screen')
             screen.enable()
