@@ -203,21 +203,30 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
             this._filter(this.options.criteria)
         })
         window._album_changed.add_listener(this, function(album) {
-            // FIXME
+            var li = this._create_li(album)
+            this.ul.find("[data-id="+album.album_id+"]").replaceWith(li)
         })
         window._album_deleted.add_listener(this, function(album_pk) {
-            // FIXME
+            this.ul.find("[data-id="+album_pk+"]").remove()
+            this._load_if_required()
         })
     },
 
-    _add_item: function(album) {
+    _create_li: function(album) {
         var photo = album.cover_photo
         var details = []
         if  (album.sort_order || album.sort_name) {
             details.push($("<div/>").text(album.sort_name + " " + album.sort_order))
         }
         var a = album_a(album, this.cache, this.loader)
-        this.append_photo(photo, album.title, details, album.description, a)
+        var li = this._super(photo, album.title, details, album.description, a)
+        li.attr('data-id', album.album_id)
+        return li
+    },
+
+    _add_item: function(album) {
+        var li = this._create_li(album)
+            .appendTo(this.ul)
         return this
     },
 

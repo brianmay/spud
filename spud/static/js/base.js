@@ -837,7 +837,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
         this._super()
     },
 
-    append_photo: function(photo, title, details, description, a) {
+    _create_li: function(photo, title, details, description, a) {
         a
                 .data("photo", null)
                 .empty()
@@ -867,7 +867,6 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
             .attr('class', "photo_item")
             .append(a)
             .on("click", function(ev) { a.trigger('click'); })
-            .appendTo(this.ul)
 
         if (photo != null) {
             li
@@ -875,6 +874,12 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
                 .toggleClass("regenerate", photo.action != null && photo.action != "D")
         }
 
+        return li
+    },
+
+    append_photo: function(photo, title, details, description, a) {
+        var li = _create_li(photo, title, details, description, a)
+            .appendTo(this.ul)
         return li
     },
 })
