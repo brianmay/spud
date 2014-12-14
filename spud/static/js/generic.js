@@ -129,12 +129,19 @@ function setup_menu(session) {
 
     $('<li/>')
         .text("People")
-        .on('click', function(ev){
+        .on('click', function(ev) {
             alert("meow")
             return false
         })
         .appendTo(menu)
 
+    $('<li/>')
+        .text("Reload")
+        .on('click', function(ev) {
+            window._reload_all.trigger()
+            return false
+        })
+        .appendTo(menu)
     menu.menu()
     $("#menu").append(menu)
 }
@@ -216,6 +223,7 @@ signal.prototype.trigger = function() {
     })
 }
 
+window._reload_all = new signal()
 window._perms_changed = new signal()
 
 ///////////////////////////////////////

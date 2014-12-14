@@ -199,6 +199,9 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
             mythis._load_if_required(mythis.options.criteria)
         })
 
+        window._reload_all.add_listener(this, function() {
+            this._filter(this.options.criteria)
+        })
         window._album_changed.add_listener(this, function(album) {
             // FIXME
         })
@@ -293,6 +296,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         if (this.loader) {
             this.loader.loaded_list.remove_listener(this)
         }
+        window._reload_all.remove_listener(this)
         window._album_changed.remove_listener(this)
         window._album_deleted.remove_listener(this)
 
@@ -587,6 +591,9 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this._setup_perms(window._perms)
         window._perms_changed.add_listener(this, this._setup_perms)
 
+        window._reload_all.add_listener(this, function() {
+            mythis.load(this.options.obj_id)
+        })
         window._album_changed.add_listener(this, function(album) {
             if (album.album_id == this.options.obj_id) {
                 mythis.set_album(album)
@@ -702,6 +709,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         var album_list_loader = this.options.album_list_loader
         album_list_loader.loaded_list.remove_listener(this)
 
+        window._reload_all.remove_listener(this)
         window._album_changed.remove_listener(this)
         window._album_deleted.remove_listener(this)
 
