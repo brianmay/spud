@@ -117,6 +117,10 @@ signal.prototype.remove_listener = function(obj) {
     delete this.objects[key]
 }
 
+signal.prototype.is_any_listeners = function() {
+    return ! $.isEmptyObject(this.listeners)
+}
+
 signal.prototype.trigger = function() {
     var mythis = this
     var fight = arguments
@@ -462,6 +466,12 @@ object_loader.prototype._got_item = function(obj) {
     this.loaded_item.trigger(obj)
 }
 
+object_loader.prototype.check_for_listeners = function() {
+    if (this.loaded_item.is_any_listeners()) {
+        return
+    }
+    this.abort()
+}
 
 ///////////////////////////////////////
 // object_list_loader
@@ -557,3 +567,12 @@ object_list_loader.prototype.get_meta = function(obj_id) {
     return meta
 }
 
+object_list_loader.prototype.check_for_listeners = function() {
+    if (this.loaded_list.is_any_listeners()) {
+        return
+    }
+    if (this.loaded_item.is_any_listeners()) {
+        return
+    }
+    this.abort()
+}

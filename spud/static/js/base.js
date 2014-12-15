@@ -316,11 +316,11 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     _destroy: function() {
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
-            this.loader.abort()
+            this.loader.check_for_listeners()
         }
         if (this.kill_loader != null) {
             this.kill_loader.loaded_item.remove_listener(this)
-            this.kill_loader.abort()
+            this.kill_loader.check_for_listeners()
         }
         this._super()
     }

@@ -246,7 +246,7 @@ $.widget('spud.album_criteria', {
         var mythis = this
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
-            this.loader.abort()
+            this.loader.check_for_listeners()
         }
         this.album = null
         this.set(criteria)
@@ -266,7 +266,7 @@ $.widget('spud.album_criteria', {
     _destroy: function() {
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
-            this.loader.abort()
+            this.loader.check_for_listeners()
         }
     },
 
@@ -362,6 +362,8 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         var mythis = this
         if (this.loader != null) {
             this.loader.loaded_list.remove_listener(this)
+            this.loader.check_for_listeners()
+            this.loader = null
         }
         this.empty()
         this.loader = new album_list_loader(criteria)
@@ -397,6 +399,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         this._super()
         if (this.loader) {
             this.loader.loaded_list.remove_listener(this)
+            this.loader.check_for_listeners()
             this.loader = null
         }
     },
@@ -413,6 +416,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
     _destroy: function() {
         if (this.loader) {
             this.loader.loaded_list.remove_listener(this)
+            this.loader.check_for_listeners()
         }
         window._reload_all.remove_listener(this)
         window._album_changed.remove_listener(this)
@@ -564,7 +568,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
 
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
-            this.loader.abort()
+            this.loader.check_for_listeners()
         }
 
         this.loader = new album_loader(obj_id)
@@ -588,7 +592,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
     _destroy: function() {
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
-            this.loader.abort()
+            this.loader.check_for_listeners()
         }
     },
 })
@@ -797,6 +801,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         var old_loader = this.options.album_list_loader
         if (old_loader != null) {
             old_loader.loaded_list.remove_listener(this)
+            old_loader.check_for_listeners()
             this.options.album_list_loader = null
         }
 
@@ -814,6 +819,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         var old_loader = this.options.album_list_loader
         if (old_loader != null) {
             old_loader.loaded_list.remove_listener(this)
+            old_loader.check_for_listeners()
         }
         this.options.album_list_loader = album_list_loader
 
@@ -843,6 +849,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         var album_list_loader = this.options.album_list_loader
         if (album_list_loader != null) {
             album_list_loader.loaded_list.remove_listener(this)
+            album_list_loader.check_for_listeners()
         }
 
         window._reload_all.remove_listener(this)
