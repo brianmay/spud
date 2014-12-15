@@ -627,7 +627,6 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
         var mythis = this
         var allok = true
         $.each(mythis.fields, function(id, field) {
-            console.log("here", id)
             var error = field.validate()
             if (error) {
                 field.set_error(error)
@@ -635,7 +634,6 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
             } else {
                 field.clear_error()
             }
-            console.log("doned", id)
         })
         if (allok) {
             this._submit()
