@@ -234,12 +234,13 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         if (item != null) {
             repr.text(item.repr)
         } else {
-            var kill_loader = new object_loader(this.options.type, item_pk)
-            kill_loader.loaded_item.add_listener(this, function(object) {
+            // FIXME this won't load more then one at a time.
+            this.kill_loader = new object_loader(this.options.type, item_pk)
+            this.kill_loader.loaded_item.add_listener(this, function(object) {
                 var item = mythis._normalize_item(object)
                 repr.text(item.repr)
             })
-            kill_loader.load()
+            this.kill_loader.load()
         }
 
         killButton.on("click", $.proxy(
@@ -311,6 +312,18 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
          })
          return response
     },
+
+    _destroy: function() {
+        if (this.loader) {
+            this.loader.remove_listener(this)
+            this.loader.abort()
+        }
+        if (this.kill_loader) {
+            this.kill_loader.remove_listener(this)
+            this.kill_loader.abort()
+        }
+        this._super()
+    }
 })
 
 
@@ -424,11 +437,6 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
             .appendTo(this.element)
 
         this.options.type = "photos"
-        this._super();
-    },
-
-    _destroy: function() {
-        this.img.image("destroy")
         this._super();
     },
 
