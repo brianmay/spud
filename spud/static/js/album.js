@@ -740,7 +740,9 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.ad.album_detail('option', 'event_update', null)
 
         var album_list_loader = this.options.album_list_loader
-        album_list_loader.loaded_list.remove_listener(this)
+        if (album_list_loader != null) {
+            album_list_loader.loaded_list.remove_listener(this)
+        }
 
         window._reload_all.remove_listener(this)
         window._album_changed.remove_listener(this)
