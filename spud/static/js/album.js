@@ -193,6 +193,8 @@ $.widget('spud.album_criteria', {
 
     set: function(criteria) {
         var mythis = this
+        mythis.element.removeClass("error")
+
         this.options.criteria = criteria
         var ul = this.criteria
         this.criteria.empty()
@@ -260,12 +262,16 @@ $.widget('spud.album_criteria', {
             mythis.set(criteria)
             mythis.loader = null
         })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+        })
         this.loader.load()
     },
 
     _destroy: function() {
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
+            this.loader.on_error.remove_listener(this)
             this.loader.check_for_listeners()
         }
     },
@@ -369,6 +375,9 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         this.loader.loaded_list.add_listener(this, function(album_list) {
             mythis._add_list(album_list)
         })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+        })
         this.loader.load_next_page()
     },
 
@@ -396,8 +405,10 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         this.idmap = {}
         this.last_id = null
         this._super()
+        this.element.removeClass("error")
         if (this.loader) {
             this.loader.loaded_list.remove_listener(this)
+            this.loader.on_error.remove_listener(this)
             this.loader.check_for_listeners()
             this.loader = null
         }
@@ -415,6 +426,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
     _destroy: function() {
         if (this.loader) {
             this.loader.loaded_list.remove_listener(this)
+            this.loader.on_error.remove_listener(this)
             this.loader.check_for_listeners()
         }
         window._reload_all.remove_listener(this)
@@ -548,6 +560,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
 
 
     set: function(album) {
+        this.element.removeClass("error")
         this._super(album)
         this.options.obj = album
         this.options.obj_id = album.album_id
@@ -570,6 +583,13 @@ $.widget('spud.album_detail',  $.spud.infobox, {
             mythis.set(album)
             mythis.loader = null
         })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+            mythis.loader = null
+            if (mythis.options.on_error) {
+                mythis.options.on_error()
+            }
+        })
         this.loader.load()
     },
 
@@ -586,6 +606,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
     _destroy: function() {
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
+            this.loader.on_error.remove_listener(this)
             this.loader.check_for_listeners()
         }
     },
@@ -705,6 +726,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.al = null
         var params = {
             'on_update': function(album) {
+                mythis.element.removeClass("error")
                 mythis.options.obj = album
                 mythis.options.obj_id = album.album_id
                 mythis._set_title("Album: "+album.title)
@@ -713,6 +735,9 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
                     'instance': album.album_id,
                     'mode': 'children',
                 })
+            },
+            'on_error': function() {
+                mythis.element.addClass("error")
             },
         }
 

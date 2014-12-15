@@ -202,6 +202,8 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
                 mythis.loader = null
                 response(object_list);
             })
+            mythis.loader.on_error.add_listener(this, function() {
+            })
             mythis.loader.load_next_page()
         };
     },
@@ -239,6 +241,10 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
             this.kill_loader.loaded_item.add_listener(this, function(object) {
                 var item = mythis._normalize_item(object)
                 repr.text(item.repr)
+            })
+            this.kill_loader.on_error.add_listener(this, function() {
+                repr.text("error")
+                    .addClass("error")
             })
             this.kill_loader.load()
         }
@@ -316,10 +322,12 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     _destroy: function() {
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
+            this.loader.on_error.remove_listener(this)
             this.loader.check_for_listeners()
         }
         if (this.kill_loader != null) {
             this.kill_loader.loaded_item.remove_listener(this)
+            this.kill_loader.on_error.remove_listener(this)
             this.kill_loader.check_for_listeners()
         }
         this._super()

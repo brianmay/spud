@@ -425,6 +425,7 @@ function object_loader(type, obj_id) {
     this._loading = false
     this._finished = false
     this.loaded_item = new signal()
+    this.on_error = new signal()
 }
 
 
@@ -456,7 +457,8 @@ object_loader.prototype.load = function() {
         },
         error: function(message) {
             mythis._loading = false
-            alert("Error: " + message)
+            console.log("error loading", mythis._type, mythis._obj_id, message)
+            mythis.on_error.trigger()
         },
     });
 }
@@ -491,6 +493,7 @@ function object_list_loader(type, criteria) {
     this._finished = false
     this.loaded_list = new signal()
     this.loaded_item = new signal()
+    this.on_error = new signal()
 }
 
 
@@ -525,7 +528,8 @@ object_list_loader.prototype.load_next_page = function() {
         },
         error: function(message) {
             mythis._loading = false
-            alert("Error: " + message)
+            console.log("error loading", mythis._type, criteria, message)
+            mythis.on_error.trigger()
         },
     });
 }

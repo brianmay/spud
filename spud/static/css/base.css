@@ -226,6 +226,7 @@ td ul.errorlist li { margin:0 !important; }
 div.system-message { background: #ffc; margin: 10px; padding: 6px 8px; }
 div.system-message p.system-message-title { padding:4px 5px 4px 25px; margin:0; color:red; background:#ffc url(../img/admin/icon_error.gif) 5px .3em no-repeat; }
 .description { padding:5px 0 0 12px; }
+.error { background: #f00; }
 
 /* FADING */
 .fade{opacity:0;-webkit-transition:opacity 0.15s linear;-moz-transition:opacity 0.15s linear;-o-transition:opacity 0.15s linear;transition:opacity 0.15s linear;}

@@ -151,9 +151,11 @@ class AlbumViewSet(viewsets.ModelViewSet):
                 instance = int(instance)
                 instance = models.album.objects.get(pk=instance)
         except ValueError:
-            instance = None
-        except models.album.DoesNotExist:
-            instance = None
+            raise drf_exceptions.ParseError(
+                "Album not integer '%s'" % instance)
+        except models.album.DoesNotExist as e:
+            raise drf_exceptions.ParseError(
+                "Cannot find album '%s': %s" % (instance, e))
 
         if instance is not None:
             if mode == "children":
@@ -229,9 +231,11 @@ class CategoryViewSet(viewsets.ModelViewSet):
                 instance = int(instance)
                 instance = models.category.objects.get(pk=instance)
         except ValueError:
-            instance = None
-        except models.category.DoesNotExist:
-            instance = None
+            raise drf_exceptions.ParseError(
+                "Category not integer '%s'" % instance)
+        except models.album.DoesNotExist as e:
+            raise drf_exceptions.ParseError(
+                "Cannot find category '%s': %s" % (instance, e))
 
         if instance is not None:
             if mode == "children":
@@ -297,9 +301,11 @@ class PlaceViewSet(viewsets.ModelViewSet):
                 instance = int(instance)
                 instance = models.place.objects.get(pk=instance)
         except ValueError:
-            instance = None
-        except models.place.DoesNotExist:
-            instance = None
+            raise drf_exceptions.ParseError(
+                "Place not integer '%s'" % instance)
+        except models.album.DoesNotExist as e:
+            raise drf_exceptions.ParseError(
+                "Cannot find place '%s': %s" % (instance, e))
 
         if instance is not None:
             if mode == "children":
