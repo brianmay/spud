@@ -607,7 +607,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         if (this.options.obj != null) {
             var album = this.options.obj
             this.options.obj_id = album.album_id
-            this.options.title = "Album "+album.title
+            this.options.title = "Album: "+album.title
         }
 
         this._super()
@@ -716,7 +716,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             'on_update': function(album) {
                 mythis.options.obj = album
                 mythis.options.obj_id = album.album_id
-                mythis._set_title("Album "+album.title)
+                mythis._set_title("Album: "+album.title)
                 mythis._setup_buttons()
             },
         }

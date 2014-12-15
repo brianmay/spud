@@ -390,8 +390,13 @@ function push_state() {
 
     var state = get_state()
     var active_screen = $(".screen:not(.disabled)").data("screen")
-    var title = active_screen.options.title
-    var url = active_screen.get_url()
+
+    var title = "SPUD"
+    var url = root_url()
+    if (active_screen != null) {
+        title = active_screen.options.title
+        url = active_screen.get_url()
+    }
 
     if (window._do_replace) {
         console.log("replace state", JSON.stringify(state), title, url)

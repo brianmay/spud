@@ -934,7 +934,7 @@ $.widget('spud.screen',  {
     },
 
     is_enabled: function() {
-        return !this.element.hasClass("disabled")
+        return !this.options.disabled
     },
 
     toggle: function() {
@@ -945,27 +945,38 @@ $.widget('spud.screen',  {
         }
     },
 
-    enable: function() {
-        this.disable_all()
+    enable: function(no_push) {
+        this.disable_all(true)
         this.element.removeClass("disabled")
-        $("head title").text(this.title)
-        push_state()
-        return this
-    },
-
-    disable: function() {
-        this.element.addClass("disabled")
-        if (this.is_enabled()) {
-            $("head title").text("SPUD")
+        this.options.disabled = false
+        if (!no_push) {
+            $("head title").text(this.options.title)
+            push_state()
         }
         return this
     },
 
-    disable_all: function() {
-        $(".screen:not(.active)").each(function() {
+    disable: function(no_push) {
+        this.element.addClass("disabled")
+        this.options.disabled = true
+        if (!no_push) {
+            if ($(".screen:not(.disabled)").length <= 0) {
+                $("head title").text("SPUD")
+            }
+            push_state()
+        }
+        return this
+    },
+
+    disable_all: function(no_push) {
+        $(".screen:not(.disabled)").each(function() {
             var screen = $(this).data('screen')
-            screen.disable()
+            screen.disable(true)
         })
+        if (!no_push) {
+            $("head title").text("SPUD")
+            push_state()
+        }
         return this
     },
 
