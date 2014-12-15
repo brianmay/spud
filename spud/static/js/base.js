@@ -314,12 +314,12 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     },
 
     _destroy: function() {
-        if (this.loader) {
-            this.loader.remove_listener(this)
+        if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
             this.loader.abort()
         }
-        if (this.kill_loader) {
-            this.kill_loader.remove_listener(this)
+        if (this.kill_loader != null) {
+            this.kill_loader.loaded_item.remove_listener(this)
             this.kill_loader.abort()
         }
         this._super()
