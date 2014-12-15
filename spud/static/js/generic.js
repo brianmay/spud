@@ -305,6 +305,7 @@ window._session_changed.add_listener(null, function(session) {
 
 function setup_page(session) {
     window._session_changed.trigger(session)
+    $("body").attr("onload", null)
 }
 
 function add_screen(screen_class, params) {
@@ -328,9 +329,9 @@ function do_list(obj_type, session, params) {
         params = {
             criteria: params,
         }
-        window._dont_push = true
+        window._do_replace = true
         add_screen(screen_class, params)
-        window._dont_push = false
+        window._do_replace = false
     }
 }
 
@@ -344,9 +345,9 @@ function do_detail(obj_type, obj_id, session, params) {
         params = {
             obj_id: obj_id,
         }
-        window._dont_push = true
+        window._do_replace = true
         add_screen(screen_class, params)
-        window._dont_push = false
+        window._do_replace = false
     }
 }
 
@@ -387,17 +388,22 @@ function push_state() {
     var active_screen = $(".screen:not(.disabled)").data("screen")
     var title = active_screen.options.title
     var url = active_screen.get_url()
-    console.log("push state", JSON.stringify(state), title, url)
-    history.pushState(state, title, url)
+
+    if (window._do_replace) {
+        console.log("replace state", JSON.stringify(state), title, url)
+        history.replaceState(state, title, url)
+    } else {
+        console.log("push state", JSON.stringify(state), title, url)
+        history.pushState(state, title, url)
+    }
 }
 
 window.onpopstate = function(ev) {
+    console.log("pop state", JSON.stringify(ev.state))
     if (ev.state != null) {
         put_state(ev.state)
-        console.log("pop state1", JSON.stringify(ev.state))
     } else {
         put_state([])
-        console.log("pop state2", JSON.stringify([]))
     }
 }
 
