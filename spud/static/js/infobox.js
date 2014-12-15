@@ -284,9 +284,6 @@ $.widget('spud.infobox', {
         this.dl = $("<div class='def_list'></div>")
             .appendTo(this.element)
 
-        $("<div class='clear'></div>")
-            .appendTo(this.element)
-
         this._create_fields()
         this._super()
 

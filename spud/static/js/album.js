@@ -288,9 +288,6 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         this._super()
 
         var mythis = this
-        if (this.options.criteria == null) {
-            this.options.criteria = {}
-        }
         this.empty()
         this.cache = {}
         if (this.options.disabled) {
@@ -299,7 +296,9 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
             this.enable()
         }
 
-        this._filter(this.options.criteria)
+        if (this.options.criteria != null) {
+            this._filter(this.options.criteria)
+        }
 
         this.element.scroll(function() {
             mythis._load_if_required(mythis.options.criteria)
@@ -526,6 +525,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
             ["sort_name", new text_output_field("Sort Name")],
             ["sort_order", new text_output_field("Sort Order")],
             ["revised", new datetime_output_field("Revised")],
+            ["description", new p_output_field("Description")],
         ]
         this.loader = null
 
@@ -544,8 +544,6 @@ $.widget('spud.album_detail',  $.spud.infobox, {
 
     _create_fields: function() {
         this._super();
-        this.description = $("<p></p>")
-            .appendTo(this.element)
     },
 
 
@@ -553,11 +551,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         this._super(album)
         this.options.obj = album
         this.options.obj_id = album.album_id
-        this.description.p(album.description)
         this.img.image("set", album.cover_photo)
-        if (album.cover_photo != null || album.description != "") {
-            this.element.removeClass("hidden")
-        }
         if (this.options.on_update) {
             this.options.on_update(album)
         }
@@ -705,24 +699,37 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             .button()
             .appendTo(this.div)
 
-        if (this.options.obj != null) {
-        }
         this._setup_loader()
         this._setup_buttons()
 
+        this.al = null
         var params = {
-            'obj': this.options.obj,
-            'obj_id': this.options.obj_id,
             'on_update': function(album) {
                 mythis.options.obj = album
                 mythis.options.obj_id = album.album_id
                 mythis._set_title("Album: "+album.title)
                 mythis._setup_buttons()
+                mythis.al.album_list("option", "criteria", {
+                    'instance': album.album_id,
+                    'mode': 'children',
+                })
             },
         }
 
         this.ad = $("<div/>").appendTo(this.div)
         $.spud.album_detail(params, this.ad)
+
+        var params = {
+            'disabled': this.options.disabled,
+        }
+        this.al = $("<div/>").appendTo(this.div)
+        $.spud.album_list(params, this.al)
+
+        if (this.options.obj != null) {
+            this.ad.album_detail('set', this.options.obj)
+        } else if (this.options.obj_id != null) {
+            this.ad.album_detail('load', this.options.obj_id)
+        }
 
         this._setup_perms(window._perms)
         window._perms_changed.add_listener(this, this._setup_perms)
@@ -825,6 +832,20 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
 
         this._setup_loader()
         this._setup_buttons()
+    },
+
+    enable: function() {
+        this._super()
+        if (this.al) {
+            this.al.album_list('enable')
+        }
+    },
+
+    disable: function() {
+        this._super()
+        if (this.al) {
+            this.al.album_list('disable')
+        }
     },
 
     _setOption: function( key, value ) {

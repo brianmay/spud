@@ -924,15 +924,6 @@ $.widget('spud.screen',  {
             .appendTo(this.element)
     },
 
-    close: function() {
-        this.disable()
-        this.element.remove()
-        $(".screen:last").each(function() {
-            var screen = $(this).data('screen')
-            screen.enable()
-        })
-    },
-
     is_enabled: function() {
         return !this.options.disabled
     },
@@ -945,39 +936,61 @@ $.widget('spud.screen',  {
         }
     },
 
-    enable: function(no_push) {
-        this.disable_all(true)
+    _enable: function() {
         this.element.removeClass("disabled")
         this.options.disabled = false
-        if (!no_push) {
-            $("head title").text(this.options.title)
-            push_state()
-        }
         return this
     },
 
-    disable: function(no_push) {
+    _disable: function() {
         this.element.addClass("disabled")
         this.options.disabled = true
-        if (!no_push) {
-            if ($(".screen:not(.disabled)").length <= 0) {
-                $("head title").text("SPUD")
-            }
-            push_state()
-        }
         return this
     },
 
-    disable_all: function(no_push) {
+    _disable_all: function() {
         $(".screen:not(.disabled)").each(function() {
             var screen = $(this).data('screen')
-            screen.disable(true)
+            screen._disable()
         })
-        if (!no_push) {
+        return this
+    },
+
+    enable: function() {
+        this._disable_all()
+        this._enable()
+        $("head title").text(this.options.title)
+        push_state()
+        return this
+    },
+
+    disable: function() {
+        this._disable()
+        if ($(".screen:not(.disabled)").length <= 0) {
+            $("head title").text("SPUD")
+        }
+        push_state()
+        return this
+    },
+
+    disable_all: function() {
+        this._disable_all()
+        $("head title").text("SPUD")
+        push_state()
+        return this
+    },
+
+    close: function() {
+        this._disable()
+        this.element.remove()
+        var last_screen = $(".screen:last")
+        if (last_screen > 0) {
+            var screen = last_screen.data('screen')
+            screen.enable()
+        } else {
             $("head title").text("SPUD")
             push_state()
         }
-        return this
     },
 
     _set_title: function(title) {
