@@ -83,7 +83,7 @@ class NestedPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.photo
         fields = (
-            'photo_id', 'title', 'description', 'place',
+            'id', 'title', 'description', 'place',
             'thumbs', 'videos',
         )
 
@@ -198,7 +198,7 @@ class PersonPkListSerializer(serializers.ListSerializer):
                 continue
 
             data = {
-                'person_id': pk,
+                'id': pk,
                 'position': index + 1,
             }
             r.append(data)

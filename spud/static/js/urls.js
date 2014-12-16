@@ -59,7 +59,7 @@ function album_a(album, cache, album_list_loader) {
 
     var title = album.title
     var a = $('<a/>')
-        .attr('href', root_url() + "albums/" + album.album_id + "/")
+        .attr('href', root_url() + "albums/" + album.id + "/")
         .on('click', function() {
             if (!cache.ads || cache.ads.parents().length == 0) {
                 var params = {

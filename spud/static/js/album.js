@@ -49,7 +49,7 @@ album_list_loader.prototype = new object_list_loader()
 album_list_loader.constructor = album_list_loader
 
 album_list_loader.prototype._get_object_id = function(obj) {
-    return obj.album_id
+    return obj.id
 }
 
 $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
@@ -123,8 +123,8 @@ $.widget('spud.album_change_dialog',  $.spud.save_dialog, {
     },
 
     set: function(album) {
-        this.album_id = album.album_id
-        if (album.album_id != null) {
+        this.obj_id = album.id
+        if (album.id != null) {
             this.set_title("Change album")
             this.set_description("Please change album " + album.title + ".")
         } else {
@@ -135,15 +135,15 @@ $.widget('spud.album_change_dialog',  $.spud.save_dialog, {
     },
 
     _submit_values: function(values) {
-        if (this.album_id != null) {
-            this._save("PATCH", this.album_id, values)
+        if (this.obj_id != null) {
+            this._save("PATCH", this.obj_id, values)
         } else {
             this._save("POST", null, values)
         }
     },
 
     _done: function(data) {
-        if (this.album_id != null) {
+        if (this.obj_id != null) {
             window._album_changed.trigger(data)
         } else {
             window._album_created.trigger(data)
@@ -162,17 +162,17 @@ $.widget('spud.album_delete_dialog',  $.spud.save_dialog, {
     },
 
     set: function(album) {
-        this.album_id = album.album_id
+        this.obj_id = album.id
         this.set_description("Are you absolutely positively sure you really want to delete " +
             album.title + "? Go ahead join the dark side. There are cookies.")
     },
 
     _submit_values: function(values) {
-        this._save("DELETE", this.album_id, {})
+        this._save("DELETE", this.obj_id, {})
     },
 
     _done: function(data) {
-        window._album_deleted.trigger(this.album_id)
+        window._album_deleted.trigger(this.obj_id)
     }
 })
 
@@ -315,7 +315,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         })
         window._album_changed.add_listener(this, function(album) {
             var li = this._create_li(album)
-            this.ul.find("[data-id="+album.album_id+"]").replaceWith(li)
+            this.ul.find("[data-id="+album.id+"]").replaceWith(li)
         })
         window._album_deleted.add_listener(this, function(album_pk) {
             this.ul.find("[data-id="+album_pk+"]").remove()
@@ -331,7 +331,7 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
         }
         var a = album_a(album, this.cache, this.loader)
         var li = this._super(photo, album.title, details, album.description, a)
-        li.attr('data-id', album.album_id)
+        li.attr('data-id', album.id)
         return li
     },
 
@@ -402,7 +402,6 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
 
     empty: function() {
         this.page = 1
-        this.idmap = {}
         this.last_id = null
         this._super()
         this.element.removeClass("error")
@@ -548,7 +547,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         this._super();
 
         if (this.options.obj != null) {
-            this.options.obj_id = this.options.obj.album_id
+            this.options.obj_id = this.options.obj.id
         } else if (this.options.obj_id != null) {
             this.load(this.options.obj_id)
         }
@@ -563,7 +562,7 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         this.element.removeClass("error")
         this._super(album)
         this.options.obj = album
-        this.options.obj_id = album.album_id
+        this.options.obj_id = album.id
         this.img.image("set", album.cover_photo)
         if (this.options.on_update) {
             this.options.on_update(album)
@@ -621,7 +620,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
 
         if (this.options.obj != null) {
             var album = this.options.obj
-            this.options.obj_id = album.album_id
+            this.options.obj_id = album.id
             this.options.title = "Album: "+album.title
         }
 
@@ -649,7 +648,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             .on("click", function(ev) {
                 if (mythis.options.obj != null) {
                     var album = {
-                        parent: mythis.options.obj.album_id,
+                        parent: mythis.options.obj.id,
                     }
                     var params = {
                         obj: album,
@@ -728,11 +727,11 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             'on_update': function(album) {
                 mythis.element.removeClass("error")
                 mythis.options.obj = album
-                mythis.options.obj_id = album.album_id
+                mythis.options.obj_id = album.id
                 mythis._set_title("Album: "+album.title)
                 mythis._setup_buttons()
                 mythis.al.album_list("option", "criteria", {
-                    'instance': album.album_id,
+                    'instance': album.id,
                     'mode': 'children',
                 })
             },
@@ -763,12 +762,12 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
             mythis.load(this.options.obj_id)
         })
         window._album_changed.add_listener(this, function(album) {
-            if (album.album_id == this.options.obj_id) {
+            if (album.id == this.options.obj_id) {
                 mythis.set_album(album)
             }
         })
-        window._album_deleted.add_listener(this, function(album_id) {
-            if (album_id == this.options.obj_id) {
+        window._album_deleted.add_listener(this, function(id) {
+            if (id == this.options.obj_id) {
                 mythis.close()
             }
         })
@@ -844,7 +843,7 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         // this._setup_buttons()
         // this._set_title("Album "+album.title)
         // this.options.obj = album
-        // this.options.obj_id = album.album_id
+        // this.options.obj_id = album.id
     },
 
     set_loader: function(album_list_loader) {

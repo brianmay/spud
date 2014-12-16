@@ -304,7 +304,7 @@
 #
 #     resp = {
 #         'type': 'photo',
-#         'id': photo.photo_id,
+#         'id': photo.id,
 #         'title': six.text_type(photo),
 #         'view': photo.view,
 #         'rating': photo.rating,
@@ -430,7 +430,7 @@
 #
 #     d = {
 #         'type': 'album',
-#         'id': album.album_id,
+#         'id': album.id,
 #         'title': album.title,
 #         'description': album.description,
 #         'cover_photo': _json_photo_brief(user, album.cover_photo),
@@ -468,7 +468,7 @@
 #
 #     d = {
 #         'type': 'category',
-#         'id': category.category_id,
+#         'id': category.id,
 #         'title': category.title,
 #         'description': category.description,
 #         'cover_photo': _json_photo_brief(user, category.cover_photo),
@@ -502,7 +502,7 @@
 #
 #     d = {
 #         'type': 'place',
-#         'id': place.place_id,
+#         'id': place.id,
 #         'title': place.title,
 #         'address': place.address,
 #         'address2': place.address2,
@@ -549,7 +549,7 @@
 #
 #     d = {
 #         'type': 'person',
-#         'id': person.person_id,
+#         'id': person.id,
 #         'title': six.text_type(person),
 #         'first_name': person.first_name,
 #         'last_name': person.last_name,
@@ -613,7 +613,7 @@
 #         for p in person.reverse_spouses.all():
 #             if person.spouse is None:
 #                 d['spouses'].append(_json_person_brief(user, p))
-#             elif p.person_id != person.spouse.person_id:
+#             elif p.id != person.spouse.person_id:
 #                 d['spouses'].append(_json_person_brief(user, p))
 #
 #         for ancestor in person.get_ascendants(include_self=False):

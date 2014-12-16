@@ -210,7 +210,7 @@ class hierarchy_model(base_model):
 
 @python_2_unicode_compatible
 class album(hierarchy_model):
-    album_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -257,7 +257,7 @@ class album(hierarchy_model):
 
 @python_2_unicode_compatible
 class category(hierarchy_model):
-    category_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -302,7 +302,7 @@ class category(hierarchy_model):
 
 @python_2_unicode_compatible
 class place(hierarchy_model):
-    place_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -357,7 +357,7 @@ class place(hierarchy_model):
 
 @python_2_unicode_compatible
 class person(hierarchy_model):
-    person_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=96, blank=True, db_index=True)
     last_name = models.CharField(max_length=96, blank=True, db_index=True)
     middle_name = models.CharField(max_length=96, blank=True)
@@ -534,7 +534,7 @@ class feedback(hierarchy_model):
 
 @python_2_unicode_compatible
 class photo(base_model):
-    photo_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=128, blank=True, db_index=True)
     path = models.CharField(max_length=255, blank=True, db_index=True)
     size = models.IntegerField(null=True, blank=True)
@@ -578,7 +578,7 @@ class photo(base_model):
         'self', through='photo_relation', symmetrical=False)
 
     class Meta:
-        ordering = ['datetime', 'photo_id']
+        ordering = ['datetime', 'id']
 
     def __str__(self):
         if self.title is None or self.title == "":

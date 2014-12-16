@@ -58,7 +58,7 @@ def get_albums(spud, albums):
             raise RuntimeError("Cannot find album '%s'" % album)
         if result["count"] > 1:
             raise RuntimeError("Multiple matches for album '%s'" % album)
-        results.append(result["results"][0]["album_id"])
+        results.append(result["results"][0]["id"])
     return results
 
 
@@ -70,7 +70,7 @@ def get_categorys(spud, categorys):
             raise RuntimeError("Cannot find category '%s'" % category)
         if result["count"] > 1:
             raise RuntimeError("Multiple matches for category '%s'" % category)
-        results.append(result["results"][0]["category_id"])
+        results.append(result["results"][0]["id"])
     return results
 
 
@@ -80,7 +80,7 @@ def get_place(spud, place):
         raise RuntimeError("Cannot find place '%s'" % place)
     if result["count"] > 1:
         raise RuntimeError("Multiple matches for place '%s'" % place)
-    return result["results"][0]["place_id"]
+    return result["results"][0]["id"]
 
 
 def get_persons(spud, persons):
@@ -95,7 +95,7 @@ def get_persons(spud, persons):
             raise RuntimeError("Cannot find person '%s'" % person)
         if result["count"] > 1:
             raise RuntimeError("Multiple matches for person '%s'" % person)
-        results.append(result["results"][0]["person_id"])
+        results.append(result["results"][0]["id"])
     return results
 
 

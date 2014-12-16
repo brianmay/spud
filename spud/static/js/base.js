@@ -304,7 +304,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
             return {
                 label: div,
                 repr: item.title,
-                pk: item.album_id,
+                pk: item.id,
             }
         }
 
