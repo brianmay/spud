@@ -540,10 +540,6 @@ object_list_loader.prototype.abort = function() {
     }
 }
 
-object_list_loader.prototype._get_object_id = function(obj) {
-    return null
-}
-
 object_list_loader.prototype._got_list = function(object_list) {
     var mythis = this
     $.each(object_list, function(j, obj) {
@@ -553,7 +549,7 @@ object_list_loader.prototype._got_list = function(object_list) {
 }
 
 object_list_loader.prototype._got_item = function(obj) {
-    var id = this._get_object_id(obj)
+    var id = obj.id
     if (id != null) {
         this._idmap[id] = Object()
         if (this._last_id) {

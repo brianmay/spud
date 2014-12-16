@@ -40,7 +40,6 @@ album_loader.prototype = new object_loader()
 album_loader.constructor = album_loader
 
 
-
 function album_list_loader(criteria) {
     object_list_loader.call(this, "albums", criteria)
 }
@@ -48,9 +47,6 @@ function album_list_loader(criteria) {
 album_list_loader.prototype = new object_list_loader()
 album_list_loader.constructor = album_list_loader
 
-album_list_loader.prototype._get_object_id = function(obj) {
-    return obj.id
-}
 
 $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
 
