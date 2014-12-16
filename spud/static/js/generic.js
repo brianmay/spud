@@ -91,7 +91,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ///////////////////////////////////////
 // signals
 ///////////////////////////////////////
+
+window._listeners = {}
+
+function remove_all_listeners(obj) {
+    var key = "null"
+    if (obj != null) {
+        key = obj.get_uuid()
+    }
+
+    if (window._listeners[key] != null) {
+        $.each(window._listeners[key], function(i, listener) {
+            if (listener != null) {
+                listener.remove_listener(obj)
+            }
+        })
+    }
+
+    delete window._listeners[key]
+}
+
 function signal() {
+    this.on_no_listeners = null
     this.listeners = {}
     this.objects = {}
 }
@@ -106,6 +127,11 @@ signal.prototype.add_listener = function(obj, listener) {
     }
     this.listeners[key] = listener
     this.objects[key] = obj
+
+    if (window._listeners[key] == null) {
+        window._listeners[key] = []
+    }
+    window._listeners[key].push(this)
 }
 
 signal.prototype.remove_listener = function(obj) {
@@ -115,6 +141,22 @@ signal.prototype.remove_listener = function(obj) {
     }
     delete this.listeners[key]
     delete this.objects[key]
+
+    if (window._listeners[key] == null) {
+        var index = window._listeners[key].indexOf(this)
+        if (index != -1) {
+            // Don't do this; is called from within loop in
+            // remove_all_listeners 
+            // window._listeners[key].splice(index, 1)
+            delete window._listeners[key]
+        }
+    }
+
+    if (!this.is_any_listeners()) {
+        if (this.on_no_listeners != null) {
+            this.on_no_listeners()
+        }
+    }
 }
 
 signal.prototype.is_any_listeners = function() {
@@ -449,6 +491,7 @@ object_loader.prototype.check_for_listeners = function() {
 // object_list_loader
 ///////////////////////////////////////
 function object_list_loader(type, criteria) {
+    var mythis = this
     this._type = type
     this._criteria = criteria
     this._page = 1
@@ -457,7 +500,9 @@ function object_list_loader(type, criteria) {
     this._idmap = {}
     this._finished = false
     this.loaded_list = new signal()
+    this.loaded_list.on_no_listeners = function() { mythis.check_for_listeners() }
     this.loaded_item = new signal()
+    this.loaded_item.on_no_listeners = function() { mythis.check_for_listeners() }
     this.on_error = new signal()
 }
 
