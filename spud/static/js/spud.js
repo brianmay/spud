@@ -16,3 +16,39 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
+
+function do_root(session, params) {
+    setup_page(session)
+}
+
+function do_list(obj_type, session, params) {
+    var screen_class
+    setup_page(session)
+    if (obj_type == "albums") {
+        screen_class = $.spud.album_list_screen
+    }
+    if (screen_class) {
+        params = {
+            criteria: params,
+        }
+        window._do_replace = true
+        add_screen(screen_class, params)
+        window._do_replace = false
+    }
+}
+
+function do_detail(obj_type, obj_id, session, params) {
+    setup_page(session)
+    var screen_class
+    if (obj_type == "albums") {
+        screen_class = $.spud.album_detail_screen
+    }
+    if (screen_class) {
+        params = {
+            obj_id: obj_id,
+        }
+        window._do_replace = true
+        add_screen(screen_class, params)
+        window._do_replace = false
+    }
+}
