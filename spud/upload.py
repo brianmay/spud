@@ -51,7 +51,7 @@ def set_category_list(photo, category_list):
 @transaction.commit_on_success
 def import_photo(
         tmp_filename, src_filename,
-        photographer, location, albums, categorys,
+        photographer, place, albums, categorys,
         src_timezone, dst_timezone, offset, dryrun, action):
 
     print()
@@ -65,7 +65,7 @@ def import_photo(
     photo = spud.models.photo()
     photo.title = ''
     photo.photographer = photographer
-    photo.location = location
+    photo.place = location
     photo.view = ''
     photo.rating = None
     photo.description = ''

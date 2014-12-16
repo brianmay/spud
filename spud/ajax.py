@@ -336,8 +336,8 @@
 #     # add cut down version of place, otherwise we might end up with infinite
 #     # recusion
 #     # photo --> photo.place --> place --> place.cover_photo --> photo --> etc
-#     if photo.location is not None:
-#         resp['place'] = {'title': six.text_type(photo.location)}
+#     if photo.place is not None:
+#         resp['place'] = {'title': six.text_type(photo.place)}
 #     else:
 #         resp['place'] = None
 #
@@ -357,7 +357,7 @@
 #     resp.update({
 #         'name': photo.name,
 #         'photographer': _json_person_brief(user, photo.photographer),
-#         'place': _json_place_brief(user, photo.location),
+#         'place': _json_place_brief(user, photo.place),
 #         'camera_make': photo.camera_make,
 #         'camera_model': photo.camera_model,
 #         'flash_used': photo.flash_used,
@@ -822,9 +822,9 @@
 #     if value is not None:
 #         criteria["place"] = _json_place_brief(user, value)
 #         if ld:
-#             search = search & Q(location__ascendant_set__ascendant=value)
+#             search = search & Q(place__ascendant_set__ascendant=value)
 #         else:
-#             search = search & Q(location=value)
+#             search = search & Q(place=value)
 #
 #     del value
 #
@@ -876,7 +876,7 @@
 #     if value is not None:
 #         if value:
 #             criteria["place_none"] = True
-#             search = search & Q(location=None)
+#             search = search & Q(place=None)
 #
 #     value = _pop_boolean(params, "person_none")
 #     if value is not None:
@@ -2740,7 +2740,7 @@
 #                 value = None
 #             else:
 #                 value = _decode_object("set_place", models.place, value)
-#             photo_list.update(location=value)
+#             photo_list.update(place=value)
 #
 #         value = None
 #
@@ -2970,10 +2970,10 @@
 #         photographer = models.person.objects.get(
 #             first_name=first_name, last_name=last_name)
 #
-#     location = None
-#     if 'location' in params:
-#         location = _pop_string(params, 'location')
-#         location = models.place.objects.get(title=location)
+#     place = None
+#     if 'place' in params:
+#         place = _pop_string(params, 'location')
+#         place = models.place.objects.get(title=location)
 #
 #     tmp_albums = _pop_string_array(params, 'albums')
 #     albums = []
@@ -3042,7 +3042,7 @@
 #         try:
 #             photo = upload.import_photo(
 #                 tmp_filename, file.name,
-#                 photographer, location, albums, categorys,
+#                 photographer, place, albums, categorys,
 #                 src_timezone, dst_timezone, offset, dryrun, 'V',
 #             )
 #             photo.generate_thumbnails(overwrite=False)

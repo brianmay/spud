@@ -19,5 +19,5 @@ Recommends: dcraw, python-ffvideo
 Suggests: python-psycopg2 | python-mysqldb | python-mysql.connector
 Description: Sortable Photo album Using a Django based database
  A database for photos and videos. Search photos by exif information, albums,
- location, categories, and people. Uses static files for all media contacts.
+ place, categories, and people. Uses static files for all media contacts.
  Postgres is recommended, although any database supported by Django should work.

@@ -83,7 +83,7 @@ class NestedPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.photo
         fields = (
-            'photo_id', 'title', 'description', 'location',
+            'photo_id', 'title', 'description', 'place',
             'thumbs', 'videos',
         )
 
@@ -347,9 +347,9 @@ class PhotoSerializer(serializers.ModelSerializer):
     # categorys = CategoryListSerializer(many=True, read_only=True)
     # categorys_pk = CategoryListSerializer(source="categorys", required=False)
 
-    location = PlaceSerializer(read_only=True)
-    location_pk = serializers.PrimaryKeyRelatedField(
-        queryset=models.place.objects.all(), source="location",
+    place = PlaceSerializer(read_only=True)
+    place_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.place.objects.all(), source="place",
         required=False, allow_null=True)
 
     persons = PersonListSerializer(

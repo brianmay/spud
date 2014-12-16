@@ -542,7 +542,7 @@ class photo(base_model):
     photographer = models.ForeignKey(
         person, null=True, blank=True, related_name='photographed',
         on_delete=models.SET_NULL)
-    location = models.ForeignKey(
+    place = models.ForeignKey(
         place, null=True, blank=True, related_name='photos',
         on_delete=models.SET_NULL)
     view = models.CharField(max_length=64, blank=True)

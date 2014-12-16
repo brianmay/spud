@@ -175,7 +175,7 @@ def main():
     photos = spud.photos(3).PATCH(data={
         'albums_pk': albums,
         'categorys_pk': categorys,
-        'location_pk': place,
+        'place_pk': place,
         'persons_pk': persons,
     })
 
@@ -189,7 +189,7 @@ def main():
             'timezone': 'Australia/Perth',
             'albums_pk': albums,
             'categorys_pk': categorys,
-            'location_pk': place,
+            'place_pk': place,
             'persons_pk': persons,
         },
         files={
@@ -208,7 +208,7 @@ def main():
             'timezone': 'Australia/Perth',
             'albums_pk': albums,
             'categorys_pk': categorys,
-            'location_pk': place,
+            'place_pk': place,
             'persons_pk': persons,
         },
         files={

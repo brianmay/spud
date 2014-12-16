@@ -48,7 +48,7 @@ exit(0)
 
 l = models.place.objects.get(title="Avalon Airport")
 a = models.album.objects.get(album="Avalon Airshow 2011")
-for p in models.photo.objects.filter(location=l, camera_model="Canon EOS 5D Mark II"):
+for p in models.photo.objects.filter(place=l, camera_model="Canon EOS 5D Mark II"):
     set_album_list(p, [ a.pk ])
 exit(0)
 
@@ -114,8 +114,8 @@ exit(0)
 
 a = models.album.objects.get(pk=326,album="Townsville 2009")
 l = models.place.objects.get(title="Brisbane City")
-for p in models.photo.objects.filter(albums=a,location=l):
-    p.location = models.place.objects.get(title="Brisbane")
+for p in models.photo.objects.filter(albums=a,place=l):
+    p.place = models.place.objects.get(title="Brisbane")
     p.save()
 
 exit(0)
@@ -129,7 +129,7 @@ for p in models.photo.objects.filter(albums__in=[106]).order_by("name"):
     print hour,minute
     p.datetime = datetime.datetime.combine(datetime.date(year=2002,month=07,day=1),datetime.time(hour=hour,minute=minute))
     p.timezone = "Australia/Brisbane"
-    p.location = l
+    p.place = l
     p.save()
     i = i + 1
 
@@ -138,7 +138,7 @@ exit(0)
 a = models.album.objects.get(pk=88,album="Merimbula 2004")
 ca = models.category.objects.get(category="Oceans")
 for i in models.photo.objects.filter(albums=a)[177:218]:
-    i.location = models.place.objects.get(title="Gippsland")
+    i.place = models.place.objects.get(title="Gippsland")
     i.save()
 
 exit(0)
@@ -147,7 +147,7 @@ a = models.album.objects.get(pk=87,album="Robe 2002")
 ca = models.category.objects.get(category="Aerial")
 for i in models.photo.objects.filter(albums=a)[:37]:
     i.datetime = i.datetime+datetime.timedelta(minutes=30)
-#    i.location = models.place.objects.get(title="Victoria")
+#    i.place = models.place.objects.get(title="Victoria")
     i.save()
 #    models.photo_category.objects.get_or_create(photo=i,category=ca)
 
@@ -156,7 +156,7 @@ exit(0)
 a = models.album.objects.get(pk=83,album="Lake Mungo 2001")
 ca = models.category.objects.get(category="Aerial")
 for i in models.photo.objects.filter(albums=a)[100:]:
-    i.location = models.place.objects.get(title="Victoria")
+    i.place = models.place.objects.get(title="Victoria")
     i.save()
     models.photo_category.objects.get_or_create(photo=i,category=ca)
 
@@ -202,7 +202,7 @@ exit(0)
 
 place = models.place.objects.get(pk=294,title="Canada")
 places = place.get_descendants()
-models.photo.objects.filter(location__in=places).update(timezone="America/Toronto")
+models.photo.objects.filter(place__in=places).update(timezone="America/Toronto")
 
 exit(0)
 
@@ -212,7 +212,7 @@ a_list = a.get_descendants()
 bm = models.person.objects.get(first_name="Brian",last_name="May")
 models.photo.objects.filter(albums__in=a_list).update(photographer=bm)
 for i in models.photo.objects.filter(albums=a):
-    i.location=p
+    i.place=p
     i.save()
 
 exit(0)
@@ -225,8 +225,8 @@ a = models.album.objects.get(pk=73,album="lca2007")
 a_list = a.get_descendants()
 #bm = models.person.objects.get(first_name="Brian",last_name="May")
 #models.photo.objects.filter(albums__in=a_list).update(photographer=bm)
-for i in models.photo.objects.filter(albums=a,location=293):
-#    i.location=sc
+for i in models.photo.objects.filter(albums=a,place=293):
+#    i.place=sc
 #    i.save()
     pc = models.photo_category.objects.get_or_create(photo=i,category=cat)
 #models.photo_category.objects.filter(photo__albums=73,category=16).update(category=305)
@@ -238,7 +238,7 @@ a_list = a.get_descendants()
 #p = models.person.objects.get(first_name="Brian",last_name="May")
 #models.photo.objects.filter(albums__in=a_list).update(photographer=p)
 for i in models.photo.objects.filter(albums=a)[65:339]:
-    i.location=p
+    i.place=p
     i.save()
 exit(0)
 
@@ -261,7 +261,7 @@ for p in photos:
 
 exit(0)
 
-for i in models.photo.objects.filter(location=281,albums=69,categorys=286):
+for i in models.photo.objects.filter(place=281,albums=69,categorys=286):
     c = models.category.objects.get(pk=123)
     models.photo_category.objects.get_or_create(photo=i,category=c)
 
@@ -278,11 +278,11 @@ a = models.album.objects.get(pk=69,album="lca2003")
 #a_list = a.get_descendants()
 #models.photo.objects.filter(albums__in=a_list).update(photographer=p)
 for i in models.photo.objects.filter(albums=a)[1:270]:
-    i.location=uwa
+    i.place=uwa
     i.save()
 
 for i in models.photo.objects.filter(albums=a)[276:355]:
-    i.location=pz
+    i.place=pz
     i.save()
 
 exit(0)
@@ -290,13 +290,13 @@ exit(0)
 p = models.place.objects.get(pk=264,title="Camberville")
 a = models.album.objects.get(pk=46,album="Camberville")
 a_list = a.get_descendants()
-models.photo.objects.filter(albums__in=a_list).update(location=p)
+models.photo.objects.filter(albums__in=a_list).update(place=p)
 exit(0)
 
 p = models.place.objects.get(pk=262,title="Marysville National Park")
 a = models.album.objects.get(pk=45,album="Marysville")
 a_list = a.get_descendants()
-models.photo.objects.filter(albums__in=a_list).update(location=p)
+models.photo.objects.filter(albums__in=a_list).update(place=p)
 exit(0)
 
 src = models.album.objects.get(pk=77,album="Tyabb Airshow")
@@ -324,7 +324,7 @@ for p in photos:
 
 exit(0)
 
-models.photo.objects.filter(albums__in=[10]).update(location=248)
+models.photo.objects.filter(albums__in=[10]).update(place=248)
 exit(0)
 
 i = 0
@@ -339,17 +339,17 @@ exit(0)
 #src = models.album.objects.get(pk=259,album="Family")
 #place = models.place.objects.get(pk=47,title="Home")
 #dst = models.album.objects.get(pk=305,album="birds")
-#for p in models.photo.objects.filter(albums=src, location=place):
+#for p in models.photo.objects.filter(albums=src, place=place):
 #    set_album_list(p, [dst.pk])
 
 def update_places(place,timezone):
-    models.photo.objects.filter(location=place).update(timezone=timezone)
+    models.photo.objects.filter(place=place).update(timezone=timezone)
     src = models.place.objects.get(pk=2,title="Göteburg")
     for p in place.children.all():
         update_places(p,timezone)
 
-models.photo.objects.filter(albums__in=[69]).update(location=241)
-models.photo.objects.filter(albums__in=[68]).update(location=243)
+models.photo.objects.filter(albums__in=[69]).update(place=241)
+models.photo.objects.filter(albums__in=[68]).update(place=243)
 
 place = models.place.objects.get(pk=2,title="Göteburg")
 update_places(place,"Europe/Stockholm")
