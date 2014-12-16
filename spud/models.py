@@ -210,7 +210,6 @@ class hierarchy_model(base_model):
 
 @python_2_unicode_compatible
 class album(hierarchy_model):
-    id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -257,7 +256,6 @@ class album(hierarchy_model):
 
 @python_2_unicode_compatible
 class category(hierarchy_model):
-    id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -302,7 +300,6 @@ class category(hierarchy_model):
 
 @python_2_unicode_compatible
 class place(hierarchy_model):
-    id = models.AutoField(primary_key=True)
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -357,7 +354,6 @@ class place(hierarchy_model):
 
 @python_2_unicode_compatible
 class person(hierarchy_model):
-    id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=96, blank=True, db_index=True)
     last_name = models.CharField(max_length=96, blank=True, db_index=True)
     middle_name = models.CharField(max_length=96, blank=True)
@@ -534,7 +530,6 @@ class feedback(hierarchy_model):
 
 @python_2_unicode_compatible
 class photo(base_model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=128, blank=True, db_index=True)
     path = models.CharField(max_length=255, blank=True, db_index=True)
     size = models.IntegerField(null=True, blank=True)
