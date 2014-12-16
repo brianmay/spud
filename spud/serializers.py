@@ -350,7 +350,7 @@ class PhotoSerializer(serializers.ModelSerializer):
     location = PlaceSerializer(read_only=True)
     location_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.place.objects.all(), source="location",
-        required=False)
+        required=False, allow_null=True)
 
     persons = PersonListSerializer(
         source="photo_person_set", read_only=True)
