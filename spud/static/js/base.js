@@ -99,6 +99,17 @@ $.fn.append_csv = function(list){
 // * BASE WIDGETS *
 // ****************
 
+$.widget('spud.widget', {
+    get_uuid: function() {
+        return this.widgetName + ":" + this.uuid
+    },
+
+    _destroy: function() {
+        remove_all_listeners(this)
+        this._super()
+    },
+});
+
 // $.widget('spud.myselectable', $.ui.selectable, {
 //     _mouseStart: function(event) {
 //         if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
@@ -666,7 +677,7 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
 // })
 
 
-$.widget('spud.image', {
+$.widget('spud.image', $.spud.widget, {
     _create: function() {
         this.element.addClass("image")
 
@@ -790,19 +801,10 @@ $.widget('spud.image', {
         img.attr('width', width)
         img.attr('height', height)
     },
-
-    get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
-    },
-
-    _destroy: function() {
-        remove_all_listeners(this)
-        this._super()
-    },
 })
 
 
-$.widget('spud.list_base',  {
+$.widget('spud.list_base', $.spud.widget, {
     _create: function() {
         this.ul = $("<ul></ul>")
             .appendTo(this.element)
@@ -833,15 +835,6 @@ $.widget('spud.list_base',  {
         this.empty()
         this.element.addClass("errors")
         return this
-    },
-
-    get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
-    },
-
-    _destroy: function() {
-        remove_all_listeners(this)
-        this._super()
     },
 })
 
@@ -906,7 +899,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
     },
 })
 
-$.widget('spud.screen',  {
+$.widget('spud.screen', $.spud.widget, {
     _create: function() {
         var mythis = this
 
@@ -1035,15 +1028,6 @@ $.widget('spud.screen',  {
 
     get_streamable_options: function() {
         return this.options
-    },
-
-    get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
-    },
-
-    _destroy: function() {
-        remove_all_listeners(this)
-        this._super()
     },
 })
 

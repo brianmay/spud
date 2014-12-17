@@ -269,7 +269,7 @@ photo_output_field.prototype.destroy = function() {
     output_field.prototype.destroy.call(this)
 }
 
-$.widget('spud.infobox', {
+$.widget('spud.infobox', $.spud.widget, {
     _create: function(){
         var options = this.options
 
@@ -294,7 +294,6 @@ $.widget('spud.infobox', {
 
     _destroy: function() {
         var mythis = this
-        remove_all_listeners(this)
         this.element.removeClass("infobox")
         $.each(this.fields, function(id, field) {
             field.destroy()
@@ -367,9 +366,5 @@ $.widget('spud.infobox', {
             this.fields[id].show()
             this.fields[id].set_edit_value(a)
         }
-    },
-
-    get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
     },
 })

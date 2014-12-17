@@ -21,17 +21,6 @@ window._album_created = new signal()
 window._album_changed = new signal()
 window._album_deleted = new signal()
 
-// function album() {
-//     this.type = "album"
-//     generic.call(this)
-// }
-//
-// album.prototype = new generic()
-// album.constructor = album
-//
-// var albums = new album()
-
-
 function album_loader(obj_id) {
     object_loader.call(this, "albums", obj_id)
 }
@@ -47,6 +36,10 @@ function album_list_loader(criteria) {
 album_list_loader.prototype = new object_list_loader()
 album_list_loader.constructor = album_list_loader
 
+
+///////////////////////////////////////
+// album dialogs
+///////////////////////////////////////
 
 $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
 
@@ -173,7 +166,11 @@ $.widget('spud.album_delete_dialog',  $.spud.save_dialog, {
 })
 
 
-$.widget('spud.album_criteria', {
+///////////////////////////////////////
+// album widgets
+///////////////////////////////////////
+
+$.widget('spud.album_criteria', $.spud.widget, {
     _create: function() {
         this.loader = null
         this.album = null
@@ -270,15 +267,6 @@ $.widget('spud.album_criteria', {
         } else {
             this._super( key, value );
         }
-    },
-
-    get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
-    },
-
-    _destroy: function() {
-        remove_all_listeners(this)
-        this._super()
     },
 })
 
@@ -414,6 +402,85 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
     },
 })
 
+
+$.widget('spud.album_detail',  $.spud.infobox, {
+    _create: function() {
+        this.options.fields = [
+            ["title", new text_output_field("Title")],
+            ["sort_name", new text_output_field("Sort Name")],
+            ["sort_order", new text_output_field("Sort Order")],
+            ["revised", new datetime_output_field("Revised")],
+            ["description", new p_output_field("Description")],
+        ]
+        this.loader = null
+
+        this.img = $("<div></div>")
+            .image({size: "mid", include_link: true})
+            .appendTo(this.element)
+
+        this._super();
+
+        if (this.options.obj != null) {
+            this.options.obj_id = this.options.obj.id
+        } else if (this.options.obj_id != null) {
+            this.load(this.options.obj_id)
+        }
+    },
+
+    _create_fields: function() {
+        this._super();
+    },
+
+
+    set: function(album) {
+        this.element.removeClass("error")
+        this._super(album)
+        this.options.obj = album
+        this.options.obj_id = album.id
+        this.img.image("set", album.cover_photo)
+        if (this.options.on_update) {
+            this.options.on_update(album)
+        }
+    },
+
+    load: function(obj_id) {
+        var mythis = this
+
+        if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
+        }
+
+        this.loader = new album_loader(obj_id)
+        this.loader.loaded_item.add_listener(this, function(album) {
+            mythis.set(album)
+            mythis.loader = null
+        })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+            mythis.loader = null
+            if (mythis.options.on_error) {
+                mythis.options.on_error()
+            }
+        })
+        this.loader.load()
+    },
+
+    _setOption: function( key, value ) {
+        if ( key === "obj" ) {
+            this.set(value)
+        } else if ( key === "obj_id" ) {
+            this.load(value)
+        } else {
+            this._super( key, value );
+        }
+    },
+})
+
+
+///////////////////////////////////////
+// album screens
+///////////////////////////////////////
+
 $.widget('spud.album_list_screen', $.spud.screen, {
     _create: function() {
         var mythis = this
@@ -504,80 +571,6 @@ $.widget('spud.album_list_screen', $.spud.screen, {
         }
         return root_url() + "albums/" + params
     }
-})
-
-
-$.widget('spud.album_detail',  $.spud.infobox, {
-    _create: function() {
-        this.options.fields = [
-            ["title", new text_output_field("Title")],
-            ["sort_name", new text_output_field("Sort Name")],
-            ["sort_order", new text_output_field("Sort Order")],
-            ["revised", new datetime_output_field("Revised")],
-            ["description", new p_output_field("Description")],
-        ]
-        this.loader = null
-
-        this.img = $("<div></div>")
-            .image({size: "mid", include_link: true})
-            .appendTo(this.element)
-
-        this._super();
-
-        if (this.options.obj != null) {
-            this.options.obj_id = this.options.obj.id
-        } else if (this.options.obj_id != null) {
-            this.load(this.options.obj_id)
-        }
-    },
-
-    _create_fields: function() {
-        this._super();
-    },
-
-
-    set: function(album) {
-        this.element.removeClass("error")
-        this._super(album)
-        this.options.obj = album
-        this.options.obj_id = album.id
-        this.img.image("set", album.cover_photo)
-        if (this.options.on_update) {
-            this.options.on_update(album)
-        }
-    },
-
-    load: function(obj_id) {
-        var mythis = this
-
-        if (this.loader != null) {
-            this.loader.loaded_item.remove_listener(this)
-        }
-
-        this.loader = new album_loader(obj_id)
-        this.loader.loaded_item.add_listener(this, function(album) {
-            mythis.set(album)
-            mythis.loader = null
-        })
-        this.loader.on_error.add_listener(this, function() {
-            mythis.element.addClass("error")
-            mythis.loader = null
-            if (mythis.options.on_error) {
-                mythis.options.on_error()
-            }
-        })
-        this.loader.load()
-    },
-
-    _setOption: function( key, value ) {
-        if ( key === "obj" ) {
-            this.set(value)
-        } else if ( key === "obj_id" ) {
-            this.load(value)
-        } else {
-            this._super( key, value );
-        }
-    },
 })
 
 
