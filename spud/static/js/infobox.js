@@ -294,6 +294,7 @@ $.widget('spud.infobox', {
 
     _destroy: function() {
         var mythis = this
+        remove_all_listeners(this)
         this.element.removeClass("infobox")
         $.each(this.fields, function(id, field) {
             field.destroy()

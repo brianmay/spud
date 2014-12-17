@@ -128,6 +128,11 @@ $.widget('spud.autocompletehtml', $.ui.autocomplete, {
     get_uuid: function() {
         return this.widgetName + ":" + this.uuid
     },
+
+    _destroy: function() {
+        remove_all_listeners(this)
+        this._super()
+    },
 });
 
 
@@ -789,6 +794,11 @@ $.widget('spud.image', {
     get_uuid: function() {
         return this.widgetName + ":" + this.uuid
     },
+
+    _destroy: function() {
+        remove_all_listeners(this)
+        this._super()
+    },
 })
 
 
@@ -827,6 +837,11 @@ $.widget('spud.list_base',  {
 
     get_uuid: function() {
         return this.widgetName + ":" + this.uuid
+    },
+
+    _destroy: function() {
+        remove_all_listeners(this)
+        this._super()
     },
 })
 
@@ -1024,6 +1039,11 @@ $.widget('spud.screen',  {
 
     get_uuid: function() {
         return this.widgetName + ":" + this.uuid
+    },
+
+    _destroy: function() {
+        remove_all_listeners(this)
+        this._super()
     },
 })
 

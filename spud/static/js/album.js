@@ -264,10 +264,6 @@ $.widget('spud.album_criteria', {
         this.loader.load()
     },
 
-    _destroy: function() {
-        remove_all_listeners(this)
-    },
-
     _setOption: function( key, value ) {
         if ( key === "obj" ) {
             this.load(value)
@@ -278,6 +274,11 @@ $.widget('spud.album_criteria', {
 
     get_uuid: function() {
         return this.widgetName + ":" + this.uuid
+    },
+
+    _destroy: function() {
+        remove_all_listeners(this)
+        this._super()
     },
 })
 
@@ -410,11 +411,6 @@ $.widget('spud.album_list', $.spud.photo_list_base, {
 
     disable: function() {
         this.element.addClass("disabled")
-    },
-
-    _destroy: function() {
-        remove_all_listeners(this)
-        this._super()
     },
 })
 
@@ -581,10 +577,6 @@ $.widget('spud.album_detail',  $.spud.infobox, {
         } else {
             this._super( key, value );
         }
-    },
-
-    _destroy: function() {
-        remove_all_listeners(this)
     },
 })
 
@@ -861,12 +853,6 @@ $.widget('spud.album_detail_screen', $.spud.screen, {
         this.options.obj = null
         this.options.obj_id = obj_id
         this.ad.album_detail('load', obj_id)
-    },
-
-    _destroy: function() {
-        this.ad.album_detail('option', 'on_update', null)
-        remove_all_listeners(this)
-        this._super()
     },
 
     get_url: function() {

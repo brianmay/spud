@@ -668,6 +668,7 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
 
     _destroy: function() {
         var mythis = this
+        remove_all_listeners(this)
         $.each(this.fields, function(id, field) {
             field.destroy()
         })
