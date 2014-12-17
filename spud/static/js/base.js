@@ -998,7 +998,7 @@ $.widget('spud.screen',  {
         this._disable()
         this.element.remove()
         var last_screen = $(".screen:last")
-        if (last_screen > 0) {
+        if (last_screen.length > 0) {
             var screen = last_screen.data('screen')
             screen.enable()
         } else {
