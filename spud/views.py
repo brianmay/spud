@@ -532,6 +532,7 @@ _types = {
     'albums',
     'categorys',
     'places',
+    'persons',
 }
 
 

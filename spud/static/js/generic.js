@@ -331,7 +331,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("People")
         .on('click', function(ev) {
-            alert("meow")
+            add_screen($.spud.person_list_screen, {})
             return false
         })
         .appendTo(menu)
@@ -1042,7 +1042,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 mythis.element.removeClass("error")
                 mythis.options.obj = obj
                 mythis.options.obj_id = obj.id
-                mythis._set_title("Album: "+obj.title)
+                mythis._set_title(mythis._type_name + ": "+obj.title)
                 mythis._setup_buttons()
                 var instance = mythis._get_object_list_instance(mythis._ol)
                 instance.option("criteria", {
