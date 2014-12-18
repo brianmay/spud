@@ -17,42 +17,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window._category_created = new signal()
-window._category_changed = new signal()
-window._category_deleted = new signal()
+window._place_created = new signal()
+window._place_changed = new signal()
+window._place_deleted = new signal()
 
-function category_loader(obj_id) {
-    object_loader.call(this, "categorys", obj_id)
+function place_loader(obj_id) {
+    object_loader.call(this, "places", obj_id)
 }
 
-category_loader.prototype = new object_loader()
-category_loader.constructor = category_loader
+place_loader.prototype = new object_loader()
+place_loader.constructor = place_loader
 
 
-function category_list_loader(criteria) {
-    object_list_loader.call(this, "categorys", criteria)
+function place_list_loader(criteria) {
+    object_list_loader.call(this, "places", criteria)
 }
 
-category_list_loader.prototype = new object_list_loader()
-category_list_loader.constructor = category_list_loader
+place_list_loader.prototype = new object_list_loader()
+place_list_loader.constructor = place_list_loader
 
 
 ///////////////////////////////////////
-// category dialogs
+// place dialogs
 ///////////////////////////////////////
 
-$.widget('spud.category_search_dialog',  $.spud.form_dialog, {
+$.widget('spud.place_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
             ["q", new text_input_field("Search for", false)],
-            ["instance", new ajax_select_field("Category", "categorys", false)],
+            ["instance", new ajax_select_field("Place", "places", false)],
             ["mode", new select_input_field("Mode",
                 [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
             ["root_only", new boolean_input_field("Root only", false)],
         ]
-        this.options.title = "Search categorys"
-        this.options.description = "Please search for an category."
+        this.options.title = "Search places"
+        this.options.description = "Please search for an place."
         this.options.button = "Search"
         this._super();
     },
@@ -79,34 +79,40 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.category_change_dialog',  $.spud.save_dialog, {
+$.widget('spud.place_change_dialog',  $.spud.save_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
-            ["description", new p_input_field("Description", false)],
             ["cover_photo", new photo_select_field("Photo", false)],
-            ["sort_name", new text_input_field("Sort Name", false)],
-            ["sort_order", new text_input_field("Sort Order", false)],
-            ["parent", new ajax_select_field("Parent", "categorys", false)],
+            ["address", new text_input_field("Address", false)],
+            ["address2", new text_input_field("Address(ctd)", false)],
+            ["city", new text_input_field("City", false)],
+            ["state", new text_input_field("State", false)],
+            ["country", new text_input_field("Country", false)],
+            ["postcode", new text_input_field("Postcode", false)],
+            ["url", new text_input_field("URL", false)],
+            ["urldesc", new text_input_field("URL desc", false)],
+            ["notes", new p_input_field("Notes", false)],
+            ["parent", new ajax_select_field("Parent", "places", false)],
         ]
 
-        this.options.title = "Change category"
+        this.options.title = "Change place"
         this.options.button = "Save"
 
-        this._type = "categorys"
+        this._type = "places"
         this._super();
     },
 
-    set: function(category) {
-        this.obj_id = category.id
-        if (category.id != null) {
-            this.set_title("Change category")
-            this.set_description("Please change category " + category.title + ".")
+    set: function(place) {
+        this.obj_id = place.id
+        if (place.id != null) {
+            this.set_title("Change place")
+            this.set_description("Please change place " + place.title + ".")
         } else {
-            this.set_title("Add new category")
-            this.set_description("Please add new category.")
+            this.set_title("Add new place")
+            this.set_description("Please add new place.")
         }
-        return this._super(category);
+        return this._super(place);
     },
 
     _submit_values: function(values) {
@@ -119,27 +125,27 @@ $.widget('spud.category_change_dialog',  $.spud.save_dialog, {
 
     _done: function(data) {
         if (this.obj_id != null) {
-            window._category_changed.trigger(data)
+            window._place_changed.trigger(data)
         } else {
-            window._category_created.trigger(data)
+            window._place_created.trigger(data)
         }
     },
 })
 
 
-$.widget('spud.category_delete_dialog',  $.spud.save_dialog, {
+$.widget('spud.place_delete_dialog',  $.spud.save_dialog, {
     _create: function() {
-        this.options.title = "Delete category"
+        this.options.title = "Delete place"
         this.options.button = "Delete"
 
-        this._type = "categorys"
+        this._type = "places"
         this._super();
     },
 
-    set: function(category) {
-        this.obj_id = category.id
+    set: function(place) {
+        this.obj_id = place.id
         this.set_description("Are you absolutely positively sure you really want to delete " +
-            category.title + "? Go ahead join the dark side. There are cookies.")
+            place.title + "? Go ahead join the dark side. There are cookies.")
     },
 
     _submit_values: function(values) {
@@ -147,16 +153,16 @@ $.widget('spud.category_delete_dialog',  $.spud.save_dialog, {
     },
 
     _done: function(data) {
-        window._category_deleted.trigger(this.obj_id)
+        window._place_deleted.trigger(this.obj_id)
     }
 })
 
 
 ///////////////////////////////////////
-// category widgets
+// place widgets
 ///////////////////////////////////////
 
-$.widget('spud.category_criteria', $.spud.object_criteria, {
+$.widget('spud.place_criteria', $.spud.object_criteria, {
     set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
@@ -210,78 +216,84 @@ $.widget('spud.category_criteria', $.spud.object_criteria, {
 })
 
 
-$.widget('spud.category_list', $.spud.object_list, {
+$.widget('spud.place_list', $.spud.object_list, {
     _create: function() {
         this._super()
 
-        window._category_changed.add_listener(this, function(category) {
-            var li = this._create_li(category)
-            this._get_item(category.id).replaceWith(li)
+        window._place_changed.add_listener(this, function(place) {
+            var li = this._create_li(place)
+            this._get_item(place.id).replaceWith(li)
         })
-        window._category_deleted.add_listener(this, function(category_id) {
-            this._get_item(category_id).remove()
+        window._place_deleted.add_listener(this, function(place_id) {
+            this._get_item(place_id).remove()
             this._load_if_required()
         })
     },
 
     _new_object_list_loader: function(criteria) {
-        return new category_list_loader(criteria)
+        return new place_list_loader(criteria)
     },
 
-    _category_a: function(category) {
+    _place_a: function(place) {
         var mythis = this
-        var category_list_loader = this.loader
+        var place_list_loader = this.loader
 
-        var title = category.title
+        var title = place.title
         var a = $('<a/>')
-            .attr('href', root_url() + "categorys/" + category.id + "/")
+            .attr('href', root_url() + "places/" + place.id + "/")
             .on('click', function() {
                 var child_id = mythis.options.child_id
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
-                        child.category_detail_screen("set", category)
-                        child.category_detail_screen("set_loader", category_list_loader)
-                        child.category_detail_screen("enable")
+                        child.place_detail_screen("set", place)
+                        child.place_detail_screen("set_loader", place_list_loader)
+                        child.place_detail_screen("enable")
                         return false
                     }
                 }
 
                 var params = {
                     id: child_id,
-                    obj: category,
-                    object_list_loader: category_list_loader,
+                    obj: place,
+                    object_list_loader: place_list_loader,
                 }
-                child = add_screen($.spud.category_detail_screen, params)
+                child = add_screen($.spud.place_detail_screen, params)
                 return false;
             })
-            .data('photo', category.cover_photo)
+            .data('photo', place.cover_photo)
             .text(title)
         return a
     },
 
-    _create_li: function(category) {
-        var photo = category.cover_photo
+    _create_li: function(place) {
+        var photo = place.cover_photo
         var details = []
-        if  (category.sort_order || category.sort_name) {
-            details.push($("<div/>").text(category.sort_name + " " + category.sort_order))
+        if  (place.sort_order || place.sort_name) {
+            details.push($("<div/>").text(place.sort_name + " " + place.sort_order))
         }
-        var a = this._category_a(category)
-        var li = this._super(photo, category.title, details, category.description, a)
-        li.attr('data-id', category.id)
+        var a = this._place_a(place)
+        var li = this._super(photo, place.title, details, place.description, a)
+        li.attr('data-id', place.id)
         return li
     },
 
 })
 
 
-$.widget('spud.category_detail',  $.spud.object_detail, {
+$.widget('spud.place_detail',  $.spud.object_detail, {
     _create: function() {
         this.options.fields = [
-            ["title", new text_output_field("Title")],
-            ["sort_name", new text_output_field("Sort Name")],
-            ["sort_order", new text_output_field("Sort Order")],
-            ["description", new p_output_field("Description")],
+            ["address", new text_output_field("Address")],
+            ["address2", new text_output_field("Address(ctd)")],
+            ["city", new text_output_field("City")],
+            ["state", new text_output_field("State")],
+            ["postcode", new text_output_field("Postcode")],
+            ["country", new text_output_field("Country")],
+            ["url", new html_output_field("URL")],
+            ["home_of", new link_list_output_field("Home of")],
+            ["work_of", new link_list_output_field("Work of")],
+            ["notes", new p_output_field("notes")],
         ]
         this.loader = null
 
@@ -292,19 +304,19 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
         this._super();
     },
 
-    set: function(category) {
+    set: function(place) {
         this.element.removeClass("error")
-        this._super(category)
-        this.options.obj = category
-        this.options.obj_id = category.id
-        this.img.image("set", category.cover_photo)
+        this._super(place)
+        this.options.obj = place
+        this.options.obj_id = place.id
+        this.img.image("set", place.cover_photo)
         if (this.options.on_update) {
-            this.options.on_update(category)
+            this.options.on_update(place)
         }
     },
 
     _new_object_loader: function(obj_id) {
-        return new category_loader(obj_id)
+        return new place_loader(obj_id)
     },
 
 
@@ -312,64 +324,64 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
 
 
 ///////////////////////////////////////
-// category screens
+// place screens
 ///////////////////////////////////////
 
-$.widget('spud.category_list_screen', $.spud.object_list_screen, {
+$.widget('spud.place_list_screen', $.spud.object_list_screen, {
     _create: function() {
-        this._type = "categorys"
-        this._type_name = "Category"
+        this._type = "places"
+        this._type_name = "Place"
 
         this._super()
     },
 
-    _object_list: $.proxy($.spud.category_list, window),
+    _object_list: $.proxy($.spud.place_list, window),
     _get_object_list_instance: function(ol) {
-        return ol.category_list("instance")
+        return ol.place_list("instance")
     },
 
 
-    _object_criteria: $.proxy($.spud.category_criteria, window),
+    _object_criteria: $.proxy($.spud.place_criteria, window),
     _get_object_criteria_instance: function(oc) {
-        return oc.category_criteria("instance")
+        return oc.place_criteria("instance")
     },
 
-    _object_search_dialog: $.proxy($.spud.category_search_dialog, window),
+    _object_search_dialog: $.proxy($.spud.place_search_dialog, window),
 })
 
 
-$.widget('spud.category_detail_screen', $.spud.object_detail_screen, {
+$.widget('spud.place_detail_screen', $.spud.object_detail_screen, {
     _create: function() {
-        this._type = "categorys"
-        this._type_name = "Category"
+        this._type = "places"
+        this._type_name = "Place"
 
         this._super()
 
         var mythis = this
 
-        window._category_changed.add_listener(this, function(obj) {
+        window._place_changed.add_listener(this, function(obj) {
             if (obj.id == this.options.obj_id) {
                 mythis.set(obj)
             }
         })
-        window._category_deleted.add_listener(this, function(obj_id) {
+        window._place_deleted.add_listener(this, function(obj_id) {
             if (obj_id == this.options.obj_id) {
                 mythis.close()
             }
         })
     },
 
-    _object_list: $.proxy($.spud.category_list, window),
+    _object_list: $.proxy($.spud.place_list, window),
     _get_object_list_instance: function(ol) {
-        return ol.category_list("instance")
+        return ol.place_list("instance")
     },
 
-    _object_detail: $.proxy($.spud.category_detail, window),
+    _object_detail: $.proxy($.spud.place_detail, window),
     _get_object_detail_instance: function(od) {
-        return od.category_detail("instance")
+        return od.place_detail("instance")
     },
 
-    _object_list_screen: $.proxy($.spud.category_list_screen, window),
-    _object_change_dialog: $.proxy($.spud.category_change_dialog, window),
+    _object_list_screen: $.proxy($.spud.place_list_screen, window),
+    _object_change_dialog: $.proxy($.spud.place_change_dialog, window),
     _object_delete_dialog: $.proxy($.spud._object_delete_dialog, window),
 })

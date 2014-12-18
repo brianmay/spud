@@ -292,37 +292,37 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     _normalize_item: function( item ) {
         var div = $("<div/>")
 
-        if (this.options.type == "albums") {
-            if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
+        if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
                 var photo = item.cover_photo.thumbs['thumb']
-                $("<img/>")
-                    .attr("src", photo.url)
-                    .attr("alt", "")
-                    .appendTo(div)
-            }
+            $("<img/>")
+                .attr("src", photo.url)
+                .attr("alt", "")
+                .appendTo(div)
+        }
 
+        if (item.title) {
             $("<div/>")
                 .addClass("title")
                 .text(item.title)
                 .appendTo(div)
-
-            if (item.description) {
-                $("<div/>")
-                    .addClass("desc")
-                    .p(item.description)
-                    .appendTo(div)
-            }
-
-            $("<div/>")
-                .addClass("clear")
-                .appendTo(div)
-
-            return {
-                label: div,
-                repr: item.title,
-                pk: item.id,
-            }
         }
+
+        if (item.description) {
+            $("<div/>")
+                .addClass("desc")
+                .p(item.description)
+                .appendTo(div)
+        }
+
+        $("<div/>")
+            .addClass("clear")
+            .appendTo(div)
+
+        return {
+            label: div,
+            repr: item.title,
+            pk: item.id,
+            }
 
         throw new Error("Unknown object type "+this.options.type);
     },

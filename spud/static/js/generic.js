@@ -323,7 +323,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Places")
         .on('click', function(ev) {
-            alert("meow")
+            add_screen($.spud.place_list_screen, {})
             return false
         })
         .appendTo(menu)

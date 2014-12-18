@@ -28,6 +28,8 @@ function do_list(obj_type, session, params) {
         screen_class = $.spud.album_list_screen
     } else if (obj_type == "categorys") {
         screen_class = $.spud.category_list_screen
+    } else if (obj_type == "places") {
+        screen_class = $.spud.place_list_screen
     }
     if (screen_class) {
         params = {
@@ -46,6 +48,8 @@ function do_detail(obj_type, obj_id, session, params) {
         screen_class = $.spud.album_detail_screen
     } else if (obj_type == "categorys") {
         screen_class = $.spud.category_detail_screen
+    } else if (obj_type == "places") {
+        screen_class = $.spud.place_detail_screen
     }
     if (screen_class) {
         params = {

@@ -290,7 +290,12 @@ class PlaceViewSet(viewsets.ModelViewSet):
         q = params.getlist('q', [])
         for r in q:
             queryset = queryset.filter(
-                Q(title__icontains=r) | Q(description__icontains=r))
+                Q(title__icontains=r) |
+                Q(address__icontains=r) |
+                Q(address2__icontains=r) |
+                Q(city__icontains=r) |
+                Q(state__icontains=r) |
+                Q(country__icontains=r))
 
         mode = params.get('mode', 'children')
         mode = mode.lower()
@@ -526,6 +531,7 @@ def root(request):
 _types = {
     'albums',
     'categorys',
+    'places',
 }
 
 
