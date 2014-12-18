@@ -358,7 +358,7 @@ class person(hierarchy_model):
     last_name = models.CharField(max_length=96, blank=True, db_index=True)
     middle_name = models.CharField(max_length=96, blank=True)
     called = models.CharField(max_length=48, blank=True)
-    gender = models.CharField(max_length=1, blank=True, choices=SEX_CHOICES)
+    sex = models.CharField(max_length=1, blank=True, choices=SEX_CHOICES)
     dob = models.DateField(null=True, blank=True)
     dod = models.DateField(null=True, blank=True)
     home = models.ForeignKey(

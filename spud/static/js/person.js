@@ -277,7 +277,7 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
             ["middle_name", new text_output_field("Middle name")],
             ["last_name", new text_output_field("Last name")],
             ["called", new text_output_field("Called")],
-            ["gender", new text_output_field("Gender")],
+            ["sex", new text_output_field("Sex")],
             ["email", new text_output_field("E-Mail")],
             ["dob", new text_output_field("Date of birth")],
             ["dod", new text_output_field("Date of death")],

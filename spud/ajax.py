@@ -572,7 +572,7 @@
 #
 #     if user.is_staff:
 #         d.update({
-#             'gender': person.gender,
+#             'sex': person.gender,
 #             'dob': None,
 #             'dod': None,
 #             'home': _json_place_brief(user, person.home),
@@ -1926,13 +1926,13 @@
 #             person.called = value
 #             updated = True
 #
-#         value = _pop_string(params, "gender")
+#         value = _pop_string(params, "sex")
 #         if value is not None:
 #             if not request.user.is_staff:
-#                 raise ErrorForbidden("No rights to change gender")
+#                 raise ErrorForbidden("No rights to change sex")
 #             if value != "1" and value != "2":
-#                 raise ErrorBadRequest("Unknown gender")
-#             person.gender = value
+#                 raise ErrorBadRequest("Unknown sex")
+#             person.sex = value
 #             updated = True
 #
 #         value = _pop_string(params, "notes")
