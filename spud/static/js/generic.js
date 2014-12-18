@@ -593,3 +593,600 @@ object_list_loader.prototype.check_for_listeners = function() {
     }
     this.abort()
 }
+
+///////////////////////////////////////
+// generic widgets
+///////////////////////////////////////
+$.widget('spud.object_criteria', $.spud.widget, {
+    _create: function() {
+        this.loader = null
+        this.album = null
+
+        this.criteria = $("<ul/>")
+            .addClass("criteria")
+            .appendTo(this.element)
+
+        if (this.options.obj) {
+            this.load(this.options.obj)
+        }
+    },
+
+    set: function(criteria) {
+    },
+
+    load: function(criteria) {
+        var mythis = this
+        if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
+            this.loader = null
+        }
+        this.album = null
+        this.set(criteria)
+        if (criteria.instance == null) {
+            return
+        }
+        this.loader = new album_loader(criteria.instance)
+        this.loader.loaded_item.add_listener(this, function(album) {
+            criteria = $.extend({}, criteria)
+            criteria.instance = album.title
+            mythis.set(criteria)
+            mythis.loader = null
+        })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+        })
+        this.loader.load()
+    },
+
+    _setOption: function( key, value ) {
+        if ( key === "obj" ) {
+            this.load(value)
+        } else {
+            this._super( key, value );
+        }
+    },
+})
+
+
+$.widget('spud.object_list', $.spud.photo_list_base, {
+    _create: function() {
+        this._super()
+
+        var mythis = this
+        this.empty()
+        if (this.options.disabled) {
+            this.disable()
+        } else {
+            this.enable()
+        }
+
+        if (this.options.criteria != null) {
+            this._filter(this.options.criteria)
+        }
+
+        this.element.scroll(function() {
+            mythis._load_if_required(mythis.options.criteria)
+        })
+
+        window._reload_all.add_listener(this, function() {
+            this._filter(this.options.criteria)
+        })
+    },
+
+    _get_item: function(obj_id) {
+        return this.ul.find("[data-id="+obj_id+"]")
+    },
+
+    _add_item: function(obj) {
+        var li = this._create_li(obj)
+            .appendTo(this.ul)
+        return this
+    },
+
+    _add_list: function(obj_list) {
+        var mythis = this
+        this.element.toggleClass("hidden", obj_list.length == 0)
+        $.each(obj_list, function(j, obj) {
+            mythis._add_item(obj)
+        })
+        this._load_if_required()
+        return this
+    },
+
+    _load_if_required: function() {
+        // if element is not displayed, we can't tell the scroll position,
+        // so we must wait for element to be displayed before we can continue
+        // loading
+        if (this.is_enabled() && this.loader) {
+            if (this.element.find("ul").height() <
+                    this.element.scrollTop() + this.element.height() + 200) {
+                this.loader.load_next_page()
+            }
+        }
+    },
+
+    _filter: function(criteria) {
+        var mythis = this
+        if (this.loader != null) {
+            this.loader.loaded_list.remove_listener(this)
+            this.loader = null
+        }
+        this.empty()
+        this.options.criteria = criteria
+        this.loader = this._new_object_list_loader(criteria)
+        this.loader.loaded_list.add_listener(this, function(obj_list) {
+            mythis._add_list(obj_list)
+        })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+        })
+        this.loader.load_next_page()
+    },
+
+    _setOption: function( key, value ) {
+        if ( key === "criteria" ) {
+            this._filter(value)
+        } else if (key === "disabled") {
+            if (value) {
+                this.enable()
+            } else {
+                this.disable()
+            }
+        } else {
+            this._super( key, value );
+        }
+    },
+
+    is_enabled: function() {
+        return !this.element.hasClass("disabled")
+    },
+
+    empty: function() {
+        this.page = 1
+        this.last_id = null
+        this._super()
+        this.element.removeClass("error")
+        if (this.loader) {
+            this.loader.loaded_list.remove_listener(this)
+            this.loader.on_error.remove_listener(this)
+            this.loader = null
+        }
+    },
+
+    enable: function() {
+        this.element.removeClass("disabled")
+        this._load_if_required()
+    },
+
+    disable: function() {
+        this.element.addClass("disabled")
+    },
+})
+
+
+$.widget('spud.object_detail',  $.spud.infobox, {
+    _create: function() {
+        this._super()
+        if (this.options.obj != null) {
+            this.options.obj_id = this.options.obj.id
+        } else if (this.options.obj_id != null) {
+            this.load(this.options.obj_id)
+        }
+    },
+
+    load: function(obj_id) {
+        var mythis = this
+
+        if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
+        }
+
+        this.loader = this._new_object_loader(obj_id)
+        this.loader.loaded_item.add_listener(this, function(obj) {
+            mythis.set(obj)
+            mythis.loader = null
+        })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+            mythis.loader = null
+            if (mythis.options.on_error) {
+                mythis.options.on_error()
+            }
+        })
+        this.loader.load()
+    },
+
+    _setOption: function( key, value ) {
+        if ( key === "obj" ) {
+            this.set(value)
+        } else if ( key === "obj_id" ) {
+            this.load(value)
+        } else {
+            this._super( key, value );
+        }
+    },
+})
+
+///////////////////////////////////////
+// generic screens
+///////////////////////////////////////
+$.widget('spud.object_list_screen', $.spud.screen, {
+    _create: function() {
+        var mythis = this
+
+        if (!this.options.criteria) {
+            this.options.criteria = {}
+        }
+
+        this.options.title = this._type_name + " list"
+        this._super()
+
+        var menu = $("<ul/>")
+            .addClass("menubar")
+            .append(
+                $("<li/>")
+                    .text("Filter")
+                    .on("click", function(ev) {
+                        var params = {
+                            obj: mythis.options.criteria,
+                            on_success: function(criteria) {
+                                mythis._filter(criteria)
+                                return true
+                            }
+                        }
+                        var div = $("<div/>")
+                        mythis.object_search_dialog(params, div)
+                    })
+            )
+            .menu()
+            .appendTo(this.div)
+
+        var params = {
+            'obj': this.options.criteria,
+            'on_load': function(criteria_dummy, title) {
+                mythis._set_title(mythis._type_name + " list: " + title)
+            }
+        }
+        this.criteria = $("<div/>").appendTo(this.div)
+        this._object_criteria(params, this.criteria)
+
+        var params = {
+            'child_id': this.options.id + ".child",
+            'criteria': this.options.criteria,
+            'disabled': this.options.disabled,
+        }
+        this.al = $("<div/>").appendTo(this.div)
+        this._object_list(params, this.al)
+    },
+
+    _filter: function(value) {
+        this.options.criteria = value
+        push_state()
+
+        var instance = this._get_object_criteria_instance(this.criteria)
+        instance.load(value)
+
+        var instance = this._get_object_list_instance(this.al)
+        instance.option("criteria", value)
+    },
+
+    _setOption: function( key, value ) {
+        if ( key === "criteria" ) {
+            this._filter(value)
+        } else if (key === "disabled") {
+            if (value) {
+                this.enable()
+            } else {
+                this.disable()
+            }
+        } else {
+            this._super( key, value );
+        }
+    },
+
+    enable: function() {
+        this._super()
+        if (this.al) {
+            var instance = this._get_object_list_instance(this.al)
+            instance.enable()
+        }
+    },
+
+    disable: function() {
+        this._super()
+        if (this.al) {
+            var instance = this._get_object_list_instance(this.al)
+            instance.disable()
+        }
+    },
+
+    get_url: function() {
+        var params = ""
+        if (!$.isEmptyObject(this.options.criteria)) {
+            params = "?" + $.param(this.options.criteria)
+        }
+        return root_url() + this._type + "/" + params
+    },
+})
+
+
+$.widget('spud.object_detail_screen', $.spud.screen, {
+    _create: function() {
+        var mythis = this
+
+        this.options.title = this._type_name+" Detail"
+
+        if (this.options.obj != null) {
+            var obj = this.options.obj
+            this.options.obj_id = obj.id
+            this.options.title = this._type_name+": "+obj.title
+        }
+
+        this._super()
+
+        var menu = $("<ul/>")
+            .addClass("menubar")
+            .append(
+                $("<li/>")
+                    .text("Children")
+                    .on("click", function(ev) {
+                        var screen_class = mythis._object_list_screen
+                        params = {
+                            criteria: {
+                                instance: mythis.options.obj_id,
+                                mode: "children",
+                            }
+                        }
+                        add_screen(screen_class, params)
+                    })
+            )
+
+        this.create_item = $("<li/>")
+            .text("Create")
+            .on("click", function(ev) {
+                if (mythis.options.obj != null) {
+                    var obj = {
+                        parent: mythis.options.obj.id,
+                    }
+                    var params = {
+                        obj: obj,
+                    }
+                    var div = $("<div/>")
+                    mythis._object_change_dialog(params, div)
+                }
+            })
+            .appendTo(menu)
+
+        this.change_item = $("<li/>")
+            .text("Change")
+            .on("click", function(ev) {
+                if (mythis.options.obj != null) {
+                    var params = {
+                        obj: mythis.options.obj,
+                    }
+                    var div = $("<div/>")
+                    mythis._object_change_dialog(params, div)
+                }
+            })
+            .appendTo(menu)
+
+        this.delete_item = $("<li/>")
+            .text("Delete")
+            .on("click", function(ev) {
+                if (mythis.options.obj != null) {
+                    var params = {
+                        obj: mythis.options.obj,
+                    }
+                    var div = $("<div/>")
+                    mythis._object_delete_dialog(params, div)
+                }
+            })
+            .appendTo(menu)
+
+        menu
+            .menu()
+            .appendTo(this.div)
+
+        this.prev_button = $("<input/>")
+            .attr('type', 'submit')
+            .attr('value', '<<')
+            .click(function() {
+                var object_list_loader = mythis.options.object_list_loader
+                var meta = object_list_loader.get_meta(mythis.options.obj_id)
+                var obj_id = meta.prev
+                if (obj_id) {
+                    mythis.load(obj_id)
+                }
+                push_state()
+            })
+            .button()
+            .appendTo(this.div)
+
+        this.next_button = $("<input/>")
+            .attr('type', 'submit')
+            .attr('value', '>>')
+            .click(function() {
+                var object_list_loader = mythis.options.object_list_loader
+                var meta = object_list_loader.get_meta(mythis.options.obj_id)
+                var obj_id = meta.next
+                if (obj_id) {
+                    mythis.load(obj_id)
+                }
+                push_state()
+            })
+            .button()
+            .appendTo(this.div)
+
+        this._setup_loader()
+        this._setup_buttons()
+
+        this._ol = null
+        var params = {
+            'on_update': function(obj) {
+                mythis.element.removeClass("error")
+                mythis.options.obj = obj
+                mythis.options.obj_id = obj.id
+                mythis._set_title("Album: "+obj.title)
+                mythis._setup_buttons()
+                var instance = mythis._get_object_list_instance(mythis._ol)
+                instance.option("criteria", {
+                    'instance': obj.id,
+                    'mode': 'children',
+                })
+            },
+            'on_error': function() {
+                mythis.element.addClass("error")
+            },
+        }
+
+        this._od = $("<div/>").appendTo(this.div)
+        this._object_detail(params, this._od)
+
+        var params = {
+            'child_id': this.options.id + ".child",
+            'disabled': this.options.disabled,
+        }
+        this._ol = $("<div/>").appendTo(this.div)
+        this._object_list(params, this._ol)
+
+        var instance = this._get_object_detail_instance(this._od)
+        if (this.options.obj != null) {
+            instance.set(this.options.obj)
+        } else if (this.options.obj_id != null) {
+            instance.load(this.options.obj_id)
+        }
+
+        this._setup_perms(window._perms)
+        window._perms_changed.add_listener(this, this._setup_perms)
+
+        window._reload_all.add_listener(this, function() {
+            mythis.load(this.options.obj_id)
+        })
+    },
+
+    _setup_loader: function() {
+        var mythis = this
+        if (this.options.object_list_loader != null) {
+            var object_list_loader = this.options.object_list_loader
+            object_list_loader.loaded_list.add_listener(this, function(object_list) {
+                mythis._setup_buttons()
+            })
+        }
+    },
+
+    _setup_perms: function(perms) {
+        if (perms.can_create) {
+            this.create_item.show()
+        } else {
+            this.create_item.hide()
+        }
+        if (perms.can_change) {
+            this.change_item.show()
+        } else {
+            this.change_item.hide()
+        }
+        if (perms.can_delete) {
+            this.delete_item.show()
+        } else {
+            this.delete_item.hide()
+        }
+    },
+
+    _setup_buttons: function() {
+        if (this.options.object_list_loader) {
+            var object_list_loader = this.options.object_list_loader
+            var meta = null
+            if (this.options.obj_id) {
+                meta = object_list_loader.get_meta(this.options.obj_id)
+            }
+
+            this.prev_button.show()
+            this.next_button.show()
+
+            if (meta != null && meta.prev) {
+                this.prev_button.button("enable")
+            } else {
+                this.prev_button.button("disable")
+            }
+            if (meta && meta.next) {
+                this.next_button.button("enable")
+            } else {
+                this.next_button.button("disable")
+            }
+        } else {
+            this.prev_button.hide()
+            this.next_button.hide()
+        }
+    },
+
+    set: function(obj) {
+        this.options.obj = obj
+        this.options.obj_id = obj.id
+        var instance = this._get_object_detail_instance(this._od)
+        instance.set(obj)
+
+        // above function will call on_update where the following
+        // will be done
+        // this._setup_buttons()
+        // this._set_title(this._type_name+": "+obj.title)
+        // this.options.obj = obj
+        // this.options.obj_id = obj.id
+    },
+
+    load: function(obj_id) {
+        this.options.obj = null
+        this.options.obj_id = obj_id
+        var instance = this._get_object_detail_instance(this._od)
+        instance.load(obj_id)
+    },
+
+    set_loader: function(object_list_loader) {
+        var old_loader = this.options.object_list_loader
+        if (old_loader != null) {
+            old_loader.loaded_list.remove_listener(this)
+        }
+        this.options.object_list_loader = object_list_loader
+
+        this._setup_loader()
+        this._setup_buttons()
+    },
+
+    enable: function() {
+        this._super()
+        if (this._ol) {
+            var instance = this._get_object_list_instance(this._ol)
+            instance.enable()
+        }
+    },
+
+    disable: function() {
+        this._super()
+        if (this._ol) {
+            var instance = this._get_object_list_instance(this._ol)
+            instance.disable()
+        }
+    },
+
+    _setOption: function( key, value ) {
+        if ( key === "obj" ) {
+            this.set(value)
+        } else if ( key === "obj_id" ) {
+            this.load(value)
+        } else if ( key === "object_list_loader" ) {
+            this.set_loader(value)
+        } else {
+            this._super( key, value );
+        }
+    },
+
+    get_url: function() {
+        return root_url() + this._type + "/" + this.options.obj_id + "/"
+    },
+
+    get_streamable_options: function() {
+        var options = this._super()
+        options = $.extend({}, options) // clone options so we can modify
+        delete options['object_list_loader']
+        return options
+    },
+})
