@@ -101,7 +101,7 @@ $.fn.append_csv = function(list){
 
 $.widget('spud.widget', {
     get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
+        return this.widgetName + "." + this.uuid
     },
 
     _destroy: function() {
@@ -137,7 +137,7 @@ $.widget('spud.autocompletehtml', $.ui.autocomplete, {
     },
 
     get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
+        return this.widgetName + "." + this.uuid
     },
 
     _destroy: function() {
@@ -903,6 +903,11 @@ $.widget('spud.screen', $.spud.widget, {
     _create: function() {
         var mythis = this
 
+        if (this.options.id == null) {
+            this.options.id = this.get_uuid()
+        }
+        this.element.attr("id", this.options.id)
+
         $("<div/>")
             .addClass("close_button")
             .text("[X]")
@@ -1017,6 +1022,9 @@ $.widget('spud.screen', $.spud.widget, {
             } else {
                 this.disable()
             }
+        } else if (key === "id") {
+            this.element.attr("id", value)
+            this.options.id = value
         } else {
             this._super( key, value );
         }

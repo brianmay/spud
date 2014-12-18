@@ -52,32 +52,6 @@ function photo_a(photo) {
     return a
 }
 
-function album_a(album, cache, album_list_loader) {
-    if (!cache) {
-        cache = {}
-    }
-
-    var title = album.title
-    var a = $('<a/>')
-        .attr('href', root_url() + "albums/" + album.id + "/")
-        .on('click', function() {
-            if (!cache.ads || cache.ads.parents().length == 0) {
-                var params = {
-                    obj: album,
-                    album_list_loader: album_list_loader,
-                }
-                cache.ads = add_screen($.spud.album_detail_screen, params)
-            } else {
-                cache.ads.album_detail_screen("set_album", album)
-                cache.ads.album_detail_screen("set_loader", album_list_loader)
-                cache.ads.album_detail_screen("enable")
-            }
-            return false;
-        })
-        .data('photo', album.cover_photo)
-        .text(title)
-    return a
-}
 
 // ***************
 // * AJAX COMMON *

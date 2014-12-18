@@ -736,6 +736,6 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
     },
 
     get_uuid: function() {
-        return this.widgetName + ":" + this.uuid
+        return this.widgetName + "." + this.uuid
     },
 })
