@@ -971,23 +971,18 @@ $.widget('spud.screen', $.spud.widget, {
     enable: function() {
         this._disable_all()
         this._enable()
-        $("head title").text(this.options.title)
         push_state()
         return this
     },
 
     disable: function() {
         this._disable()
-        if ($(".screen:not(.disabled)").length <= 0) {
-            $("head title").text("SPUD")
-        }
         push_state()
         return this
     },
 
     disable_all: function() {
         this._disable_all()
-        $("head title").text("SPUD")
         push_state()
         return this
     },
@@ -1000,7 +995,6 @@ $.widget('spud.screen', $.spud.widget, {
             var screen = last_screen.data('screen')
             screen.enable()
         } else {
-            $("head title").text("SPUD")
             push_state()
         }
     },
@@ -1009,7 +1003,7 @@ $.widget('spud.screen', $.spud.widget, {
         this.h1.text(title)
         this.options.title = title
         if (this.is_enabled()) {
-            $("head title").text(title)
+            push_state(true)
         }
     },
 

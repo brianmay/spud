@@ -390,7 +390,7 @@ function put_state(state) {
     window._dont_push = false
 }
 
-function push_state() {
+function push_state(do_replace) {
     if (window._dont_push) {
         return
     }
@@ -405,13 +405,15 @@ function push_state() {
         url = active_screen.get_url()
     }
 
-    if (window._do_replace) {
+    if (window._do_replace || do_replace) {
         console.log("replace state", JSON.stringify(state), title, url)
         history.replaceState(state, title, url)
     } else {
         console.log("push state", JSON.stringify(state), title, url)
         history.pushState(state, title, url)
     }
+
+    $("head title").text(title)
 }
 
 window.onpopstate = function(ev) {
