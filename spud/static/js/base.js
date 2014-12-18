@@ -683,6 +683,8 @@ $.widget('spud.image', $.spud.widget, {
 
         if (this.options.photo != null) {
             this.set(this.options.photo)
+        } else {
+            this.set_none()
         }
     },
 
@@ -763,7 +765,7 @@ $.widget('spud.image', $.spud.widget, {
     set_loading: function() {
         this._clear()
         $("<img></img>")
-            .attr("src", media_url("img/ajax-loader.gif"))
+            .attr("src", static_url("img/ajax-loader.gif"))
             .appendTo(this.element)
     },
 
@@ -857,11 +859,9 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
                 .data("photo", null)
                 .empty()
 
-        if (photo != null) {
-            var div = $("<div />")
-                .image({ photo: photo, size: "thumb" })
-                .appendTo(a)
-        }
+        var div = $("<div />")
+            .image({ photo: photo, size: "thumb" })
+            .appendTo(a)
 
         $("<div class='title'></div>")
             .text(title)
