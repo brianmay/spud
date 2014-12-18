@@ -26,6 +26,8 @@ function do_list(obj_type, session, params) {
     setup_page(session)
     if (obj_type == "albums") {
         screen_class = $.spud.album_list_screen
+    } else if (obj_type == "categorys") {
+        screen_class = $.spud.category_list_screen
     }
     if (screen_class) {
         params = {
@@ -42,6 +44,8 @@ function do_detail(obj_type, obj_id, session, params) {
     var screen_class
     if (obj_type == "albums") {
         screen_class = $.spud.album_detail_screen
+    } else if (obj_type == "categorys") {
+        screen_class = $.spud.category_detail_screen
     }
     if (screen_class) {
         params = {

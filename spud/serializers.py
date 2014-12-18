@@ -128,6 +128,8 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    cover_photo = NestedPhotoSerializer(read_only=True)
+
     class Meta:
         model = models.category
 
@@ -151,11 +153,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class PlaceSerializer(serializers.ModelSerializer):
+    cover_photo = NestedPhotoSerializer(read_only=True)
+
     class Meta:
         model = models.place
 
 
 class PersonSerializer(serializers.ModelSerializer):
+    cover_photo = NestedPhotoSerializer(read_only=True)
+
     class Meta:
         model = models.person
 

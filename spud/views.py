@@ -525,6 +525,7 @@ def root(request):
 
 _types = {
     'albums',
+    'categorys',
 }
 
 

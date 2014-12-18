@@ -313,7 +313,15 @@ function setup_menu(session) {
         .appendTo(menu)
 
     $('<li/>')
-        .text("Categorys")
+        .text("Categories")
+        .on('click', function(ev) {
+            add_screen($.spud.category_list_screen, {})
+            return false
+        })
+        .appendTo(menu)
+
+    $('<li/>')
+        .text("Places")
         .on('click', function(ev) {
             alert("meow")
             return false
@@ -322,6 +330,14 @@ function setup_menu(session) {
 
     $('<li/>')
         .text("People")
+        .on('click', function(ev) {
+            alert("meow")
+            return false
+        })
+        .appendTo(menu)
+
+    $('<li/>')
+        .text("Photos")
         .on('click', function(ev) {
             alert("meow")
             return false
@@ -835,7 +851,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
                             }
                         }
                         var div = $("<div/>")
-                        mythis.object_search_dialog(params, div)
+                        mythis._object_search_dialog(params, div)
                     })
             )
             .menu()
