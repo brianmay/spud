@@ -59,7 +59,7 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
 
     set: function(criteria) {
         if (true) {
-            this.add_field("needs_revision",
+            this.add_field(null, "needs_revision",
                 new boolean_input_field("Needs revision"))
         } else {
             this.remove_field("needs_revision")
