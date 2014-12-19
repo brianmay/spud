@@ -627,7 +627,6 @@ $.widget('spud.object_criteria', $.spud.widget, {
         this.element.data('object_criteria', this)
 
         this.loader = null
-        this.album = null
 
         this.criteria = $("<ul/>")
             .addClass("criteria")
@@ -647,15 +646,14 @@ $.widget('spud.object_criteria', $.spud.widget, {
             this.loader.loaded_item.remove_listener(this)
             this.loader = null
         }
-        this.album = null
         this.set(criteria)
         if (criteria.instance == null) {
             return
         }
         this.loader = get_object_loader(this._type, criteria.instance)
-        this.loader.loaded_item.add_listener(this, function(album) {
+        this.loader.loaded_item.add_listener(this, function(obj) {
             criteria = $.extend({}, criteria)
-            criteria.instance = album.title
+            criteria.instance = obj.title
             mythis.set(criteria)
             mythis.loader = null
         })
