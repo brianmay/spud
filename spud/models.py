@@ -413,6 +413,14 @@ class person(hierarchy_model):
         self._fix_ascendants(
             ["mother", "father"], person_ascendant, cache, do_descendants)
 
+    # spouses
+
+    def spouses(self):
+        return person.objects.filter(
+            Q(pk=self.spouse_id) |
+            Q(spouse__id=self.pk)
+        )
+
     # grand parents generation
 
     def grandparents(self):

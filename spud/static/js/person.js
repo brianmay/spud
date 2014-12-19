@@ -202,6 +202,10 @@ $.widget('spud.person_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
+
+    _new_object_loader: function(obj_id) {
+        return new person_loader(obj_id)
+    },
 })
 
 
@@ -281,18 +285,18 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
             ["email", new text_output_field("E-Mail")],
             ["dob", new text_output_field("Date of birth")],
             ["dod", new text_output_field("Date of death")],
-            ["work", new link_output_field("Work")],
-            ["home", new link_output_field("Home")],
-            ["spouses", new link_list_output_field("Spouses")],
+            ["work", new link_output_field("Work", "places")],
+            ["home", new link_output_field("Home", "places")],
+            ["spouses", new link_list_output_field("Spouses", "persons")],
             ["notes", new p_output_field("Notes")],
-            ["grandparents", new link_list_output_field("Grand Parents")],
-            ["uncles_aunts", new link_list_output_field("Uncles and Aunts")],
-            ["parents", new link_list_output_field("Parents")],
-            ["siblings", new link_list_output_field("Siblings")],
-            ["cousins", new link_list_output_field("Cousins")],
-            ["children", new link_list_output_field("Children")],
-            ["nephews_nieces", new link_list_output_field("Nephews and Nieces")],
-            ["grandchildren", new link_list_output_field("Grand children")],
+            ["grandparents", new link_list_output_field("Grand Parents", "persons")],
+            ["uncles_aunts", new link_list_output_field("Uncles and Aunts", "persons")],
+            ["parents", new link_list_output_field("Parents", "persons")],
+            ["siblings", new link_list_output_field("Siblings", "persons")],
+            ["cousins", new link_list_output_field("Cousins", "persons")],
+            ["children", new link_list_output_field("Children", "persons")],
+            ["nephews_nieces", new link_list_output_field("Nephews and Nieces", "persons")],
+            ["grandchildren", new link_list_output_field("Grand children", "persons")],
         ]
         this.loader = null
 

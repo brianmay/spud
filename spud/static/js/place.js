@@ -213,6 +213,10 @@ $.widget('spud.place_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
+
+    _new_object_loader: function(obj_id) {
+        return new place_loader(obj_id)
+    },
 })
 
 
@@ -291,8 +295,8 @@ $.widget('spud.place_detail',  $.spud.object_detail, {
             ["postcode", new text_output_field("Postcode")],
             ["country", new text_output_field("Country")],
             ["url", new html_output_field("URL")],
-            ["home_of", new link_list_output_field("Home of")],
-            ["work_of", new link_list_output_field("Work of")],
+            ["home_of", new link_list_output_field("Home of", "places")],
+            ["work_of", new link_list_output_field("Work of", "places")],
             ["notes", new p_output_field("notes")],
         ]
         this.loader = null

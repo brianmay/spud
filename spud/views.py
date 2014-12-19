@@ -173,7 +173,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
         root_only = params.get('root_only', False)
         if root_only:
-            queryset = queryset.filter(parent=None)
+            queryset = queryset.filter(parent__isnull=True)
 
         if self.request.user.is_staff:
             needs_revision = params.get('needs_revision', False)
@@ -253,7 +253,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
         root_only = params.get('root_only', False)
         if root_only:
-            queryset = queryset.filter(parent=None)
+            queryset = queryset.filter(parent__isnull=True)
 
         return queryset
 
@@ -328,7 +328,7 @@ class PlaceViewSet(viewsets.ModelViewSet):
 
         root_only = params.get('root_only', False)
         if root_only:
-            queryset = queryset.filter(parent=None)
+            queryset = queryset.filter(parent__isnull=True)
 
         return queryset
 
@@ -352,6 +352,16 @@ class PersonViewSet(viewsets.ModelViewSet):
         queryset = models.person.objects.all()
         params = self.request.QUERY_PARAMS
 
+        name = params.get('name', None)
+        if name is not None:
+            try:
+                person = models.person.objects.get_by_name(name)
+            except exceptions.NameDoesNotExist as e:
+                raise drf_exceptions.ParseError(
+                    "Cannot find person '%s': %s" % (name, e))
+
+            queryset = queryset.filter(pk=person.pk)
+
         q = params.getlist('q', [])
         for r in q:
             queryset = queryset.filter(
@@ -359,6 +369,41 @@ class PersonViewSet(viewsets.ModelViewSet):
                 Q(middle_name__icontains=r) |
                 Q(last_name__icontains=r) |
                 Q(called__icontains=r))
+
+        mode = params.get('mode', 'children')
+        mode = mode.lower()
+
+        try:
+            instance = params.get('instance')
+            if instance is not None:
+                instance = int(instance)
+                instance = models.person.objects.get(pk=instance)
+        except ValueError:
+            raise drf_exceptions.ParseError(
+                "Person not integer '%s'" % instance)
+        except models.person.DoesNotExist as e:
+            raise drf_exceptions.ParseError(
+                "Cannot find person '%s': %s" % (instance, e))
+
+        if instance is not None:
+            if mode == "children":
+                queryset = queryset.filter(
+                    Q(mother=instance) | Q(father=instance))
+            elif mode == "ascendants":
+                queryset = queryset.filter(
+                    descendant_set__descendant=instance,
+                    descendant_set__position__gt=0)
+            elif mode == "descendants":
+                queryset = queryset.filter(
+                    ascendant_set__ascendant=instance,
+                    ascendant_set__position__gt=0)
+            else:
+                instance = None
+
+        root_only = params.get('root_only', False)
+        if root_only:
+            queryset = queryset.filter(mother__isnull=True,
+                                       father__isnull=True)
 
         return queryset
 

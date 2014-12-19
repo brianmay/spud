@@ -156,7 +156,8 @@ datetime_output_field.prototype.set = function(value) {
 
 
 // define link_output_field
-function link_output_field(title) {
+function link_output_field(title, type) {
+    this.type = type
     output_field.call(this, title)
 }
 
@@ -164,10 +165,19 @@ link_output_field.prototype = new output_field()
 link_output_field.constructor = link_output_field
 
 link_output_field.prototype.set = function(value) {
-    this.output.html(object_a(value))
+    var mythis = this
+
     this.toggle(value != null)
+    if (value == null) {
+        this.output.text("")
+        return
+    }
+
+    var a = object_a(this.type, value)
+    this.output.html(a)
 }
 
+// FIXME: check if this is required
 // define html_output_field
 function html_output_field(title) {
     output_field.call(this, title)
@@ -182,37 +192,38 @@ html_output_field.prototype.set = function(value) {
 }
 
 // define html_list_output_field
-function html_list_output_field(title) {
-    output_field.call(this, title)
-}
-
-
-html_list_output_field.prototype = new output_field()
-html_list_output_field.constructor = html_list_output_field
-
-html_list_output_field.prototype.create = function(id) {
-    return this.output = $('<ul />')
-}
-
-html_list_output_field.prototype.set = function(value) {
-    this.output.empty()
-
-    if (value==null) {
-        this.hide()
-        return
-    }
-
-    var mythis = this
-    $.each(value, function(i, item){
-        $("<li></li>")
-            .append(item)
-            .appendTo(mythis.output)
-    })
-    this.toggle(value.length > 0)
-}
+// function html_list_output_field(title) {
+//     output_field.call(this, title)
+// }
+//
+//
+// html_list_output_field.prototype = new output_field()
+// html_list_output_field.constructor = html_list_output_field
+//
+// html_list_output_field.prototype.create = function(id) {
+//     return this.output = $('<ul />')
+// }
+//
+// html_list_output_field.prototype.set = function(value) {
+//     this.output.empty()
+//
+//     if (value==null) {
+//         this.hide()
+//         return
+//     }
+//
+//     var mythis = this
+//     $.each(value, function(i, item){
+//         $("<li></li>")
+//             .append(item)
+//             .appendTo(mythis.output)
+//     })
+//     this.toggle(value.length > 0)
+// }
 
 // define link_list_output_field
-function link_list_output_field(title) {
+function link_list_output_field(title, type) {
+    this.type = type
     output_field.call(this, title)
 }
 
@@ -237,7 +248,7 @@ link_list_output_field.prototype.set = function(value) {
     $.each(value, function(i, item){
         mythis.output
             .append(sep)
-            .append(object_a(item))
+            .append(object_a(mythis.type, item))
         sep = ", "
     })
     mythis.output.append(".")

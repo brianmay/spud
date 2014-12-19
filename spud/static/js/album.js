@@ -225,6 +225,10 @@ $.widget('spud.album_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
+
+    _new_object_loader: function(obj_id) {
+        return new album_loader(obj_id)
+    },
 })
 
 

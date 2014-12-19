@@ -207,6 +207,10 @@ $.widget('spud.category_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
+
+    _new_object_loader: function(obj_id) {
+        return new category_loader(obj_id)
+    },
 })
 
 

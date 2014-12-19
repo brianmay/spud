@@ -42,6 +42,37 @@ function root_a() {
     return a
 }
 
+function object_a(type, value) {
+    var screen
+
+    if (type == "albums") {
+        screen = $.spud.album_detail_screen
+    } else if (type == "categorys") {
+        screen = $.spud.category_detail_screen
+    } else if (type == "places") {
+        screen = $.spud.place_detail_screen
+    } else if (type == "persons") {
+        screen = $.spud.person_detail_screen
+    } else {
+        return null
+    }
+
+    var a = $('<a/>')
+        .attr('href', root_url() + type + "/" + value.id + "/")
+        .on('click', function() {
+            var params = {}
+            // force a reload
+            params.obj = null
+            params.obj_id = value.id
+            add_screen(screen, params)
+            return false;
+        })
+        .data('photo', value.cover_photo)
+        .text(value.title)
+
+    return a
+}
+
 function photo_a(photo) {
     var title = photo.title
     var a = $('<a/>')

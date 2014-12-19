@@ -13,6 +13,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
+
 import tempfile
 import pytz
 import datetime
@@ -159,8 +163,63 @@ class PlaceSerializer(serializers.ModelSerializer):
         model = models.place
 
 
-class PersonSerializer(serializers.ModelSerializer):
+class PersonTitleField(f.CharField):
+    def get_attribute(self, obj):
+        return obj
+
+    def to_representation(self, value):
+        return "%s" % value
+
+
+class NestedPersonSerializer(serializers.ModelSerializer):
+    title = PersonTitleField(read_only=True)
     cover_photo = NestedPhotoSerializer(read_only=True)
+
+    class Meta:
+        model = models.photo
+        fields = (
+            'id', 'title', 'cover_photo',
+        )
+
+
+class PersonSerializer(serializers.ModelSerializer):
+    title = PersonTitleField(read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
+
+    home = PlaceSerializer(read_only=True)
+    home_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.place.objects.all(), source="home",
+        required=False)
+
+    work = PlaceSerializer(read_only=True)
+    work_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.place.objects.all(), source="work",
+        required=False)
+
+    mother = None
+    mother_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.person.objects.all(), source="mother",
+        required=False)
+
+    father = None
+    father_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.person.objects.all(), source="father",
+        required=False)
+
+    spouse = None
+    spouse_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.person.objects.all(), source="spouse",
+        required=False)
+
+    spouses = NestedPersonSerializer(many=True, read_only=True)
+    grandparents = NestedPersonSerializer(many=True, read_only=True)
+    uncles_aunts = NestedPersonSerializer(many=True, read_only=True)
+    parents = NestedPersonSerializer(many=True, read_only=True)
+    siblings = NestedPersonSerializer(many=True, read_only=True)
+    cousins = NestedPersonSerializer(many=True, read_only=True)
+    children = NestedPersonSerializer(many=True, read_only=True)
+    nephews_nieces = NestedPersonSerializer(many=True, read_only=True)
+    grandchildren = NestedPersonSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.person

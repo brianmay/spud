@@ -641,7 +641,7 @@ $.widget('spud.object_criteria', $.spud.widget, {
         if (criteria.instance == null) {
             return
         }
-        this.loader = new album_loader(criteria.instance)
+        this.loader = this._new_object_loader(criteria.instance)
         this.loader.loaded_item.add_listener(this, function(album) {
             criteria = $.extend({}, criteria)
             criteria.instance = album.title
