@@ -21,21 +21,6 @@ window._person_created = new signal()
 window._person_changed = new signal()
 window._person_deleted = new signal()
 
-function person_loader(obj_id) {
-    object_loader.call(this, "persons", obj_id)
-}
-
-person_loader.prototype = new object_loader()
-person_loader.constructor = person_loader
-
-
-function person_list_loader(criteria) {
-    object_list_loader.call(this, "persons", criteria)
-}
-
-person_list_loader.prototype = new object_list_loader()
-person_list_loader.constructor = person_list_loader
-
 
 ///////////////////////////////////////
 // person dialogs
@@ -173,6 +158,9 @@ $.widget('spud.person_delete_dialog',  $.spud.save_dialog, {
 
 $.widget('spud.person_criteria', $.spud.object_criteria, {
     set: function(criteria) {
+        this._type = "persons"
+        this._type_name = "Person"
+
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -222,15 +210,14 @@ $.widget('spud.person_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new person_loader(obj_id)
-    },
 })
 
 
 $.widget('spud.person_list', $.spud.object_list, {
     _create: function() {
+        this._type = "persons"
+        this._type_name = "Person"
+
         this._super()
 
         window._person_changed.add_listener(this, function(person) {
@@ -241,10 +228,6 @@ $.widget('spud.person_list', $.spud.object_list, {
             this._get_item(person_id).remove()
             this._load_if_required()
         })
-    },
-
-    _new_object_list_loader: function(criteria) {
-        return new person_list_loader(criteria)
     },
 
     _person_a: function(person) {
@@ -296,6 +279,9 @@ $.widget('spud.person_list', $.spud.object_list, {
 
 $.widget('spud.person_detail',  $.spud.object_detail, {
     _create: function() {
+        this._type = "persons"
+        this._type_name = "Person"
+
         this.options.fields = [
             ["first_name", new text_output_field("First name")],
             ["middle_name", new text_output_field("Middle name")],
@@ -337,12 +323,6 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
             this.options.on_update(person)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new person_loader(obj_id)
-    },
-
-
 })
 
 

@@ -21,21 +21,6 @@ window._album_created = new signal()
 window._album_changed = new signal()
 window._album_deleted = new signal()
 
-function album_loader(obj_id) {
-    object_loader.call(this, "albums", obj_id)
-}
-
-album_loader.prototype = new object_loader()
-album_loader.constructor = album_loader
-
-
-function album_list_loader(criteria) {
-    object_list_loader.call(this, "albums", criteria)
-}
-
-album_list_loader.prototype = new object_list_loader()
-album_list_loader.constructor = album_list_loader
-
 
 ///////////////////////////////////////
 // album dialogs
@@ -172,6 +157,9 @@ $.widget('spud.album_delete_dialog',  $.spud.save_dialog, {
 
 $.widget('spud.album_criteria', $.spud.object_criteria, {
     set: function(criteria) {
+        this._type = "albums"
+        this._type_name = "Album"
+
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -225,15 +213,14 @@ $.widget('spud.album_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new album_loader(obj_id)
-    },
 })
 
 
 $.widget('spud.album_list', $.spud.object_list, {
     _create: function() {
+        this._type = "albums"
+        this._type_name = "Album"
+
         this._super()
 
         window._album_changed.add_listener(this, function(album) {
@@ -244,10 +231,6 @@ $.widget('spud.album_list', $.spud.object_list, {
             this._get_item(album_id).remove()
             this._load_if_required()
         })
-    },
-
-    _new_object_list_loader: function(criteria) {
-        return new album_list_loader(criteria)
     },
 
     _album_a: function(album) {
@@ -299,6 +282,9 @@ $.widget('spud.album_list', $.spud.object_list, {
 
 $.widget('spud.album_detail',  $.spud.object_detail, {
     _create: function() {
+        this._type = "albums"
+        this._type_name = "Album"
+
         this.options.fields = [
             ["title", new text_output_field("Title")],
             ["sort_name", new text_output_field("Sort Name")],
@@ -325,12 +311,6 @@ $.widget('spud.album_detail',  $.spud.object_detail, {
             this.options.on_update(album)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new album_loader(obj_id)
-    },
-
-
 })
 
 

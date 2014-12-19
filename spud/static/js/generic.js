@@ -505,6 +505,10 @@ object_loader.prototype.check_for_listeners = function() {
     this.abort()
 }
 
+function get_object_loader(type, obj_id) {
+    return new object_loader(type, obj_id)
+}
+
 ///////////////////////////////////////
 // object_list_loader
 ///////////////////////////////////////
@@ -610,6 +614,10 @@ object_list_loader.prototype.check_for_listeners = function() {
     this.abort()
 }
 
+function get_object_list_loader(type, criteria) {
+    return new object_list_loader(type, criteria)
+}
+
 ///////////////////////////////////////
 // generic widgets
 ///////////////////////////////////////
@@ -641,7 +649,7 @@ $.widget('spud.object_criteria', $.spud.widget, {
         if (criteria.instance == null) {
             return
         }
-        this.loader = this._new_object_loader(criteria.instance)
+        this.loader = get_object_loader(this._type, criteria.instance)
         this.loader.loaded_item.add_listener(this, function(album) {
             criteria = $.extend({}, criteria)
             criteria.instance = album.title
@@ -729,7 +737,7 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         }
         this.empty()
         this.options.criteria = criteria
-        this.loader = this._new_object_list_loader(criteria)
+        this.loader = get_object_list_loader(this._type, criteria)
         this.loader.loaded_list.add_listener(this, function(obj_list) {
             mythis._add_list(obj_list)
         })
@@ -797,7 +805,7 @@ $.widget('spud.object_detail',  $.spud.infobox, {
             this.loader.loaded_item.remove_listener(this)
         }
 
-        this.loader = this._new_object_loader(obj_id)
+        this.loader = get_object_loader(this._type, obj_id)
         this.loader.loaded_item.add_listener(this, function(obj) {
             mythis.set(obj)
             mythis.loader = null

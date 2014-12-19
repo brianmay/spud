@@ -21,21 +21,6 @@ window._place_created = new signal()
 window._place_changed = new signal()
 window._place_deleted = new signal()
 
-function place_loader(obj_id) {
-    object_loader.call(this, "places", obj_id)
-}
-
-place_loader.prototype = new object_loader()
-place_loader.constructor = place_loader
-
-
-function place_list_loader(criteria) {
-    object_list_loader.call(this, "places", criteria)
-}
-
-place_list_loader.prototype = new object_list_loader()
-place_list_loader.constructor = place_list_loader
-
 
 ///////////////////////////////////////
 // place dialogs
@@ -164,6 +149,9 @@ $.widget('spud.place_delete_dialog',  $.spud.save_dialog, {
 
 $.widget('spud.place_criteria', $.spud.object_criteria, {
     set: function(criteria) {
+        this._type = "places"
+        this._type_name = "Place"
+
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -213,15 +201,14 @@ $.widget('spud.place_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new place_loader(obj_id)
-    },
 })
 
 
 $.widget('spud.place_list', $.spud.object_list, {
     _create: function() {
+        this._type = "places"
+        this._type_name = "Place"
+
         this._super()
 
         window._place_changed.add_listener(this, function(place) {
@@ -232,10 +219,6 @@ $.widget('spud.place_list', $.spud.object_list, {
             this._get_item(place_id).remove()
             this._load_if_required()
         })
-    },
-
-    _new_object_list_loader: function(criteria) {
-        return new place_list_loader(criteria)
     },
 
     _place_a: function(place) {
@@ -287,6 +270,9 @@ $.widget('spud.place_list', $.spud.object_list, {
 
 $.widget('spud.place_detail',  $.spud.object_detail, {
     _create: function() {
+        this._type = "places"
+        this._type_name = "Place"
+
         this.options.fields = [
             ["address", new text_output_field("Address")],
             ["address2", new text_output_field("Address(ctd)")],
@@ -318,12 +304,6 @@ $.widget('spud.place_detail',  $.spud.object_detail, {
             this.options.on_update(place)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new place_loader(obj_id)
-    },
-
-
 })
 
 

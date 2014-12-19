@@ -21,21 +21,6 @@ window._category_created = new signal()
 window._category_changed = new signal()
 window._category_deleted = new signal()
 
-function category_loader(obj_id) {
-    object_loader.call(this, "categorys", obj_id)
-}
-
-category_loader.prototype = new object_loader()
-category_loader.constructor = category_loader
-
-
-function category_list_loader(criteria) {
-    object_list_loader.call(this, "categorys", criteria)
-}
-
-category_list_loader.prototype = new object_list_loader()
-category_list_loader.constructor = category_list_loader
-
 
 ///////////////////////////////////////
 // category dialogs
@@ -158,6 +143,9 @@ $.widget('spud.category_delete_dialog',  $.spud.save_dialog, {
 
 $.widget('spud.category_criteria', $.spud.object_criteria, {
     set: function(criteria) {
+        this._type = "categorys"
+        this._type_name = "Category"
+
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -207,15 +195,14 @@ $.widget('spud.category_criteria', $.spud.object_criteria, {
             this.options.on_load(criteria, title)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new category_loader(obj_id)
-    },
 })
 
 
 $.widget('spud.category_list', $.spud.object_list, {
     _create: function() {
+        this._type = "categorys"
+        this._type_name = "Category"
+
         this._super()
 
         window._category_changed.add_listener(this, function(category) {
@@ -226,10 +213,6 @@ $.widget('spud.category_list', $.spud.object_list, {
             this._get_item(category_id).remove()
             this._load_if_required()
         })
-    },
-
-    _new_object_list_loader: function(criteria) {
-        return new category_list_loader(criteria)
     },
 
     _category_a: function(category) {
@@ -281,6 +264,9 @@ $.widget('spud.category_list', $.spud.object_list, {
 
 $.widget('spud.category_detail',  $.spud.object_detail, {
     _create: function() {
+        this._type = "categorys"
+        this._type_name = "Category"
+
         this.options.fields = [
             ["title", new text_output_field("Title")],
             ["sort_name", new text_output_field("Sort Name")],
@@ -306,12 +292,6 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
             this.options.on_update(category)
         }
     },
-
-    _new_object_loader: function(obj_id) {
-        return new category_loader(obj_id)
-    },
-
-
 })
 
 
