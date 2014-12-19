@@ -81,8 +81,28 @@ $.widget('spud.person_search_dialog',  $.spud.form_dialog, {
 
 $.widget('spud.person_change_dialog',  $.spud.save_dialog, {
     _create: function() {
-        this.options.fields = [
-            ["title", new text_input_field("Title", true)],
+        this.options.pages = [
+            {name: 'basic', title: 'Basics', fields: [
+                ["cover_photo", new photo_select_field("Photo", false)],
+                ["first_name", new text_input_field("First name", false)],
+                ["middle_name", new text_input_field("Middle name", false)],
+                ["last_name", new text_input_field("Last name", false)],
+                ["called", new text_input_field("Called", false)],
+                ["sex", new select_input_field("Sex", [ ["1","Male"], ["2","Female"] ], true)],
+            ]},
+            {name: 'connections', title: 'Connections', fields: [
+                ["work_pk", new ajax_select_field("Work", "places", false)],
+                ["home_pk", new ajax_select_field("Home", "places", false)],
+                ["mother_pk", new ajax_select_field("Mother", "persons", false)],
+                ["father_pk", new ajax_select_field("Father", "persons", false)],
+                ["spouse_pk", new ajax_select_field("Spouse", "persons", false)],
+            ]},
+            {name: 'other', title: 'Other', fields: [
+                ["email", new text_input_field("E-Mail", false)],
+                ["dob", new date_input_field("Date of birth", false)],
+                ["dod", new date_input_field("Date of death", false)],
+                ["notes", new p_input_field("Notes", false)],
+            ]},
         ]
 
         this.options.title = "Change person"
@@ -281,7 +301,7 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
             ["middle_name", new text_output_field("Middle name")],
             ["last_name", new text_output_field("Last name")],
             ["called", new text_output_field("Called")],
-            ["sex", new text_output_field("Sex")],
+            ["sex", new select_output_field("Sex", [ ["1","Male"], ["2","Female"] ]) ],
             ["email", new text_output_field("E-Mail")],
             ["dob", new text_output_field("Date of birth")],
             ["dod", new text_output_field("Date of death")],

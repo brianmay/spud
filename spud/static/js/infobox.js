@@ -94,6 +94,28 @@ text_output_field.prototype.set = function(value) {
     this.toggle(Boolean(value))
 }
 
+// define select_input_field
+function select_output_field(title, options) {
+    this.options = {}
+    var mythis = this
+    $.each(options, function(id, v){
+        var id = v[0]
+        var value = v[1]
+        mythis.options[id] = value
+    })
+    output_field.call(this, title)
+}
+
+select_output_field.prototype = new output_field()
+select_output_field.constructor = select_output_field
+
+select_output_field.prototype.set = function(value) {
+    var mythis = this
+    value = this.options[value]
+    this.output.text(value)
+}
+
+
 // define boolean_outbooleanut_field
 function boolean_output_field(title) {
     output_field.call(this, title)

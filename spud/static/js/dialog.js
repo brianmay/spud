@@ -577,12 +577,6 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
             delete options.button
         }
 
-        this.f = $("<form method='get' />")
-            .appendTo(this.element)
-
-        this.table = $("<table />")
-            .appendTo(this.f)
-
         options.buttons = {}
         options.buttons[submit] = function() {
             mythis._check_submit()
@@ -591,7 +585,41 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
             mythis.close()
         }
 
-        this._create_fields()
+        this.f = $("<form method='get' />")
+            .appendTo(this.element)
+
+        this.fields = {}
+        if (this.options.pages) {
+            this.page = {}
+            this.tabs = $("<div/>").appendTo(this.element)
+
+            var ul = $("<ul></ul>").appendTo(this.tabs)
+
+            $.each(mythis.options.pages, function(id, page) {
+                var name = page.name
+                var title = page.title
+                $("<li/>")
+                    .append(
+                        $("<a/>")
+                            .attr("href", '#' + name)
+                            .text(title)
+                    )
+                    .appendTo(ul)
+
+                mythis.page[name] = $("<div/>")
+                    .attr('id', name)
+                    .appendTo(mythis.tabs)
+
+                mythis._create_fields(name, page.fields)
+            })
+
+            mythis.tabs.tabs()
+        } else {
+            this.table = $("<table />")
+                .appendTo(this.f)
+            this._create_fields(null, this.options.fields)
+        }
+
 
         if (options.initial != null) {
             this.set(options.initial)
@@ -640,10 +668,9 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
         }
     },
 
-    _create_fields: function() {
-        this.fields = {}
-        if (this.options.fields != null) {
-            this.add_fields(this.options.fields)
+    _create_fields: function(page, fields) {
+        if (fields != null) {
+            this.add_fields(page, fields)
         }
     },
 
@@ -687,20 +714,24 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
         return this
     },
 
-    add_field: function(id, field) {
+    add_field: function(page, id, field) {
         this.remove_field(id, field)
         var html = field.to_html(id)
-        this.table.append(html)
+        if (page == null) {
+            this.table.append(html)
+        } else {
+            this.page[page].append(html)
+        }
         this.fields[id] = field
         return this
     },
 
-    add_fields: function(fields) {
+    add_fields: function(page, fields) {
         var mythis = this
         $.each(fields, function(i, v){
             var id = v[0]
             var field = v[1]
-            mythis.add_field(id, field)
+            mythis.add_field(page, id, field)
         })
         return this
     },
