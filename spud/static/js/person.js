@@ -340,16 +340,7 @@ $.widget('spud.person_list_screen', $.spud.object_list_screen, {
     },
 
     _object_list: $.proxy($.spud.person_list, window),
-    _get_object_list_instance: function(ol) {
-        return ol.person_list("instance")
-    },
-
-
     _object_criteria: $.proxy($.spud.person_criteria, window),
-    _get_object_criteria_instance: function(oc) {
-        return oc.person_criteria("instance")
-    },
-
     _object_search_dialog: $.proxy($.spud.person_search_dialog, window),
 })
 
@@ -376,15 +367,7 @@ $.widget('spud.person_detail_screen', $.spud.object_detail_screen, {
     },
 
     _object_list: $.proxy($.spud.person_list, window),
-    _get_object_list_instance: function(ol) {
-        return ol.person_list("instance")
-    },
-
     _object_detail: $.proxy($.spud.person_detail, window),
-    _get_object_detail_instance: function(od) {
-        return od.person_detail("instance")
-    },
-
     _object_list_screen: $.proxy($.spud.person_list_screen, window),
     _object_change_dialog: $.proxy($.spud.person_change_dialog, window),
     _object_delete_dialog: $.proxy($.spud._object_delete_dialog, window),

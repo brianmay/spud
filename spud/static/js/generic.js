@@ -623,6 +623,9 @@ function get_object_list_loader(type, criteria) {
 ///////////////////////////////////////
 $.widget('spud.object_criteria', $.spud.widget, {
     _create: function() {
+        this._super()
+        this.element.data('object_criteria', this)
+
         this.loader = null
         this.album = null
 
@@ -675,6 +678,7 @@ $.widget('spud.object_criteria', $.spud.widget, {
 $.widget('spud.object_list', $.spud.photo_list_base, {
     _create: function() {
         this._super()
+        this.element.data('object_list', this)
 
         var mythis = this
         this.empty()
@@ -791,6 +795,8 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
 $.widget('spud.object_detail',  $.spud.infobox, {
     _create: function() {
         this._super()
+        this.element.data('object_detail', this)
+
         if (this.options.obj != null) {
             this.options.obj_id = this.options.obj.id
         } else if (this.options.obj_id != null) {
@@ -887,10 +893,10 @@ $.widget('spud.object_list_screen', $.spud.screen, {
         this.options.criteria = value
         push_state()
 
-        var instance = this._get_object_criteria_instance(this.criteria)
+        var instance = this.criteria.data('object_criteria')
         instance.load(value)
 
-        var instance = this._get_object_list_instance(this.al)
+        var instance = this.al.data('object_list')
         instance.option("criteria", value)
     },
 
@@ -911,7 +917,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
     enable: function() {
         this._super()
         if (this.al) {
-            var instance = this._get_object_list_instance(this.al)
+            var instance = this.al.data('object_list')
             instance.enable()
         }
     },
@@ -919,7 +925,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
     disable: function() {
         this._super()
         if (this.al) {
-            var instance = this._get_object_list_instance(this.al)
+            var instance = this.al.data('object_list')
             instance.disable()
         }
     },
@@ -1052,7 +1058,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 mythis.options.obj_id = obj.id
                 mythis._set_title(mythis._type_name + ": "+obj.title)
                 mythis._setup_buttons()
-                var instance = mythis._get_object_list_instance(mythis._ol)
+                var instance = mymythis._ol.data('object_list')
                 instance.option("criteria", {
                     'instance': obj.id,
                     'mode': 'children',
@@ -1073,7 +1079,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this._ol = $("<div/>").appendTo(this.div)
         this._object_list(params, this._ol)
 
-        var instance = this._get_object_detail_instance(this._od)
+        var instance = this._od.data('object_detail')
         if (this.options.obj != null) {
             instance.set(this.options.obj)
         } else if (this.options.obj_id != null) {
@@ -1146,7 +1152,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     set: function(obj) {
         this.options.obj = obj
         this.options.obj_id = obj.id
-        var instance = this._get_object_detail_instance(this._od)
+        var instance = this._od.data('object_detail')
         instance.set(obj)
 
         // above function will call on_update where the following
@@ -1160,7 +1166,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     load: function(obj_id) {
         this.options.obj = null
         this.options.obj_id = obj_id
-        var instance = this._get_object_detail_instance(this._od)
+        var instance = this._od.data('object_detail')
         instance.load(obj_id)
     },
 
@@ -1178,7 +1184,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     enable: function() {
         this._super()
         if (this._ol) {
-            var instance = this._get_object_list_instance(this._ol)
+            var instance = this._ol.data('object_list')
             instance.enable()
         }
     },
@@ -1186,7 +1192,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     disable: function() {
         this._super()
         if (this._ol) {
-            var instance = this._get_object_list_instance(this._ol)
+            var instance = this._ol.data('object_list')
             instance.disable()
         }
     },

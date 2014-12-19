@@ -321,16 +321,7 @@ $.widget('spud.place_list_screen', $.spud.object_list_screen, {
     },
 
     _object_list: $.proxy($.spud.place_list, window),
-    _get_object_list_instance: function(ol) {
-        return ol.place_list("instance")
-    },
-
-
     _object_criteria: $.proxy($.spud.place_criteria, window),
-    _get_object_criteria_instance: function(oc) {
-        return oc.place_criteria("instance")
-    },
-
     _object_search_dialog: $.proxy($.spud.place_search_dialog, window),
 })
 
@@ -357,15 +348,7 @@ $.widget('spud.place_detail_screen', $.spud.object_detail_screen, {
     },
 
     _object_list: $.proxy($.spud.place_list, window),
-    _get_object_list_instance: function(ol) {
-        return ol.place_list("instance")
-    },
-
     _object_detail: $.proxy($.spud.place_detail, window),
-    _get_object_detail_instance: function(od) {
-        return od.place_detail("instance")
-    },
-
     _object_list_screen: $.proxy($.spud.place_list_screen, window),
     _object_change_dialog: $.proxy($.spud.place_change_dialog, window),
     _object_delete_dialog: $.proxy($.spud._object_delete_dialog, window),
