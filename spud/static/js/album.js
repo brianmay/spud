@@ -33,7 +33,8 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
             ["q", new text_input_field("Search for", false)],
             ["instance", new ajax_select_field("Album", "albums", false)],
             ["mode", new select_input_field("Mode",
-                [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ])],
+                [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ],
+                false)],
             ["root_only", new boolean_input_field("Root only", false)],
         ]
         this.options.title = "Search albums"
