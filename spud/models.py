@@ -214,14 +214,14 @@ class album(hierarchy_model):
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
     title = models.CharField(max_length=96, db_index=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(null=True, blank=True)
     cover_photo = models.ForeignKey(
         'photo', related_name='album_cover_of', null=True, blank=True,
         on_delete=models.SET_NULL)
-    sort_name = models.CharField(max_length=96, blank=True)
-    sort_order = models.CharField(max_length=96, blank=True)
-    revised = models.DateTimeField(null=True)
-    revised_utc_offset = models.IntegerField(null=True)
+    sort_name = models.CharField(max_length=96, null=True, blank=True)
+    sort_order = models.CharField(max_length=96, null=True, blank=True)
+    revised = models.DateTimeField(null=True, blank=True)
+    revised_utc_offset = models.IntegerField(null=True, blank=True)
     objects = managers.HierarchyManager()
 
     class Meta:
@@ -264,12 +264,12 @@ class category(hierarchy_model):
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
     title = models.CharField(max_length=96, db_index=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(null=True, blank=True)
     cover_photo = models.ForeignKey(
         'photo', related_name='category_cover_of', null=True, blank=True,
         on_delete=models.SET_NULL)
-    sort_name = models.CharField(max_length=96, blank=True)
-    sort_order = models.CharField(max_length=96, blank=True)
+    sort_name = models.CharField(max_length=96, null=True, blank=True)
+    sort_order = models.CharField(max_length=96, null=True, blank=True)
     objects = managers.HierarchyManager()
 
     class Meta:
@@ -312,18 +312,18 @@ class place(hierarchy_model):
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
     title = models.CharField(max_length=192, db_index=True)
-    address = models.CharField(max_length=192, blank=True)
-    address2 = models.CharField(max_length=192, blank=True)
-    city = models.CharField(max_length=96, blank=True)
-    state = models.CharField(max_length=96, blank=True)
-    postcode = models.CharField(max_length=30, blank=True)
-    country = models.CharField(max_length=96, blank=True)
-    url = models.CharField(max_length=3072, blank=True)
-    urldesc = models.CharField(max_length=96, blank=True)
+    address = models.CharField(max_length=192, null=True,  blank=True)
+    address2 = models.CharField(max_length=192, null=True, blank=True)
+    city = models.CharField(max_length=96, null=True, blank=True)
+    state = models.CharField(max_length=96, null=True, blank=True)
+    postcode = models.CharField(max_length=30, null=True, blank=True)
+    country = models.CharField(max_length=96, null=True, blank=True)
+    url = models.CharField(max_length=3072, null=True, blank=True)
+    urldesc = models.CharField(max_length=96, null=True, blank=True)
     cover_photo = models.ForeignKey(
         'photo', related_name='place_cover_of', null=True, blank=True,
         on_delete=models.SET_NULL)
-    notes = models.TextField(blank=True)
+    notes = models.TextField(null=True, blank=True)
     objects = managers.HierarchyManager()
 
     class Meta:
@@ -366,11 +366,13 @@ class place(hierarchy_model):
 
 @python_2_unicode_compatible
 class person(hierarchy_model):
-    first_name = models.CharField(max_length=96, blank=True, db_index=True)
-    last_name = models.CharField(max_length=96, blank=True, db_index=True)
-    middle_name = models.CharField(max_length=96, blank=True)
-    called = models.CharField(max_length=48, blank=True)
-    sex = models.CharField(max_length=1, blank=True, choices=SEX_CHOICES)
+    first_name = models.CharField(max_length=96, db_index=True)
+    last_name = models.CharField(
+        max_length=96, null=True, blank=True, db_index=True)
+    middle_name = models.CharField(max_length=96, null=True, blank=True)
+    called = models.CharField(max_length=48, null=True, blank=True)
+    sex = models.CharField(
+        max_length=1, null=True, blank=True, choices=SEX_CHOICES)
     dob = models.DateField(null=True, blank=True)
     dod = models.DateField(null=True, blank=True)
     home = models.ForeignKey(
@@ -388,22 +390,22 @@ class person(hierarchy_model):
     spouse = models.ForeignKey(
         'self', null=True, blank=True, related_name='reverse_spouses',
         on_delete=models.SET_NULL)
-    notes = models.TextField(blank=True)
+    notes = models.TextField(null=True, blank=True)
     cover_photo = models.ForeignKey(
         'photo', related_name='person_cover_of', null=True, blank=True,
         on_delete=models.SET_NULL)
-    email = models.CharField(max_length=192, blank=True)
+    email = models.CharField(max_length=192, null=True, blank=True)
 
     class Meta:
         ordering = ['last_name', 'first_name']
 
     def __str__(self):
         result = "%s" % (self.first_name)
-        if self.middle_name is not None and self.middle_name != "":
+        if self.middle_name is not None and self.middle_name:
             result += " %s" % (self.middle_name)
-        if self.called is not None and self.called != "":
+        if self.called is not None and self.called:
             result += " (%s)" % (self.called)
-        if self.last_name is not None and self.last_name != "":
+        if self.last_name is not None and self.last_name:
             result += " %s" % (self.last_name)
         return result
 
@@ -511,16 +513,16 @@ class feedback(hierarchy_model):
         'self', related_name='children', null=True, blank=True,
         on_delete=models.CASCADE)
     rating = models.IntegerField()
-    comment = models.TextField(blank=True)
+    comment = models.TextField(null=True, blank=True)
 
     # Information about the user leaving the comment
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         blank=True, null=True, related_name="photos_feedbacks",
         on_delete=models.SET_NULL)
-    user_name = models.CharField(max_length=50, blank=True)
-    user_email = models.EmailField(blank=True)
-    user_url = models.URLField(blank=True)
+    user_name = models.CharField(max_length=50, null=True, blank=True)
+    user_email = models.EmailField(null=True, blank=True)
+    user_url = models.URLField(null=True, blank=True)
 
     # Metadata about the comment
     submit_datetime = models.DateTimeField()
@@ -555,8 +557,8 @@ class feedback(hierarchy_model):
 
 @python_2_unicode_compatible
 class photo(base_model):
-    name = models.CharField(max_length=128, blank=True, db_index=True)
-    path = models.CharField(max_length=255, blank=True, db_index=True)
+    name = models.CharField(max_length=128, db_index=True)
+    path = models.CharField(max_length=255, db_index=True)
     size = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=64, blank=True, db_index=True)
     photographer = models.ForeignKey(
@@ -565,24 +567,24 @@ class photo(base_model):
     place = models.ForeignKey(
         place, null=True, blank=True, related_name='photos',
         on_delete=models.SET_NULL)
-    view = models.CharField(max_length=64, blank=True)
+    view = models.CharField(max_length=64, null=True, blank=True)
     rating = models.FloatField(null=True, blank=True, db_index=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(null=True, blank=True)
     utc_offset = models.IntegerField()
     datetime = models.DateTimeField(db_index=True)
-    camera_make = models.CharField(max_length=32, blank=True)
-    camera_model = models.CharField(max_length=32, blank=True)
-    flash_used = models.CharField(max_length=1, blank=True)
-    focal_length = models.CharField(max_length=64, blank=True)
-    exposure = models.CharField(max_length=64, blank=True)
-    compression = models.CharField(max_length=64, blank=True)
-    aperture = models.CharField(max_length=16, blank=True)
+    camera_make = models.CharField(max_length=32, null=True, blank=True)
+    camera_model = models.CharField(max_length=32, null=True, blank=True)
+    flash_used = models.CharField(max_length=1, null=True, blank=True)
+    focal_length = models.CharField(max_length=64, null=True, blank=True)
+    exposure = models.CharField(max_length=64, null=True, blank=True)
+    compression = models.CharField(max_length=64, null=True, blank=True)
+    aperture = models.CharField(max_length=16, null=True, blank=True)
     level = models.IntegerField()
-    iso_equiv = models.CharField(max_length=8, blank=True)
-    metering_mode = models.CharField(max_length=32, blank=True)
-    focus_dist = models.CharField(max_length=16, blank=True)
-    ccd_width = models.CharField(max_length=16, blank=True)
-    comment = models.TextField(blank=True)
+    iso_equiv = models.CharField(max_length=8, null=True, blank=True)
+    metering_mode = models.CharField(max_length=32, null=True, blank=True)
+    focus_dist = models.CharField(max_length=16, null=True, blank=True)
+    ccd_width = models.CharField(max_length=16, null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
     action = models.CharField(
         max_length=4, null=True, blank=True,
         choices=PHOTO_ACTION, db_index=True)
