@@ -1088,6 +1088,9 @@ class photo_relation(base_model):
     desc_1 = models.CharField(max_length=384)
     desc_2 = models.CharField(max_length=384)
 
+    class Meta:
+        unique_together = ('photo_1', 'photo_2')
+
     def __str__(self):
         return "relationship '%s' to '%s'" % (self.photo_1, self.photo_2)
 

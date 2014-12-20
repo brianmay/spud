@@ -339,7 +339,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Photos")
         .on('click', function(ev) {
-            alert("meow")
+            add_screen($.spud.photo_list_screen, {})
             return false
         })
         .appendTo(menu)
@@ -960,10 +960,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                     .on("click", function(ev) {
                         var screen_class = mythis._object_list_screen
                         params = {
-                            criteria: {
-                                instance: mythis.options.obj_id,
-                                mode: "children",
-                            }
+                            criteria: mythis._get_children_criteria(),
                         }
                         add_screen(screen_class, params)
                     })
@@ -1056,11 +1053,8 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 mythis.options.obj_id = obj.id
                 mythis._set_title(mythis._type_name + ": "+obj.title)
                 mythis._setup_buttons()
-                var instance = mymythis._ol.data('object_list')
-                instance.option("criteria", {
-                    'instance': obj.id,
-                    'mode': 'children',
-                })
+                var instance = mythis._ol.data('object_list')
+                instance.option("criteria", mythis._get_children_criteria())
             },
             'on_error': function() {
                 mythis.element.addClass("error")
@@ -1090,6 +1084,13 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         window._reload_all.add_listener(this, function() {
             mythis.load(this.options.obj_id)
         })
+    },
+
+    _get_children_criteria: function() {
+        return {
+            'instance': this.options.obj_id,
+            'mode': 'children',
+        }
     },
 
     _setup_loader: function() {

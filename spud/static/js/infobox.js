@@ -304,6 +304,7 @@ photo_output_field.prototype.destroy = function() {
 
 $.widget('spud.infobox', $.spud.widget, {
     _create: function(){
+        var mythis = this
         var options = this.options
 
         this.element.addClass("infobox")
@@ -314,10 +315,39 @@ $.widget('spud.infobox', $.spud.widget, {
                 .appendTo(this.element)
         }
 
-        this.dl = $("<div class='def_list'></div>")
-            .appendTo(this.element)
+        this.fields = {}
+        if (this.options.pages) {
+            this.page = {}
+            this.tabs = $("<div/>").appendTo(this.element)
 
-        this._create_fields()
+            var ul = $("<ul></ul>").appendTo(this.tabs)
+
+            $.each(mythis.options.pages, function(id, page) {
+                var name = page.name
+                var title = page.title
+                $("<li/>")
+                    .append(
+                        $("<a/>")
+                            .attr("href", '#' + name)
+                            .text(title)
+                    )
+                    .appendTo(ul)
+
+                mythis.page[name] = $("<div/>")
+                    .addClass("def_list")
+                    .attr('id', name)
+                    .appendTo(mythis.tabs)
+
+                mythis._create_fields(name, page.fields)
+            })
+
+            mythis.tabs.tabs()
+        } else {
+            this.dl = $("<div/>")
+                .addClass("def_list")
+                .appendTo(this.element)
+            this._create_fields(null, this.options.fields)
+        }
         this._super()
 
         if (this.options.obj != null) {
@@ -335,10 +365,9 @@ $.widget('spud.infobox', $.spud.widget, {
     },
 
 
-    _create_fields: function() {
-        this.fields = {}
-        if (this.options.fields != null) {
-            this.add_fields(this.options.fields)
+    _create_fields: function(page, fields) {
+        if (fields != null) {
+            this.add_fields(page, fields)
         }
     },
 
@@ -354,20 +383,24 @@ $.widget('spud.infobox', $.spud.widget, {
         return this
     },
 
-    add_field: function(id, field) {
+    add_field: function(page, id, field) {
         this.remove_field(id, field)
         var html = field.to_html(id)
-        this.dl.append(html)
+        if (page == null) {
+            this.dl.append(html)
+        } else {
+            this.page[page].append(html)
+        }
         this.fields[id] = field
         return this
     },
 
-    add_fields: function(fields) {
+    add_fields: function(page, fields) {
         var mythis = this
         $.each(fields, function(i, v) {
             var id = v[0]
             var field = v[1]
-            mythis.add_field(id, field)
+            mythis.add_field(page, id, field)
         })
         return this
     },

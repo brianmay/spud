@@ -18,6 +18,8 @@ from __future__ import unicode_literals
 
 import datetime
 import json
+import pytz
+
 from rest_framework import viewsets, status, exceptions as drf_exceptions
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser
@@ -37,6 +39,167 @@ from django.db.models import Q, Count
 from . import models
 from . import serializers
 from . import exceptions
+
+
+def _decode_int(title, string):
+    if string is None:
+        return None
+    try:
+        return int(string)
+    except ValueError:
+        raise drf_exceptions.ParseError("%s got non-integer" % title)
+
+
+def _decode_boolean(title, string):
+    if string is None:
+        return None
+    elif string.lower() == "true":
+        return True
+    elif string.lower() == "false":
+        return False
+    else:
+        raise drf_exceptions.ParseError("%s got non-boolean" % title)
+
+
+def _decode_object(title, model, pk):
+    if pk is None:
+        return pk
+    try:
+        return model.objects.get(pk=pk)
+    except model.DoesNotExist:
+        raise drf_exceptions.ParseError("%s does not exist" % title)
+
+
+def _decode_object_by_name(title, model, name):
+    if name is None:
+        return None
+
+    try:
+        return model.objects.get_by_name(name)
+    except exceptions.NameDoesNotExist as e:
+        raise drf_exceptions.ParseError(
+            "Cannot find album '%s': %s" % (name, e))
+
+
+def _decode_timezone(title, value):
+    if value[0] == "+" or value[0] == "-":
+        sign, offset = (value[0], value[1:])
+        if len(offset) == 2:
+            offset = _decode_int(title, offset) * 60
+        elif len(offset) == 4:
+            offset = (
+                _decode_int(title, offset[0:2]) * 60 +
+                _decode_int(title, offset[2:4]))
+        else:
+            raise drf_exceptions.ParseError("%s can't parse timezone" % title)
+        if sign == '-':
+            offset = -offset
+        timezone = pytz.FixedOffset(offset)
+        offset = None
+
+    else:
+        try:
+            timezone = pytz.timezone(value)
+        except pytz.UnknownTimeZoneError:
+            raise drf_exceptions.ParseError("%s unknown timezone" % title)
+
+    return timezone
+
+
+def _decode_datetime(title, value, timezone):
+    if value is None:
+        return None
+
+    if value == "":
+        raise drf_exceptions.ParseError("%s date/time is empty string" % title)
+
+    value = value.split(" ")
+    if value[-1].find("/") != -1 or value[-1][0] == '+' or value[-1][0] == '-':
+        timezone = _decode_timezone(title, value[-1])
+        del value[-1]
+
+    value = " ".join(value)
+
+    dt = None
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d nextday")
+            dt = dt + datetime.timedelta(days=1)
+        except ValueError:
+            pass
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d nextday")
+            dt = dt + datetime.timedelta(days=1)
+        except ValueError:
+            pass
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            pass
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M")
+        except ValueError:
+            pass
+
+    if dt is None:
+        try:
+            dt = datetime.datetime.strptime(value, "%Y-%m-%d")
+        except ValueError:
+            raise drf_exceptions.ParseError("%s can't parse date/time" % title)
+
+    dt = timezone.localize(dt)
+    return dt
+
+
+def _get_string(params, key, default=None):
+    value = params.getlist(key)
+    if len(value) < 1:
+        return default
+    if len(value) > 1:
+        raise drf_exceptions.ParseError("%s has >1 values" % key)
+    return value[0]
+
+
+def _get_int(params, key, default=None):
+    value = _get_string(params, key)
+    if value is None:
+        return default
+    return _decode_int(key, value)
+
+
+def _get_boolean(params, key, default=None):
+    value = _get_string(params, key)
+    if value is None:
+        return default
+    return _decode_boolean(key, value)
+
+
+def _get_object(params, key, model):
+    return _decode_object(key, model, _get_int(params, key))
+
+
+def _get_object_array(params, key, model):
+    value = params.getlist(key)
+    result = []
+    for v in value:
+        v = [_decode_object(key, model, v)]
+        result.extend(v)
+    return result
+
+
+def _get_object_by_name(params, key, model):
+    return _decode_object_by_name(key, model, _get_string(params, key))
+
+
+def _get_datetime(params, key, timezone):
+    return _decode_datetime(key, _get_string(params, key), timezone)
 
 
 #########################
@@ -127,14 +290,8 @@ class AlbumViewSet(viewsets.ModelViewSet):
         queryset = models.album.objects.all()
         params = self.request.QUERY_PARAMS
 
-        name = params.get('name', None)
-        if name is not None:
-            try:
-                album = models.album.objects.get_by_name(name)
-            except exceptions.NameDoesNotExist as e:
-                raise drf_exceptions.ParseError(
-                    "Cannot find album '%s': %s" % (name, e))
-
+        album = _get_object_by_name(params, 'name', models.album)
+        if album is not None:
             queryset = queryset.filter(pk=album.pk)
 
         q = params.getlist('q')
@@ -142,21 +299,10 @@ class AlbumViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 Q(title__icontains=r) | Q(description__icontains=r))
 
-        mode = params.get('mode', 'children')
+        mode = _get_string(params, 'mode', 'children')
         mode = mode.lower()
 
-        try:
-            instance = params.get('instance')
-            if instance is not None:
-                instance = int(instance)
-                instance = models.album.objects.get(pk=instance)
-        except ValueError:
-            raise drf_exceptions.ParseError(
-                "Album not integer '%s'" % instance)
-        except models.album.DoesNotExist as e:
-            raise drf_exceptions.ParseError(
-                "Cannot find album '%s': %s" % (instance, e))
-
+        instance = _get_object(params, "instance", models.album)
         if instance is not None:
             if mode == "children":
                 queryset = queryset.filter(parent=instance)
@@ -171,12 +317,12 @@ class AlbumViewSet(viewsets.ModelViewSet):
             else:
                 instance = None
 
-        root_only = params.get('root_only', False)
+        root_only = _get_boolean(params, 'root_only', False)
         if root_only:
             queryset = queryset.filter(parent__isnull=True)
 
         if self.request.user.is_staff:
-            needs_revision = params.get('needs_revision', False)
+            needs_revision = _get_boolean(params, 'needs_revision', False)
             if needs_revision:
                 dt = datetime.datetime.utcnow()-datetime.timedelta(days=365)
                 queryset = queryset.filter(
@@ -207,14 +353,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
         queryset = models.category.objects.all()
         params = self.request.QUERY_PARAMS
 
-        name = params.get('name', None)
-        if name is not None:
-            try:
-                category = models.category.objects.get_by_name(name)
-            except exceptions.NameDoesNotExist as e:
-                raise drf_exceptions.ParseError(
-                    "Cannot find category '%s': %s" % (name, e))
-
+        category = _get_object_by_name(params, 'name', models.category)
+        if category is not None:
             queryset = queryset.filter(pk=category.pk)
 
         q = params.getlist('q', [])
@@ -222,21 +362,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 Q(title__icontains=r) | Q(description__icontains=r))
 
-        mode = params.get('mode', 'children')
+        mode = _get_string(params, 'mode', 'children')
         mode = mode.lower()
 
-        try:
-            instance = params.get('instance')
-            if instance is not None:
-                instance = int(instance)
-                instance = models.category.objects.get(pk=instance)
-        except ValueError:
-            raise drf_exceptions.ParseError(
-                "Category not integer '%s'" % instance)
-        except models.album.DoesNotExist as e:
-            raise drf_exceptions.ParseError(
-                "Cannot find category '%s': %s" % (instance, e))
-
+        instance = _get_object(params, "instance", models.category)
         if instance is not None:
             if mode == "children":
                 queryset = queryset.filter(parent=instance)
@@ -251,7 +380,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
             else:
                 instance = None
 
-        root_only = params.get('root_only', False)
+        root_only = _get_boolean(params, 'root_only', False)
         if root_only:
             queryset = queryset.filter(parent__isnull=True)
 
@@ -277,14 +406,8 @@ class PlaceViewSet(viewsets.ModelViewSet):
         queryset = models.place.objects.all()
         params = self.request.QUERY_PARAMS
 
-        name = params.get('name', None)
-        if name is not None:
-            try:
-                place = models.place.objects.get_by_name(name)
-            except exceptions.NameDoesNotExist as e:
-                raise drf_exceptions.ParseError(
-                    "Cannot find place '%s': %s" % (name, e))
-
+        place = _get_object_by_name(params, 'name', models.place)
+        if place is not None:
             queryset = queryset.filter(pk=place.pk)
 
         q = params.getlist('q', [])
@@ -297,21 +420,10 @@ class PlaceViewSet(viewsets.ModelViewSet):
                 Q(state__icontains=r) |
                 Q(country__icontains=r))
 
-        mode = params.get('mode', 'children')
+        mode = _get_string(params, 'mode', 'children')
         mode = mode.lower()
 
-        try:
-            instance = params.get('instance')
-            if instance is not None:
-                instance = int(instance)
-                instance = models.place.objects.get(pk=instance)
-        except ValueError:
-            raise drf_exceptions.ParseError(
-                "Place not integer '%s'" % instance)
-        except models.album.DoesNotExist as e:
-            raise drf_exceptions.ParseError(
-                "Cannot find place '%s': %s" % (instance, e))
-
+        instance = _get_object(params, "instance", models.place)
         if instance is not None:
             if mode == "children":
                 queryset = queryset.filter(parent=instance)
@@ -326,7 +438,7 @@ class PlaceViewSet(viewsets.ModelViewSet):
             else:
                 instance = None
 
-        root_only = params.get('root_only', False)
+        root_only = _get_boolean(params, 'root_only', False)
         if root_only:
             queryset = queryset.filter(parent__isnull=True)
 
@@ -352,14 +464,8 @@ class PersonViewSet(viewsets.ModelViewSet):
         queryset = models.person.objects.all()
         params = self.request.QUERY_PARAMS
 
-        name = params.get('name', None)
-        if name is not None:
-            try:
-                person = models.person.objects.get_by_name(name)
-            except exceptions.NameDoesNotExist as e:
-                raise drf_exceptions.ParseError(
-                    "Cannot find person '%s': %s" % (name, e))
-
+        person = _get_object_by_name(params, 'name', models.person)
+        if person is not None:
             queryset = queryset.filter(pk=person.pk)
 
         q = params.getlist('q', [])
@@ -370,21 +476,10 @@ class PersonViewSet(viewsets.ModelViewSet):
                 Q(last_name__icontains=r) |
                 Q(called__icontains=r))
 
-        mode = params.get('mode', 'children')
+        mode = _get_string(params, 'mode', 'children')
         mode = mode.lower()
 
-        try:
-            instance = params.get('instance')
-            if instance is not None:
-                instance = int(instance)
-                instance = models.person.objects.get(pk=instance)
-        except ValueError:
-            raise drf_exceptions.ParseError(
-                "Person not integer '%s'" % instance)
-        except models.person.DoesNotExist as e:
-            raise drf_exceptions.ParseError(
-                "Cannot find person '%s': %s" % (instance, e))
-
+        instance = _get_object(params, "instance", models.person)
         if instance is not None:
             if mode == "children":
                 queryset = queryset.filter(
@@ -400,7 +495,7 @@ class PersonViewSet(viewsets.ModelViewSet):
             else:
                 instance = None
 
-        root_only = params.get('root_only', False)
+        root_only = _get_boolean(params, 'root_only', False)
         if root_only:
             queryset = queryset.filter(mother__isnull=True,
                                        father__isnull=True)
@@ -424,12 +519,185 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.FeedbackSerializer
 
 
+def _get_photo_search(user, params):
+    search = Q()
+    photo_list = models.photo.objects.all()
+
+    pd = _get_boolean(params, "person_descendants", False)
+    ld = _get_boolean(params, "place_descendants", False)
+    ad = _get_boolean(params, "album_descendants", False)
+    cd = _get_boolean(params, "category_descendants", False)
+
+    timezone = django.conf.settings.TIME_ZONE
+    timezone = pytz.timezone(timezone)
+
+    value = _get_string(params, "description")
+
+    value = _get_int(params, "first_id")
+    if value is not None:
+        search = search & Q(pk__gte=value)
+
+    value = _get_int(params, "last_id")
+    if value is not None:
+        search = search & Q(pk__lt=value)
+
+    value = _get_datetime(params, "first_date", timezone)
+    if value is not None:
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+        search = search & Q(datetime__gte=utc_value)
+
+    value = _get_datetime(params, "last_date", timezone)
+    if value is not None:
+        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
+        search = search & Q(datetime__lt=utc_value)
+
+    value = _get_int(params, "lower_rating")
+    if value is not None:
+        search = search & Q(rating__gte=value)
+
+    value = _get_int(params, "upper_rating")
+    if value is not None:
+        search = search & Q(rating__lte=value)
+
+    value = _get_string(params, "title")
+    if value is not None:
+        search = search & Q(title__icontains=value)
+
+    value = _get_string(params, "camera_make")
+    if value is not None:
+        search = search & Q(camera_make__icontains=value)
+
+    value = _get_string(params, "camera_model")
+    if value is not None:
+        search = search & Q(camera_model__icontains=value)
+
+    value = _get_object(params, "photographer", models.person)
+    if value is not None:
+        search = search & Q(photographer=value)
+
+    value = _get_object(params, "place", models.place)
+    if value is not None:
+        if ld:
+            search = search & Q(place__ascendant_set__ascendant=value)
+        else:
+            search = search & Q(place=value)
+
+    del value
+
+    value = _get_object(params, "person", models.person)
+    if value is not None:
+        if pd:
+            photo_list = photo_list.filter(
+                persons__ascendant_set__ascendant=value)
+        else:
+            photo_list = photo_list.filter(persons=value)
+
+    value = _get_object(params, "album", models.album)
+    if value is not None:
+        if ad:
+            photo_list = photo_list.filter(
+                albums__ascendant_set__ascendant=value)
+        else:
+            photo_list = photo_list.filter(albums=value)
+
+    value = _get_object(params, "category", models.category)
+    if value is not None:
+        if cd:
+            photo_list = photo_list.filter(
+                categorys__ascendant_set__ascendant=value)
+        else:
+            photo_list = photo_list.filter(categorys=value)
+
+    values = _get_object_array(params, "photos", models.photo)
+    if values is not None:
+        q = Q()
+        for value in values:
+            q = q | Q(pk=value.pk)
+        photo_list = photo_list.filter(q)
+
+    del values
+
+    value = _get_boolean(params, "place_none")
+    if value is not None:
+        if value:
+            search = search & Q(place=None)
+
+    value = _get_boolean(params, "person_none")
+    if value is not None:
+        if value:
+            search = search & Q(persons=None)
+
+    value = _get_boolean(params, "album_none")
+    if value is not None:
+        if value:
+            search = search & Q(albums=None)
+
+    value = _get_boolean(params, "category_none")
+    if value is not None:
+        if value:
+            search = search & Q(categorys=None)
+
+    value = _get_string(params, "action")
+    if value is not None:
+        if value == "none":
+            search = search & Q(action__isnull=True)
+        elif value == "set":
+            search = search & Q(action__isnull=False)
+        else:
+            search = search & Q(action=value)
+
+    value = _get_string(params, "path")
+    if value is not None:
+        search = search & Q(path=value)
+
+    value = _get_string(params, "name")
+    if value is not None:
+        search = search & Q(name=value)
+
+    if not user.is_staff:
+        search = search & Q(action__isnull=True)
+
+    queryset = photo_list.filter(search)
+
+    photo = _get_object_by_name(params, 'name', models.photo)
+    if photo is not None:
+        queryset = queryset.filter(pk=photo.pk)
+
+    q = params.getlist('q')
+    for r in q:
+        queryset = queryset.filter(
+            Q(title__icontains=r) | Q(description__icontains=r))
+
+    instance = _get_object(params, "instance", models.photo)
+    if instance is not None:
+        queryset = queryset.filter(
+            Q(relations_1__photo_2=instance) |
+            Q(relations_2__photo_1=instance)).distinct()
+
+    return queryset
+
+
 class PhotoViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = models.photo.objects.all()
     serializer_class = serializers.PhotoSerializer
+
+    def get_queryset(self):
+        params = self.request.QUERY_PARAMS
+        queryset = _get_photo_search(self.request.user, params)
+        return queryset
+
+    def get_serializer_context(self):
+        context = super(PhotoViewSet, self).get_serializer_context()
+
+        params = self.request.QUERY_PARAMS
+        instance = _get_object(params, "instance", models.photo)
+        if instance is not None:
+            context['related_photo'] = instance
+
+        return context
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -578,6 +846,7 @@ _types = {
     'categorys',
     'places',
     'persons',
+    'photos',
 }
 
 

@@ -32,6 +32,8 @@ function do_list(obj_type, session, params) {
         screen_class = $.spud.place_list_screen
     } else if (obj_type == "persons") {
         screen_class = $.spud.person_list_screen
+    } else if (obj_type == "photos") {
+        screen_class = $.spud.photo_list_screen
     }
     if (screen_class) {
         params = {
@@ -54,6 +56,8 @@ function do_detail(obj_type, obj_id, session, params) {
         screen_class = $.spud.place_detail_screen
     } else if (obj_type == "persons") {
         screen_class = $.spud.person_detail_screen
+    } else if (obj_type == "photos") {
+        screen_class = $.spud.photo_detail_screen
     }
     if (screen_class) {
         params = {

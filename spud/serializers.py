@@ -353,39 +353,68 @@ class PhotoRelationSerializer(serializers.ModelSerializer):
         model = models.photo_relation
 
 
-class PhotoRelationListSerializer(serializers.ListSerializer):
-    child = PhotoRelationSerializer()
-
-    def get_attribute(self, obj):
-        return (obj.relations_1,  obj.relations_2)
-
-    def to_internal_value(self, data):
-        raise NotImplemented()
-
-    def to_representation(self, value):
-        result = []
-        relations_1, relations_2 = value
-
-        for pr in relations_1.all():
-            r = {
-                'id': pr.pk,
-                'description': pr.desc_2,
-                'photo': pr.photo_2.pk,
-            }
-            result.append(r)
-
-        for pr in relations_2.all():
-            r = {
-                'id': pr.pk,
-                'description': pr.desc_1,
-                'photo': pr.photo_1.pk,
-            }
-            result.append(r)
-
-        return result
+# class PhotoRelationListSerializer(serializers.ListSerializer):
+#     child = PhotoRelationSerializer()
+#
+#     def get_attribute(self, obj):
+#         return (obj.relations_1,  obj.relations_2)
+#
+#     def to_internal_value(self, data):
+#         raise NotImplemented()
+#
+#     def to_representation(self, value):
+#         result = []
+#         relations_1, relations_2 = value
+#
+#         for pr in relations_1.all():
+#             r = {
+#                 'id': pr.pk,
+#                 'description': pr.desc_2,
+#                 'photo': pr.photo_2.pk,
+#             }
+#             result.append(r)
+#
+#         for pr in relations_2.all():
+#             r = {
+#                 'id': pr.pk,
+#                 'description': pr.desc_1,
+#                 'photo': pr.photo_1.pk,
+#             }
+#             result.append(r)
+#
+#         return result
 
 
 default_timezone = pytz.timezone(settings.TIME_ZONE)
+
+
+class PhotoListSerializer(serializers.ListSerializer):
+
+    def to_representation(self, data):
+        # iterable = data.all() if isinstance(data, models.Manager) else data
+        iterable = data
+
+        results = []
+        for photo in iterable.all():
+            result = self.child.to_representation(photo)
+
+            if 'related_photo' in self.context:
+                related_photo = self.context['related_photo']
+                try:
+                    pr = photo.relations_2.get(photo_1=related_photo)
+                    result['relation'] = pr.desc_2
+                except models.photo_relation.DoesNotExist:
+                    pass
+
+                try:
+                    pr = photo.relations_1.get(photo_2=related_photo)
+                    result['relation'] = pr.desc_1
+                except models.photo_relation.DoesNotExist:
+                    pass
+
+            results.append(result)
+
+        return results
 
 
 class PhotoSerializer(serializers.ModelSerializer):
@@ -418,12 +447,13 @@ class PhotoSerializer(serializers.ModelSerializer):
         required=False, allow_null=True)
 
     persons = PersonListSerializer(
+        child=NestedPersonSerializer(),
         source="photo_person_set", read_only=True)
     persons_pk = PersonPkListSerializer(
         source="photo_person_set", required=False)
 
     feedbacks = FeedbackSerializer(many=True, read_only=True)
-    relations = PhotoRelationListSerializer(read_only=True)
+#    relations = PhotoRelationListSerializer(read_only=True)
 
     thumbs = PhotoThumbListSerializer(
         source="get_thumbs", read_only=True)
@@ -660,6 +690,7 @@ class PhotoSerializer(serializers.ModelSerializer):
             # 'action': {'required': False},
             'datetime': {'required': False},
         }
+        list_serializer_class = PhotoListSerializer
 
 
 #class PhotoAlbumSerializer(serializers.ModelSerializer):
