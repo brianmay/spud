@@ -107,6 +107,9 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class AlbumSerializer(serializers.ModelSerializer):
     cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False)
 
     class Meta:
         model = models.album
@@ -133,6 +136,9 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False)
 
     class Meta:
         model = models.category
@@ -158,6 +164,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False)
 
     class Meta:
         model = models.place
@@ -174,17 +183,23 @@ class PersonTitleField(f.CharField):
 class NestedPersonSerializer(serializers.ModelSerializer):
     title = PersonTitleField(read_only=True)
     cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False)
 
     class Meta:
         model = models.photo
         fields = (
-            'id', 'title', 'cover_photo',
+            'id', 'title', 'cover_photo', 'cover_photo_pk',
         )
 
 
 class PersonSerializer(serializers.ModelSerializer):
     title = PersonTitleField(read_only=True)
     cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False)
 
     home = PlaceSerializer(read_only=True)
     home_pk = serializers.PrimaryKeyRelatedField(

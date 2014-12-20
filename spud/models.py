@@ -234,6 +234,10 @@ class album(hierarchy_model):
         self._fix_ascendants(
             ["parent"], album_ascendant, cache, do_descendants)
 
+    def save(self, *args, **kwargs):
+        super(album, self).save(*args, **kwargs)
+        self.fix_ascendants()
+
     def check_delete(self):
         errorlist = []
         if self.photos.all().count() > 0:
@@ -277,6 +281,10 @@ class category(hierarchy_model):
     def fix_ascendants(self, cache=None, do_descendants=True):
         self._fix_ascendants(
             ["parent"], category_ascendant, cache, do_descendants)
+
+    def save(self, *args, **kwargs):
+        super(category, self).save(*args, **kwargs)
+        self.fix_ascendants()
 
     def check_delete(self):
         errorlist = []
@@ -327,6 +335,10 @@ class place(hierarchy_model):
     def fix_ascendants(self, cache=None, do_descendants=True):
         self._fix_ascendants(
             ["parent"], place_ascendant, cache, do_descendants)
+
+    def save(self, *args, **kwargs):
+        super(place, self).save(*args, **kwargs)
+        self.fix_ascendants()
 
     def check_delete(self):
         errorlist = []
@@ -412,6 +424,10 @@ class person(hierarchy_model):
     def fix_ascendants(self, cache=None, do_descendants=True):
         self._fix_ascendants(
             ["mother", "father"], person_ascendant, cache, do_descendants)
+
+    def save(self, *args, **kwargs):
+        super(person, self).save(*args, **kwargs)
+        self.fix_ascendants()
 
     # spouses
 
@@ -527,6 +543,7 @@ class feedback(hierarchy_model):
                 .replace(tzinfo=None)
             self.utc_offset = value.utcoffset().seconds / 60
         super(feedback, self).save(*args, **kwargs)
+        self.fix_ascendants()
 
     def fix_ascendants(self, cache=None, do_descendants=True):
         self._fix_ascendants(

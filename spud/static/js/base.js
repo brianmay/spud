@@ -192,14 +192,14 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         this._super();
     },
 
-    set: function(item, item_pk) {
+    set: function(obj, obj_pk) {
         this.deck.children().remove();
-        if (item != null) {
-            this.input.val(item.pk)
-            this._addKiller(item)
-        } else if (item_pk != null) {
-            this.input.val(item_pk)
-            this._addKiller(null, item_pk)
+        if (obj != null) {
+            this.input.val(obj.pk)
+            this._addKiller(obj)
+        } else if (obj_pk != null) {
+            this.input.val(obj_pk)
+            this._addKiller(null, obj_pk)
         }
     },
 
@@ -230,32 +230,36 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         }
         this.input.val(ui.item.pk);
         this.text.val('');
-        this._addKiller(ui.item, null);
+        this._addKiller(ui.item.obj, null);
         this._trigger("added", ev, ui.item);
         return false;
     },
 
-    _addKiller: function(item, item_pk) {
-        if (item != null) {
-            item_pk = item.pk
+    _loaded_killer: function(repr, obj) {
+        var item = this._normalize_item(obj)
+        repr.text(item.repr)
+    },
+
+    _addKiller: function(obj, obj_pk) {
+        if (obj != null) {
+            obj_pk = obj.pk
         }
 
         var mythis = this
         var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
         var repr = $("<div></div>").text("loading")
         var div = $("<div></div>")
-            .attr("id", this.id+'_on_deck_'+item_pk)
+            .attr("id", this.id+'_on_deck_'+obj_pk)
             .append(killButton)
             .append(repr)
             .appendTo(this.deck)
 
-        if (item != null) {
-            repr.text(item.repr)
+        if (obj != null) {
+            this._loaded_killer(repr, obj)
         } else {
-            var kill_loader = new object_loader(this.options.type, item_pk)
-            kill_loader.loaded_item.add_listener(this, function(object) {
-                var item = mythis._normalize_item(object)
-                repr.text(item.repr)
+            var kill_loader = new object_loader(this.options.type, obj_pk)
+            kill_loader.loaded_item.add_listener(this, function(obj) {
+                this._loaded_killer(repr, obj)
             })
             kill_loader.on_error.add_listener(this, function() {
                 repr.text("error")
@@ -266,8 +270,8 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
         killButton.on("click", $.proxy(
             function(ev) {
-                this._kill(item, div);
-                return this._trigger("killed", ev, item)
+                this._kill(obj, div);
+                return this._trigger("killed", ev, obj)
             },
             this))
     },
@@ -288,34 +292,34 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         this.source( { q: value }, this._response() );
     },
 
-    _normalize_item: function( item ) {
+    _normalize_item: function( obj ) {
         var div = $("<div/>")
 
-        if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
-            var photo = item.cover_photo.thumbs['thumb']
+        if (obj.cover_photo && obj.cover_photo.thumbs['thumb']) {
+            var photo = obj.cover_photo.thumbs['thumb']
             $("<img/>")
                 .attr("src", photo.url)
                 .attr("alt", "")
                 .appendTo(div)
-        } else if (item.thumbs != null && item.thumbs['thumb']) {
-            var photo = item.thumbs['thumb']
+        } else if (obj.thumbs != null && obj.thumbs['thumb']) {
+            var photo = obj.thumbs['thumb']
             $("<img/>")
                 .attr("src", photo.url)
                 .attr("alt", "")
                 .appendTo(div)
         }
 
-        if (item.title) {
+        if (obj.title) {
             $("<div/>")
                 .addClass("title")
-                .text(item.title)
+                .text(obj.title)
                 .appendTo(div)
         }
 
-        if (item.description) {
+        if (obj.description) {
             $("<div/>")
                 .addClass("desc")
-                .p(item.description)
+                .p(obj.description)
                 .appendTo(div)
         }
 
@@ -325,17 +329,18 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
         return {
             label: div,
-            repr: item.title,
-            pk: item.id,
+            obj: obj,
+            repr: obj.title,
+            pk: obj.id,
             }
 
         throw new Error("Unknown object type "+this.options.type);
     },
 
-    _normalize: function( items ) {
+    _normalize: function( objs ) {
         var mythis = this
-        var response = $.map( items, function( item ) {
-            return mythis._normalize_item(item)
+        var response = $.map( objs, function( obj ) {
+            return mythis._normalize_item(obj)
          })
          return response
     },
@@ -455,43 +460,9 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
         this._super();
     },
 
-    set: function(photo) {
+    _loaded_killer: function(repr, photo) {
+        this._super(repr, photo)
         this.img.image("set", photo)
-        item = null
-        if (photo != null) {
-            var item = { pk: photo.id, repr: photo.title }
-        }
-        this._super(item);
-    },
-
-    _receiveResult: function(ev, ui) {
-        this._super(ev, ui);
-        var mythis = this
-        this.img.image("set_loading")
-//         load_photo(ui.item.pk,
-//             function(data) {
-//                 mythis.img.image("set", data.photo)
-//             },
-//             function(message) {
-//                 mythis.img.image("set_error")
-//             }
-//         )
-
-        if (this.loader != null) {
-            this.loader.loaded_item.remove_listener(this)
-            this.loader.on_error.remove_listener(this)
-        }
-
-        var loader = new object_loader("photos", ui.item.pk)
-        this.loader = loader
-        loader.loaded_item.add_listener(this, function(object) {
-            mythis.img.image("set", object)
-        })
-        loader.on_error.add_listener(this, function() {
-            mythis.img.image("set_error")
-        })
-        loader.load()
-        return false
     },
 
     _kill: function(item, div) {

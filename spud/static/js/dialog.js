@@ -546,7 +546,7 @@ photo_select_field.prototype.destroy = function() {
 }
 
 photo_select_field.prototype.set = function(value) {
-    this.input.photo_select("set", value)
+    this.input.photo_select("set", null, value)
 }
 
 photo_select_field.prototype.get = function() {

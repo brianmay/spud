@@ -69,7 +69,7 @@ $.widget('spud.person_change_dialog',  $.spud.save_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["cover_photo", new photo_select_field("Photo", false)],
+                ["cover_photo_pk", new photo_select_field("Photo", false)],
                 ["first_name", new text_input_field("First name", false)],
                 ["middle_name", new text_input_field("Middle name", false)],
                 ["last_name", new text_input_field("Last name", false)],

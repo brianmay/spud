@@ -666,7 +666,8 @@ def _get_photo_search(user, params):
     q = params.getlist('q')
     for r in q:
         queryset = queryset.filter(
-            Q(title__icontains=r) | Q(description__icontains=r))
+            Q(name__icontains=r) | Q(title__icontains=r)
+            | Q(description__icontains=r))
 
     instance = _get_object(params, "instance", models.photo)
     if instance is not None:
