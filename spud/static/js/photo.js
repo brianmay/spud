@@ -50,11 +50,11 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
                 ["place_descendants", new boolean_input_field("Descend places", false)],
                 ["place_none", new boolean_input_field("No places", false)],
 
-                ["album", new ajax_select_field("Albums", "albums", false)],
+                ["album", new ajax_select_field("Album", "albums", false)],
                 ["album_descendants", new boolean_input_field("Descend albums", false)],
                 ["album_none", new boolean_input_field("No albums", false)],
 
-                ["category", new ajax_select_field("Categories", "categorys", false)],
+                ["category", new ajax_select_field("Category", "categorys", false)],
                 ["category_descendants", new boolean_input_field("Descend categories", false)],
                 ["category_none", new boolean_input_field("No categories", false)],
             ]},
@@ -85,14 +85,21 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
 
 $.widget('spud.photo_change_dialog',  $.spud.save_dialog, {
     _create: function() {
-        this.options.fields = [
-            ["title", new text_input_field("Title", true)],
-            ["description", new p_input_field("Description", false)],
-            ["cover_photo", new photo_select_field("Photo", false)],
-            ["sort_name", new text_input_field("Sort Name", false)],
-            ["sort_order", new text_input_field("Sort Order", false)],
-            ["parent", new ajax_select_field("Parent", "photos", false)],
-            ["revised", new datetime_input_field("Revised", false)],
+        this.options.pages = [
+            {name: 'basic', title: 'Basics', fields: [
+                ["datetime", new datetime_input_field("Date", true)],
+                ["title", new text_input_field("Title", true)],
+                ["photographer", new ajax_select_field("Photographer", "persons", false)],
+            ]},
+            {name: 'connections', title: 'Connections', fields: [
+                ["place_pk", new ajax_select_field("Place", "places", false)],
+//                ["album", new ajax_select_field("Album", "albums", false)],
+//                ["category", new ajax_select_field("Category", "categorys", false)],
+            ]},
+            {name: 'camera', title: 'Camera', fields: [
+                ["camera_make", new text_input_field("Camera Make", false)],
+                ["camera_model", new text_input_field("Camera Model", false)],
+            ]},
         ]
 
         this.options.title = "Change photo"
