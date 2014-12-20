@@ -335,6 +335,12 @@ $.widget('spud.category_detail_screen', $.spud.object_detail_screen, {
         })
     },
 
+    _get_photo_criteria: function() {
+        return {
+            'category': this.options.obj_id,
+        }
+    },
+
     _object_list: $.proxy($.spud.category_list, window),
     _object_detail: $.proxy($.spud.category_detail, window),
     _object_list_screen: $.proxy($.spud.category_list_screen, window),

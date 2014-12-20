@@ -966,6 +966,20 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                     })
             )
 
+        if (this._photo_list_screen != null) {
+            menu.append(
+                $("<li/>")
+                    .text("Photos")
+                    .on("click", function(ev) {
+                        var screen_class = mythis._photo_list_screen
+                        params = {
+                            criteria: mythis._get_photo_criteria(),
+                        }
+                        add_screen(screen_class, params)
+                    })
+            )
+        }
+
         this.create_item = $("<li/>")
             .text("Create")
             .on("click", function(ev) {
@@ -1217,5 +1231,9 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         options = $.extend({}, options) // clone options so we can modify
         delete options['object_list_loader']
         return options
+    },
+
+    _photo_list_screen: function(params, div) {
+        return $.spud.photo_list_screen(params, div)
     },
 })

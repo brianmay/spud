@@ -366,6 +366,12 @@ $.widget('spud.person_detail_screen', $.spud.object_detail_screen, {
         })
     },
 
+    _get_photo_criteria: function() {
+        return {
+            'person': this.options.obj_id,
+        }
+    },
+
     _object_list: $.proxy($.spud.person_list, window),
     _object_detail: $.proxy($.spud.person_detail, window),
     _object_list_screen: $.proxy($.spud.person_list_screen, window),

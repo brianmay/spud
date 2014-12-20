@@ -452,6 +452,11 @@ class PhotoSerializer(serializers.ModelSerializer):
     persons_pk = PersonPkListSerializer(
         source="photo_person_set", required=False)
 
+    photographer = NestedPersonSerializer(read_only=True)
+    photographer_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.person.objects.all(), source="photographer",
+        required=False)
+
     feedbacks = FeedbackSerializer(many=True, read_only=True)
 #    relations = PhotoRelationListSerializer(read_only=True)
 

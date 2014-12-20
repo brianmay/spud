@@ -354,6 +354,12 @@ $.widget('spud.album_detail_screen', $.spud.object_detail_screen, {
         })
     },
 
+    _get_photo_criteria: function() {
+        return {
+            'album': this.options.obj_id,
+        }
+    },
+
     _object_list: $.proxy($.spud.album_list, window),
     _object_detail: $.proxy($.spud.album_detail, window),
     _object_list_screen: $.proxy($.spud.album_list_screen, window),

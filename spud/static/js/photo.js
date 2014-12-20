@@ -89,7 +89,7 @@ $.widget('spud.photo_change_dialog',  $.spud.save_dialog, {
             {name: 'basic', title: 'Basics', fields: [
                 ["datetime", new datetime_input_field("Date", true)],
                 ["title", new text_input_field("Title", true)],
-                ["photographer", new ajax_select_field("Photographer", "persons", false)],
+                ["photographer_pk", new ajax_select_field("Photographer", "persons", false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
                 ["place_pk", new ajax_select_field("Place", "places", false)],
@@ -394,6 +394,7 @@ $.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
         }
     },
 
+    _photo_list_screen: null,
     _object_list: $.proxy($.spud.photo_list, window),
     _object_detail: $.proxy($.spud.photo_detail, window),
     _object_list_screen: $.proxy($.spud.photo_list_screen, window),

@@ -252,17 +252,16 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         if (item != null) {
             repr.text(item.repr)
         } else {
-            // FIXME this won't load more then one at a time.
-            this.kill_loader = new object_loader(this.options.type, item_pk)
-            this.kill_loader.loaded_item.add_listener(this, function(object) {
+            var kill_loader = new object_loader(this.options.type, item_pk)
+            kill_loader.loaded_item.add_listener(this, function(object) {
                 var item = mythis._normalize_item(object)
                 repr.text(item.repr)
             })
-            this.kill_loader.on_error.add_listener(this, function() {
+            kill_loader.on_error.add_listener(this, function() {
                 repr.text("error")
                     .addClass("error")
             })
-            this.kill_loader.load()
+            kill_loader.load()
         }
 
         killButton.on("click", $.proxy(
@@ -293,7 +292,13 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         var div = $("<div/>")
 
         if (item.cover_photo && item.cover_photo.thumbs['thumb']) {
-                var photo = item.cover_photo.thumbs['thumb']
+            var photo = item.cover_photo.thumbs['thumb']
+            $("<img/>")
+                .attr("src", photo.url)
+                .attr("alt", "")
+                .appendTo(div)
+        } else if (item.thumbs != null && item.thumbs['thumb']) {
+            var photo = item.thumbs['thumb']
             $("<img/>")
                 .attr("src", photo.url)
                 .attr("alt", "")
@@ -334,11 +339,6 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
          })
          return response
     },
-
-    _destroy: function() {
-        remove_all_listeners(this)
-        this._super()
-    }
 })
 
 
@@ -476,6 +476,21 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
 //                 mythis.img.image("set_error")
 //             }
 //         )
+
+        if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
+            this.loader.on_error.remove_listener(this)
+        }
+
+        var loader = new object_loader("photos", ui.item.pk)
+        this.loader = loader
+        loader.loaded_item.add_listener(this, function(object) {
+            mythis.img.image("set", object)
+        })
+        loader.on_error.add_listener(this, function() {
+            mythis.img.image("set_error")
+        })
+        loader.load()
         return false
     },
 

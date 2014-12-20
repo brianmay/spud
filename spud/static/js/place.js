@@ -347,6 +347,13 @@ $.widget('spud.place_detail_screen', $.spud.object_detail_screen, {
         })
     },
 
+
+    _get_photo_criteria: function() {
+        return {
+            'place': this.options.obj_id,
+        }
+    },
+
     _object_list: $.proxy($.spud.place_list, window),
     _object_detail: $.proxy($.spud.place_detail, window),
     _object_list_screen: $.proxy($.spud.place_list_screen, window),
