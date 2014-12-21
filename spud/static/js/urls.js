@@ -109,6 +109,11 @@ function ajax(settings) {
         cache: false,
     }, settings)
 
+    if (settings.type != null && settings.type != "GET") {
+        settings.data = JSON.stringify(settings.data)
+        settings.contentType = 'application/json; charset=UTF-8'
+    }
+   
     var success = settings.success
     delete settings.success
 
@@ -134,10 +139,14 @@ function ajax(settings) {
                 if (textStatus=="abort") {
                     return
                 }
-                if (jqXHR.responseJSON) {
-                    error(jqXHR.responseJSON.detail)
+                if (jqXHR.responseJSON !=null) {
+                    var message = jqXHR.responseJSON.detail
+                    if (message == null) {
+                        message = errorThrown
+                    }
+                    error(message, jqXHR.responseJSON)
                 } else {
-                    error(jqXHR.status + " " + errorThrown)
+                    error(jqXHR.status + " " + errorThrown, null)
                 }
             }
         )

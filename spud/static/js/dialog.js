@@ -55,6 +55,8 @@ input_field.prototype.get = function() {
     var value = this.input.val()
     if (value) {
         value = value.trim()
+    } else {
+        value = null
     }
     return value
 }
@@ -210,10 +212,12 @@ datetime_input_field.prototype.get = function() {
     var time = this.time.val().trim()
     var timezone = this.timezone.val().trim()
 
-    var result = []
-    if (date != "") {
-        result.push(date)
+    if (date == "") {
+        return null
     }
+
+    var result = []
+    result.push(date)
     if (time != "") {
         result.push(time)
     }
@@ -257,9 +261,9 @@ date_input_field.prototype.create = function(id) {
 }
 
 date_input_field.prototype.validate = function() {
-    var date = this.input.val().trim()
+    var date = this.get()
 
-    if (date != "") {
+    if (date != null) {
         if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
             return "date format not yyyy-mm-dd"
         }
@@ -301,7 +305,7 @@ integer_input_field.prototype = new text_input_field()
 integer_input_field.constructor = integer_input_field
 
 integer_input_field.prototype.validate = function() {
-    var value = this.input.val().trim()
+    var value = this.get()
     var intRegex = /^\d+$/;
     if (value && !intRegex.test(value)) {
         return "Value must be integer"
@@ -353,7 +357,7 @@ select_input_field.prototype.set = function(value) {
 }
 
 select_input_field.prototype.validate = function() {
-    var value = this.input.val()
+    var value = this.get()
     if (this.options[value] == null) {
         return value +" is not valid option"
     }

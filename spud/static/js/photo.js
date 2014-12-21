@@ -83,7 +83,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.photo_change_dialog',  $.spud.save_dialog, {
+$.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
@@ -139,7 +139,7 @@ $.widget('spud.photo_change_dialog',  $.spud.save_dialog, {
 })
 
 
-$.widget('spud.photo_delete_dialog',  $.spud.save_dialog, {
+$.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.title = "Delete photo"
         this.options.button = "Delete"

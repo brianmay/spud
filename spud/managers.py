@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from django.db import models
+from django.db.models import Q
 
 from . import exceptions
 
@@ -59,5 +60,54 @@ class HierarchyManager(models.Manager):
                 raise exceptions.NameDoesNotExist(
                     "Multiple results returned for %s '%s'"
                     % (type_name, search))
+
+        return instance
+
+
+class PersonManager(models.Manager):
+
+    def get_by_name(self, name):
+        type_name = self.model._meta.verbose_name.title()
+
+        qtmp = self.get_queryset()
+        for val in name.split(" "):
+            qtmp = qtmp.filter(
+                Q(first_name__iexact=val)
+                | Q(middle_name__iexact=val)
+                | Q(last_name__iexact=val)
+                | Q(called__iexact=val)
+            )
+
+        try:
+            instance = qtmp.get()
+        except self.model.DoesNotExist:
+            raise exceptions.NameDoesNotExist(
+                "%s '%s' does not exist"
+                % (type_name, name))
+        except self.model.MultipleObjectsReturned:
+            raise exceptions.NameDoesNotExist(
+                "Multiple results returned for %s '%s'"
+                % (type_name, name))
+
+        return instance
+
+
+class PhotoManager(models.Manager):
+
+    def get_by_name(self, name):
+        type_name = self.model._meta.verbose_name.title()
+
+        qtmp = self.get_queryset()
+
+        try:
+            instance = qtmp.get(name=name)
+        except self.model.DoesNotExist:
+            raise exceptions.NameDoesNotExist(
+                "%s '%s' does not exist"
+                % (type_name, name))
+        except self.model.MultipleObjectsReturned:
+            raise exceptions.NameDoesNotExist(
+                "Multiple results returned for %s '%s'"
+                % (type_name, name))
 
         return instance

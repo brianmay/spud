@@ -65,7 +65,7 @@ $.widget('spud.place_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.place_change_dialog',  $.spud.save_dialog, {
+$.widget('spud.place_change_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -119,7 +119,7 @@ $.widget('spud.place_change_dialog',  $.spud.save_dialog, {
 })
 
 
-$.widget('spud.place_delete_dialog',  $.spud.save_dialog, {
+$.widget('spud.place_delete_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.title = "Delete place"
         this.options.button = "Delete"

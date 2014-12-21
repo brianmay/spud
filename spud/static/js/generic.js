@@ -181,9 +181,9 @@ window._session_changed = new signal()
 
 
 ///////////////////////////////////////
-// save_dialog
+// ajax_dialog
 ///////////////////////////////////////
-$.widget('spud.save_dialog',  $.spud.form_dialog, {
+$.widget('spud.ajax_dialog',  $.spud.form_dialog, {
     _save: function(http_type, oject_id, values) {
         var mythis = this
         var type = this._type
@@ -204,8 +204,15 @@ $.widget('spud.save_dialog',  $.spud.form_dialog, {
                 mythis._done(data)
                 mythis.close()
             },
-            error: function(message) {
+            error: function(message, data) {
                 mythis._loading = false
+                if (data != null) {
+                    $.each(data, function(id, error) {
+                        if (mythis.fields[id] != null) {
+                            mythis.fields[id].set_error(error)
+                        }
+                    })
+                }
                 alert("Error: " + message)
                 mythis.uiDialogButtonPane.find(".ui-button").button("enable")
             },
@@ -220,7 +227,7 @@ $.widget('spud.save_dialog',  $.spud.form_dialog, {
 ///////////////////////////////////////
 // sessions
 ///////////////////////////////////////
-$.widget('spud.login_dialog',  $.spud.save_dialog, {
+$.widget('spud.login_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.fields = [
             ["username", new text_input_field("Username", true)],
@@ -243,7 +250,7 @@ $.widget('spud.login_dialog',  $.spud.save_dialog, {
     },
 })
 
-$.widget('spud.logout_dialog',  $.spud.save_dialog, {
+$.widget('spud.logout_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.title = "Logout"
         this.options.description = "Are you sure you want to logout?"

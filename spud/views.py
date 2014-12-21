@@ -21,7 +21,7 @@ import json
 import pytz
 
 from rest_framework import viewsets, status, exceptions as drf_exceptions
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
@@ -242,41 +242,45 @@ def _get_session(request):
     return data
 
 
-@api_view(['GET'])
-def session_detail(request):
-    data = _get_session(request)
-    return Response(data)
+class SessionDetail(APIView):
+    def session_detail(self, request):
+        data = _get_session(request)
+        return Response(data)
 
 
-@api_view(['POST'])
-def login(request):
-    username = request.POST.get("username", None)
-    password = request.POST.get("password", None)
+class Login(APIView):
+    permission_classes = ()
 
-    if username is None:
-        raise drf_exceptions.PermissionDenied("username not supplied")
-    if password is None:
-        raise drf_exceptions.PermissionDenied("password not supplied")
+    def post(self, request):
+        username = request.data.get("username", None)
+        password = request.data.get("password", None)
 
-    user = django.contrib.auth.authenticate(
-        username=username, password=password)
-    if user is not None:
-        if user.is_active:
-            django.contrib.auth.login(request, user)
+        if username is None:
+            raise drf_exceptions.PermissionDenied("username not supplied")
+        if password is None:
+            raise drf_exceptions.PermissionDenied("password not supplied")
+
+        user = django.contrib.auth.authenticate(
+            username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                django.contrib.auth.login(request, user)
+            else:
+                raise drf_exceptions.PermissionDenied("Account is disabled")
         else:
-            raise drf_exceptions.PermissionDenied("Account is disabled")
-    else:
-        raise drf_exceptions.PermissionDenied("Invalid login")
+            raise drf_exceptions.PermissionDenied("Invalid login")
 
-    data = _get_session(request)
-    return Response(data)
+        data = _get_session(request)
+        return Response(data)
 
 
-@api_view(['POST'])
-def logout(request):
-    django.contrib.auth.logout(request)
-    data = _get_session(request)
-    return Response(data)
+class Logout(APIView):
+    permission_classes = ()
+
+    def post(self, request):
+        django.contrib.auth.logout(request)
+        data = _get_session(request)
+        return Response(data)
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
@@ -288,7 +292,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = models.album.objects.all()
-        params = self.request.QUERY_PARAMS
+        params = self.request.query_params
 
         album = _get_object_by_name(params, 'name', models.album)
         if album is not None:
@@ -351,7 +355,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = models.category.objects.all()
-        params = self.request.QUERY_PARAMS
+        params = self.request.query_params
 
         category = _get_object_by_name(params, 'name', models.category)
         if category is not None:
@@ -404,7 +408,7 @@ class PlaceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = models.place.objects.all()
-        params = self.request.QUERY_PARAMS
+        params = self.request.query_params
 
         place = _get_object_by_name(params, 'name', models.place)
         if place is not None:
@@ -462,7 +466,7 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = models.person.objects.all()
-        params = self.request.QUERY_PARAMS
+        params = self.request.query_params
 
         person = _get_object_by_name(params, 'name', models.person)
         if person is not None:
@@ -686,14 +690,14 @@ class PhotoViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.PhotoSerializer
 
     def get_queryset(self):
-        params = self.request.QUERY_PARAMS
+        params = self.request.query_params
         queryset = _get_photo_search(self.request.user, params)
         return queryset
 
     def get_serializer_context(self):
         context = super(PhotoViewSet, self).get_serializer_context()
 
-        params = self.request.QUERY_PARAMS
+        params = self.request.query_params
         instance = _get_object(params, "instance", models.photo)
         if instance is not None:
             context['related_photo'] = instance

@@ -78,7 +78,7 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.album_change_dialog',  $.spud.save_dialog, {
+$.widget('spud.album_change_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -127,7 +127,7 @@ $.widget('spud.album_change_dialog',  $.spud.save_dialog, {
 })
 
 
-$.widget('spud.album_delete_dialog',  $.spud.save_dialog, {
+$.widget('spud.album_delete_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.title = "Delete album"
         this.options.button = "Delete"

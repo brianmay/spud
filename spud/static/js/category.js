@@ -65,7 +65,7 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.category_change_dialog',  $.spud.save_dialog, {
+$.widget('spud.category_change_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -113,7 +113,7 @@ $.widget('spud.category_change_dialog',  $.spud.save_dialog, {
 })
 
 
-$.widget('spud.category_delete_dialog',  $.spud.save_dialog, {
+$.widget('spud.category_delete_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.title = "Delete category"
         this.options.button = "Delete"

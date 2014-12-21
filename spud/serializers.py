@@ -199,32 +199,32 @@ class PersonSerializer(serializers.ModelSerializer):
     cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False)
+        required=False, allow_null=True)
 
     home = PlaceSerializer(read_only=True)
     home_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.place.objects.all(), source="home",
-        required=False)
+        required=False, allow_null=True)
 
     work = PlaceSerializer(read_only=True)
     work_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.place.objects.all(), source="work",
-        required=False)
+        required=False, allow_null=True)
 
     mother = None
     mother_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="mother",
-        required=False)
+        required=False, allow_null=True)
 
     father = None
     father_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="father",
-        required=False)
+        required=False, allow_null=True)
 
     spouse = None
     spouse_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="spouse",
-        required=False)
+        required=False, allow_null=True)
 
     spouses = NestedPersonSerializer(many=True, read_only=True)
     grandparents = NestedPersonSerializer(many=True, read_only=True)

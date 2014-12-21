@@ -395,6 +395,7 @@ class person(hierarchy_model):
         'photo', related_name='person_cover_of', null=True, blank=True,
         on_delete=models.SET_NULL)
     email = models.CharField(max_length=192, null=True, blank=True)
+    objects = managers.PersonManager()
 
     class Meta:
         ordering = ['last_name', 'first_name']
@@ -598,6 +599,8 @@ class photo(base_model):
         person, through='photo_person', related_name='photos')
     relations = models.ManyToManyField(
         'self', through='photo_relation', symmetrical=False)
+
+    objects = managers.PhotoManager()
 
     class Meta:
         ordering = ['datetime', 'id']

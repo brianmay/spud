@@ -65,12 +65,12 @@ $.widget('spud.person_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.person_change_dialog',  $.spud.save_dialog, {
+$.widget('spud.person_change_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
                 ["cover_photo_pk", new photo_select_field("Photo", false)],
-                ["first_name", new text_input_field("First name", false)],
+                ["first_name", new text_input_field("First name", true)],
                 ["middle_name", new text_input_field("Middle name", false)],
                 ["last_name", new text_input_field("Last name", false)],
                 ["called", new text_input_field("Called", false)],
@@ -128,7 +128,7 @@ $.widget('spud.person_change_dialog',  $.spud.save_dialog, {
 })
 
 
-$.widget('spud.person_delete_dialog',  $.spud.save_dialog, {
+$.widget('spud.person_delete_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.title = "Delete person"
         this.options.button = "Delete"
