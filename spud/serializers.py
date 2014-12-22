@@ -31,17 +31,35 @@ from rest_framework import fields as f
 from . import models, media
 
 
-class TimezoneField(f.CharField):
-    def to_internal_value(self, data):
-        try:
-            timezone = pytz.timezone(data)
-        except pytz.UnknownTimeZoneError:
-            raise exceptions.ValidationError("Unknown timezone '%s'"
-                                             % data)
-        return timezone
-
-    def to_representation(self, value):
-        return str(value)
+# class TimezoneField(f.CharField):
+#     def to_internal_value(self, data):
+#         try:
+#             timezone = pytz.timezone(data)
+#         except pytz.UnknownTimeZoneError:
+#             raise exceptions.ValidationError("Unknown timezone '%s'"
+#                                              % data)
+#         return timezone
+#
+#     def to_representation(self, value):
+#         return str(value)
+#
+#
+# class UtcDateTimeField(f.DateTimeField):
+#     def get_attribute(self, instance):
+#         source, utc_offset = self.source.split(":")
+#         return getattr(instance, source), getattr(instance, utc_offset)
+#
+#     def to_representation(self, value):
+#         dt = value[0]
+#         utc_offset = value[1]
+#
+#         from_tz = pytz.utc
+#         to_tz = pytz.FixedOffset(utc_offset)
+#         to_offset = datetime.timedelta(minutes=utc_offset)
+#         local = from_tz.localize(dt)
+#         local = (local + to_offset).replace(tzinfo=to_tz)
+#
+#         return super(UtcDateTimeField, self).to_representation(local)
 
 
 class PhotoThumbSerializer(serializers.ModelSerializer):
@@ -433,9 +451,7 @@ class PhotoListSerializer(serializers.ListSerializer):
 
 
 class PhotoSerializer(serializers.ModelSerializer):
-    src_timezone = TimezoneField(write_only=True)
-    timezone = TimezoneField(write_only=True)
-    offset = serializers.IntegerField(write_only=True, default=0)
+#    timezone = TimezoneField(write_only=True)
 
 #    albums = AlbumListSerializer()
 #    categorys = CategoryListSerializer()
@@ -479,6 +495,10 @@ class PhotoSerializer(serializers.ModelSerializer):
         source="get_thumbs", read_only=True)
     videos = PhotoVideoListSerializer(
         source="get_videos", read_only=True)
+
+#    datetime = UtcDateTimeField(
+#        required=False,
+#        source="datetime:utc_offset")
 
     def validate(self, attrs):
         if 'photo' not in self._initial_data:
@@ -541,17 +561,11 @@ class PhotoSerializer(serializers.ModelSerializer):
                 dt = m.get_datetime()
             print(dt)
 
-            src_timezone = attrs.pop('src_timezone')
             dst_timezone = attrs.pop('timezone')
 
-            dt = src_timezone.localize(dt)
+            dt = pytz.utc.localize(dt)
             print(dt)
             dt = dt.astimezone(dst_timezone)
-            print(dt)
-
-            # add manual offsets
-            offset = attrs.pop('offset')
-            dt += datetime.timedelta(seconds=offset)
             print(dt)
 
             # save the time

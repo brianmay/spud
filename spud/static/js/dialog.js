@@ -141,9 +141,20 @@ datetime_input_field.prototype.create = function(id) {
 
 datetime_input_field.prototype.set = function(value) {
     if (value != null) {
-        this.date.val(value.date)
-        this.time.val(value.time)
-        this.timezone.val(value.timezone)
+        var datetime = new moment.utc(value[0])
+        var utc_offset = value[1]
+        datetime = datetime.zone(-utc_offset)
+        this.date.datepicker("setDate", datetime.format("YYYY-MM-dd"))
+        this.date.val(datetime.format("YYYY-MM-DD"))
+        this.time.val(datetime.format("HH:mm:ss"))
+
+        var hours   = Math.floor(utc_offset / 60);
+        var minutes = utc_offset - (hours * 60);
+
+        if (hours   < 10) {hours   = "0"+hours;}
+        if (minutes < 10) {minutes = "0"+minutes;}
+
+        this.timezone.val(hours + ":" + minutes)
     } else {
         this.date.val("")
         this.time.val("")
@@ -167,6 +178,9 @@ datetime_input_field.prototype.validate = function() {
         }
         if (Number(a[2]) < 1 || Number(a[2]) > 31) {
             return "date must be between 1 and 31"
+        }
+        if (a[3] != null) {
+            return "Too many components in date"
         }
     }
 
@@ -193,14 +207,30 @@ datetime_input_field.prototype.validate = function() {
         if (Number(a[2]) < 0 || Number(a[2]) > 59) {
             return "Seconds must be between 0 and 59"
         }
+        if (a[3] != null) {
+            return "Too many components in time"
+        }
     }
 
     if (timezone != "") {
-        if (date == "") {
-            return "Specifying timezone without date wrong"
-        }
-        if (/\s/.test(timezone)) {
-            return "Timezone must not have whitespace"
+        var a = timezone.split(":")
+        if (a.length > 1) {
+            if (Number(a[0]) < -12 || Number(a[0]) > 12) {
+                return "Hour must be between -12 and 12"
+            }
+            if (Number(a[1]) < 0 || Number(a[1]) > 59) {
+                return "Minutes must be between 0 and 59"
+            }
+            if (a[2] != null) {
+                return "Too many components in timezone"
+            }
+            if (date == "") {
+                return "Specifying timezone without date wrong"
+            }
+        } else {
+            if (moment.tz.zone(timezone) == null) {
+                return "Unknown timezone"
+            }
         }
     }
 
@@ -216,15 +246,34 @@ datetime_input_field.prototype.get = function() {
         return null
     }
 
-    var result = []
-    result.push(date)
+    var result = date
     if (time != "") {
-        result.push(time)
+        result = result + " " + time
     }
+
+
+    var datetime
+    var utc_offset
     if (timezone != "") {
-        result.push(timezone)
+        var a = timezone.split(":")
+        if (a.length > 1) {
+            utc_offset = Number(a[0]) * 60 + Number(a[1])
+            datetime=moment.tz(result, "YYYY-MM-DD HH:mm:ss", "UTC")
+            datetime.subtract(utc_offset, 'minutes')
+        } else {
+            datetime=moment.tz(result, "YYYY-MM-DD HH:mm:ss", timezone)
+            utc_offset = - datetime.zone()
+            datetime.utc()
+        }
+    } else {
+        datetime=moment(result, "YYYY-MM-DD HH:mm:ss")
+        utc_offset = - datetime.zone()
+        datetime.utc()
     }
-    return result.join(" ")
+
+    console.log(datetime.toISOString(), utc_offset)
+
+    return [ datetime.toISOString(), utc_offset ]
 }
 
 

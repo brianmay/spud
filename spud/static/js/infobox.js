@@ -166,12 +166,72 @@ function datetime_output_field(title) {
 datetime_output_field.prototype = new output_field()
 datetime_output_field.constructor = datetime_output_field
 
+datetime_output_field.prototype.create = function(id) {
+
+    this.datetime = null
+
+    var mythis = this
+
+    var div = $('<div/>')
+
+    this.output = $('<div />').appendTo(div)
+
+    this.timezone = "local"
+
+    $('<select />')
+        .append(
+            $('<option />')
+                .attr('value', "UTC")
+                .text("utc")
+        )
+        .append(
+            $('<option />')
+                .attr('value', "source")
+                .text("source")
+        )
+        .append(
+            $('<option />')
+                .attr('value', "local")
+                .text("local")
+        )
+        .val(this.timezone)
+        .on("click", function(ev) {
+            mythis.timezone = $(this).val()
+            mythis.set(mythis.value)
+        })
+        .appendTo(div)
+
+    return div
+}
+
 datetime_output_field.prototype.set = function(value) {
+    this.value = value
+
+    var locale = navigator.language
+    this.output.empty()
+
     if (value != null) {
-        this.output.text(value)
+        var datetime = new moment.utc(value[0])
+        var utc_offset = value[1]
+        if (this.timezone == "local") {
+            datetime.local()
+        } else if (this.timezone == "source") {
+            datetime.zone(-utc_offset)
+        } else {
+            datetime = datetime.tz(this.timezone)
+        }
+
+        if (datetime != null) {
+            datetime = datetime.format("dddd, MMMM Do YYYY, h:mm:ss a")
+        } else {
+            datetime = "N/A"
+        }
+
+        this.output
+            .append( $("<p/>").text(datetime + " " + this.timezone) )
+
         this.show()
     } else {
-        this.output.text("")
         this.hide()
     }
 }

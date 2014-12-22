@@ -71,9 +71,9 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
 
     _submit_values: function(values) {
         var criteria = {}
-        
+
         $.each(values, function (key, el) {
-            if (el) { criteria[key] = el }
+            if (el != null) { criteria[key] = el }
         });
 
         var mythis = this
@@ -118,10 +118,16 @@ $.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
             this.set_title("Add new photo")
             this.set_description("Please add new photo.")
         }
-        return this._super(photo);
+
+        var clone = $.extend({}, photo)
+        clone.datetime = [ clone.datetime, clone.utc_offset ]
+        return this._super(clone);
     },
 
     _submit_values: function(values) {
+        values.utc_offset = values.datetime[1]
+        values.datetime = values.datetime[0]
+
         if (this.obj_id != null) {
             this._save("PATCH", this.obj_id, values)
         } else {
@@ -308,8 +314,7 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
                 ["place", new link_output_field("Place", "places")],
                 ["albums", new link_list_output_field("Albums", "albums")],
                 ["categorys", new link_list_output_field("Categories", "categorys")],
-                ["utctime", new link_output_field("Date & time")],
-                ["localtime", new link_output_field("Date & time")],
+                ["datetime", new datetime_output_field("Date & time")],
                 ["photographer", new link_output_field("Photographer", "persons")],
                 ["rating", new text_output_field("Rating")],
 //                ["videos", new html_output_field("Videos")],
@@ -338,7 +343,11 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
 
     set: function(photo) {
         this.element.removeClass("error")
-        this._super(photo)
+
+        var clone = $.extend({}, photo)
+        clone.datetime = [ clone.datetime, clone.utc_offset ]
+        this._super(clone)
+
         this.options.obj = photo
         this.options.obj_id = photo.id
         this.img.image("set", photo)

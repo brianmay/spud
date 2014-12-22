@@ -46,17 +46,9 @@ $.widget('spud.place_search_dialog',  $.spud.form_dialog, {
     _submit_values: function(values) {
         var criteria = {}
 
-        var v = values.q
-        if (v) { criteria.q = v }
-
-        var v = values.instance
-        if (v) { criteria.instance = v }
-
-        var v = values.mode
-        if (v) { criteria.mode = v }
-
-        var v = values.root_only
-        if (v) { criteria.root_only = v }
+        $.each(values, function (key, el) {
+            if (el != null) { criteria[key] = el }
+        });
 
         var mythis = this
         if (this.options.on_success(criteria)) {

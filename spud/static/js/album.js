@@ -56,20 +56,9 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
     _submit_values: function(values) {
         var criteria = {}
 
-        var v = values.q
-        if (v) { criteria.q = v }
-
-        var v = values.instance
-        if (v) { criteria.instance = v }
-
-        var v = values.mode
-        if (v) { criteria.mode = v }
-
-        var v = values.root_only
-        if (v) { criteria.root_only = v }
-
-        var v = values.needs_revision
-        if (v) { criteria.needs_revision = v }
+        $.each(values, function (key, el) {
+            if (el != null) { criteria[key] = el }
+        });
 
         var mythis = this
         if (this.options.on_success(criteria)) {
@@ -106,10 +95,20 @@ $.widget('spud.album_change_dialog',  $.spud.ajax_dialog, {
             this.set_title("Add new album")
             this.set_description("Please add new album.")
         }
-        return this._super(album);
+
+        var clone = $.extend({}, album)
+        if (clone.revised != null) {
+            clone.revised = [ clone.revised, clone.revised_utc_offset ]
+        } else {
+            clone.revised = null
+        }
+        return this._super(clone);
     },
 
     _submit_values: function(values) {
+        values.revised_utc_offset = values.revised[1]
+        values.revised = values.revised[0]
+
         if (this.obj_id != null) {
             this._save("PATCH", this.obj_id, values)
         } else {
@@ -304,7 +303,15 @@ $.widget('spud.album_detail',  $.spud.object_detail, {
 
     set: function(album) {
         this.element.removeClass("error")
-        this._super(album)
+
+        var clone = $.extend({}, album)
+        if (clone.revised != null) {
+            clone.revised = [ clone.revised, clone.revised_utc_offset ]
+        } else {
+            clone.revised = null
+        }
+        this._super(clone)
+
         this.options.obj = album
         this.options.obj_id = album.id
         this.img.image("set", album.cover_photo)
