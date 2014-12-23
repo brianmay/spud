@@ -318,6 +318,11 @@ class PersonPkListSerializer(serializers.ListSerializer):
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
+    title = f.IntegerField(source="id", read_only=True)
+    photo = NestedPhotoSerializer(read_only=True)
+    photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="photo")
+
     class Meta:
         model = models.feedback
 

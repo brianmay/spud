@@ -53,6 +53,10 @@ function object_a(type, value) {
         screen = $.spud.place_detail_screen
     } else if (type == "persons") {
         screen = $.spud.person_detail_screen
+    } else if (type == "photos") {
+        screen = $.spud.photo_detail_screen
+    } else if (type == "feedbacks") {
+        screen = $.spud.feedback_detail_screen
     } else {
         return null
     }
@@ -74,13 +78,7 @@ function object_a(type, value) {
 }
 
 function photo_a(photo) {
-    var title = photo.title
-    var a = $('<a/>')
-        .attr('href', root_url() + "photo/" + photo.id + "/")
-        .on('click', function() { do_photo(photo.id); return false; })
-        .data('photo', photo)
-        .text(title)
-    return a
+    return object_a("photos", photo)
 }
 
 

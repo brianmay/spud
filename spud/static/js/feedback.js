@@ -22,6 +22,126 @@ window._feedback_changed = new signal()
 window._feedback_deleted = new signal()
 
 
+function _feedback_html(feedback, feedback_a, include_children, include_photo, include_links) {
+    if (feedback == null) {
+        return null;
+    }
+    var user=null
+    if (feedback.user) {
+       user = feedback.user + " (verified)"
+    } else {
+       user = feedback.user_name + " (unverified)"
+    }
+
+    var div = $("<div></div>")
+        .addClass("feedback_item")
+        .addClass(feedback.is_removed ? "removed" : "")
+        .addClass(feedback.is_public ? "public" : "")
+
+    var rights = {
+        can_moderate: true,
+        cad_add: true,
+    }
+
+    if (feedback.is_removed && !rights.can_moderate) {
+        $("<p></p>")
+            .text(" feedback was deleted.")
+            .prepend(feedback_a(feedback))
+            .appendTo(div)
+
+    } else {
+        var datetime
+        if (include_links) {
+            datetime = feedback_a(feedback)
+        } else {
+            datetime = $("<span></span>")
+        }
+        datetime.text("datetime" + feedback.submit_datetime.title)
+
+        if (include_photo) {
+            $("<div />")
+                .image({ photo: feedback.photo, size: "thumb", include_link: true })
+                .appendTo(div)
+        }
+
+        $("<div></div>")
+            .addClass("title")
+            .text("Response by " + user + " at ")
+            .append(datetime)
+            .appendTo(div)
+
+        $("<div></div>")
+            .text("Rating: "+ feedback.rating)
+            .appendTo(div)
+
+        $("<div></div>")
+            .p(feedback.comment)
+            .appendTo(div)
+    }
+
+    if (false && include_links) {
+        if (rights.can_add) {
+            div
+                .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
+                .append(" / ")
+        }
+        if (rights.can_moderate) {
+            if (feedback.is_public) {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_public: false }); return false; })
+                    .text("Set private")
+                    .appendTo(div)
+            } else {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_public: true }); return false; })
+                    .text("Set public")
+                    .appendTo(div)
+            }
+            div.append(" / ")
+            if (feedback.is_removed) {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_removed: false }); return false; })
+                    .text("Undelete")
+                    .appendTo(div)
+            } else {
+                $("<a></a>")
+                    .attr("href", "#")
+                    .on("click", function() { _change_feedback(feedback, { is_removed: true }); return false; })
+                    .text("Delete")
+                    .appendTo(div)
+            }
+            div.append(" / ")
+        }
+
+        div
+            .append(photo_a(feedback.photo, {}, "Goto photo"))
+    }
+
+    if (include_children && feedback.children.length > 0) {
+        var ul = $("<ul></ul>")
+            .addClass("clear")
+            .addClass("feedback_ul")
+
+        $.each(feedback.children, function(j, child) {
+            $("<li></li>")
+                .append(_feedback_html(child, null, include_children, include_photo, include_links))
+                .appendTo(ul)
+        })
+
+       div.append(ul)
+    }
+
+    $("<div></div>")
+        .addClass("clear")
+        .appendTo(div)
+
+    return div
+}
+
+
 ///////////////////////////////////////
 // feedback dialogs
 ///////////////////////////////////////
@@ -60,12 +180,23 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
 $.widget('spud.feedback_change_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.fields = [
-            ["title", new text_input_field("Title", true)],
-            ["description", new p_input_field("Description", false)],
-            ["cover_photo", new photo_select_field("Photo", false)],
-            ["sort_name", new text_input_field("Sort Name", false)],
-            ["sort_order", new text_input_field("Sort Order", false)],
-            ["parent", new ajax_select_field("Parent", "feedbacks", false)],
+            ["rating", new select_input_field("Rating", [
+                ["5", "5: Acceptable"],
+                ["6", "6: Good"],
+                ["7", "7: Excellent"],
+                ["8", "8: Perfect"],
+                ["9", "9: Sell it"],
+
+                ["0", "0: Delete it"],
+                ["1", "1: Think about deleting"],
+                ["2", "2: Has some value"],
+                ["3", "3: Barely acceptable"],
+                ["4", "4: Can't decide"],
+            ])],
+            ["user_name", new text_input_field("Name", true)],
+            ["user_email", new text_input_field("E-Mail", false)],
+            ["user_url", new text_input_field("URL", false)],
+            ["comment", new p_input_field("Comment", true)],
         ]
 
         this.options.title = "Change feedback"
@@ -198,6 +329,11 @@ $.widget('spud.feedback_list', $.spud.object_list, {
         this._type_name = "Feedback"
 
         this._super()
+        this.element
+            .removeClass("photo_list")
+            .addClass("feedback_list")
+
+        this.ul.addClass("feedback_ul")
 
         window._feedback_changed.add_listener(this, function(feedback) {
             var li = this._create_li(feedback)
@@ -236,20 +372,20 @@ $.widget('spud.feedback_list', $.spud.object_list, {
                 child = add_screen($.spud.feedback_detail_screen, params)
                 return false;
             })
-            .data('photo', feedback.cover_photo)
+            .data('photo', feedback.photo)
             .text(title)
         return a
     },
 
     _create_li: function(feedback) {
-        var photo = feedback.cover_photo
         var details = []
         if  (feedback.sort_order || feedback.sort_name) {
             details.push($("<div/>").text(feedback.sort_name + " " + feedback.sort_order))
         }
-        var a = this._feedback_a(feedback)
-        var li = this._super(photo, feedback.title, details, feedback.description, a)
-        li.attr('data-id', feedback.id)
+        var li = $("<li/>")
+            .append(_feedback_html(
+                feedback, $.proxy(this._feedback_a, this), false, true, true))
+            .attr('data-id', feedback.id)
         return li
     },
 
@@ -262,10 +398,17 @@ $.widget('spud.feedback_detail',  $.spud.object_detail, {
         this._type_name = "Feedback"
 
         this.options.fields = [
-            ["title", new text_output_field("Title")],
-            ["sort_name", new text_output_field("Sort Name")],
-            ["sort_order", new text_output_field("Sort Order")],
-            ["description", new p_output_field("Description")],
+            ["rating", new integer_output_field("Rating")],
+            ["user", new text_output_field("Name (verified)")],
+            ["user_name", new text_output_field("Name (unverified)")],
+            ["user_email", new text_output_field("E-Mail (unverified)")],
+            ["user_url", new text_output_field("URL (unverified)")],
+            ["parent", new html_output_field("In response to")],
+            ["ip_address", new text_output_field("IP Address")],
+            ["is_public", new boolean_output_field("Is public")],
+            ["is_removed", new boolean_output_field("Is removed")],
+            ["submit_datetime", new datetime_output_field("Submit Date/Time")],
+            ["comment", new p_output_field("Comment")],
         ]
         this.loader = null
 
@@ -279,11 +422,13 @@ $.widget('spud.feedback_detail',  $.spud.object_detail, {
     set: function(feedback) {
         this.element.removeClass("error")
 
-        this._super(feedback)
+        var clone = $.extend({}, feedback)
+        clone.submit_datetime = [ clone.submit_datetime, clone.utc_offset ]
+        this._super(clone)
 
         this.options.obj = feedback
         this.options.obj_id = feedback.id
-        this.img.image("set", feedback.cover_photo)
+        this.img.image("set", feedback.photo)
         if (this.options.on_update) {
             this.options.on_update(feedback)
         }
@@ -332,7 +477,6 @@ $.widget('spud.feedback_detail_screen', $.spud.object_detail_screen, {
 
     _get_photo_criteria: function() {
         return {
-            'feedback': this.options.obj_id,
         }
     },
 

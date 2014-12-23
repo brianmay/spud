@@ -522,6 +522,41 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = models.feedback.objects.all()
     serializer_class = serializers.FeedbackSerializer
 
+    def get_queryset(self):
+        queryset = models.feedback.objects.all()
+        params = self.request.query_params
+
+        q = params.getlist('q', [])
+        for r in q:
+            queryset = queryset.filter(
+                Q(comment__icontains=r)
+                | Q(user__name__icontains=r)
+                | Q(username__icontains=r))
+
+        mode = _get_string(params, 'mode', 'children')
+        mode = mode.lower()
+
+        instance = _get_object(params, "instance", models.feedback)
+        if instance is not None:
+            if mode == "children":
+                queryset = queryset.filter(parent=instance)
+            elif mode == "ascendants":
+                queryset = queryset.filter(
+                    descendant_set__descendant=instance,
+                    descendant_set__position__gt=0)
+            elif mode == "descendants":
+                queryset = queryset.filter(
+                    ascendant_set__ascendant=instance,
+                    ascendant_set__position__gt=0)
+            else:
+                instance = None
+
+        root_only = _get_boolean(params, 'root_only', False)
+        if root_only:
+            queryset = queryset.filter(parent__isnull=True)
+
+        return queryset
+
 
 def _get_photo_search(user, params):
     search = Q()
