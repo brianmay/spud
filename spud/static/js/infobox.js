@@ -195,7 +195,7 @@ datetime_output_field.prototype.create = function(id) {
                 .text("local")
         )
         .val(this.timezone)
-        .on("click", function(ev) {
+        .on("change", function(ev) {
             mythis.timezone = $(this).val()
             mythis.set(mythis.value)
         })
