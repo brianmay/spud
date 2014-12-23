@@ -852,6 +852,7 @@ _types = {
     'places',
     'persons',
     'photos',
+    'feedbacks',
 }
 
 

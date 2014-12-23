@@ -352,6 +352,14 @@ function setup_menu(session) {
         .appendTo(menu)
 
     $('<li/>')
+        .text("Feedback")
+        .on('click', function(ev) {
+            add_screen($.spud.feedback_list_screen, {})
+            return false
+        })
+        .appendTo(menu)
+
+    $('<li/>')
         .text("Reload")
         .on('click', function(ev) {
             window._reload_all.trigger()
