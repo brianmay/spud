@@ -47,7 +47,7 @@ $.widget('spud.place_search_dialog',  $.spud.form_dialog, {
         var criteria = {}
 
         $.each(values, function (key, el) {
-            if (el != null) { criteria[key] = el }
+            if (el != null && el!=false) { criteria[key] = el }
         });
 
         var mythis = this

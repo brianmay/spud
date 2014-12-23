@@ -121,6 +121,14 @@ VIDEO_FORMATS = {
 DEFAULT_TIMEZONE = {}
 DEFAULT_DTOFFSET = {}
 
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# If running in a Windows environment this must be set to the same as your
+# system time zone.
+TIME_ZONE = 'UTC'
+
+
 DEFAULT_CONTENT_TYPE = "application/xhtml+xml"
 
 # The name of the class to use for starting the test suite.

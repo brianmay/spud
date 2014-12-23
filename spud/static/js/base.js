@@ -204,7 +204,12 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     },
 
     get: function() {
-        return this.input.val()
+        var value = this.input.val()
+        if (value != "") {
+            return this.input.val()
+        } else {
+            return null
+        }
     },
 
     _initSource: function() {

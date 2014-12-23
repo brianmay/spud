@@ -18,13 +18,13 @@ from __future__ import unicode_literals
 
 import datetime
 import json
-import pytz
 
 from rest_framework import viewsets, status, exceptions as drf_exceptions
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
+from django.utils.dateparse import parse_datetime
 import django.contrib.auth
 from django.shortcuts import render_to_response
 #from django.shortcuts import get_object_or_404
@@ -81,81 +81,40 @@ def _decode_object_by_name(title, model, name):
             "Cannot find album '%s': %s" % (name, e))
 
 
-def _decode_timezone(title, value):
-    if value[0] == "+" or value[0] == "-":
-        sign, offset = (value[0], value[1:])
-        if len(offset) == 2:
-            offset = _decode_int(title, offset) * 60
-        elif len(offset) == 4:
-            offset = (
-                _decode_int(title, offset[0:2]) * 60 +
-                _decode_int(title, offset[2:4]))
-        else:
-            raise drf_exceptions.ParseError("%s can't parse timezone" % title)
-        if sign == '-':
-            offset = -offset
-        timezone = pytz.FixedOffset(offset)
-        offset = None
+# def _decode_timezone(title, value):
+#     if value[0] == "+" or value[0] == "-":
+#         sign, offset = (value[0], value[1:])
+#         if len(offset) == 2:
+#             offset = _decode_int(title, offset) * 60
+#         elif len(offset) == 4:
+#             offset = (
+#                 _decode_int(title, offset[0:2]) * 60 +
+#                 _decode_int(title, offset[2:4]))
+#         else:
+#            raise drf_exceptions.ParseError("%s can't parse timezone" % title)
+#         if sign == '-':
+#             offset = -offset
+#         timezone = pytz.FixedOffset(offset)
+#         offset = None
+#
+#     else:
+#         try:
+#             timezone = pytz.timezone(value)
+#         except pytz.UnknownTimeZoneError:
+#             raise drf_exceptions.ParseError("%s unknown timezone" % title)
+#
+#     return timezone
 
-    else:
-        try:
-            timezone = pytz.timezone(value)
-        except pytz.UnknownTimeZoneError:
-            raise drf_exceptions.ParseError("%s unknown timezone" % title)
 
-    return timezone
-
-
-def _decode_datetime(title, value, timezone):
+def _decode_datetime(title, value):
     if value is None:
         return None
 
-    if value == "":
-        raise drf_exceptions.ParseError("%s date/time is empty string" % title)
+    value = parse_datetime(value)
+    if value is None:
+        raise drf_exceptions.ParseError("%s can't parse date/time" % title)
 
-    value = value.split(" ")
-    if value[-1].find("/") != -1 or value[-1][0] == '+' or value[-1][0] == '-':
-        timezone = _decode_timezone(title, value[-1])
-        del value[-1]
-
-    value = " ".join(value)
-
-    dt = None
-
-    if dt is None:
-        try:
-            dt = datetime.datetime.strptime(value, "%Y-%m-%d nextday")
-            dt = dt + datetime.timedelta(days=1)
-        except ValueError:
-            pass
-
-    if dt is None:
-        try:
-            dt = datetime.datetime.strptime(value, "%Y-%m-%d nextday")
-            dt = dt + datetime.timedelta(days=1)
-        except ValueError:
-            pass
-
-    if dt is None:
-        try:
-            dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            pass
-
-    if dt is None:
-        try:
-            dt = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M")
-        except ValueError:
-            pass
-
-    if dt is None:
-        try:
-            dt = datetime.datetime.strptime(value, "%Y-%m-%d")
-        except ValueError:
-            raise drf_exceptions.ParseError("%s can't parse date/time" % title)
-
-    dt = timezone.localize(dt)
-    return dt
+    return value
 
 
 def _get_string(params, key, default=None):
@@ -198,8 +157,8 @@ def _get_object_by_name(params, key, model):
     return _decode_object_by_name(key, model, _get_string(params, key))
 
 
-def _get_datetime(params, key, timezone):
-    return _decode_datetime(key, _get_string(params, key), timezone)
+def _get_datetime(params, key):
+    return _decode_datetime(key, _get_string(params, key))
 
 
 #########################
@@ -567,9 +526,6 @@ def _get_photo_search(user, params):
     ad = _get_boolean(params, "album_descendants", False)
     cd = _get_boolean(params, "category_descendants", False)
 
-    timezone = django.conf.settings.TIME_ZONE
-    timezone = pytz.timezone(timezone)
-
     value = _get_string(params, "description")
 
     value = _get_int(params, "first_id")
@@ -580,15 +536,13 @@ def _get_photo_search(user, params):
     if value is not None:
         search = search & Q(pk__lt=value)
 
-    value = _get_datetime(params, "first_date", timezone)
+    value = _get_datetime(params, "first_datetime")
     if value is not None:
-        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-        search = search & Q(datetime__gte=utc_value)
+        search = search & Q(datetime__gte=value)
 
-    value = _get_datetime(params, "last_date", timezone)
+    value = _get_datetime(params, "last_datetime")
     if value is not None:
-        utc_value = value.astimezone(pytz.utc).replace(tzinfo=None)
-        search = search & Q(datetime__lt=utc_value)
+        search = search & Q(datetime__lt=value)
 
     value = _get_int(params, "lower_rating")
     if value is not None:

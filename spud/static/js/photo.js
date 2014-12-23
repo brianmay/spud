@@ -31,8 +31,8 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["first_date", new datetime_input_field("First date", false)],
-                ["last_date", new datetime_input_field("Last date", false)],
+                ["first_datetime", new datetime_input_field("First date", false)],
+                ["last_datetime", new datetime_input_field("Last date", false)],
                 ["lower_rating", new integer_input_field("Upper rating", false)],
                 ["upper_rating", new integer_input_field("Lower rating", false)],
                 ["title", new text_input_field("Title", false)],
@@ -69,12 +69,33 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
         this._super();
     },
 
+    set: function(criteria) {
+        var clone = $.extend({}, criteria)
+
+        if (clone.first_datetime != null) {
+            clone.first_datetime = [ clone.first_datetime, 0 ]
+        }
+
+        if (clone.last_datetime != null) {
+            clone.last_datetime = [ clone.last_datetime, 0 ]
+        }
+
+        this._super(clone)
+    },
+
     _submit_values: function(values) {
         var criteria = {}
 
         $.each(values, function (key, el) {
-            if (el != null) { criteria[key] = el }
+            if (el != null && el!=false) { criteria[key] = el }
         });
+
+        if (values.first_datetime != null) {
+            criteria.first_datetime = values.first_datetime[0]
+        }
+        if (values.last_datetime != null) {
+            criteria.last_datetime = values.last_datetime[0]
+        }
 
         var mythis = this
         if (this.options.on_success(criteria)) {

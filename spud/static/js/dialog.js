@@ -439,7 +439,8 @@ boolean_input_field.prototype.set = function(value) {
 }
 
 boolean_input_field.prototype.get = function() {
-    return this.input.is(":checked")
+    var value = this.input.is(":checked")
+    return value
 }
 
 // define ajax_select_field
