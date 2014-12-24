@@ -786,98 +786,6 @@ class photo(base_model):
         return
     update_size.alters_data = True
 
-    def update_from_source(self):
-        m = media.get_media(self.get_orig_path())
-        exif = m.get_exif()
-
-        (width, height) = m.get_size()
-        size = m.get_bytes()
-
-        # FIXME
-        self.width = width
-        self.height = height
-        self.size = size
-
-        try:
-            self.camera_make = exif['EXIF:Make']
-        except KeyError:
-            pass
-
-        try:
-            self.camera_model = exif['EXIF:Model']
-        except KeyError:
-            pass
-
-        try:
-            if int(exif['EXIF:Flash']) & 1:
-                self.flash_used = 'Y'
-            else:
-                self.flash_used = 'N'
-        except KeyError:
-            pass
-
-        try:
-            self.focal_length = exif['EXIF:FocalLength']
-        except KeyError:
-            pass
-
-        try:
-            self.exposure = exif['EXIF:ExposureTime']
-        except KeyError:
-            pass
-
-        try:
-            self.compression = ""
-        except KeyError:
-            pass
-
-        try:
-            fnumber = exif['EXIF:FNumber']
-            self.aperture = "F%.1f" % (fnumber)
-        except KeyError:
-            pass
-
-        try:
-            self.iso_equiv = exif['EXIF:ISO']
-        except KeyError:
-            pass
-
-        try:
-            value = int(exif['EXIF:MeteringMode'])
-            if value == 0:
-                self.metering_mode = "unknown"
-            elif value == 1:
-                self.metering_mode = "average"
-            elif value == 2:
-                self.metering_mode = "center weighted average"
-            elif value == 3:
-                self.metering_mode = "spot"
-            elif value == 4:
-                self.metering_mode = "multi spot"
-            elif value == 5:
-                self.metering_mode = "pattern"
-            elif value == 6:
-                self.metering_mode = "partial"
-            elif value == 255:
-                self.metering_mode = "other"
-            else:
-                self.metering_mode = "reserved"
-        except KeyError:
-            pass
-
-        try:
-            self.focus_dist = exif['Composite:HyperfocalDistance']
-        except KeyError:
-            pass
-
-        try:
-            self.ccd_width = ""
-        except KeyError:
-            pass
-
-        return
-    update_from_source.alters_data = True
-
     @classmethod
     def get_conflicts(cls, new_path, new_name):
         # check for conflicts or errors
@@ -1065,14 +973,14 @@ class photo_video(base_model):
         (shortname, _) = os.path.splitext(photo.name)
         return os.path.join(
             settings.IMAGE_PATH, "video", self.size,
-            photo.path, shortname + self.extension)
+            photo.path, shortname + "." + self.extension)
 
     def get_url(self):
         photo = self.photo
         (shortname, _) = os.path.splitext(photo.name)
         return iri_to_uri(os.path.join(
             settings.IMAGE_URL, "video", urlquote(self.size),
-            urlquote(photo.path), urlquote(shortname + self.extension)))
+            urlquote(photo.path), urlquote(shortname + "." + self.extension)))
 
     def delete(self):
         path = self.get_path()

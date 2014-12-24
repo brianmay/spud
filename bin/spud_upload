@@ -15,10 +15,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
 
+from six.moves import configparser
+import datetime
+import pytz
 import argparse
+import os.path
 from hammock import Hammock
 from requests.auth import HTTPBasicAuth
+
+from spud import media
 
 
 class Spud(Hammock):
@@ -83,6 +92,15 @@ def get_place(spud, place):
     return result["results"][0]["id"]
 
 
+def get_person(spud, person):
+    result = spud.persons.GET(params={'name': person})
+    if result["count"] < 1:
+        raise RuntimeError("Cannot find person '%s'" % person)
+    if result["count"] > 1:
+        raise RuntimeError("Multiple matches for person '%s'" % person)
+    return result["results"][0]["id"]
+
+
 def get_persons(spud, persons):
     results = []
     for person in persons:
@@ -90,13 +108,90 @@ def get_persons(spud, persons):
             results.append("unknown")
             continue
 
-        result = spud.persons.GET(params={'q': person.split(" ")})
-        if result["count"] < 1:
-            raise RuntimeError("Cannot find person '%s'" % person)
-        if result["count"] > 1:
-            raise RuntimeError("Multiple matches for person '%s'" % person)
-        results.append(result["results"][0]["id"])
+        results.append(get_person(person))
     return results
+
+
+def import_photo(
+        config, spud, src_filename,
+        photographer, place, albums, categorys,
+        src_timezone, dst_timezone, offset, dry_run):
+
+    print()
+
+    # check source file
+    if not os.path.exists(src_filename):
+        raise RuntimeError("source photo doesn't exist at %s" % (src_filename))
+
+    m = media.get_media(src_filename)
+    exif = m.get_normalized_exif()
+
+    # set everything without commiting anything
+    photo = {}
+    photo['photographer'] = photographer
+    photo['place'] = place
+    photo['albums'] = albums
+    photo['categorys'] = categorys
+    photo['level'] = 1
+
+    camera = None
+    if 'camera_model' in exif:
+        camera = exif['camera_model']
+
+    # get time
+    dt = m.get_datetime()
+    print(dt)
+
+    if src_timezone is None and camera is not None \
+            and config.has_section(camera):
+        name = config.get(camera, "timezone")
+        if name is not None:
+            src_timezone = pytz.timezone(name)
+
+    if src_timezone is None:
+        name = config.get('defaults', 'timezone')
+        src_timezone = pytz.timezone(name)
+
+    dt = src_timezone.localize(dt)
+    print(dt)
+
+    # adjust time for destination timezone
+    if dst_timezone is None:
+        name = config.get('defaults', 'timezone')
+        dst_timezone = pytz.timezone(name)
+
+    dt = dt.astimezone(dst_timezone)
+    print(dt)
+
+    # add manual offsets
+    dt += datetime.timedelta(minutes=offset)
+    if camera is not None and config.has_section(camera):
+        dt += datetime.timedelta(minutes=int(config.get(camera, offset)))
+    print(dt)
+
+    # save the time
+    photo['utc_offset'] = dt.utcoffset().total_seconds() / 60
+    photo['datetime'] = dt.astimezone(pytz.utc).replace(tzinfo=None)
+
+    print(photo['datetime'], photo['utc_offset'])
+
+    if dry_run:
+        print("would import %s"
+              % (src_filename))
+        print(photo)
+        return
+
+    photo = spud.photos.POST(
+        data=photo,
+        files={
+            'photo':
+            open(src_filename, 'rb')}
+    )
+
+    print("imported  %s as %d"
+          % (src_filename, photo.id))
+
+    return photo
 
 
 def main():
@@ -112,17 +207,37 @@ def main():
         '--place',
         help='Add photos to place')
     parser.add_argument(
-        '--person', action="append", default=[],
-        help='Add photos to person')
+        '--photographer',
+        help='Add photographer to photos.')
+    # parser.add_argument(
+    #     '--person', action="append", default=[],
+    #     help='Add photos to person')
+    parser.add_argument(
+        '--config',
+        default=os.path.join(os.getenv('HOME'), '.spud.conf'),
+        help='Configuration file')
+    parser.add_argument(
+        '--dry_run', action="store_true",
+        help='Dry run')
+    parser.add_argument(
+        'files', nargs='+',
+        help='Files to add')
     args = parser.parse_args()
 
     anonymous_spud = Spud(
         None, None,
         "http://localhost:8000/api", append_slash=True)
 
+    config = configparser.RawConfigParser()
+    config.read(args.config)
+
+    username = config.get("spud", "username")
+    password = config.get("spud", "password")
+    url = config.get("spud", "url")
+
     spud = Spud(
-        "brian", "1234",
-        "http://localhost:8000/api", append_slash=True)
+        username, password,
+        url, append_slash=True)
 
     print("")
     print("get_session (anonymous)")
@@ -156,66 +271,36 @@ def main():
         place = get_place(spud, args.place)
         print(place)
 
-    print("")
-    print("get_persons")
-    print("------------")
-    persons = get_persons(spud, args.person)
-    print(persons)
+    # print("")
+    # print("get_persons")
+    # print("------------")
+    # persons = get_persons(spud, args.person)
+    # print(persons)
 
-    print("")
-    print("get_photos")
-    print("---------")
-    photos = spud.photos.GET()
-    print(photos)
-    return
+    photographer = None
+    if args.photographer:
+        print("")
+        print("get_photographer")
+        print("------------")
+        photographer = get_person(spud, args.photographer)
+        print(photographer)
 
-    print("")
-    print("patch_photo")
-    print("---------")
-    photos = spud.photos(3).PATCH(data={
-        'albums_pk': albums,
-        'categorys_pk': categorys,
-        'place_pk': place,
-        'persons_pk': persons,
-    })
+    # print("")
+    # print("get_photos")
+    # print("---------")
+    # photos = spud.photos.GET()
+    # print(photos)
+    # return
 
-    print("")
-    print("post_photo")
-    print("---------")
-    result = spud.photos.POST(
-        data={
-            'level': 1,
-            'src_timezone': 'Australia/Melbourne',
-            'timezone': 'Australia/Perth',
-            'albums_pk': albums,
-            'categorys_pk': categorys,
-            'place_pk': place,
-            'persons_pk': persons,
-        },
-        files={
-            'photo':
-            open('/home/brian/ownCloud/photos/paris.jpg', 'rb')}
-    )
-    print(result)
+    src_timezone = None
+    dst_timezone = None
+    offset = 0
 
-    print("")
-    print("post_photo")
-    print("---------")
-    result = spud.photos.POST(
-        data={
-            'level': 1,
-            'src_timezone': 'Australia/Melbourne',
-            'timezone': 'Australia/Perth',
-            'albums_pk': albums,
-            'categorys_pk': categorys,
-            'place_pk': place,
-            'persons_pk': persons,
-        },
-        files={
-            'photo':
-            open('/home/brian/ownCloud/photos/squirrel.jpg', 'rb')}
-    )
-    print(result)
+    for filename in args.files:
+        import_photo(
+            config, spud, filename,
+            photographer, place, albums, categorys,
+            src_timezone, dst_timezone, offset, args.dry_run)
 
     return
 

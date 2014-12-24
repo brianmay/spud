@@ -356,7 +356,7 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
         this.loader = null
 
         this.img = $("<div></div>")
-            .image({size: "mid", include_link: true})
+            .image({size: "mid", do_video: true, include_link: false})
             .appendTo(this.element)
 
         this._super();

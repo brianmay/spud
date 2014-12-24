@@ -110,6 +110,89 @@ class media:
     def is_video(self):
         return False
 
+    def get_normalized_exif(self):
+        r = {}
+        exif = self.get_exif()
+
+        try:
+            r['camera_make'] = exif['EXIF:Make']
+        except KeyError:
+            pass
+
+        try:
+            r['camera_model'] = exif['EXIF:Model']
+        except KeyError:
+            pass
+
+        try:
+            if int(exif['EXIF:Flash']) & 1:
+                r['flash_used'] = 'Y'
+            else:
+                r['flash_used'] = 'N'
+        except KeyError:
+            pass
+
+        try:
+            r['focal_length'] = exif['EXIF:FocalLength']
+        except KeyError:
+            pass
+
+        try:
+            r['exposure'] = exif['EXIF:ExposureTime']
+        except KeyError:
+            pass
+
+        # try:
+        #     r['compression'] = ""
+        # except KeyError:
+        #     pass
+
+        try:
+            fnumber = exif['EXIF:FNumber']
+            r['aperture'] = "F%.1f" % (fnumber)
+        except KeyError:
+            pass
+
+        try:
+            r['iso_equiv'] = exif['EXIF:ISO']
+        except KeyError:
+            pass
+
+        try:
+            value = int(exif['EXIF:MeteringMode'])
+            if value == 0:
+                r['metering_mode'] = "unknown"
+            elif value == 1:
+                r['metering_mode'] = "average"
+            elif value == 2:
+                r['metering_mode'] = "center weighted average"
+            elif value == 3:
+                r['metering_mode'] = "spot"
+            elif value == 4:
+                r['metering_mode'] = "multi spot"
+            elif value == 5:
+                r['metering_mode'] = "pattern"
+            elif value == 6:
+                r['metering_mode'] = "partial"
+            elif value == 255:
+                r['metering_mode'] = "other"
+            else:
+                r['metering_mode'] = "reserved"
+        except KeyError:
+            pass
+
+        try:
+            r['focus_dist'] = exif['Composite:HyperfocalDistance']
+        except KeyError:
+            pass
+
+        # try:
+        #     r['ccd_width'] = ""
+        # except KeyError:
+        #     pass
+
+        return r
+
 
 class media_jpeg(media):
     def rotate(self, amount):

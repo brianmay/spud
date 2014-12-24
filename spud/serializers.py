@@ -17,11 +17,10 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import tempfile
 import pytz
-import datetime
 import os
 import shutil
+import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
@@ -92,7 +91,9 @@ class PhotoVideoListSerializer(serializers.ListSerializer):
     def to_representation(self, value):
         result = {}
         for v in value:
-            result[v.size] = self.child.to_representation(v)
+            if v.size not in result:
+                result[v.size] = []
+            result[v.size].append(self.child.to_representation(v))
         return result
 
 
@@ -456,8 +457,6 @@ class PhotoListSerializer(serializers.ListSerializer):
 
 
 class PhotoSerializer(serializers.ModelSerializer):
-#    timezone = TimezoneField(write_only=True)
-
 #    albums = AlbumListSerializer()
 #    categorys = CategoryListSerializer()
 
@@ -506,7 +505,8 @@ class PhotoSerializer(serializers.ModelSerializer):
 #        source="datetime:utc_offset")
 
     def validate(self, attrs):
-        if 'photo' not in self._initial_data:
+        print(self.initial_data)
+        if 'photo' not in self.initial_data:
             return attrs
 
         # settings for the file upload
@@ -529,7 +529,7 @@ class PhotoSerializer(serializers.ModelSerializer):
             )
         }
 
-        file_obj = self._initial_data['photo']
+        file_obj = self.initial_data['photo']
 
         if settings.IMAGE_PATH is None:
             raise exceptions.PermissionDenied(
@@ -542,71 +542,47 @@ class PhotoSerializer(serializers.ModelSerializer):
             raise exceptions.ValidationError('Minimum file size exceeded.')
 
 # FIXME
-#        print (type(file_obj), file_obj.content_type)
 #        if file_obj.content_type not in options["acceptedformats"]:
 #            raise exceptions.ParseError(
 #                'File type not supported.')
 
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            for chunk in file_obj.chunks():
-                tmp_file.write(chunk)
-            del chunk
+#        with tempfile.NamedTemporaryFile() as tmp_file:
+#            for chunk in file_obj.chunks():
+#                tmp_file.write(chunk)
+#            del chunk
+#
+#            tmp_file.flush()
+#            tmp_filename = tmp_file.name
+#
+#            # check source file
+#            name = os.path.basename(file_obj.name)
 
-            tmp_file.flush()
-            tmp_filename = tmp_file.name
-
-            # check source file
-            name = os.path.basename(file_obj.name)
-
-            # get time
-            if 'datetime' in attrs:
-                dt = attrs['datetime']
-            else:
-                m = media.get_media(tmp_filename, name)
-                dt = m.get_datetime()
-            print(dt)
-
-            dst_timezone = attrs.pop('timezone')
-
-            dt = pytz.utc.localize(dt)
-            print(dt)
-            dt = dt.astimezone(dst_timezone)
-            print(dt)
-
-            # save the time
-            attrs['utc_offset'] = dt.utcoffset().total_seconds() / 60
-            attrs['datetime'] = dt.astimezone(pytz.utc).replace(tzinfo=None)
-
-            # determine the destination path
-            path = "%04d/%02d/%02d" % (dt.year, dt.month, dt.day)
-            try:
-                path, name \
-                    = models.photo.get_new_name(tmp_filename, path, name)
-            except RuntimeError as err:
-                raise exceptions.ValidationError(err.message)
-            except models.photo_already_exists_error as err:
-                raise exceptions.ValidationError(err.message)
-
-        attrs['path'] = path
-        attrs['name'] = name
-        attrs['size'] = file_obj.size
-#        dst = os.path.join(settings.IMAGE_PATH, "orig", path, name)
-
+        raise exceptions.ValidationError('I dont like cats.')
         return attrs
 
     def create(self, validated_attrs):
-        fields = validated_attrs
+        assert 'photo' in self.initial_data
 
-        assert 'photo' in self._initial_data
+        file_obj = self.initial_data['photo']
 
-        file_obj = self._initial_data['photo']
+        from_tz = pytz.utc
+        to_tz = pytz.FixedOffset(validated_attrs['utc_offset'])
+        to_offset = datetime.timedelta(minutes=validated_attrs['utc_offset'])
+        local = from_tz.localize(validated_attrs['datetime'])
+        local = (local + to_offset).replace(tzinfo=to_tz)
 
-        path = fields['path']
-        name = fields['name']
+        path = "%04d/%02d/%02d" % (local.year, local.month, local.day)
+        name = file_obj.name
+
+        validated_attrs['path'] = path
+        validated_attrs['name'] = name
+        validated_attrs['size'] = file_obj.size
+        validated_attrs['action'] = 'V'
+
         dst = os.path.join(settings.IMAGE_PATH, "orig", path, name)
 
         # Go ahead and do stuff
-        print("importing to %s/%s" % (path, name))
+        print("importing to %s" % dst)
 
         umask = os.umask(0o022)
         try:
@@ -618,12 +594,21 @@ class PhotoSerializer(serializers.ModelSerializer):
         finally:
             os.umask(umask)
 
-        print("imported  %s/%s" % (path, name))
+        # FIXME rotate???
 
         albums = validated_attrs.pop("albums", [])
         categorys = validated_attrs.pop("categorys", [])
         persons = validated_attrs.pop("photo_person_set", [])
         feedbacks = validated_attrs.pop("feedbacks", [])
+
+        m = media.get_media(self.get_orig_path())
+        (validated_attrs['width'], validated_attrs['height']) = m.get_size()
+        validated_attrs['size'] = m.get_bytes()
+
+        exif = m.get_normalized_exif()
+        assert 'datetime' not in exif
+        exif.update(validated_attrs)
+        validated_attrs = exif
 
         instance = models.photo.objects.create(**validated_attrs)
 
@@ -643,11 +628,9 @@ class PhotoSerializer(serializers.ModelSerializer):
             models.feedback.objects.create(
                 photo=instance, **person)
 
-        instance.update_from_source()
-        instance.generate_thumbnails(overwrite=False)
+        # instance.generate_thumbnails(overwrite=False)
 
-        # FIXME rotate???
-        # FIXME set actions correctly
+        print("imported  %s/%s as %d" % (path, name, instance.pk))
 
         return instance
 
@@ -726,7 +709,7 @@ class PhotoSerializer(serializers.ModelSerializer):
             'utc_offset': {'read_only': True},
             'timestamp': {'read_only': True},
 
-            # 'action': {'required': False},
+            'action': {'required': False},
             'datetime': {'required': False},
         }
         list_serializer_class = PhotoListSerializer

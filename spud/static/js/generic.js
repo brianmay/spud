@@ -314,7 +314,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Albums")
         .on('click', function(ev) {
-            add_screen($.spud.album_list_screen, {})
+            var criteria = {root_only: true}
+            add_screen($.spud.album_list_screen, {criteria: criteria})
             return false
         })
         .appendTo(menu)
@@ -322,7 +323,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Categories")
         .on('click', function(ev) {
-            add_screen($.spud.category_list_screen, {})
+            var criteria = {root_only: true}
+            add_screen($.spud.category_list_screen, {criteria: criteria})
             return false
         })
         .appendTo(menu)
@@ -330,7 +332,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Places")
         .on('click', function(ev) {
-            add_screen($.spud.place_list_screen, {})
+            var criteria = {root_only: true}
+            add_screen($.spud.place_list_screen, {criteria: criteria})
             return false
         })
         .appendTo(menu)
@@ -338,7 +341,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("People")
         .on('click', function(ev) {
-            add_screen($.spud.person_list_screen, {})
+            var criteria = {}
+            add_screen($.spud.person_list_screen, {criteria: criteria})
             return false
         })
         .appendTo(menu)
@@ -346,7 +350,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Photos")
         .on('click', function(ev) {
-            add_screen($.spud.photo_list_screen, {})
+            var criteria = {}
+            add_screen($.spud.photo_list_screen, {criteria: criteria})
             return false
         })
         .appendTo(menu)
@@ -354,7 +359,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Feedback")
         .on('click', function(ev) {
-            add_screen($.spud.feedback_list_screen, {})
+            var criteria = {}
+            add_screen($.spud.feedback_list_screen, {criteria: criteria})
             return false
         })
         .appendTo(menu)
@@ -421,20 +427,26 @@ function put_state(state) {
     window._dont_push = false
 }
 
+function _get_page() {
+    var title = "SPUD"
+    var url = root_url()
+    var active_screen = $(".screen:not(.disabled)").data("screen")
+    if (active_screen != null) {
+        title = active_screen.options.title
+        url = active_screen.get_url()
+    }
+    return { title: title, url: url }
+}
+
 function push_state(do_replace) {
     if (window._dont_push) {
         return
     }
 
     var state = get_state()
-    var active_screen = $(".screen:not(.disabled)").data("screen")
-
-    var title = "SPUD"
-    var url = root_url()
-    if (active_screen != null) {
-        title = active_screen.options.title
-        url = active_screen.get_url()
-    }
+    var page = _get_page()
+    var title = page.title
+    var url = page.url
 
     if (window._do_replace || do_replace) {
         console.log("replace state", JSON.stringify(state), title, url)
@@ -454,6 +466,10 @@ window.onpopstate = function(ev) {
     } else {
         put_state([])
     }
+
+    var page = _get_page()
+    var title = page.title
+    $("head title").text(title)
 }
 
 ///////////////////////////////////////

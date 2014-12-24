@@ -686,11 +686,11 @@ $.widget('spud.image', $.spud.widget, {
     set: function(photo) {
         this._clear()
 
-        if (this.options.do_video && Object.keys(photo.video).length > 0) {
+        if (this.options.do_video && !$.isEmptyObject(photo.videos)) {
             var img = $("<video controls='controls'/>")
 
             var size = "320"
-            $.each(photo.video[size], function(priority, video){
+            $.each(photo.videos[size], function(priority, video){
                 img
                     .attr("width", video.width)
                     .attr("height", video.height)

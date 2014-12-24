@@ -194,3 +194,9 @@ if settings.DEBUG and settings.IMAGE_PATH is not None:
         url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': settings.IMAGE_PATH}),
     )
+if settings.DEBUG:
+    urlpatterns += patterns(
+        '',
+        url(r'^errors.html$', 'django.views.static.serve',
+            {'document_root': ".", 'path': "errors.html"}),
+    )

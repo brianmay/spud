@@ -202,7 +202,7 @@ def _get_session(request):
 
 
 class SessionDetail(APIView):
-    def session_detail(self, request):
+    def get(self, request):
         data = _get_session(request)
         return Response(data)
 
