@@ -537,38 +537,32 @@ ajax_select_multiple_field.prototype.get = function() {
 }
 
 
-// // define ajax_select_sorted_field
-// function ajax_select_sorted_field(title, type, required) {
-//     input_field.call(this, title, required)
-//     this.type = type
-// }
-//
-// ajax_select_sorted_field.prototype = new input_field()
-// ajax_select_sorted_field.constructor = ajax_select_sorted_field
-// ajax_select_sorted_field.prototype.create = function(id) {
-//     return this.input = $("<span/>")
-//         .attr("name", id)
-//         .attr("id", "id_" + id)
-//         .ajaxautocompletesorted({type: this.type})
-// }
-//
-// ajax_select_sorted_field.prototype.destroy = function() {
-//     this.input.ajaxautocompletesorted("destroy")
-// }
-//
-// ajax_select_sorted_field.prototype.set = function(value) {
-//     var value_arr = []
-//     if (value != null) {
-//         var value_arr = $.map(value,
-//             function(value){ return { pk: value.id, repr: value.title, } }
-//         );
-//     }
-//     this.input.ajaxautocompletesorted("set", value_arr)
-// }
-//
-// ajax_select_sorted_field.prototype.get = function() {
-//     return this.input.ajaxautocompletesorted("get")
-// }
+// define ajax_select_sorted_field
+function ajax_select_sorted_field(title, type, required) {
+    input_field.call(this, title, required)
+    this.type = type
+}
+
+ajax_select_sorted_field.prototype = new input_field()
+ajax_select_sorted_field.constructor = ajax_select_sorted_field
+ajax_select_sorted_field.prototype.create = function(id) {
+    return this.input = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .ajaxautocompletesorted({type: this.type})
+}
+
+ajax_select_sorted_field.prototype.destroy = function() {
+    this.input.ajaxautocompletesorted("destroy")
+}
+
+ajax_select_sorted_field.prototype.set = function(value) {
+    this.input.ajaxautocompletesorted("set", null, value)
+}
+
+ajax_select_sorted_field.prototype.get = function() {
+    return this.input.ajaxautocompletesorted("get")
+}
 
 
 // define photo_select_field

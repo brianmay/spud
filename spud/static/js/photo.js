@@ -56,6 +56,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
                 ["place_descendants", new boolean_input_field("Descend places", false)],
                 ["place_none", new boolean_input_field("No places", false)],
 
+                ["person", new ajax_select_field("Person", "persons", false)],
                 ["person_none", new boolean_input_field("No people", false)],
                 ["person_descendants", new boolean_input_field("Descend people", false)],
             ]},
@@ -114,9 +115,10 @@ $.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
                 ["photographer_pk", new ajax_select_field("Photographer", "persons", false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
-                ["place_pk", new ajax_select_field("Place", "places", false)],
                 ["albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
                 ["categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
+                ["place_pk", new ajax_select_field("Place", "places", false)],
+                ["persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
                 ["camera_make", new text_input_field("Camera Make", false)],

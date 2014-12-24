@@ -259,7 +259,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
             .append(repr)
             .appendTo(this.deck)
 
-        if (obj != null) {
+        if (obj != null || obj_pk == null) {
             this._loaded_killer(repr, obj)
         } else {
             var kill_loader = new object_loader(this.options.type, obj_pk)
@@ -379,10 +379,18 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
     get: function() {
         var value = this.input.val().slice(1,-1)
         if (value != "") {
-            return value.split("|")
+            value = value.split("|")
         } else {
-            return []
+            value = []
         }
+
+        var tmp = []
+        $.each(value, function(i, id) {
+            if (id == "null") { id = null }
+            tmp.push(id)
+        })
+
+        return tmp
     },
 
     _receiveResult: function(ev, ui) {
@@ -482,33 +490,51 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
     _kill: function(obj_pk, div) {
         this._super(obj_pk, div);
         this.img.image("set_none")
+    },
+})
+
+
+$.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
+    _create: function(){
+        this._super()
+        this.deck
+            .sortable()
+            .on("sortstop", $.proxy(
+                function() {
+                    var value = this.deck.sortable( "toArray" )
+                    value = $.map(value, function(id) {
+                        return id.match(/(.+)[\-=_](.+)/)[2]
+                    })
+                    if (value.length > 0) {
+                        this.input.val("|" + value.join("|") + "|")
+                    } else {
+                        this.input.val("|")
+                    }
+                },
+                this)
+            )
+    },
+
+    _normalize: function( objs ) {
+        var unknown = [ null ]
+        objs = unknown.concat(objs)
+        return this._super(objs)
+    },
+
+    _normalize_item: function( obj ) {
+        if (obj == null) {
+            return {
+                'pk': null,
+                repr: "Unknown",
+                label: "Unknown",
+                obj: obj,
+            }
+        }
+        return this._super(obj)
     }
 })
 
 
-// $.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
-//     _create: function(){
-//         this._super()
-//         this.deck
-//             .sortable()
-//             .on("sortstop", $.proxy(
-//                 function() {
-//                     var value = this.deck.sortable( "toArray" )
-//                     value = $.map(value, function(id) {
-//                         return id.match(/(.+)[\-=_](.+)/)[2]
-//                     })
-//                     if (value.length > 0) {
-//                         this.input.val("|" + value.join("|") + "|")
-//                     } else {
-//                         this.input.val("|")
-//                     }
-//                 },
-//                 this)
-//             )
-//     }
-// })
-//
-//
 // $.widget('spud.spud_menu', $.ui.menu, {
 //     _create: function() {
 //

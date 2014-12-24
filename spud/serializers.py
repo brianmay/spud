@@ -274,7 +274,7 @@ class PersonListSerializer(serializers.ListSerializer):
         position = 1
         value = value.order_by("position")
         for pp in value.order_by("position"):
-            if position < pp.position:
+            while position < pp.position:
                 result.append(None)
                 position = position + 1
 
@@ -298,7 +298,7 @@ class PersonPkListSerializer(serializers.ListSerializer):
                 continue
 
             data = {
-                'id': pk,
+                'person_id': pk,
                 'position': index + 1,
             }
             r.append(data)
@@ -310,7 +310,7 @@ class PersonPkListSerializer(serializers.ListSerializer):
         position = 1
         value = value.order_by("position")
         for pp in value.order_by("position"):
-            if position < pp.position:
+            while position < pp.position:
                 result.append(None)
                 position = position + 1
 
@@ -516,7 +516,6 @@ class PhotoSerializer(serializers.ModelSerializer):
 #        source="datetime:utc_offset")
 
     def validate(self, attrs):
-        print(self.initial_data)
         if 'photo' not in self.initial_data:
             return attrs
 
