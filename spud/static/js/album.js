@@ -156,10 +156,14 @@ $.widget('spud.album_delete_dialog',  $.spud.ajax_dialog, {
 ///////////////////////////////////////
 
 $.widget('spud.album_criteria', $.spud.object_criteria, {
-    set: function(criteria) {
+    _create: function() {
         this._type = "albums"
         this._type_name = "Album"
 
+        this._super()
+    },
+
+    set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 

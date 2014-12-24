@@ -9,12 +9,18 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 #user-tools { position:absolute; top:0; right:0; padding:1.2em 10px; font-size:11px; text-align:right; }
 
 /* MENU */
-.menubar.ui-menu {
-    border: 0;
-    background: #ddd; 
+#header ul.menubar {
+    color: #ffc;
+    background: #000000;
+    border: none;
 }
 
-.menubar .ui-menu-item {
+ul.menubar {
+    background: #bbb;
+    border: none;
+}
+
+ul.menubar .ui-menu-item {
     display: inline-block;
 }
 
@@ -25,30 +31,61 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 
 .screen {
     margin: 5px;
-    padding: 10px;
+    padding: 0px;
     border-radius: 10px;
-    background: #ddd;
+    background: #eee;
 }
-.screen h1 {
-    color: #666;
+.screen .screen_header {
+    border: 1px solid #e78f08;
+    background: #f6a828 url("images/ui-bg_gloss-wave_35_f6a828_500x100.png") 50% 50% repeat-x;
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 5px 10px 5px 10px;
 }
 .screen .screen_content {
     display: block;
+    padding: 10px;
 }
 
 .screen.disabled {
     background: #eee;
 }
-.screen.disabled h1 {
+.screen.disabled .screen_header {
+    border: 1px solid #ccc;
     color: #ccc;
+    background: none;
 }
 .screen.disabled .screen_content {
     display: none;
 }
 
-.screen .ui-tabs {
+.infobox .fields, .ui-dialog .fields {
     display: inline-block;
     vertical-align: top;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    margin: 5px;
+}
+
+.ui-dialog .ui-tabs {
+    width: 100%;
+    margin: 0;
+}
+
+.ui-tabs .ui-tabs-panel {
+    padding: 5px 0px;
+}
+
+.ui-tabs .ui-widget-header {
+    background: none;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    border-radius: none;
+}
+
+.ui-tabs .ui-widget-content {
 }
 
 /* PHOTO LIST */
@@ -60,7 +97,7 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 .photo_item .desc ul { text-align: left; }
 .photo_item .desc ol { text-align: left; }
 
-.photo_list { border:1px solid #666; margin-bottom: 10px; height: 400px; overflow-y: scroll; }
+.photo_list { border:1px solid #666; margin-bottom: 10px; height: 400px; overflow-y: scroll; background: #fff; }
 .photo_list > ul { padding:0; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:170px; margin:10px; padding-top:10px; text-align: center; width:140px; }
 .photo_list .photo_item .desc { float:left; display:none; }
@@ -76,9 +113,9 @@ body { margin:0; padding:0; font-size:11px; font-family:"Lucida Grande","DejaVu 
 }
 
 /* LIST INFO BOX */
-.infobox { border:1px solid #000; padding:10px; margin-bottom:10px; }
-.infobox .image { display:inline-block; }
-.infobox .def_list { max-width:500px; display: inline-block; vertical-align:top; margin-left: 5px; }
+// .infobox { border:1px solid #000; padding:10px; margin-bottom:10px; background: #fff; }
+.infobox .image { display:inline-block; margin: 5px; }
+.infobox .def_list { max-width:500px; display: inline-block; vertical-align:top; padding:5px; }
 .infobox .def_list .item { border-top:1px solid #ddd; margin-bottom: 5px; }
 .infobox .def_list .term { margin:0; padding:5px; background:#ddd; color:#333; text-align:right; font-weight:bold; position:absolute; width:100px; vertical-align: top; }
 .infobox .def_list .definition { margin-left:110px; padding:5px; display:inline-block; vertical-align:top;}

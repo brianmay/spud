@@ -135,10 +135,14 @@ $.widget('spud.category_delete_dialog',  $.spud.ajax_dialog, {
 ///////////////////////////////////////
 
 $.widget('spud.category_criteria', $.spud.object_criteria, {
-    set: function(criteria) {
+    _create: function() {
         this._type = "categorys"
         this._type_name = "Category"
 
+        this._super()
+    },
+
+    set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 

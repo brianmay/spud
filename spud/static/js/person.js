@@ -150,10 +150,14 @@ $.widget('spud.person_delete_dialog',  $.spud.ajax_dialog, {
 ///////////////////////////////////////
 
 $.widget('spud.person_criteria', $.spud.object_criteria, {
-    set: function(criteria) {
+    _create: function() {
         this._type = "persons"
         this._type_name = "Person"
 
+        this._super()
+    },
+
+    set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 

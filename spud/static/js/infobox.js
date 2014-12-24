@@ -328,9 +328,12 @@ link_list_output_field.prototype.set = function(value) {
     var mythis = this
     var sep = ""
     $.each(value, function(i, item){
-        mythis.output
-            .append(sep)
-            .append(object_a(mythis.type, item))
+        mythis.output.append(sep)
+        if (item != null) {
+            mythis.output.append(object_a(mythis.type, item))
+        } else {
+            mythis.output.append("Unknown")
+        }
         sep = ", "
     })
     mythis.output.append(".")
@@ -378,7 +381,9 @@ $.widget('spud.infobox', $.spud.widget, {
         this.fields = {}
         if (this.options.pages) {
             this.page = {}
-            this.tabs = $("<div/>").appendTo(this.element)
+            this.tabs = $("<div/>")
+                .addClass("fields")
+                .appendTo(this.element)
 
             var ul = $("<ul></ul>").appendTo(this.tabs)
 
@@ -404,6 +409,7 @@ $.widget('spud.infobox', $.spud.widget, {
             mythis.tabs.tabs()
         } else {
             this.dl = $("<div/>")
+                .addClass("fields")
                 .addClass("def_list")
                 .appendTo(this.element)
             this._create_fields(null, this.options.fields)

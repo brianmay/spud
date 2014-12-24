@@ -407,6 +407,9 @@ select_input_field.prototype.set = function(value) {
 
 select_input_field.prototype.validate = function() {
     var value = this.get()
+    if (value == null) {
+        value = ""
+    }
     if (this.options[value] == null) {
         return value +" is not valid option"
     }
@@ -463,13 +466,6 @@ ajax_select_field.prototype.destroy = function() {
 }
 
 ajax_select_field.prototype.set = function(value) {
-//    var item = null
-//    if (value != null) {
-//        item = {
-//            pk: value.id,
-//            repr: value.title,
-//        }
-//    }
     this.input.ajaxautocomplete("set", null, value)
 }
 
@@ -511,42 +507,36 @@ ajax_select_field.prototype.get = function() {
 // quick_select_field.prototype.get = function() {
 //     return this.input.quickautocomplete("get")
 // }
-//
-//
-// // define ajax_select_multiple_field
-// function ajax_select_multiple_field(title, type, required) {
-//     input_field.call(this, title, required)
-//     this.type = type
-// }
-//
-// ajax_select_multiple_field.prototype = new input_field()
-// ajax_select_multiple_field.constructor = ajax_select_multiple_field
-// ajax_select_multiple_field.prototype.create = function(id) {
-//     return this.input = $("<span/>")
-//         .attr("name", id)
-//         .attr("id", "id_" + id)
-//         .ajaxautocompletemultiple({type: this.type})
-// }
-//
-// ajax_select_multiple_field.prototype.destroy = function() {
-//     this.input.ajaxautocompletemultiple("destroy")
-// }
-//
-// ajax_select_multiple_field.prototype.set = function(value) {
-//     var value_arr = []
-//     if (value != null) {
-//         var value_arr = $.map(value,
-//             function(v){ return { pk: v.id, repr: v.title, } }
-//         );
-//     }
-//     this.input.ajaxautocompletemultiple("set", value_arr)
-// }
-//
-// ajax_select_multiple_field.prototype.get = function() {
-//     return this.input.ajaxautocompletemultiple("get")
-// }
-//
-//
+
+
+// define ajax_select_multiple_field
+function ajax_select_multiple_field(title, type, required) {
+    input_field.call(this, title, required)
+    this.type = type
+}
+
+ajax_select_multiple_field.prototype = new input_field()
+ajax_select_multiple_field.constructor = ajax_select_multiple_field
+ajax_select_multiple_field.prototype.create = function(id) {
+    return this.input = $("<span/>")
+        .attr("name", id)
+        .attr("id", "id_" + id)
+        .ajaxautocompletemultiple({type: this.type})
+}
+
+ajax_select_multiple_field.prototype.destroy = function() {
+    this.input.ajaxautocompletemultiple("destroy")
+}
+
+ajax_select_multiple_field.prototype.set = function(value) {
+    this.input.ajaxautocompletemultiple("set", null, value)
+}
+
+ajax_select_multiple_field.prototype.get = function() {
+    return this.input.ajaxautocompletemultiple("get")
+}
+
+
 // // define ajax_select_sorted_field
 // function ajax_select_sorted_field(title, type, required) {
 //     input_field.call(this, title, required)
@@ -651,7 +641,9 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
         this.fields = {}
         if (this.options.pages) {
             this.page = {}
-            this.tabs = $("<div/>").appendTo(this.element)
+            this.tabs = $("<div/>")
+                .addClass("fields")
+                .appendTo(this.element)
 
             var ul = $("<ul></ul>").appendTo(this.tabs)
 
@@ -676,6 +668,7 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
             mythis.tabs.tabs()
         } else {
             this.table = $("<table />")
+                .addClass("fields")
                 .appendTo(this.f)
             this._create_fields(null, this.options.fields)
         }

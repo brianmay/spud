@@ -141,10 +141,14 @@ $.widget('spud.place_delete_dialog',  $.spud.ajax_dialog, {
 ///////////////////////////////////////
 
 $.widget('spud.place_criteria', $.spud.object_criteria, {
-    set: function(criteria) {
+    _create: function() {
         this._type = "places"
         this._type_name = "Place"
 
+        this._super()
+    },
+
+    set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 

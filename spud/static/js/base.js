@@ -196,7 +196,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         this.deck.children().remove();
         if (obj != null) {
             this.input.val(obj.pk)
-            this._addKiller(obj)
+            this._addKiller(obj, null)
         } else if (obj_pk != null) {
             this.input.val(obj_pk)
             this._addKiller(null, obj_pk)
@@ -231,12 +231,12 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
     _receiveResult: function(ev, ui) {
         if (this.input.val()) {
-            this._kill();
+            this._kill(ui.item.pk, null);
         }
         this.input.val(ui.item.pk);
         this.text.val('');
         this._addKiller(ui.item.obj, null);
-        this._trigger("added", ev, ui.item);
+        this._trigger("added", ev, ui.item.obj);
         return false;
     },
 
@@ -247,7 +247,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
     _addKiller: function(obj, obj_pk) {
         if (obj != null) {
-            obj_pk = obj.pk
+            obj_pk = obj.id
         }
 
         var mythis = this
@@ -275,13 +275,13 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
         killButton.on("click", $.proxy(
             function(ev) {
-                this._kill(obj, div);
+                this._kill(obj_pk, div);
                 return this._trigger("killed", ev, obj)
             },
             this))
     },
 
-    _kill: function(item, div) {
+    _kill: function(obj_pk, div) {
         this.input.val('');
         this.deck.children().fadeOut(1.0).remove();
     },
@@ -352,50 +352,59 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 })
 
 
-// $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
-//     set: function(initial) {
-//         if (initial.length > 0) {
-//             var value = $.map(initial, function(v){ return v.pk });
-//             this.input.val("|" + value.join("|") + "|")
-//         } else {
-//             this.input.val("|")
-//         }
-//         this.deck.children().remove();
-//         var mythis = this
-//         $.each(initial, function(i, v) {
-//             mythis._addKiller(v)
-//         });
-//     },
-//
-//     get: function() {
-//         var value = this.input.val().slice(1,-1)
-//         if (value != "") {
-//             return value.split("|")
-//         } else {
-//             return []
-//         }
-//     },
-//
-//     _receiveResult: function(ev, ui) {
-//         var prev = this.input.val();
-//
-//         if (prev.indexOf("|"+ui.item.pk+"|") == -1) {
-//                 this.input.val((prev ? prev : "|") + ui.item.pk + "|");
-//                 this.text.val('');
-//                 this._addKiller(ui.item);
-//                 this._trigger("added",  ev, ui.item);
-//         }
-//
-//         return false;
-//     },
-//
-//     _kill: function(item, div) {
-//         this.input.val(this.input.val().replace("|" + item.pk + "|", "|"));
-//         div.fadeOut().remove();
-//     },
-// })
-//
-//
+$.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
+    set: function(obj_list, pk_list) {
+        var mythis = this
+
+        this.deck.children().remove();
+
+        if (obj_list != null) {
+            pk_list = $.map(obj_list, function(v){ return v.pk });
+            $.each(obj_list, function(i, v) {
+                mythis._addKiller(v, null)
+            });
+        } else {
+            $.each(pk_list, function(i, v) {
+                mythis._addKiller(null, v)
+            });
+        }
+
+        if (pk_list.length > 0) {
+            this.input.val("|" + pk_list.join("|") + "|")
+        } else {
+            this.input.val("|")
+        }
+    },
+
+    get: function() {
+        var value = this.input.val().slice(1,-1)
+        if (value != "") {
+            return value.split("|")
+        } else {
+            return []
+        }
+    },
+
+    _receiveResult: function(ev, ui) {
+        var prev = this.input.val();
+
+        if (prev.indexOf("|"+ui.item.pk+"|") == -1) {
+                this.input.val((prev ? prev : "|") + ui.item.pk + "|");
+                this.text.val('');
+                this._addKiller(ui.item.obj, null);
+                this._trigger("added",  ev, ui.item.obj);
+        }
+
+        return false;
+    },
+
+    _kill: function(obj_pk, div) {
+        this.input.val(this.input.val().replace("|" + obj_pk + "|", "|"));
+        div.fadeOut().remove();
+    },
+})
+
+
 // $.widget('spud.quickautocomplete', $.spud.ajaxautocomplete, {
 //     _create: function(){
 //         delete this.options.type
@@ -470,8 +479,8 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
         this.img.image("set", photo)
     },
 
-    _kill: function(item, div) {
-        this._super(item, div);
+    _kill: function(obj_pk, div) {
+        this._super(obj_pk, div);
         this.img.image("set_none")
     }
 })
@@ -899,6 +908,10 @@ $.widget('spud.screen', $.spud.widget, {
         }
         this.element.attr("id", this.options.id)
 
+        var header = $("<div/>")
+            .addClass("screen_header")
+            .appendTo(this.element)
+
         $("<div/>")
             .addClass("close_button")
             .text("[X]")
@@ -906,11 +919,12 @@ $.widget('spud.screen', $.spud.widget, {
                 mythis.close()
                 return false;
             })
-            .appendTo(this.element)
+            .appendTo(header)
 
         this.h1 = $("<h1/>")
             .on("click", function(ev) { mythis.toggle() })
-            .appendTo(this.element)
+            .appendTo(header)
+
         this._set_title(this.options.title)
 
         this.element.data('screen', this)

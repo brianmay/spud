@@ -287,8 +287,9 @@ class PersonPkListSerializer(serializers.ListSerializer):
     child = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all())
 
-    def get_value(self, dictionary):
-        return dictionary.getlist(self.field_name)
+#    def get_value(self, dictionary):
+#        print("aaaa", dictionary)
+#        return dictionary.getlist(self.field_name)
 
     def to_internal_value(self, data):
         r = []
@@ -456,9 +457,19 @@ class PhotoListSerializer(serializers.ListSerializer):
         return results
 
 
+class PhotoTitleField(f.CharField):
+    def get_attribute(self, obj):
+        value = super(PhotoTitleField, self).get_attribute(obj)
+        if not value:
+            value = obj.name
+        return value
+
+
 class PhotoSerializer(serializers.ModelSerializer):
 #    albums = AlbumListSerializer()
 #    categorys = CategoryListSerializer()
+
+    title = PhotoTitleField()
 
     albums = AlbumSerializer(many=True, read_only=True)
     albums_pk = serializers.PrimaryKeyRelatedField(
@@ -490,7 +501,7 @@ class PhotoSerializer(serializers.ModelSerializer):
     photographer = NestedPersonSerializer(read_only=True)
     photographer_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="photographer",
-        required=False)
+        required=False, allow_null=True)
 
     feedbacks = FeedbackSerializer(many=True, read_only=True)
 #    relations = PhotoRelationListSerializer(read_only=True)

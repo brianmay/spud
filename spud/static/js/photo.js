@@ -31,6 +31,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
+                ["q", new text_input_field("Search for", false)],
                 ["first_datetime", new datetime_input_field("First date", false)],
                 ["last_datetime", new datetime_input_field("Last date", false)],
                 ["lower_rating", new integer_input_field("Upper rating", false)],
@@ -43,13 +44,6 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
                 ["last_id", new integer_input_field("Last id", false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
-                ["person_none", new boolean_input_field("No people", false)],
-                ["person_descendants", new boolean_input_field("Descend people", false)],
-
-                ["place", new ajax_select_field("Place", "places", false)],
-                ["place_descendants", new boolean_input_field("Descend places", false)],
-                ["place_none", new boolean_input_field("No places", false)],
-
                 ["album", new ajax_select_field("Album", "albums", false)],
                 ["album_descendants", new boolean_input_field("Descend albums", false)],
                 ["album_none", new boolean_input_field("No albums", false)],
@@ -57,6 +51,13 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
                 ["category", new ajax_select_field("Category", "categorys", false)],
                 ["category_descendants", new boolean_input_field("Descend categories", false)],
                 ["category_none", new boolean_input_field("No categories", false)],
+
+                ["place", new ajax_select_field("Place", "places", false)],
+                ["place_descendants", new boolean_input_field("Descend places", false)],
+                ["place_none", new boolean_input_field("No places", false)],
+
+                ["person_none", new boolean_input_field("No people", false)],
+                ["person_descendants", new boolean_input_field("Descend people", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
                 ["camera_make", new text_input_field("Camera Make", false)],
@@ -114,8 +115,8 @@ $.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
             ]},
             {name: 'connections', title: 'Connections', fields: [
                 ["place_pk", new ajax_select_field("Place", "places", false)],
-//                ["album", new ajax_select_field("Album", "albums", false)],
-//                ["category", new ajax_select_field("Category", "categorys", false)],
+                ["albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
+                ["categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
                 ["camera_make", new text_input_field("Camera Make", false)],
@@ -196,10 +197,22 @@ $.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
 ///////////////////////////////////////
 
 $.widget('spud.photo_criteria', $.spud.object_criteria, {
-    set: function(criteria) {
+    _create: function() {
         this._type = "photos"
         this._type_name = "Photo"
 
+        this.load_attributes = [
+            { name: 'album', type: 'albums' },
+            { name: 'category', type: 'categorys' },
+            { name: 'place', type: 'places' },
+            { name: 'person', type: 'persons' },
+            { name: 'instance', type: 'photos' },
+        ]
+
+        this._super()
+    },
+
+    set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -229,8 +242,17 @@ $.widget('spud.photo_criteria', $.spud.object_criteria, {
             title = "search " + criteria['q']
         }
 
-        else if (criteria['root_only']) {
-            title = "root only"
+        else if (criteria['album'] != null) {
+            title = "album " + criteria['album']
+        }
+        else if (criteria['category'] != null) {
+            title = "category " + criteria['category']
+        }
+        else if (criteria['place'] != null) {
+            title = "place " + criteria['place']
+        }
+        else if (criteria['person'] != null) {
+            title = "person " + criteria['person']
         }
 
         else {
@@ -308,7 +330,13 @@ $.widget('spud.photo_list', $.spud.object_list, {
             details.push($("<div/>").text(photo.place.title))
         }
         if (photo.persons.length > 0) {
-            var persons = $.map(photo.persons, function(person) { return person.title })
+            var persons = $.map(photo.persons, function(person) {
+                if (person != null) {
+                    return person.title
+                } else {
+                    return "Unknown"
+                }
+            })
             details.push($("<div/>").text(persons.join(", ")))
         }
         var a = this._photo_a(photo)
@@ -332,9 +360,10 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
                 ["view", new p_output_field("View")],
                 ["comment", new p_output_field("Comment")],
                 ["name", new text_output_field("File")],
-                ["place", new link_output_field("Place", "places")],
                 ["albums", new link_list_output_field("Albums", "albums")],
                 ["categorys", new link_list_output_field("Categories", "categorys")],
+                ["place", new link_output_field("Place", "places")],
+                ["persons", new link_list_output_field("People", "persons")],
                 ["datetime", new datetime_output_field("Date & time")],
                 ["photographer", new link_output_field("Photographer", "persons")],
                 ["rating", new text_output_field("Rating")],

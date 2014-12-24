@@ -654,10 +654,16 @@ function get_object_list_loader(type, criteria) {
 ///////////////////////////////////////
 $.widget('spud.object_criteria', $.spud.widget, {
     _create: function() {
+        if (this.load_attributes == null) {
+            this.load_attributes = [
+                { name: 'instance', type: this._type }
+            ]
+        }
+
         this._super()
         this.element.data('object_criteria', this)
 
-        this.loader = null
+        this.loaders = []
 
         this.criteria = $("<ul/>")
             .addClass("criteria")
@@ -671,27 +677,36 @@ $.widget('spud.object_criteria', $.spud.widget, {
     set: function(criteria) {
     },
 
+    cancel_loaders: function() {
+        var mythis = this
+
+        $.each(this.loaders, function(i, loader) {
+            loader.loaded_item.remove_listener(mythis)
+            loader.on_error.remove_listener(mythis)
+        })
+    },
+
     load: function(criteria) {
         var mythis = this
-        if (this.loader != null) {
-            this.loader.loaded_item.remove_listener(this)
-            this.loader = null
-        }
+        this.cancel_loaders()
         this.set(criteria)
-        if (criteria.instance == null) {
-            return
-        }
-        this.loader = get_object_loader(this._type, criteria.instance)
-        this.loader.loaded_item.add_listener(this, function(obj) {
-            criteria = $.extend({}, criteria)
-            criteria.instance = obj.title
-            mythis.set(criteria)
-            mythis.loader = null
+        var clone = $.extend({}, criteria)
+        $.each(this.load_attributes, function(i, value) {
+            if (criteria[value.name] == null) {
+                return
+            }
+            var loader = get_object_loader(value.type, criteria[value.name])
+            loader.loaded_item.add_listener(mythis, function(obj) {
+                clone[value.name] = obj.title
+                mythis.set(clone)
+                mythis.loader = null
+            })
+            loader.on_error.add_listener(mythis, function() {
+                mythis.element.addClass("error")
+            })
+            loader.load()
+            mythis.loaders.push(loader)
         })
-        this.loader.on_error.add_listener(this, function() {
-            mythis.element.addClass("error")
-        })
-        this.loader.load()
     },
 
     _setOption: function( key, value ) {
