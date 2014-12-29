@@ -30,7 +30,10 @@ from rest_framework import fields as f
 from . import models, media
 
 
-# class TimezoneField(f.CharField):
+class CharField(f.CharField):
+    default_empty_html = None
+
+# class TimezoneField(CharField):
 #     def to_internal_value(self, data):
 #         try:
 #             timezone = pytz.timezone(data)
@@ -130,6 +133,12 @@ class AlbumSerializer(serializers.ModelSerializer):
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False)
 
+    #! def __init__(self, *args, **kwargs):
+    #!     super(AlbumSerializer, self).__init__(*args, **kwargs)
+    #!     request = self.context['request']
+    #!     if not request.user.is_staff:
+    #!         del self.fields['notes']
+
     class Meta:
         model = models.album
 
@@ -191,7 +200,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         model = models.place
 
 
-class PersonTitleField(f.CharField):
+class PersonTitleField(CharField):
     def get_attribute(self, obj):
         return obj
 
@@ -457,7 +466,7 @@ class PhotoListSerializer(serializers.ListSerializer):
         return results
 
 
-class PhotoTitleField(f.CharField):
+class PhotoTitleField(CharField):
     def get_attribute(self, obj):
         value = super(PhotoTitleField, self).get_attribute(obj)
         if not value:
@@ -469,7 +478,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 #    albums = AlbumListSerializer()
 #    categorys = CategoryListSerializer()
 
-    title = PhotoTitleField()
+    title = PhotoTitleField(required=False, allow_null=True)
 
     albums = AlbumSerializer(many=True, read_only=True)
     albums_pk = serializers.PrimaryKeyRelatedField(
@@ -551,21 +560,10 @@ class PhotoSerializer(serializers.ModelSerializer):
         if file_obj.size < options["minfilesize"]:
             raise exceptions.ValidationError('Minimum file size exceeded.')
 
-# FIXME
-#        if file_obj.content_type not in options["acceptedformats"]:
-#            raise exceptions.ParseError(
-#                'File type not supported.')
-
-#        with tempfile.NamedTemporaryFile() as tmp_file:
-#            for chunk in file_obj.chunks():
-#                tmp_file.write(chunk)
-#            del chunk
-#
-#            tmp_file.flush()
-#            tmp_filename = tmp_file.name
-#
-#            # check source file
-#            name = os.path.basename(file_obj.name)
+        try:
+            media.get_media(file_obj.name, file_obj)
+        except media.UnknownMediaType:
+            raise exceptions.ParseError('File type not supported.')
 
         raise exceptions.ValidationError('I dont like cats.')
         return attrs
@@ -613,7 +611,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 
         m = media.get_media(self.get_orig_path())
         (validated_attrs['width'], validated_attrs['height']) = m.get_size()
-        validated_attrs['size'] = m.get_bytes()
+        validated_attrs['size'] = file_obj.size
 
         exif = m.get_normalized_exif()
         assert 'datetime' not in exif

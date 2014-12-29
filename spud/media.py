@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import six
 import tempfile
 import subprocess
 import os
@@ -25,23 +26,52 @@ import spud.exif
 import datetime
 
 
+class UnknownMediaType(Exception):
+    pass
+
+
 class media:
-    def __init__(self, src_full):
-        self.src_full = src_full
+    def __init__(self, fp):
+        self._fp = fp
+        self._tmp_file = None
+
+    def get_fp(self):
+        if not isinstance(self._fp, six.string_types):
+            self._fp.seek(0)
+        return self._fp
 
     def get_path(self):
-        return self.src_full
+        if isinstance(self._fp, six.string_types):
+            return self._fp
+
+        if self._tmp_file is None:
+            tmp_file = tempfile.NamedTemporaryFile(delete=False)
+            print("creating temp file %s" % tmp_file)
+
+            for chunk in self._fp.chunks():
+                tmp_file.write(chunk)
+            del chunk
+
+            tmp_file.flush()
+            self._tmp_file = tmp_file.name
+
+        return self._tmp_file
+
+    def __del__(self):
+        if self._tmp_file is not None:
+            print("removing temp file %s" % self._tmp_file)
+            os.unlink(self._tmp_file)
+            self._tmp_file = None
 
     def get_size(self):
-        im = Image.open(self.src_full)
+        fp = self.get_fp()
+        im = Image.open(fp)
         return im.size
 
-    def get_bytes(self):
-        return os.path.getsize(self.src_full)
-
     def get_exif(self):
+        path = self.get_path()
         with spud.exif.ExifTool() as e:
-            exif = e.get_metadata(self.src_full)
+            exif = e.get_metadata(path)
         assert(len(exif) == 1)
         return exif[0]
 
@@ -67,14 +97,11 @@ class media:
             dt = datetime.datetime.strptime(value, "%Y:%m:%d %H:%M:%S")
         del value
 
-        if dt is None:
-            dt = datetime.datetime.fromtimestamp(
-                os.path.getmtime(self.src_full))
-
         return dt
 
     def create_thumbnail(self, dst_path, max_size):
-        image = Image.open(self.src_full)
+        fp = self.get_fp()
+        image = Image.open(fp)
         return self._create_thumbnail(dst_path, max_size, image)
 
     def _create_thumbnail(self, dst_path, max_size, image):
@@ -216,7 +243,8 @@ class media_video(media):
 
     def create_thumbnail(self, dst_path, max_size):
         import ffvideo
-        vs = ffvideo.VideoStream(self.src_full)
+        path = self.get_path()
+        vs = ffvideo.VideoStream(path)
         image = vs.get_frame_at_sec(0).image()
         return self._create_thumbnail(dst_path, max_size, image)
 
@@ -263,7 +291,8 @@ class media_video(media):
 
     def get_size(self):
         import ffvideo
-        vs = ffvideo.VideoStream(self.src_full)
+        path = self.get_path()
+        vs = ffvideo.VideoStream(path)
         return vs.frame_width, vs.frame_height
 
     def is_video(self):
@@ -273,7 +302,8 @@ class media_video(media):
 class media_raw(media):
 
     def create_thumbnail(self, dst_path, max_size):
-        cmd = ["dcraw", "-T", "-c", self.src_full]
+        path = self.get_path()
+        cmd = ["dcraw", "-T", "-c", path]
         t = tempfile.TemporaryFile()
         p = subprocess.Popen(cmd, stdout=t)
         rc = p.wait()
@@ -287,7 +317,8 @@ class media_raw(media):
         return xysize
 
     def get_size(self):
-        cmd = ["dcraw", "-T", "-c", self.src_full]
+        path = self.get_path()
+        cmd = ["dcraw", "-T", "-c", path]
         t = tempfile.TemporaryFile()
         p = subprocess.Popen(cmd, stdout=t)
         rc = p.wait()
@@ -300,20 +331,21 @@ class media_raw(media):
         return image.size
 
 
-def get_media(filename, orig_name=None):
-    if orig_name is None:
-        orig_name = filename
-    (_, extension) = os.path.splitext(orig_name)
+def get_media(filename, fp=None):
+    if fp is None:
+        fp = filename
+
+    (_, extension) = os.path.splitext(filename)
     extension = extension.lower()
     if extension == ".jpg" or extension == ".tif":
-        return media_jpeg(filename)
+        return media_jpeg(fp)
     elif extension == ".avi" or extension == ".mov" \
             or extension == ".ogv" or extension == ".webm" \
             or extension == ".mp4":
-        return media_video(filename)
+        return media_video(fp)
     elif extension == ".png":
-        return media(filename)
+        return media(fp)
     elif extension == ".cr2":
-        return media_raw(filename)
+        return media_raw(fp)
     else:
-        raise RuntimeError("unknown media type for %s" % (filename))
+        raise UnknownMediaType("unknown media type for %s" % (fp))

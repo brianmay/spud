@@ -213,7 +213,8 @@ class album(hierarchy_model):
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
-    title = models.CharField(max_length=96, db_index=True)
+    title = models.CharField(
+        max_length=96, null=True, blank=True, db_index=True)
     description = models.TextField(null=True, blank=True)
     cover_photo = models.ForeignKey(
         'photo', related_name='album_cover_of', null=True, blank=True,

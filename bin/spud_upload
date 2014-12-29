@@ -142,6 +142,10 @@ def import_photo(
     dt = m.get_datetime()
     print(dt)
 
+    if dt is None:
+        dt = datetime.datetime.fromtimestamp(os.path.getmtime(src_filename))
+        print(dt)
+
     if src_timezone is None and camera is not None \
             and config.has_section(camera):
         name = config.get(camera, "timezone")
