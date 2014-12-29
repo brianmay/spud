@@ -169,6 +169,69 @@ $.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
 })
 
 
+$.widget('spud.photo_bulk_update_dialog',  $.spud.ajax_dialog, {
+    _create: function() {
+        this.options.pages = [
+            {name: 'basic', title: 'Basics', fields: [
+                ["set_datetime", new datetime_input_field("Date", false)],
+                ["set_title", new text_input_field("Title", false)],
+                ["set_photographer_pk", new ajax_select_field("Photographer", "persons", false)],
+            ]},
+            {name: 'add', title: 'Add', fields: [
+                ["add_albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
+                ["add_categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
+                ["add_place_pk", new ajax_select_field("Place", "places", false)],
+                ["add_persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
+            ]},
+            {name: 'rem', title: 'Remove', fields: [
+                ["rem_albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
+                ["rem_categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
+                ["rem_place_pk", new ajax_select_field("Place", "places", false)],
+                ["rem_persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
+            ]},
+            {name: 'camera', title: 'Camera', fields: [
+                ["set_camera_make", new text_input_field("Camera Make", false)],
+                ["set_camera_model", new text_input_field("Camera Model", false)],
+            ]},
+        ]
+
+        this.options.title = "Bulk photo update"
+        this.options.button = "Save"
+
+        this._type = "photos"
+        this._super();
+    },
+
+    set: function(photo) {
+        var clone = $.extend({}, photo)
+        clone.set_datetime = [ clone.set_datetime, clone.set_utc_offset ]
+        return this._super(clone);
+    },
+
+    _submit_values: function(values) {
+        var data = $.extend({}, this.options.criteria)
+
+        $.each(values, function (key, el) {
+            if (el != null && el!=false) { data[key] = el }
+        });
+
+        if (data.set_datetime != null) {
+            data.set_utc_offset = data.set_datetime[1]
+            data.set_datetime = data.set_datetime[0]
+        }
+
+        console.log(data)
+        // this._save("PATCH", null, data)
+    },
+
+    _done: function(data) {
+        $.each(data.results, function(photo) {
+            window._photo_changed.trigger(photo)
+        })
+    },
+})
+
+
 $.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
     _create: function() {
         this.options.title = "Delete photo"
@@ -392,6 +455,21 @@ $.widget('spud.photo_list', $.spud.object_list, {
         return li
     },
 
+    bulk_update: function() {
+        var criteria
+        if (this.options.selection.length <= 0) {
+            criteria = this.options.criteria
+        } else {
+            criteria = {
+                photos: this.options.selection
+            }
+        }
+        var params = {
+            criteria: criteria,
+        }
+        var div = $("<div/>")
+        $.spud.photo_bulk_update_dialog(params, div)
+    }
 })
 
 
@@ -465,6 +543,20 @@ $.widget('spud.photo_list_screen', $.spud.object_list_screen, {
         this._type_name = "Photo"
 
         this._super()
+    },
+
+    _setup_menu: function(menu) {
+        this._super(menu)
+
+        var mythis = this
+        menu.append(
+            $("<li/>")
+                .text("Update")
+                .on("click", function(ev) {
+                    var instance = mythis._ol.data('object_list')
+                    instance.bulk_update()
+                })
+        )
     },
 
     get_streamable_options: function() {

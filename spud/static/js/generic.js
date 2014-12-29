@@ -886,6 +886,26 @@ $.widget('spud.object_detail',  $.spud.infobox, {
 // generic screens
 ///////////////////////////////////////
 $.widget('spud.object_list_screen', $.spud.screen, {
+    _setup_menu: function(menu) {
+        var mythis = this
+
+        menu.append(
+            $("<li/>")
+                .text("Filter")
+                .on("click", function(ev) {
+                    var params = {
+                        obj: mythis.options.criteria,
+                        on_success: function(criteria) {
+                            mythis._filter(criteria)
+                            return true
+                        }
+                    }
+                    var div = $("<div/>")
+                    mythis._object_search_dialog(params, div)
+                })
+        )
+    },
+
     _create: function() {
         var mythis = this
 
@@ -898,22 +918,10 @@ $.widget('spud.object_list_screen', $.spud.screen, {
 
         var menu = $("<ul/>")
             .addClass("menubar")
-            .append(
-                $("<li/>")
-                    .text("Filter")
-                    .on("click", function(ev) {
-                        var params = {
-                            obj: mythis.options.criteria,
-                            on_success: function(criteria) {
-                                mythis._filter(criteria)
-                                return true
-                            }
-                        }
-                        var div = $("<div/>")
-                        mythis._object_search_dialog(params, div)
-                    })
-            )
-            .menu()
+
+        this._setup_menu(menu)
+
+        menu.menu()
             .appendTo(this.div)
 
         var params = {
@@ -989,32 +997,20 @@ $.widget('spud.object_list_screen', $.spud.screen, {
 
 
 $.widget('spud.object_detail_screen', $.spud.screen, {
-    _create: function() {
+    _setup_menu: function(menu) {
         var mythis = this
 
-        this.options.title = this._type_name+" Detail"
-
-        if (this.options.obj != null) {
-            var obj = this.options.obj
-            this.options.obj_id = obj.id
-            this.options.title = this._type_name+": "+obj.title
-        }
-
-        this._super()
-
-        var menu = $("<ul/>")
-            .addClass("menubar")
-            .append(
-                $("<li/>")
-                    .text("Children")
-                    .on("click", function(ev) {
-                        var screen_class = mythis._object_list_screen
-                        params = {
-                            criteria: mythis._get_children_criteria(),
-                        }
-                        add_screen(screen_class, params)
-                    })
-            )
+        menu.append(
+            $("<li/>")
+                .text("Children")
+                .on("click", function(ev) {
+                    var screen_class = mythis._object_list_screen
+                    params = {
+                        criteria: mythis._get_children_criteria(),
+                    }
+                    add_screen(screen_class, params)
+                })
+        )
 
         if (this._photo_list_screen != null) {
             menu.append(
@@ -1071,6 +1067,25 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 }
             })
             .appendTo(menu)
+    },
+
+    _create: function() {
+        var mythis = this
+
+        this.options.title = this._type_name+" Detail"
+
+        if (this.options.obj != null) {
+            var obj = this.options.obj
+            this.options.obj_id = obj.id
+            this.options.title = this._type_name+": "+obj.title
+        }
+
+        this._super()
+
+        var menu = $("<ul/>")
+            .addClass("menubar")
+
+        this._setup_menu(menu)
 
         menu
             .menu()
