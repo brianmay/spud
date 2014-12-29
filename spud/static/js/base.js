@@ -110,13 +110,13 @@ $.widget('spud.widget', {
     },
 });
 
-// $.widget('spud.myselectable', $.ui.selectable, {
-//     _mouseStart: function(event) {
-//         if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
-//             this._super( event );
-//         }
-//     },
-// });
+$.widget('spud.myselectable', $.ui.selectable, {
+    _mouseStart: function(event) {
+        if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
+            this._super( event );
+        }
+    },
+});
 
 
 $.widget('spud.autocompletehtml', $.ui.autocomplete, {
@@ -1060,7 +1060,8 @@ $.widget('spud.screen', $.spud.widget, {
     },
 
     get_streamable_options: function() {
-        return this.options
+        var options = $.extend({}, this.options) // clone options so we can modify
+        return options
     },
 })
 

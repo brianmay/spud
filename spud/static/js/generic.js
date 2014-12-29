@@ -725,7 +725,8 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         this.element.data('object_list', this)
 
         var mythis = this
-        this.empty()
+        this.page = 1
+
         if (this.options.disabled) {
             this.disable()
         } else {
@@ -741,6 +742,7 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         })
 
         window._reload_all.add_listener(this, function() {
+            this.empty()
             this._filter(this.options.criteria)
         })
     },
@@ -783,7 +785,6 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
             this.loader.loaded_list.remove_listener(this)
             this.loader = null
         }
-        this.empty()
         this.options.criteria = criteria
         this.loader = get_object_list_loader(this._type, criteria)
         this.loader.loaded_list.add_listener(this, function(obj_list) {
@@ -797,6 +798,7 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
 
     _setOption: function( key, value ) {
         if ( key === "criteria" ) {
+            this.empty()
             this._filter(value)
         } else if (key === "disabled") {
             if (value) {
@@ -815,7 +817,6 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
 
     empty: function() {
         this.page = 1
-        this.last_id = null
         this._super()
         this.element.removeClass("error")
         if (this.loader) {
@@ -929,8 +930,11 @@ $.widget('spud.object_list_screen', $.spud.screen, {
             'criteria': this.options.criteria,
             'disabled': this.options.disabled,
         }
-        this.al = $("<div/>").appendTo(this.div)
-        this._object_list(params, this.al)
+        if (this.options.object_list_options != null) {
+            params = $.extend({}, this.options.object_list_options, params)
+        }
+        this._ol = $("<div/>").appendTo(this.div)
+        this._object_list(params, this._ol)
     },
 
     _filter: function(value) {
@@ -940,7 +944,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
         var instance = this.criteria.data('object_criteria')
         instance.load(value)
 
-        var instance = this.al.data('object_list')
+        var instance = this._ol.data('object_list')
         instance.option("criteria", value)
     },
 
@@ -960,16 +964,16 @@ $.widget('spud.object_list_screen', $.spud.screen, {
 
     enable: function() {
         this._super()
-        if (this.al) {
-            var instance = this.al.data('object_list')
+        if (this._ol != null) {
+            var instance = this._ol.data('object_list')
             instance.enable()
         }
     },
 
     disable: function() {
         this._super()
-        if (this.al) {
-            var instance = this.al.data('object_list')
+        if (this._ol != null) {
+            var instance = this._ol.data('object_list')
             instance.disable()
         }
     },
@@ -1273,7 +1277,6 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
 
     get_streamable_options: function() {
         var options = this._super()
-        options = $.extend({}, options) // clone options so we can modify
         delete options['object_list_loader']
         return options
     },

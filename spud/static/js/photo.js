@@ -277,11 +277,49 @@ $.widget('spud.photo_criteria', $.spud.object_criteria, {
 
 
 $.widget('spud.photo_list', $.spud.object_list, {
+    _add_selection: function(photo) {
+        var selection = this.options.selection
+        if (selection.indexOf(photo.id) == -1) {
+            selection.push(photo.id)
+            push_state(true)
+        }
+    },
+
+    _del_selection: function(photo) {
+        var selection = this.options.selection
+        var index = selection.indexOf(photo.id)
+        if (index != -1) {
+            selection.splice(index, 1);
+            push_state(true)
+        }
+    },
+
+    _is_photo_selected: function(photo) {
+        var selection = this.options.selection
+        var index = selection.indexOf(photo.id)
+        return index != -1
+    },
+
     _create: function() {
+        var mythis = this
+
         this._type = "photos"
         this._type_name = "Photo"
 
+        if (this.options.selection == null) {
+            this.options.selection = []
+        }
         this._super()
+
+        this.ul.myselectable({
+            filter: "li",
+            selected: function( event, ui ) {
+                mythis._add_selection( $(ui.selected).data('photo') );
+            },
+            unselected: function( event, ui ) {
+                mythis._del_selection( $(ui.unselected).data('photo') );
+            },
+        })
 
         window._photo_changed.add_listener(this, function(photo) {
             var li = this._create_li(photo)
@@ -291,6 +329,11 @@ $.widget('spud.photo_list', $.spud.object_list, {
             this._get_item(photo_id).remove()
             this._load_if_required()
         })
+    },
+
+    empty: function() {
+        this.options.selection = []
+        this._super()
     },
 
     _photo_a: function(photo) {
@@ -320,7 +363,6 @@ $.widget('spud.photo_list', $.spud.object_list, {
                 child = add_screen($.spud.photo_detail_screen, params)
                 return false;
             })
-            .data('photo', photo.cover_photo)
             .text(title)
         return a
     },
@@ -343,7 +385,10 @@ $.widget('spud.photo_list', $.spud.object_list, {
         }
         var a = this._photo_a(photo)
         var li = this._super(photo, photo.relation || photo.title, details, photo.description, a)
-        li.attr('data-id', photo.id)
+        // li.attr('data-id', photo.id)
+        li.data('photo', photo)
+        li.data('id', photo.id)
+        li.toggleClass("ui-selected", this._is_photo_selected(photo))
         return li
     },
 
@@ -420,6 +465,17 @@ $.widget('spud.photo_list_screen', $.spud.object_list_screen, {
         this._type_name = "Photo"
 
         this._super()
+    },
+
+    get_streamable_options: function() {
+        var options = this._super()
+        if (this._ol != null) {
+            var instance = this._ol.data('object_list')
+            options.object_list_options = {
+                selection: instance.options.selection
+            }
+        }
+        return options
     },
 
     _object_list: $.proxy($.spud.photo_list, window),
