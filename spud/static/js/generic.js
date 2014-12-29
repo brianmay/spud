@@ -1164,21 +1164,20 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     },
 
     _setup_perms: function(perms) {
-        if (perms.can_create) {
-            this.create_item.show()
-        } else {
-            this.create_item.hide()
+        var can_create=false
+        var can_change=false
+        var can_delete=false
+
+        if (perms[this._type] != null) {
+            var perms_for_type = perms[this._type]
+            can_create = perms_for_type.can_create
+            can_change = perms_for_type.can_change
+            can_delete = perms_for_type.can_delete
         }
-        if (perms.can_change) {
-            this.change_item.show()
-        } else {
-            this.change_item.hide()
-        }
-        if (perms.can_delete) {
-            this.delete_item.show()
-        } else {
-            this.delete_item.hide()
-        }
+
+        this.create_item.toggle(can_create)
+        this.change_item.toggle(can_change)
+        this.delete_item.toggle(can_delete)
     },
 
     _setup_buttons: function() {

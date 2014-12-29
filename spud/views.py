@@ -185,12 +185,10 @@ class GroupViewSet(viewsets.ModelViewSet):
 def _get_session(request):
     user = request.user
 
+    perms = {}
+
     data = {
-        'perms': {
-            'can_create': user.is_authenticated(),
-            'can_change': user.is_authenticated(),
-            'can_delete': user.is_authenticated(),
-        },
+        'perms': perms
     }
 
     if user.is_authenticated():
@@ -198,10 +196,21 @@ def _get_session(request):
             user, context={'request': request})
         data['user'] = serializer.data
 
+        for t in ['album', 'category', 'place', 'person', 'photo', 'feedback']:
+            t_plural = t + "s"
+
+            perms[t_plural] = {
+                'can_create': user.has_perm('spud.add_' + t),
+                'can_change': user.has_perm('spud.change_' + t),
+                'can_delete': user.has_perm('spud.delete_' + t),
+            }
+
     return data
 
 
 class SessionDetail(APIView):
+    permission_classes = ()
+
     def get(self, request):
         data = _get_session(request)
         return Response(data)
