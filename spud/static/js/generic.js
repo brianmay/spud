@@ -1018,7 +1018,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 .text("Children")
                 .on("click", function(ev) {
                     var screen_class = mythis._object_list_screen
-                    params = {
+                    var params = {
                         criteria: mythis._get_children_criteria(),
                     }
                     add_screen(screen_class, params)
@@ -1031,7 +1031,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                     .text("Photos")
                     .on("click", function(ev) {
                         var screen_class = mythis._photo_list_screen
-                        params = {
+                        var params = {
                             criteria: mythis._get_photo_criteria(),
                         }
                         add_screen(screen_class, params)
