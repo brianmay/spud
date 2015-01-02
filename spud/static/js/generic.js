@@ -17,6 +17,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
+$(document)
+    .tooltip({
+        items: "a",
+        content: function() {
+            var photo = $(this).data('photo')
+            if (photo != null) {
+                return $("<div></div>")
+                    .image({size: 'thumb', photo: photo})
+            }
+            return null
+        },
+    })
+
 // function generic() {
 //     this.has_ancestors = true
 //     this.has_children = true
