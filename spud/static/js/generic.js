@@ -201,7 +201,6 @@ $.widget('spud.ajax_dialog',  $.spud.form_dialog, {
         var mythis = this
         var type = this._type
         this._loading = true
-        this.uiDialogButtonPane.find(".ui-button").button("disable")
         var url
         if (oject_id != null) {
             url = window.__root_prefix + "api/" + type + "/" + oject_id + "/"
@@ -227,7 +226,7 @@ $.widget('spud.ajax_dialog',  $.spud.form_dialog, {
                     })
                 }
                 alert("Error: " + message)
-                mythis.uiDialogButtonPane.find(".ui-button").button("enable")
+                this.enable()
             },
         });
     },
@@ -687,7 +686,7 @@ $.widget('spud.object_criteria', $.spud.widget, {
         }
     },
 
-    set: function(criteria) {
+    _set: function(criteria) {
     },
 
     cancel_loaders: function() {
@@ -700,9 +699,13 @@ $.widget('spud.object_criteria', $.spud.widget, {
     },
 
     load: function(criteria) {
+        this._setOption("obj", criteria)
+    },
+
+    _load: function(criteria) {
         var mythis = this
         this.cancel_loaders()
-        this.set(criteria)
+        this._set(criteria)
         var clone = $.extend({}, criteria)
         $.each(this.load_attributes, function(i, value) {
             if (criteria[value.name] == null) {
@@ -711,7 +714,7 @@ $.widget('spud.object_criteria', $.spud.widget, {
             var loader = get_object_loader(value.type, criteria[value.name])
             loader.loaded_item.add_listener(mythis, function(obj) {
                 clone[value.name] = obj.title
-                mythis.set(clone)
+                mythis._set(clone)
                 mythis.loader = null
             })
             loader.on_error.add_listener(mythis, function() {
@@ -722,12 +725,11 @@ $.widget('spud.object_criteria', $.spud.widget, {
         })
     },
 
-    _setOption: function( key, value ) {
+    _setOption: function(key, value ) {
         if ( key === "obj" ) {
-            this.load(value)
-        } else {
-            this._super( key, value );
+            this._load(value)
         }
+        this._super( key, value );
     },
 })
 
@@ -741,9 +743,7 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         this.page = 1
 
         if (this.options.disabled) {
-            this.disable()
-        } else {
-            this.enable()
+            this.element.addClass("disabled")
         }
 
         if (this.options.criteria != null) {
@@ -784,7 +784,7 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         // if element is not displayed, we can't tell the scroll position,
         // so we must wait for element to be displayed before we can continue
         // loading
-        if (this.is_enabled() && this.loader) {
+        if (!this.options.disabled && this.loader) {
             if (this.element.find("ul").height() <
                     this.element.scrollTop() + this.element.height() + 200) {
                 this.loader.load_next_page()
@@ -814,18 +814,13 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
             this.empty()
             this._filter(value)
         } else if (key === "disabled") {
-            if (value) {
-                this.enable()
+            if (!value) {
+                this._enable()
             } else {
-                this.disable()
+                this._disable()
             }
-        } else {
-            this._super( key, value );
         }
-    },
-
-    is_enabled: function() {
-        return !this.element.hasClass("disabled")
+        this._super( key, value );
     },
 
     empty: function() {
@@ -839,12 +834,12 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         }
     },
 
-    enable: function() {
+    _enable: function() {
         this.element.removeClass("disabled")
         this._load_if_required()
     },
 
-    disable: function() {
+    _disable: function() {
         this.element.addClass("disabled")
     },
 })
@@ -863,6 +858,10 @@ $.widget('spud.object_detail',  $.spud.infobox, {
     },
 
     load: function(obj_id) {
+        this._setOption("obj_id", obj_id)
+    },
+
+    _load: function(obj_id) {
         var mythis = this
 
         if (this.loader != null) {
@@ -886,12 +885,11 @@ $.widget('spud.object_detail',  $.spud.infobox, {
 
     _setOption: function( key, value ) {
         if ( key === "obj" ) {
-            this.set(value)
+            this._set(value)
         } else if ( key === "obj_id" ) {
-            this.load(value)
-        } else {
-            this._super( key, value );
+            this._load(value)
         }
+        this._super( key, value );
     },
 })
 
@@ -972,18 +970,11 @@ $.widget('spud.object_list_screen', $.spud.screen, {
     _setOption: function( key, value ) {
         if ( key === "criteria" ) {
             this._filter(value)
-        } else if (key === "disabled") {
-            if (value) {
-                this.enable()
-            } else {
-                this.disable()
-            }
-        } else {
-            this._super( key, value );
         }
+        this._super( key, value );
     },
 
-    enable: function() {
+    _enable: function() {
         this._super()
         if (this._ol != null) {
             var instance = this._ol.data('object_list')
@@ -991,7 +982,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
         }
     },
 
-    disable: function() {
+    _disable: function() {
         this._super()
         if (this._ol != null) {
             var instance = this._ol.data('object_list')
@@ -1240,6 +1231,10 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     },
 
     set: function(obj) {
+        this._setOption("obj", obj)
+    },
+
+    _set: function(obj) {
         this.options.obj = obj
         this.options.obj_id = obj.id
         var instance = this._od.data('object_detail')
@@ -1254,6 +1249,10 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     },
 
     load: function(obj_id) {
+        this._setOption("obj_id", obj_id)
+    },
+
+    _load: function(obj_id) {
         this.options.obj = null
         this.options.obj_id = obj_id
         var instance = this._od.data('object_detail')
@@ -1261,6 +1260,10 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     },
 
     set_loader: function(object_list_loader) {
+        this._setOption("obj_list_loader", object_list_loader)
+    },
+
+    _set_loader: function(object_list_loader) {
         var old_loader = this.options.object_list_loader
         if (old_loader != null) {
             old_loader.loaded_list.remove_listener(this)
@@ -1271,7 +1274,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this._setup_buttons()
     },
 
-    enable: function() {
+    _enable: function() {
         this._super()
         if (this._ol) {
             var instance = this._ol.data('object_list')
@@ -1279,7 +1282,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         }
     },
 
-    disable: function() {
+    _disable: function() {
         this._super()
         if (this._ol) {
             var instance = this._ol.data('object_list')
@@ -1289,14 +1292,13 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
 
     _setOption: function( key, value ) {
         if ( key === "obj" ) {
-            this.set(value)
+            this._set(value)
         } else if ( key === "obj_id" ) {
-            this.load(value)
-        } else if ( key === "object_list_loader" ) {
-            this.set_loader(value)
-        } else {
-            this._super( key, value );
+            this._load(value)
+        } else if ( key === "obj_list_loader" ) {
+            this._set_loader(value)
         }
+        this._super( key, value );
     },
 
     get_url: function() {

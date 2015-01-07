@@ -91,6 +91,14 @@ input_field.prototype.destroy = function() {
     this.tr.remove()
 }
 
+input_field.prototype.enable = function() {
+    this.input.attr('disabled', null)
+}
+
+input_field.prototype.disable = function() {
+    this.input.attr('disabled', true)
+}
+
 // define text_input_field
 function text_input_field(title, required) {
     input_field.call(this, title, required)
@@ -119,6 +127,7 @@ datetime_input_field.constructor = datetime_input_field
 datetime_input_field.prototype.create = function(id) {
     this.date = $('<input />')
         .attr('id', "id_" + id + "_date")
+        .attr('placeholder', 'YYYY-MM-DD')
         .datepicker({
             changeMonth: true,
             changeYear: true,
@@ -127,10 +136,12 @@ datetime_input_field.prototype.create = function(id) {
 
     this.time = $('<input />')
         .attr('type', "text")
+        .attr('placeholder', 'HH:MM:SS')
         .attr('id', "id_" + id + "_time")
 
     this.timezone = $('<input />')
         .attr('type', "text")
+        .attr('placeholder', 'timezone')
         .attr('id', "id_" + id + "_timezonetime")
 
     return $("<span></span>")
@@ -275,6 +286,19 @@ datetime_input_field.prototype.get = function() {
 
     return [ datetime.toISOString(), utc_offset ]
 }
+
+datetime_input_field.prototype.enable = function() {
+    this.date.attr('disabled', null)
+    this.time.attr('disabled', null)
+    this.timezone.attr('disabled', null)
+}
+
+datetime_input_field.prototype.disable = function() {
+    this.date.attr('disabled', true)
+    this.time.attr('disabled', true)
+    this.timezone.attr('disabled', true)
+}
+
 
 
 // define password_input_field
@@ -473,6 +497,15 @@ ajax_select_field.prototype.get = function() {
     return this.input.ajaxautocomplete("get")
 }
 
+ajax_select_field.prototype.enable = function() {
+    this.input.ajaxautocomplete("enable")
+}
+
+ajax_select_field.prototype.disable = function() {
+    this.input.ajaxautocomplete("disable")
+}
+
+
 
 // define quick_select_field
 // function quick_select_field(title, type, required) {
@@ -536,6 +569,14 @@ ajax_select_multiple_field.prototype.get = function() {
     return this.input.ajaxautocompletemultiple("get")
 }
 
+ajax_select_multiple_field.prototype.enable = function() {
+    this.input.ajaxautocompletemultiple("enable")
+}
+
+ajax_select_multiple_field.prototype.disable = function() {
+    this.input.ajaxautocompletemultiple("disable")
+}
+
 
 // define ajax_select_sorted_field
 function ajax_select_sorted_field(title, type, required) {
@@ -562,6 +603,14 @@ ajax_select_sorted_field.prototype.set = function(value) {
 
 ajax_select_sorted_field.prototype.get = function() {
     return this.input.ajaxautocompletesorted("get")
+}
+
+ajax_select_sorted_field.prototype.enable = function() {
+    this.input.ajaxautocompletesorted("enable")
+}
+
+ajax_select_sorted_field.prototype.disable = function() {
+    this.input.ajaxautocompletesorted("disable")
 }
 
 
@@ -599,35 +648,22 @@ photo_select_field.prototype.validate = function() {
     return null
 }
 
+photo_select_field.prototype.enable = function() {
+    this.input.photo_select("enable")
+}
+
+photo_select_field.prototype.disable = function() {
+    this.input.photo_select("disable")
+}
+
+
+
 
 // define dialog
-$.widget('spud.form_dialog',  $.ui.dialog, {
+$.widget('spud.form_dialog',  $.spud.base_dialog, {
     _create: function() {
         var mythis = this
         var options = this.options
-
-        this.description = $("<p/>")
-            .appendTo(this.element)
-
-        if (options.description != null) {
-            this.description
-                .text(options.description)
-            delete options.description
-        }
-
-        var submit = "Continue"
-        if (options.button != null) {
-            submit = options.button
-            delete options.button
-        }
-
-        options.buttons = {}
-        options.buttons[submit] = function() {
-            mythis._check_submit()
-        }
-        options.buttons['Cancel'] = function() {
-            mythis.close()
-        }
 
         this.f = $("<form method='get' />")
             .appendTo(this.element)
@@ -652,7 +688,7 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
                     )
                     .appendTo(ul)
 
-                mythis.page[name] = $("<div/>")
+                mythis.page[name] = $("<table/>")
                     .attr('id', name)
                     .appendTo(mythis.tabs)
 
@@ -661,41 +697,13 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
 
             mythis.tabs.tabs()
         } else {
-            this.table = $("<table />")
+            this.table = $("<table/>")
                 .addClass("fields")
                 .appendTo(this.f)
             this._create_fields(null, this.options.fields)
         }
 
-
-        if (options.initial != null) {
-            this.set(options.initial)
-            delete options.initial
-        }
-
-        options.width = 400
-
         this._super()
-
-        this.element.on(
-            "keypress",
-            function(ev) {
-                if (ev.which == 13 && !ev.shiftKey) {
-                    mythis._check_submit()
-                    return false
-                    }
-            }
-        )
-        this.element.on(
-            this.widgetEventPrefix + "close",
-            function( ev, ui ) {
-                mythis.destroy()
-            }
-        )
-
-        if (this.options.obj != null) {
-            this.set(this.options.obj)
-        }
     },
 
     _check_submit: function() {
@@ -711,6 +719,7 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
             }
         })
         if (allok) {
+            this.disable()
             this._submit()
         }
     },
@@ -724,41 +733,34 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
     _submit: function() {
         var mythis = this
         var values = {}
-        $.each(mythis.fields, function(id, field) {
+        $.each(this.fields, function(id, field) {
             values[id] = mythis.get_value(id)
         })
         this._submit_values(values)
     },
 
+    _disable: function() {
+        $.each(this.fields, function(id, field) {
+            field.disable()
+        })
+        this._super()
+    },
+
+    _enable: function() {
+        $.each(this.fields, function(id, field) {
+            field.enable()
+        })
+        this._super()
+    },
+
     _submit_values: function(values) {
     },
 
-    set: function(values) {
+    _set: function(values) {
         var mythis = this
         $.each(mythis.fields, function(id, field) {
             mythis.set_value(id, values[id])
         })
-    },
-
-    _destroy: function() {
-        var mythis = this
-        remove_all_listeners(this)
-        $.each(this.fields, function(id, field) {
-            field.destroy()
-        })
-        this.element
-            .empty()
-        this._super()
-    },
-
-    set_title: function(title) {
-        this.element.parent().find(".ui-dialog-title").html(title)
-        return this
-    },
-
-    set_description: function(description) {
-        this.description.text(description)
-        return this
     },
 
     add_field: function(page, id, field) {
@@ -813,7 +815,11 @@ $.widget('spud.form_dialog',  $.ui.dialog, {
         return this.fields[id].get()
     },
 
-    get_uuid: function() {
-        return this.widgetName + "." + this.uuid
+    _destroy: function() {
+        var mythis = this
+        $.each(this.fields, function(id, field) {
+            field.destroy()
+        })
+        this._super()
     },
 })

@@ -75,7 +75,7 @@ $.widget('spud.category_change_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(category) {
+    _set: function(category) {
         this.obj_id = category.id
         if (category.id != null) {
             this.set_title("Change category")
@@ -114,7 +114,7 @@ $.widget('spud.category_delete_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(category) {
+    _set: function(category) {
         this.obj_id = category.id
         this.set_description("Are you absolutely positively sure you really want to delete " +
             category.title + "? Go ahead join the dark side. There are cookies.")
@@ -142,7 +142,7 @@ $.widget('spud.category_criteria', $.spud.object_criteria, {
         this._super()
     },
 
-    set: function(criteria) {
+    _set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -220,6 +220,9 @@ $.widget('spud.category_list', $.spud.object_list, {
         var a = $('<a/>')
             .attr('href', root_url() + "categorys/" + category.id + "/")
             .on('click', function() {
+                if (mythis.options.disabled) {
+                    return false
+                }
                 var child_id = mythis.options.child_id
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
@@ -279,7 +282,7 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
         this._super();
     },
 
-    set: function(category) {
+    _set: function(category) {
         this.element.removeClass("error")
         this._super(category)
         this.options.obj = category
@@ -321,7 +324,7 @@ $.widget('spud.category_detail_screen', $.spud.object_detail_screen, {
 
         window._category_changed.add_listener(this, function(obj) {
             if (obj.id == this.options.obj_id) {
-                mythis.set(obj)
+                mythis._set(obj)
             }
         })
         window._category_deleted.add_listener(this, function(obj_id) {

@@ -71,7 +71,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
         this._super();
     },
 
-    set: function(criteria) {
+    _set: function(criteria) {
         var clone = $.extend({}, criteria)
 
         if (clone.first_datetime != null) {
@@ -133,7 +133,7 @@ $.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(photo) {
+    _set: function(photo) {
         this.obj_id = photo.id
         if (photo.id != null) {
             this.set_title("Change photo")
@@ -202,14 +202,14 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(photo) {
+    _set: function(photo) {
         var clone = $.extend({}, photo)
         clone.set_datetime = [ clone.set_datetime, clone.set_utc_offset ]
         return this._super(clone);
     },
 
     _submit_values: function(values) {
-        var data = $.extend({}, this.options.criteria)
+        var data = {}
 
         $.each(values, function (key, el) {
             if (el != null && el!=false) { data[key] = el }
@@ -222,13 +222,61 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.ajax_dialog, {
 
         console.log(data)
         // this._save("PATCH", null, data)
+
+        var params = {
+            criteria: this.options.criteria,
+            obj: data,
+        }
+        var div = $("<div/>")
+        $.spud.photo_bulk_confirm_dialog(params, div)
     },
 
     _done: function(data) {
-        $.each(data.results, function(photo) {
-            window._photo_changed.trigger(photo)
-        })
+//        $.each(data.results, function(photo) {
+//            window._photo_changed.trigger(photo)
+//        })
     },
+})
+
+
+$.widget('spud.photo_bulk_confirm_dialog',  $.spud.base_dialog, {
+    _create: function() {
+        this.options.title = "Confirm bulk update"
+        this.options.button = "Confirm"
+
+        this._type = "photos"
+
+        this._ul = $("<ul/>").appendTo(this.element)
+
+        this._ol = $("<div/>").appendTo(this.element)
+        $.spud.photo_list({}, this._ol)
+
+        this._super();
+    },
+
+    _set: function(values) {
+        var mythis = this
+        this._ul.empty()
+        $.each(values, function(key, value) {
+            $("<li/>").text(key + " = " + value)
+                .appendTo(mythis._ul)
+        })
+        var instance = this._ol.data("object_list")
+        instance.option("criteria", this.options.criteria)
+    },
+
+    _disable: function() {
+        var instance = this._ol.data("object_list")
+        instance.disable()
+        this._super()
+    },
+
+    _enable: function() {
+        var instance = this._ol.data("object_list")
+        instance.enable()
+        this._super()
+    },
+
 })
 
 
@@ -241,7 +289,7 @@ $.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(photo) {
+    _set: function(photo) {
         this.obj_id = photo.id
         this.set_description("Are you absolutely positively sure you really want to delete " +
             photo.title + "? Go ahead join the dark side. There are cookies.")
@@ -277,7 +325,7 @@ $.widget('spud.photo_criteria', $.spud.object_criteria, {
         this._super()
     },
 
-    set: function(criteria) {
+    _set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -394,6 +442,16 @@ $.widget('spud.photo_list', $.spud.object_list, {
         })
     },
 
+    disable: function() {
+        this.ul.myselectable("disable")
+        this._super()
+    },
+
+    enable: function() {
+        this.ul.myselectable("enable")
+        this._super()
+    },
+
     empty: function() {
         this.options.selection = []
         this._super()
@@ -407,6 +465,9 @@ $.widget('spud.photo_list', $.spud.object_list, {
         var a = $('<a/>')
             .attr('href', root_url() + "photos/" + photo.id + "/")
             .on('click', function() {
+                if (mythis.options.disabled) {
+                    return false
+                }
                 var child_id = mythis.options.child_id
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
@@ -456,13 +517,10 @@ $.widget('spud.photo_list', $.spud.object_list, {
     },
 
     bulk_update: function() {
-        var criteria
-        if (this.options.selection.length <= 0) {
-            criteria = this.options.criteria
-        } else {
-            criteria = {
-                photos: this.options.selection
-            }
+        var criteria = this.options.criteria
+        if (this.options.selection.length > 0) {
+            criteria = $.extend({}, criteria)
+            criteria.photos = this.options.selection
         }
         var params = {
             criteria: criteria,
@@ -516,7 +574,7 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
         this._super();
     },
 
-    set: function(photo) {
+    _set: function(photo) {
         this.element.removeClass("error")
 
         var clone = $.extend({}, photo)
@@ -587,7 +645,7 @@ $.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
 
         window._photo_changed.add_listener(this, function(obj) {
             if (obj.id == this.options.obj_id) {
-                mythis.set(obj)
+                mythis._set(obj)
             }
         })
         window._photo_deleted.add_listener(this, function(obj_id) {

@@ -81,7 +81,7 @@ $.widget('spud.place_change_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(place) {
+    _set: function(place) {
         this.obj_id = place.id
         if (place.id != null) {
             this.set_title("Change place")
@@ -120,7 +120,7 @@ $.widget('spud.place_delete_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(place) {
+    _set: function(place) {
         this.obj_id = place.id
         this.set_description("Are you absolutely positively sure you really want to delete " +
             place.title + "? Go ahead join the dark side. There are cookies.")
@@ -148,7 +148,7 @@ $.widget('spud.place_criteria', $.spud.object_criteria, {
         this._super()
     },
 
-    set: function(criteria) {
+    _set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -226,12 +226,15 @@ $.widget('spud.place_list', $.spud.object_list, {
         var a = $('<a/>')
             .attr('href', root_url() + "places/" + place.id + "/")
             .on('click', function() {
+                if (!mythis.options.disabled) {
+                    return false
+                }
                 var child_id = mythis.options.child_id
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
-                        child.place_detail_screen("set", place)
-                        child.place_detail_screen("set_loader", place_list_loader)
+                        child.place_detail_screen("set", person)
+                        child.place_detail_screen("set_loader", person_list_loader)
                         child.place_detail_screen("enable")
                         return false
                     }
@@ -291,7 +294,7 @@ $.widget('spud.place_detail',  $.spud.object_detail, {
         this._super();
     },
 
-    set: function(place) {
+    _set: function(place) {
         this.element.removeClass("error")
         this._super(place)
         this.options.obj = place
@@ -333,7 +336,7 @@ $.widget('spud.place_detail_screen', $.spud.object_detail_screen, {
 
         window._place_changed.add_listener(this, function(obj) {
             if (obj.id == this.options.obj_id) {
-                mythis.set(obj)
+                mythis._set(obj)
             }
         })
         window._place_deleted.add_listener(this, function(obj_id) {

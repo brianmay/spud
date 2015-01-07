@@ -90,7 +90,7 @@ $.widget('spud.person_change_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(person) {
+    _set: function(person) {
         this.obj_id = person.id
         if (person.id != null) {
             this.set_title("Change person")
@@ -129,7 +129,7 @@ $.widget('spud.person_delete_dialog',  $.spud.ajax_dialog, {
         this._super();
     },
 
-    set: function(person) {
+    _set: function(person) {
         this.obj_id = person.id
         this.set_description("Are you absolutely positively sure you really want to delete " +
             person.title + "? Go ahead join the dark side. There are cookies.")
@@ -157,7 +157,7 @@ $.widget('spud.person_criteria', $.spud.object_criteria, {
         this._super()
     },
 
-    set: function(criteria) {
+    _set: function(criteria) {
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -235,6 +235,9 @@ $.widget('spud.person_list', $.spud.object_list, {
         var a = $('<a/>')
             .attr('href', root_url() + "persons/" + person.id + "/")
             .on('click', function() {
+                if (mythis.options.disabled) {
+                    return false
+                }
                 var child_id = mythis.options.child_id
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
@@ -310,7 +313,7 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
         this._super();
     },
 
-    set: function(person) {
+    _set: function(person) {
         this.element.removeClass("error")
         this._super(person)
         this.options.obj = person
@@ -352,7 +355,7 @@ $.widget('spud.person_detail_screen', $.spud.object_detail_screen, {
 
         window._person_changed.add_listener(this, function(obj) {
             if (obj.id == this.options.obj_id) {
-                mythis.set(obj)
+                mythis._set(obj)
             }
         })
         window._person_deleted.add_listener(this, function(obj_id) {

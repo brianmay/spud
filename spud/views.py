@@ -610,7 +610,7 @@ def _get_photo_search(user, params):
         else:
             photo_list = photo_list.filter(categorys=value)
 
-    values = _get_object_array(params, "photos", models.photo)
+    values = _get_object_array(params, "photos[]", models.photo)
     if values is not None:
         q = Q()
         for value in values:

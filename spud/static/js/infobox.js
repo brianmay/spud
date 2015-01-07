@@ -417,7 +417,7 @@ $.widget('spud.infobox', $.spud.widget, {
         this._super()
 
         if (this.options.obj != null) {
-            this.set(this.options.obj)
+            this._set(this.options.obj)
         }
     },
 
@@ -437,7 +437,11 @@ $.widget('spud.infobox', $.spud.widget, {
         }
     },
 
-    set: function(values) {
+    set: function(obj) {
+        this._setOption("obj", obj)
+    },
+
+    _set: function(values) {
         var mythis = this
         var visible = false
         $.each(mythis.fields, function(id, field) {
@@ -498,5 +502,24 @@ $.widget('spud.infobox', $.spud.widget, {
             this.fields[id].show()
             this.fields[id].set_edit_value(a)
         }
+    },
+
+    _enable: function() {
+    },
+
+    _disable: function() {
+    },
+
+    _setOption: function( key, value ) {
+        if (key === "obj") {
+            this._set(value)
+        } else if (key === "disabled") {
+            if (!value) {
+                this._enable()
+            } else {
+                this._disable()
+            }
+        }
+        this._super( key, value );
     },
 })

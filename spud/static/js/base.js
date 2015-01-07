@@ -108,13 +108,169 @@ $.widget('spud.widget', {
         remove_all_listeners(this)
         this._super()
     },
+
+    _enable: function() {
+    },
+
+    _disable: function() {
+    },
+
+    _setOption: function( key, value ) {
+        if (key === "disabled") {
+            if (!value) {
+                this._enable()
+            } else {
+                this._disable()
+            }
+        }
+        this._super( key, value );
+    },
+
 });
+
+// define dialog
+$.widget('spud.base_dialog',  $.ui.dialog, {
+    _create: function() {
+        var mythis = this
+        var options = this.options
+
+        this.description = $("<p/>")
+            .appendTo(this.element)
+
+        if (options.description != null) {
+            this.description
+                .text(options.description)
+            delete options.description
+        }
+
+        var submit = "Continue"
+        if (options.button != null) {
+            submit = options.button
+            delete options.button
+        }
+
+        options.buttons = {}
+        options.buttons[submit] = function() {
+            mythis._check_submit()
+        }
+        options.buttons['Cancel'] = function() {
+            mythis.close()
+        }
+
+        options.width = 400
+
+        this._super()
+
+        this.element.on(
+            "keypress",
+            function(ev) {
+                if (ev.which == 13 && !ev.shiftKey) {
+                    mythis._check_submit()
+                    return false
+                    }
+            }
+        )
+        this.element.on(
+            this.widgetEventPrefix + "close",
+            function( ev, ui ) {
+                mythis.destroy()
+            }
+        )
+
+        if (this.options.obj != null) {
+            this._set(this.options.obj)
+        }
+    },
+
+    _check_submit: function() {
+        this.disable()
+        this._submit()
+    },
+
+    _submit: function() {
+    },
+
+    set: function(obj) {
+        this._setOption("obj", obj)
+    },
+
+    _set: function(values) {
+    },
+
+    _disable: function() {
+        this.uiDialogButtonPane.find(".ui-button").button("disable")
+    },
+
+    _enable: function() {
+        this.uiDialogButtonPane.find(".ui-button").button("enable")
+    },
+
+    _setOption: function( key, value ) {
+        if (key === "obj") {
+            this._set(value)
+        } else if (key === "disabled") {
+            if (!value) {
+                this._enable()
+            } else {
+                this._disable()
+            }
+        }
+        this._super( key, value );
+    },
+
+    _destroy: function() {
+        var mythis = this
+        remove_all_listeners(this)
+        this.element
+            .empty()
+        this._super()
+    },
+
+    set_title: function(title) {
+        this.element.parent().find(".ui-dialog-title").html(title)
+        return this
+    },
+
+    set_description: function(description) {
+        this.description.text(description)
+        return this
+    },
+
+    get_uuid: function() {
+        return this.widgetName + "." + this.uuid
+    },
+
+    enable: function() {
+        return this._setOptions({ disabled: false });
+    },
+
+    disable: function() {
+        return this._setOptions({ disabled: true });
+    },
+})
 
 $.widget('spud.myselectable', $.ui.selectable, {
     _mouseStart: function(event) {
         if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
             this._super( event );
         }
+    },
+
+    _disable: function() {
+    },
+
+    _enable: function() {
+    },
+
+    _setOption: function( key, value ) {
+        if (key === "disabled") {
+            if (!value) {
+                this._enable()
+            } else {
+                this._disable()
+            }
+        }
+        this._super( key, value );
     },
 });
 
@@ -177,7 +333,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
         var options = this.options
         if (options.initial != null) {
-            this.set(options.initial)
+            this._set(options.initial)
             delete options.initial
         }
 
@@ -192,7 +348,32 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         this._super();
     },
 
+    _enable: function() {
+        this.text.attr('disabled', null)
+    },
+
+    _disable: function() {
+        this.text.attr('disabled', true)
+    },
+
+    _setOption: function( key, value ) {
+        if (key === "initial") {
+            this._set(value)
+        } else if (key === "disabled") {
+            if (!value) {
+                this._enable()
+            } else {
+                this._disable()
+            }
+        }
+        this._super( key, value );
+    },
+
     set: function(obj, obj_pk) {
+        this._set(obj, obj_pk)
+    },
+
+    _set: function(obj, obj_pk) {
         this.deck.children().remove();
         if (obj != null) {
             this.input.val(obj.pk)
@@ -353,7 +534,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
 
 $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
-    set: function(obj_list, pk_list) {
+    _set: function(obj_list, pk_list) {
         var mythis = this
 
         this.deck.children().remove();
@@ -708,7 +889,7 @@ $.widget('spud.image', $.spud.widget, {
         this.element.addClass("image")
 
         if (this.options.photo != null) {
-            this.set(this.options.photo)
+            this._set(this.options.photo)
         } else {
             this.set_none()
         }
@@ -719,6 +900,10 @@ $.widget('spud.image', $.spud.widget, {
     },
 
     set: function(photo) {
+        this._setOption("photo", photo)
+    },
+
+    _set: function(photo) {
         this._clear()
 
         if (this.options.do_video && !$.isEmptyObject(photo.videos)) {
@@ -769,6 +954,19 @@ $.widget('spud.image', $.spud.widget, {
                 this.set_none()
             }
         }
+    },
+
+    _setOption: function( key, value ) {
+        if (key === "photo") {
+            this._set(value)
+        } else if (key === "disabled") {
+            if (!value) {
+                this._enable()
+            } else {
+                this._disable()
+            }
+        }
+        this._super( key, value );
     },
 
     set_error: function() {
@@ -967,12 +1165,8 @@ $.widget('spud.screen', $.spud.widget, {
             .appendTo(this.element)
     },
 
-    is_enabled: function() {
-        return !this.options.disabled
-    },
-
     toggle: function() {
-        if (this.is_enabled()) {
+        if (this.options.disabled) {
             this.disable()
         } else {
             this.enable()
@@ -981,13 +1175,11 @@ $.widget('spud.screen', $.spud.widget, {
 
     _enable: function() {
         this.element.removeClass("disabled")
-        this.options.disabled = false
         return this
     },
 
     _disable: function() {
         this.element.addClass("disabled")
-        this.options.disabled = true
         return this
     },
 
@@ -996,19 +1188,6 @@ $.widget('spud.screen', $.spud.widget, {
             var screen = $(this).data('screen')
             screen._disable()
         })
-        return this
-    },
-
-    enable: function() {
-        this._disable_all()
-        this._enable()
-        push_state()
-        return this
-    },
-
-    disable: function() {
-        this._disable()
-        push_state()
         return this
     },
 
@@ -1033,7 +1212,7 @@ $.widget('spud.screen', $.spud.widget, {
     _set_title: function(title) {
         this.h1.text(title)
         this.options.title = title
-        if (this.is_enabled()) {
+        if (!this.options.disabled) {
             push_state(true)
         }
     },
@@ -1042,17 +1221,19 @@ $.widget('spud.screen', $.spud.widget, {
         if ( key === "title" ) {
             this._set_title(value)
         } else if (key === "disabled") {
-            if (value) {
-                this.enable()
+            if (!value) {
+                this._disable_all()
+                this._enable()
+                push_state()
             } else {
-                this.disable()
+                this._disable()
+                push_state()
             }
         } else if (key === "id") {
             this.element.attr("id", value)
             this.options.id = value
-        } else {
-            this._super( key, value );
         }
+        this._super( key, value );
     },
 
     get_url: function() {
