@@ -198,7 +198,7 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.ajax_dialog, {
         this.options.title = "Bulk photo update"
         this.options.button = "Save"
 
-        this._type = "photos"
+        // this._type = "photos"
         this._super();
     },
 
@@ -221,30 +221,45 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.ajax_dialog, {
         }
 
         console.log(data)
-        // this._save("PATCH", null, data)
+        this._data = data
+        this.element.hide()
 
         var params = {
             criteria: this.options.criteria,
             obj: data,
+            on_proceed: $.proxy(this._proceed, this),
+            on_cancel: $.proxy(this._cancel, this),
         }
         var div = $("<div/>")
         $.spud.photo_bulk_confirm_dialog(params, div)
     },
 
-    _done: function(data) {
-//        $.each(data.results, function(photo) {
-//            window._photo_changed.trigger(photo)
-//        })
+    _proceed: function() {
+        this.close()
+
+        var params = {
+            criteria: this.options.criteria,
+            obj: this._data,
+        }
+        var div = $("<div/>")
+        $.spud.photo_bulk_proceed_dialog(params, div)
+    },
+
+    _cancel: function() {
+        this.element.show()
+        this.enable()
     },
 })
 
 
 $.widget('spud.photo_bulk_confirm_dialog',  $.spud.base_dialog, {
     _create: function() {
+        this._proceed = false
+
         this.options.title = "Confirm bulk update"
         this.options.button = "Confirm"
 
-        this._type = "photos"
+        // this._type = "photos"
 
         this._ul = $("<ul/>").appendTo(this.element)
 
@@ -277,8 +292,90 @@ $.widget('spud.photo_bulk_confirm_dialog',  $.spud.base_dialog, {
         this._super()
     },
 
+    _submit: function() {
+        this._proceed = true
+        this.close()
+    },
+
+    _destroy: function() {
+        this._super()
+        if (this._proceed) {
+            this.options.on_proceed()
+        } else {
+            this.options.on_cancel()
+        }
+    },
+
 })
 
+
+$.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
+    _create: function() {
+        this._canceled = false
+
+        this.options.title = "Bulk update"
+        this.options.button = "Meow"
+
+        // this._type = "photos"
+
+        this._pb = $("<div/>").appendTo(this.element)
+        $.ui.progressbar({value: false}, this._pb)
+
+        this._status = $("<div/>")
+            .text("Please wait")
+            .appendTo(this.element)
+
+        this._super()
+    },
+
+    _set: function(values) {
+        this._oll = get_object_list_loader("photos", this.options.criteria)
+        this._oll.loaded_item.add_listener(this, this._loaded_item)
+        this._oll.loaded_list.add_listener(this, this._loaded_list)
+        this._oll.on_error.add_listener(this, this._on_error)
+        // instance.option("criteria", this.options.criteria)
+        if (!this._oll.load_next_page()) {
+            this.close()
+        }
+    },
+
+    _loaded_item: function(obj, count, n) {
+        if (this._canceled) {
+            return
+        }
+
+        this._status.text("Processed "+n+" out of "+count)
+        this._pb.progressbar("option", "max", count)
+        this._pb.progressbar("value", n)
+        // this._save("PATCH", null, data)
+//        $.each(data.results, function(photo) {
+//            window._photo_changed.trigger(photo)
+//        })
+    },
+
+    _loaded_list: function(object_list) {
+        if (this._canceled) {
+            return
+        }
+        if (!this._oll.load_next_page()) {
+            this.close()
+        }
+    },
+
+    _on_error: function() {
+        this._status.text("Error occurred loading objects")
+    },
+
+    _submit: function() {
+        alert("meow")
+    },
+
+    _destroy: function() {
+        this._canceled = true
+        this._oll.abort()
+        this._super()
+    }
+})
 
 $.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
     _create: function() {
