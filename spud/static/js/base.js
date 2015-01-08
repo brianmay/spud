@@ -163,13 +163,11 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
         if (options.description != null) {
             this.description
                 .text(options.description)
-            delete options.description
         }
 
         var submit = "Continue"
         if (options.button != null) {
             submit = options.button
-            delete options.button
         }
 
         options.buttons = {}
