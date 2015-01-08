@@ -26,7 +26,7 @@ function _feedback_html(feedback, feedback_a, include_children, include_photo, i
     if (feedback == null) {
         return null;
     }
-    var user=null
+    var user = null
     if (feedback.user) {
        user = feedback.user + " (verified)"
     } else {
@@ -71,7 +71,7 @@ function _feedback_html(feedback, feedback_a, include_children, include_photo, i
             .appendTo(div)
 
         $("<div></div>")
-            .text("Rating: "+ feedback.rating)
+            .text("Rating: " + feedback.rating)
             .appendTo(div)
 
         $("<div></div>")
@@ -79,46 +79,46 @@ function _feedback_html(feedback, feedback_a, include_children, include_photo, i
             .appendTo(div)
     }
 
-    if (false && include_links) {
-        if (rights.can_add) {
-            div
-                .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
-                .append(" / ")
-        }
-        if (rights.can_moderate) {
-            if (feedback.is_public) {
-                $("<a></a>")
-                    .attr("href", "#")
-                    .on("click", function() { _change_feedback(feedback, { is_public: false }); return false; })
-                    .text("Set private")
-                    .appendTo(div)
-            } else {
-                $("<a></a>")
-                    .attr("href", "#")
-                    .on("click", function() { _change_feedback(feedback, { is_public: true }); return false; })
-                    .text("Set public")
-                    .appendTo(div)
-            }
-            div.append(" / ")
-            if (feedback.is_removed) {
-                $("<a></a>")
-                    .attr("href", "#")
-                    .on("click", function() { _change_feedback(feedback, { is_removed: false }); return false; })
-                    .text("Undelete")
-                    .appendTo(div)
-            } else {
-                $("<a></a>")
-                    .attr("href", "#")
-                    .on("click", function() { _change_feedback(feedback, { is_removed: true }); return false; })
-                    .text("Delete")
-                    .appendTo(div)
-            }
-            div.append(" / ")
-        }
-
-        div
-            .append(photo_a(feedback.photo, {}, "Goto photo"))
-    }
+//     if (false && include_links) {
+//         if (rights.can_add) {
+//             div
+//                 .append(feedbacks.add_a(feedback.photo, feedback, "Reply"))
+//                 .append(" / ")
+//         }
+//         if (rights.can_moderate) {
+//             if (feedback.is_public) {
+//                 $("<a></a>")
+//                     .attr("href", "#")
+//                     .on("click", function() { _change_feedback(feedback, { is_public: false }); return false; })
+//                     .text("Set private")
+//                     .appendTo(div)
+//             } else {
+//                 $("<a></a>")
+//                     .attr("href", "#")
+//                     .on("click", function() { _change_feedback(feedback, { is_public: true }); return false; })
+//                     .text("Set public")
+//                     .appendTo(div)
+//             }
+//             div.append(" / ")
+//             if (feedback.is_removed) {
+//                 $("<a></a>")
+//                     .attr("href", "#")
+//                     .on("click", function() { _change_feedback(feedback, { is_removed: false }); return false; })
+//                     .text("Undelete")
+//                     .appendTo(div)
+//             } else {
+//                 $("<a></a>")
+//                     .attr("href", "#")
+//                     .on("click", function() { _change_feedback(feedback, { is_removed: true }); return false; })
+//                     .text("Delete")
+//                     .appendTo(div)
+//             }
+//             div.append(" / ")
+//         }
+//
+//         div
+//             .append(photo_a(feedback.photo, {}, "Goto photo"))
+//     }
 
     if (include_children && feedback.children.length > 0) {
         var ul = $("<ul></ul>")
@@ -153,7 +153,7 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
             ["q", new text_input_field("Search for", false)],
             ["instance", new ajax_select_field("Feedback", "feedbacks", false)],
             ["mode", new select_input_field("Mode",
-                [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ],
+                [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
             ["root_only", new boolean_input_field("Root only", false)],
         ]
@@ -167,10 +167,9 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
         var criteria = {}
 
         $.each(values, function (key, el) {
-            if (el != null && el!=false) { criteria[key] = el }
+            if (el != null && el !== false) { criteria[key] = el }
         });
 
-        var mythis = this
         if (this.options.on_success(criteria)) {
             this.close()
         }
@@ -253,10 +252,12 @@ $.widget('spud.feedback_delete_dialog',  $.spud.ajax_dialog, {
     },
 
     _submit_values: function(values) {
+        void values
         this._save("DELETE", this.obj_id, {})
     },
 
     _done: function(data) {
+        void data
         window._feedback_deleted.trigger(this.obj_id)
     }
 })
@@ -286,25 +287,25 @@ $.widget('spud.feedback_criteria', $.spud.object_criteria, {
 
         var title = null
 
-        var mode = criteria['mode'] || 'children'
-        delete criteria['mode']
+        var mode = criteria.mode || 'children'
+        delete criteria.mode
 
-        if (criteria['instance'] != null) {
-            var instance = criteria['instance']
+        if (criteria.instance != null) {
+            var instance = criteria.instance
             title = instance + " / " + mode
 
             $("<li/>")
                 .text("instance" + " = " + instance + " (" + mode + ")")
                 .appendTo(ul)
 
-            delete criteria['instance']
+            delete criteria.instance
         }
 
-        else if (criteria['q'] != null) {
-            title = "search " + criteria['q']
+        else if (criteria.q != null) {
+            title = "search " + criteria.q
         }
 
-        else if (criteria['root_only']) {
+        else if (criteria.root_only) {
             title = "root only"
         }
 
@@ -410,7 +411,7 @@ $.widget('spud.feedback_detail',  $.spud.object_detail, {
             ["user_name", new text_output_field("Name (unverified)")],
             ["user_email", new text_output_field("E-Mail (unverified)")],
             ["user_url", new text_output_field("URL (unverified)")],
-            ["parent", new html_output_field("In response to")],
+            ["parent", new link_output_field("In response to", "feedbacks")],
             ["ip_address", new text_output_field("IP Address")],
             ["is_public", new boolean_output_field("Is public")],
             ["is_removed", new boolean_output_field("Is removed")],
@@ -471,12 +472,12 @@ $.widget('spud.feedback_detail_screen', $.spud.object_detail_screen, {
         var mythis = this
 
         window._feedback_changed.add_listener(this, function(obj) {
-            if (obj.id == this.options.obj_id) {
+            if (obj.id === this.options.obj_id) {
                 mythis._set(obj)
             }
         })
         window._feedback_deleted.add_listener(this, function(obj_id) {
-            if (obj_id == this.options.obj_id) {
+            if (obj_id === this.options.obj_id) {
                 mythis.close()
             }
         })

@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-"use strict";
+"use strict"
 
 $(document)
     .tooltip({
@@ -123,6 +123,7 @@ function remove_all_listeners(obj) {
 
     delete window._listeners[key]
 }
+void remove_all_listeners
 
 function signal() {
     this.on_no_listeners = null
@@ -158,9 +159,9 @@ signal.prototype = {
 
         if (window._listeners[key] == null) {
             var index = window._listeners[key].indexOf(this)
-            if (index != -1) {
+            if (index !== -1) {
                 // Don't do this; is called from within loop in
-                // remove_all_listeners 
+                // remove_all_listeners
                 // window._listeners[key].splice(index, 1)
                 delete window._listeners[key]
             }
@@ -174,7 +175,7 @@ signal.prototype = {
     },
 
     is_any_listeners: function() {
-        return ! $.isEmptyObject(this.listeners)
+        return !$.isEmptyObject(this.listeners)
     },
 
     trigger: function() {
@@ -182,7 +183,7 @@ signal.prototype = {
         var fight = arguments
         $.each(this.listeners, function(uuid, listener) {
             var obj = null
-            if (uuid != "null") {
+            if (uuid !== "null") {
                 obj = mythis.objects[uuid]
             }
             listener.apply(obj, fight)
@@ -234,6 +235,7 @@ $.widget('spud.ajax_dialog',  $.spud.form_dialog, {
     },
 
     _done: function(data) {
+        void data
     },
 
 })
@@ -246,7 +248,7 @@ $.widget('spud.login_dialog',  $.spud.ajax_dialog, {
         this.options.fields = [
             ["username", new text_input_field("Username", true)],
             ["password", new password_input_field("Password", true)],
-        ],
+        ]
 
         this.options.title = "Login"
         this.options.description = "Please login by typing in your username and password below."
@@ -282,6 +284,13 @@ $.widget('spud.logout_dialog',  $.spud.ajax_dialog, {
     },
 })
 
+function add_screen(screen_class, params) {
+    var cm = $("#content")
+    var div = $("<div/>").appendTo(cm)
+    screen_class(params, div)
+    return div
+}
+
 function setup_user_tools(session) {
     var ut = $("#user-tools")
 
@@ -299,6 +308,7 @@ function setup_user_tools(session) {
         $("<a/>")
             .text("logout")
             .on("click", function(ev) {
+                void ev
                 var div = $("<div/>")
                 $.spud.logout_dialog({}, div)
             })
@@ -313,6 +323,7 @@ function setup_user_tools(session) {
         $("<a/>")
             .text("login")
             .on("click", function(ev) {
+                void ev
                 var div = $("<div/>")
                 $.spud.login_dialog({}, div)
             })
@@ -321,6 +332,7 @@ function setup_user_tools(session) {
 }
 
 function setup_menu(session) {
+    void session
     var menu = $("<ul/>")
         .addClass("menubar")
         .empty()
@@ -328,6 +340,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Albums")
         .on('click', function(ev) {
+            void ev
             var criteria = {root_only: true}
             add_screen($.spud.album_list_screen, {criteria: criteria})
             return false
@@ -337,6 +350,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Categories")
         .on('click', function(ev) {
+            void ev
             var criteria = {root_only: true}
             add_screen($.spud.category_list_screen, {criteria: criteria})
             return false
@@ -346,6 +360,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Places")
         .on('click', function(ev) {
+            void ev
             var criteria = {root_only: true}
             add_screen($.spud.place_list_screen, {criteria: criteria})
             return false
@@ -355,6 +370,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("People")
         .on('click', function(ev) {
+            void ev
             var criteria = {}
             add_screen($.spud.person_list_screen, {criteria: criteria})
             return false
@@ -364,6 +380,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Photos")
         .on('click', function(ev) {
+            void ev
             var criteria = {}
             add_screen($.spud.photo_list_screen, {criteria: criteria})
             return false
@@ -373,6 +390,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Feedback")
         .on('click', function(ev) {
+            void ev
             var criteria = {}
             add_screen($.spud.feedback_list_screen, {criteria: criteria})
             return false
@@ -382,6 +400,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Reload")
         .on('click', function(ev) {
+            void ev
             window._reload_all.trigger()
             return false
         })
@@ -405,13 +424,7 @@ function setup_page(session) {
     $("body").attr("onload", null)
 }
 
-function add_screen(screen_class, params) {
-    var cm = $("#content")
-    var div = $("<div/>").appendTo(cm)
-    screen_class(params, div)
-    return div
-}
-
+void setup_page
 
 ///////////////////////////////////////
 // state
@@ -511,13 +524,13 @@ object_loader.prototype = {
         var mythis = this
         var criteria = this._criteria
         var page = this._page
-        var params = jQuery.extend({}, criteria, { 'page': page })
+        var params = $.extend({}, criteria, { 'page': page })
 
         console.log("loading object", this._type, this._obj_id)
         this._loading = true
 
         this.xhr = ajax({
-            url: window.__root_prefix + "api/" + this._type + "/" + this._obj_id + "/", 
+            url: window.__root_prefix + "api/" + this._type + "/" + this._obj_id + "/",
             data: params,
             success: function(data) {
                 console.log("got object", mythis._type, mythis._obj_id)
@@ -588,7 +601,7 @@ object_list_loader.prototype = {
         var mythis = this
         var criteria = this._criteria
         var page = this._page
-        var params = jQuery.extend({}, criteria, { 'page': page })
+        var params = $.extend({}, criteria, { 'page': page })
 
         console.log("loading list", this._type, criteria, page)
         this._loading = true
@@ -723,6 +736,7 @@ $.widget('spud.object_criteria', $.spud.widget, {
     },
 
     _set: function(criteria) {
+        void criteria
     },
 
     cancel_loaders: function() {
@@ -797,18 +811,18 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
     },
 
     _get_item: function(obj_id) {
-        return this.ul.find("[data-id="+obj_id+"]")
+        return this.ul.find("[data-id=" + obj_id + "]")
     },
 
     _add_item: function(obj, count, n) {
-        var li = this._create_li(obj)
+        void n
+        this._create_li(obj)
             .appendTo(this.ul)
         return this
     },
 
     _add_list: function(obj_list, count) {
-        var mythis = this
-        this.element.toggleClass("hidden", count == 0)
+        this.element.toggleClass("hidden", count === 0)
         this._load_if_required()
         return this
     },
@@ -938,6 +952,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
             $("<li/>")
                 .text("Filter")
                 .on("click", function(ev) {
+                    void ev
                     var params = {
                         obj: mythis.options.criteria,
                         on_success: function(criteria) {
@@ -978,7 +993,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
         this.criteria = $("<div/>").appendTo(this.div)
         this._object_criteria(params, this.criteria)
 
-        var params = {
+        params = {
             'child_id': this.options.id + ".child",
             'criteria': this.options.criteria,
             'disabled': this.options.disabled,
@@ -997,7 +1012,7 @@ $.widget('spud.object_list_screen', $.spud.screen, {
         var instance = this.criteria.data('object_criteria')
         instance.load(value)
 
-        var instance = this._ol.data('object_list')
+        instance = this._ol.data('object_list')
         instance.option("criteria", value)
     },
 
@@ -1042,6 +1057,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
             $("<li/>")
                 .text("Children")
                 .on("click", function(ev) {
+                    void ev
                     var screen_class = mythis._object_list_screen
                     var params = {
                         criteria: mythis._get_children_criteria(),
@@ -1055,6 +1071,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 $("<li/>")
                     .text("Photos")
                     .on("click", function(ev) {
+                        void ev
                         var screen_class = mythis._photo_list_screen
                         var params = {
                             criteria: mythis._get_photo_criteria(),
@@ -1067,6 +1084,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this.create_item = $("<li/>")
             .text("Create")
             .on("click", function(ev) {
+                void ev
                 if (mythis.options.obj != null) {
                     var obj = {
                         parent: mythis.options.obj.id,
@@ -1083,6 +1101,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this.change_item = $("<li/>")
             .text("Change")
             .on("click", function(ev) {
+                void ev
                 if (mythis.options.obj != null) {
                     var params = {
                         obj: mythis.options.obj,
@@ -1096,6 +1115,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this.delete_item = $("<li/>")
             .text("Delete")
             .on("click", function(ev) {
+                void ev
                 if (mythis.options.obj != null) {
                     var params = {
                         obj: mythis.options.obj,
@@ -1110,12 +1130,12 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     _create: function() {
         var mythis = this
 
-        this.options.title = this._type_name+" Detail"
+        this.options.title = this._type_name + " Detail"
 
         if (this.options.obj != null) {
-            var obj = this.options.obj
-            this.options.obj_id = obj.id
-            this.options.title = this._type_name+": "+obj.title
+            var tmp_obj = this.options.obj
+            this.options.obj_id = tmp_obj.id
+            this.options.title = this._type_name + ": " + tmp_obj.title
         }
 
         this._super()
@@ -1133,8 +1153,8 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
             .attr('type', 'submit')
             .attr('value', '<<')
             .click(function() {
-                var object_list_loader = mythis.options.object_list_loader
-                var meta = object_list_loader.get_meta(mythis.options.obj_id)
+                var oll = mythis.options.object_list_loader
+                var meta = oll.get_meta(mythis.options.obj_id)
                 var obj_id = meta.prev
                 if (obj_id) {
                     mythis.load(obj_id)
@@ -1148,8 +1168,8 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
             .attr('type', 'submit')
             .attr('value', '>>')
             .click(function() {
-                var object_list_loader = mythis.options.object_list_loader
-                var meta = object_list_loader.get_meta(mythis.options.obj_id)
+                var oll = mythis.options.object_list_loader
+                var meta = oll.get_meta(mythis.options.obj_id)
                 var obj_id = meta.next
                 if (obj_id) {
                     mythis.load(obj_id)
@@ -1164,24 +1184,14 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
 
         this._ol = null
         var params = {
-            'on_update': function(obj) {
-                mythis.element.removeClass("error")
-                mythis.options.obj = obj
-                mythis.options.obj_id = obj.id
-                mythis._set_title(mythis._type_name + ": "+obj.title)
-                mythis._setup_buttons()
-                var instance = mythis._ol.data('object_list')
-                instance.option("criteria", mythis._get_children_criteria())
-            },
-            'on_error': function() {
-                mythis.element.addClass("error")
-            },
+            'on_update': $.proxy(this._loaded, this),
+            'on_error': $.proxy(this._loaded_error, this),
         }
 
         this._od = $("<div/>").appendTo(this.div)
         this._object_detail(params, this._od)
 
-        var params = {
+        params = {
             'child_id': this.options.id + ".child",
             'disabled': this.options.disabled,
         }
@@ -1213,17 +1223,18 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     _setup_loader: function() {
         var mythis = this
         if (this.options.object_list_loader != null) {
-            var object_list_loader = this.options.object_list_loader
-            object_list_loader.loaded_list.add_listener(this, function(object_list, count) {
+            var oll = this.options.object_list_loader
+            oll.loaded_list.add_listener(this, function(object_list, count) {
+                void count
                 mythis._setup_buttons()
             })
         }
     },
 
     _setup_perms: function(perms) {
-        var can_create=false
-        var can_change=false
-        var can_delete=false
+        var can_create = false
+        var can_change = false
+        var can_delete = false
 
         if (perms[this._type] != null) {
             var perms_for_type = perms[this._type]
@@ -1239,10 +1250,10 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
 
     _setup_buttons: function() {
         if (this.options.object_list_loader) {
-            var object_list_loader = this.options.object_list_loader
+            var oll = this.options.object_list_loader
             var meta = null
             if (this.options.obj_id) {
-                meta = object_list_loader.get_meta(this.options.obj_id)
+                meta = oll.get_meta(this.options.obj_id)
             }
 
             this.prev_button.show()
@@ -1293,16 +1304,30 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         instance.load(obj_id)
     },
 
-    set_loader: function(object_list_loader) {
-        this._setOption("obj_list_loader", object_list_loader)
+    _loaded: function(obj) {
+        this.element.removeClass("error")
+        this.options.obj = obj
+        this.options.obj_id = obj.id
+        this._set_title(this._type_name + ": " + obj.title)
+        this._setup_buttons()
+        var instance = this._ol.data('object_list')
+        instance.option("criteria", this._get_children_criteria())
     },
 
-    _set_loader: function(object_list_loader) {
+    _loaded_error: function() {
+        this.element.addClass("error")
+    },
+
+    set_loader: function(oll) {
+        this._setOption("obj_list_loader", oll)
+    },
+
+    _set_loader: function(oll) {
         var old_loader = this.options.object_list_loader
         if (old_loader != null) {
             old_loader.loaded_list.remove_listener(this)
         }
-        this.options.object_list_loader = object_list_loader
+        this.options.object_list_loader = oll
 
         this._setup_loader()
         this._setup_buttons()
@@ -1341,7 +1366,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
 
     get_streamable_options: function() {
         var options = this._super()
-        delete options['object_list_loader']
+        delete options.object_list_loader
         return options
     },
 

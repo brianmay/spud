@@ -29,6 +29,7 @@ function static_url(file) {
    return window.__static_prefix + file
 }
 
+void static_url
 
 // *********
 // * LINKS *
@@ -42,20 +43,22 @@ function root_a() {
     return a
 }
 
+void root_a
+
 function object_a(type, value) {
     var screen
 
-    if (type == "albums") {
+    if (type === "albums") {
         screen = $.spud.album_detail_screen
-    } else if (type == "categorys") {
+    } else if (type === "categorys") {
         screen = $.spud.category_detail_screen
-    } else if (type == "places") {
+    } else if (type === "places") {
         screen = $.spud.place_detail_screen
-    } else if (type == "persons") {
+    } else if (type === "persons") {
         screen = $.spud.person_detail_screen
-    } else if (type == "photos") {
+    } else if (type === "photos") {
         screen = $.spud.photo_detail_screen
-    } else if (type == "feedbacks") {
+    } else if (type === "feedbacks") {
         screen = $.spud.feedback_detail_screen
     } else {
         return null
@@ -81,6 +84,8 @@ function photo_a(photo) {
     return object_a("photos", photo)
 }
 
+void photo_a
+
 
 // ***************
 // * AJAX COMMON *
@@ -102,42 +107,43 @@ $.ajaxSetup({
 
 
 function ajax(settings) {
-    var settings = jQuery.extend({
-        dataType : 'json',
+    settings = $.extend({
+        dataType: 'json',
         cache: false,
     }, settings)
 
-    if (settings.type != null && settings.type != "GET") {
+    if (settings.type != null && settings.type !== "GET") {
         settings.data = JSON.stringify(settings.data)
         settings.contentType = 'application/json; charset=UTF-8'
     }
-   
+
     var success = settings.success
     delete settings.success
 
     var error = settings.error
     delete settings.error
 
-    if (success==null) {
+    if (success == null) {
         throw new Error("success is not defined")
     }
 
-    if (error==null) {
+    if (error == null) {
         throw new Error("error is not defined")
     }
 
     var xhr = $.ajax(settings)
         .done(
             function(data, textStatus, jqXHR) {
+                void jqXHR
                 success(data)
             }
         )
         .fail(
             function(jqXHR, textStatus, errorThrown) {
-                if (textStatus=="abort") {
+                if (textStatus === "abort") {
                     return
                 }
-                if (jqXHR.responseJSON !=null) {
+                if (jqXHR.responseJSON != null) {
                     var message = jqXHR.responseJSON.detail
                     if (message == null) {
                         message = errorThrown
@@ -151,3 +157,5 @@ function ajax(settings) {
 
     return xhr
 }
+
+void ajax

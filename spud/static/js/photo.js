@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-"use strict";
+"use strict"
 
 window._photo_created = new signal()
 window._photo_changed = new signal()
@@ -89,7 +89,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
         var criteria = {}
 
         $.each(values, function (key, el) {
-            if (el != null && el!=false) { criteria[key] = el }
+            if (el != null && el !== false) { criteria[key] = el }
         });
 
         if (values.first_datetime != null) {
@@ -99,7 +99,6 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
             criteria.last_datetime = values.last_datetime[0]
         }
 
-        var mythis = this
         if (this.options.on_success(criteria)) {
             this.close()
         }
@@ -212,7 +211,7 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.ajax_dialog, {
         var data = {}
 
         $.each(values, function (key, el) {
-            if (el != null && el!=false) { data[key] = el }
+            if (el != null && el !== false) { data[key] = el }
         });
 
         if (data.set_datetime != null) {
@@ -329,6 +328,7 @@ $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
     },
 
     _set: function(values) {
+        void values
         this._oll = get_object_list_loader("photos", this.options.criteria)
         this._oll.loaded_item.add_listener(this, this._loaded_item)
         this._oll.loaded_list.add_listener(this, this._loaded_list)
@@ -344,7 +344,7 @@ $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
             return
         }
 
-        this._status.text("Processed "+n+" out of "+count)
+        this._status.text("Processed " + n + " out of " + count)
         this._pb.progressbar("option", "max", count)
         this._pb.progressbar("value", n)
         // this._save("PATCH", null, data)
@@ -354,6 +354,7 @@ $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
     },
 
     _loaded_list: function(object_list) {
+        void object_list
         if (this._canceled) {
             return
         }
@@ -393,10 +394,12 @@ $.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
     },
 
     _submit_values: function(values) {
+        void values
         this._save("DELETE", this.obj_id, {})
     },
 
     _done: function(data) {
+        void data
         window._photo_deleted.trigger(this.obj_id)
     }
 })
@@ -434,35 +437,35 @@ $.widget('spud.photo_criteria', $.spud.object_criteria, {
 
         var title = null
 
-        var mode = criteria['mode'] || 'children'
-        delete criteria['mode']
+        var mode = criteria.mode || 'children'
+        delete criteria.mode
 
-        if (criteria['instance'] != null) {
-            var instance = criteria['instance']
+        if (criteria.instance != null) {
+            var instance = criteria.instance
             title = instance + " / " + mode
 
             $("<li/>")
                 .text("instance" + " = " + instance + " (" + mode + ")")
                 .appendTo(ul)
 
-            delete criteria['instance']
+            delete criteria.instance
         }
 
-        else if (criteria['q'] != null) {
-            title = "search " + criteria['q']
+        else if (criteria.q != null) {
+            title = "search " + criteria.q
         }
 
-        else if (criteria['album'] != null) {
-            title = "album " + criteria['album']
+        else if (criteria.album != null) {
+            title = "album " + criteria.album
         }
-        else if (criteria['category'] != null) {
-            title = "category " + criteria['category']
+        else if (criteria.category != null) {
+            title = "category " + criteria.category
         }
-        else if (criteria['place'] != null) {
-            title = "place " + criteria['place']
+        else if (criteria.place != null) {
+            title = "place " + criteria.place
         }
-        else if (criteria['person'] != null) {
-            title = "person " + criteria['person']
+        else if (criteria.person != null) {
+            title = "person " + criteria.person
         }
 
         else {
@@ -487,7 +490,7 @@ $.widget('spud.photo_criteria', $.spud.object_criteria, {
 $.widget('spud.photo_list', $.spud.object_list, {
     _add_selection: function(photo) {
         var selection = this.options.selection
-        if (selection.indexOf(photo.id) == -1) {
+        if (selection.indexOf(photo.id) === -1) {
             selection.push(photo.id)
             push_state(true)
         }
@@ -496,7 +499,7 @@ $.widget('spud.photo_list', $.spud.object_list, {
     _del_selection: function(photo) {
         var selection = this.options.selection
         var index = selection.indexOf(photo.id)
-        if (index != -1) {
+        if (index !== -1) {
             selection.splice(index, 1);
             push_state(true)
         }
@@ -505,7 +508,7 @@ $.widget('spud.photo_list', $.spud.object_list, {
     _is_photo_selected: function(photo) {
         var selection = this.options.selection
         var index = selection.indexOf(photo.id)
-        return index != -1
+        return index !== -1
     },
 
     _create: function() {
@@ -708,6 +711,7 @@ $.widget('spud.photo_list_screen', $.spud.object_list_screen, {
             $("<li/>")
                 .text("Update")
                 .on("click", function(ev) {
+                    void ev
                     var instance = mythis._ol.data('object_list')
                     instance.bulk_update()
                 })
@@ -741,12 +745,12 @@ $.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
         var mythis = this
 
         window._photo_changed.add_listener(this, function(obj) {
-            if (obj.id == this.options.obj_id) {
+            if (obj.id === this.options.obj_id) {
                 mythis._set(obj)
             }
         })
         window._photo_deleted.add_listener(this, function(obj_id) {
-            if (obj_id == this.options.obj_id) {
+            if (obj_id === this.options.obj_id) {
                 mythis.close()
             }
         })

@@ -44,7 +44,9 @@ output_field.prototype.to_html = function(id) {
 }
 
 output_field.prototype.create = function(id) {
-    return this.output = $('<span />')
+    void id
+    this.output = $('<span />')
+    return
 }
 
 output_field.prototype.destroy = function() {
@@ -98,7 +100,7 @@ text_output_field.prototype.set = function(value) {
 function select_output_field(title, options) {
     this.options = {}
     var mythis = this
-    $.each(options, function(id, v){
+    $.each(options, function(i, v){
         var id = v[0]
         var value = v[1]
         mythis.options[id] = value
@@ -110,7 +112,6 @@ select_output_field.prototype = new output_field()
 select_output_field.constructor = select_output_field
 
 select_output_field.prototype.set = function(value) {
-    var mythis = this
     value = this.options[value]
     this.output.text(value)
 }
@@ -167,6 +168,7 @@ datetime_output_field.prototype = new output_field()
 datetime_output_field.constructor = datetime_output_field
 
 datetime_output_field.prototype.create = function(id) {
+    void id
 
     this.datetime = null
 
@@ -196,6 +198,7 @@ datetime_output_field.prototype.create = function(id) {
         )
         .val(this.timezone)
         .on("change", function(ev) {
+            void ev
             mythis.timezone = $(this).val()
             mythis.set(mythis.value)
         })
@@ -207,15 +210,14 @@ datetime_output_field.prototype.create = function(id) {
 datetime_output_field.prototype.set = function(value) {
     this.value = value
 
-    var locale = navigator.language
     this.output.empty()
 
     if (value != null) {
         var datetime = new moment.utc(value[0])
         var utc_offset = value[1]
-        if (this.timezone == "local") {
+        if (this.timezone === "local") {
             datetime.local()
-        } else if (this.timezone == "source") {
+        } else if (this.timezone === "source") {
             datetime.zone(-utc_offset)
         } else {
             datetime = datetime.tz(this.timezone)
@@ -247,8 +249,6 @@ link_output_field.prototype = new output_field()
 link_output_field.constructor = link_output_field
 
 link_output_field.prototype.set = function(value) {
-    var mythis = this
-
     this.toggle(value != null)
     if (value == null) {
         this.output.text("")
@@ -261,18 +261,18 @@ link_output_field.prototype.set = function(value) {
 
 // FIXME: check if this is required
 // define html_output_field
-function html_output_field(title) {
-    output_field.call(this, title)
-}
-
-html_output_field.prototype = new output_field()
-html_output_field.constructor = html_output_field
-
-html_output_field.prototype.set = function(value) {
-    this.output.html(value)
-    this.toggle(value != null)
-}
-
+// function html_output_field(title) {
+//     output_field.call(this, title)
+// }
+//
+// html_output_field.prototype = new output_field()
+// html_output_field.constructor = html_output_field
+//
+// html_output_field.prototype.set = function(value) {
+//     this.output.html(value)
+//     this.toggle(value != null)
+// }
+//
 // define html_list_output_field
 // function html_list_output_field(title) {
 //     output_field.call(this, title)
@@ -314,13 +314,15 @@ link_list_output_field.prototype = new output_field()
 link_list_output_field.constructor = link_list_output_field
 
 link_list_output_field.prototype.create = function(id) {
-    return this.output = $('<span />')
+    void id
+    this.output = $('<span />')
+    return this.output
 }
 
 link_list_output_field.prototype.set = function(value) {
     this.output.empty()
 
-    if (value==null || value.length==0) {
+    if (value == null || value.length === 0) {
         this.hide()
         return
     }
@@ -351,6 +353,7 @@ photo_output_field.prototype = new output_field()
 photo_output_field.constructor = photo_output_field
 
 photo_output_field.prototype.create = function(id) {
+    void id
     this.output = $('<div />').image({ size: this.size, include_link: this.do_link })
     return this.output
 }
@@ -422,7 +425,6 @@ $.widget('spud.infobox', $.spud.widget, {
     },
 
     _destroy: function() {
-        var mythis = this
         this.element.removeClass("infobox")
         $.each(this.fields, function(id, field) {
             field.destroy()
@@ -446,7 +448,9 @@ $.widget('spud.infobox', $.spud.widget, {
         var visible = false
         $.each(mythis.fields, function(id, field) {
             mythis.set_value(id, values[id])
-            if (field.visible) visible = true
+            if (field.visible) {
+                visible = true
+            }
         })
 
         this.element.toggleClass("hidden", !visible)
@@ -477,7 +481,9 @@ $.widget('spud.infobox', $.spud.widget, {
 
     remove_field: function(id) {
         var field = this.fields[id]
-        if (field == null) return this
+        if (field == null) {
+            return this
+        }
         field.destroy()
         delete this.fields[id]
         return this
@@ -486,6 +492,7 @@ $.widget('spud.infobox', $.spud.widget, {
     remove_all_fields: function() {
         var mythis = this
         $.each(this.fields, function(i, v) {
+            void v
             mythis.remove_field(i)
         })
         return this

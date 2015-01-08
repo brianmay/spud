@@ -36,14 +36,14 @@ $.fn.p = function(text){
         return this
     }
     var converter = new Showdown.converter()
-    var text = converter.makeHtml(text)
+    text = converter.makeHtml(text)
     this.html(text)
     return this
 }
 
 
 $.fn.append_csv = function(list){
-    if (list.length == 0) {
+    if (list.length === 0) {
         return this
     }
 
@@ -63,7 +63,7 @@ function extend(base, sub) {
   // Avoid instantiating the base class just to setup inheritance
   // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
   // for a polyfill
-  // Also, do a recursive merge of two prototypes, so we don't overwrite 
+  // Also, do a recursive merge of two prototypes, so we don't overwrite
   // the existing prototype, but still maintain the inheritance chain
   // Thanks to @ccnokes
   var origProto = sub.prototype;
@@ -75,11 +75,13 @@ function extend(base, sub) {
   sub.prototype.constructor = sub;
   // In ECMAScript5+ (all modern browsers), you can make the constructor property
   // non-enumerable if you define it like this instead
-  Object.defineProperty(sub.prototype, 'constructor', { 
+  Object.defineProperty(sub.prototype, 'constructor', {
     enumerable: false,
     value: sub
   });
 }
+
+void extend
 
 
 // function is_equal_objects(x, y)
@@ -174,7 +176,7 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
         options.buttons[submit] = function() {
             mythis._check_submit()
         }
-        options.buttons['Cancel'] = function() {
+        options.buttons.Cancel = function() {
             mythis.close()
         }
 
@@ -185,7 +187,7 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
         this.element.on(
             "keypress",
             function(ev) {
-                if (ev.which == 13 && !ev.shiftKey) {
+                if (ev.which === 13 && !ev.shiftKey) {
                     mythis._check_submit()
                     return false
                     }
@@ -194,6 +196,8 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
         this.element.on(
             this.widgetEventPrefix + "close",
             function( ev, ui ) {
+                void ev
+                void ui
                 mythis.destroy()
             }
         )
@@ -216,6 +220,7 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
     },
 
     _set: function(values) {
+        void values
     },
 
     _disable: function() {
@@ -240,7 +245,6 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
     },
 
     _destroy: function() {
-        var mythis = this
         remove_all_listeners(this)
         this.element
             .empty()
@@ -304,7 +308,9 @@ $.widget('spud.autocompletehtml', $.ui.autocomplete, {
 
     _renderItem: function(ul, item) {
         if (this.sizeul) {
-            if(ul.css('max-width')=='none') ul.css('max-width',this.outerWidth());
+            if (ul.css('max-width') === 'none') {
+                ul.css('max-width', this.outerWidth());
+            }
             this.sizeul = false
         }
         return $("<li></li>")
@@ -359,7 +365,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         }
 
         if (options.type != null) {
-            options.source =  "/api/" + options.type
+            options.source = "/api/" + options.type
         }
 
         this.element.on(
@@ -407,7 +413,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
     get: function() {
         var value = this.input.val()
-        if (value != "") {
+        if (value !== "") {
             return this.input.val()
         } else {
             return null
@@ -420,7 +426,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
             if (mythis.loader != null) {
                 mythis.loader.abort()
             }
-            mythis.loader = new object_list_loader(this.options.type, request)
+            mythis.loader = get_object_list_loader(this.options.type, request)
             mythis.loader.loaded_list.add_listener(this, function(object_list) {
                 mythis.loader = null
                 response(object_list);
@@ -452,11 +458,10 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
             obj_pk = obj.id
         }
 
-        var mythis = this
         var killButton = $('<span class="ui-icon ui-icon-trash">X</span> ');
         var repr = $("<div></div>").text("loading")
         var div = $("<div></div>")
-            .attr("id", this.id+'_on_deck_'+obj_pk)
+            .attr("id", this.id + '_on_deck_' + obj_pk)
             .append(killButton)
             .append(repr)
             .appendTo(this.deck)
@@ -464,9 +469,9 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         if (obj != null || obj_pk == null) {
             this._loaded_killer(repr, obj)
         } else {
-            var kill_loader = new object_loader(this.options.type, obj_pk)
-            kill_loader.loaded_item.add_listener(this, function(obj) {
-                this._loaded_killer(repr, obj)
+            var kill_loader = get_object_loader(this.options.type, obj_pk)
+            kill_loader.loaded_item.add_listener(this, function(killer_obj) {
+                this._loaded_killer(repr, killer_obj)
             })
             kill_loader.on_error.add_listener(this, function() {
                 repr.text("error")
@@ -484,6 +489,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     },
 
     _kill: function(obj_pk, div) {
+        void div
         this.input.val('');
         this.deck.children().fadeOut(1.0).remove();
     },
@@ -501,15 +507,16 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
     _normalize_item: function( obj ) {
         var div = $("<div/>")
+        var photo
 
-        if (obj.cover_photo && obj.cover_photo.thumbs['thumb']) {
-            var photo = obj.cover_photo.thumbs['thumb']
+        if (obj.cover_photo && obj.cover_photo.thumbs.thumb) {
+            photo = obj.cover_photo.thumbs.thumb
             $("<img/>")
                 .attr("src", photo.url)
                 .attr("alt", "")
                 .appendTo(div)
-        } else if (obj.thumbs != null && obj.thumbs['thumb']) {
-            var photo = obj.thumbs['thumb']
+        } else if (obj.thumbs != null && obj.thumbs.thumb) {
+            photo = obj.thumbs.thumb
             $("<img/>")
                 .attr("src", photo.url)
                 .attr("alt", "")
@@ -540,8 +547,6 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
             repr: obj.title,
             pk: obj.id,
             }
-
-        throw new Error("Unknown object type "+this.options.type);
     },
 
     _normalize: function( objs ) {
@@ -579,8 +584,8 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
     },
 
     get: function() {
-        var value = this.input.val().slice(1,-1)
-        if (value != "") {
+        var value = this.input.val().slice(1, -1)
+        if (value !== "") {
             value = value.split("|")
         } else {
             value = []
@@ -588,7 +593,7 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
 
         var tmp = []
         $.each(value, function(i, id) {
-            if (id == "null") { id = null }
+            if (id === "null") { id = null }
             tmp.push(id)
         })
 
@@ -598,7 +603,7 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
     _receiveResult: function(ev, ui) {
         var prev = this.input.val();
 
-        if (prev.indexOf("|"+ui.item.pk+"|") == -1) {
+        if (prev.indexOf("|" + ui.item.pk + "|") === -1) {
                 this.input.val((prev ? prev : "|") + ui.item.pk + "|");
                 this.text.val('');
                 this._addKiller(ui.item.obj, null);
@@ -950,7 +955,7 @@ $.widget('spud.image', $.spud.widget, {
 
             var image = null
             if (photo != null) {
-                var image = photo.thumbs[this.options.size]
+                image = photo.thumbs[this.options.size]
             }
 
             if (image != null) {
@@ -993,7 +998,7 @@ $.widget('spud.image', $.spud.widget, {
     set_error: function() {
         this._clear()
         $("<img></img>")
-            .attr("src", media_url("img/error.png"))
+            .attr("src", static_url("img/error.png"))
             .appendTo(this.element)
     },
 
@@ -1019,7 +1024,7 @@ $.widget('spud.image', $.spud.widget, {
         var height = this.height
 
         var img = this.img
-        var aspect = width/height
+        var aspect = width / height
 
         var innerWidth = window.innerWidth
         var innerHeight = window.innerHeight
@@ -1040,10 +1045,10 @@ $.widget('spud.image', $.spud.widget, {
         }
 
         if (enlarge) {
-            img.css("padding-top", (window.innerHeight-height)/2 + "px")
-            img.css("padding-bottom", (window.innerHeight-height)/2 + "px")
-            img.css("padding-left", (window.innerWidth-width)/2 + "px")
-            img.css("padding-right", (window.innerWidth-width)/2 + "px")
+            img.css("padding-top", (window.innerHeight - height) / 2 + "px")
+            img.css("padding-bottom", (window.innerHeight - height) / 2 + "px")
+            img.css("padding-left", (window.innerWidth - width) / 2 + "px")
+            img.css("padding-right", (window.innerWidth - width) / 2 + "px")
         }
         img.attr('width', width)
         img.attr('height', height)
@@ -1104,7 +1109,7 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
                 .data("photo", null)
                 .empty()
 
-        var div = $("<div />")
+        $("<div />")
             .image({ photo: photo, size: "thumb" })
             .appendTo(a)
 
@@ -1126,19 +1131,22 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
         var li = $("<li />")
             .attr('class', "photo_item")
             .append(a)
-            .on("click", function(ev) { a.trigger('click'); })
+            .on("click", function(ev) {
+                void ev
+                a.trigger('click');
+            })
 
         if (photo != null) {
             li
-                .toggleClass("removed", photo.action == "D")
-                .toggleClass("regenerate", photo.action != null && photo.action != "D")
+                .toggleClass("removed", photo.action === "D")
+                .toggleClass("regenerate", photo.action != null && photo.action !== "D")
         }
 
         return li
     },
 
     append_photo: function(photo, title, details, description, a) {
-        var li = _create_li(photo, title, details, description, a)
+        var li = this._create_li(photo, title, details, description, a)
             .appendTo(this.ul)
         return li
     },
@@ -1161,13 +1169,17 @@ $.widget('spud.screen', $.spud.widget, {
             .addClass("close_button")
             .text("[X]")
             .on("click", function(ev) {
+                void ev
                 mythis.close()
                 return false;
             })
             .appendTo(header)
 
         this.h1 = $("<h1/>")
-            .on("click", function(ev) { mythis.toggle() })
+            .on("click", function(ev) {
+                void ev
+                mythis.toggle()
+            })
             .appendTo(header)
 
         this._set_title(this.options.title)
@@ -1266,4 +1278,3 @@ $.widget('spud.screen', $.spud.widget, {
         return options
     },
 })
-

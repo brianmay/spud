@@ -18,23 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "use strict";
 
 function do_root(session, params) {
+    void params
     setup_page(session)
 }
+
+void do_root
 
 function do_list(obj_type, session, params) {
     var screen_class
     setup_page(session)
-    if (obj_type == "albums") {
+    if (obj_type === "albums") {
         screen_class = $.spud.album_list_screen
-    } else if (obj_type == "categorys") {
+    } else if (obj_type === "categorys") {
         screen_class = $.spud.category_list_screen
-    } else if (obj_type == "places") {
+    } else if (obj_type === "places") {
         screen_class = $.spud.place_list_screen
-    } else if (obj_type == "persons") {
+    } else if (obj_type === "persons") {
         screen_class = $.spud.person_list_screen
-    } else if (obj_type == "photos") {
+    } else if (obj_type === "photos") {
         screen_class = $.spud.photo_list_screen
-    } else if (obj_type == "feedbacks") {
+    } else if (obj_type === "feedbacks") {
         screen_class = $.spud.feedback_list_screen
     }
     if (screen_class) {
@@ -47,20 +50,22 @@ function do_list(obj_type, session, params) {
     }
 }
 
+void do_list
+
 function do_detail(obj_type, obj_id, session, params) {
     setup_page(session)
     var screen_class
-    if (obj_type == "albums") {
+    if (obj_type === "albums") {
         screen_class = $.spud.album_detail_screen
-    } else if (obj_type == "categorys") {
+    } else if (obj_type === "categorys") {
         screen_class = $.spud.category_detail_screen
-    } else if (obj_type == "places") {
+    } else if (obj_type === "places") {
         screen_class = $.spud.place_detail_screen
-    } else if (obj_type == "persons") {
+    } else if (obj_type === "persons") {
         screen_class = $.spud.person_detail_screen
-    } else if (obj_type == "photos") {
+    } else if (obj_type === "photos") {
         screen_class = $.spud.photo_detail_screen
-    } else if (obj_type == "feedbacks") {
+    } else if (obj_type === "feedbacks") {
         screen_class = $.spud.feedback_detail_screen
     }
     if (screen_class) {
@@ -72,3 +77,5 @@ function do_detail(obj_type, obj_id, session, params) {
         window._do_replace = false
     }
 }
+
+void do_detail

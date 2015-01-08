@@ -33,7 +33,7 @@ $.widget('spud.person_search_dialog',  $.spud.form_dialog, {
             ["q", new text_input_field("Search for", false)],
             ["instance", new ajax_select_field("Person", "persons", false)],
             ["mode", new select_input_field("Mode",
-                [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ],
+                [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
             ["root_only", new boolean_input_field("Root only", false)],
         ]
@@ -47,10 +47,9 @@ $.widget('spud.person_search_dialog',  $.spud.form_dialog, {
         var criteria = {}
 
         $.each(values, function (key, el) {
-            if (el != null && el!=false) { criteria[key] = el }
+            if (el != null && el !== false) { criteria[key] = el }
         });
 
-        var mythis = this
         if (this.options.on_success(criteria)) {
             this.close()
         }
@@ -66,7 +65,7 @@ $.widget('spud.person_change_dialog',  $.spud.ajax_dialog, {
                 ["middle_name", new text_input_field("Middle name", false)],
                 ["last_name", new text_input_field("Last name", false)],
                 ["called", new text_input_field("Called", false)],
-                ["sex", new select_input_field("Sex", [ ["1","Male"], ["2","Female"] ], true)],
+                ["sex", new select_input_field("Sex", [ ["1", "Male"], ["2", "Female"] ], true)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
                 ["work_pk", new ajax_select_field("Work", "places", false)],
@@ -136,10 +135,12 @@ $.widget('spud.person_delete_dialog',  $.spud.ajax_dialog, {
     },
 
     _submit_values: function(values) {
+        void values
         this._save("DELETE", this.obj_id, {})
     },
 
     _done: function(data) {
+        void data
         window._person_deleted.trigger(this.obj_id)
     }
 })
@@ -169,25 +170,25 @@ $.widget('spud.person_criteria', $.spud.object_criteria, {
 
         var title = null
 
-        var mode = criteria['mode'] || 'children'
-        delete criteria['mode']
+        var mode = criteria.mode || 'children'
+        delete criteria.mode
 
-        if (criteria['instance'] != null) {
-            var instance = criteria['instance']
+        if (criteria.instance != null) {
+            var instance = criteria.instance
             title = instance + " / " + mode
 
             $("<li/>")
                 .text("instance" + " = " + instance + " (" + mode + ")")
                 .appendTo(ul)
 
-            delete criteria['instance']
+            delete criteria.instance
         }
 
-        else if (criteria['q'] != null) {
-            title = "search " + criteria['q']
+        else if (criteria.q != null) {
+            title = "search " + criteria.q
         }
 
-        else if (criteria['root_only']) {
+        else if (criteria.root_only) {
             title = "root only"
         }
 
@@ -287,7 +288,7 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
             ["middle_name", new text_output_field("Middle name")],
             ["last_name", new text_output_field("Last name")],
             ["called", new text_output_field("Called")],
-            ["sex", new select_output_field("Sex", [ ["1","Male"], ["2","Female"] ]) ],
+            ["sex", new select_output_field("Sex", [ ["1", "Male"], ["2", "Female"] ]) ],
             ["email", new text_output_field("E-Mail")],
             ["dob", new text_output_field("Date of birth")],
             ["dod", new text_output_field("Date of death")],
@@ -354,12 +355,12 @@ $.widget('spud.person_detail_screen', $.spud.object_detail_screen, {
         var mythis = this
 
         window._person_changed.add_listener(this, function(obj) {
-            if (obj.id == this.options.obj_id) {
+            if (obj.id === this.options.obj_id) {
                 mythis._set(obj)
             }
         })
         window._person_deleted.add_listener(this, function(obj_id) {
-            if (obj_id == this.options.obj_id) {
+            if (obj_id === this.options.obj_id) {
                 mythis.close()
             }
         })

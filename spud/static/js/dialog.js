@@ -83,7 +83,7 @@ input_field.prototype.set_error = function(error) {
     }
 }
 
-input_field.prototype.clear_error = function(error) {
+input_field.prototype.clear_error = function() {
     this.set_error(null)
 }
 
@@ -107,10 +107,11 @@ function text_input_field(title, required) {
 text_input_field.prototype = new input_field()
 text_input_field.constructor = text_input_field
 text_input_field.prototype.create = function(id) {
-    return this.input = $('<input />')
+    this.input = $('<input />')
         .attr('type', "text")
         .attr('name', id)
         .attr('id', "id_" + id)
+    return this.input
 }
 
 text_input_field.prototype.set = function(value) {
@@ -159,11 +160,11 @@ datetime_input_field.prototype.set = function(value) {
         this.date.val(datetime.format("YYYY-MM-DD"))
         this.time.val(datetime.format("HH:mm:ss"))
 
-        var hours   = Math.floor(utc_offset / 60);
+        var hours = Math.floor(utc_offset / 60);
         var minutes = utc_offset - (hours * 60);
 
-        if (hours   < 10) {hours   = "0"+hours;}
-        if (minutes < 10) {minutes = "0"+minutes;}
+        if (hours < 10) {hours = "0" + hours;}
+        if (minutes < 10) {minutes = "0" + minutes;}
 
         this.timezone.val(hours + ":" + minutes)
     } else {
@@ -177,13 +178,14 @@ datetime_input_field.prototype.validate = function() {
     var date = this.date.val().trim()
     var time = this.time.val().trim()
     var timezone = this.timezone.val().trim()
+    var a
 
-    if (date != "") {
+    if (date !== "") {
         if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
             return "date format not yyyy-mm-dd"
         }
 
-        var a = date.split("-")
+        a = date.split("-")
         if (Number(a[1]) < 1 || Number(a[1]) > 12) {
             return "Month must be between 1 and 12"
         }
@@ -195,7 +197,7 @@ datetime_input_field.prototype.validate = function() {
         }
     }
 
-    if (time != "") {
+    if (time !== "") {
         if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
             return "date format not hh:mm[:ss]"
         }
@@ -204,11 +206,11 @@ datetime_input_field.prototype.validate = function() {
             return "time format not hh:mm[:ss]"
         }
 
-        if (date == "") {
+        if (date === "") {
             return "date must be given if time is given"
         }
 
-        var a = time.split(":")
+        a = time.split(":")
         if (Number(a[0]) < 0 || Number(a[0]) > 23) {
             return "Hour must be between 0 and 23"
         }
@@ -223,8 +225,8 @@ datetime_input_field.prototype.validate = function() {
         }
     }
 
-    if (timezone != "") {
-        var a = timezone.split(":")
+    if (timezone !== "") {
+        a = timezone.split(":")
         if (a.length > 1) {
             if (Number(a[0]) < -12 || Number(a[0]) > 12) {
                 return "Hour must be between -12 and 12"
@@ -235,7 +237,7 @@ datetime_input_field.prototype.validate = function() {
             if (a[2] != null) {
                 return "Too many components in timezone"
             }
-            if (date == "") {
+            if (date === "") {
                 return "Specifying timezone without date wrong"
             }
         } else {
@@ -253,32 +255,32 @@ datetime_input_field.prototype.get = function() {
     var time = this.time.val().trim()
     var timezone = this.timezone.val().trim()
 
-    if (date == "") {
+    if (date === "") {
         return null
     }
 
     var result = date
-    if (time != "") {
+    if (time !== "") {
         result = result + " " + time
     }
 
 
     var datetime
     var utc_offset
-    if (timezone != "") {
+    if (timezone !== "") {
         var a = timezone.split(":")
         if (a.length > 1) {
             utc_offset = Number(a[0]) * 60 + Number(a[1])
-            datetime=moment.tz(result, "YYYY-MM-DD HH:mm:ss", "UTC")
+            datetime = moment.tz(result, "YYYY-MM-DD HH:mm:ss", "UTC")
             datetime.subtract(utc_offset, 'minutes')
         } else {
-            datetime=moment.tz(result, "YYYY-MM-DD HH:mm:ss", timezone)
-            utc_offset = - datetime.zone()
+            datetime = moment.tz(result, "YYYY-MM-DD HH:mm:ss", timezone)
+            utc_offset = -datetime.zone()
             datetime.utc()
         }
     } else {
-        datetime=moment(result, "YYYY-MM-DD HH:mm:ss")
-        utc_offset = - datetime.zone()
+        datetime = moment(result, "YYYY-MM-DD HH:mm:ss")
+        utc_offset = -datetime.zone()
         datetime.utc()
     }
 
@@ -309,10 +311,11 @@ function password_input_field(title, required) {
 password_input_field.prototype = new text_input_field()
 password_input_field.constructor = password_input_field
 password_input_field.prototype.create = function(id) {
-    return this.input = $('<input />')
+    this.input = $('<input />')
         .attr('type', "password")
         .attr('name', id)
         .attr('id', "id_" + id)
+    return this.input
 }
 
 
@@ -324,13 +327,14 @@ function date_input_field(title, required) {
 date_input_field.prototype = new text_input_field()
 date_input_field.constructor = date_input_field
 date_input_field.prototype.create = function(id) {
-    return this.input = $('<input />')
+    this.input = $('<input />')
         .attr('id', "id_" + id)
         .datepicker({
             changeMonth: true,
             changeYear: true,
             dateFormat: "yy-mm-dd",
         })
+    return this.input
 }
 
 date_input_field.prototype.validate = function() {
@@ -361,11 +365,12 @@ function p_input_field(title, required) {
 p_input_field.prototype = new text_input_field()
 p_input_field.constructor = p_input_field
 p_input_field.prototype.create = function(id) {
-    return this.input = $('<textarea />')
+    this.input = $('<textarea />')
         .attr('rows', 10)
         .attr('cols', 40)
         .attr('name', id)
         .attr('id', "id_" + id)
+    return this.input
 }
 
 
@@ -413,7 +418,7 @@ select_input_field.prototype.set_options = function(options) {
             .text("-----")
             .appendTo(mythis.input)
     }
-    $.each(options, function(id, v){
+    $.each(options, function(i, v){
         var id = v[0]
         var value = v[1]
         mythis.options[id] = $('<option />')
@@ -425,7 +430,6 @@ select_input_field.prototype.set_options = function(options) {
 }
 
 select_input_field.prototype.set = function(value) {
-    var mythis = this
     this.input.val(value)
 }
 
@@ -435,7 +439,7 @@ select_input_field.prototype.validate = function() {
         value = ""
     }
     if (this.options[value] == null) {
-        return value +" is not valid option"
+        return value + " is not valid option"
     }
     return null
 }
@@ -450,18 +454,18 @@ function boolean_input_field(title, options, required) {
 boolean_input_field.prototype = new input_field()
 boolean_input_field.constructor = boolean_input_field
 boolean_input_field.prototype.create = function(id) {
-    return this.input = $('<input />')
+    this.input = $('<input />')
         .attr('type', 'checkbox')
         .attr('name', id)
         .attr('id', "id_" + id)
+    return this.input
 }
 
 boolean_input_field.prototype.set = function(value) {
-    var mythis = this
     if (value) {
-        mythis.input.attr('checked','checked')
+        this.input.attr('checked', 'checked')
     } else {
-        mythis.input.removeAttr('checked')
+        this.input.removeAttr('checked')
     }
 }
 
@@ -479,10 +483,11 @@ function ajax_select_field(title, type, required) {
 ajax_select_field.prototype = new input_field()
 ajax_select_field.constructor = ajax_select_field
 ajax_select_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
+    this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .ajaxautocomplete({type: this.type})
+    return this.input
 }
 
 ajax_select_field.prototype.destroy = function() {
@@ -551,10 +556,11 @@ function ajax_select_multiple_field(title, type, required) {
 ajax_select_multiple_field.prototype = new input_field()
 ajax_select_multiple_field.constructor = ajax_select_multiple_field
 ajax_select_multiple_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
+    this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .ajaxautocompletemultiple({type: this.type})
+    return this.input
 }
 
 ajax_select_multiple_field.prototype.destroy = function() {
@@ -587,10 +593,11 @@ function ajax_select_sorted_field(title, type, required) {
 ajax_select_sorted_field.prototype = new input_field()
 ajax_select_sorted_field.constructor = ajax_select_sorted_field
 ajax_select_sorted_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
+    this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .ajaxautocompletesorted({type: this.type})
+    return this.input
 }
 
 ajax_select_sorted_field.prototype.destroy = function() {
@@ -622,10 +629,11 @@ function photo_select_field(title, required) {
 photo_select_field.prototype = new input_field()
 photo_select_field.constructor = photo_select_field
 photo_select_field.prototype.create = function(id) {
-    return this.input = $("<span/>")
+    this.input = $("<span/>")
         .attr("name", id)
         .attr("id", "id_" + id)
         .photo_select()
+    return this.input
 }
 
 photo_select_field.prototype.destroy = function() {
@@ -663,7 +671,6 @@ photo_select_field.prototype.disable = function() {
 $.widget('spud.form_dialog',  $.spud.base_dialog, {
     _create: function() {
         var mythis = this
-        var options = this.options
 
         this.f = $("<form method='get' />")
             .appendTo(this.element)
@@ -734,6 +741,7 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
         var mythis = this
         var values = {}
         $.each(this.fields, function(id, field) {
+            void field
             values[id] = mythis.get_value(id)
         })
         this._submit_values(values)
@@ -754,11 +762,13 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
     },
 
     _submit_values: function(values) {
+        void values
     },
 
     _set: function(values) {
         var mythis = this
         $.each(mythis.fields, function(id, field) {
+            void field
             mythis.set_value(id, values[id])
         })
     },
@@ -787,7 +797,9 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
 
     remove_field: function(id) {
         var field = this.fields[id]
-        if (field == null) return this
+        if (field == null) {
+            return this
+        }
         field.destroy()
         delete this.fields[id]
         return this
@@ -796,6 +808,7 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
     remove_all_fields: function() {
         var mythis = this
         $.each(this.fields, function(i, v) {
+            void v
             mythis.remove_field(i)
         })
         return this
@@ -816,7 +829,6 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
     },
 
     _destroy: function() {
-        var mythis = this
         $.each(this.fields, function(id, field) {
             field.destroy()
         })

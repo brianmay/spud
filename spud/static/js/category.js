@@ -33,7 +33,7 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
             ["q", new text_input_field("Search for", false)],
             ["instance", new ajax_select_field("Category", "categorys", false)],
             ["mode", new select_input_field("Mode",
-                [ ["children", "Children"], ["descendants","Descendants"], ["ascendants","Ascendants"] ],
+                [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
             ["root_only", new boolean_input_field("Root only", false)],
         ]
@@ -47,10 +47,9 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
         var criteria = {}
 
         $.each(values, function (key, el) {
-            if (el != null && el!=false) { criteria[key] = el }
+            if (el != null && el !== false) { criteria[key] = el }
         });
 
-        var mythis = this
         if (this.options.on_success(criteria)) {
             this.close()
         }
@@ -121,10 +120,12 @@ $.widget('spud.category_delete_dialog',  $.spud.ajax_dialog, {
     },
 
     _submit_values: function(values) {
+        void values
         this._save("DELETE", this.obj_id, {})
     },
 
     _done: function(data) {
+        void data
         window._category_deleted.trigger(this.obj_id)
     }
 })
@@ -154,25 +155,25 @@ $.widget('spud.category_criteria', $.spud.object_criteria, {
 
         var title = null
 
-        var mode = criteria['mode'] || 'children'
-        delete criteria['mode']
+        var mode = criteria.mode || 'children'
+        delete criteria.mode
 
-        if (criteria['instance'] != null) {
-            var instance = criteria['instance']
+        if (criteria.instance != null) {
+            var instance = criteria.instance
             title = instance + " / " + mode
 
             $("<li/>")
                 .text("instance" + " = " + instance + " (" + mode + ")")
                 .appendTo(ul)
 
-            delete criteria['instance']
+            delete criteria.instance
         }
 
-        else if (criteria['q'] != null) {
-            title = "search " + criteria['q']
+        else if (criteria.q != null) {
+            title = "search " + criteria.q
         }
 
-        else if (criteria['root_only']) {
+        else if (criteria.root_only) {
             title = "root only"
         }
 
@@ -323,12 +324,12 @@ $.widget('spud.category_detail_screen', $.spud.object_detail_screen, {
         var mythis = this
 
         window._category_changed.add_listener(this, function(obj) {
-            if (obj.id == this.options.obj_id) {
+            if (obj.id === this.options.obj_id) {
                 mythis._set(obj)
             }
         })
         window._category_deleted.add_listener(this, function(obj_id) {
-            if (obj_id == this.options.obj_id) {
+            if (obj_id === this.options.obj_id) {
                 mythis.close()
             }
         })
