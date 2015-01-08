@@ -26,75 +26,80 @@ function output_field(title) {
     this.title = title
 }
 
-output_field.prototype.to_html = function(id) {
-    var html = this.create(id)
+output_field.prototype = {
+    to_html: function(id) {
+        var html = this.create(id)
 
-    this.dt = $("<div class='term'/>")
-        .text(this.title)
-    this.dd = $("<div class='definition'/>")
-        .append(html)
+        this.dt = $("<div class='term'/>")
+            .text(this.title)
+        this.dd = $("<div class='definition'/>")
+            .append(html)
 
-    this.item = $("<div class='item'/>")
-        .append(this.dt)
-        .append(this.dd)
+        this.item = $("<div class='item'/>")
+            .append(this.dt)
+            .append(this.dd)
 
-    this.visible = true
+        this.visible = true
 
-    return this.item
+        return this.item
+    },
+
+    create: function(id) {
+        void id
+        this.output = $('<span />')
+        return
+    },
+
+    destroy: function() {
+        this.item.remove()
+    },
+
+    set_edit_value: function(html) {
+        html.addClass("edit")
+        var edit = this.dd.find(".edit")
+        if (edit.length > 0) {
+            edit.replaceWith(html)
+        } else {
+            this.dd.append(" ")
+            this.dd.append(html)
+        }
+    },
+
+    toggle: function(show) {
+        this.item.toggleClass("hidden", !show)
+        this.visible = show
+    },
+
+    hide: function() {
+        this.item.addClass("hidden")
+        this.visible = false
+    },
+
+    show: function() {
+        this.item.removeClass("hidden")
+        this.visible = true
+    },
 }
 
-output_field.prototype.create = function(id) {
-    void id
-    this.output = $('<span />')
-    return
-}
-
-output_field.prototype.destroy = function() {
-    this.item.remove()
-}
-
-output_field.prototype.set_edit_value = function(html) {
-    html.addClass("edit")
-    var edit = this.dd.find(".edit")
-    if (edit.length > 0) {
-        edit.replaceWith(html)
-    } else {
-        this.dd.append(" ")
-        this.dd.append(html)
-    }
-}
-
-output_field.prototype.toggle = function(show) {
-    this.item.toggleClass("hidden", !show)
-    this.visible = show
-}
-
-output_field.prototype.hide = function() {
-    this.item.addClass("hidden")
-    this.visible = false
-}
-
-output_field.prototype.show = function() {
-    this.item.removeClass("hidden")
-    this.visible = true
-}
 
 // define text_output_field
 function text_output_field(title) {
     output_field.call(this, title)
 }
 
-text_output_field.prototype = new output_field()
-text_output_field.constructor = text_output_field
-
-text_output_field.prototype.set = function(value) {
-    if (value != null) {
-        this.output.text(value)
-    } else {
-        this.output.text("None")
-    }
-    this.toggle(Boolean(value))
+text_output_field.prototype = {
+    set: function(value) {
+        if (value != null) {
+            this.output.text(value)
+        } else {
+            this.output.text("None")
+        }
+        this.toggle(Boolean(value))
+    },
 }
+
+extend(output_field, text_output_field)
+
 
 // define select_input_field
 function select_output_field(title, options) {
@@ -108,13 +113,14 @@ function select_output_field(title, options) {
     output_field.call(this, title)
 }
 
-select_output_field.prototype = new output_field()
-select_output_field.constructor = select_output_field
-
-select_output_field.prototype.set = function(value) {
-    value = this.options[value]
-    this.output.text(value)
+select_output_field.prototype = {
+    set: function(value) {
+        value = this.options[value]
+        this.output.text(value)
+    },
 }
+
+extend(output_field, select_output_field)
 
 
 // define boolean_outbooleanut_field
@@ -122,13 +128,14 @@ function boolean_output_field(title) {
     output_field.call(this, title)
 }
 
-boolean_output_field.prototype = new output_field()
-boolean_output_field.constructor = boolean_output_field
-
-boolean_output_field.prototype.set = function(value) {
-    this.output.text(value ? "True" : " False")
-    this.toggle(value != null)
+boolean_output_field.prototype = {
+    set: function(value) {
+        this.output.text(value ? "True" : " False")
+        this.toggle(value != null)
+    },
 }
+
+extend(output_field, boolean_output_field)
 
 
 // define integer_outintegerut_field
@@ -136,13 +143,14 @@ function integer_output_field(title) {
     output_field.call(this, title)
 }
 
-integer_output_field.prototype = new output_field()
-integer_output_field.constructor = integer_output_field
-
-integer_output_field.prototype.set = function(value) {
-    this.output.text(value)
-    this.toggle(value != null)
+integer_output_field.prototype = {
+    set: function(value) {
+        this.output.text(value)
+        this.toggle(value != null)
+    },
 }
+
+extend(output_field, integer_output_field)
 
 
 // define p_output_field
@@ -150,13 +158,14 @@ function p_output_field(title) {
     output_field.call(this, title)
 }
 
-p_output_field.prototype = new output_field()
-p_output_field.constructor = p_output_field
-
-p_output_field.prototype.set = function(value) {
-    this.output.p(value)
-    this.toggle(Boolean(value))
+p_output_field.prototype = {
+    set: function(value) {
+        this.output.p(value)
+        this.toggle(Boolean(value))
+    },
 }
+
+extend(output_field, p_output_field)
 
 
 // define datetime_output_field
@@ -164,79 +173,80 @@ function datetime_output_field(title) {
     output_field.call(this, title)
 }
 
-datetime_output_field.prototype = new output_field()
-datetime_output_field.constructor = datetime_output_field
+datetime_output_field.prototype = {
+    create: function(id) {
+        void id
 
-datetime_output_field.prototype.create = function(id) {
-    void id
+        this.datetime = null
 
-    this.datetime = null
+        var mythis = this
 
-    var mythis = this
+        var div = $('<div/>')
 
-    var div = $('<div/>')
+        this.output = $('<div />').appendTo(div)
 
-    this.output = $('<div />').appendTo(div)
+        this.timezone = "local"
 
-    this.timezone = "local"
+        $('<select />')
+            .append(
+                $('<option />')
+                    .attr('value', "UTC")
+                    .text("utc")
+            )
+            .append(
+                $('<option />')
+                    .attr('value', "source")
+                    .text("source")
+            )
+            .append(
+                $('<option />')
+                    .attr('value', "local")
+                    .text("local")
+            )
+            .val(this.timezone)
+            .on("change", function(ev) {
+                void ev
+                mythis.timezone = $(this).val()
+                mythis.set(mythis.value)
+            })
+            .appendTo(div)
 
-    $('<select />')
-        .append(
-            $('<option />')
-                .attr('value', "UTC")
-                .text("utc")
-        )
-        .append(
-            $('<option />')
-                .attr('value', "source")
-                .text("source")
-        )
-        .append(
-            $('<option />')
-                .attr('value', "local")
-                .text("local")
-        )
-        .val(this.timezone)
-        .on("change", function(ev) {
-            void ev
-            mythis.timezone = $(this).val()
-            mythis.set(mythis.value)
-        })
-        .appendTo(div)
+        return div
+    },
 
-    return div
+    set: function(value) {
+        this.value = value
+
+        this.output.empty()
+
+        if (value != null) {
+            var datetime = new moment.utc(value[0])
+            var utc_offset = value[1]
+            if (this.timezone === "local") {
+                datetime.local()
+            } else if (this.timezone === "source") {
+                datetime.zone(-utc_offset)
+            } else {
+                datetime = datetime.tz(this.timezone)
+            }
+
+            if (datetime != null) {
+                datetime = datetime.format("dddd, MMMM Do YYYY, h:mm:ss a")
+            } else {
+                datetime = "N/A"
+            }
+
+            this.output
+                .append( $("<p/>").text(datetime + " " + this.timezone) )
+
+            this.show()
+        } else {
+            this.hide()
+        }
+    },
 }
 
-datetime_output_field.prototype.set = function(value) {
-    this.value = value
-
-    this.output.empty()
-
-    if (value != null) {
-        var datetime = new moment.utc(value[0])
-        var utc_offset = value[1]
-        if (this.timezone === "local") {
-            datetime.local()
-        } else if (this.timezone === "source") {
-            datetime.zone(-utc_offset)
-        } else {
-            datetime = datetime.tz(this.timezone)
-        }
-
-        if (datetime != null) {
-            datetime = datetime.format("dddd, MMMM Do YYYY, h:mm:ss a")
-        } else {
-            datetime = "N/A"
-        }
-
-        this.output
-            .append( $("<p/>").text(datetime + " " + this.timezone) )
-
-        this.show()
-    } else {
-        this.hide()
-    }
-}
+extend(output_field, datetime_output_field)
 
 
 // define link_output_field
@@ -245,19 +255,20 @@ function link_output_field(title, type) {
     output_field.call(this, title)
 }
 
-link_output_field.prototype = new output_field()
-link_output_field.constructor = link_output_field
+link_output_field.prototype = {
+    set: function(value) {
+        this.toggle(value != null)
+        if (value == null) {
+            this.output.text("")
+            return
+        }
 
-link_output_field.prototype.set = function(value) {
-    this.toggle(value != null)
-    if (value == null) {
-        this.output.text("")
-        return
-    }
-
-    var a = object_a(this.type, value)
-    this.output.html(a)
+        var a = object_a(this.type, value)
+        this.output.html(a)
+    },
 }
+
+extend(output_field, link_output_field)
 
 // FIXME: check if this is required
 // define html_output_field
@@ -303,44 +314,46 @@ link_output_field.prototype.set = function(value) {
 //     this.toggle(value.length > 0)
 // }
 
+
 // define link_list_output_field
 function link_list_output_field(title, type) {
     this.type = type
     output_field.call(this, title)
 }
 
+link_list_output_field.prototype = {
+    create: function(id) {
+        void id
+        this.output = $('<span />')
+        return this.output
+    },
 
-link_list_output_field.prototype = new output_field()
-link_list_output_field.constructor = link_list_output_field
+    set: function(value) {
+        this.output.empty()
 
-link_list_output_field.prototype.create = function(id) {
-    void id
-    this.output = $('<span />')
-    return this.output
-}
-
-link_list_output_field.prototype.set = function(value) {
-    this.output.empty()
-
-    if (value == null || value.length === 0) {
-        this.hide()
-        return
-    }
-
-    var mythis = this
-    var sep = ""
-    $.each(value, function(i, item){
-        mythis.output.append(sep)
-        if (item != null) {
-            mythis.output.append(object_a(mythis.type, item))
-        } else {
-            mythis.output.append("Unknown")
+        if (value == null || value.length === 0) {
+            this.hide()
+            return
         }
-        sep = ", "
-    })
-    mythis.output.append(".")
-    this.toggle(value.length > 0)
+
+        var mythis = this
+        var sep = ""
+        $.each(value, function(i, item){
+            mythis.output.append(sep)
+            if (item != null) {
+                mythis.output.append(object_a(mythis.type, item))
+            } else {
+                mythis.output.append("Unknown")
+            }
+            sep = ", "
+        })
+        mythis.output.append(".")
+        this.toggle(value.length > 0)
+    },
 }
+
+extend(output_field, link_list_output_field)
+
 
 // define photo_output_field
 function photo_output_field(title, size, do_link) {
@@ -349,24 +362,28 @@ function photo_output_field(title, size, do_link) {
     output_field.call(this, title)
 }
 
-photo_output_field.prototype = new output_field()
-photo_output_field.constructor = photo_output_field
+photo_output_field.prototype = {
+    create: function(id) {
+        void id
+        this.output = $('<div />').image({ size: this.size, include_link: this.do_link })
+        return this.output
+    },
 
-photo_output_field.prototype.create = function(id) {
-    void id
-    this.output = $('<div />').image({ size: this.size, include_link: this.do_link })
-    return this.output
+    set: function(value) {
+        this.output.image('set', value)
+        this.toggle(value != null)
+    },
+
+    destroy: function() {
+        this.output.image('destroy')
+        output_field.prototype.destroy.call(this)
+    },
 }
 
-photo_output_field.prototype.set = function(value) {
-    this.output.image('set', value)
-    this.toggle(value != null)
-}
+extend(output_field, photo_output_field)
 
-photo_output_field.prototype.destroy = function() {
-    this.output.image('destroy')
-    output_field.prototype.destroy.call(this)
-}
+
+// define infobox widget
 
 $.widget('spud.infobox', $.spud.widget, {
     _create: function(){

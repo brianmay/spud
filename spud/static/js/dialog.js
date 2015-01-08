@@ -27,296 +27,304 @@ function input_field(title, required) {
     this.required = Boolean(required)
 }
 
-input_field.prototype.to_html = function(id) {
-    var html = this.create(id)
+input_field.prototype = {
+    to_html: function(id) {
+        var html = this.create(id)
 
-    var th = $("<th/>")
-    $("<label/>")
-        .attr("for", "id_" + id)
-        .text(this.title + ":")
-        .appendTo(th)
-        .toggleClass("required", this.required)
+        var th = $("<th/>")
+        $("<label/>")
+            .attr("for", "id_" + id)
+            .text(this.title + ":")
+            .appendTo(th)
+            .toggleClass("required", this.required)
 
-    this.errors = $("<div></div>")
+        this.errors = $("<div></div>")
 
-    var td = $("<td/>")
-        .append(html)
-        .append(this.errors)
+        var td = $("<td/>")
+            .append(html)
+            .append(this.errors)
 
 
-    this.tr = $("<tr/>")
-        .append(th)
-        .append(td)
+        this.tr = $("<tr/>")
+            .append(th)
+            .append(td)
 
-    return this.tr
+        return this.tr
+    },
+
+    get: function() {
+        var value = this.input.val()
+        if (value) {
+            value = value.trim()
+        } else {
+            value = null
+        }
+        return value
+    },
+
+    validate: function() {
+        var value = this.input.val()
+        if (this.required && !value) {
+            return "This value is required"
+        }
+        return null
+    },
+
+    set_error: function(error) {
+        this.tr.toggleClass("errors", Boolean(error))
+        this.errors.toggleClass("errornote", Boolean(error))
+        if (this.input) {
+            this.input.toggleClass("errors", Boolean(error))
+            this.input.find("input").toggleClass("errors", Boolean(error))
+        }
+        if (error) {
+            this.errors.text(error)
+        } else {
+            this.errors.text("")
+        }
+    },
+
+    clear_error: function() {
+        this.set_error(null)
+    },
+
+    destroy: function() {
+        this.tr.remove()
+    },
+
+    enable: function() {
+        this.input.attr('disabled', null)
+    },
+
+    disable: function() {
+        this.input.attr('disabled', true)
+    },
 }
 
-input_field.prototype.get = function() {
-    var value = this.input.val()
-    if (value) {
-        value = value.trim()
-    } else {
-        value = null
-    }
-    return value
-}
-
-input_field.prototype.validate = function() {
-    var value = this.input.val()
-    if (this.required && !value) {
-        return "This value is required"
-    }
-    return null
-}
-
-input_field.prototype.set_error = function(error) {
-    this.tr.toggleClass("errors", Boolean(error))
-    this.errors.toggleClass("errornote", Boolean(error))
-    if (this.input) {
-        this.input.toggleClass("errors", Boolean(error))
-        this.input.find("input").toggleClass("errors", Boolean(error))
-    }
-    if (error) {
-        this.errors.text(error)
-    } else {
-        this.errors.text("")
-    }
-}
-
-input_field.prototype.clear_error = function() {
-    this.set_error(null)
-}
-
-input_field.prototype.destroy = function() {
-    this.tr.remove()
-}
-
-input_field.prototype.enable = function() {
-    this.input.attr('disabled', null)
-}
-
-input_field.prototype.disable = function() {
-    this.input.attr('disabled', true)
-}
 
 // define text_input_field
 function text_input_field(title, required) {
     input_field.call(this, title, required)
 }
 
-text_input_field.prototype = new input_field()
-text_input_field.constructor = text_input_field
-text_input_field.prototype.create = function(id) {
-    this.input = $('<input />')
-        .attr('type', "text")
-        .attr('name', id)
-        .attr('id', "id_" + id)
-    return this.input
+text_input_field.prototype = {
+    create: function(id) {
+        this.input = $('<input />')
+            .attr('type', "text")
+            .attr('name', id)
+            .attr('id', "id_" + id)
+        return this.input
+    },
+
+    set: function(value) {
+        this.input.val(value)
+    },
 }
 
-text_input_field.prototype.set = function(value) {
-    this.input.val(value)
-}
+extend(input_field, text_input_field)
+
 
 // define datetime_input_field
 function datetime_input_field(title, required) {
     input_field.call(this, title, required)
 }
 
-datetime_input_field.prototype = new input_field()
-datetime_input_field.constructor = datetime_input_field
-datetime_input_field.prototype.create = function(id) {
-    this.date = $('<input />')
-        .attr('id', "id_" + id + "_date")
-        .attr('placeholder', 'YYYY-MM-DD')
-        .datepicker({
-            changeMonth: true,
-            changeYear: true,
-            dateFormat: "yy-mm-dd",
-        })
+datetime_input_field.prototype = {
+    create: function(id) {
+        this.date = $('<input />')
+            .attr('id', "id_" + id + "_date")
+            .attr('placeholder', 'YYYY-MM-DD')
+            .datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: "yy-mm-dd",
+            })
 
-    this.time = $('<input />')
-        .attr('type', "text")
-        .attr('placeholder', 'HH:MM:SS')
-        .attr('id', "id_" + id + "_time")
+        this.time = $('<input />')
+            .attr('type', "text")
+            .attr('placeholder', 'HH:MM:SS')
+            .attr('id', "id_" + id + "_time")
 
-    this.timezone = $('<input />')
-        .attr('type', "text")
-        .attr('placeholder', 'timezone')
-        .attr('id', "id_" + id + "_timezonetime")
+        this.timezone = $('<input />')
+            .attr('type', "text")
+            .attr('placeholder', 'timezone')
+            .attr('id', "id_" + id + "_timezonetime")
 
-    return $("<span></span>")
-        .append(this.date)
-        .append(this.time)
-        .append(this.timezone)
-}
+        return $("<span></span>")
+            .append(this.date)
+            .append(this.time)
+            .append(this.timezone)
+    },
 
-datetime_input_field.prototype.set = function(value) {
-    if (value != null) {
-        var datetime = new moment.utc(value[0])
-        var utc_offset = value[1]
-        datetime = datetime.zone(-utc_offset)
-        this.date.datepicker("setDate", datetime.format("YYYY-MM-dd"))
-        this.date.val(datetime.format("YYYY-MM-DD"))
-        this.time.val(datetime.format("HH:mm:ss"))
+    set: function(value) {
+        if (value != null) {
+            var datetime = new moment.utc(value[0])
+            var utc_offset = value[1]
+            datetime = datetime.zone(-utc_offset)
+            this.date.datepicker("setDate", datetime.format("YYYY-MM-dd"))
+            this.date.val(datetime.format("YYYY-MM-DD"))
+            this.time.val(datetime.format("HH:mm:ss"))
 
-        var hours = Math.floor(utc_offset / 60);
-        var minutes = utc_offset - (hours * 60);
+            var hours = Math.floor(utc_offset / 60);
+            var minutes = utc_offset - (hours * 60);
 
-        if (hours < 10) {hours = "0" + hours;}
-        if (minutes < 10) {minutes = "0" + minutes;}
+            if (hours < 10) {hours = "0" + hours;}
+            if (minutes < 10) {minutes = "0" + minutes;}
 
-        this.timezone.val(hours + ":" + minutes)
-    } else {
-        this.date.val("")
-        this.time.val("")
-        this.timezone.val("")
-    }
-}
+            this.timezone.val(hours + ":" + minutes)
+        } else {
+            this.date.val("")
+            this.time.val("")
+            this.timezone.val("")
+        }
+    },
 
-datetime_input_field.prototype.validate = function() {
-    var date = this.date.val().trim()
-    var time = this.time.val().trim()
-    var timezone = this.timezone.val().trim()
-    var a
+    validate: function() {
+        var date = this.date.val().trim()
+        var time = this.time.val().trim()
+        var timezone = this.timezone.val().trim()
+        var a
 
-    if (date !== "") {
-        if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
-            return "date format not yyyy-mm-dd"
+        if (date !== "") {
+            if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
+                return "date format not yyyy-mm-dd"
+            }
+
+            a = date.split("-")
+            if (Number(a[1]) < 1 || Number(a[1]) > 12) {
+                return "Month must be between 1 and 12"
+            }
+            if (Number(a[2]) < 1 || Number(a[2]) > 31) {
+                return "date must be between 1 and 31"
+            }
+            if (a[3] != null) {
+                return "Too many components in date"
+            }
         }
 
-        a = date.split("-")
-        if (Number(a[1]) < 1 || Number(a[1]) > 12) {
-            return "Month must be between 1 and 12"
-        }
-        if (Number(a[2]) < 1 || Number(a[2]) > 31) {
-            return "date must be between 1 and 31"
-        }
-        if (a[3] != null) {
-            return "Too many components in date"
-        }
-    }
+        if (time !== "") {
+            if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
+                return "date format not hh:mm[:ss]"
+            }
 
-    if (time !== "") {
-        if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
-            return "date format not hh:mm[:ss]"
-        }
+            if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
+                return "time format not hh:mm[:ss]"
+            }
 
-        if (!/^\d\d:\d\d+(:\d\d+)?$/.test(time)) {
-            return "time format not hh:mm[:ss]"
-        }
+            if (date === "") {
+                return "date must be given if time is given"
+            }
 
-        if (date === "") {
-            return "date must be given if time is given"
-        }
-
-        a = time.split(":")
-        if (Number(a[0]) < 0 || Number(a[0]) > 23) {
-            return "Hour must be between 0 and 23"
-        }
-        if (Number(a[1]) < 0 || Number(a[1]) > 59) {
-            return "Minutes must be between 0 and 59"
-        }
-        if (Number(a[2]) < 0 || Number(a[2]) > 59) {
-            return "Seconds must be between 0 and 59"
-        }
-        if (a[3] != null) {
-            return "Too many components in time"
-        }
-    }
-
-    if (timezone !== "") {
-        a = timezone.split(":")
-        if (a.length > 1) {
-            if (Number(a[0]) < -12 || Number(a[0]) > 12) {
-                return "Hour must be between -12 and 12"
+            a = time.split(":")
+            if (Number(a[0]) < 0 || Number(a[0]) > 23) {
+                return "Hour must be between 0 and 23"
             }
             if (Number(a[1]) < 0 || Number(a[1]) > 59) {
                 return "Minutes must be between 0 and 59"
             }
-            if (a[2] != null) {
-                return "Too many components in timezone"
+            if (Number(a[2]) < 0 || Number(a[2]) > 59) {
+                return "Seconds must be between 0 and 59"
             }
-            if (date === "") {
-                return "Specifying timezone without date wrong"
-            }
-        } else {
-            if (moment.tz.zone(timezone) == null) {
-                return "Unknown timezone"
+            if (a[3] != null) {
+                return "Too many components in time"
             }
         }
-    }
 
-    return null
-}
+        if (timezone !== "") {
+            a = timezone.split(":")
+            if (a.length > 1) {
+                if (Number(a[0]) < -12 || Number(a[0]) > 12) {
+                    return "Hour must be between -12 and 12"
+                }
+                if (Number(a[1]) < 0 || Number(a[1]) > 59) {
+                    return "Minutes must be between 0 and 59"
+                }
+                if (a[2] != null) {
+                    return "Too many components in timezone"
+                }
+                if (date === "") {
+                    return "Specifying timezone without date wrong"
+                }
+            } else {
+                if (moment.tz.zone(timezone) == null) {
+                    return "Unknown timezone"
+                }
+            }
+        }
 
-datetime_input_field.prototype.get = function() {
-    var date = this.date.val().trim()
-    var time = this.time.val().trim()
-    var timezone = this.timezone.val().trim()
-
-    if (date === "") {
         return null
-    }
+    },
 
-    var result = date
-    if (time !== "") {
-        result = result + " " + time
-    }
+    get: function() {
+        var date = this.date.val().trim()
+        var time = this.time.val().trim()
+        var timezone = this.timezone.val().trim()
+
+        if (date === "") {
+            return null
+        }
+
+        var result = date
+        if (time !== "") {
+            result = result + " " + time
+        }
 
 
-    var datetime
-    var utc_offset
-    if (timezone !== "") {
-        var a = timezone.split(":")
-        if (a.length > 1) {
-            utc_offset = Number(a[0]) * 60 + Number(a[1])
-            datetime = moment.tz(result, "YYYY-MM-DD HH:mm:ss", "UTC")
-            datetime.subtract(utc_offset, 'minutes')
+        var datetime
+        var utc_offset
+        if (timezone !== "") {
+            var a = timezone.split(":")
+            if (a.length > 1) {
+                utc_offset = Number(a[0]) * 60 + Number(a[1])
+                datetime = moment.tz(result, "YYYY-MM-DD HH:mm:ss", "UTC")
+                datetime.subtract(utc_offset, 'minutes')
+            } else {
+                datetime = moment.tz(result, "YYYY-MM-DD HH:mm:ss", timezone)
+                utc_offset = -datetime.zone()
+                datetime.utc()
+            }
         } else {
-            datetime = moment.tz(result, "YYYY-MM-DD HH:mm:ss", timezone)
+            datetime = moment(result, "YYYY-MM-DD HH:mm:ss")
             utc_offset = -datetime.zone()
             datetime.utc()
         }
-    } else {
-        datetime = moment(result, "YYYY-MM-DD HH:mm:ss")
-        utc_offset = -datetime.zone()
-        datetime.utc()
-    }
 
-    console.log(datetime.toISOString(), utc_offset)
+        console.log(datetime.toISOString(), utc_offset)
 
-    return [ datetime.toISOString(), utc_offset ]
+        return [ datetime.toISOString(), utc_offset ]
+    },
+
+    enable: function() {
+        this.date.attr('disabled', null)
+        this.time.attr('disabled', null)
+        this.timezone.attr('disabled', null)
+    },
+
+    disable: function() {
+        this.date.attr('disabled', true)
+        this.time.attr('disabled', true)
+        this.timezone.attr('disabled', true)
+    },
 }
 
-datetime_input_field.prototype.enable = function() {
-    this.date.attr('disabled', null)
-    this.time.attr('disabled', null)
-    this.timezone.attr('disabled', null)
-}
-
-datetime_input_field.prototype.disable = function() {
-    this.date.attr('disabled', true)
-    this.time.attr('disabled', true)
-    this.timezone.attr('disabled', true)
-}
-
-
+extend(input_field, datetime_input_field)
 
 // define password_input_field
 function password_input_field(title, required) {
     text_input_field.call(this, title, required)
 }
 
-password_input_field.prototype = new text_input_field()
-password_input_field.constructor = password_input_field
-password_input_field.prototype.create = function(id) {
-    this.input = $('<input />')
-        .attr('type', "password")
-        .attr('name', id)
-        .attr('id', "id_" + id)
-    return this.input
+password_input_field.prototype = {
+    create: function(id) {
+        this.input = $('<input />')
+            .attr('type', "password")
+            .attr('name', id)
+            .attr('id', "id_" + id)
+        return this.input
+    },
 }
+
+extend(text_input_field, password_input_field)
 
 
 // define date_input_field
@@ -324,37 +332,39 @@ function date_input_field(title, required) {
     text_input_field.call(this, title, required)
 }
 
-date_input_field.prototype = new text_input_field()
-date_input_field.constructor = date_input_field
-date_input_field.prototype.create = function(id) {
-    this.input = $('<input />')
-        .attr('id', "id_" + id)
-        .datepicker({
-            changeMonth: true,
-            changeYear: true,
-            dateFormat: "yy-mm-dd",
-        })
-    return this.input
+date_input_field.prototype = {
+    create: function(id) {
+        this.input = $('<input />')
+            .attr('id', "id_" + id)
+            .datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: "yy-mm-dd",
+            })
+        return this.input
+    },
+
+    validate: function() {
+        var date = this.get()
+
+        if (date != null) {
+            if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
+                return "date format not yyyy-mm-dd"
+            }
+
+            var a = date.split("-")
+            if (Number(a[1]) < 1 || Number(a[1]) > 12) {
+                return "Month must be between 1 and 12"
+            }
+            if (Number(a[2]) < 1 || Number(a[2]) > 31) {
+                return "date must be between 1 and 31"
+            }
+        }
+        return null
+    },
 }
 
-date_input_field.prototype.validate = function() {
-    var date = this.get()
-
-    if (date != null) {
-        if (!/^\d\d\d\d-\d\d-\d\d$/.test(date)) {
-            return "date format not yyyy-mm-dd"
-        }
-
-        var a = date.split("-")
-        if (Number(a[1]) < 1 || Number(a[1]) > 12) {
-            return "Month must be between 1 and 12"
-        }
-        if (Number(a[2]) < 1 || Number(a[2]) > 31) {
-            return "date must be between 1 and 31"
-        }
-    }
-    return null
-}
+extend(text_input_field, date_input_field)
 
 
 // define p_input_field
@@ -362,16 +372,18 @@ function p_input_field(title, required) {
     text_input_field.call(this, title, required)
 }
 
-p_input_field.prototype = new text_input_field()
-p_input_field.constructor = p_input_field
-p_input_field.prototype.create = function(id) {
-    this.input = $('<textarea />')
-        .attr('rows', 10)
-        .attr('cols', 40)
-        .attr('name', id)
-        .attr('id', "id_" + id)
-    return this.input
+p_input_field.prototype = {
+    create: function(id) {
+        this.input = $('<textarea />')
+            .attr('rows', 10)
+            .attr('cols', 40)
+            .attr('name', id)
+            .attr('id', "id_" + id)
+        return this.input
+    },
 }
+
+extend(text_input_field, p_input_field)
 
 
 // define integer_input_field
@@ -379,17 +391,19 @@ function integer_input_field(title, required) {
     text_input_field.call(this, title, required)
 }
 
-integer_input_field.prototype = new text_input_field()
-integer_input_field.constructor = integer_input_field
-
-integer_input_field.prototype.validate = function() {
-    var value = this.get()
-    var intRegex = /^\d+$/;
-    if (value && !intRegex.test(value)) {
-        return "Value must be integer"
-    }
-    return text_input_field.prototype.validate.call(this, value)
+integer_input_field.prototype = {
+    validate: function() {
+        var value = this.get()
+        var intRegex = /^\d+$/;
+        if (value && !intRegex.test(value)) {
+            return "Value must be integer"
+        }
+        return text_input_field.prototype.validate.call(this, value)
+    },
 }
+
+extend(text_input_field, integer_input_field)
+
 
 // define select_input_field
 function select_input_field(title, options, required) {
@@ -397,52 +411,54 @@ function select_input_field(title, options, required) {
     input_field.call(this, title, required)
 }
 
-select_input_field.prototype = new input_field()
-select_input_field.constructor = select_input_field
-select_input_field.prototype.create = function(id) {
-    this.input = $('<select />')
-        .attr('name', id)
-        .attr('id', "id_" + id)
+select_input_field.prototype = {
+    create: function(id) {
+        this.input = $('<select />')
+            .attr('name', id)
+            .attr('id', "id_" + id)
 
-    this.set_options(this.options_list)
-    return this.input
+        this.set_options(this.options_list)
+        return this.input
+    },
+
+    set_options: function(options) {
+        this.input.empty()
+        this.options = {}
+        var mythis = this
+        if (!this.required) {
+            mythis.options[""] = $('<option />')
+                .attr('value', "")
+                .text("-----")
+                .appendTo(mythis.input)
+        }
+        $.each(options, function(i, v){
+            var id = v[0]
+            var value = v[1]
+            mythis.options[id] = $('<option />')
+                .attr('value', id)
+                .text(value)
+                .appendTo(mythis.input)
+        })
+        this.options_list = options
+    },
+
+    set: function(value) {
+        this.input.val(value)
+    },
+
+    validate: function() {
+        var value = this.get()
+        if (value == null) {
+            value = ""
+        }
+        if (this.options[value] == null) {
+            return value + " is not valid option"
+        }
+        return null
+    },
 }
 
-select_input_field.prototype.set_options = function(options) {
-    this.input.empty()
-    this.options = {}
-    var mythis = this
-    if (!this.required) {
-        mythis.options[""] = $('<option />')
-            .attr('value', "")
-            .text("-----")
-            .appendTo(mythis.input)
-    }
-    $.each(options, function(i, v){
-        var id = v[0]
-        var value = v[1]
-        mythis.options[id] = $('<option />')
-            .attr('value', id)
-            .text(value)
-            .appendTo(mythis.input)
-    })
-    this.options_list = options
-}
-
-select_input_field.prototype.set = function(value) {
-    this.input.val(value)
-}
-
-select_input_field.prototype.validate = function() {
-    var value = this.get()
-    if (value == null) {
-        value = ""
-    }
-    if (this.options[value] == null) {
-        return value + " is not valid option"
-    }
-    return null
-}
+extend(input_field, select_input_field)
 
 
 // define boolean_input_field
@@ -451,28 +467,31 @@ function boolean_input_field(title, options, required) {
     input_field.call(this, title, required)
 }
 
-boolean_input_field.prototype = new input_field()
-boolean_input_field.constructor = boolean_input_field
-boolean_input_field.prototype.create = function(id) {
-    this.input = $('<input />')
-        .attr('type', 'checkbox')
-        .attr('name', id)
-        .attr('id', "id_" + id)
-    return this.input
+boolean_input_field.prototype = {
+    create: function(id) {
+        this.input = $('<input />')
+            .attr('type', 'checkbox')
+            .attr('name', id)
+            .attr('id', "id_" + id)
+        return this.input
+    },
+
+    set: function(value) {
+        if (value) {
+            this.input.attr('checked', 'checked')
+        } else {
+            this.input.removeAttr('checked')
+        }
+    },
+
+    get: function() {
+        var value = this.input.is(":checked")
+        return value
+    },
 }
 
-boolean_input_field.prototype.set = function(value) {
-    if (value) {
-        this.input.attr('checked', 'checked')
-    } else {
-        this.input.removeAttr('checked')
-    }
-}
+extend(input_field, boolean_input_field)
 
-boolean_input_field.prototype.get = function() {
-    var value = this.input.is(":checked")
-    return value
-}
 
 // define ajax_select_field
 function ajax_select_field(title, type, required) {
@@ -480,36 +499,37 @@ function ajax_select_field(title, type, required) {
     this.type = type
 }
 
-ajax_select_field.prototype = new input_field()
-ajax_select_field.constructor = ajax_select_field
-ajax_select_field.prototype.create = function(id) {
-    this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .ajaxautocomplete({type: this.type})
-    return this.input
+ajax_select_field.prototype = {
+    create: function(id) {
+        this.input = $("<span/>")
+            .attr("name", id)
+            .attr("id", "id_" + id)
+            .ajaxautocomplete({type: this.type})
+        return this.input
+    },
+
+    destroy: function() {
+        this.input.ajaxautocomplete("destroy")
+    },
+
+    set: function(value) {
+        this.input.ajaxautocomplete("set", null, value)
+    },
+
+    get: function() {
+        return this.input.ajaxautocomplete("get")
+    },
+
+    enable: function() {
+        this.input.ajaxautocomplete("enable")
+    },
+
+    disable: function() {
+        this.input.ajaxautocomplete("disable")
+    },
 }
 
-ajax_select_field.prototype.destroy = function() {
-    this.input.ajaxautocomplete("destroy")
-}
-
-ajax_select_field.prototype.set = function(value) {
-    this.input.ajaxautocomplete("set", null, value)
-}
-
-ajax_select_field.prototype.get = function() {
-    return this.input.ajaxautocomplete("get")
-}
-
-ajax_select_field.prototype.enable = function() {
-    this.input.ajaxautocomplete("enable")
-}
-
-ajax_select_field.prototype.disable = function() {
-    this.input.ajaxautocomplete("disable")
-}
-
+extend(input_field, ajax_select_field)
 
 
 // define quick_select_field
@@ -553,35 +573,37 @@ function ajax_select_multiple_field(title, type, required) {
     this.type = type
 }
 
-ajax_select_multiple_field.prototype = new input_field()
-ajax_select_multiple_field.constructor = ajax_select_multiple_field
-ajax_select_multiple_field.prototype.create = function(id) {
-    this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .ajaxautocompletemultiple({type: this.type})
-    return this.input
+ajax_select_multiple_field.prototype = {
+    create: function(id) {
+        this.input = $("<span/>")
+            .attr("name", id)
+            .attr("id", "id_" + id)
+            .ajaxautocompletemultiple({type: this.type})
+        return this.input
+    },
+
+    destroy: function() {
+        this.input.ajaxautocompletemultiple("destroy")
+    },
+
+    set: function(value) {
+        this.input.ajaxautocompletemultiple("set", null, value)
+    },
+
+    get: function() {
+        return this.input.ajaxautocompletemultiple("get")
+    },
+
+    enable: function() {
+        this.input.ajaxautocompletemultiple("enable")
+    },
+
+    disable: function() {
+        this.input.ajaxautocompletemultiple("disable")
+    },
 }
 
-ajax_select_multiple_field.prototype.destroy = function() {
-    this.input.ajaxautocompletemultiple("destroy")
-}
-
-ajax_select_multiple_field.prototype.set = function(value) {
-    this.input.ajaxautocompletemultiple("set", null, value)
-}
-
-ajax_select_multiple_field.prototype.get = function() {
-    return this.input.ajaxautocompletemultiple("get")
-}
-
-ajax_select_multiple_field.prototype.enable = function() {
-    this.input.ajaxautocompletemultiple("enable")
-}
-
-ajax_select_multiple_field.prototype.disable = function() {
-    this.input.ajaxautocompletemultiple("disable")
-}
+extend(input_field, ajax_select_multiple_field)
 
 
 // define ajax_select_sorted_field
@@ -590,35 +612,37 @@ function ajax_select_sorted_field(title, type, required) {
     this.type = type
 }
 
-ajax_select_sorted_field.prototype = new input_field()
-ajax_select_sorted_field.constructor = ajax_select_sorted_field
-ajax_select_sorted_field.prototype.create = function(id) {
-    this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .ajaxautocompletesorted({type: this.type})
-    return this.input
+ajax_select_sorted_field.prototype = {
+    create: function(id) {
+        this.input = $("<span/>")
+            .attr("name", id)
+            .attr("id", "id_" + id)
+            .ajaxautocompletesorted({type: this.type})
+        return this.input
+    },
+
+    destroy: function() {
+        this.input.ajaxautocompletesorted("destroy")
+    },
+
+    set: function(value) {
+        this.input.ajaxautocompletesorted("set", null, value)
+    },
+
+    get: function() {
+        return this.input.ajaxautocompletesorted("get")
+    },
+
+    enable: function() {
+        this.input.ajaxautocompletesorted("enable")
+    },
+
+    disable: function() {
+        this.input.ajaxautocompletesorted("disable")
+    },
 }
 
-ajax_select_sorted_field.prototype.destroy = function() {
-    this.input.ajaxautocompletesorted("destroy")
-}
-
-ajax_select_sorted_field.prototype.set = function(value) {
-    this.input.ajaxautocompletesorted("set", null, value)
-}
-
-ajax_select_sorted_field.prototype.get = function() {
-    return this.input.ajaxautocompletesorted("get")
-}
-
-ajax_select_sorted_field.prototype.enable = function() {
-    this.input.ajaxautocompletesorted("enable")
-}
-
-ajax_select_sorted_field.prototype.disable = function() {
-    this.input.ajaxautocompletesorted("disable")
-}
+extend(input_field, ajax_select_sorted_field)
 
 
 // define photo_select_field
@@ -626,45 +650,45 @@ function photo_select_field(title, required) {
     input_field.call(this, title, required)
 }
 
-photo_select_field.prototype = new input_field()
-photo_select_field.constructor = photo_select_field
-photo_select_field.prototype.create = function(id) {
-    this.input = $("<span/>")
-        .attr("name", id)
-        .attr("id", "id_" + id)
-        .photo_select()
-    return this.input
+photo_select_field.prototype = {
+    create: function(id) {
+        this.input = $("<span/>")
+            .attr("name", id)
+            .attr("id", "id_" + id)
+            .photo_select()
+        return this.input
+    },
+
+    destroy: function() {
+        this.input.photo_select("destroy")
+    },
+
+    set: function(value) {
+        this.input.photo_select("set", null, value)
+    },
+
+    get: function() {
+        return this.input.photo_select("get")
+    },
+
+    validate: function() {
+        var value = this.input.photo_select("get")
+        if (this.required && !value) {
+            return "This value is required"
+        }
+        return null
+    },
+
+    enable: function() {
+        this.input.photo_select("enable")
+    },
+
+    disable: function() {
+        this.input.photo_select("disable")
+    },
 }
 
-photo_select_field.prototype.destroy = function() {
-    this.input.photo_select("destroy")
-}
-
-photo_select_field.prototype.set = function(value) {
-    this.input.photo_select("set", null, value)
-}
-
-photo_select_field.prototype.get = function() {
-    return this.input.photo_select("get")
-}
-
-photo_select_field.prototype.validate = function() {
-    var value = this.input.photo_select("get")
-    if (this.required && !value) {
-        return "This value is required"
-    }
-    return null
-}
-
-photo_select_field.prototype.enable = function() {
-    this.input.photo_select("enable")
-}
-
-photo_select_field.prototype.disable = function() {
-    this.input.photo_select("disable")
-}
-
-
+extend(input_field, photo_select_field)
 
 
 // define dialog
