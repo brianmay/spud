@@ -130,62 +130,64 @@ function signal() {
     this.objects = {}
 }
 
-signal.prototype.add_listener = function(obj, listener) {
-    var key = "null"
-    if (obj != null) {
-        key = obj.get_uuid()
-    }
-    if (this.listeners[key]) {
-        this.remove_listener(key)
-    }
-    this.listeners[key] = listener
-    this.objects[key] = obj
-
-    if (window._listeners[key] == null) {
-        window._listeners[key] = []
-    }
-    window._listeners[key].push(this)
-}
-
-signal.prototype.remove_listener = function(obj) {
-    var key = "null"
-    if (obj != null) {
-        key = obj.get_uuid()
-    }
-    delete this.listeners[key]
-    delete this.objects[key]
-
-    if (window._listeners[key] == null) {
-        var index = window._listeners[key].indexOf(this)
-        if (index != -1) {
-            // Don't do this; is called from within loop in
-            // remove_all_listeners 
-            // window._listeners[key].splice(index, 1)
-            delete window._listeners[key]
+signal.prototype = {
+    add_listener: function(obj, listener) {
+        var key = "null"
+        if (obj != null) {
+            key = obj.get_uuid()
         }
-    }
-
-    if (!this.is_any_listeners()) {
-        if (this.on_no_listeners != null) {
-            this.on_no_listeners()
+        if (this.listeners[key]) {
+            this.remove_listener(key)
         }
-    }
-}
+        this.listeners[key] = listener
+        this.objects[key] = obj
 
-signal.prototype.is_any_listeners = function() {
-    return ! $.isEmptyObject(this.listeners)
-}
-
-signal.prototype.trigger = function() {
-    var mythis = this
-    var fight = arguments
-    $.each(this.listeners, function(uuid, listener) {
-        var obj = null
-        if (uuid != "null") {
-            obj = mythis.objects[uuid]
+        if (window._listeners[key] == null) {
+            window._listeners[key] = []
         }
-        listener.apply(obj, fight)
-    })
+        window._listeners[key].push(this)
+    },
+
+    remove_listener: function(obj) {
+        var key = "null"
+        if (obj != null) {
+            key = obj.get_uuid()
+        }
+        delete this.listeners[key]
+        delete this.objects[key]
+
+        if (window._listeners[key] == null) {
+            var index = window._listeners[key].indexOf(this)
+            if (index != -1) {
+                // Don't do this; is called from within loop in
+                // remove_all_listeners 
+                // window._listeners[key].splice(index, 1)
+                delete window._listeners[key]
+            }
+        }
+
+        if (!this.is_any_listeners()) {
+            if (this.on_no_listeners != null) {
+                this.on_no_listeners()
+            }
+        }
+    },
+
+    is_any_listeners: function() {
+        return ! $.isEmptyObject(this.listeners)
+    },
+
+    trigger: function() {
+        var mythis = this
+        var fight = arguments
+        $.each(this.listeners, function(uuid, listener) {
+            var obj = null
+            if (uuid != "null") {
+                obj = mythis.objects[uuid]
+            }
+            listener.apply(obj, fight)
+        })
+    }
 }
 
 window._reload_all = new signal()
@@ -497,55 +499,57 @@ function object_loader(type, obj_id) {
 }
 
 
-object_loader.prototype.load = function() {
-    if (this._loading) {
-        return
-    }
-    if (this._finished) {
-        return
-    }
+object_loader.prototype = {
+    load: function() {
+        if (this._loading) {
+            return
+        }
+        if (this._finished) {
+            return
+        }
 
-    var mythis = this
-    var criteria = this._criteria
-    var page = this._page
-    var params = jQuery.extend({}, criteria, { 'page': page })
+        var mythis = this
+        var criteria = this._criteria
+        var page = this._page
+        var params = jQuery.extend({}, criteria, { 'page': page })
 
-    console.log("loading object", this._type, this._obj_id)
-    this._loading = true
+        console.log("loading object", this._type, this._obj_id)
+        this._loading = true
 
-    this.xhr = ajax({
-        url: window.__root_prefix + "api/" + this._type + "/" + this._obj_id + "/", 
-        data: params,
-        success: function(data) {
-            console.log("got object", mythis._type, mythis._obj_id)
-            mythis._loading = false
-            mythis._finished = true
+        this.xhr = ajax({
+            url: window.__root_prefix + "api/" + this._type + "/" + this._obj_id + "/", 
+            data: params,
+            success: function(data) {
+                console.log("got object", mythis._type, mythis._obj_id)
+                mythis._loading = false
+                mythis._finished = true
 
-            mythis._got_item(data)
-        },
-        error: function(message) {
-            mythis._loading = false
-            console.log("error loading", mythis._type, mythis._obj_id, message)
-            mythis.on_error.trigger()
-        },
-    });
-}
+                mythis._got_item(data)
+            },
+            error: function(message) {
+                mythis._loading = false
+                console.log("error loading", mythis._type, mythis._obj_id, message)
+                mythis.on_error.trigger()
+            },
+        });
+    },
 
-object_loader.prototype.abort = function() {
-    if (this._loading) {
-        this.xhr.abort()
-    }
-}
+    abort: function() {
+        if (this._loading) {
+            this.xhr.abort()
+        }
+    },
 
-object_loader.prototype._got_item = function(obj) {
-    this.loaded_item.trigger(obj)
-}
+    _got_item: function(obj) {
+        this.loaded_item.trigger(obj)
+    },
 
-object_loader.prototype.check_for_listeners = function() {
-    if (this.loaded_item.is_any_listeners()) {
-        return
-    }
-    this.abort()
+    check_for_listeners: function() {
+        if (this.loaded_item.is_any_listeners()) {
+            return
+        }
+        this.abort()
+    },
 }
 
 function get_object_loader(type, obj_id) {
@@ -560,106 +564,138 @@ function object_list_loader(type, criteria) {
     this._type = type
     this._criteria = criteria
     this._page = 1
+    this._n = 0
     this._loading = false
-    this._last_id = null
-    this._idmap = {}
     this._finished = false
-    this.loaded_list = new signal()
-    this.loaded_list.on_no_listeners = function() { mythis.check_for_listeners() }
     this.loaded_item = new signal()
     this.loaded_item.on_no_listeners = function() { mythis.check_for_listeners() }
+    this.loaded_list = new signal()
+    this.loaded_list.on_no_listeners = function() { mythis.check_for_listeners() }
     this.on_error = new signal()
 }
 
 
-object_list_loader.prototype.load_next_page = function() {
-    if (this._loading) {
-        return
-    }
-    if (this._finished) {
-        return
-    }
+object_list_loader.prototype = {
 
-    var mythis = this
-    var criteria = this._criteria
-    var page = this._page
-    var params = jQuery.extend({}, criteria, { 'page': page })
-
-    console.log("loading list", this._type, criteria, page)
-    this._loading = true
-
-    this.xhr = ajax({
-        url: window.__root_prefix + "api/" + this._type + "/",
-        data: params,
-        success: function(data) {
-            console.log("got list", mythis._type, criteria, page)
-            mythis._loading = false
-            mythis._page = page + 1
-            if (!data.next) {
-                mythis._finished = true
-            }
-
-            mythis._got_list(data.results)
-        },
-        error: function(message) {
-            mythis._loading = false
-            console.log("error loading", mythis._type, criteria, message)
-            mythis.on_error.trigger()
-        },
-    });
-}
-
-object_list_loader.prototype.abort = function() {
-    if (this._loading) {
-        this.xhr.abort()
-    }
-}
-
-object_list_loader.prototype._got_list = function(object_list) {
-    var mythis = this
-    $.each(object_list, function(j, obj) {
-        mythis._got_item(obj)
-    })
-    this.loaded_list.trigger(object_list)
-}
-
-object_list_loader.prototype._got_item = function(obj) {
-    var id = obj.id
-    if (id != null) {
-        this._idmap[id] = Object()
-        if (this._last_id) {
-            this._idmap[this._last_id].next = id
-            this._idmap[id].prev = this._last_id
+    load_next_page: function() {
+        if (this._loading) {
+            return true
         }
-        this._last_id = id
-    }
-    this.loaded_item.trigger(obj)
-}
+        if (this._finished) {
+            return false
+        }
 
-object_list_loader.prototype.get_meta = function(obj_id) {
-    var meta = this._idmap[obj_id]
-    if (!meta) {
-        return null
-    }
-    if (!meta.next) {
-        this.load_next_page()
-    }
-    return meta
-}
+        var mythis = this
+        var criteria = this._criteria
+        var page = this._page
+        var params = jQuery.extend({}, criteria, { 'page': page })
 
-object_list_loader.prototype.check_for_listeners = function() {
-    if (this.loaded_list.is_any_listeners()) {
-        return
-    }
-    if (this.loaded_item.is_any_listeners()) {
-        return
-    }
-    this.abort()
+        console.log("loading list", this._type, criteria, page)
+        this._loading = true
+
+        this.xhr = ajax({
+            url: window.__root_prefix + "api/" + this._type + "/",
+            data: params,
+            success: function(data) {
+                console.log("got list", mythis._type, criteria, page)
+                mythis._loading = false
+                mythis._page = page + 1
+                if (!data.next) {
+                    mythis._finished = true
+                }
+
+                mythis._got_list(data.results, data.count)
+            },
+            error: function(message) {
+                mythis._loading = false
+                console.log("error loading", mythis._type, criteria, message)
+                mythis.on_error.trigger()
+            },
+        });
+
+        return true
+    },
+
+    abort: function() {
+        if (this._loading) {
+            this.xhr.abort()
+        }
+    },
+
+    _got_list: function(object_list, count) {
+        var mythis = this
+        $.each(object_list, function(j, obj) {
+            mythis._got_item(obj, count, mythis._n)
+            mythis._n = mythis._n + 1
+        })
+
+        // we trigger the object_list *after* all objects have been processed.
+        this.loaded_list.trigger(object_list, count)
+    },
+
+    _got_item: function(obj, count, i) {
+        this.loaded_item.trigger(obj, count, i)
+    },
+
+    check_for_listeners: function() {
+        if (this.loaded_list.is_any_listeners()) {
+            return
+        }
+        if (this.loaded_item.is_any_listeners()) {
+            return
+        }
+        this.abort()
+    },
 }
 
 function get_object_list_loader(type, criteria) {
     return new object_list_loader(type, criteria)
 }
+void get_object_list_loader
+
+///////////////////////////////////////
+// tracked_object_list_loader
+///////////////////////////////////////
+function tracked_object_list_loader(type, criteria) {
+    object_list_loader.call(this, type, criteria)
+    this._last_id = null
+    this._idmap = {}
+}
+
+tracked_object_list_loader.prototype = {
+    _got_item: function(obj, count, n) {
+        object_list_loader.prototype._got_item.call(this, obj, count, n)
+
+        var id = obj.id
+        if (id != null) {
+            this._idmap[id] = Object()
+            if (this._last_id) {
+                this._idmap[this._last_id].next = id
+                this._idmap[id].prev = this._last_id
+            }
+            this._last_id = id
+        }
+    },
+
+    get_meta: function(obj_id) {
+        var meta = this._idmap[obj_id]
+        if (!meta) {
+            return null
+        }
+        if (!meta.next) {
+            this.load_next_page()
+        }
+        return meta
+    },
+}
+
+extend(object_list_loader, tracked_object_list_loader)
+
+
+function get_tracked_object_list_loader(type, criteria) {
+    return new tracked_object_list_loader(type, criteria)
+}
+
 
 ///////////////////////////////////////
 // generic widgets
@@ -764,18 +800,15 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         return this.ul.find("[data-id="+obj_id+"]")
     },
 
-    _add_item: function(obj) {
+    _add_item: function(obj, count, n) {
         var li = this._create_li(obj)
             .appendTo(this.ul)
         return this
     },
 
-    _add_list: function(obj_list) {
+    _add_list: function(obj_list, count) {
         var mythis = this
-        this.element.toggleClass("hidden", obj_list.length == 0)
-        $.each(obj_list, function(j, obj) {
-            mythis._add_item(obj)
-        })
+        this.element.toggleClass("hidden", count == 0)
         this._load_if_required()
         return this
     },
@@ -795,14 +828,14 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
     _filter: function(criteria) {
         var mythis = this
         if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
             this.loader.loaded_list.remove_listener(this)
             this.loader = null
         }
         this.options.criteria = criteria
-        this.loader = get_object_list_loader(this._type, criteria)
-        this.loader.loaded_list.add_listener(this, function(obj_list) {
-            mythis._add_list(obj_list)
-        })
+        this.loader = get_tracked_object_list_loader(this._type, criteria)
+        this.loader.loaded_item.add_listener(this, this._add_item)
+        this.loader.loaded_list.add_listener(this, this._add_list)
         this.loader.on_error.add_listener(this, function() {
             mythis.element.addClass("error")
         })
@@ -828,6 +861,7 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         this._super()
         this.element.removeClass("error")
         if (this.loader) {
+            this.loader.loaded_item.remove_listener(this)
             this.loader.loaded_list.remove_listener(this)
             this.loader.on_error.remove_listener(this)
             this.loader = null
@@ -1180,7 +1214,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         var mythis = this
         if (this.options.object_list_loader != null) {
             var object_list_loader = this.options.object_list_loader
-            object_list_loader.loaded_list.add_listener(this, function(object_list) {
+            object_list_loader.loaded_list.add_listener(this, function(object_list, count) {
                 mythis._setup_buttons()
             })
         }
