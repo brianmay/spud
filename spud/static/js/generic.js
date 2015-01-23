@@ -932,9 +932,7 @@ $.widget('spud.object_detail',  $.spud.infobox, {
     },
 
     _setOption: function( key, value ) {
-        if ( key === "obj" ) {
-            this._set(value)
-        } else if ( key === "obj_id" ) {
+        if ( key === "obj_id" ) {
             this._load(value)
         }
         this._super( key, value );
