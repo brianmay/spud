@@ -229,7 +229,7 @@ $.widget('spud.ajax_dialog',  $.spud.form_dialog, {
                     })
                 }
                 alert("Error: " + message)
-                this.enable()
+                mythis.enable()
             },
         });
     },
