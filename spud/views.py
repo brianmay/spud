@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import six
 import datetime
 import json
 
@@ -119,12 +120,18 @@ def _decode_datetime(title, value):
 
 
 def _get_string(params, key, default=None):
-    value = params.getlist(key)
-    if len(value) < 1:
-        return default
-    if len(value) > 1:
-        raise drf_exceptions.ParseError("%s has >1 values" % key)
-    return value[0]
+    if isinstance(params, QueryDict):
+        value = params.getlist(key)
+        if len(value) < 1:
+            return default
+        if len(value) > 1:
+            raise drf_exceptions.ParseError("%s has >1 values" % key)
+        return value[0]
+    else:
+        value = params.get(key, default)
+        if value is not None and not isinstance(value, six.string_types):
+            raise drf_exceptions.ParseError("%s is not None or a string" % key)
+        return value
 
 
 def _get_int(params, key, default=None):
@@ -145,10 +152,25 @@ def _get_object(params, key, model):
     return _decode_object(key, model, _get_int(params, key))
 
 
+def _get_list(params, key):
+    if isinstance(params, QueryDict):
+        if key in params:
+            value = params.getlist(key)
+        else:
+            value = params.getlist(key + "[]")
+    else:
+        value = params.get(key, [])
+        if not isinstance(value, list):
+            raise drf_exceptions.ParseError("%s is not a list" % key)
+
+    return value
+
+
 def _get_object_array(params, key, model):
-    value = params.getlist(key)
+    mylist = _get_list(params, key)
+
     result = []
-    for v in value:
+    for v in mylist:
         v = [_decode_object(key, model, v)]
         result.extend(v)
     return result
@@ -267,7 +289,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
         if album is not None:
             queryset = queryset.filter(pk=album.pk)
 
-        q = params.getlist('q')
+        q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(
                 Q(title__icontains=r) | Q(description__icontains=r))
@@ -330,7 +352,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         if category is not None:
             queryset = queryset.filter(pk=category.pk)
 
-        q = params.getlist('q', [])
+        q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(
                 Q(title__icontains=r) | Q(description__icontains=r))
@@ -383,7 +405,7 @@ class PlaceViewSet(viewsets.ModelViewSet):
         if place is not None:
             queryset = queryset.filter(pk=place.pk)
 
-        q = params.getlist('q', [])
+        q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(
                 Q(title__icontains=r) |
@@ -441,7 +463,7 @@ class PersonViewSet(viewsets.ModelViewSet):
         if person is not None:
             queryset = queryset.filter(pk=person.pk)
 
-        q = params.getlist('q', [])
+        q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(
                 Q(first_name__icontains=r) |
@@ -495,7 +517,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         queryset = models.feedback.objects.all()
         params = self.request.query_params
 
-        q = params.getlist('q', [])
+        q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(
                 Q(comment__icontains=r)
@@ -611,11 +633,11 @@ def _get_photo_search(user, params):
         else:
             photo_list = photo_list.filter(categorys=value)
 
-    values = _get_object_array(params, "photos[]", models.photo)
+    values = _get_list(params, "photos")
     if values is not None:
         q = Q()
         for value in values:
-            q = q | Q(pk=value.pk)
+            q = q | Q(pk=value)
         photo_list = photo_list.filter(q)
 
     del values
@@ -666,7 +688,7 @@ def _get_photo_search(user, params):
     if photo is not None:
         queryset = queryset.filter(pk=photo.pk)
 
-    q = params.getlist('q')
+    q = _get_list(params, 'q')
     for r in q:
         queryset = queryset.filter(
             Q(name__icontains=r) | Q(title__icontains=r)
