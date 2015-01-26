@@ -47,7 +47,7 @@ output_field.prototype = {
     create: function(id) {
         void id
         this.output = $('<span />')
-        return
+        return this.output
     },
 
     destroy: function() {
@@ -322,12 +322,6 @@ function link_list_output_field(title, type) {
 }
 
 link_list_output_field.prototype = {
-    create: function(id) {
-        void id
-        this.output = $('<span />')
-        return this.output
-    },
-
     set: function(value) {
         this.output.empty()
 
