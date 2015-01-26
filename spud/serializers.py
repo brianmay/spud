@@ -576,7 +576,7 @@ class PhotoSerializer(serializers.ModelSerializer):
         try:
             media.get_media(file_obj.name, file_obj)
         except media.UnknownMediaType:
-            raise exceptions.ParseError('File type not supported.')
+            raise exceptions.ValidationError('File type not supported.')
 
         raise exceptions.ValidationError('I dont like cats.')
         return attrs
