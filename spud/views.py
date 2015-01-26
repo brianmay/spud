@@ -27,11 +27,12 @@ from rest_framework.response import Response
 from django.utils.dateparse import parse_datetime
 import django.contrib.auth
 from django.shortcuts import render_to_response
-#from django.shortcuts import get_object_or_404
+# from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.http import Http404
-#from django.http import HttpResponseRedirect, Http404
-#from django.core.urlresolvers import reverse
+from django.http.request import QueryDict
+# from django.http import HttpResponseRedirect, Http404
+# from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.models import User, Group
 from django.db.models import Q, Count
@@ -711,44 +712,44 @@ class PhotoViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-#class PhotoThumbViewSet(viewsets.ModelViewSet):
-#    """
-#    API endpoint that allows groups to be viewed or edited.
-#    """
-#    queryset = models.photo_thumb.objects.all()
-#    serializer_class = serializers.PhotoThumbSerializer
+# class PhotoThumbViewSet(viewsets.ModelViewSet):
+#     """
+#     API endpoint that allows groups to be viewed or edited.
+#     """
+#     queryset = models.photo_thumb.objects.all()
+#     serializer_class = serializers.PhotoThumbSerializer
 #
 #
-#class PhotoVideoViewSet(viewsets.ModelViewSet):
-#    """
-#    API endpoint that allows groups to be viewed or edited.
-#    """
-#    queryset = models.photo_video.objects.all()
-#    serializer_class = serializers.PhotoVideoSerializer
+# class PhotoVideoViewSet(viewsets.ModelViewSet):
+#     """
+#     API endpoint that allows groups to be viewed or edited.
+#     """
+#     queryset = models.photo_video.objects.all()
+#     serializer_class = serializers.PhotoVideoSerializer
 #
 #
-#class PhotoAlbumViewSet(viewsets.ModelViewSet):
-#    """
-#    API endpoint that allows groups to be viewed or edited.
-#    """
-#    queryset = models.photo_album.objects.all()
-#    serializer_class = serializers.PhotoAlbumSerializer
+# class PhotoAlbumViewSet(viewsets.ModelViewSet):
+#     """
+#     API endpoint that allows groups to be viewed or edited.
+#     """
+#     queryset = models.photo_album.objects.all()
+#     serializer_class = serializers.PhotoAlbumSerializer
 #
 #
-#class PhotoCategoryViewSet(viewsets.ModelViewSet):
-#    """
-#    API endpoint that allows groups to be viewed or edited.
-#    """
-#    queryset = models.photo_category.objects.all()
-#    serializer_class = serializers.PhotoCategorySerializer
+# class PhotoCategoryViewSet(viewsets.ModelViewSet):
+#     """
+#     API endpoint that allows groups to be viewed or edited.
+#     """
+#     queryset = models.photo_category.objects.all()
+#     serializer_class = serializers.PhotoCategorySerializer
 #
 #
-#class PhotoPersonViewSet(viewsets.ModelViewSet):
-#    """
-#    API endpoint that allows groups to be viewed or edited.
-#    """
-#    queryset = models.photo_person.objects.all()
-#    serializer_class = serializers.PhotoPersonSerializer
+# class PhotoPersonViewSet(viewsets.ModelViewSet):
+#     """
+#     API endpoint that allows groups to be viewed or edited.
+#     """
+#     queryset = models.photo_person.objects.all()
+#     serializer_class = serializers.PhotoPersonSerializer
 
 
 class PhotoRelationViewSet(viewsets.ModelViewSet):
