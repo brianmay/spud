@@ -272,6 +272,42 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
     disable: function() {
         return this._setOptions({ disabled: true });
     },
+
+    _save: function(http_type, oject_id, values) {
+        var mythis = this
+        var type = this._type
+        this._loading = true
+        var url
+        if (oject_id != null) {
+            url = window.__root_prefix + "api/" + type + "/" + oject_id + "/"
+        } else {
+            url = window.__root_prefix + "api/" + type + "/"
+        }
+        this.xhr = ajax({
+            url: url,
+            data: values,
+            type: http_type,
+            success: function(data) {
+                mythis._loading = false
+                mythis._save_success(data)
+            },
+            error: function(message, data) {
+                mythis._loading = false
+                mythis._save_error(message, data)
+            },
+        });
+    },
+
+    _save_success: function(data) {
+        void data
+        this.close()
+    },
+
+    _save_error: function(message, data) {
+        void data
+        alert("Error: " + message)
+        this.enable()
+    },
 })
 
 $.widget('spud.myselectable', $.ui.selectable, {

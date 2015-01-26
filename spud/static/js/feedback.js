@@ -176,7 +176,7 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.feedback_change_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["rating", new select_input_field("Rating", [
@@ -226,17 +226,18 @@ $.widget('spud.feedback_change_dialog',  $.spud.ajax_dialog, {
         }
     },
 
-    _done: function(data) {
+    _save_success: function(data) {
         if (this.obj_id != null) {
             window._feedback_changed.trigger(data)
         } else {
             window._feedback_created.trigger(data)
         }
+        this._super(data);
     },
 })
 
 
-$.widget('spud.feedback_delete_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.feedback_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete feedback"
         this.options.button = "Delete"
@@ -256,9 +257,9 @@ $.widget('spud.feedback_delete_dialog',  $.spud.ajax_dialog, {
         this._save("DELETE", this.obj_id, {})
     },
 
-    _done: function(data) {
-        void data
+    _save_success: function(data) {
         window._feedback_deleted.trigger(this.obj_id)
+        this._super(data);
     }
 })
 

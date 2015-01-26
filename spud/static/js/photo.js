@@ -105,7 +105,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
@@ -158,17 +158,18 @@ $.widget('spud.photo_change_dialog',  $.spud.ajax_dialog, {
         }
     },
 
-    _done: function(data) {
+    _save_success: function(data) {
         if (this.obj_id != null) {
             window._photo_changed.trigger(data)
         } else {
             window._photo_created.trigger(data)
         }
+        this._super(data);
     },
 })
 
 
-$.widget('spud.photo_bulk_update_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
@@ -378,7 +379,7 @@ $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
     }
 })
 
-$.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.photo_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete photo"
         this.options.button = "Delete"
@@ -398,9 +399,9 @@ $.widget('spud.photo_delete_dialog',  $.spud.ajax_dialog, {
         this._save("DELETE", this.obj_id, {})
     },
 
-    _done: function(data) {
-        void data
+    _save_success: function(data) {
         window._photo_deleted.trigger(this.obj_id)
+        this._super(data);
     }
 })
 

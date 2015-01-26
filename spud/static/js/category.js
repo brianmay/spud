@@ -56,7 +56,7 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.category_change_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.category_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -94,17 +94,18 @@ $.widget('spud.category_change_dialog',  $.spud.ajax_dialog, {
         }
     },
 
-    _done: function(data) {
+    _save_success: function(data) {
         if (this.obj_id != null) {
             window._category_changed.trigger(data)
         } else {
             window._category_created.trigger(data)
         }
+        this._super(data);
     },
 })
 
 
-$.widget('spud.category_delete_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.category_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete category"
         this.options.button = "Delete"
@@ -124,9 +125,9 @@ $.widget('spud.category_delete_dialog',  $.spud.ajax_dialog, {
         this._save("DELETE", this.obj_id, {})
     },
 
-    _done: function(data) {
-        void data
+    _save_success: function(data) {
         window._category_deleted.trigger(this.obj_id)
+        this._super(data);
     }
 })
 

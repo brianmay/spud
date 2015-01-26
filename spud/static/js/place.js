@@ -56,7 +56,7 @@ $.widget('spud.place_search_dialog',  $.spud.form_dialog, {
     },
 })
 
-$.widget('spud.place_change_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.place_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
@@ -100,17 +100,18 @@ $.widget('spud.place_change_dialog',  $.spud.ajax_dialog, {
         }
     },
 
-    _done: function(data) {
+    _save_success: function(data) {
         if (this.obj_id != null) {
             window._place_changed.trigger(data)
         } else {
             window._place_created.trigger(data)
         }
+        this._super(data);
     },
 })
 
 
-$.widget('spud.place_delete_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.place_delete_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Delete place"
         this.options.button = "Delete"
@@ -130,9 +131,9 @@ $.widget('spud.place_delete_dialog',  $.spud.ajax_dialog, {
         this._save("DELETE", this.obj_id, {})
     },
 
-    _done: function(data) {
-        void data
+    _save_success: function(data) {
         window._place_deleted.trigger(this.obj_id)
+        this._super(data);
     }
 })
 

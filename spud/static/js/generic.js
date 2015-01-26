@@ -197,53 +197,9 @@ window._session_changed = new signal()
 
 
 ///////////////////////////////////////
-// ajax_dialog
-///////////////////////////////////////
-$.widget('spud.ajax_dialog',  $.spud.form_dialog, {
-    _save: function(http_type, oject_id, values) {
-        var mythis = this
-        var type = this._type
-        this._loading = true
-        var url
-        if (oject_id != null) {
-            url = window.__root_prefix + "api/" + type + "/" + oject_id + "/"
-        } else {
-            url = window.__root_prefix + "api/" + type + "/"
-        }
-        this.xhr = ajax({
-            url: url,
-            data: values,
-            type: http_type,
-            success: function(data) {
-                mythis._loading = false
-                mythis._done(data)
-                mythis.close()
-            },
-            error: function(message, data) {
-                mythis._loading = false
-                if (data != null) {
-                    $.each(data, function(id, error) {
-                        if (mythis.fields[id] != null) {
-                            mythis.fields[id].set_error(error)
-                        }
-                    })
-                }
-                alert("Error: " + message)
-                mythis.enable()
-            },
-        });
-    },
-
-    _done: function(data) {
-        void data
-    },
-
-})
-
-///////////////////////////////////////
 // sessions
 ///////////////////////////////////////
-$.widget('spud.login_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.login_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["username", new text_input_field("Username", true)],
@@ -261,12 +217,13 @@ $.widget('spud.login_dialog',  $.spud.ajax_dialog, {
         this._save("POST", "login", values)
     },
 
-    _done: function(session) {
+    _save_success: function(session) {
         window._session_changed.trigger(session)
+        this._super(session);
     },
 })
 
-$.widget('spud.logout_dialog',  $.spud.ajax_dialog, {
+$.widget('spud.logout_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.title = "Logout"
         this.options.description = "Are you sure you want to logout?"
@@ -279,8 +236,9 @@ $.widget('spud.logout_dialog',  $.spud.ajax_dialog, {
         this._save("POST", "logout", values)
     },
 
-    _done: function(session) {
+    _save_success: function(session) {
         window._session_changed.trigger(session)
+        this._super(session);
     },
 })
 

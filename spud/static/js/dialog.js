@@ -858,4 +858,16 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
         })
         this._super()
     },
+
+    _save_error: function(message, data) {
+        var mythis = this
+        if (data != null) {
+            $.each(data, function(id, error) {
+                if (mythis.fields[id] != null) {
+                    mythis.fields[id].set_error(error)
+                }
+            })
+        }
+        this._super()
+    },
 })
