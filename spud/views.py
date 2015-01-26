@@ -733,6 +733,29 @@ class PhotoViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def bulk_update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+
+        criteria = request.data['criteria']
+        values = request.data['values']
+
+        queryset = _get_photo_search(self.request.user, criteria)
+        count = 0
+
+        for instance in queryset:
+            serializer = self.get_serializer(
+                instance, data=values, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            count = count + 1
+        return Response({'count': count})
+
+    def patch(self, request, *args, **kwargs):
+        if 'pk' not in kwargs:
+            kwargs['partial'] = True
+            return self.bulk_update(request, *args, **kwargs)
+        else:
+            return super(PhotoViewSet, self).patch(request, *args, **kwargs)
 
 # class PhotoThumbViewSet(viewsets.ModelViewSet):
 #     """
