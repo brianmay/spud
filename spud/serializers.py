@@ -497,10 +497,22 @@ class PhotoSerializer(serializers.ModelSerializer):
     albums_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.album.objects.all(), source="albums",
         many=True, required=False)
+    add_albums_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.album.objects.all(), write_only=True,
+        many=True, required=False)
+    rem_albums_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.album.objects.all(), write_only=True,
+        many=True, required=False)
 
     categorys = CategorySerializer(many=True, read_only=True)
     categorys_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.category.objects.all(), source="categorys",
+        many=True, required=False)
+    add_categorys_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.category.objects.all(), write_only=True,
+        many=True, required=False)
+    rem_categorys_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.category.objects.all(), write_only=True,
         many=True, required=False)
 
     # albums = AlbumSerializer(many=True, read_only=True)
@@ -519,6 +531,10 @@ class PhotoSerializer(serializers.ModelSerializer):
         source="photo_person_set", read_only=True)
     persons_pk = PersonPkListSerializer(
         source="photo_person_set", required=False)
+    add_persons_pk = PersonPkListSerializer(
+        required=False, write_only=True)
+    rem_persons_pk = PersonPkListSerializer(
+        required=False, write_only=True)
 
     photographer = NestedPersonSerializer(read_only=True)
     photographer_pk = serializers.PrimaryKeyRelatedField(
@@ -617,10 +633,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 
         # FIXME rotate???
 
-        albums = validated_attrs.pop("albums", [])
-        categorys = validated_attrs.pop("categorys", [])
-        persons = validated_attrs.pop("photo_person_set", [])
-        feedbacks = validated_attrs.pop("feedbacks", [])
+        m2m_attrs = self._pop_m2m_attrs(validated_attrs)
 
         m = media.get_media(self.get_orig_path())
         (validated_attrs['width'], validated_attrs['height']) = m.get_size()
@@ -633,21 +646,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 
         instance = models.photo.objects.create(**validated_attrs)
 
-        for album in albums:
-            models.photo_album.objects.create(
-                photo=instance, album=album)
-
-        for category in categorys:
-            models.photo_category.objects.create(
-                photo=instance, category=category)
-
-        for person in persons:
-            models.photo_person.objects.create(
-                photo=instance, **person)
-
-        for feedback in feedbacks:
-            models.feedback.objects.create(
-                photo=instance, **person)
+        self._process_m2m(instance, m2m_attrs)
 
         # instance.generate_thumbnails(overwrite=False)
 
@@ -656,16 +655,46 @@ class PhotoSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_attrs):
-        albums = validated_attrs.pop("albums", [])
-        categorys = validated_attrs.pop("categorys", [])
-        persons = validated_attrs.pop("photo_person_set", [])
-        feedbacks = validated_attrs.pop("feedbacks", [])
-        print("albums", albums)
-        print("persons", persons)
+        m2m_attrs = self._pop_m2m_attrs(validated_attrs)
 
         for attr, value in validated_attrs.items():
             setattr(instance, attr, value)
         instance.save()
+
+        self._process_m2m(instance, m2m_attrs)
+        return instance
+
+    def _pop_m2m_attrs(self, validated_attrs):
+        return {
+            'albums': validated_attrs.pop("albums", None),
+            'add_albums': validated_attrs.pop("add_albums_pk", None),
+            'rem_albums': validated_attrs.pop("rem_albums_pk", None),
+
+            'categorys': validated_attrs.pop("categorys", None),
+            'add_categorys': validated_attrs.pop("add_categorys_pk", None),
+            'rem_categorys': validated_attrs.pop("rem_categorys_pk", None),
+
+            'persons': validated_attrs.pop("photo_person_set", None),
+            'add_persons': validated_attrs.pop("add_persons_pk", None),
+            'rem_persons': validated_attrs.pop("rem_persons_pk", None),
+        }
+
+    def _process_m2m(self, instance, m2m_attrs):
+        albums = m2m_attrs["albums"]
+        add_albums = m2m_attrs["add_albums"]
+        rem_albums = m2m_attrs["rem_albums"]
+
+        categorys = m2m_attrs["categorys"]
+        add_categorys = m2m_attrs["add_categorys"]
+        rem_categorys = m2m_attrs["rem_categorys"]
+
+        persons = m2m_attrs["persons"]
+        add_persons = m2m_attrs["add_persons"]
+        rem_persons = m2m_attrs["rem_persons"]
+
+        print("albums", albums, add_albums, rem_albums)
+        print("categorys", categorys, add_categorys, rem_categorys)
+        print("persons", persons, add_persons, rem_persons)
 
         if albums is not None:
             pa_list = list(instance.photo_album_set.all())
@@ -680,6 +709,16 @@ class PhotoSerializer(serializers.ModelSerializer):
                     photo=instance, album=value)
                 del value
             del pa_list
+
+        if rem_albums is not None:
+            for album in rem_albums:
+                models.photo_album.objects.filter(
+                    photo=instance, album=album).delete()
+
+        if add_albums is not None:
+            for album in add_albums:
+                models.photo_album.objects.get_or_create(
+                    photo=instance, album=album)
 
         if categorys is not None:
             pc_list = list(instance.photo_category_set.all())
@@ -727,8 +766,25 @@ class PhotoSerializer(serializers.ModelSerializer):
 
             del pp_list
 
-        # FIXME: feedbacks
-        print(feedbacks)
+        if rem_persons is not None:
+            for person in rem_persons:
+                person_id = person['person_id']
+                models.photo_person.objects.filter(
+                    photo=instance, person_id=person_id).delete()
+
+        if add_persons is not None:
+
+            for person in add_persons:
+                result = models.photo_person.objects\
+                    .filter(photo=instance)\
+                    .aggregate(Max('position'))
+                position_max = result['position__max'] or 0
+
+                person_id = person['person_id']
+                position = position_max + 1
+                models.photo_person.objects.get_or_create(
+                    photo=instance, person_id=person_id,
+                    defaults={position: position})
 
         return instance
 
