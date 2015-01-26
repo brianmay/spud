@@ -133,33 +133,33 @@ class AlbumSerializer(serializers.ModelSerializer):
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False)
 
-    #! def __init__(self, *args, **kwargs):
-    #!     super(AlbumSerializer, self).__init__(*args, **kwargs)
-    #!     request = self.context['request']
-    #!     if not request.user.is_staff:
-    #!         del self.fields['notes']
+    # def __init__(self, *args, **kwargs):
+    #     super(AlbumSerializer, self).__init__(*args, **kwargs)
+    #     request = self.context['request']
+    #     if not request.user.is_staff:
+    #         del self.fields['notes']
 
     class Meta:
         model = models.album
 
 
-#class AlbumListSerializer(serializers.ListSerializer):
-#    child = serializers.PrimaryKeyRelatedField(
-#        queryset=models.album.objects.all())
+# class AlbumListSerializer(serializers.ListSerializer):
+#     child = serializers.PrimaryKeyRelatedField(
+#         queryset=models.album.objects.all())
 #
-#    def get_value(self, dictionary):
-#        return dictionary.getlist(self.field_name)
+#     def get_value(self, dictionary):
+#         return dictionary.getlist(self.field_name)
 #
-#    def to_internal_value(self, data):
-#        r = []
-#        for name in data:
-#            try:
-#                pk = int(name)
-#                instance = models.album.objects.get(pk=pk)
-#            except ValueError:
-#                instance = models.album.objects.get_by_name(name)
-#            r.append(instance)
-#        return r
+#     def to_internal_value(self, data):
+#         r = []
+#         for name in data:
+#             try:
+#                 pk = int(name)
+#                 instance = models.album.objects.get(pk=pk)
+#             except ValueError:
+#                 instance = models.album.objects.get_by_name(name)
+#             r.append(instance)
+#         return r
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -172,22 +172,22 @@ class CategorySerializer(serializers.ModelSerializer):
         model = models.category
 
 
-#class CategoryListSerializer(serializers.ListSerializer):
-#    child = CategorySerializer()
+# class CategoryListSerializer(serializers.ListSerializer):
+#     child = CategorySerializer()
 #
-#    def get_value(self, dictionary):
-#        return dictionary.getlist(self.field_name)
+#     def get_value(self, dictionary):
+#         return dictionary.getlist(self.field_name)
 #
-#    def to_internal_value(self, data):
-#        r = []
-#        for name in data:
-#            try:
-#                pk = int(name)
-#                instance = models.category.objects.get(pk=pk)
-#            except ValueError:
-#                instance = models.category.objects.get_by_name(name)
-#            r.append(instance)
-#        return r
+#     def to_internal_value(self, data):
+#         r = []
+#         for name in data:
+#             try:
+#                 pk = int(name)
+#                 instance = models.category.objects.get(pk=pk)
+#             except ValueError:
+#                 instance = models.category.objects.get_by_name(name)
+#             r.append(instance)
+#         return r
 
 
 class PlaceSerializer(serializers.ModelSerializer):
@@ -475,8 +475,8 @@ class PhotoTitleField(CharField):
 
 
 class PhotoSerializer(serializers.ModelSerializer):
-#    albums = AlbumListSerializer()
-#    categorys = CategoryListSerializer()
+    # albums = AlbumListSerializer()
+    # categorys = CategoryListSerializer()
 
     title = PhotoTitleField(required=False, allow_null=True)
 
@@ -723,16 +723,16 @@ class PhotoSerializer(serializers.ModelSerializer):
         list_serializer_class = PhotoListSerializer
 
 
-#class PhotoAlbumSerializer(serializers.ModelSerializer):
-#    class Meta:
-#        model = models.photo_album
+# class PhotoAlbumSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = models.photo_album
 #
 #
-#class PhotoCategorySerializer(serializers.ModelSerializer):
-#    class Meta:
-#        model = models.photo_category
+# class PhotoCategorySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = models.photo_category
 #
 #
-#class PhotoPersonSerializer(serializers.ModelSerializer):
-#    class Meta:
-#        model = models.photo_person
+# class PhotoPersonSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = models.photo_person
