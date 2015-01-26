@@ -22,6 +22,7 @@ import os
 import shutil
 import datetime
 
+from django.db.models import Max
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers, exceptions
@@ -694,17 +695,28 @@ class PhotoSerializer(serializers.ModelSerializer):
                 del value
             del pc_list
 
+        if rem_categorys is not None:
+            for category in rem_categorys:
+                models.photo_category.objects.filter(
+                    photo=instance, category=category).delete()
+
+        if add_categorys is not None:
+            for category in add_categorys:
+                models.photo_category.objects.get_or_create(
+                    photo=instance, category=category)
+
         if persons is not None:
             pp_list = list(instance.photo_person_set.all())
 
             for pp in pp_list:
                 found = None
                 for index, person in enumerate(persons):
-                    if pp.position != person['position'] and \
+                    if pp.position == person['position'] and \
                             pp.person_id == person['person_id']:
                         found = index
-                if found:
-                    persons.remove(index)
+                    print(index, person, found)
+                if found is not None:
+                    del persons[found]
                 else:
                     pp.delete()
 
