@@ -173,32 +173,30 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["set_datetime", new datetime_input_field("Date", false)],
-                ["set_title", new text_input_field("Title", false)],
-                ["set_photographer_pk", new ajax_select_field("Photographer", "persons", false)],
+                ["datetime", new datetime_input_field("Date", false)],
+                ["title", new text_input_field("Title", false)],
+                ["photographer_pk", new ajax_select_field("Photographer", "persons", false)],
+                ["place_pk", new ajax_select_field("Place", "places", false)],
             ]},
             {name: 'add', title: 'Add', fields: [
                 ["add_albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
                 ["add_categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
-                ["add_place_pk", new ajax_select_field("Place", "places", false)],
                 ["add_persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
             ]},
             {name: 'rem', title: 'Remove', fields: [
                 ["rem_albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
                 ["rem_categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
-                ["rem_place_pk", new ajax_select_field("Place", "places", false)],
                 ["rem_persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
-                ["set_camera_make", new text_input_field("Camera Make", false)],
-                ["set_camera_model", new text_input_field("Camera Model", false)],
+                ["camera_make", new text_input_field("Camera Make", false)],
+                ["camera_model", new text_input_field("Camera Model", false)],
             ]},
         ]
 
         this.options.title = "Bulk photo update"
         this.options.button = "Save"
 
-        // this._type = "photos"
         this._super();
     },
 
@@ -311,12 +309,10 @@ $.widget('spud.photo_bulk_confirm_dialog',  $.spud.base_dialog, {
 
 $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
     _create: function() {
-        this._canceled = false
-
         this.options.title = "Bulk update"
-        this.options.button = "Meow"
+        this.options.button = "Retry"
 
-        // this._type = "photos"
+        this._type = "photos"
 
         this._pb = $("<div/>").appendTo(this.element)
         $.ui.progressbar({value: false}, this._pb)
@@ -329,52 +325,28 @@ $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
     },
 
     _set: function(values) {
-        void values
-        this._oll = get_object_list_loader("photos", this.options.criteria)
-        this._oll.loaded_item.add_listener(this, this._loaded_item)
-        this._oll.loaded_list.add_listener(this, this._loaded_list)
-        this._oll.on_error.add_listener(this, this._on_error)
-        // instance.option("criteria", this.options.criteria)
-        if (!this._oll.load_next_page()) {
-            this.close()
-        }
-    },
-
-    _loaded_item: function(obj, count, n) {
-        if (this._canceled) {
-            return
-        }
-
-        this._status.text("Processed " + n + " out of " + count)
-        this._pb.progressbar("option", "max", count)
-        this._pb.progressbar("value", n)
-        // this._save("PATCH", null, data)
-//        $.each(data.results, function(photo) {
-//            window._photo_changed.trigger(photo)
-//        })
-    },
-
-    _loaded_list: function(object_list) {
-        void object_list
-        if (this._canceled) {
-            return
-        }
-        if (!this._oll.load_next_page()) {
-            this.close()
-        }
-    },
-
-    _on_error: function() {
-        this._status.text("Error occurred loading objects")
+        this._values = values
+        this._check_submit()
     },
 
     _submit: function() {
-        alert("meow")
+        var data = {
+            'criteria': this.options.criteria,
+            'values': this._values
+        }
+        this._save("PATCH", null, data)
+    },
+
+    _save_success: function(data) {
+        void data
+//        $.each(data.results, function(photo) {
+//            window._photo_changed.trigger(photo)
+//        })
+        window._reload_all.trigger()
+        this._super()
     },
 
     _destroy: function() {
-        this._canceled = true
-        this._oll.abort()
         this._super()
     }
 })
