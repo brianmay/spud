@@ -378,16 +378,12 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
             .attr("id", this.id)
             .attr("type", "text")
 
-        this.input = $('<input type="hidden"/>')
-            .attr("name", this.name)
-
         this.deck = $('<div class="results_on_deck"></div>')
 
         this.element
             .removeAttr("id")
             .removeAttr("name")
             .append(this.text)
-            .append(this.input)
             .append(this.deck)
             .append("<p class='help'>Enter text to search.</p>")
 
@@ -439,18 +435,22 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     _set: function(obj, obj_pk) {
         this.deck.children().remove();
         if (obj != null) {
-            this.input.val(obj.pk)
             this._addKiller(obj, null)
         } else if (obj_pk != null) {
-            this.input.val(obj_pk)
             this._addKiller(null, obj_pk)
         }
     },
 
     get: function() {
-        var value = this.input.val()
-        if (value !== "") {
-            return this.input.val()
+        var children = this.deck.children()
+
+        var value = $.map(children, function(child) {
+            var id = $(child).attr('id')
+            return parseInt(id.match(/(.+)[\-=_](.+)/)[2])
+        })
+
+        if (value.length >= 1) {
+            return value[0]
         } else {
             return null
         }
@@ -474,10 +474,7 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
     },
 
     _receiveResult: function(ev, ui) {
-        if (this.input.val()) {
-            this._kill(ui.item.pk, null);
-        }
-        this.input.val(ui.item.pk);
+        this.deck.empty()
         this.text.val('');
         this._addKiller(ui.item.obj, null);
         this._trigger("added", ev, ui.item.obj);
@@ -526,7 +523,6 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
     _kill: function(obj_pk, div) {
         void div
-        this.input.val('');
         this.deck.children().fadeOut(1.0).remove();
     },
 
@@ -596,6 +592,13 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
 
 
 $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
+    _create: function(){
+        if (this.options.allow_duplicates == null) {
+            this.options.allow_duplicates = false
+        }
+        this._super();
+    },
+
     _set: function(obj_list, pk_list) {
         var mythis = this
 
@@ -611,36 +614,23 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
                 mythis._addKiller(null, v)
             });
         }
-
-        if (pk_list.length > 0) {
-            this.input.val("|" + pk_list.join("|") + "|")
-        } else {
-            this.input.val("|")
-        }
     },
 
     get: function() {
-        var value = this.input.val().slice(1, -1)
-        if (value !== "") {
-            value = value.split("|")
-        } else {
-            value = []
-        }
+        var children = this.deck.children()
 
-        var tmp = []
-        $.each(value, function(i, id) {
-            if (id === "null") { id = null }
-            tmp.push(id)
+        var value = $.map(children, function(child) {
+            var id = $(child).attr('id')
+            return parseInt(id.match(/(.+)[\-=_](.+)/)[2])
         })
 
-        return tmp
+        return value
     },
 
     _receiveResult: function(ev, ui) {
-        var prev = this.input.val();
+        var prev = this.get()
 
-        if (prev.indexOf("|" + ui.item.pk + "|") === -1) {
-                this.input.val((prev ? prev : "|") + ui.item.pk + "|");
+        if ($.inArray(ui.item.pk, prev) === -1 || this.options.allow_duplicates) {
                 this.text.val('');
                 this._addKiller(ui.item.obj, null);
                 this._trigger("added",  ev, ui.item.obj);
@@ -650,7 +640,6 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
     },
 
     _kill: function(obj_pk, div) {
-        this.input.val(this.input.val().replace("|" + obj_pk + "|", "|"));
         div.fadeOut().remove();
     },
 })
@@ -739,23 +728,12 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
 
 $.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
     _create: function(){
+        if (this.options.allow_duplicates == null) {
+            this.options.allow_duplicates = true
+        }
         this._super()
         this.deck
             .sortable()
-            .on("sortstop", $.proxy(
-                function() {
-                    var value = this.deck.sortable( "toArray" )
-                    value = $.map(value, function(id) {
-                        return id.match(/(.+)[\-=_](.+)/)[2]
-                    })
-                    if (value.length > 0) {
-                        this.input.val("|" + value.join("|") + "|")
-                    } else {
-                        this.input.val("|")
-                    }
-                },
-                this)
-            )
     },
 
     _normalize: function( objs ) {
