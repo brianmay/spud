@@ -306,6 +306,18 @@ class PersonPkListSerializer(serializers.ListSerializer):
             if pk is None or pk == "unknown":
                 continue
 
+            try:
+                pk = int(pk)
+            except ValueError:
+                raise exceptions.ValidationError(
+                    "Person '%s' is not integer." % pk)
+
+            try:
+                models.person.objects.get(pk=pk)
+            except models.person.DoesNotExist:
+                raise exceptions.ValidationError(
+                    "Person '%s' does not exist." % pk)
+
             data = {
                 'person_id': pk,
                 'position': index + 1,
