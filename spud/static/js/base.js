@@ -1150,12 +1150,6 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
                 a.trigger('click');
             })
 
-        if (photo != null) {
-            li
-                .toggleClass("removed", photo.action === "D")
-                .toggleClass("regenerate", photo.action != null && photo.action !== "D")
-        }
-
         return li
     },
 

@@ -112,6 +112,18 @@ $.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
                 ["datetime", new datetime_input_field("Date", true)],
                 ["title", new text_input_field("Title", true)],
                 ["photographer_pk", new ajax_select_field("Photographer", "persons", false)],
+                ["action", new select_input_field("Action", [
+                    ["", "no action"],
+                    ["D", "delete"],
+                    ["S", "regenerate size"],
+                    ["R", "regenerate thumbnails"],
+                    ["V", "regenerate video"],
+                    ["M", "move photo"],
+                    ["auto", "rotate automatic"],
+                    ["90", "rotate 90 degrees clockwise"],
+                    ["180", "rotate 180 degrees clockwise"],
+                    ["270", "rotate 270 degrees clockwise"],
+                ], false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
                 ["albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
@@ -177,6 +189,18 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
                 ["title", new text_input_field("Title", false)],
                 ["photographer_pk", new ajax_select_field("Photographer", "persons", false)],
                 ["place_pk", new ajax_select_field("Place", "places", false)],
+                ["action", new select_input_field("Action", [
+                    ["none", "no action"],
+                    ["D", "delete"],
+                    ["S", "regenerate size"],
+                    ["R", "regenerate thumbnails"],
+                    ["V", "regenerate video"],
+                    ["M", "move photo"],
+                    ["auto", "rotate automatic"],
+                    ["90", "rotate 90 degrees clockwise"],
+                    ["180", "rotate 180 degrees clockwise"],
+                    ["270", "rotate 270 degrees clockwise"],
+                ], false)],
             ]},
             {name: 'add', title: 'Add', fields: [
                 ["add_albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
@@ -212,6 +236,10 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
         $.each(values, function (key, el) {
             if (el != null && el !== false) { data[key] = el }
         });
+
+        if (data.action === "none") {
+            data.action = null
+        }
 
         if (data.set_datetime != null) {
             data.set_utc_offset = data.set_datetime[1]
@@ -585,6 +613,8 @@ $.widget('spud.photo_list', $.spud.object_list, {
         // li.attr('data-id', photo.id)
         li.data('photo', photo)
         li.data('id', photo.id)
+        li.toggleClass("removed", photo.action === "D")
+        li.toggleClass("regenerate", photo.action != null && photo.action !== "D")
         li.toggleClass("ui-selected", this._is_photo_selected(photo))
         return li
     },
@@ -657,6 +687,7 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
         this.options.obj = photo
         this.options.obj_id = photo.id
         this.img.image("set", photo)
+
         if (this.options.on_update) {
             this.options.on_update(photo)
         }
@@ -733,6 +764,13 @@ $.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
         return {
             'instance': this.options.obj_id,
         }
+    },
+
+    _loaded: function(obj) {
+        this.div
+            .toggleClass("removed", obj.action === "D")
+            .toggleClass("regenerate", obj.action != null && obj.action !== "D")
+        this._super(obj);
     },
 
     _photo_list_screen: null,

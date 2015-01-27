@@ -425,20 +425,25 @@ select_input_field.prototype = {
         this.input.empty()
         this.options = {}
         var mythis = this
-        if (!this.required) {
-            mythis.options[""] = $('<option />')
-                .attr('value', "")
-                .text("-----")
-                .appendTo(mythis.input)
-        }
+        var null_option = "-----"
         $.each(options, function(i, v){
             var id = v[0]
             var value = v[1]
-            mythis.options[id] = $('<option />')
-                .attr('value', id)
-                .text(value)
-                .appendTo(mythis.input)
+            if (value !== "") {
+                mythis.options[id] = $('<option />')
+                    .attr('value', id)
+                    .text(value)
+                    .appendTo(mythis.input)
+            } else {
+                null_option = value
+            }
         })
+        if (!this.required) {
+            mythis.options[""] = $('<option />')
+                .attr('value', "")
+                .text(null_option)
+                .prependTo(mythis.input)
+        }
         this.options_list = options
     },
 

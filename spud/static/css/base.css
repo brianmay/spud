@@ -35,6 +35,16 @@ ul.menubar .ui-menu-item {
     border-radius: 10px;
     background: #eee;
 }
+
+.screen .removed {
+    text-decoration: line-through;
+    opacity:0.5;
+}
+
+.screen .regenerate {
+    background:#CCE; color:#333;
+}
+
 .screen .screen_header {
     border: 1px solid #e78f08;
     background: #f6a828 url("images/ui-bg_gloss-wave_35_f6a828_500x100.png") 50% 50% repeat-x;
@@ -106,6 +116,8 @@ ul.menubar .ui-menu-item {
 
 .photo_list { border:1px solid #666; margin-bottom: 10px; height: 400px; overflow-y: scroll; background: #fff; }
 .photo_list > ul { padding:0; }
+.photo_list .removed { text-decoration: line-through; opacity:0.5; }
+.photo_list .regenerate { background:#CCE; color:#333; }
 .photo_list .ui-selected { background: #F39814; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:170px; margin:10px; padding-top:10px; text-align: center; width:140px; }
 .photo_list .photo_item .desc { float:left; display:none; }
