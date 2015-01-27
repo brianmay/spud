@@ -31,6 +31,26 @@ from rest_framework import fields as f
 from . import models, media
 
 
+class ListSerializer(serializers.ListSerializer):
+
+    def set_request(self, request):
+        field = self.child
+        if isinstance(field, ModelSerializer):
+            field.set_request(request)
+        elif isinstance(field, ListSerializer):
+            field.set_request(request)
+
+
+class ModelSerializer(serializers.ModelSerializer):
+
+    def set_request(self, request):
+        for key, field in self.fields.items():
+            if isinstance(field, ModelSerializer):
+                field.set_request(request)
+            elif isinstance(field, ListSerializer):
+                field.set_request(request)
+
+
 class CharField(f.CharField):
     default_empty_html = None
 
@@ -65,14 +85,14 @@ class CharField(f.CharField):
 #         return super(UtcDateTimeField, self).to_representation(local)
 
 
-class PhotoThumbSerializer(serializers.ModelSerializer):
+class PhotoThumbSerializer(ModelSerializer):
     url = f.URLField(source="get_url")
 
     class Meta:
         model = models.photo_thumb
 
 
-class PhotoThumbListSerializer(serializers.ListSerializer):
+class PhotoThumbListSerializer(ListSerializer):
     child = PhotoThumbSerializer()
 
     def to_representation(self, value):
@@ -82,14 +102,14 @@ class PhotoThumbListSerializer(serializers.ListSerializer):
         return result
 
 
-class PhotoVideoSerializer(serializers.ModelSerializer):
+class PhotoVideoSerializer(ModelSerializer):
     url = f.URLField(source="get_url")
 
     class Meta:
         model = models.photo_video
 
 
-class PhotoVideoListSerializer(serializers.ListSerializer):
+class PhotoVideoListSerializer(ListSerializer):
     child = PhotoVideoSerializer()
 
     def to_representation(self, value):
@@ -101,7 +121,7 @@ class PhotoVideoListSerializer(serializers.ListSerializer):
         return result
 
 
-class NestedPhotoSerializer(serializers.ModelSerializer):
+class NestedPhotoSerializer(ModelSerializer):
     thumbs = PhotoThumbListSerializer(
         source="get_thumbs", read_only=True)
     videos = PhotoVideoListSerializer(
@@ -115,36 +135,38 @@ class NestedPhotoSerializer(serializers.ModelSerializer):
         )
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = (
             'id', 'username', 'first_name', 'last_name', 'email', 'groups')
 
 
-class GroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(ModelSerializer):
     class Meta:
         model = Group
         fields = ('id', 'name')
 
 
-class AlbumSerializer(serializers.ModelSerializer):
+class AlbumSerializer(ModelSerializer):
     cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False)
 
-    # def __init__(self, *args, **kwargs):
-    #     super(AlbumSerializer, self).__init__(*args, **kwargs)
-    #     request = self.context['request']
-    #     if not request.user.is_staff:
-    #         del self.fields['notes']
+    def set_request(self, request):
+        super(AlbumSerializer, self).set_request(request)
+
+        if not request.user.is_staff:
+            del self.fields['revised']
+            del self.fields['revised_utc_offset']
 
     class Meta:
         model = models.album
+        list_serializer_class = ListSerializer
 
 
-# class AlbumListSerializer(serializers.ListSerializer):
+# class AlbumListSerializer(ListSerializer):
 #     child = serializers.PrimaryKeyRelatedField(
 #         queryset=models.album.objects.all())
 #
@@ -163,7 +185,7 @@ class AlbumSerializer(serializers.ModelSerializer):
 #         return r
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(ModelSerializer):
     cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
@@ -171,9 +193,10 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.category
+        list_serializer_class = ListSerializer
 
 
-# class CategoryListSerializer(serializers.ListSerializer):
+# class CategoryListSerializer(ListSerializer):
 #     child = CategorySerializer()
 #
 #     def get_value(self, dictionary):
@@ -191,14 +214,22 @@ class CategorySerializer(serializers.ModelSerializer):
 #         return r
 
 
-class PlaceSerializer(serializers.ModelSerializer):
+class PlaceSerializer(ModelSerializer):
     cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False)
 
+    def set_request(self, request):
+        super(PlaceSerializer, self).set_request(request)
+
+        if not request.user.is_staff:
+            del self.fields['address']
+            del self.fields['address2']
+
     class Meta:
         model = models.place
+        list_serializer_class = ListSerializer
 
 
 class PersonTitleField(CharField):
@@ -209,7 +240,7 @@ class PersonTitleField(CharField):
         return "%s" % value
 
 
-class NestedPersonSerializer(serializers.ModelSerializer):
+class NestedPersonSerializer(ModelSerializer):
     title = PersonTitleField(read_only=True)
     cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
@@ -221,9 +252,10 @@ class NestedPersonSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'title', 'cover_photo', 'cover_photo_pk',
         )
+        list_serializer_class = ListSerializer
 
 
-class PersonSerializer(serializers.ModelSerializer):
+class PersonSerializer(ModelSerializer):
     title = PersonTitleField(read_only=True)
     cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
@@ -265,11 +297,41 @@ class PersonSerializer(serializers.ModelSerializer):
     nephews_nieces = NestedPersonSerializer(many=True, read_only=True)
     grandchildren = NestedPersonSerializer(many=True, read_only=True)
 
+    def set_request(self, request):
+        super(PersonSerializer, self).set_request(request)
+
+        if not request.user.is_staff:
+            del self.fields['sex']
+            del self.fields['dob']
+            del self.fields['dod']
+            del self.fields['home']
+            del self.fields['home_pk']
+            del self.fields['work']
+            del self.fields['work_pk']
+            del self.fields['father']
+            del self.fields['father_pk']
+            del self.fields['mother']
+            del self.fields['mother_pk']
+            del self.fields['spouse']
+            del self.fields['spouse_pk']
+            del self.fields['spouses']
+            del self.fields['grandparents']
+            del self.fields['uncles_aunts']
+            del self.fields['parents']
+            del self.fields['siblings']
+            del self.fields['cousins']
+            del self.fields['children']
+            del self.fields['nephews_nieces']
+            del self.fields['grandchildren']
+            del self.fields['notes']
+            del self.fields['email']
+
     class Meta:
         model = models.person
+        list_serializer_class = ListSerializer
 
 
-class PersonListSerializer(serializers.ListSerializer):
+class PersonListSerializer(ListSerializer):
     child = PersonSerializer()
 
     def get_value(self, dictionary):
@@ -286,7 +348,7 @@ class PersonListSerializer(serializers.ListSerializer):
         return result
 
 
-class PersonPkListSerializer(serializers.ListSerializer):
+class PersonPkListSerializer(ListSerializer):
     child = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all())
 
@@ -325,7 +387,7 @@ class PersonPkListSerializer(serializers.ListSerializer):
         return result
 
 
-class FeedbackSerializer(serializers.ModelSerializer):
+class FeedbackSerializer(ModelSerializer):
     title = f.IntegerField(source="id", read_only=True)
     photo = NestedPhotoSerializer(read_only=True)
     photo_pk = serializers.PrimaryKeyRelatedField(
@@ -333,9 +395,10 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.feedback
+        list_serializer_class = ListSerializer
 
 
-# class PhotoPersonSerializer(serializers.ModelSerializer):
+# class PhotoPersonSerializer(ModelSerializer):
 #     class Meta:
 #         model = models.photo_person
 #         fields = ()
@@ -394,12 +457,13 @@ class FeedbackSerializer(serializers.ModelSerializer):
 #             del i
 
 
-class PhotoRelationSerializer(serializers.ModelSerializer):
+class PhotoRelationSerializer(ModelSerializer):
     class Meta:
         model = models.photo_relation
+        list_serializer_class = ListSerializer
 
 
-# class PhotoRelationListSerializer(serializers.ListSerializer):
+# class PhotoRelationListSerializer(ListSerializer):
 #     child = PhotoRelationSerializer()
 #
 #     def get_attribute(self, obj):
@@ -434,7 +498,7 @@ class PhotoRelationSerializer(serializers.ModelSerializer):
 default_timezone = pytz.timezone(settings.TIME_ZONE)
 
 
-class PhotoListSerializer(serializers.ListSerializer):
+class PhotoListSerializer(ListSerializer):
 
     def to_representation(self, data):
         # iterable = data.all() if isinstance(data, models.Manager) else data
@@ -471,9 +535,10 @@ class PhotoTitleField(CharField):
         return value
 
 
-class PhotoSerializer(serializers.ModelSerializer):
+class PhotoSerializer(ModelSerializer):
     # albums = AlbumListSerializer()
     # categorys = CategoryListSerializer()
+    orig_url = f.URLField(source="get_orig_url")
 
     title = PhotoTitleField(required=False, allow_null=True)
 
@@ -772,6 +837,12 @@ class PhotoSerializer(serializers.ModelSerializer):
 
         return instance
 
+    def set_request(self, request):
+        super(PhotoSerializer, self).set_request(request)
+
+        if not request.user.is_staff:
+            del self.fields['orig_url']
+
     class Meta:
         model = models.photo
         extra_kwargs = {
@@ -787,16 +858,16 @@ class PhotoSerializer(serializers.ModelSerializer):
         list_serializer_class = PhotoListSerializer
 
 
-# class PhotoAlbumSerializer(serializers.ModelSerializer):
+# class PhotoAlbumSerializer(ModelSerializer):
 #     class Meta:
 #         model = models.photo_album
 #
 #
-# class PhotoCategorySerializer(serializers.ModelSerializer):
+# class PhotoCategorySerializer(ModelSerializer):
 #     class Meta:
 #         model = models.photo_category
 #
 #
-# class PhotoPersonSerializer(serializers.ModelSerializer):
+# class PhotoPersonSerializer(ModelSerializer):
 #     class Meta:
 #         model = models.photo_person

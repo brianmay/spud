@@ -740,6 +740,24 @@ $.widget('spud.photo_list_screen', $.spud.object_list_screen, {
 
 
 $.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
+    _setup_menu: function(menu) {
+        var mythis = this
+
+        this._super(menu)
+
+        this._orig = $("<li/>")
+            .text("Original")
+            .on("click", function(ev) {
+                void ev
+                if (mythis.options.obj.orig_url != null) {
+                    window.open(mythis.options.obj.orig_url)
+                }
+
+            })
+            .hide()
+            .appendTo(menu)
+    },
+
     _create: function() {
         this._type = "photos"
         this._type_name = "Photo"
@@ -767,6 +785,7 @@ $.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
     },
 
     _loaded: function(obj) {
+        this._orig.toggle(obj.orig_url != null)
         this.div
             .toggleClass("removed", obj.action === "D")
             .toggleClass("regenerate", obj.action != null && obj.action !== "D")

@@ -184,10 +184,18 @@ def _get_datetime(params, key):
     return _decode_datetime(key, _get_string(params, key))
 
 
+class ModelViewSet(viewsets.ModelViewSet):
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(ModelViewSet, self).get_serializer(*args, **kwargs)
+        serializer.set_request(serializer.context['request'])
+        return serializer
+
+
 #########################
 # Django-Rest-Framework #
 #########################
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(ModelViewSet):
     permission_classes = (IsAdminUser,)
     """
     API endpoint that allows users to be viewed or edited.
@@ -196,7 +204,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserSerializer
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupViewSet(ModelViewSet):
     permission_classes = (IsAdminUser,)
     """
     API endpoint that allows groups to be viewed or edited.
@@ -274,7 +282,7 @@ class Logout(APIView):
         return Response(data)
 
 
-class AlbumViewSet(viewsets.ModelViewSet):
+class AlbumViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -337,7 +345,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -390,7 +398,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PlaceViewSet(viewsets.ModelViewSet):
+class PlaceViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -448,7 +456,7 @@ class PlaceViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PersonViewSet(viewsets.ModelViewSet):
+class PersonViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -506,7 +514,7 @@ class PersonViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FeedbackViewSet(viewsets.ModelViewSet):
+class FeedbackViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -703,7 +711,7 @@ def _get_photo_search(user, params):
     return queryset
 
 
-class PhotoViewSet(viewsets.ModelViewSet):
+class PhotoViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -757,7 +765,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
         else:
             return super(PhotoViewSet, self).patch(request, *args, **kwargs)
 
-# class PhotoThumbViewSet(viewsets.ModelViewSet):
+# class PhotoThumbViewSet(ModelViewSet):
 #     """
 #     API endpoint that allows groups to be viewed or edited.
 #     """
@@ -765,7 +773,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
 #     serializer_class = serializers.PhotoThumbSerializer
 #
 #
-# class PhotoVideoViewSet(viewsets.ModelViewSet):
+# class PhotoVideoViewSet(ModelViewSet):
 #     """
 #     API endpoint that allows groups to be viewed or edited.
 #     """
@@ -773,7 +781,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
 #     serializer_class = serializers.PhotoVideoSerializer
 #
 #
-# class PhotoAlbumViewSet(viewsets.ModelViewSet):
+# class PhotoAlbumViewSet(ModelViewSet):
 #     """
 #     API endpoint that allows groups to be viewed or edited.
 #     """
@@ -781,7 +789,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
 #     serializer_class = serializers.PhotoAlbumSerializer
 #
 #
-# class PhotoCategoryViewSet(viewsets.ModelViewSet):
+# class PhotoCategoryViewSet(ModelViewSet):
 #     """
 #     API endpoint that allows groups to be viewed or edited.
 #     """
@@ -789,7 +797,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
 #     serializer_class = serializers.PhotoCategorySerializer
 #
 #
-# class PhotoPersonViewSet(viewsets.ModelViewSet):
+# class PhotoPersonViewSet(ModelViewSet):
 #     """
 #     API endpoint that allows groups to be viewed or edited.
 #     """
@@ -797,7 +805,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
 #     serializer_class = serializers.PhotoPersonSerializer
 
 
-class PhotoRelationViewSet(viewsets.ModelViewSet):
+class PhotoRelationViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
