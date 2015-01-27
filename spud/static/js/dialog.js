@@ -709,7 +709,7 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
             this.page = {}
             this.tabs = $("<div/>")
                 .addClass("fields")
-                .appendTo(this.element)
+                .appendTo(this.f)
 
             var ul = $("<ul></ul>").appendTo(this.tabs)
 
