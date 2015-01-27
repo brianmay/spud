@@ -346,5 +346,5 @@ $.widget('spud.category_detail_screen', $.spud.object_detail_screen, {
     _object_detail: $.proxy($.spud.category_detail, window),
     _object_list_screen: $.proxy($.spud.category_list_screen, window),
     _object_change_dialog: $.proxy($.spud.category_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud._object_delete_dialog, window),
+    _object_delete_dialog: $.proxy($.spud.category_delete_dialog, window),
 })

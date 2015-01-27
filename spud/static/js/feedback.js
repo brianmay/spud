@@ -493,5 +493,5 @@ $.widget('spud.feedback_detail_screen', $.spud.object_detail_screen, {
     _object_detail: $.proxy($.spud.feedback_detail, window),
     _object_list_screen: $.proxy($.spud.feedback_list_screen, window),
     _object_change_dialog: $.proxy($.spud.feedback_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud._object_delete_dialog, window),
+    _object_delete_dialog: $.proxy($.spud.feedback_delete_dialog, window),
 })

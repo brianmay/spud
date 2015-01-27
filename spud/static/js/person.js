@@ -377,5 +377,5 @@ $.widget('spud.person_detail_screen', $.spud.object_detail_screen, {
     _object_detail: $.proxy($.spud.person_detail, window),
     _object_list_screen: $.proxy($.spud.person_list_screen, window),
     _object_change_dialog: $.proxy($.spud.person_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud._object_delete_dialog, window),
+    _object_delete_dialog: $.proxy($.spud.person_delete_dialog, window),
 })
