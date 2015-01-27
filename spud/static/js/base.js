@@ -162,6 +162,8 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
         this.description = $("<p/>")
             .appendTo(this.element)
 
+        this.element.data('dialog', this)
+
         if (options.description != null) {
             this.description
                 .text(options.description)

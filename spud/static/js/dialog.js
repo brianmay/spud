@@ -701,6 +701,13 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
     _create: function() {
         var mythis = this
 
+        $.each($(".autoclose"), function(i, dialog) {
+            var instance = $(dialog).data("dialog")
+            instance.close()
+        })
+
+        this.element.addClass("autoclose")
+
         this.f = $("<form method='get' />")
             .appendTo(this.element)
 
