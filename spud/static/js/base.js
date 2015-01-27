@@ -1192,9 +1192,9 @@ $.widget('spud.screen', $.spud.widget, {
 
     toggle: function() {
         if (this.options.disabled) {
-            this.disable()
-        } else {
             this.enable()
+        } else {
+            this.disable()
         }
     },
 
