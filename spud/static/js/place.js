@@ -228,7 +228,7 @@ $.widget('spud.place_list', $.spud.object_list, {
         var a = $('<a/>')
             .attr('href', root_url() + "places/" + place.id + "/")
             .on('click', function() {
-                if (!mythis.options.disabled) {
+                if (mythis.options.disabled) {
                     return false
                 }
                 var child_id = mythis.options.child_id
