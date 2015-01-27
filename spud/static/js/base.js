@@ -735,24 +735,6 @@ $.widget('spud.ajaxautocompletesorted',  $.spud.ajaxautocompletemultiple, {
         this.deck
             .sortable()
     },
-
-    _normalize: function( objs ) {
-        var unknown = [ null ]
-        objs = unknown.concat(objs)
-        return this._super(objs)
-    },
-
-    _normalize_item: function( obj ) {
-        if (obj == null) {
-            return {
-                'pk': null,
-                repr: "Unknown",
-                label: "Unknown",
-                obj: obj,
-            }
-        }
-        return this._super(obj)
-    }
 })
 
 

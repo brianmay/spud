@@ -281,15 +281,8 @@ class PersonListSerializer(serializers.ListSerializer):
     def to_representation(self, value):
         result = []
 
-        position = 1
-        value = value.order_by("position")
         for pp in value.order_by("position"):
-            while position < pp.position:
-                result.append(None)
-                position = position + 1
-
             result.append(self.child.to_representation(pp.person))
-            position = position + 1
         return result
 
 
@@ -304,8 +297,6 @@ class PersonPkListSerializer(serializers.ListSerializer):
     def to_internal_value(self, data):
         r = []
         for index, pk in enumerate(data):
-            if pk is None or pk == "unknown":
-                continue
 
             try:
                 pk = int(pk)
@@ -329,15 +320,8 @@ class PersonPkListSerializer(serializers.ListSerializer):
     def to_representation(self, value):
         result = []
 
-        position = 1
-        value = value.order_by("position")
         for pp in value.order_by("position"):
-            while position < pp.position:
-                result.append(None)
-                position = position + 1
-
             result.append(pp.person_id)
-            position = position + 1
         return result
 
 
