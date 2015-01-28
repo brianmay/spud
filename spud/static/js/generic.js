@@ -1275,7 +1275,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     },
 
     set_loader: function(oll) {
-        this._setOption("obj_list_loader", oll)
+        this._setOption("object_list_loader", oll)
     },
 
     _set_loader: function(oll) {
@@ -1310,7 +1310,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
             this._set(value)
         } else if ( key === "obj_id" ) {
             this._load(value)
-        } else if ( key === "obj_list_loader" ) {
+        } else if ( key === "object_list_loader" ) {
             this._set_loader(value)
         }
         this._super( key, value );
