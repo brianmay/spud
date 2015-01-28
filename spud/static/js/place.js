@@ -235,9 +235,9 @@ $.widget('spud.place_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
+                        child.place_detail_screen("enable")
                         child.place_detail_screen("set", place)
                         child.place_detail_screen("set_loader", place_list_loader)
-                        child.place_detail_screen("enable")
                         return false
                     }
                 }

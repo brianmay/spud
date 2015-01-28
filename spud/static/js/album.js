@@ -254,9 +254,9 @@ $.widget('spud.album_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
+                        child.album_detail_screen("enable")
                         child.album_detail_screen("set", album)
                         child.album_detail_screen("set_loader", album_list_loader)
-                        child.album_detail_screen("enable")
                         return false
                     }
                 }

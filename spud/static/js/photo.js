@@ -573,9 +573,9 @@ $.widget('spud.photo_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
+                        child.photo_detail_screen("enable")
                         child.photo_detail_screen("set", photo)
                         child.photo_detail_screen("set_loader", photo_list_loader)
-                        child.photo_detail_screen("enable")
                         return false
                     }
                 }

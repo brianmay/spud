@@ -244,9 +244,9 @@ $.widget('spud.person_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
+                        child.person_detail_screen("enable")
                         child.person_detail_screen("set", person)
                         child.person_detail_screen("set_loader", person_list_loader)
-                        child.person_detail_screen("enable")
                         return false
                     }
                 }

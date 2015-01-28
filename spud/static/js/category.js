@@ -229,9 +229,9 @@ $.widget('spud.category_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
+                        child.category_detail_screen("enable")
                         child.category_detail_screen("set", category)
                         child.category_detail_screen("set_loader", category_list_loader)
-                        child.category_detail_screen("enable")
                         return false
                     }
                 }

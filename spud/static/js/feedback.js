@@ -366,9 +366,9 @@ $.widget('spud.feedback_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
+                        child.feedback_detail_screen("enable")
                         child.feedback_detail_screen("set", feedback)
                         child.feedback_detail_screen("set_loader", feedback_list_loader)
-                        child.feedback_detail_screen("enable")
                         return false
                     }
                 }
