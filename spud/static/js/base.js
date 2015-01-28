@@ -1203,11 +1203,13 @@ $.widget('spud.screen', $.spud.widget, {
 
     _enable: function() {
         this.element.removeClass("disabled")
+        this.options.disabled = false
         return this
     },
 
     _disable: function() {
         this.element.addClass("disabled")
+        this.options.disabled = true
         return this
     },
 
