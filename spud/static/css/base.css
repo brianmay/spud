@@ -122,8 +122,6 @@ ul.menubar .ui-menu-item {
 .photo_list .regenerate { background:#CCE; color:#333; }
 .photo_list .ui-selected { background: #F39814; }
 .photo_list .photo_item { display:inline-block; vertical-align:top; height:170px; margin:10px; padding-top:10px; text-align: center; width:140px; }
-.photo_list .photo_item .desc { float:left; display:none; }
-.photo_list .photo_item:HOVER .desc { display:inline; background:#ddd; color:#000; border:1px solid #000; position:relative; left:-25px; top:0px; z-index:100; width:200px; padding:10px; }
 
 .photo_list.disabled {
     background: #ddd;

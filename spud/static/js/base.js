@@ -1120,11 +1120,6 @@ $.widget('spud.photo_list_base',  $.spud.list_base, {
                 .html(details)
                 .appendTo(a)
         }
-        if (description) {
-            $("<div class='desc'></div>")
-                .p(description)
-                .appendTo(a)
-        }
 
         var li = $("<li />")
             .attr('class', "photo_item")
