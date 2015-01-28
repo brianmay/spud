@@ -1174,8 +1174,6 @@ $.widget('spud.screen', $.spud.widget, {
             })
             .appendTo(header)
 
-        this._set_title(this.options.title)
-
         this.element.data('screen', this)
         this.element.addClass("screen")
 
@@ -1184,6 +1182,11 @@ $.widget('spud.screen', $.spud.widget, {
         } else {
             this.enable()
         }
+
+        // We must set title after enabling widget, so we push new state to
+        // history first.
+        this._set_title(this.options.title)
+
 
         this.div = $("<div/>")
             .addClass("screen_content")
