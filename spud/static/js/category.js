@@ -290,9 +290,6 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
         this.options.obj = category
         this.options.obj_id = category.id
         this.img.image("set", category.cover_photo)
-        if (this.options.on_update) {
-            this.options.on_update(category)
-        }
     },
 })
 

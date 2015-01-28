@@ -687,10 +687,6 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
         this.options.obj = photo
         this.options.obj_id = photo.id
         this.img.image("set", photo)
-
-        if (this.options.on_update) {
-            this.options.on_update(photo)
-        }
     },
 })
 

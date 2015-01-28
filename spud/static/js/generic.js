@@ -882,9 +882,6 @@ $.widget('spud.object_detail',  $.spud.infobox, {
         this.loader.on_error.add_listener(this, function() {
             mythis.element.addClass("error")
             mythis.loader = null
-            if (mythis.options.on_error) {
-                mythis.options.on_error()
-            }
         })
         this.loader.load()
     },
@@ -1138,27 +1135,20 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this._setup_loader()
         this._setup_buttons()
 
-        this._ol = null
-        var params = {
-            'on_update': $.proxy(this._loaded, this),
-            'on_error': $.proxy(this._loaded_error, this),
-        }
-
         this._od = $("<div/>").appendTo(this.div)
-        this._object_detail(params, this._od)
+        this._object_detail({}, this._od)
 
-        params = {
+        var params = {
             'child_id': this.options.id + ".child",
             'disabled': this.options.disabled,
         }
         this._ol = $("<div/>").appendTo(this.div)
         this._object_list(params, this._ol)
 
-        var instance = this._od.data('object_detail')
         if (this.options.obj != null) {
-            instance.set(this.options.obj)
+            this.set(this.options.obj)
         } else if (this.options.obj_id != null) {
-            instance.load(this.options.obj_id)
+            this.load(this.options.obj_id)
         }
 
         this._setup_perms(window._perms)
@@ -1241,12 +1231,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         var instance = this._od.data('object_detail')
         instance.set(obj)
 
-        // above function will call on_update where the following
-        // will be done
-        // this._setup_buttons()
-        // this._set_title(this._type_name+": "+obj.title)
-        // this.options.obj = obj
-        // this.options.obj_id = obj.id
+        this._loaded(obj)
     },
 
     load: function(obj_id) {
@@ -1256,8 +1241,24 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
     _load: function(obj_id) {
         this.options.obj = null
         this.options.obj_id = obj_id
-        var instance = this._od.data('object_detail')
-        instance.load(obj_id)
+
+        var mythis = this
+
+        if (this.loader != null) {
+            this.loader.loaded_item.remove_listener(this)
+        }
+
+        this.loader = get_object_loader(this._type, obj_id)
+        this.loader.loaded_item.add_listener(this, function(obj) {
+            mythis.loader = null
+            mythis._loaded(obj)
+        })
+        this.loader.on_error.add_listener(this, function() {
+            mythis.element.addClass("error")
+            mythis.loader = null
+            mythis._loaded_error()
+        })
+        this.loader.load()
     },
 
     _loaded: function(obj) {
@@ -1266,7 +1267,11 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this.options.obj_id = obj.id
         this._set_title(this._type_name + ": " + obj.title)
         this._setup_buttons()
-        var instance = this._ol.data('object_list')
+
+        var instance = this._od.data('object_detail')
+        instance.set(obj)
+
+        instance = this._ol.data('object_list')
         instance.option("criteria", this._get_children_criteria())
     },
 

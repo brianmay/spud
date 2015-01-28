@@ -303,9 +303,6 @@ $.widget('spud.place_detail',  $.spud.object_detail, {
         this.options.obj = place
         this.options.obj_id = place.id
         this.img.image("set", place.cover_photo)
-        if (this.options.on_update) {
-            this.options.on_update(place)
-        }
     },
 })
 

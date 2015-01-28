@@ -321,9 +321,6 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
         this.options.obj = person
         this.options.obj_id = person.id
         this.img.image("set", person.cover_photo)
-        if (this.options.on_update) {
-            this.options.on_update(person)
-        }
     },
 })
 
