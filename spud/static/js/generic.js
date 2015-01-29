@@ -1192,6 +1192,10 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
         this.create_item.toggle(can_create)
         this.change_item.toggle(can_change)
         this.delete_item.toggle(can_delete)
+
+        if (this.options.obj_id != null) {
+            this.load(this.options.obj_id)
+        }
     },
 
     _setup_buttons: function() {
