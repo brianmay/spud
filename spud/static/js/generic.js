@@ -1102,6 +1102,8 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
             .menu()
             .appendTo(this.div)
 
+        var button_div = $("<div/>").appendTo(this.div)
+
         this.prev_button = $("<input/>")
             .attr('type', 'submit')
             .attr('value', '<<')
@@ -1115,7 +1117,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 push_state()
             })
             .button()
-            .appendTo(this.div)
+            .appendTo(button_div)
 
         this.next_button = $("<input/>")
             .attr('type', 'submit')
@@ -1130,7 +1132,7 @@ $.widget('spud.object_detail_screen', $.spud.screen, {
                 push_state()
             })
             .button()
-            .appendTo(this.div)
+            .appendTo(button_div)
 
         this._setup_loader()
         this._setup_buttons()

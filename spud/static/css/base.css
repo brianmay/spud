@@ -26,7 +26,7 @@ ul.menubar .ui-menu-item {
 }
 
 /* SCREEN */
-.screen .close_button {
+.screen .button {
     float: right;
 }
 
@@ -58,6 +58,11 @@ ul.menubar .ui-menu-item {
 .screen .screen_content {
     display: block;
     padding: 10px;
+    height: 400px;
+    display: none;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
 }
 
 .screen.disabled {
@@ -70,6 +75,56 @@ ul.menubar .ui-menu-item {
 }
 .screen.disabled .screen_content {
     display: none;
+}
+
+.maximize .screen.disabled {
+    display: none;
+}
+
+.maximize {
+}
+
+.maximize .screen  {
+    margin: 0px;
+    background: #fff;
+    border: none;
+    border-radius: 0;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.maximize .screen .screen_header {
+    border: none;
+    border-radius: 0;
+    flex: none;
+}
+
+.screen .screen_content > * {
+    flex: none;
+}
+
+.screen .screen_content > .infobox {
+    flex: 0 1 auto;
+}
+
+.screen .screen_content > .photo_list {
+    flex: 0 1 auto;
+}
+
+.maximize .screen .screen_content {
+    display: flex;
+    flex-direction: column;
+    padding: 0px;
+}
+
+.maximize .screen .photo_list {
+    border: none;
 }
 
 .infobox .fields, .ui-dialog .fields {
@@ -116,7 +171,7 @@ ul.menubar .ui-menu-item {
 .photo_item .desc ul { text-align: left; }
 .photo_item .desc ol { text-align: left; }
 
-.photo_list { border:1px solid #666; margin-bottom: 10px; height: 400px; overflow-y: scroll; background: #fff; }
+.photo_list { border:1px solid #666; margin-bottom: 10px; overflow-y: scroll; background: #fff; }
 .photo_list > ul { padding:0; }
 .photo_list .removed { text-decoration: line-through; opacity:0.5; }
 .photo_list .regenerate { background:#CCE; color:#333; }

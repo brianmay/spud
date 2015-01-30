@@ -1152,7 +1152,30 @@ $.widget('spud.screen', $.spud.widget, {
             .addClass("screen_header")
             .appendTo(this.element)
 
+        this.maximize_button = $("<div/>")
+            .addClass("button")
+            .addClass("maximize_button")
+            .text("[M]")
+            .click(function(ev) {
+                void ev
+                mythis.maximize()
+            })
+            .appendTo(header)
+
+        this.unmaximize_button = $("<div/>")
+            .addClass("button")
+            .addClass("unmaximize_button")
+            .text("[R]")
+            .on("click", function(ev) {
+                void ev
+                mythis.unmaximize()
+            })
+            .appendTo(header)
+
+        this._set_maximize_button()
+
         $("<div/>")
+            .addClass("button")
             .addClass("close_button")
             .text("[X]")
             .on("click", function(ev) {
@@ -1186,6 +1209,24 @@ $.widget('spud.screen', $.spud.widget, {
         this.div = $("<div/>")
             .addClass("screen_content")
             .appendTo(this.element)
+    },
+
+    _set_maximize_button: function() {
+        var maximize = $("#content").hasClass("maximize")
+        this.maximize_button.toggle(!maximize)
+        this.unmaximize_button.toggle(maximize)
+    },
+
+    maximize: function() {
+        this.enable()
+        $("#content").addClass("maximize")
+        this._set_maximize_button()
+    },
+
+    unmaximize: function() {
+        this.enable()
+        $("#content").removeClass("maximize")
+        this._set_maximize_button()
     },
 
     toggle: function() {
@@ -1251,6 +1292,7 @@ $.widget('spud.screen', $.spud.widget, {
                 this._enable()
                 push_state()
             } else {
+                this.unmaximize()
                 this._disable()
                 push_state()
             }
