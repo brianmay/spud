@@ -63,14 +63,15 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     'spud',
+    'pipeline',
+    'ajax_select',
+    'rest_framework',
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'ajax_select',
-    'rest_framework',
 )
 
 # South not available for Python 3+ or Django 1.7+
@@ -147,3 +148,39 @@ REST_FRAMEWORK = {
     'PAGINATE_BY': 2,
 }
 ANONYMOUS_USER_ID = -1
+
+###
+# DJANGO PIPELINE
+###
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+PIPELINE_EMBED_PATH = r'img/|images/'
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.csstidy.CSSTidyCompressor'
+PIPELINE_CSS = {
+    'spud': {
+        'source_filenames': (
+            'css/*.css',
+        ),
+        'output_filename': 'min.css',
+        'variant': 'datauri',
+    },
+}
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.slimit.SlimItCompressor'
+PIPELINE_JS = {
+    'spud': {
+        'source_filenames': (
+            'js/jquery.js',
+            'js/jquery-ui.js',
+            'js/jcookie.js',
+            'js/showdown.js',
+            'js/moment-with-locales.js',
+            'js/moment-timezone-with-data.js',
+            'js/base.js',
+            'js/dialog.js',
+            'js/infobox.js',
+            'js/generic.js',
+            'js/*.js',
+        ),
+        'output_filename': 'min.js',
+    }
+}

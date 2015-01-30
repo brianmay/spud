@@ -864,11 +864,14 @@ $.widget('spud.object_detail',  $.spud.infobox, {
     },
 
     load: function(obj_id) {
+        alert("depreciated code1")
         this._setOption("obj_id", obj_id)
     },
 
     _load: function(obj_id) {
         var mythis = this
+
+        alert("depreciated code3")
 
         if (this.loader != null) {
             this.loader.loaded_item.remove_listener(this)
@@ -888,6 +891,7 @@ $.widget('spud.object_detail',  $.spud.infobox, {
 
     _setOption: function( key, value ) {
         if ( key === "obj_id" ) {
+            alert("depreciated code2")
             this._load(value)
         }
         this._super( key, value );
