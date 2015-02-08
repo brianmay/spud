@@ -54,36 +54,6 @@ class ModelSerializer(serializers.ModelSerializer):
 class CharField(f.CharField):
     default_empty_html = None
 
-# class TimezoneField(CharField):
-#     def to_internal_value(self, data):
-#         try:
-#             timezone = pytz.timezone(data)
-#         except pytz.UnknownTimeZoneError:
-#             raise exceptions.ValidationError("Unknown timezone '%s'"
-#                                              % data)
-#         return timezone
-#
-#     def to_representation(self, value):
-#         return str(value)
-#
-#
-# class UtcDateTimeField(f.DateTimeField):
-#     def get_attribute(self, instance):
-#         source, utc_offset = self.source.split(":")
-#         return getattr(instance, source), getattr(instance, utc_offset)
-#
-#     def to_representation(self, value):
-#         dt = value[0]
-#         utc_offset = value[1]
-#
-#         from_tz = pytz.utc
-#         to_tz = pytz.FixedOffset(utc_offset)
-#         to_offset = datetime.timedelta(minutes=utc_offset)
-#         local = from_tz.localize(dt)
-#         local = (local + to_offset).replace(tzinfo=to_tz)
-#
-#         return super(UtcDateTimeField, self).to_representation(local)
-
 
 class PhotoThumbSerializer(ModelSerializer):
     url = f.URLField(source="get_url")
@@ -185,25 +155,6 @@ class AlbumSerializer(ModelSerializer):
         list_serializer_class = ListSerializer
 
 
-# class AlbumListSerializer(ListSerializer):
-#     child = serializers.PrimaryKeyRelatedField(
-#         queryset=models.album.objects.all())
-#
-#     def get_value(self, dictionary):
-#         return dictionary.getlist(self.field_name)
-#
-#     def to_internal_value(self, data):
-#         r = []
-#         for name in data:
-#             try:
-#                 pk = int(name)
-#                 instance = models.album.objects.get(pk=pk)
-#             except ValueError:
-#                 instance = models.album.objects.get_by_name(name)
-#             r.append(instance)
-#         return r
-
-
 class NestedCategorySerializer(ModelSerializer):
     cover_photo = NestedPhotoSerializer(
         source="get_cover_photo", read_only=True)
@@ -232,24 +183,6 @@ class CategorySerializer(ModelSerializer):
     class Meta:
         model = models.category
         list_serializer_class = ListSerializer
-
-
-# class CategoryListSerializer(ListSerializer):
-#     child = CategorySerializer()
-#
-#     def get_value(self, dictionary):
-#         return dictionary.getlist(self.field_name)
-#
-#     def to_internal_value(self, data):
-#         r = []
-#         for name in data:
-#             try:
-#                 pk = int(name)
-#                 instance = models.category.objects.get(pk=pk)
-#             except ValueError:
-#                 instance = models.category.objects.get_by_name(name)
-#             r.append(instance)
-#         return r
 
 
 class NestedPlaceSerializer(ModelSerializer):
@@ -411,10 +344,6 @@ class PersonPkListSerializer(ListSerializer):
     child = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all())
 
-#    def get_value(self, dictionary):
-#        print("aaaa", dictionary)
-#        return dictionary.getlist(self.field_name)
-
     def to_internal_value(self, data):
         r = []
         for index, pk in enumerate(data):
@@ -458,101 +387,10 @@ class FeedbackSerializer(ModelSerializer):
         list_serializer_class = ListSerializer
 
 
-# class PhotoPersonSerializer(ModelSerializer):
-#     class Meta:
-#         model = models.photo_person
-#         fields = ()
-
-
-# class PhotoPersonSerializerTmp(serializers.RelatedField):
-#     read_only = False
-#     many = True
-#
-#     def field_to_native(self, obj, field_name):
-#         if obj is None:
-#             return None
-#
-#         result = []
-#         persons = getattr(obj, field_name)
-#         for p in persons.order_by("photo_person__position").all():
-#             serializer = PersonSerializer(p)
-#             result.append(serializer.data)
-#         return result
-#
-#     def field_from_native(self, data, files, field_name, into):
-#         try:
-#             value = data.getlist(field_name)
-#             if value == []:
-#                 value = self.get_default_value()
-#         except AttributeError:
-#             value = data[field_name]
-#
-#         print value
-#
-#         pa_list = list(into.photo_person_set.all())
-#         position = 1
-#         for pa, person in zip(pa_list, value):
-#             if (pa.position != position or
-#                     pa.person.pk != person.pk):
-#                 pa.position = position
-#                 pa.person = person
-#                 pa.save()
-#             position = position + 1
-#             del pa
-#             del person
-#
-#         # for every value not already in pa_list
-#         for i in xrange(len(pa_list), len(value)):
-#             person = value[i]
-#             models.photo_person.objects.create(
-#                 photo=into, person=person, position=position)
-#             position = position + 1
-#             del i
-#             del person
-#         del position
-#
-#         # for every pa that was not included in values list
-#         for i in xrange(len(value), len(pa_list)):
-#             pa_list[i].delete()
-#             del i
-
-
 class PhotoRelationSerializer(ModelSerializer):
     class Meta:
         model = models.photo_relation
         list_serializer_class = ListSerializer
-
-
-# class PhotoRelationListSerializer(ListSerializer):
-#     child = PhotoRelationSerializer()
-#
-#     def get_attribute(self, obj):
-#         return (obj.relations_1,  obj.relations_2)
-#
-#     def to_internal_value(self, data):
-#         raise NotImplemented()
-#
-#     def to_representation(self, value):
-#         result = []
-#         relations_1, relations_2 = value
-#
-#         for pr in relations_1.all():
-#             r = {
-#                 'id': pr.pk,
-#                 'description': pr.desc_2,
-#                 'photo': pr.photo_2.pk,
-#             }
-#             result.append(r)
-#
-#         for pr in relations_2.all():
-#             r = {
-#                 'id': pr.pk,
-#                 'description': pr.desc_1,
-#                 'photo': pr.photo_1.pk,
-#             }
-#             result.append(r)
-#
-#         return result
 
 
 default_timezone = pytz.timezone(settings.TIME_ZONE)
@@ -596,8 +434,6 @@ class PhotoTitleField(CharField):
 
 
 class PhotoSerializer(ModelSerializer):
-    # albums = AlbumListSerializer()
-    # categorys = CategoryListSerializer()
     orig_url = f.URLField(source="get_orig_url")
 
     title = PhotoTitleField(required=False, allow_null=True)
@@ -623,12 +459,6 @@ class PhotoSerializer(ModelSerializer):
     rem_categorys_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.category.objects.all(), write_only=True,
         many=True, required=False)
-
-    # albums = AlbumSerializer(many=True, read_only=True)
-    # albums_pk = AlbumListSerializer(source="albums", required=False)
-
-    # categorys = CategoryListSerializer(many=True, read_only=True)
-    # categorys_pk = CategoryListSerializer(source="categorys", required=False)
 
     place = PlaceSerializer(read_only=True)
     place_pk = serializers.PrimaryKeyRelatedField(
@@ -657,10 +487,6 @@ class PhotoSerializer(ModelSerializer):
         source="get_thumbs", read_only=True)
     videos = PhotoVideoListSerializer(
         source="get_videos", read_only=True)
-
-#    datetime = UtcDateTimeField(
-#        required=False,
-#        source="datetime:utc_offset")
 
     def validate(self, attrs):
         if 'photo' not in self.initial_data:
@@ -916,18 +742,3 @@ class PhotoSerializer(ModelSerializer):
             'datetime': {'required': False},
         }
         list_serializer_class = PhotoListSerializer
-
-
-# class PhotoAlbumSerializer(ModelSerializer):
-#     class Meta:
-#         model = models.photo_album
-#
-#
-# class PhotoCategorySerializer(ModelSerializer):
-#     class Meta:
-#         model = models.photo_category
-#
-#
-# class PhotoPersonSerializer(ModelSerializer):
-#     class Meta:
-#         model = models.photo_person
