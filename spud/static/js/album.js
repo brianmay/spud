@@ -36,21 +36,12 @@ $.widget('spud.album_search_dialog',  $.spud.form_dialog, {
                 [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
             ["root_only", new boolean_input_field("Root only", false)],
+            ["needs_revision", new boolean_input_field("Needs revision")],
         ]
         this.options.title = "Search albums"
         this.options.description = "Please search for an album."
         this.options.button = "Search"
         this._super();
-    },
-
-    _set: function(criteria) {
-        if (true) {
-            this.add_field(null, "needs_revision",
-                new boolean_input_field("Needs revision"))
-        } else {
-            this.remove_field("needs_revision")
-        }
-        this._super(criteria)
     },
 
     _submit_values: function(values) {
