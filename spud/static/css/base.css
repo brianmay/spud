@@ -30,6 +30,16 @@ body {
     text-decoration: underline;
 }
 
+/* LINKS */
+#header a:link, #header a:visited {
+    text-decoration: none;
+}
+
+#header a:hover, #header a:active {
+    text-decoration: underline;
+    color: #f6a828;
+}
+
 #branding h1 {
     padding: 0 10px;
     font-size: 18px;
@@ -225,7 +235,7 @@ ul.menubar .ui-menu-item {
 .photo_item {
     border: 1px solid #dddddd;
 }
-.photo_item: HOVER {
+.photo_item:HOVER {
     border: 1px solid #000;
 }
 .photo_item .title {
@@ -243,6 +253,12 @@ ul.menubar .ui-menu-item {
 .photo_item .desc ol {
     text-align: left;
 }
+
+.photo_item a {
+    color: #333;
+    text-decoration: none;
+}
+
 
 .photo_list {
     display: flex;
