@@ -148,12 +148,30 @@ class GroupSerializer(ModelSerializer):
         fields = ('id', 'name')
 
 
+class NestedAlbumSerializer(ModelSerializer):
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False, allow_null=True)
+
+    class Meta:
+        model = models.album
+        fields = (
+            'id', 'title', 'cover_photo', 'cover_photo_pk',
+        )
+        list_serializer_class = ListSerializer
+
+
 class AlbumSerializer(ModelSerializer):
     cover_photo = NestedPhotoSerializer(
         source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False, allow_null=True)
+
+    ascendants = NestedAlbumSerializer(
+        source="list_ascendants", many=True, read_only=True)
 
     def set_request(self, request):
         super(AlbumSerializer, self).set_request(request)
@@ -186,12 +204,30 @@ class AlbumSerializer(ModelSerializer):
 #         return r
 
 
+class NestedCategorySerializer(ModelSerializer):
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False, allow_null=True)
+
+    class Meta:
+        model = models.category
+        fields = (
+            'id', 'title', 'cover_photo', 'cover_photo_pk',
+        )
+        list_serializer_class = ListSerializer
+
+
 class CategorySerializer(ModelSerializer):
     cover_photo = NestedPhotoSerializer(
         source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False, allow_null=True)
+
+    ascendants = NestedCategorySerializer(
+        source="list_ascendants", many=True, read_only=True)
 
     class Meta:
         model = models.category
@@ -216,12 +252,30 @@ class CategorySerializer(ModelSerializer):
 #         return r
 
 
+class NestedPlaceSerializer(ModelSerializer):
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        required=False, allow_null=True)
+
+    class Meta:
+        model = models.place
+        fields = (
+            'id', 'title', 'cover_photo', 'cover_photo_pk',
+        )
+        list_serializer_class = ListSerializer
+
+
 class PlaceSerializer(ModelSerializer):
     cover_photo = NestedPhotoSerializer(
         source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False, allow_null=True)
+
+    ascendants = NestedPlaceSerializer(
+        source="list_ascendants", many=True, read_only=True)
 
     def set_request(self, request):
         super(PlaceSerializer, self).set_request(request)

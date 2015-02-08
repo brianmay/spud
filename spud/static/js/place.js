@@ -287,6 +287,7 @@ $.widget('spud.place_detail',  $.spud.object_detail, {
             ["home_of", new link_list_output_field("Home of", "places")],
             ["work_of", new link_list_output_field("Work of", "places")],
             ["notes", new p_output_field("notes")],
+            ["ascendants", new link_list_output_field("Ascendants", "places")],
         ]
         this.loader = null
 

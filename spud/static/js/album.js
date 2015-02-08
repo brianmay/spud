@@ -300,6 +300,7 @@ $.widget('spud.album_detail',  $.spud.object_detail, {
             ["sort_order", new text_output_field("Sort Order")],
             ["revised", new datetime_output_field("Revised")],
             ["description", new p_output_field("Description")],
+            ["ascendants", new link_list_output_field("Ascendants", "albums")],
         ]
         this.loader = null
 

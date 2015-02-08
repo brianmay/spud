@@ -274,6 +274,7 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
             ["sort_name", new text_output_field("Sort Name")],
             ["sort_order", new text_output_field("Sort Order")],
             ["description", new p_output_field("Description")],
+            ["ascendants", new link_list_output_field("Ascendants", "categorys")],
         ]
         this.loader = null
 

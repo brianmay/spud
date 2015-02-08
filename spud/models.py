@@ -121,6 +121,9 @@ class hierarchy_model(base_model):
             for i in self.ascendant_set.filter(position__gt=0):
                 yield i.ascendant
 
+    def list_ascendants(self):
+        return self.get_ascendants(False)
+
     def _ascendants_glue(
             self, instance, position, seen, cache, parent_attributes):
         glue = []
