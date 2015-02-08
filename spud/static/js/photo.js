@@ -671,6 +671,7 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
         this.loader = null
 
         this.img = $("<div></div>")
+            .addClass('subject')
             .image({size: "mid", do_video: true, include_link: false})
             .appendTo(this.element)
 
