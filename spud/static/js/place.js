@@ -60,7 +60,7 @@ $.widget('spud.place_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
-            ["cover_photo", new photo_select_field("Photo", false)],
+            ["cover_photo_pk", new photo_select_field("Photo", false)],
             ["address", new text_input_field("Address", false)],
             ["address2", new text_input_field("Address(ctd)", false)],
             ["city", new text_input_field("City", false)],

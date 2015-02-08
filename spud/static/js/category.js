@@ -61,7 +61,7 @@ $.widget('spud.category_change_dialog',  $.spud.form_dialog, {
         this.options.fields = [
             ["title", new text_input_field("Title", true)],
             ["description", new p_input_field("Description", false)],
-            ["cover_photo", new photo_select_field("Photo", false)],
+            ["cover_photo_pk", new photo_select_field("Photo", false)],
             ["sort_name", new text_input_field("Sort Name", false)],
             ["sort_order", new text_input_field("Sort Order", false)],
             ["parent", new ajax_select_field("Parent", "categorys", false)],

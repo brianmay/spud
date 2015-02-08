@@ -248,15 +248,18 @@ class album(hierarchy_model):
         return errorlist
 
     def get_cover_photo(self):
-        photo = None
+        cphoto = None
         if self.cover_photo is not None:
-            photo = self.cover_photo
+            cphoto = self.cover_photo
         else:
+
+            query = photo.objects.filter(albums__ascendant_set__ascendant=self)
+            query = query.exclude(action='D').reverse()
             try:
-                photo = self.photos.exclude(action='D').reverse()[0]
+                cphoto = query[0]
             except IndexError:
                 pass
-        return photo
+        return cphoto
 
 
 @python_2_unicode_compatible
@@ -296,15 +299,19 @@ class category(hierarchy_model):
         return errorlist
 
     def get_cover_photo(self):
-        photo = None
+        cphoto = None
         if self.cover_photo is not None:
-            photo = self.cover_photo
+            cphoto = self.cover_photo
         else:
+
+            query = photo.objects.filter(
+                categorys__ascendant_set__ascendant=self)
+            query = query.exclude(action='D').reverse()
             try:
-                photo = self.photos.exclude(action='D').reverse()[0]
+                cphoto = query[0]
             except IndexError:
                 pass
-        return photo
+        return cphoto
 
 
 @python_2_unicode_compatible
@@ -354,15 +361,18 @@ class place(hierarchy_model):
         return errorlist
 
     def get_cover_photo(self):
-        photo = None
+        cphoto = None
         if self.cover_photo is not None:
-            photo = self.cover_photo
+            cphoto = self.cover_photo
         else:
+
+            query = photo.objects.filter(place__ascendant_set__ascendant=self)
+            query = query.exclude(action='D').reverse()
             try:
-                photo = self.photos.exclude(action='D').reverse()[0]
+                cphoto = query[0]
             except IndexError:
                 pass
-        return photo
+        return cphoto
 
 
 @python_2_unicode_compatible

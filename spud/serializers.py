@@ -149,10 +149,11 @@ class GroupSerializer(ModelSerializer):
 
 
 class AlbumSerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False)
+        required=False, allow_null=True)
 
     def set_request(self, request):
         super(AlbumSerializer, self).set_request(request)
@@ -186,10 +187,11 @@ class AlbumSerializer(ModelSerializer):
 
 
 class CategorySerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False)
+        required=False, allow_null=True)
 
     class Meta:
         model = models.category
@@ -215,10 +217,11 @@ class CategorySerializer(ModelSerializer):
 
 
 class PlaceSerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False)
+        required=False, allow_null=True)
 
     def set_request(self, request):
         super(PlaceSerializer, self).set_request(request)
@@ -242,10 +245,11 @@ class PersonTitleField(CharField):
 
 class NestedPersonSerializer(ModelSerializer):
     title = PersonTitleField(read_only=True)
-    cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False)
+        required=False, allow_null=True)
 
     class Meta:
         model = models.photo
@@ -257,7 +261,8 @@ class NestedPersonSerializer(ModelSerializer):
 
 class PersonSerializer(ModelSerializer):
     title = PersonTitleField(read_only=True)
-    cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo = NestedPhotoSerializer(
+        source="get_cover_photo", read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
         required=False, allow_null=True)
@@ -391,7 +396,8 @@ class FeedbackSerializer(ModelSerializer):
     title = f.IntegerField(source="id", read_only=True)
     photo = NestedPhotoSerializer(read_only=True)
     photo_pk = serializers.PrimaryKeyRelatedField(
-        queryset=models.photo.objects.all(), source="photo")
+        queryset=models.photo.objects.all(), source="photo",
+        allow_null=True)
 
     class Meta:
         model = models.feedback
