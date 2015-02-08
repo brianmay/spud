@@ -351,6 +351,7 @@ $.widget('spud.place_detail_screen', $.spud.object_detail_screen, {
     _get_photo_criteria: function() {
         return {
             'place': this.options.obj_id,
+            'place_descendants': true,
         }
     },
 

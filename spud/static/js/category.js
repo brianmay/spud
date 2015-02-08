@@ -337,6 +337,7 @@ $.widget('spud.category_detail_screen', $.spud.object_detail_screen, {
     _get_photo_criteria: function() {
         return {
             'category': this.options.obj_id,
+            'category_descendants': true,
         }
     },
 

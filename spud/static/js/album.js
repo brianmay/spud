@@ -362,6 +362,7 @@ $.widget('spud.album_detail_screen', $.spud.object_detail_screen, {
     _get_photo_criteria: function() {
         return {
             'album': this.options.obj_id,
+            'album_descendants': true,
         }
     },
 
