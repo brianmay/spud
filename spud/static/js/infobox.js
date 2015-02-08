@@ -117,6 +117,7 @@ select_output_field.prototype = {
     set: function(value) {
         value = this.options[value]
         this.output.text(value)
+        this.toggle(value != null)
     },
 }
 
@@ -464,7 +465,13 @@ $.widget('spud.infobox', $.spud.widget, {
             }
         })
 
-        this.element.toggleClass("hidden", !visible)
+        if (this.tabs != null) {
+            this.tabs.toggleClass("hidden", !visible)
+        }
+
+        if (this.dl != null) {
+            this.dl.toggleClass("hidden", !visible)
+        }
         return this
     },
 
