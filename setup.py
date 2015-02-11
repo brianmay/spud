@@ -92,5 +92,7 @@ setup(
         "Pillow",
         "six",
         "pytz",
+        "cssmin",
+        "slimit>=0.8.1",
     ],
 )
