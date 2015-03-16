@@ -13,3 +13,8 @@ override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	./run_tests.sh
 endif
+
+.PHONY: override_dh_clean
+override_dh_clean:
+	dh_clean
+	rm -rf tmp

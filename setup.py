@@ -84,10 +84,11 @@ setup(
             ['conf/spud.conf', ]),
     ],
     install_requires=[
-        "python > 2.6",
         "Django >= 1.6",
+        "django-pipeline",
         "South >= 0.7",
         "django-ajax-selects >= 1.1.3",
+        "djangorestframework >= 3.0.5",
         "python-dateutil",
         "Pillow",
         "six",

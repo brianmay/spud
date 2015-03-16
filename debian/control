@@ -5,7 +5,8 @@ Maintainer: Brian May <bam@debian.org>
 Build-Depends: debhelper (>=8.1.0), dh-python, libjs-jquery, libjs-jquery-ui,
  python-all (>= 2.6.6-3~), python-setuptools, python-six, python-flake8,
  python-ajax-select, python-dateutil, python-pil, python-tz, python-django,
- python-django-pipeline, cssmin, slimit
+ python-django-pipeline, python-djangorestframework,
+ cssmin, slimit,
 Homepage: https://github.com/brianmay/spud
 Standards-Version: 3.9.6
 X-Python-Version: >= 2.7
@@ -15,7 +16,8 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  libapache2-mod-wsgi | httpd-wsgi,
  apache2 | httpd,
- libimage-exiftool-perl, libav-tools
+ libimage-exiftool-perl, libav-tools,
+ libjs-jquery,
 Recommends: dcraw, python-ffvideo
 Suggests: python-psycopg2 | python-mysqldb | python-mysql.connector
 Description: Sortable Photo album Using a Django based database
