@@ -880,6 +880,6 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
                 }
             })
         }
-        this._super()
+        this._super(message, data)
     },
 })
