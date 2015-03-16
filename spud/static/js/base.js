@@ -1058,9 +1058,6 @@ $.widget('spud.list_base', $.spud.widget, {
     _create: function() {
         this.ul = $("<ul></ul>")
             .appendTo(this.element)
-
-        this.p = $("<p></p>")
-            .appendTo(this.element)
     },
 
     empty: function() {

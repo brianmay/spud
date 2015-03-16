@@ -52,7 +52,7 @@ PHOTO_ACTION = (
 )
 
 
-class photo_already_exists_error(Exception):
+class PhotoAlreadyExistsError(Exception):
     pass
 
 
@@ -841,7 +841,7 @@ class photo(base_model):
 
             dupfile = dups[0].get_orig_path()
             if filecmp.cmp(old_file, dupfile):
-                raise photo_already_exists_error(
+                raise PhotoAlreadyExistsError(
                     "same photo %d already exists at %s/%s as %s/%s" %
                     (dups[0].pk, new_path, new_name,
                         dups[0].path, dups[0].name))
