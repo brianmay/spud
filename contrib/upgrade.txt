@@ -1,0 +1,4 @@
+DEFAULT_TIMEZONE = UTC
+UPDATE spud_album SET revised=revised::timestamp AT TIME ZONE 'UTC';
+UPDATE spud_photo SET datetime=datetime::timestamp AT TIME ZONE 'UTC';
+UPDATE spud_feedback SET submit_datetime=submit_datetime::timestamp AT TIME ZONE 'UTC';
