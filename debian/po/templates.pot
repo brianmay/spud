@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spud\n"
 "Report-Msgid-Bugs-To: spud@packages.debian.org\n"
-"POT-Creation-Date: 2014-11-06 11:36+1100\n"
+"POT-Creation-Date: 2015-03-17 11:31+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,7 @@ msgstr ""
 #. Type: note
 #. Description
 #: ../spud.templates:2001
-msgid " spud-manage migrate"
+msgid " spud migrate"
 msgstr ""
 
 #. Type: note
@@ -76,15 +76,15 @@ msgstr ""
 #: ../spud.templates:3001
 msgid ""
 " spud-migrate-south\n"
-" spud-manage migrate"
+" spud migrate"
 msgstr ""
 
 #. Type: note
 #. Description
 #: ../spud.templates:3001
 msgid ""
-"Do not run \"spud-manage migrate\" until after the spud-migrate-south has "
-"completed successfully or you may end up with a broken system."
+"Do not run \"spud migrate\" until after the spud-migrate-south has completed "
+"successfully or you may end up with a broken system."
 msgstr ""
 
 #. Type: note

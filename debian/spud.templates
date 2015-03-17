@@ -12,7 +12,7 @@ Type: note
 _Description: Pending Migrations
  You will need to run migrations manually in order to complete the upgrade.
  .
-  spud-manage migrate
+  spud migrate
 
 Template: spud/pending_south_migrations
 Type: note
@@ -21,9 +21,9 @@ _Description: Pending South Migrations
  upgrade.
  .
   spud-migrate-south
-  spud-manage migrate
+  spud migrate
  .
- Do not run "spud-manage migrate" until after the spud-migrate-south has
+ Do not run "spud migrate" until after the spud-migrate-south has
  completed successfully or you may end up with a broken system.
 
 Template: spud/error_migrations
