@@ -277,7 +277,7 @@ class AlbumViewSet(ModelViewSet):
         queryset = models.album.objects.all()
         params = self.request.query_params
 
-        album = _get_object_by_name(params, 'name', models.album)
+        album = _get_object_by_name(params, 'obj', models.album)
         if album is not None:
             queryset = queryset.filter(pk=album.pk)
 
@@ -340,7 +340,7 @@ class CategoryViewSet(ModelViewSet):
         queryset = models.category.objects.all()
         params = self.request.query_params
 
-        category = _get_object_by_name(params, 'name', models.category)
+        category = _get_object_by_name(params, 'obj', models.category)
         if category is not None:
             queryset = queryset.filter(pk=category.pk)
 
@@ -393,7 +393,7 @@ class PlaceViewSet(ModelViewSet):
         queryset = models.place.objects.all()
         params = self.request.query_params
 
-        place = _get_object_by_name(params, 'name', models.place)
+        place = _get_object_by_name(params, 'obj', models.place)
         if place is not None:
             queryset = queryset.filter(pk=place.pk)
 
@@ -451,7 +451,7 @@ class PersonViewSet(ModelViewSet):
         queryset = models.person.objects.all()
         params = self.request.query_params
 
-        person = _get_object_by_name(params, 'name', models.person)
+        person = _get_object_by_name(params, 'obj', models.person)
         if person is not None:
             queryset = queryset.filter(pk=person.pk)
 
@@ -676,7 +676,7 @@ def _get_photo_search(user, params):
 
     queryset = photo_list.filter(search)
 
-    photo = _get_object_by_name(params, 'name', models.photo)
+    photo = _get_object_by_name(params, 'obj', models.photo)
     if photo is not None:
         queryset = queryset.filter(pk=photo.pk)
 
