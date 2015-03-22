@@ -570,19 +570,17 @@ class PhotoSerializer(ModelSerializer):
         finally:
             os.umask(umask)
 
-        # FIXME rotate???
+        m = media.get_media(dst)
 
-        m2m_attrs = self._pop_m2m_attrs(validated_attrs)
+        # (validated_attrs['width'], validated_attrs['height']) = m.get_size()
 
-        m = media.get_media(self.get_orig_path())
-        (validated_attrs['width'], validated_attrs['height']) = m.get_size()
-        validated_attrs['size'] = file_obj.size
 
         exif = m.get_normalized_exif()
         assert 'datetime' not in exif
         exif.update(validated_attrs)
         validated_attrs = exif
 
+        m2m_attrs = self._pop_m2m_attrs(validated_attrs)
         instance = models.photo.objects.create(**validated_attrs)
 
         self._process_m2m(instance, m2m_attrs)
