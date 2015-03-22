@@ -38,7 +38,7 @@ function root_a() {
     var title = "Home"
     var a = $('<a/>')
         .attr('href', root_url())
-        .on('click', function() { do_root(); return false; })
+        .on('click', function() { window.do_root(); return false; })
         .text(title)
     return a
 }

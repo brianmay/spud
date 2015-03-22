@@ -17,14 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-function do_root(session, params) {
+window.do_root = function(session, params) {
     void params
     setup_page(session)
 }
 
-void do_root
-
-function do_list(obj_type, session, params) {
+window.do_list = function(obj_type, session, params) {
     var screen_class
     setup_page(session)
     if (obj_type === "albums") {
@@ -50,9 +48,7 @@ function do_list(obj_type, session, params) {
     }
 }
 
-void do_list
-
-function do_detail(obj_type, obj_id, session, params) {
+window.do_detail = function(obj_type, obj_id, session, params) {
     setup_page(session)
     var screen_class
     if (obj_type === "albums") {
@@ -77,5 +73,3 @@ function do_detail(obj_type, obj_id, session, params) {
         window._do_replace = false
     }
 }
-
-void do_detail

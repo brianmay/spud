@@ -776,7 +776,7 @@ def root(request):
     js_params = json.dumps(request.GET)
     return render_to_response('spud/static.html', {
         'title': 'Root',
-        'onload': "do_root(%s, %s)"
+        'onload': "window.do_root(%s, %s)"
                   % (js_session, js_params),
     }, context_instance=RequestContext(request))
 
@@ -804,7 +804,7 @@ def obj_list(request, obj_type):
     js_params = json.dumps(request.GET)
     return render_to_response('spud/static.html', {
         'title': 'Object list',
-        'onload': "do_list(%s, %s, %s)"
+        'onload': "window.do_list(%s, %s, %s)"
                   % (obj_type, js_session, js_params),
     }, context_instance=RequestContext(request))
 
@@ -818,6 +818,6 @@ def obj_detail(request, obj_type, obj_id):
     js_params = json.dumps(request.GET)
     return render_to_response('spud/static.html', {
         'title': 'Object detail',
-        'onload': "do_detail(%s, %d, %s, %s)"
+        'onload': "window.do_detail(%s, %d, %s, %s)"
                   % (obj_type, obj_id, js_session, js_params),
     }, context_instance=RequestContext(request))
