@@ -93,7 +93,7 @@ def _decode_datetime(title, value):
     return value
 
 
-def _get_string(params, key, default=None):
+def _get_anything(params, key, default=None):
     if isinstance(params, QueryDict):
         value = params.getlist(key)
         if len(value) < 1:
@@ -103,22 +103,32 @@ def _get_string(params, key, default=None):
         return value[0]
     else:
         value = params.get(key, default)
-        if value is not None and not isinstance(value, six.string_types):
-            raise drf_exceptions.ParseError("%s is not None or a string" % key)
         return value
 
 
+def _get_string(params, key, default=None):
+    value = _get_anything(params, key, default)
+    if value is not None and not isinstance(value, six.string_types):
+        raise drf_exceptions.ParseError(
+            "%s value %s is not None or a string" % (key, value))
+    return value
+
+
 def _get_int(params, key, default=None):
-    value = _get_string(params, key)
+    value = _get_anything(params, key)
     if value is None:
         return default
+    if isinstance(value, int):
+        return value
     return _decode_int(key, value)
 
 
 def _get_boolean(params, key, default=None):
-    value = _get_string(params, key)
+    value = _get_anything(params, key)
     if value is None:
         return default
+    if isinstance(value, bool):
+        return value
     return _decode_boolean(key, value)
 
 
