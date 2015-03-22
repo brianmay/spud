@@ -481,7 +481,6 @@ class PhotoSerializer(ModelSerializer):
         required=False, allow_null=True)
 
     feedbacks = FeedbackSerializer(many=True, read_only=True)
-#    relations = PhotoRelationListSerializer(read_only=True)
 
     thumbs = PhotoThumbListSerializer(
         source="get_thumbs", read_only=True)
