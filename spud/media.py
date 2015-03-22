@@ -235,7 +235,9 @@ class media_jpeg(media):
         else:
             raise RuntimeError("rotate amount %s unknown" % (amount))
 
-        subprocess.check_call(["exiftran", "-i", arg, self.get_path()])
+        with open("/dev/null", "w") as null:
+            subprocess.check_call(
+                ["exiftran", "-i", arg, self.get_path()], stderr=null)
 
 
 class media_video(media):
