@@ -78,8 +78,8 @@ def _decode_object_by_name(title, model, name):
     try:
         return model.objects.get_by_name(name)
     except exceptions.NameDoesNotExist as e:
-        raise drf_exceptions.ParseError(
-            "Cannot find album '%s': %s" % (name, e))
+        raise Http404(
+            "Cannot find %s '%s': %s" % (model.__name__, name, e))
 
 
 def _decode_datetime(title, value):
