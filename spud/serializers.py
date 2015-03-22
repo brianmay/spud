@@ -543,6 +543,7 @@ class PhotoSerializer(ModelSerializer):
             raise exceptions.ValidationError(
                 'File already exists at %s.'
                 % ",".join([str(d.id) for d in dups]))
+
         return attrs
 
     def create(self, validated_attrs):
@@ -582,7 +583,6 @@ class PhotoSerializer(ModelSerializer):
 
         m2m_attrs = self._pop_m2m_attrs(validated_attrs)
         instance = models.photo.objects.create(**validated_attrs)
-
         self._process_m2m(instance, m2m_attrs)
 
         print("generating thumbnails  %s/%s" % (path, name))
