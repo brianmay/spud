@@ -655,7 +655,9 @@ def _get_photo_search(user, params):
             search = search & Q(categorys=None)
 
     value = _get_string(params, "action")
-    if value is not None:
+    if not user.is_staff:
+        search = search & Q(action__isnull=True)
+    elif value is not None:
         if value == "none":
             search = search & Q(action__isnull=True)
         elif value == "set":
@@ -670,9 +672,6 @@ def _get_photo_search(user, params):
     value = _get_string(params, "name")
     if value is not None:
         search = search & Q(name=value)
-
-    if not user.is_staff:
-        search = search & Q(action__isnull=True)
 
     queryset = photo_list.filter(search)
 
