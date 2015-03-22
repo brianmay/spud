@@ -26,6 +26,7 @@ import argparse
 import os.path
 from hammock import Hammock
 from requests.auth import HTTPBasicAuth
+from requests import exceptions
 
 from spud import media
 
@@ -62,19 +63,60 @@ class Spud(Hammock):
 def get_albums(spud, albums):
     results = []
     for album in albums:
-        result = spud.albums.GET(params={'name': album})
-        if result["count"] < 1:
-            raise RuntimeError("Cannot find album '%s'" % album)
-        if result["count"] > 1:
-            raise RuntimeError("Multiple matches for album '%s'" % album)
-        results.append(result["results"][0]["id"])
+        if '/' in album:
+            parent, _, create_album = album.rpartition("/")
+        else:
+            parent = album
+            create_album = None
+
+        parent_result = spud.albums.GET(params={'obj': parent})
+        if parent_result["count"] < 1:
+            raise RuntimeError("Cannot find album '%s'" % parent)
+        if parent_result["count"] > 1:
+            raise RuntimeError("Multiple matches for album '%s'" % parent)
+        parent_result = parent_result["results"][0]
+
+        if create_album is not None:
+            try:
+                result = spud.albums.GET(
+                    params={
+                        'obj': create_album,
+                        'parent': parent_result["id"],
+                    })
+
+                print(result)
+                if result["count"] < 1:
+                    raise RuntimeError("Cannot find album '%s'" % album)
+                if result["count"] > 1:
+                    raise RuntimeError("Multiple matches for album '%s'" % album)
+
+                result = result["results"][0]
+
+
+            except exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    result = spud.albums.POST(
+                        data={
+                            'title': create_album,
+                            'parent': parent_result["id"],
+                            'sort_name': 'date',
+                            'sort_order': create_album,
+                        })
+                    print("Created album %s" % result)
+                else:
+                    raise
+        else:
+            result = parent_result
+
+        results.append(result["id"])
+
     return results
 
 
 def get_categorys(spud, categorys):
     results = []
     for category in categorys:
-        result = spud.categorys.GET(params={'name': category})
+        result = spud.categorys.GET(params={'obj': category})
         if result["count"] < 1:
             raise RuntimeError("Cannot find category '%s'" % category)
         if result["count"] > 1:
@@ -84,7 +126,7 @@ def get_categorys(spud, categorys):
 
 
 def get_place(spud, place):
-    result = spud.places.GET(params={'name': place})
+    result = spud.places.GET(params={'obj': place})
     if result["count"] < 1:
         raise RuntimeError("Cannot find place '%s'" % place)
     if result["count"] > 1:
@@ -93,7 +135,7 @@ def get_place(spud, place):
 
 
 def get_person(spud, person):
-    result = spud.persons.GET(params={'name': person})
+    result = spud.persons.GET(params={'obj': person})
     if result["count"] < 1:
         raise RuntimeError("Cannot find person '%s'" % person)
     if result["count"] > 1:
@@ -112,6 +154,44 @@ def get_persons(spud, persons):
     return results
 
 
+def parse_timezone(value):
+    if value[0] == "+" or value[0] == "-":
+        sign, offset = (value[0], value[1:])
+        if len(offset) == 2:
+            offset = int(offset) * 60
+        elif len(offset) == 4:
+            offset = (
+                int(offset[0:2]) * 60 +
+                int(offset[2:4]))
+        else:
+           raise RuntimeError("can't parse timezone %s" % value)
+        if sign == '-':
+            offset = -offset
+        timezone = pytz.FixedOffset(offset)
+        offset = None
+
+    else:
+        try:
+            timezone = pytz.timezone(value)
+        except pytz.UnknownTimeZoneError:
+           raise RuntimeError("unknown timezone %s" % value)
+
+    return timezone
+
+
+def parse_timedelta(time):
+    positive = 1
+    if time[0] == "-":
+        time = time[1:]
+        positive = -1
+
+    hh, mm, ss = time.split(":")
+    hh = int(hh)
+    mm = int(mm)
+    ss = int(ss)
+
+    return datetime.timedelta(seconds=positive*(hh*3600+mm*60+ss))
+
 def import_photo(
         config, spud, src_filename,
         photographer, place, albums, categorys,
@@ -124,14 +204,21 @@ def import_photo(
         raise RuntimeError("source photo doesn't exist at %s" % (src_filename))
 
     m = media.get_media(src_filename)
+    try:
+        print("rotating %s..." % src_filename)
+        m.rotate("auto")
+    except NotImplementedError:
+        pass
+
+    print("processing %s..." % src_filename)
     exif = m.get_normalized_exif()
 
     # set everything without commiting anything
     photo = {}
-    photo['photographer'] = photographer
-    photo['place'] = place
-    photo['albums'] = albums
-    photo['categorys'] = categorys
+    photo['photographer_pk'] = photographer
+    photo['places_pk'] = place
+    photo['albums_pk'] = albums
+    photo['categorys_pk'] = categorys
     photo['level'] = 1
 
     camera = None
@@ -140,50 +227,53 @@ def import_photo(
 
     # get time
     dt = m.get_datetime()
-    print(dt)
+    print("src time %s" % dt)
 
     if dt is None:
         dt = datetime.datetime.fromtimestamp(os.path.getmtime(src_filename))
-        print(dt)
+        print("src time from file %s" % dt)
 
     if src_timezone is None and camera is not None \
             and config.has_section(camera):
         name = config.get(camera, "timezone")
         if name is not None:
-            src_timezone = pytz.timezone(name)
+            src_timezone = parse_timezone(name)
 
     if src_timezone is None:
         name = config.get('defaults', 'timezone')
-        src_timezone = pytz.timezone(name)
+        src_timezone = parse_timezone(name)
 
     dt = src_timezone.localize(dt)
-    print(dt)
+    print("src time with timezone %s (%s)" % (dt, src_timezone))
 
     # adjust time for destination timezone
     if dst_timezone is None:
         name = config.get('defaults', 'timezone')
-        dst_timezone = pytz.timezone(name)
+        dst_timezone = parse_timezone(name)
 
     dt = dt.astimezone(dst_timezone)
-    print(dt)
+    print("adjusted with dst timezone %s (%s)" % (dt, dst_timezone))
 
     # add manual offsets
-    dt += datetime.timedelta(minutes=offset)
+    td = datetime.timedelta(minutes=offset)
+    dt += td
+    print("adjusted with offset %s (%s)" % (dt, td))
+
     if camera is not None and config.has_section(camera):
-        dt += datetime.timedelta(minutes=int(config.get(camera, offset)))
-    print(dt)
+        td = parse_timedelta(config.get(camera, 'offset'))
+        dt += td
+        print("adjusted with camera offset %s (%s)" % (dt, td))
 
     # save the time
-    photo['utc_offset'] = dt.utcoffset().total_seconds() / 60
+    photo['utc_offset'] = int(dt.utcoffset().total_seconds() / 60)
     photo['datetime'] = dt.astimezone(pytz.utc).replace(tzinfo=None)
-
-    print(photo['datetime'], photo['utc_offset'])
 
     if dry_run:
         print("would import %s"
               % (src_filename))
-        print(photo)
         return
+
+    print("uploading photo %s" % photo)
 
     photo = spud.photos.POST(
         data=photo,
@@ -193,7 +283,7 @@ def import_photo(
     )
 
     print("imported  %s as %d"
-          % (src_filename, photo.id))
+          % (src_filename, photo['id']))
 
     return photo
 
@@ -215,7 +305,7 @@ def main():
         help='Add photographer to photos.')
     # parser.add_argument(
     #     '--person', action="append", default=[],
-    #     help='Add photos to person')
+    #     help='Add person to photos')
     parser.add_argument(
         '--config',
         default=os.path.join(os.getenv('HOME'), '.spud.conf'),
@@ -228,9 +318,8 @@ def main():
         help='Files to add')
     args = parser.parse_args()
 
-    anonymous_spud = Spud(
-        None, None,
-        "http://localhost:8000/api", append_slash=True)
+    with open(args.config) as f:
+        pass
 
     config = configparser.RawConfigParser()
     config.read(args.config)
@@ -242,12 +331,6 @@ def main():
     spud = Spud(
         username, password,
         url, append_slash=True)
-
-    print("")
-    print("get_session (anonymous)")
-    print("-----------------------")
-    session = anonymous_spud.session.GET()
-    print(session)
 
     print("")
     print("get_session")
