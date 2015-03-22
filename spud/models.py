@@ -26,6 +26,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 import dateutil.tz
 import os
+import os.path
 import datetime
 import pytz
 import shutil
@@ -706,7 +707,9 @@ class photo(base_model):
 
     def delete(self):
         if self.name:
-            os.unlink(self.get_orig_path())
+            path = self.get_orig_path()
+            if os.path.lexists(path):
+                os.unlink(path)
         for pt in self.photo_thumb_set.all():
             path = pt.get_path()
             if os.path.lexists(path):
