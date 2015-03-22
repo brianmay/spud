@@ -572,6 +572,7 @@ object_list_loader.prototype = {
                 mythis._loading = false
                 mythis._page = page + 1
                 if (!data.next) {
+                    console.log("finished list", mythis._type, criteria, page)
                     mythis._finished = true
                 }
 
@@ -790,7 +791,7 @@ $.widget('spud.object_list', $.spud.photo_list_base, {
         // so we must wait for element to be displayed before we can continue
         // loading
         if (!this.options.disabled && this.loader) {
-            if (this.element.find("ul").height() <
+            if (this.element.prop('scrollHeight') <
                     this.element.scrollTop() + this.element.height() + 200) {
                 this.loader.load_next_page()
             }
