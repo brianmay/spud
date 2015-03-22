@@ -529,7 +529,20 @@ class PhotoSerializer(ModelSerializer):
         except media.UnknownMediaType:
             raise exceptions.ValidationError('File type not supported.')
 
-        raise exceptions.ValidationError('I dont like cats.')
+        from_tz = pytz.utc
+        to_tz = pytz.FixedOffset(attrs['utc_offset'])
+        to_offset = datetime.timedelta(minutes=attrs['utc_offset'])
+        local = from_tz.localize(attrs['datetime'])
+        local = (local + to_offset).replace(tzinfo=to_tz)
+
+        attrs['path'] = "%04d/%02d/%02d" % (local.year, local.month, local.day)
+        attrs['name'] = file_obj.name
+
+        dups, count = models.photo.get_conflicts(attrs['path'], attrs['name'])
+        if count > 0:
+            raise exceptions.ValidationError(
+                'File already exists at %s.'
+                % ",".join([str(d.id) for d in dups]))
         return attrs
 
     def create(self, validated_attrs):
@@ -537,20 +550,11 @@ class PhotoSerializer(ModelSerializer):
 
         file_obj = self.initial_data['photo']
 
-        from_tz = pytz.utc
-        to_tz = pytz.FixedOffset(validated_attrs['utc_offset'])
-        to_offset = datetime.timedelta(minutes=validated_attrs['utc_offset'])
-        local = from_tz.localize(validated_attrs['datetime'])
-        local = (local + to_offset).replace(tzinfo=to_tz)
-
-        path = "%04d/%02d/%02d" % (local.year, local.month, local.day)
-        name = file_obj.name
-
-        validated_attrs['path'] = path
-        validated_attrs['name'] = name
         validated_attrs['size'] = file_obj.size
-        validated_attrs['action'] = 'V'
+        validated_attrs['action'] = None
 
+        path = validated_attrs['path']
+        name = validated_attrs['name']
         dst = os.path.join(settings.IMAGE_PATH, "orig", path, name)
 
         # Go ahead and do stuff
