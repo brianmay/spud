@@ -96,8 +96,13 @@ $.widget('spud.album_change_dialog',  $.spud.form_dialog, {
     },
 
     _submit_values: function(values) {
-        values.revised_utc_offset = values.revised[1]
-        values.revised = values.revised[0]
+        if (values.revised != null) {
+            values.revised_utc_offset = values.revised[1]
+            values.revised = values.revised[0]
+        } else {
+            values.revised_utc_offset = null
+            values.revised = null
+        }
 
         if (this.obj_id != null) {
             this._save("PATCH", this.obj_id, values)
