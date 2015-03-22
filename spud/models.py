@@ -726,12 +726,11 @@ class photo(base_model):
         m.rotate(amount)
 
         (width, height) = m.get_size()
-        size = m.get_bytes()
+        self.size = os.path.getsize(self.get_orig_path())
 
         # FIXME
-        self.width = width
-        self.height = height
-        self.size = size
+        # self.width = width
+        # self.height = height
         return
     rotate.alters_data = True
 
