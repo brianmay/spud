@@ -517,8 +517,8 @@ class PhotoSerializer(ModelSerializer):
             raise exceptions.PermissionDenied(
                 'This site does not support uploads.')
 
-        if file_obj.size > options["maxfilesize"]:
-            raise exceptions.ValidationError('Maximum file size exceeded.')
+        # if file_obj.size > options["maxfilesize"]:
+        #     raise exceptions.ValidationError('Maximum file size exceeded.')
 
         if file_obj.size < options["minfilesize"]:
             raise exceptions.ValidationError('Minimum file size exceeded.')
