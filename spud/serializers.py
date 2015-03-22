@@ -739,7 +739,6 @@ class PhotoSerializer(ModelSerializer):
             'size': {'read_only': True},
             'path': {'read_only': True},
             'name': {'read_only': True},
-            'utc_offset': {'read_only': True},
             'timestamp': {'read_only': True},
 
             'action': {'required': False},
