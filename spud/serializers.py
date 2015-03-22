@@ -585,7 +585,18 @@ class PhotoSerializer(ModelSerializer):
 
         self._process_m2m(instance, m2m_attrs)
 
-        # instance.generate_thumbnails(overwrite=False)
+        print("generating thumbnails  %s/%s" % (path, name))
+        try:
+            instance.generate_thumbnails(overwrite=False)
+        except:
+            instance.action='R'
+            instance.save()
+
+        try:
+            instance.generate_videos(overwrite=False)
+        except:
+            instance.action='V'
+            instance.save()
 
         print("imported  %s/%s as %d" % (path, name, instance.pk))
 
