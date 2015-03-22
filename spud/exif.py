@@ -50,4 +50,12 @@ class ExifTool(object):
         return output[:-len(self.sentinel)]
 
     def get_metadata(self, *filenames):
-        return json.loads(self.execute("-G", "-j", "-n", *filenames))
+        exif = json.loads(self.execute("-G", "-j", "-n", *filenames))
+        assert len(exif) == 1
+
+        new_exif = {}
+        for key, value in exif[0].iteritems():
+            if value != "undef":
+                new_exif[key] = value
+
+        return new_exif

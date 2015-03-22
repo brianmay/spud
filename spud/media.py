@@ -72,8 +72,7 @@ class media:
         path = self.get_path()
         with spud.exif.ExifTool() as e:
             exif = e.get_metadata(path)
-        assert(len(exif) == 1)
-        return exif[0]
+        return exif
 
     def get_datetime(self):
         exif = self.get_exif()
