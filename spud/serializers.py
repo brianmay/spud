@@ -434,7 +434,7 @@ class PhotoTitleField(CharField):
 
 
 class PhotoSerializer(ModelSerializer):
-    orig_url = f.URLField(source="get_orig_url")
+    orig_url = f.URLField(source="get_orig_url", read_only=True)
 
     title = PhotoTitleField(required=False, allow_null=True)
 
