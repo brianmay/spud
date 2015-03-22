@@ -131,7 +131,7 @@ class media:
         return (thumb_width, thumb_height)
 
     def rotate(self, amount):
-        raise RuntimeError("rotate not implemented")
+        raise NotImplementedError("rotate not implemented")
 
     def is_video(self):
         return False
