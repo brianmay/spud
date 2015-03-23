@@ -212,8 +212,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('desc_1', models.CharField(max_length=384)),
                 ('desc_2', models.CharField(max_length=384)),
-                ('photo_1', models.ForeignKey(related_name='relations_1', db_column=b'photo_id_1', to='spud.photo')),
-                ('photo_2', models.ForeignKey(related_name='relations_2', db_column=b'photo_id_2', to='spud.photo')),
+                ('photo_1', models.ForeignKey(related_name='relations_1', db_column='photo_id_1', to='spud.photo')),
+                ('photo_2', models.ForeignKey(related_name='relations_2', db_column='photo_id_2', to='spud.photo')),
             ],
             options={
                 'abstract': False,
