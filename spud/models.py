@@ -664,7 +664,7 @@ class photo(base_model):
             (shortname, _) = os.path.splitext(name)
             return os.path.join(
                 settings.IMAGE_PATH, "video",
-                size, path, shortname + extension)
+                size, path, shortname + "." + extension)
         else:
             raise RuntimeError("unknown image size %s" % (size))
 
