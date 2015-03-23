@@ -242,12 +242,30 @@ class media_jpeg(media):
 
 class media_video(media):
 
-    def create_thumbnail(self, dst_path, max_size):
-        import ffvideo
+    def _get_ffprobe_vs(self):
         path = self.get_path()
-        vs = ffvideo.VideoStream(path)
-        image = vs.get_frame_at_sec(0).image()
-        return self._create_thumbnail(dst_path, max_size, image)
+        videometadata = spud.exif.ffprobe(path)
+
+        vs = []
+        for stream in videometadata['streams']:
+            if stream['codec_type'] == "video":
+                vs.append(stream)
+
+        assert len(vs) == 1
+        return vs[0]
+
+    def create_thumbnail(self, dst_path, max_size):
+        path = self.get_path()
+
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            subprocess.check_call([
+                "ffmpeg", "-v", "quiet", "-y", "-ss", "0",
+                "-i",  path, "-vframes",  "1", "-f", "image2", tmp_file.name])
+
+            image = Image.open(tmp_file.name)
+            rc = self._create_thumbnail(dst_path, max_size, image)
+
+        return rc
 
     def create_video(self, dst_path, size, format):
         width, height = self.get_size()
@@ -291,10 +309,10 @@ class media_video(media):
             return None
 
     def get_size(self):
-        import ffvideo
-        path = self.get_path()
-        vs = ffvideo.VideoStream(path)
-        return vs.frame_width, vs.frame_height
+        vs = self._get_ffprobe_vs(self)
+        width = int(vs['width'])
+        height = int(vs['height'])
+        return width, height
 
     def is_video(self):
         return True

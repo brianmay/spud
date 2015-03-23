@@ -18,7 +18,7 @@ Depends: ${misc:Depends}, ${python:Depends},
  apache2 | httpd,
  libimage-exiftool-perl, libav-tools,
  libjs-jquery,
-Recommends: dcraw, python-ffvideo
+Recommends: dcraw
 Suggests: python-psycopg2 | python-mysqldb | python-mysql.connector
 Description: Sortable Photo album Using a Django based database
  A database for photos and videos. Search photos by exif information, albums,
