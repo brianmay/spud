@@ -594,7 +594,7 @@ class PhotoSerializer(ModelSerializer):
         try:
             instance.generate_videos(overwrite=False)
         except:
-            instance.action='V'
+            instance.action='R'
             instance.save()
 
         print("imported  %s/%s as %d" % (path, name, instance.pk))

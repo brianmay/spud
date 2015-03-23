@@ -115,9 +115,7 @@ $.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
                 ["action", new select_input_field("Action", [
                     ["", "no action"],
                     ["D", "delete"],
-                    ["S", "regenerate size"],
-                    ["R", "regenerate thumbnails"],
-                    ["V", "regenerate video"],
+                    ["R", "regenerate thumbnails & video"],
                     ["M", "move photo"],
                     ["auto", "rotate automatic"],
                     ["90", "rotate 90 degrees clockwise"],
@@ -192,9 +190,7 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
                 ["action", new select_input_field("Action", [
                     ["none", "no action"],
                     ["D", "delete"],
-                    ["S", "regenerate size"],
-                    ["R", "regenerate thumbnails"],
-                    ["V", "regenerate video"],
+                    ["R", "regenerate thumbnails & video"],
                     ["M", "move photo"],
                     ["auto", "rotate automatic"],
                     ["90", "rotate 90 degrees clockwise"],
