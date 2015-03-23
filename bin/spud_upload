@@ -86,9 +86,11 @@ def get_albums(spud, albums):
 
                 print(result)
                 if result["count"] < 1:
-                    raise RuntimeError("Cannot find album '%s'" % album)
+                    raise RuntimeError(
+                        "Cannot find album '%s'" % album)
                 if result["count"] > 1:
-                    raise RuntimeError("Multiple matches for album '%s'" % album)
+                    raise RuntimeError(
+                        "Multiple matches for album '%s'" % album)
 
                 result = result["results"][0]
 
@@ -164,7 +166,7 @@ def parse_timezone(value):
                 int(offset[0:2]) * 60 +
                 int(offset[2:4]))
         else:
-           raise RuntimeError("can't parse timezone %s" % value)
+            raise RuntimeError("can't parse timezone %s" % value)
         if sign == '-':
             offset = -offset
         timezone = pytz.FixedOffset(offset)
@@ -174,7 +176,7 @@ def parse_timezone(value):
         try:
             timezone = pytz.timezone(value)
         except pytz.UnknownTimeZoneError:
-           raise RuntimeError("unknown timezone %s" % value)
+            raise RuntimeError("unknown timezone %s" % value)
 
     return timezone
 
@@ -318,7 +320,7 @@ def main():
         help='Files to add')
     args = parser.parse_args()
 
-    with open(args.config) as f:
+    with open(args.config):
         pass
 
     config = configparser.RawConfigParser()
