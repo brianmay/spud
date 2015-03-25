@@ -16,7 +16,7 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  libapache2-mod-wsgi | httpd-wsgi,
  apache2 | httpd,
- libimage-exiftool-perl, libav-tools,
+ libimage-exiftool-perl, libav-tools, exiftran,
  libjs-jquery,
 Recommends: dcraw
 Suggests: python-psycopg2 | python-mysqldb | python-mysql.connector
