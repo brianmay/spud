@@ -24,40 +24,18 @@ import datetime
 import pytz
 import argparse
 import os.path
-from hammock import Hammock
+import beanbag.v2 as beanbag
+from beanbag.v2 import GET, POST
+from beanbag.bbexcept import BeanBagException
+from requests import Session
 from requests.auth import HTTPBasicAuth
-from requests import exceptions
+from requests import exceptions, Request
 
 from spud import media
 
 
-class Spud(Hammock):
-    def __init__(self, username, password, *args, **kwargs):
-        if username:
-            self._auth = HTTPBasicAuth(username, password)
-        super(Spud, self).__init__(*args, **kwargs)
-
-    def _request(self, *args, **kwargs):
-        if 'auth' not in kwargs:
-            kwargs['auth'] = self._auth
-        result = super(Spud, self)._request(*args, **kwargs)
-        if result.status_code == 400 or result.status_code == 403:
-            data = result.json()
-            raise RuntimeError(data)
-        with open("errors.html", "w") as f:
-            f.write(result.text)
-        result.raise_for_status()
-        data = result.json()
-        return data
-
-    def POST(self, *args, **kwargs):
-        cookies = self._session.cookies
-        if 'csrftoken' in cookies:
-            csrf_token = cookies['csrftoken']
-            if 'data' not in kwargs:
-                kwargs['data'] = {}
-            kwargs['data']['csrfmiddlewaretoken'] = csrf_token
-        return super(Spud, self).POST(*args, **kwargs)
+class BeanBag(beanbag.BeanBag):
+    pass
 
 
 def get_albums(spud, albums):
@@ -69,7 +47,7 @@ def get_albums(spud, albums):
             parent = album
             create_album = None
 
-        parent_result = spud.albums.GET(params={'obj': parent})
+        parent_result = GET(spud.albums(obj=parent))
         if parent_result["count"] < 1:
             raise RuntimeError("Cannot find album '%s'" % parent)
         if parent_result["count"] > 1:
@@ -78,11 +56,10 @@ def get_albums(spud, albums):
 
         if create_album is not None:
             try:
-                result = spud.albums.GET(
-                    params={
-                        'obj': create_album,
-                        'parent': parent_result["id"],
-                    })
+                result = GET(spud.albums(
+                    obj=create_album,
+                    parent=parent_result["id"],
+                ))
 
                 print(result)
                 if result["count"] < 1:
@@ -94,11 +71,11 @@ def get_albums(spud, albums):
 
                 result = result["results"][0]
 
-
             except exceptions.HTTPError as e:
                 if e.response.status_code == 404:
-                    result = spud.albums.POST(
-                        data={
+                    result = POST(
+                        spud.albums,
+                        {
                             'title': create_album,
                             'parent': parent_result["id"],
                             'sort_name': 'date',
@@ -118,7 +95,7 @@ def get_albums(spud, albums):
 def get_categorys(spud, categorys):
     results = []
     for category in categorys:
-        result = spud.categorys.GET(params={'obj': category})
+        result = GET(spud.categorys(obj=category))
         if result["count"] < 1:
             raise RuntimeError("Cannot find category '%s'" % category)
         if result["count"] > 1:
@@ -128,7 +105,7 @@ def get_categorys(spud, categorys):
 
 
 def get_place(spud, place):
-    result = spud.places.GET(params={'obj': place})
+    result = GET(spud.places(obj=place))
     if result["count"] < 1:
         raise RuntimeError("Cannot find place '%s'" % place)
     if result["count"] > 1:
@@ -137,7 +114,7 @@ def get_place(spud, place):
 
 
 def get_person(spud, person):
-    result = spud.persons.GET(params={'obj': person})
+    result = GET(spud.persons(obj=person))
     if result["count"] < 1:
         raise RuntimeError("Cannot find person '%s'" % person)
     if result["count"] > 1:
@@ -152,7 +129,7 @@ def get_persons(spud, persons):
             results.append("unknown")
             continue
 
-        results.append(get_person(person))
+        results.append(get_person(spud, person))
     return results
 
 
@@ -193,6 +170,7 @@ def parse_timedelta(time):
     ss = int(ss)
 
     return datetime.timedelta(seconds=positive*(hh*3600+mm*60+ss))
+
 
 def import_photo(
         config, spud, src_filename,
@@ -277,11 +255,12 @@ def import_photo(
 
     print("uploading photo %s" % photo)
 
-    photo = spud.photos.POST(
-        data=photo,
-        files={
-            'photo':
-            open(src_filename, 'rb')}
+    photo = POST(
+        spud.photos,
+        Request(
+            data=photo,
+            files={'photo': open(src_filename, 'rb')}
+        )
     )
 
     print("imported  %s as %d"
@@ -330,66 +309,79 @@ def main():
     password = config.get("spud", "password")
     url = config.get("spud", "url")
 
-    spud = Spud(
-        username, password,
-        url, append_slash=True)
+    session = Session()
+    session.auth = HTTPBasicAuth(username, password)
+    spud = BeanBag(url, session=session, ext="/")
 
-    print("")
-    print("get_session")
-    print("-----------")
-    session = spud.session.GET()
-    print(session)
-
-    print("")
-    print("get_album")
-    print("---------")
-    albums = get_albums(spud, args.album)
-    print(albums)
-
-    print("")
-    print("get_category")
-    print("------------")
-    categorys = get_categorys(spud, args.category)
-    print(categorys)
-
-    place = None
-    if args.place:
+    try:
         print("")
-        print("get_place")
+        print("get_session")
+        print("-----------")
+        session = GET(spud.session, {'meow': 100})
+        print(session)
+
+        print("")
+        print("get_album")
         print("---------")
-        place = get_place(spud, args.place)
-        print(place)
+        albums = get_albums(spud, args.album)
+        print(albums)
 
-    # print("")
-    # print("get_persons")
-    # print("------------")
-    # persons = get_persons(spud, args.person)
-    # print(persons)
-
-    photographer = None
-    if args.photographer:
         print("")
-        print("get_photographer")
+        print("get_category")
         print("------------")
-        photographer = get_person(spud, args.photographer)
-        print(photographer)
+        categorys = get_categorys(spud, args.category)
+        print(categorys)
 
-    # print("")
-    # print("get_photos")
-    # print("---------")
-    # photos = spud.photos.GET()
-    # print(photos)
-    # return
+        place = None
+        if args.place:
+            print("")
+            print("get_place")
+            print("---------")
+            place = get_place(spud, args.place)
+            print(place)
 
-    src_timezone = None
-    dst_timezone = None
-    offset = 0
+        # print("")
+        # print("get_persons")
+        # print("------------")
+        # persons = get_persons(spud, args.person)
+        # print(persons)
 
-    for filename in args.files:
-        import_photo(
-            config, spud, filename,
-            photographer, place, albums, categorys,
-            src_timezone, dst_timezone, offset, args.dry_run)
+        photographer = None
+        if args.photographer:
+            print("")
+            print("get_photographer")
+            print("------------")
+            photographer = get_person(spud, args.photographer)
+            print(photographer)
+
+        # print("")
+        # print("get_photos")
+        # print("---------")
+        # photos = spud.photos.GET()
+        # print(photos)
+        # return
+
+        src_timezone = None
+        dst_timezone = None
+        offset = 0
+
+        for filename in args.files:
+            import_photo(
+                config, spud, filename,
+                photographer, place, albums, categorys,
+                src_timezone, dst_timezone, offset, args.dry_run)
+    except BeanBagException as e:
+        json = e.msg.json()
+        if json is not None:
+            if 'detail' in json:
+                print("Server error: %s" % json['detail'])
+            else:
+                print("Server error: %s" % json)
+            exit(1)
+        else:
+            print("Server error:", e.msg)
+            # print("Error:", e.msg.content)
+        raise
 
     return
 
