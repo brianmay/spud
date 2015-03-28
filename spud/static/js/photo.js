@@ -590,19 +590,14 @@ $.widget('spud.photo_list', $.spud.object_list, {
 
     _create_li: function(photo) {
         var details = []
-        details.push($("<div/>").text(photo.datetime))
+
+        var datetime = new moment.utc(photo.datetime)
+        datetime.zone(-photo.utc_offset)
+        datetime = datetime.format("YYYY-MM-DD hh:mm")
+
+        details.push($("<div/>").text(datetime))
         if (photo.place != null) {
             details.push($("<div/>").text(photo.place.title))
-        }
-        if (photo.persons.length > 0) {
-            var persons = $.map(photo.persons, function(person) {
-                if (person != null) {
-                    return person.title
-                } else {
-                    return "Unknown"
-                }
-            })
-            details.push($("<div/>").text(persons.join(", ")))
         }
         var a = this._photo_a(photo)
         var li = this._super(photo, photo.relation || photo.title, details, photo.description, a)

@@ -50,13 +50,17 @@ function _feedback_html(feedback, feedback_a, include_children, include_photo, i
             .appendTo(div)
 
     } else {
-        var datetime
+        var datetime = new moment.utc(feedback.submit_datetime)
+        datetime.zone(-feedback.utc_offset)
+        datetime = datetime.format("dddd, MMMM Do YYYY, h:mm:ss a")
+
+        var datetime_node
         if (include_links) {
-            datetime = feedback_a(feedback)
+            datetime_node = feedback_a(feedback)
         } else {
-            datetime = $("<span></span>")
+            datetime_node = $("<span></span>")
         }
-        datetime.text("datetime" + feedback.submit_datetime.title)
+        datetime_node.text(datetime)
 
         if (include_photo) {
             $("<div />")
@@ -67,7 +71,7 @@ function _feedback_html(feedback, feedback_a, include_children, include_photo, i
         $("<div></div>")
             .addClass("title")
             .text("Response by " + user + " at ")
-            .append(datetime)
+            .append(datetime_node)
             .appendTo(div)
 
         $("<div></div>")

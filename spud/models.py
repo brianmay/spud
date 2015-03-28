@@ -99,9 +99,17 @@ class hierarchy_model(base_model):
         abstract = True
 
     def get_descendants(self, include_self):
+        queryset = self.descendant_set.all()
+        queryset = queryset.select_related('cover_photo')
+        queryset = queryset.prefetch_related(
+            'descendant__cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related(
+            'descendant__cover_photo__photo_video_set')
+
         if include_self:
             results = 0
-            for i in self.descendant_set.all():
+
+            for i in queryset:
                 results = results + 1
                 yield i.descendant
             # if descendants list is length 0 it is invalid,
@@ -109,15 +117,26 @@ class hierarchy_model(base_model):
             if results == 0:
                 yield self
         else:
-            for i in self.descendant_set.filter(position__gt=0):
+            for i in queryset.filter(position__gt=0):
                 yield i.descendant
 
     def get_ascendants(self, include_self):
+        queryset = self.ascendant_set.all()
+        queryset = queryset.select_related('cover_photo')
+        queryset = queryset.prefetch_related(
+            'ascendant__cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related(
+            'ascendant__cover_photo__photo_video_set')
+
+        for i in queryset.all():
+            print(i.position, i.ascendant.pk)
+        return
+
         if include_self:
-            for i in self.ascendant_set.all():
+            for i in queryset.all():
                 yield i.ascendant
         else:
-            for i in self.ascendant_set.filter(position__gt=0):
+            for i in queryset.filter(position__gt=0):
                 yield i.ascendant
 
     def list_ascendants(self):
@@ -445,10 +464,18 @@ class person(hierarchy_model):
         super(person, self).save(*args, **kwargs)
         self.fix_ascendants()
 
+    def _queryset(self):
+        queryset = person.objects.all()
+        queryset = queryset.select_related(
+            'cover_photo', 'mother', 'father', 'spouse', 'home', 'work')
+        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+        return queryset
+
     # spouses
 
     def spouses(self):
-        return person.objects.filter(
+        return self._queryset().filter(
             Q(pk=self.spouse_id) |
             Q(spouse__id=self.pk)
         )
@@ -457,7 +484,7 @@ class person(hierarchy_model):
 
     def grandparents(self):
         parents = self.parents()
-        return person.objects.filter(
+        return self._queryset().filter(
             Q(father_of__in=parents)
             | Q(mother_of__in=parents))
 
@@ -466,7 +493,7 @@ class person(hierarchy_model):
     def uncles_aunts(self):
         parents = [i.pk for i in self.parents()]
         grandparents = self.grandparents()
-        return person.objects.filter(
+        return self._queryset().filter(
             Q(father__in=grandparents)
             | Q(mother__in=grandparents)).exclude(pk__in=parents)
 
@@ -482,29 +509,29 @@ class person(hierarchy_model):
 
     def siblings(self):
         parents = self.parents()
-        return person.objects.filter(
+        return self._queryset().filter(
             Q(father__in=parents) | Q(mother__in=parents)).exclude(pk=self.pk)
 
     def cousins(self):
         parents = self.uncles_aunts()
-        return person.objects.filter(
+        return self._queryset().filter(
             Q(father__in=parents) | Q(mother__in=parents))
 
     # next generation
 
     def children(self):
-        return person.objects.filter(Q(father=self) | Q(mother=self))
+        return self._queryset().filter(Q(father=self) | Q(mother=self))
 
     def nephews_nieces(self):
         parents = self.siblings()
-        return person.objects.filter(
+        return self._queryset().filter(
             Q(father__in=parents) | Q(mother__in=parents))
 
     # grand children generation
 
     def grandchildren(self):
         children = self.children()
-        return person.objects.filter(
+        return self._queryset().filter(
             Q(father__in=children) | Q(mother__in=children))
 
     def get_cover_photo(self):

@@ -25,6 +25,7 @@ import datetime
 from django.db.models import Max
 from django.conf import settings
 from django.contrib.auth.models import User, Group
+
 from rest_framework import serializers, exceptions
 from rest_framework import fields as f
 
@@ -91,7 +92,28 @@ class PhotoVideoListSerializer(ListSerializer):
         return result
 
 
+class PhotoTitleField(CharField):
+    def get_attribute(self, obj):
+        value = super(PhotoTitleField, self).get_attribute(obj)
+        if not value:
+            value = obj.name
+        return value
+
+
+class NestedPhotoPlaceSerializer(ModelSerializer):
+    class Meta:
+        model = models.place
+        fields = (
+            'id', 'title',
+        )
+        list_serializer_class = ListSerializer
+
+
 class NestedPhotoSerializer(ModelSerializer):
+    title = PhotoTitleField(required=False, allow_null=True)
+
+    place = NestedPhotoPlaceSerializer(read_only=True)
+
     thumbs = PhotoThumbListSerializer(
         source="get_thumbs", read_only=True)
     videos = PhotoVideoListSerializer(
@@ -100,7 +122,7 @@ class NestedPhotoSerializer(ModelSerializer):
     class Meta:
         model = models.photo
         fields = (
-            'id', 'title', 'description', 'place',
+            'id', 'title', 'description', 'datetime', 'utc_offset', 'place',
             'thumbs', 'videos',
         )
 
@@ -119,11 +141,11 @@ class GroupSerializer(ModelSerializer):
 
 
 class NestedAlbumSerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     class Meta:
         model = models.album
@@ -134,11 +156,11 @@ class NestedAlbumSerializer(ModelSerializer):
 
 
 class AlbumSerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     ascendants = NestedAlbumSerializer(
         source="list_ascendants", many=True, read_only=True)
@@ -156,11 +178,11 @@ class AlbumSerializer(ModelSerializer):
 
 
 class NestedCategorySerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     class Meta:
         model = models.category
@@ -171,11 +193,11 @@ class NestedCategorySerializer(ModelSerializer):
 
 
 class CategorySerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     ascendants = NestedCategorySerializer(
         source="list_ascendants", many=True, read_only=True)
@@ -186,11 +208,11 @@ class CategorySerializer(ModelSerializer):
 
 
 class NestedPlaceSerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     class Meta:
         model = models.place
@@ -201,11 +223,11 @@ class NestedPlaceSerializer(ModelSerializer):
 
 
 class PlaceSerializer(ModelSerializer):
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     ascendants = NestedPlaceSerializer(
         source="list_ascendants", many=True, read_only=True)
@@ -232,11 +254,11 @@ class PersonTitleField(CharField):
 
 class NestedPersonSerializer(ModelSerializer):
     title = PersonTitleField(read_only=True)
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     class Meta:
         model = models.photo
@@ -248,11 +270,11 @@ class NestedPersonSerializer(ModelSerializer):
 
 class PersonSerializer(ModelSerializer):
     title = PersonTitleField(read_only=True)
-    cover_photo = NestedPhotoSerializer(
-        source="get_cover_photo", read_only=True)
+    cover_photo = NestedPhotoSerializer(read_only=True)
     cover_photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="cover_photo",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     home = PlaceSerializer(read_only=True)
     home_pk = serializers.PrimaryKeyRelatedField(
@@ -335,7 +357,7 @@ class PersonListSerializer(ListSerializer):
     def to_representation(self, value):
         result = []
 
-        for pp in value.order_by("position"):
+        for pp in value.all():
             result.append(self.child.to_representation(pp.person))
         return result
 
@@ -370,7 +392,7 @@ class PersonPkListSerializer(ListSerializer):
     def to_representation(self, value):
         result = []
 
-        for pp in value.order_by("position"):
+        for pp in value.all():
             result.append(pp.person_id)
         return result
 
@@ -380,7 +402,8 @@ class FeedbackSerializer(ModelSerializer):
     photo = NestedPhotoSerializer(read_only=True)
     photo_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.photo.objects.all(), source="photo",
-        allow_null=True)
+        allow_null=True,
+        style={'base_template': 'input.html'})
 
     class Meta:
         model = models.feedback
@@ -425,14 +448,6 @@ class PhotoListSerializer(ListSerializer):
         return results
 
 
-class PhotoTitleField(CharField):
-    def get_attribute(self, obj):
-        value = super(PhotoTitleField, self).get_attribute(obj)
-        if not value:
-            value = obj.name
-        return value
-
-
 class PhotoSerializer(ModelSerializer):
     orig_url = f.URLField(source="get_orig_url", read_only=True)
 
@@ -441,29 +456,36 @@ class PhotoSerializer(ModelSerializer):
     albums = AlbumSerializer(many=True, read_only=True)
     albums_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.album.objects.all(), source="albums",
-        many=True, required=False)
+        many=True, required=False,
+        style={'base_template': 'input.html'})
     add_albums_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.album.objects.all(), write_only=True,
-        many=True, required=False)
+        many=True, required=False,
+        style={'base_template': 'input.html'})
     rem_albums_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.album.objects.all(), write_only=True,
-        many=True, required=False)
+        many=True, required=False,
+        style={'base_template': 'input.html'})
 
     categorys = CategorySerializer(many=True, read_only=True)
     categorys_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.category.objects.all(), source="categorys",
-        many=True, required=False)
+        many=True, required=False,
+        style={'base_template': 'input.html'})
     add_categorys_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.category.objects.all(), write_only=True,
-        many=True, required=False)
+        many=True, required=False,
+        style={'base_template': 'input.html'})
     rem_categorys_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.category.objects.all(), write_only=True,
-        many=True, required=False)
+        many=True, required=False,
+        style={'base_template': 'input.html'})
 
     place = PlaceSerializer(read_only=True)
     place_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.place.objects.all(), source="place",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     persons = PersonListSerializer(
         child=NestedPersonSerializer(),
@@ -478,7 +500,8 @@ class PhotoSerializer(ModelSerializer):
     photographer = NestedPersonSerializer(read_only=True)
     photographer_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="photographer",
-        required=False, allow_null=True)
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
 
     feedbacks = FeedbackSerializer(many=True, read_only=True)
 
@@ -574,7 +597,6 @@ class PhotoSerializer(ModelSerializer):
 
         # (validated_attrs['width'], validated_attrs['height']) = m.get_size()
 
-
         exif = m.get_normalized_exif()
         assert 'datetime' not in exif
         exif.update(validated_attrs)
@@ -588,13 +610,13 @@ class PhotoSerializer(ModelSerializer):
         try:
             instance.generate_thumbnails(overwrite=False)
         except:
-            instance.action='R'
+            instance.action = 'R'
             instance.save()
 
         try:
             instance.generate_videos(overwrite=False)
         except:
-            instance.action='R'
+            instance.action = 'R'
             instance.save()
 
         print("imported  %s/%s as %d" % (path, name, instance.pk))

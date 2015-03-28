@@ -274,7 +274,11 @@ class AlbumViewSet(ModelViewSet):
     serializer_class = serializers.AlbumSerializer
 
     def get_queryset(self):
-        queryset = models.album.objects.all()
+        queryset = self.queryset
+        queryset = queryset.select_related('cover_photo')
+        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+
         params = self.request.query_params
 
         album = _get_object_by_name(params, 'obj', models.album)
@@ -337,7 +341,11 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = serializers.CategorySerializer
 
     def get_queryset(self):
-        queryset = models.category.objects.all()
+        queryset = self.queryset
+        queryset = queryset.select_related('cover_photo')
+        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+
         params = self.request.query_params
 
         category = _get_object_by_name(params, 'obj', models.category)
@@ -390,7 +398,11 @@ class PlaceViewSet(ModelViewSet):
     serializer_class = serializers.PlaceSerializer
 
     def get_queryset(self):
-        queryset = models.place.objects.all()
+        queryset = self.queryset
+        queryset = queryset.select_related('cover_photo')
+        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+
         params = self.request.query_params
 
         place = _get_object_by_name(params, 'obj', models.place)
@@ -445,10 +457,24 @@ class PersonViewSet(ModelViewSet):
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = models.person.objects.all()
-    serializer_class = serializers.PersonSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            # PersonSerializer too slow for lists
+            return serializers.NestedPersonSerializer
+        else:
+            return serializers.PersonSerializer
 
     def get_queryset(self):
-        queryset = models.person.objects.all()
+        queryset = self.queryset
+        queryset = queryset.select_related('cover_photo')
+        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+
+        if self.action != 'list':
+            queryset = queryset.select_related(
+                'mother', 'father', 'spouse', 'home', 'work')
+
         params = self.request.query_params
 
         person = _get_object_by_name(params, 'obj', models.person)
@@ -541,170 +567,213 @@ class FeedbackViewSet(ModelViewSet):
         return queryset
 
 
-def _get_photo_search(user, params):
-    search = Q()
-    photo_list = models.photo.objects.all()
-
-    pd = _get_boolean(params, "person_descendants", False)
-    ld = _get_boolean(params, "place_descendants", False)
-    ad = _get_boolean(params, "album_descendants", False)
-    cd = _get_boolean(params, "category_descendants", False)
-
-    value = _get_string(params, "description")
-
-    value = _get_int(params, "first_id")
-    if value is not None:
-        search = search & Q(pk__gte=value)
-
-    value = _get_int(params, "last_id")
-    if value is not None:
-        search = search & Q(pk__lt=value)
-
-    value = _get_datetime(params, "first_datetime")
-    if value is not None:
-        search = search & Q(datetime__gte=value)
-
-    value = _get_datetime(params, "last_datetime")
-    if value is not None:
-        search = search & Q(datetime__lt=value)
-
-    value = _get_int(params, "lower_rating")
-    if value is not None:
-        search = search & Q(rating__gte=value)
-
-    value = _get_int(params, "upper_rating")
-    if value is not None:
-        search = search & Q(rating__lte=value)
-
-    value = _get_string(params, "title")
-    if value is not None:
-        search = search & Q(title__icontains=value)
-
-    value = _get_string(params, "camera_make")
-    if value is not None:
-        search = search & Q(camera_make__icontains=value)
-
-    value = _get_string(params, "camera_model")
-    if value is not None:
-        search = search & Q(camera_model__icontains=value)
-
-    value = _get_object(params, "photographer", models.person)
-    if value is not None:
-        search = search & Q(photographer=value)
-
-    value = _get_object(params, "place", models.place)
-    if value is not None:
-        if ld:
-            search = search & Q(place__ascendant_set__ascendant=value)
-        else:
-            search = search & Q(place=value)
-
-    del value
-
-    value = _get_object(params, "person", models.person)
-    if value is not None:
-        if pd:
-            photo_list = photo_list.filter(
-                persons__ascendant_set__ascendant=value)
-        else:
-            photo_list = photo_list.filter(persons=value)
-
-    value = _get_object(params, "album", models.album)
-    if value is not None:
-        if ad:
-            photo_list = photo_list.filter(
-                albums__ascendant_set__ascendant=value)
-        else:
-            photo_list = photo_list.filter(albums=value)
-
-    value = _get_object(params, "category", models.category)
-    if value is not None:
-        if cd:
-            photo_list = photo_list.filter(
-                categorys__ascendant_set__ascendant=value)
-        else:
-            photo_list = photo_list.filter(categorys=value)
-
-    values = _get_list(params, "photos")
-    if values is not None:
-        q = Q()
-        for value in values:
-            q = q | Q(pk=value)
-        photo_list = photo_list.filter(q)
-
-    del values
-
-    value = _get_boolean(params, "place_none")
-    if value is not None:
-        if value:
-            search = search & Q(place=None)
-
-    value = _get_boolean(params, "person_none")
-    if value is not None:
-        if value:
-            search = search & Q(persons=None)
-
-    value = _get_boolean(params, "album_none")
-    if value is not None:
-        if value:
-            search = search & Q(albums=None)
-
-    value = _get_boolean(params, "category_none")
-    if value is not None:
-        if value:
-            search = search & Q(categorys=None)
-
-    value = _get_string(params, "action")
-    if not user.is_staff:
-        search = search & Q(action__isnull=True)
-    elif value is not None:
-        if value == "none":
-            search = search & Q(action__isnull=True)
-        elif value == "set":
-            search = search & Q(action__isnull=False)
-        else:
-            search = search & Q(action=value)
-
-    value = _get_string(params, "path")
-    if value is not None:
-        search = search & Q(path=value)
-
-    value = _get_string(params, "name")
-    if value is not None:
-        search = search & Q(name=value)
-
-    queryset = photo_list.filter(search)
-
-    photo = _get_object_by_name(params, 'obj', models.photo)
-    if photo is not None:
-        queryset = queryset.filter(pk=photo.pk)
-
-    q = _get_list(params, 'q')
-    for r in q:
-        queryset = queryset.filter(
-            Q(name__icontains=r) | Q(title__icontains=r)
-            | Q(description__icontains=r))
-
-    instance = _get_object(params, "instance", models.photo)
-    if instance is not None:
-        queryset = queryset.filter(
-            Q(relations_1__photo_2=instance) |
-            Q(relations_2__photo_1=instance)).distinct()
-
-    return queryset
-
-
 class PhotoViewSet(ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = models.photo.objects.all()
-    serializer_class = serializers.PhotoSerializer
+
+    def _get_photo_search(self, user, params):
+        search = Q()
+
+        queryset = self.queryset
+
+        queryset = queryset.select_related('place')
+
+        queryset = queryset.prefetch_related('photo_thumb_set')
+        queryset = queryset.prefetch_related('photo_video_set')
+
+        queryset = queryset.prefetch_related('place__cover_photo')
+        queryset = queryset.prefetch_related(
+            'place__cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related(
+            'place__cover_photo__photo_video_set')
+
+        if self.action != 'list':
+            queryset = queryset.prefetch_related('feedbacks')
+
+            queryset = queryset.prefetch_related('albums')
+            queryset = queryset.prefetch_related('albums__cover_photo')
+            queryset = queryset.prefetch_related(
+                'albums__cover_photo__photo_thumb_set')
+            queryset = queryset.prefetch_related(
+                'albums__cover_photo__photo_video_set')
+
+            queryset = queryset.prefetch_related('categorys')
+            queryset = queryset.prefetch_related('categorys__cover_photo')
+            queryset = queryset.prefetch_related(
+                'categorys__cover_photo__photo_thumb_set')
+            queryset = queryset.prefetch_related(
+                'categorys__cover_photo__photo_video_set')
+
+            queryset = queryset.prefetch_related('photo_person_set')
+            queryset = queryset.prefetch_related('photo_person_set__person')
+            queryset = queryset.prefetch_related(
+                'photo_person_set__person__cover_photo')
+            queryset = queryset.prefetch_related(
+                'photo_person_set__person__cover_photo__photo_thumb_set')
+            queryset = queryset.prefetch_related(
+                'photo_person_set__person__cover_photo__photo_video_set')
+
+        pd = _get_boolean(params, "person_descendants", False)
+        ld = _get_boolean(params, "place_descendants", False)
+        ad = _get_boolean(params, "album_descendants", False)
+        cd = _get_boolean(params, "category_descendants", False)
+
+        value = _get_string(params, "description")
+
+        value = _get_int(params, "first_id")
+        if value is not None:
+            search = search & Q(pk__gte=value)
+
+        value = _get_int(params, "last_id")
+        if value is not None:
+            search = search & Q(pk__lt=value)
+
+        value = _get_datetime(params, "first_datetime")
+        if value is not None:
+            search = search & Q(datetime__gte=value)
+
+        value = _get_datetime(params, "last_datetime")
+        if value is not None:
+            search = search & Q(datetime__lt=value)
+
+        value = _get_int(params, "lower_rating")
+        if value is not None:
+            search = search & Q(rating__gte=value)
+
+        value = _get_int(params, "upper_rating")
+        if value is not None:
+            search = search & Q(rating__lte=value)
+
+        value = _get_string(params, "title")
+        if value is not None:
+            search = search & Q(title__icontains=value)
+
+        value = _get_string(params, "camera_make")
+        if value is not None:
+            search = search & Q(camera_make__icontains=value)
+
+        value = _get_string(params, "camera_model")
+        if value is not None:
+            search = search & Q(camera_model__icontains=value)
+
+        value = _get_object(params, "photographer", models.person)
+        if value is not None:
+            search = search & Q(photographer=value)
+
+        value = _get_object(params, "place", models.place)
+        if value is not None:
+            if ld:
+                search = search & Q(place__ascendant_set__ascendant=value)
+            else:
+                search = search & Q(place=value)
+
+        del value
+
+        value = _get_object(params, "person", models.person)
+        if value is not None:
+            if pd:
+                queryset = queryset.filter(
+                    persons__ascendant_set__ascendant=value)
+            else:
+                queryset = queryset.filter(persons=value)
+
+        value = _get_object(params, "album", models.album)
+        if value is not None:
+            if ad:
+                queryset = queryset.filter(
+                    albums__ascendant_set__ascendant=value)
+            else:
+                queryset = queryset.filter(albums=value)
+
+        value = _get_object(params, "category", models.category)
+        if value is not None:
+            if cd:
+                queryset = queryset.filter(
+                    categorys__ascendant_set__ascendant=value)
+            else:
+                queryset = queryset.filter(categorys=value)
+
+        values = _get_list(params, "photos")
+        if values is not None:
+            q = Q()
+            for value in values:
+                q = q | Q(pk=value)
+            queryset = queryset.filter(q)
+
+        del values
+
+        value = _get_boolean(params, "place_none")
+        if value is not None:
+            if value:
+                search = search & Q(place=None)
+
+        value = _get_boolean(params, "person_none")
+        if value is not None:
+            if value:
+                search = search & Q(persons=None)
+
+        value = _get_boolean(params, "album_none")
+        if value is not None:
+            if value:
+                search = search & Q(albums=None)
+
+        value = _get_boolean(params, "category_none")
+        if value is not None:
+            if value:
+                search = search & Q(categorys=None)
+
+        value = _get_string(params, "action")
+        if not user.is_staff:
+            search = search & Q(action__isnull=True)
+        elif value is not None:
+            if value == "none":
+                search = search & Q(action__isnull=True)
+            elif value == "set":
+                search = search & Q(action__isnull=False)
+            else:
+                search = search & Q(action=value)
+
+        value = _get_string(params, "path")
+        if value is not None:
+            search = search & Q(path=value)
+
+        value = _get_string(params, "name")
+        if value is not None:
+            search = search & Q(name=value)
+
+        queryset = queryset.filter(search)
+
+        photo = _get_object_by_name(params, 'obj', models.photo)
+        if photo is not None:
+            queryset = queryset.filter(pk=photo.pk)
+
+        q = _get_list(params, 'q')
+        for r in q:
+            queryset = queryset.filter(
+                Q(name__icontains=r) | Q(title__icontains=r)
+                | Q(description__icontains=r))
+
+        instance = _get_object(params, "instance", models.photo)
+        if instance is not None:
+            queryset = queryset.filter(
+                Q(relations_1__photo_2=instance) |
+                Q(relations_2__photo_1=instance)).distinct()
+
+        return queryset
 
     def get_queryset(self):
         params = self.request.query_params
-        queryset = _get_photo_search(self.request.user, params)
+        queryset = self._get_photo_search(self.request.user, params)
         return queryset
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            # PhotoSerializer too slow for lists
+            return serializers.NestedPhotoSerializer
+        else:
+            return serializers.PhotoSerializer
 
     def get_serializer_context(self):
         context = super(PhotoViewSet, self).get_serializer_context()
@@ -730,7 +799,7 @@ class PhotoViewSet(ModelViewSet):
         criteria = request.data['criteria']
         values = request.data['values']
 
-        queryset = _get_photo_search(self.request.user, criteria)
+        queryset = self._get_photo_search(self.request.user, criteria)
         count = 0
 
         for instance in queryset:

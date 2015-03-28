@@ -1,17 +1,34 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
-from django.core.management import setup_environ
-from spud import settings
-setup_environ(settings)
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'spud.settings'
 
-import re
+import django
+django.setup()
 
 import datetime
 
 from spud import models
 
 import pytz
+
+types = [
+    models.album,
+    models.category,
+    models.place,
+    models.person,
+]
+
+for t in types:
+    for obj in t.objects.filter(cover_photo__isnull=True):
+        print(t, obj.pk, obj)
+        cp = obj.get_cover_photo()
+        if cp is not None:
+            obj.cover_photo = cp
+            obj.save()
+
+exit(0)
 
 def set_album_list(photo, pk_list):
     pa_list = photo.photo_album_set.all()
