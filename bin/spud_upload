@@ -25,17 +25,27 @@ import pytz
 import argparse
 import os.path
 import beanbag.v2 as beanbag
-from beanbag.v2 import GET, POST
+
+from beanbag.v2 import GET, POST, Request
 from beanbag.bbexcept import BeanBagException
 from requests import Session
-from requests.auth import HTTPBasicAuth
-from requests import exceptions, Request
+from requests import exceptions
 
 from spud import media
 
 
 class BeanBag(beanbag.BeanBag):
     pass
+
+
+class CSRFBeanBag(BeanBag):
+
+    def make_request(self, path, verb, req):
+        if verb not in ["GET", "HEAD", "TRACE", "OPTIONS"]:
+            cookies = self.session.cookies
+            if 'csrftoken' in cookies:
+                req.headers["X-CSRFToken"] = cookies['csrftoken']
+        return super(~CSRFBeanBag, self).make_request(path, verb, req)
 
 
 def get_albums(spud, albums):
@@ -52,6 +62,7 @@ def get_albums(spud, albums):
             raise RuntimeError("Cannot find album '%s'" % parent)
         if parent_result["count"] > 1:
             raise RuntimeError("Multiple matches for album '%s'" % parent)
+        assert parent_result is not None
         parent_result = parent_result["results"][0]
 
         if create_album is not None:
@@ -310,14 +321,21 @@ def main():
     url = config.get("spud", "url")
 
     session = Session()
-    session.auth = HTTPBasicAuth(username, password)
-    spud = BeanBag(url, session=session, ext="/")
+    spud = CSRFBeanBag(url, session=session, ext="/")
 
     try:
         print("")
+        print("login")
+        print("-----")
+        result = POST(
+            spud.session.login,
+            {'username': username, 'password': password, 'no_csrf': True})
+        print(result)
+
+        print("")
         print("get_session")
         print("-----------")
-        session = GET(spud.session, {'meow': 100})
+        session = GET(spud.session)
         print(session)
 
         print("")
@@ -370,8 +388,15 @@ def main():
                 config, spud, filename,
                 photographer, place, albums, categorys,
                 src_timezone, dst_timezone, offset, args.dry_run)
+
+        print("")
+        print("logout")
+        print("------")
+        result = POST(spud.session.logout)
+        print(result)
+
     except BeanBagException as e:
-        json = e.msg.json()
+        json = e.response.json()
         if json is not None:
             if 'detail' in json:
                 print("Server error: %s" % json['detail'])
