@@ -2,7 +2,7 @@ Source: spud
 Section: python
 Priority: optional
 Maintainer: Brian May <bam@debian.org>
-Build-Depends: debhelper (>=8.1.0), dh-python, libjs-jquery, libjs-jquery-ui,
+Build-Depends: debhelper (>=9), dh-python, libjs-jquery, libjs-jquery-ui,
  python-all (>= 2.6.6-3~), python-setuptools, python-six, python-flake8,
  python-ajax-select, python-dateutil, python-pil, python-tz, python-django,
  python-django-pipeline, python-djangorestframework,

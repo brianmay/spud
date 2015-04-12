@@ -1,3 +1,9 @@
+spud (2.0.1-1) unstable; urgency=medium
+
+  * Numerous bugs fixed.
+
+ -- Brian May <bam@debian.org>  Sun, 12 Apr 2015 10:59:47 +1000
+
 spud (2.0.0-1) unstable; urgency=medium
 
   * New release.
