@@ -64,7 +64,7 @@
 		}
 
 		// handle digits before the decimal
-		for (i; i < whole.length; i++) {
+		for (i = i; i < whole.length; i++) {
 			num = charCodeToInt(whole.charCodeAt(i));
 			out = 60 * out + num;
 		}
