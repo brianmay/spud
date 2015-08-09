@@ -1,3 +1,12 @@
+spud (2.0.2-1) unstable; urgency=medium
+
+  * Work around django-pipeline/slimit js curruption.
+  * Change default url prefix.
+  * Add support for CORS.
+  * Fix new PEP8 issues.
+
+ -- Brian May <bam@debian.org>  Sun, 09 Aug 2015 17:41:37 +1000
+
 spud (2.0.1-1) unstable; urgency=medium
 
   * Numerous bugs fixed.
