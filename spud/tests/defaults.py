@@ -13,6 +13,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import os
+import os.path
 
 
 class InvalidString(str):
@@ -75,7 +77,6 @@ DATABASES = {
         'ATOMIC_REQUESTS': True,
     }
 }
-import os
 SERVER_EMAIL = 'django@' + os.uname()[1]
 ACCOUNTS_EMAIL = 'accounts@vpac.org'
 APPROVE_ACCOUNTS_EMAIL = ACCOUNTS_EMAIL
@@ -90,7 +91,6 @@ SECRET_KEY = '5hvhpe6gv2t5x4$3dtq(w2v#vg@)sx4p3r_@wv%l41g!stslc*'
 STATIC_ROOT = 'tmp/static'
 STATIC_URL = "/static/"
 
-import os.path
 TEST_MODULE_ROOT = os.path.dirname(os.path.realpath(__file__))
 FIXTURE_DIRS = (os.path.join(TEST_MODULE_ROOT),)
 

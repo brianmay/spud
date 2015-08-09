@@ -16,6 +16,10 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import sys
+import django
+from socket import getfqdn
+
 SITE_ID = 1
 SESSION_COOKIE_SECURE = True
 
@@ -78,8 +82,6 @@ INSTALLED_APPS = (
 )
 
 # South not available for Python 3+ or Django 1.7+
-import sys
-import django
 if sys.version_info < (3, 0) and django.VERSION < (1, 7):
     INSTALLED_APPS += ('south',)
 
@@ -137,7 +139,6 @@ DEFAULT_CONTENT_TYPE = "application/xhtml+xml"
 # The name of the class to use for starting the test suite.
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-from socket import getfqdn
 ALLOWED_HOSTS = [getfqdn()]
 
 REST_FRAMEWORK = {

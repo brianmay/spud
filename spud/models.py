@@ -485,8 +485,8 @@ class person(hierarchy_model):
     def grandparents(self):
         parents = self.parents()
         return self._queryset().filter(
-            Q(father_of__in=parents)
-            | Q(mother_of__in=parents))
+            Q(father_of__in=parents) |
+            Q(mother_of__in=parents))
 
     # parents generation
 
@@ -494,8 +494,8 @@ class person(hierarchy_model):
         parents = [i.pk for i in self.parents()]
         grandparents = self.grandparents()
         return self._queryset().filter(
-            Q(father__in=grandparents)
-            | Q(mother__in=grandparents)).exclude(pk__in=parents)
+            Q(father__in=grandparents) |
+            Q(mother__in=grandparents)).exclude(pk__in=parents)
 
     def parents(self):
         results = []

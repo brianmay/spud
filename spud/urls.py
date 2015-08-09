@@ -21,9 +21,10 @@ from rest_framework import routers
 from django.conf.urls import url, include, patterns
 from django.conf import settings
 from django.contrib import admin
-admin.autodiscover()
 
 from . import views
+
+admin.autodiscover()
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)

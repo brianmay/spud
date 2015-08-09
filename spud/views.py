@@ -538,9 +538,9 @@ class FeedbackViewSet(ModelViewSet):
         q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(
-                Q(comment__icontains=r)
-                | Q(user__name__icontains=r)
-                | Q(username__icontains=r))
+                Q(comment__icontains=r) |
+                Q(user__name__icontains=r) |
+                Q(username__icontains=r))
 
         mode = _get_string(params, 'mode', 'children')
         mode = mode.lower()
@@ -752,8 +752,8 @@ class PhotoViewSet(ModelViewSet):
         q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(
-                Q(name__icontains=r) | Q(title__icontains=r)
-                | Q(description__icontains=r))
+                Q(name__icontains=r) | Q(title__icontains=r) |
+                Q(description__icontains=r))
 
         instance = _get_object(params, "instance", models.photo)
         if instance is not None:

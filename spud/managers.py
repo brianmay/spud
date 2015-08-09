@@ -72,10 +72,10 @@ class PersonManager(models.Manager):
         qtmp = self.get_queryset()
         for val in name.split(" "):
             qtmp = qtmp.filter(
-                Q(first_name__iexact=val)
-                | Q(middle_name__iexact=val)
-                | Q(last_name__iexact=val)
-                | Q(called__iexact=val)
+                Q(first_name__iexact=val) |
+                Q(middle_name__iexact=val) |
+                Q(last_name__iexact=val) |
+                Q(called__iexact=val)
             )
 
         try:
