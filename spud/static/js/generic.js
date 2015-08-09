@@ -488,7 +488,7 @@ object_loader.prototype = {
         this._loading = true
 
         this.xhr = ajax({
-            url: window.__root_prefix + "api/" + this._type + "/" + this._obj_id + "/",
+            url: window.__api_prefix + "api/" + this._type + "/" + this._obj_id + "/",
             data: params,
             success: function(data) {
                 console.log("got object", mythis._type, mythis._obj_id)
@@ -565,7 +565,7 @@ object_list_loader.prototype = {
         this._loading = true
 
         this.xhr = ajax({
-            url: window.__root_prefix + "api/" + this._type + "/",
+            url: window.__api_prefix + "api/" + this._type + "/",
             data: params,
             success: function(data) {
                 console.log("got list", mythis._type, criteria, page)

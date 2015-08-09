@@ -39,6 +39,7 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
+    "spud.context_processors.common",
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
@@ -48,6 +49,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -66,6 +68,7 @@ INSTALLED_APPS = (
     'pipeline',
     'ajax_select',
     'rest_framework',
+    'corsheaders',
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',

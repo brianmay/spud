@@ -281,9 +281,9 @@ $.widget('spud.base_dialog',  $.ui.dialog, {
         this._loading = true
         var url
         if (oject_id != null) {
-            url = window.__root_prefix + "api/" + type + "/" + oject_id + "/"
+            url = window.__api_prefix + "api/" + type + "/" + oject_id + "/"
         } else {
-            url = window.__root_prefix + "api/" + type + "/"
+            url = window.__api_prefix + "api/" + type + "/"
         }
         this.xhr = ajax({
             url: url,

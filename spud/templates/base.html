@@ -6,6 +6,7 @@
 <script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";</script>
 <script type="text/javascript">window.__static_prefix = "{% filter escapejs %}{% static "" %}{% endfilter %}";</script>
 <script type="text/javascript">window.__root_prefix = "{% filter escapejs %}{% url "root" %}{% endfilter %}";</script>
+<script type="text/javascript">window.__api_prefix = "{% filter escapejs %}{{ API_ROOT_URL }}{% endfilter %}";</script>
 {% load pipeline %}
 {% stylesheet 'spud' %}
 {% javascript 'spud' %}

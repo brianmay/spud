@@ -95,5 +95,6 @@ setup(
         "pytz",
         "cssmin",
         "slimit>=0.8.1",
+        "django-cors-headers",
     ],
 )

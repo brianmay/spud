@@ -3,8 +3,8 @@ Section: python
 Priority: optional
 Maintainer: Brian May <bam@debian.org>
 Build-Depends: debhelper (>=9), dh-python, libjs-jquery, libjs-jquery-ui,
- python-all (>= 2.6.6-3~), python-setuptools, python-six, python-flake8,
- python-ajax-select, python-dateutil, python-pil, python-tz, python-django,
+ python-all (>= 2.6.6-3~), python-setuptools, python-six, python-flake8, python-django-cors-headers,
+ python-ajax-select, python-dateutil, python-pil, python-tz, python-django, python3-django-cors-headers,
  python-django-pipeline, python-djangorestframework,
  cssmin, slimit,
 Homepage: https://github.com/brianmay/spud
