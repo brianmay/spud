@@ -26,12 +26,37 @@ import argparse
 import os.path
 import beanbag.v2 as beanbag
 
-from beanbag.v2 import GET, POST, Request
+from beanbag.v2 import Request
 from beanbag.bbexcept import BeanBagException
 from requests import Session
-from requests import exceptions
 
 from spud import media
+
+
+class NotFoundError(Exception):
+    pass
+
+
+def GET(*args, **kwargs):
+    try:
+        return beanbag.GET(*args, **kwargs)
+    except BeanBagException as e:
+        if e.response.status_code == 404:
+            raise NotFoundError(e.msg)
+        raise
+
+
+def POST(*args, **kwargs):
+    print(args, kwargs)
+    try:
+        return beanbag.POST(*args, **kwargs)
+    except BeanBagException as e:
+        if e.response.status_code == 404:
+            raise NotFoundError(e.msg)
+        raise
+
+
+referer = None
 
 
 class BeanBag(beanbag.BeanBag):
@@ -41,10 +66,13 @@ class BeanBag(beanbag.BeanBag):
 class CSRFBeanBag(BeanBag):
 
     def make_request(self, path, verb, req):
+        global referer
+
         if verb not in ["GET", "HEAD", "TRACE", "OPTIONS"]:
             cookies = self.session.cookies
             if 'csrftoken' in cookies:
                 req.headers["X-CSRFToken"] = cookies['csrftoken']
+            req.headers["referer"] = referer
         return super(~CSRFBeanBag, self).make_request(path, verb, req)
 
 
@@ -57,79 +85,78 @@ def get_albums(spud, albums):
             parent = album
             create_album = None
 
-        parent_result = GET(spud.albums(obj=parent))
-        if parent_result["count"] < 1:
-            raise RuntimeError("Cannot find album '%s'" % parent)
-        if parent_result["count"] > 1:
-            raise RuntimeError("Multiple matches for album '%s'" % parent)
-        assert parent_result is not None
-        parent_result = parent_result["results"][0]
-
-        if create_album is not None:
-            try:
-                result = GET(spud.albums(
-                    obj=create_album,
-                    parent=parent_result["id"],
-                ))
-
-                print(result)
-                if result["count"] < 1:
-                    raise RuntimeError(
-                        "Cannot find album '%s'" % album)
-                if result["count"] > 1:
-                    raise RuntimeError(
-                        "Multiple matches for album '%s'" % album)
-
-                result = result["results"][0]
-
-            except exceptions.HTTPError as e:
-                if e.response.status_code == 404:
-                    result = POST(
-                        spud.albums,
-                        {
-                            'title': create_album,
-                            'parent': parent_result["id"],
-                            'sort_name': 'date',
-                            'sort_order': create_album,
-                        })
-                    print("Created album %s" % result)
-                else:
-                    raise
-        else:
-            result = parent_result
-
-        results.append(result["id"])
+        result = get_album(spud, parent, create_album)
+        results.append(result)
 
     return results
+
+
+def get_album(spud, parent, create_album):
+    try:
+        parent_result = GET(spud.albums(obj=parent))
+    except NotFoundError:
+        raise RuntimeError("Cannot find album '%s'" % parent)
+
+    assert parent_result["count"] == 1
+    assert parent_result is not None
+    parent_result = parent_result["results"][0]
+
+    if create_album is not None:
+        try:
+            result = GET(spud.albums(
+                obj=create_album,
+                parent=parent_result["id"],
+            ))
+
+            assert result["count"] == 1
+            result = result["results"][0]
+
+        except NotFoundError:
+            result = POST(
+                spud.albums,
+                {
+                    'title': create_album,
+                    'parent': parent_result["id"],
+                    'sort_name': 'date',
+                    'sort_order': create_album,
+                })
+            print("Created album %s" % result)
+    else:
+        result = parent_result
+
+    return result["id"]
 
 
 def get_categorys(spud, categorys):
     results = []
     for category in categorys:
-        result = GET(spud.categorys(obj=category))
-        if result["count"] < 1:
+        try:
+            result = GET(spud.categorys(obj=category))
+        except NotFoundError:
             raise RuntimeError("Cannot find category '%s'" % category)
-        if result["count"] > 1:
-            raise RuntimeError("Multiple matches for category '%s'" % category)
+
+        assert result["count"] == 1
         results.append(result["results"][0]["id"])
     return results
 
 
 def get_place(spud, place):
-    result = GET(spud.places(obj=place))
-    if result["count"] < 1:
+    try:
+        result = GET(spud.places(obj=place))
+    except NotFoundError:
         raise RuntimeError("Cannot find place '%s'" % place)
-    if result["count"] > 1:
-        raise RuntimeError("Multiple matches for place '%s'" % place)
+
+    assert result["count"] == 1
     return result["results"][0]["id"]
 
 
 def get_person(spud, person):
-    result = GET(spud.persons(obj=person))
-    if result["count"] < 1:
+    try:
+        result = GET(spud.persons(obj=person))
+    except NotFoundError:
         raise RuntimeError("Cannot find person '%s'" % person)
-    if result["count"] > 1:
-        raise RuntimeError("Multiple matches for person '%s'" % person)
+
+    assert result["count"] == 1
     return result["results"][0]["id"]
 
 
@@ -285,7 +312,11 @@ def main():
         description='Upload photos to spud')
     parser.add_argument(
         '--album', action="append", default=[],
-        help='Add photos to album')
+        help='Add photos to album. If album1/album2 syntax, '
+        'will create album1 under album2.')
+    parser.add_argument(
+        '--album_prefix',
+        help='Create album dirname under prefix.')
     parser.add_argument(
         '--category', action="append", default=[],
         help='Add photos to category')
@@ -320,6 +351,9 @@ def main():
     password = config.get("spud", "password")
     url = config.get("spud", "url")
 
+    global referer
+    referer = url
+
     session = Session()
     spud = CSRFBeanBag(url, session=session, ext="/")
 
@@ -339,14 +373,14 @@ def main():
         print(session)
 
         print("")
-        print("get_album")
-        print("---------")
+        print("get_albums")
+        print("----------")
         albums = get_albums(spud, args.album)
         print(albums)
 
         print("")
-        print("get_category")
-        print("------------")
+        print("get_categorys")
+        print("-------------")
         categorys = get_categorys(spud, args.category)
         print(categorys)
 
@@ -384,9 +418,26 @@ def main():
         offset = 0
 
         for filename in args.files:
+            albums_copy = albums
+
+            if args.album_prefix:
+
+                dirname = os.path.dirname(filename)
+                dirname = os.path.basename(dirname)
+
+                print("")
+                print("get_album")
+                print("---------")
+                print("%s/%s" % (args.album_prefix, dirname))
+                album_id = get_album(spud, args.album_prefix, dirname)
+                print(album_id)
+
+                albums_copy = list(albums)
+                albums_copy.append(album_id)
+
             import_photo(
                 config, spud, filename,
-                photographer, place, albums, categorys,
+                photographer, place, albums_copy, categorys,
                 src_timezone, dst_timezone, offset, args.dry_run)
 
         print("")
