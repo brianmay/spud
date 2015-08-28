@@ -40,15 +40,6 @@ router.register(r'photos', views.PhotoViewSet)
 urlpatterns = patterns(
     '',
     # # account management
-    url(r'^admin/', include(admin.site.urls)),
-
-    url(r'^api/session/$', views.SessionDetail.as_view()),
-    url(r'^api/session/login/$', views.Login.as_view()),
-    url(r'^api/session/logout/$', views.Logout.as_view()),
-    url(r'^api/', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls',
-        namespace='rest_framework')),
-
     url(r'^$',
         'spud.views.root', name='root'),
 
@@ -61,6 +52,20 @@ urlpatterns = patterns(
     url(r'^(?P<obj_type>\w+)/(?P<obj_id>\d+)/$',
         'spud.views.obj_detail', name='obj_detail'),
 )
+
+if getattr(settings, 'API_ROOT_URL', None) is None:
+    urlpatterns += patterns(
+        '',
+        url(r'^admin/', include(admin.site.urls)),
+
+        url(r'^api/session/$', views.SessionDetail.as_view()),
+        url(r'^api/session/login/$', views.Login.as_view()),
+        url(r'^api/session/logout/$', views.Logout.as_view()),
+        url(r'^api/', include(router.urls)),
+        url(r'^api-auth/', include('rest_framework.urls',
+            namespace='rest_framework')),
+    )
+
 
 if settings.DEBUG and settings.IMAGE_PATH is not None:
     urlpatterns += patterns(
