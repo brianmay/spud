@@ -753,7 +753,7 @@ class PhotoSerializer(ModelSerializer):
                 position = position_max + 1
                 models.photo_person.objects.get_or_create(
                     photo=instance, person_id=person_id,
-                    defaults={position: position})
+                    defaults={'position': position})
 
         return instance
 
