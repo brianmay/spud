@@ -259,7 +259,7 @@ class media_video(media):
 
         with tempfile.NamedTemporaryFile() as tmp_file:
             subprocess.check_call([
-                "ffmpeg", "-v", "quiet", "-y", "-ss", "0",
+                "avconv", "-v", "quiet", "-y", "-ss", "0",
                 "-i",  path, "-vframes",  "1", "-f", "image2", tmp_file.name])
 
             image = Image.open(tmp_file.name)

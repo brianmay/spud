@@ -63,12 +63,12 @@ class ExifTool(object):
 
 def ffprobe(filename):
     process = subprocess.Popen([
-        "ffprobe", "-v", "quiet", "-print_format", "json",
+        "avprobe", "-v", "quiet", "-of", "json",
         "-show_format", "-show_streams", filename],
         stdout=subprocess.PIPE)
     (stdout, stderr) = process.communicate()
     rc = process.wait()
     if rc != 0:
-        raise RuntimeError("ffprobe failed with %d" % rc)
+        raise RuntimeError("avprobe failed with %d" % rc)
     videometadata = json.loads(stdout)
     return videometadata
