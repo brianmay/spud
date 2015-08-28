@@ -561,10 +561,14 @@ $.widget('spud.photo_list', $.spud.object_list, {
         var title = photo.title
         var a = $('<a/>')
             .attr('href', root_url() + "photos/" + photo.id + "/")
-            .on('click', function() {
+            .on('click', function(event) {
                 if (mythis.options.disabled) {
                     return false
                 }
+                if (event.altKey || event.metaKey || event.ctrlKey || event.shiftKey) {
+                    return false
+                }
+
                 var child_id = mythis.options.child_id
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
