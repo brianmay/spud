@@ -309,7 +309,7 @@ class media_video(media):
             return None
 
     def get_size(self):
-        vs = self._get_ffprobe_vs(self)
+        vs = self._get_ffprobe_vs()
         width = int(vs['width'])
         height = int(vs['height'])
         return width, height
