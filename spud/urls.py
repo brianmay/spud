@@ -58,9 +58,15 @@ if getattr(settings, 'API_ROOT_URL', None) is None:
         '',
         url(r'^admin/', include(admin.site.urls)),
 
-        url(r'^api/session/$', views.SessionDetail.as_view()),
-        url(r'^api/session/login/$', views.Login.as_view()),
-        url(r'^api/session/logout/$', views.Logout.as_view()),
+        url(r'^api/session/$', views.SessionDetail.as_view(),
+            name="session-detail"),
+
+        url(r'^api/session/login/$', views.Login.as_view(),
+            name="session-login"),
+
+        url(r'^api/session/logout/$', views.Logout.as_view(),
+            name="session-logout"),
+
         url(r'^api/', include(router.urls)),
         url(r'^api-auth/', include('rest_framework.urls',
             namespace='rest_framework')),
