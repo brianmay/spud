@@ -11,7 +11,7 @@ env:
  - DJANGO_VERSION=1.8
 
 install:
-    - travis_retry pip install -q Django==$DJANGO_VERSION pytest pytest-django djangorestframework django-pipeline django-ajax-selects django-cors-headers py-dateutil pytz
+    - travis_retry pip install -q Django==$DJANGO_VERSION pytest pytest-django djangorestframework django-pipeline django-ajax-selects django-cors-headers py-dateutil pytz pillow
 
 script:
   - py.test
