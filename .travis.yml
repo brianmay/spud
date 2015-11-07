@@ -15,3 +15,8 @@ install:
 
 script:
   - py.test
+
+matrix:
+    exclude:
+        - python: 3.5
+          env: DJANGO_VERSION=1.7.10
