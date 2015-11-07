@@ -132,12 +132,14 @@ class UserSerializer(ModelSerializer):
         model = User
         fields = (
             'id', 'username', 'first_name', 'last_name', 'email', 'groups')
+        list_serializer_class = ListSerializer
 
 
 class GroupSerializer(ModelSerializer):
     class Meta:
         model = Group
         fields = ('id', 'name')
+        list_serializer_class = ListSerializer
 
 
 class NestedAlbumSerializer(ModelSerializer):
