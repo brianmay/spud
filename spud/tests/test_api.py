@@ -14,19 +14,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
+import datetime
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.http import QueryDict
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
-
-@pytest.fixture
-def client():
-    return APIClient()
+from spud import models
 
 
-def get_expected_user(user):
+def get_json_user(user):
     if user is None:
         return None
 
@@ -40,7 +40,7 @@ def get_expected_user(user):
     }
 
 
-def get_expected_session(user):
+def get_json_session(user):
     if user is None:
         return {
             "perms": {}
@@ -116,7 +116,7 @@ def get_expected_session(user):
 
     return {
         'perms': perms,
-        'user': get_expected_user(user),
+        'user': get_json_user(user),
     }
 
 
@@ -129,7 +129,7 @@ def login(client, user):
         data = {'username': user.username, 'password': '1234'}
         response = client.post(url, data, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == get_expected_session(user)
+        assert response.data == get_json_session(user)
 
 
 def pytest_generate_tests(metafunc):
@@ -177,9 +177,14 @@ class UserTests(BaseTests):
         return User.objects.create_user('test1', 'test@example.org', '1234')
 
     def check_authorized(self, obj_type, action):
+        print(obj_type, action)
         if obj_type == 'user':
             return False
-        return True
+        if action == 'list':
+            return True
+        if action == 'detail':
+            return True
+        return False
 
     def check_response(self, response, obj_type, action):
         ok = self.check_authorized(obj_type, action)
@@ -213,158 +218,395 @@ scenario_superuser = ('scenario_superuser', {'scenario': SuperuserTests()})
 class TestSessions(object):
     scenarios = [scenario_unauth, scenario_user, scenario_superuser]
 
-    def test_session_detail(self, client, scenario):
+    def test_session_detail(self, scenario):
+        client = APIClient()
         user = scenario.get_user()
         login(client, user)
 
+        # get session detail
         url = reverse('session-detail')
         response = client.get(url, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == get_expected_session(user)
+        assert response.data == get_json_session(user)
 
-    def test_session_login_twice(self, client, scenario):
+    def test_session_login_twice(self, scenario):
+        client = APIClient()
         user = scenario.get_user()
         login(client, user)
 
+        # get session detail
         url = reverse('session-detail')
         response = client.get(url, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == get_expected_session(user)
+        assert response.data == get_json_session(user)
 
         if user is not None:
+            # login to website
             url = reverse('session-login')
             data = {'username': user.username, 'password': '1234'}
             response = client.post(url, data, format='json')
             assert response.status_code == status.HTTP_200_OK
-            assert response.data == get_expected_session(user)
+            assert response.data == get_json_session(user)
 
+            # get session detail
             url = reverse('session-detail')
             response = client.get(url, format='json')
             assert response.status_code == status.HTTP_200_OK
-            assert response.data == get_expected_session(user)
+            assert response.data == get_json_session(user)
 
-    def test_session_logout(self, client, scenario):
+    def test_session_logout(self, scenario):
+        client = APIClient()
         user = scenario.get_user()
         login(client, user)
 
+        # logout
         url = reverse('session-logout')
         data = {}
         response = client.post(url, data, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == get_expected_session(None)
+        assert response.data == get_json_session(None)
 
+        # get session detail
         url = reverse('session-detail')
         response = client.get(url, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == get_expected_session(None)
+        assert response.data == get_json_session(None)
 
+        # logout - should be NOP
         url = reverse('session-logout')
         data = {}
         response = client.post(url, data, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == get_expected_session(None)
+        assert response.data == get_json_session(None)
 
+        # get session detail
         url = reverse('session-detail')
         response = client.get(url, format='json')
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == get_expected_session(None)
+        assert response.data == get_json_session(None)
 
 
-@pytest.mark.django_db(transaction=True)
-class TestUsers(object):
+class BaseTest(object):
     scenarios = [scenario_unauth, scenario_user, scenario_superuser]
 
-    def test_user_list(self, client, scenario):
+    def create_test_db(self, user):
+        raise NotImplementedError()
+
+    def get_test_creates(self, user):
+        raise NotImplementedError()
+
+    def get_test_updates(self):
+        raise NotImplementedError()
+
+    def get_test_deletes(self):
+        raise NotImplementedError()
+
+    def model_to_json(self, obj, user):
+        raise NotImplementedError()
+
+    def get_list_url(self):
+        return reverse('%s-list' % self.name)
+
+    def get_detail_url(self, pk):
+        return reverse('%s-detail' % self.name, args=[pk])
+
+    def test_obj_create(self, scenario):
+        client = APIClient()
         user = scenario.get_user()
         login(client, user)
 
-        url = reverse('user-list')
-        response = client.get(url, format='json')
-        if scenario.check_response(response, 'user', 'list'):
-            assert response.status_code == status.HTTP_200_OK
-            assert response.data == [
-                get_expected_user(user)
-            ]
-
-    def test_user_create_delete(self, client, scenario):
-        user = scenario.get_user()
-        login(client, user)
-
-        url = reverse('user-list')
-        data = {'username': 'newuser', 'password': '1234'}
-        response = client.post(url, data, format='json')
-        if scenario.check_response(response, 'user', 'create'):
+        # create obj without parent
+        url = self.get_list_url()
+        json = self.get_test_creates(user)
+        response = client.post(url, json, format='json')
+        if scenario.check_response(response, self.name, 'create'):
             assert response.status_code == status.HTTP_201_CREATED
-            assert response.data == {
-                'username': 'newuser',
-                'email': '',
-                'id': response.data['id'],
-                'first_name': '',
-                'groups': [],
-                'last_name': '',
-            }
-            pk = response.data['id']
-        else:
-            pk = 1
+            json['id'] = response.data['id']
+            assert response.data == json
 
-        url = reverse('user-detail', args=[pk])
-        response = client.delete(url, format='json')
-        if scenario.check_response(response, 'user', 'delete'):
-            assert response.status_code == status.HTTP_204_NO_CONTENT
-            assert response.data is None
+            # check obj exists
+            obj = self.model.objects.get(pk=response.data['id'])
+            assert self.model_to_json(obj, user) == json
 
-        url = reverse('user-detail', args=[pk])
+    def test_obj_list(self, scenario):
+        client = APIClient()
+        user = scenario.get_user()
+        login(client, user)
+        objs = self.create_test_db(user)
+        lists = self.get_test_lists(user)
+
+        for params, expected_list in lists:
+            qd = QueryDict("", mutable=True)
+            for key, value in params.items():
+                qd[key] = value
+
+            # list all objs
+            url = self.get_list_url() + "?" + qd.urlencode()
+            response = client.get(url, format='json')
+            if scenario.check_response(response, self.name, 'list'):
+                assert response.status_code == status.HTTP_200_OK
+                assert len(response.data) == len(expected_list)
+                print(response.data, expected_list)
+                for data, expected in zip(response.data, expected_list):
+                    if expected is not None:
+                        assert data["id"] == expected
+                        obj = objs[data["id"]]
+                        assert data == self.model_to_json(obj, user)
+
+    def test_obj_delete(self, scenario):
+        client = APIClient()
+        user = scenario.get_user()
+        login(client, user)
+
+        objs = self.create_test_db(user)
+        deletes = self.get_test_deletes()
+
+        for pk, expected_status, expected_data in deletes:
+            obj = objs[pk]
+
+            url = self.get_detail_url(pk)
+            response = client.delete(url, format='json')
+            if scenario.check_response(response, self.name, 'delete'):
+                assert response.status_code == expected_status
+                assert response.data == expected_data
+                if response.status_code != status.HTTP_204_NO_CONTENT:
+                    # check obj still exists and unchanged
+                    json = self.model_to_json(obj, user)
+                    obj2 = self.model.objects.get(pk=obj.pk)
+                    json2 = self.model_to_json(obj2, user)
+                    assert json == json2
+                else:
+                    # check obj is deleted
+                    with pytest.raises(self.model.DoesNotExist):
+                        self.model.objects.get(pk=obj.pk)
+
+    def test_obj_detail(self, scenario):
+        client = APIClient()
+        user = scenario.get_user()
+        login(client, user)
+        objs = self.create_test_db(user)
+
+        for obj in objs.values():
+            url = self.get_detail_url(obj.pk)
+            response = client.get(url, format='json')
+            if scenario.check_response(response, self.name, 'detail'):
+                assert response.status_code == status.HTTP_200_OK
+                assert response.data == self.model_to_json(obj, user)
+
+    def test_obj_detail_notfound(self, scenario):
+        client = APIClient()
+        user = scenario.get_user()
+        login(client, user)
+
+        # get obj detail
+        url = self.get_detail_url(999)
         response = client.get(url, format='json')
-        if scenario.check_response(response, 'user', 'detail'):
+        if scenario.check_response(response, self.name, 'detail'):
             assert response.status_code == status.HTTP_404_NOT_FOUND
             assert response.data == {'detail': 'Not found.'}
 
-    def test_user_detail(self, client, scenario):
+    def test_obj_put(self, scenario):
+        client = APIClient()
         user = scenario.get_user()
         login(client, user)
 
-        pk = 1
-        if user is not None:
-            pk = user.pk
+        objs = self.create_test_db(user)
+        updates = self.get_test_updates()
 
-        url = reverse('user-detail', args=[pk])
-        response = client.get(url, format='json')
-        if scenario.check_response(response, 'user', 'detail'):
-            assert response.status_code == status.HTTP_200_OK
-            assert response.data == get_expected_user(user)
+        for pk, update in updates:
+            obj = objs[pk]
 
-    def test_user_put(self, client, scenario):
+            json = self.model_to_json(obj, user)
+            json.update(update)
+
+            url = self.get_detail_url(obj.pk)
+            response = client.put(url, json, format='json')
+            if scenario.check_response(response, self.name, 'change'):
+                assert response.status_code == status.HTTP_200_OK
+                assert response.data == json
+
+    def test_obj_patch(self, scenario):
+        client = APIClient()
         user = scenario.get_user()
         login(client, user)
 
-        pk = 1
-        if user is not None:
-            pk = user.pk
+        objs = self.create_test_db(user)
+        updates = self.get_test_updates()
 
-        data = {'email': 'silly@example.org'}
-        expected = get_expected_user(user) or {}
-        expected.update(data)
+        for pk, update in updates:
+            obj = objs[pk]
 
-        url = reverse('user-detail', args=[pk])
-        response = client.put(url, expected, format='json')
-        if scenario.check_response(response, 'user', 'change'):
-            assert response.status_code == status.HTTP_200_OK
-            assert response.data == expected
+            json = self.model_to_json(obj, user)
+            json.update(update)
 
-    def test_user_patch(self, client, scenario):
-        user = scenario.get_user()
-        login(client, user)
+            url = self.get_detail_url(obj.pk)
+            response = client.patch(url, update, format='json')
+            if scenario.check_response(response, self.name, 'change'):
+                assert response.status_code == status.HTTP_200_OK
+                assert response.data == json
 
-        pk = 1
-        if user is not None:
-            pk = user.pk
 
-        data = {'email': 'silly@example.org'}
-        expected = get_expected_user(user) or {}
-        expected.update(data)
+@pytest.mark.django_db(transaction=True)
+class TestUsers(BaseTest):
+    name = "user"
+    model = User
 
-        url = reverse('user-detail', args=[pk])
-        response = client.patch(url, data, format='json')
-        if scenario.check_response(response, 'user', 'change'):
-            assert response.status_code == status.HTTP_200_OK
-            assert response.data == expected
+    def create_test_db(self, user):
+        result = {}
+        self.pks = []
+
+        # create album without parent
+        obj = User.objects.create_user(
+            'deleteme', 'delete@example.org', '1234')
+        result[obj.pk] = obj
+        self.pks.append(obj.pk)
+
+        # return results
+        return result
+
+    def get_test_creates(self, user):
+        json = {
+            'username': 'newuser',
+            'email': '',
+            'first_name': '',
+            'groups': [],
+            'last_name': '',
+        }
+        return json
+
+    def get_test_lists(self, user):
+        l = [
+            ({}, [None, self.pks[0]]),
+        ]
+        return l
+
+    def get_test_updates(self):
+        l = []
+        for pk in self.pks:
+            l.append((pk, {'email': 'deleted@example.org'}))
+        return l
+
+    def get_test_deletes(self):
+        l = []
+        for pk in self.pks:
+            l.append((pk, status.HTTP_204_NO_CONTENT, None))
+        return l
+
+    def model_to_json(self, obj, user):
+        json = {
+            'username': obj.username,
+            'first_name': obj.first_name,
+            'last_name': obj.last_name,
+            'email': obj.email,
+            'groups': [],
+            'id': obj.pk,
+        }
+        return json
+
+
+@pytest.mark.django_db(transaction=True)
+class TestAlbums(BaseTest):
+    name = "album"
+    model = models.album
+
+    def create_test_db(self, user):
+        result = {}
+        self.pks = []
+
+        # create album without parent
+        album = models.album.objects.create(
+            parent=None,
+            title="My Album",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+            revised=datetime.datetime(year=2015, month=11, day=8),
+            revised_utc_offset=600,
+        )
+        result[album.pk] = album
+        self.pks.append(album.pk)
+
+        # create album with parent
+        parent = album
+        album = models.album.objects.create(
+            parent=parent,
+            title="My 2nd Album",
+            description="My 2nd description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-09",
+            revised=datetime.datetime(year=2015, month=11, day=10),
+            revised_utc_offset=600,
+        )
+        result[album.pk] = album
+        self.pks.append(album.pk)
+
+        # return results
+        return result
+
+    def get_test_creates(self, user):
+        json = {
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'ascendants': [],
+            'title': 'My Album',
+            'description': 'My description',
+            'sort_name': 'date',
+            'sort_order': '2015-11-08',
+            'parent': None,
+            'revised': '2015-11-08T00:00:00',
+            'revised_utc_offset': 600,
+        }
+        return json
+
+    def get_test_lists(self, user):
+        l = [
+            ({}, self.pks),
+            ({'q': '2nd'}, [self.pks[1]]),
+        ]
+        return l
+
+    def get_test_updates(self):
+        a1, a2 = self.pks
+        return [
+            (a1, {'title': 'My new title #1'}),
+            (a2, {'title': 'My new title #2'}),
+        ]
+
+    def get_test_deletes(self):
+        a1, a2 = self.pks
+        d = [
+            (a1, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete album with children'}),
+            (a2, status.HTTP_204_NO_CONTENT, None),
+        ]
+        return d
+
+    def model_to_json(self, album, user):
+        json = {
+            'id': album.pk,
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'ascendants': [],  # FIXME
+            'title': album.title,
+            'description': album.description,
+            'sort_name': album.sort_name,
+            'sort_order': album.sort_order,
+            'parent': None,
+        }
+        if album.cover_photo is not None:
+            json.update({
+                'cover_photo': album.cover_photo.title,
+                'cover_photo_pk': album.cover_photo.pk,
+            })
+        if album.parent is not None:
+            json.update({
+                'parent': album.parent.pk,
+            })
+        if user is not None and user.is_staff:
+            json.update({
+                'revised': album.revised.isoformat(),
+                'revised_utc_offset': album.revised_utc_offset,
+            })
+        return json
