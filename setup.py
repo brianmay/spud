@@ -89,7 +89,6 @@ setup(
         "Django >= 1.6",
         "django-pipeline",
         "South >= 0.7",
-        "django-ajax-selects >= 1.1.3",
         "djangorestframework >= 3.0.5",
         "python-dateutil",
         "Pillow",

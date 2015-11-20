@@ -70,7 +70,6 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     'spud',
     'pipeline',
-    'ajax_select',
     'rest_framework',
     'corsheaders',
     'django.contrib.auth',
