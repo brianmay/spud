@@ -613,6 +613,8 @@ class TestAlbums(BaseTest):
             (a2, status.HTTP_403_FORBIDDEN, {
                 'detail': 'Cannot delete album with children'}),
             (a3, status.HTTP_204_NO_CONTENT, None),
+            (a2, status.HTTP_204_NO_CONTENT, None),
+            (a1, status.HTTP_204_NO_CONTENT, None),
         ]
         return d
 
