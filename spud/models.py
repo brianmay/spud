@@ -100,7 +100,6 @@ class hierarchy_model(base_model):
 
     def get_descendants(self, include_self):
         queryset = self.descendant_set.all()
-        queryset = queryset.select_related('cover_photo')
         queryset = queryset.prefetch_related(
             'descendant__cover_photo__photo_thumb_set')
         queryset = queryset.prefetch_related(
@@ -122,7 +121,6 @@ class hierarchy_model(base_model):
 
     def get_ascendants(self, include_self):
         queryset = self.ascendant_set.all()
-        queryset = queryset.select_related('cover_photo')
         queryset = queryset.prefetch_related(
             'ascendant__cover_photo__photo_thumb_set')
         queryset = queryset.prefetch_related(
