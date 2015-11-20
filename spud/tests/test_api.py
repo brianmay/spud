@@ -663,3 +663,153 @@ class TestAlbums(BaseTest):
                 'revised_utc_offset': album.revised_utc_offset,
             })
         return json
+
+
+@pytest.mark.django_db(transaction=True)
+class TestCategorys(BaseTest):
+    name = "category"
+    model = models.category
+
+    def create_test_db(self, user):
+        result = {}
+        self.pks = []
+
+        # create category without parent
+        category = models.category.objects.create(
+            parent=None,
+            title="My Category",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+        )
+        result[category.pk] = category
+        self.pks.append(category.pk)
+
+        # create category with parent
+        parent = category
+        category = models.category.objects.create(
+            parent=parent,
+            title="My 2nd Category",
+            description="My 2nd description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-09",
+        )
+        result[category.pk] = category
+        self.pks.append(category.pk)
+
+        # create category with parent that has a parent
+        parent = category
+        category = models.category.objects.create(
+            parent=parent,
+            title="My 3rd Category",
+            description="My 3rd description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-10",
+        )
+        result[category.pk] = category
+        self.pks.append(category.pk)
+
+        # return results
+        self.objs = result
+        return result
+
+    def get_test_creates(self, user):
+        json = {
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'ascendants': [],
+            'title': 'My Category',
+            'description': 'My description',
+            'sort_name': 'date',
+            'sort_order': '2015-11-08',
+            'parent': None,
+        }
+        return json
+
+    def get_test_lists(self, user):
+        l = [
+            ({}, self.pks),
+            ({'q': '2nd'}, [self.pks[1]]),
+        ]
+        return l
+
+    def get_test_updates(self, user):
+        a1, a2, a3 = self.pks
+
+        obj = self.objs[a1]
+        expected1 = self.model_to_json(obj, user)
+        expected1['title'] = 'My new title #1'
+
+        obj = self.objs[a2]
+        expected2 = self.model_to_json(obj, user)
+        expected2['title'] = 'My new title #2'
+        expected2['ascendants'][0]['title'] = 'My new title #1'
+
+        obj = self.objs[a3]
+        expected3 = self.model_to_json(obj, user)
+        expected3['title'] = 'My new title #3'
+        expected3['ascendants'][0]['title'] = 'My new title #2'
+        expected3['ascendants'][1]['title'] = 'My new title #1'
+
+        return [
+            (a1, {'title': 'My new title #1'}, expected1),
+            (a2, {'title': 'My new title #2'}, expected2),
+            (a3, {'title': 'My new title #3'}, expected3),
+        ]
+
+    def get_test_deletes(self):
+        a1, a2, a3 = self.pks
+        d = [
+            (a1, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete category with children'}),
+            (a2, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete category with children'}),
+            (a3, status.HTTP_204_NO_CONTENT, None),
+            (a2, status.HTTP_204_NO_CONTENT, None),
+            (a1, status.HTTP_204_NO_CONTENT, None),
+        ]
+        return d
+
+    def model_to_json(self, category, user):
+        json = {
+            'id': category.pk,
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'ascendants': [],
+            'title': category.title,
+            'description': category.description,
+            'sort_name': category.sort_name,
+            'sort_order': category.sort_order,
+            'parent': None,
+        }
+        if category.cover_photo is not None:
+            json.update({
+                'cover_photo': category.cover_photo.title,
+                'cover_photo_pk': category.cover_photo.pk,
+            })
+
+        parent = category.parent
+        ascendants = []
+        while parent is not None:
+            ascendants.append({
+                'id': parent.pk,
+                'title': parent.title,
+                'cover_photo': None,
+                'cover_photo_pk': None,
+            })
+            if parent.cover_photo is not None:
+                json.update({
+                    'cover_photo': parent.cover_photo.title,
+                    'cover_photo_pk': parent.cover_photo.pk,
+                })
+            parent = parent.parent
+
+        if category.parent is not None:
+            json.update({
+                'parent': category.parent.pk,
+                'ascendants': ascendants,
+            })
+        return json

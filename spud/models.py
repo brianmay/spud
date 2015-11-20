@@ -310,9 +310,9 @@ class category(hierarchy_model):
     def check_delete(self):
         errorlist = []
         if self.photos.all().count() > 0:
-            errorlist.append("Cannot delete category object with photos")
+            errorlist.append("Cannot delete category with photos")
         if self.children.all().count() > 0:
-            errorlist.append("Cannot delete category object with children")
+            errorlist.append("Cannot delete category with children")
         return errorlist
 
     def get_cover_photo(self):
