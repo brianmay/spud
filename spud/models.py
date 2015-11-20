@@ -126,16 +126,14 @@ class hierarchy_model(base_model):
         queryset = queryset.prefetch_related(
             'ascendant__cover_photo__photo_video_set')
 
-        for i in queryset.all():
-            print(i.position, i.ascendant.pk)
-        return
-
         if include_self:
             for i in queryset.all():
                 yield i.ascendant
         else:
             for i in queryset.filter(position__gt=0):
                 yield i.ascendant
+
+        return
 
     def list_ascendants(self):
         return self.get_ascendants(False)

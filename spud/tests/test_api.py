@@ -295,7 +295,7 @@ class BaseTest(object):
     def get_test_creates(self, user):
         raise NotImplementedError()
 
-    def get_test_updates(self):
+    def get_test_updates(self, user):
         raise NotImplementedError()
 
     def get_test_deletes(self):
@@ -411,19 +411,16 @@ class BaseTest(object):
         login(client, user)
 
         objs = self.create_test_db(user)
-        updates = self.get_test_updates()
+        updates = self.get_test_updates(user)
 
-        for pk, update in updates:
+        for pk, _, expected in updates:
             obj = objs[pk]
 
-            json = self.model_to_json(obj, user)
-            json.update(update)
-
             url = self.get_detail_url(obj.pk)
-            response = client.put(url, json, format='json')
+            response = client.put(url, expected, format='json')
             if scenario.check_response(response, self.name, 'change'):
                 assert response.status_code == status.HTTP_200_OK
-                assert response.data == json
+                assert response.data == expected
 
     def test_obj_patch(self, scenario):
         client = APIClient()
@@ -431,19 +428,16 @@ class BaseTest(object):
         login(client, user)
 
         objs = self.create_test_db(user)
-        updates = self.get_test_updates()
+        updates = self.get_test_updates(user)
 
-        for pk, update in updates:
+        for pk, update, expected in updates:
             obj = objs[pk]
-
-            json = self.model_to_json(obj, user)
-            json.update(update)
 
             url = self.get_detail_url(obj.pk)
             response = client.patch(url, update, format='json')
             if scenario.check_response(response, self.name, 'change'):
                 assert response.status_code == status.HTTP_200_OK
-                assert response.data == json
+                assert response.data == expected
 
 
 @pytest.mark.django_db(transaction=True)
@@ -462,6 +456,7 @@ class TestUsers(BaseTest):
         self.pks.append(obj.pk)
 
         # return results
+        self.objs = result
         return result
 
     def get_test_creates(self, user):
@@ -480,10 +475,13 @@ class TestUsers(BaseTest):
         ]
         return l
 
-    def get_test_updates(self):
+    def get_test_updates(self, user):
         l = []
         for pk in self.pks:
-            l.append((pk, {'email': 'deleted@example.org'}))
+            obj = self.objs[pk]
+            expected = self.model_to_json(obj, user)
+            expected.update({'email': 'deleted@example.org'})
+            l.append((pk, {'email': 'deleted@example.org'}, expected))
         return l
 
     def get_test_deletes(self):
@@ -542,7 +540,23 @@ class TestAlbums(BaseTest):
         result[album.pk] = album
         self.pks.append(album.pk)
 
+        # create album with parent that has a parent
+        parent = album
+        album = models.album.objects.create(
+            parent=parent,
+            title="My 3rd Album",
+            description="My 3rd description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-10",
+            revised=datetime.datetime(year=2015, month=11, day=10),
+            revised_utc_offset=600,
+        )
+        result[album.pk] = album
+        self.pks.append(album.pk)
+
         # return results
+        self.objs = result
         return result
 
     def get_test_creates(self, user):
@@ -567,19 +581,38 @@ class TestAlbums(BaseTest):
         ]
         return l
 
-    def get_test_updates(self):
-        a1, a2 = self.pks
+    def get_test_updates(self, user):
+        a1, a2, a3 = self.pks
+
+        obj = self.objs[a1]
+        expected1 = self.model_to_json(obj, user)
+        expected1['title'] = 'My new title #1'
+
+        obj = self.objs[a2]
+        expected2 = self.model_to_json(obj, user)
+        expected2['title'] = 'My new title #2'
+        expected2['ascendants'][0]['title'] = 'My new title #1'
+
+        obj = self.objs[a3]
+        expected3 = self.model_to_json(obj, user)
+        expected3['title'] = 'My new title #3'
+        expected3['ascendants'][0]['title'] = 'My new title #2'
+        expected3['ascendants'][1]['title'] = 'My new title #1'
+
         return [
-            (a1, {'title': 'My new title #1'}),
-            (a2, {'title': 'My new title #2'}),
+            (a1, {'title': 'My new title #1'}, expected1),
+            (a2, {'title': 'My new title #2'}, expected2),
+            (a3, {'title': 'My new title #3'}, expected3),
         ]
 
     def get_test_deletes(self):
-        a1, a2 = self.pks
+        a1, a2, a3 = self.pks
         d = [
             (a1, status.HTTP_403_FORBIDDEN, {
                 'detail': 'Cannot delete album with children'}),
-            (a2, status.HTTP_204_NO_CONTENT, None),
+            (a2, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete album with children'}),
+            (a3, status.HTTP_204_NO_CONTENT, None),
         ]
         return d
 
@@ -588,7 +621,7 @@ class TestAlbums(BaseTest):
             'id': album.pk,
             'cover_photo': None,
             'cover_photo_pk': None,
-            'ascendants': [],  # FIXME
+            'ascendants': [],
             'title': album.title,
             'description': album.description,
             'sort_name': album.sort_name,
@@ -600,9 +633,27 @@ class TestAlbums(BaseTest):
                 'cover_photo': album.cover_photo.title,
                 'cover_photo_pk': album.cover_photo.pk,
             })
+
+        parent = album.parent
+        ascendants = []
+        while parent is not None:
+            ascendants.append({
+                'id': parent.pk,
+                'title': parent.title,
+                'cover_photo': None,
+                'cover_photo_pk': None,
+            })
+            if parent.cover_photo is not None:
+                json.update({
+                    'cover_photo': parent.cover_photo.title,
+                    'cover_photo_pk': parent.cover_photo.pk,
+                })
+            parent = parent.parent
+
         if album.parent is not None:
             json.update({
                 'parent': album.parent.pk,
+                'ascendants': ascendants,
             })
         if user is not None and user.is_staff:
             json.update({
