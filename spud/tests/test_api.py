@@ -1515,3 +1515,130 @@ class TestFeedbacks(BaseTest):
             })
 
         return json
+
+
+@pytest.mark.django_db(transaction=True)
+class TestPhotoRelations(BaseTest):
+    name = "photo_relation"
+    model = models.photo_relation
+
+    def create_test_db(self, user):
+        result = {}
+        self.pks = []
+
+        photo1 = models.photo.objects.create(
+            name="test.jpg", path="a/b/c",
+            level=0,
+            datetime=datetime.datetime(2015, 11, 21), utc_offset=600)
+        photo2 = models.photo.objects.create(
+            name="test.jpg", path="a/b/c",
+            level=0,
+            datetime=datetime.datetime(2015, 11, 21), utc_offset=600)
+
+        photo_relation = models.photo_relation.objects.create(
+            photo_1=photo1,
+            photo_2=photo2,
+            desc_1="description 1",
+            desc_2="description 2",
+        )
+        result[photo_relation.pk] = photo_relation
+        self.pks.append(photo_relation.pk)
+
+        # return results
+        self.objs = result
+        return result
+
+    def get_test_creates(self, user):
+        photo1 = models.photo.objects.create(
+            name="test.jpg", path="a/b/c",
+            level=0,
+            datetime=datetime.datetime(2015, 11, 21), utc_offset=600)
+        photo2 = models.photo.objects.create(
+            name="test.jpg", path="a/b/c",
+            level=0,
+            datetime=datetime.datetime(2015, 11, 21), utc_offset=600)
+
+        json = {
+            'photo_1': {
+                'id': photo1.pk,
+                'title': photo1.name,
+                'description': photo1.description,
+                'datetime': photo1.datetime.isoformat(),
+                'utc_offset': photo1.utc_offset,
+                'place': None,
+                'thumbs': {},
+                'videos': {},
+            },
+            'photo_1_pk': photo1.pk,
+            'photo_2': {
+                'id': photo2.pk,
+                'title': photo2.name,
+                'description': photo2.description,
+                'datetime': photo2.datetime.isoformat(),
+                'utc_offset': photo2.utc_offset,
+                'place': None,
+                'thumbs': {},
+                'videos': {},
+            },
+            'photo_2_pk': photo2.pk,
+            'desc_1': 'description 1',
+            'desc_2': 'description 2',
+        }
+        return [(json, json)]
+
+    def get_test_lists(self, user):
+        l = [
+            ({}, self.pks_to_json(self.pks, user)),
+        ]
+        return l
+
+    def get_test_updates(self, user):
+        pr = self.pks[0]
+
+        obj = self.objs[pr]
+        expected1 = self.model_to_json(obj, user)
+        expected1['desc_1'] = 'My new desc #1'
+        expected1['desc_2'] = 'My new desc #2'
+
+        return [
+            (pr,
+             {'desc_1': 'My new desc #1', 'desc_2': 'My new desc #2'},
+             expected1),
+        ]
+
+    def get_test_deletes(self):
+        pr = self.pks[0]
+        d = [
+            (pr, status.HTTP_204_NO_CONTENT, None),
+        ]
+        return d
+
+    def model_to_json(self, photo_relation, user):
+        json = {
+            'id': photo_relation.pk,
+            'photo_1': {
+                'id': photo_relation.photo_1.pk,
+                'title': photo_relation.photo_1.name,
+                'description': photo_relation.photo_1.description,
+                'datetime': photo_relation.photo_1.datetime.isoformat(),
+                'utc_offset': photo_relation.photo_1.utc_offset,
+                'place': None,
+                'thumbs': {},
+                'videos': {},
+            },
+            'photo_1_pk': photo_relation.photo_1.pk,
+            'photo_2': {
+                'id': photo_relation.photo_2.pk,
+                'title': photo_relation.photo_2.name,
+                'description': photo_relation.photo_2.description,
+                'datetime': photo_relation.photo_2.datetime.isoformat(),
+                'utc_offset': photo_relation.photo_2.utc_offset,
+                'place': None,
+                'thumbs': {},
+                'videos': {},
+            },
+            'photo_2_pk': photo_relation.photo_2.pk,
+            'desc_1': photo_relation.desc_1,
+            'desc_2': photo_relation.desc_2,
+        }
+        return json

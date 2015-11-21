@@ -442,6 +442,17 @@ class PhotoRelationSerializer(ModelSerializer):
         model = models.photo_relation
         list_serializer_class = ListSerializer
 
+    photo_1 = NestedPhotoSerializer(read_only=True)
+    photo_1_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="photo_1",
+        allow_null=True,
+        style={'base_template': 'input.html'})
+
+    photo_2 = NestedPhotoSerializer(read_only=True)
+    photo_2_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="photo_2",
+        allow_null=True,
+        style={'base_template': 'input.html'})
 
 default_timezone = pytz.timezone(settings.TIME_ZONE)
 
