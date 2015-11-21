@@ -543,7 +543,7 @@ class person(hierarchy_model):
 
 
 class feedback(hierarchy_model):
-    photo = models.ForeignKey(
+    cover_photo = models.ForeignKey(
         'photo', related_name="feedbacks",
         on_delete=models.CASCADE)
     parent = models.ForeignKey(

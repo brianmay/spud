@@ -399,17 +399,42 @@ class PersonPkListSerializer(ListSerializer):
         return result
 
 
-class FeedbackSerializer(ModelSerializer):
-    title = f.IntegerField(source="id", read_only=True)
-    photo = NestedPhotoSerializer(read_only=True)
-    photo_pk = serializers.PrimaryKeyRelatedField(
-        queryset=models.photo.objects.all(), source="photo",
+class NestedFeedbackSerializer(ModelSerializer):
+    cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
         allow_null=True,
         style={'base_template': 'input.html'})
 
     class Meta:
         model = models.feedback
+        fields = (
+            'id', 'cover_photo', 'cover_photo_pk', 'rating', 'comment',
+            'user_name', 'user_email', 'user_url',
+            'submit_datetime', 'utc_offset',
+            'ip_address', 'is_public', 'is_removed',
+            'user',
+        )
         list_serializer_class = ListSerializer
+
+
+class FeedbackSerializer(ModelSerializer):
+    cover_photo = NestedPhotoSerializer(read_only=True)
+    cover_photo_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.photo.objects.all(), source="cover_photo",
+        allow_null=True,
+        style={'base_template': 'input.html'})
+
+    ascendants = NestedFeedbackSerializer(
+        source="list_ascendants", many=True, read_only=True)
+
+    class Meta:
+        model = models.feedback
+        list_serializer_class = ListSerializer
+        extra_kwargs = {
+            'submit_datetime': {'read_only': True},
+            'utc_offset': {'read_only': True},
+        }
 
 
 class PhotoRelationSerializer(ModelSerializer):

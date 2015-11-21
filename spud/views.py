@@ -539,8 +539,8 @@ class FeedbackViewSet(ModelViewSet):
         for r in q:
             queryset = queryset.filter(
                 Q(comment__icontains=r) |
-                Q(user__name__icontains=r) |
-                Q(username__icontains=r))
+                Q(user__username__icontains=r) |
+                Q(user_name__icontains=r))
 
         mode = _get_string(params, 'mode', 'children')
         mode = mode.lower()
