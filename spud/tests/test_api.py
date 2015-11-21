@@ -294,6 +294,9 @@ class BaseTest(object):
     def get_test_creates(self, user):
         raise NotImplementedError()
 
+    def get_test_lists(self, user):
+        raise NotImplementedError()
+
     def get_test_updates(self, user):
         raise NotImplementedError()
 
@@ -302,6 +305,29 @@ class BaseTest(object):
 
     def model_to_json(self, obj, user):
         raise NotImplementedError()
+
+    def pks_to_json(self, pks, user):
+        result = []
+        for pk in pks:
+            if pk is not None:
+                obj = self.objs[pk]
+                json = self.model_to_json(obj, user)
+            else:
+                json = None
+            result.append(json)
+        return result
+
+    def set_cover_photo(self, json, obj):
+        if obj.cover_photo is not None:
+            json.update({
+                'cover_photo': obj.cover_photo.title,
+                'cover_photo_pk': obj.cover_photo.pk,
+            })
+        else:
+            json.update({
+                'cover_photo': None,
+                'cover_photo_pk': None,
+            })
 
     def get_list_url(self):
         return reverse('%s-list' % self.name)
@@ -314,24 +340,25 @@ class BaseTest(object):
         user = scenario.get_user()
         login(client, user)
 
-        # create obj without parent
         url = self.get_list_url()
-        json = self.get_test_creates(user)
-        response = client.post(url, json, format='json')
-        if scenario.check_response(response, self.name, 'create'):
-            assert response.status_code == status.HTTP_201_CREATED
-            json['id'] = response.data['id']
-            assert response.data == json
+        creates = self.get_test_creates(user)
 
-            # check obj exists
-            obj = self.model.objects.get(pk=response.data['id'])
-            assert self.model_to_json(obj, user) == json
+        for json in creates:
+            response = client.post(url, json, format='json')
+            if scenario.check_response(response, self.name, 'create'):
+                assert response.status_code == status.HTTP_201_CREATED
+                json['id'] = response.data['id']
+                assert response.data == json
+
+                # check obj exists
+                obj = self.model.objects.get(pk=response.data['id'])
+                assert self.model_to_json(obj, user) == json
 
     def test_obj_list(self, scenario):
         client = APIClient()
         user = scenario.get_user()
         login(client, user)
-        objs = self.create_test_db(user)
+        self.create_test_db(user)
         lists = self.get_test_lists(user)
 
         for params, expected_list in lists:
@@ -345,11 +372,27 @@ class BaseTest(object):
             if scenario.check_response(response, self.name, 'list'):
                 assert response.status_code == status.HTTP_200_OK
                 assert len(response.data) == len(expected_list)
+                print([d['id'] for d in response.data])
+                print(expected_list)
                 for data, expected in zip(response.data, expected_list):
                     if expected is not None:
-                        assert data["id"] == expected
-                        obj = objs[data["id"]]
-                        assert data == self.model_to_json(obj, user)
+                        assert data == expected
+
+    def test_obj_detail(self, scenario):
+        client = APIClient()
+        user = scenario.get_user()
+        login(client, user)
+        objs = self.create_test_db(user)
+
+        for obj in objs.values():
+            print("=====", obj.pk)
+            url = self.get_detail_url(obj.pk)
+            response = client.get(url, format='json')
+            if scenario.check_response(response, self.name, 'detail'):
+                assert response.status_code == status.HTTP_200_OK
+                print("?????", response.data)
+                print("?????", self.model_to_json(obj, user))
+                assert response.data == self.model_to_json(obj, user)
 
     def test_obj_delete(self, scenario):
         client = APIClient()
@@ -377,19 +420,6 @@ class BaseTest(object):
                     # check obj is deleted
                     with pytest.raises(self.model.DoesNotExist):
                         self.model.objects.get(pk=obj.pk)
-
-    def test_obj_detail(self, scenario):
-        client = APIClient()
-        user = scenario.get_user()
-        login(client, user)
-        objs = self.create_test_db(user)
-
-        for obj in objs.values():
-            url = self.get_detail_url(obj.pk)
-            response = client.get(url, format='json')
-            if scenario.check_response(response, self.name, 'detail'):
-                assert response.status_code == status.HTTP_200_OK
-                assert response.data == self.model_to_json(obj, user)
 
     def test_obj_detail_notfound(self, scenario):
         client = APIClient()
@@ -458,18 +488,18 @@ class TestUsers(BaseTest):
         return result
 
     def get_test_creates(self, user):
-        json = {
+        json = [{
             'username': 'newuser',
             'email': '',
             'first_name': '',
             'groups': [],
             'last_name': '',
-        }
+        }]
         return json
 
     def get_test_lists(self, user):
         l = [
-            ({}, [None, self.pks[0]]),
+            ({}, self.pks_to_json([None] + self.pks, user)),
         ]
         return l
 
@@ -512,7 +542,7 @@ class TestAlbums(BaseTest):
         # create album without parent
         album = models.album.objects.create(
             parent=None,
-            title="My Album",
+            title="My 1st Album",
             description="My description",
             cover_photo=None,
             sort_name="date",
@@ -558,7 +588,7 @@ class TestAlbums(BaseTest):
         return result
 
     def get_test_creates(self, user):
-        json = {
+        json = [{
             'cover_photo': None,
             'cover_photo_pk': None,
             'ascendants': [],
@@ -569,13 +599,13 @@ class TestAlbums(BaseTest):
             'parent': None,
             'revised': '2015-11-08T00:00:00',
             'revised_utc_offset': 600,
-        }
+        }]
         return json
 
     def get_test_lists(self, user):
         l = [
-            ({}, self.pks),
-            ({'q': '2nd'}, [self.pks[1]]),
+            ({}, self.pks_to_json(self.pks, user)),
+            ({'q': '2nd'}, self.pks_to_json([self.pks[1]], user)),
         ]
         return l
 
@@ -619,8 +649,6 @@ class TestAlbums(BaseTest):
     def model_to_json(self, album, user):
         json = {
             'id': album.pk,
-            'cover_photo': None,
-            'cover_photo_pk': None,
             'ascendants': [],
             'title': album.title,
             'description': album.description,
@@ -628,26 +656,17 @@ class TestAlbums(BaseTest):
             'sort_order': album.sort_order,
             'parent': None,
         }
-        if album.cover_photo is not None:
-            json.update({
-                'cover_photo': album.cover_photo.title,
-                'cover_photo_pk': album.cover_photo.pk,
-            })
+        self.set_cover_photo(json, album)
 
         parent = album.parent
         ascendants = []
         while parent is not None:
-            ascendants.append({
+            parent_json = {
                 'id': parent.pk,
                 'title': parent.title,
-                'cover_photo': None,
-                'cover_photo_pk': None,
-            })
-            if parent.cover_photo is not None:
-                json.update({
-                    'cover_photo': parent.cover_photo.title,
-                    'cover_photo_pk': parent.cover_photo.pk,
-                })
+            }
+            self.set_cover_photo(parent_json, parent)
+            ascendants.append(parent_json)
             parent = parent.parent
 
         if album.parent is not None:
@@ -675,7 +694,7 @@ class TestCategorys(BaseTest):
         # create category without parent
         category = models.category.objects.create(
             parent=None,
-            title="My Category",
+            title="My 1st Category",
             description="My description",
             cover_photo=None,
             sort_name="date",
@@ -715,7 +734,7 @@ class TestCategorys(BaseTest):
         return result
 
     def get_test_creates(self, user):
-        json = {
+        json = [{
             'cover_photo': None,
             'cover_photo_pk': None,
             'ascendants': [],
@@ -724,13 +743,13 @@ class TestCategorys(BaseTest):
             'sort_name': 'date',
             'sort_order': '2015-11-08',
             'parent': None,
-        }
+        }]
         return json
 
     def get_test_lists(self, user):
         l = [
-            ({}, self.pks),
-            ({'q': '2nd'}, [self.pks[1]]),
+            ({}, self.pks_to_json(self.pks, user)),
+            ({'q': '2nd'}, self.pks_to_json([self.pks[1]], user)),
         ]
         return l
 
@@ -774,8 +793,6 @@ class TestCategorys(BaseTest):
     def model_to_json(self, category, user):
         json = {
             'id': category.pk,
-            'cover_photo': None,
-            'cover_photo_pk': None,
             'ascendants': [],
             'title': category.title,
             'description': category.description,
@@ -783,26 +800,17 @@ class TestCategorys(BaseTest):
             'sort_order': category.sort_order,
             'parent': None,
         }
-        if category.cover_photo is not None:
-            json.update({
-                'cover_photo': category.cover_photo.title,
-                'cover_photo_pk': category.cover_photo.pk,
-            })
+        self.set_cover_photo(json, category)
 
         parent = category.parent
         ascendants = []
         while parent is not None:
-            ascendants.append({
+            parent_json = {
                 'id': parent.pk,
                 'title': parent.title,
-                'cover_photo': None,
-                'cover_photo_pk': None,
-            })
-            if parent.cover_photo is not None:
-                json.update({
-                    'cover_photo': parent.cover_photo.title,
-                    'cover_photo_pk': parent.cover_photo.pk,
-                })
+            }
+            self.set_cover_photo(parent_json, parent)
+            ascendants.append(parent_json)
             parent = parent.parent
 
         if category.parent is not None:
@@ -856,7 +864,7 @@ class TestPlaces(BaseTest):
         return result
 
     def get_test_creates(self, user):
-        json = {
+        json = [{
             'cover_photo': None,
             'cover_photo_pk': None,
             'ascendants': [],
@@ -871,13 +879,13 @@ class TestPlaces(BaseTest):
             'state': None,
             'url': None,
             'urldesc': None,
-        }
+        }]
         return json
 
     def get_test_lists(self, user):
         l = [
-            ({}, self.pks),
-            ({'q': '2nd'}, [self.pks[1]]),
+            ({}, self.pks_to_json(self.pks, user)),
+            ({'q': '2nd'}, self.pks_to_json([self.pks[1]], user)),
         ]
         return l
 
@@ -921,8 +929,6 @@ class TestPlaces(BaseTest):
     def model_to_json(self, place, user):
         json = {
             'id': place.pk,
-            'cover_photo': None,
-            'cover_photo_pk': None,
             'ascendants': [],
             'title': place.title,
             'parent': None,
@@ -934,26 +940,17 @@ class TestPlaces(BaseTest):
             'url': None,
             'urldesc': None,
         }
-        if place.cover_photo is not None:
-            json.update({
-                'cover_photo': place.cover_photo.title,
-                'cover_photo_pk': place.cover_photo.pk,
-            })
+        self.set_cover_photo(json, place)
 
         parent = place.parent
         ascendants = []
         while parent is not None:
-            ascendants.append({
+            parent_json = {
                 'id': parent.pk,
                 'title': parent.title,
-                'cover_photo': None,
-                'cover_photo_pk': None,
-            })
-            if parent.cover_photo is not None:
-                json.update({
-                    'cover_photo': parent.cover_photo.title,
-                    'cover_photo_pk': parent.cover_photo.pk,
-                })
+            }
+            self.set_cover_photo(parent_json, parent)
+            ascendants.append(parent_json)
             parent = parent.parent
 
         if place.parent is not None:
@@ -967,5 +964,376 @@ class TestPlaces(BaseTest):
                 'address': None,
                 'address2': None,
             })
+
+        return json
+
+
+@pytest.mark.django_db(transaction=True)
+class TestPersons(BaseTest):
+    name = "person"
+    model = models.person
+
+    def create_test_db(self, user):
+        result = {}
+        self.pks = []
+
+        place = models.place.objects.create(
+            parent=None,
+            title="My 1st Place",
+            cover_photo=None,
+        )
+
+        person = models.person.objects.create(
+            first_name="My Grandfather",
+            sex="1",
+            cover_photo=None,
+            home=place,
+        )
+        grandfather = person
+        result[person.pk] = person
+        self.pks.append(person.pk)
+
+        person = models.person.objects.create(
+            first_name="My Grandmother",
+            sex="2",
+            cover_photo=None,
+            spouse=grandfather,
+            work=place,
+        )
+        grandmother = person
+        result[person.pk] = person
+        self.pks.append(person.pk)
+
+        person = models.person.objects.create(
+            first_name="My Father",
+            sex="1",
+            cover_photo=None,
+        )
+        father = person
+        result[person.pk] = person
+        self.pks.append(person.pk)
+
+        person = models.person.objects.create(
+            first_name="My Mother",
+            father=grandfather,
+            mother=grandmother,
+            cover_photo=None,
+            spouse=father,
+        )
+        mother = person
+        result[person.pk] = person
+        self.pks.append(person.pk)
+
+        person = models.person.objects.create(
+            first_name="Me",
+            sex="1",
+            father=father,
+            mother=mother,
+            cover_photo=None,
+        )
+        me = person
+        result[person.pk] = person
+        self.pks.append(person.pk)
+
+        person = models.person.objects.create(
+            first_name="My child",
+            father=me,
+            mother=mother,
+            cover_photo=None,
+        )
+        result[person.pk] = person
+        self.pks.append(person.pk)
+
+        # return results
+        self.objs = result
+        return result
+
+    def get_test_creates(self, user):
+        json = [{
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'first_name': 'My Person',
+            'last_name': None,
+            'called': None,
+            'children': [],
+            'cousins': [],
+            'dob': None,
+            'dod': None,
+            'email': None,
+            'father': None,
+            'father_pk': None,
+            'grandchildren': [],
+            'grandparents': [],
+            'home': None,
+            'home_pk': None,
+            'middle_name': None,
+            'mother': None,
+            'mother_pk': None,
+            'nephews_nieces': [],
+            'notes': None,
+            'parents': [],
+            'sex': '1',
+            'siblings': [],
+            'spouse': None,
+            'spouse_pk': None,
+            'spouses': [],
+            'title': 'My Person',
+            'uncles_aunts': [],
+            'work': None,
+            'work_pk': None,
+        }]
+        return json
+
+    def get_test_lists(self, user):
+        grandfather, grandmother, father, mother, me, child = self.pks
+        expected_list = self.pks_to_json([
+            me, father, grandfather, grandmother, mother, child], user)
+
+        for expected in expected_list:
+            del expected['first_name']
+            del expected['middle_name']
+            del expected['last_name']
+            del expected['called']
+            if user is not None and user.is_staff:
+                del expected['children']
+                del expected['cousins']
+                del expected['dob']
+                del expected['dod']
+                del expected['email']
+                del expected['father']
+                del expected['father_pk']
+                del expected['grandchildren']
+                del expected['grandparents']
+                del expected['home']
+                del expected['home_pk']
+                del expected['mother']
+                del expected['mother_pk']
+                del expected['nephews_nieces']
+                del expected['notes']
+                del expected['parents']
+                del expected['sex']
+                del expected['siblings']
+                del expected['spouse']
+                del expected['spouse_pk']
+                del expected['spouses']
+                del expected['uncles_aunts']
+                del expected['work']
+                del expected['work_pk']
+
+        l = [
+            ({}, expected_list),
+        ]
+        return l
+
+    def get_test_updates(self, user):
+        grandfather, grandmother, father, mother, me, child = self.pks
+
+        obj = self.objs[grandfather]
+        expected1 = self.model_to_json(obj, user)
+        expected1['title'] = 'My new title #1'
+        if user is not None and user.is_staff:
+            expected1['first_name'] = 'My new title #1'
+
+        obj = self.objs[grandmother]
+        expected2 = self.model_to_json(obj, user)
+        expected2['title'] = 'My new title #2'
+        if user is not None and user.is_staff:
+            expected2['first_name'] = 'My new title #2'
+            expected2['spouse']['title'] = 'My new title #1'
+            expected2['spouses'][0]['title'] = 'My new title #1'
+
+        obj = self.objs[mother]
+        expected3 = self.model_to_json(obj, user)
+        expected3['title'] = 'My new title #3'
+        if user is not None and user.is_staff:
+            expected3['first_name'] = 'My new title #3'
+            expected3['father']['title'] = 'My new title #1'
+            expected3['mother']['title'] = 'My new title #2'
+            expected3['parents'][0]['title'] = 'My new title #1'
+            expected3['parents'][1]['title'] = 'My new title #2'
+
+        return [
+            (grandfather, {'first_name': 'My new title #1'}, expected1),
+            (grandmother, {'first_name': 'My new title #2'}, expected2),
+            (mother, {'first_name': 'My new title #3'}, expected3),
+        ]
+
+    def get_test_deletes(self):
+        grandfather, grandmother, father, mother, me, child = self.pks
+        d = [
+            (grandfather, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete person that is a father, '
+                'Cannot delete person that is a spouse'}),
+            (grandmother, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete person that is a mother'}),
+            (father, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete person that is a father, '
+                'Cannot delete person that is a spouse'}),
+            (mother, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete person that is a mother'}),
+            (me, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete person that is a father'}),
+            (child, status.HTTP_204_NO_CONTENT, None),
+            (me, status.HTTP_204_NO_CONTENT, None),
+            (mother, status.HTTP_204_NO_CONTENT, None),
+            (father, status.HTTP_204_NO_CONTENT, None),
+            (grandmother, status.HTTP_204_NO_CONTENT, None),
+            (grandfather, status.HTTP_204_NO_CONTENT, None),
+        ]
+        return d
+
+    def _model_to_simplified(self, person, user):
+        json = {
+            'id': person.pk,
+            'title': person.first_name,
+            'cover_photo': None,
+            'cover_photo_pk': None,
+        }
+        self.set_cover_photo(json, person)
+        return json
+
+    def model_to_json(self, person, user):
+        grandchildren = []
+        for p in person.grandchildren():
+            p_json = self._model_to_simplified(p, user)
+            grandchildren.append(p_json)
+
+        children = []
+        for p in person.children():
+            p_json = self._model_to_simplified(p, user)
+            children.append(p_json)
+
+        parents = []
+        for p in person.parents():
+            p_json = self._model_to_simplified(p, user)
+            parents.append(p_json)
+
+        grandparents = []
+        for p in person.grandparents():
+            p_json = self._model_to_simplified(p, user)
+            grandparents.append(p_json)
+
+        spouses = []
+        for p in person.spouses():
+            p_json = self._model_to_simplified(p, user)
+            spouses.append(p_json)
+
+        siblings = []
+        for p in person.siblings():
+            p_json = self._model_to_simplified(p, user)
+            siblings.append(p_json)
+
+        cousins = []
+        for p in person.cousins():
+            p_json = self._model_to_simplified(p, user)
+            cousins.append(p_json)
+
+        nephews_nieces = []
+        for p in person.nephews_nieces():
+            p_json = self._model_to_simplified(p, user)
+            nephews_nieces.append(p_json)
+
+        uncles_aunts = []
+        for p in person.uncles_aunts():
+            p_json = self._model_to_simplified(p, user)
+            uncles_aunts.append(p_json)
+
+        json = {
+            'id': person.pk,
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'first_name': person.first_name,
+            'middle_name': person.middle_name,
+            'last_name': person.last_name,
+            'called': person.called,
+            'title': person.first_name,
+        }
+        self.set_cover_photo(json, person)
+
+        if user is not None and user.is_staff:
+            json.update({
+                'children': children,
+                'cousins': cousins,
+                'dob': person.dob,
+                'dod': person.dod,
+                'email': person.email,
+                'father': None,
+                'father_pk': None,
+                'grandchildren': grandchildren,
+                'grandparents': grandparents,
+                'home': None,
+                'home_pk': None,
+                'mother': None,
+                'mother_pk': None,
+                'nephews_nieces': nephews_nieces,
+                'notes': person.notes,
+                'parents': parents,
+                'sex': person.sex,
+                'siblings': siblings,
+                'spouse': None,
+                'spouse_pk': None,
+                'spouses': spouses,
+                'uncles_aunts': uncles_aunts,
+                'work': None,
+                'work_pk': None,
+            })
+            if person.father is not None:
+                p_json = self._model_to_simplified(person.father, user)
+                json.update({
+                    'father': p_json,
+                    'father_pk': person.father.pk,
+                })
+            if person.mother is not None:
+                p_json = self._model_to_simplified(person.mother, user)
+                json.update({
+                    'mother': p_json,
+                    'mother_pk': person.mother.pk,
+                })
+            if person.spouse is not None:
+                p_json = self._model_to_simplified(person.spouse, user)
+                json.update({
+                    'spouse': p_json,
+                    'spouse_pk': person.spouse.pk,
+                })
+            if person.work is not None:
+                json.update({
+                    'work': {
+                        'id': person.work.pk,
+                        'title': person.work.title,
+                        'address': person.work.address,
+                        'address2': person.work.address2,
+                        'city': person.work.city,
+                        'state': person.work.state,
+                        'postcode': person.work.postcode,
+                        'country': person.work.country,
+                        'url': person.work.url,
+                        'urldesc': person.work.urldesc,
+                        'notes': person.work.notes,
+                        'parent': None,
+                        'ascendants': [],
+                    },
+                    'work_pk': person.work.pk,
+                })
+                self.set_cover_photo(json['work'], person.work)
+            if person.home is not None:
+                json.update({
+                    'home': {
+                        'id': person.home.pk,
+                        'title': person.home.title,
+                        'address': person.home.address,
+                        'address2': person.home.address2,
+                        'city': person.home.city,
+                        'state': person.home.state,
+                        'postcode': person.home.postcode,
+                        'country': person.home.country,
+                        'url': person.home.url,
+                        'urldesc': person.home.urldesc,
+                        'notes': person.home.notes,
+                        'parent': None,
+                        'ascendants': [],
+                    },
+                    'home_pk': person.home.pk,
+                })
+                self.set_cover_photo(json['home'], person.home)
 
         return json

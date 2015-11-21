@@ -288,17 +288,17 @@ class PersonSerializer(ModelSerializer):
         queryset=models.place.objects.all(), source="work",
         required=False, allow_null=True)
 
-    mother = None
+    mother = NestedPersonSerializer(read_only=True)
     mother_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="mother",
         required=False, allow_null=True)
 
-    father = None
+    father = NestedPersonSerializer(read_only=True)
     father_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="father",
         required=False, allow_null=True)
 
-    spouse = None
+    spouse = NestedPersonSerializer(read_only=True)
     spouse_pk = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all(), source="spouse",
         required=False, allow_null=True)
