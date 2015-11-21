@@ -177,7 +177,6 @@ class UserTests(BaseTests):
         return User.objects.create_user('test1', 'test@example.org', '1234')
 
     def check_authorized(self, obj_type, action):
-        print(obj_type, action)
         if obj_type == 'user':
             return False
         if action == 'list':
@@ -346,7 +345,6 @@ class BaseTest(object):
             if scenario.check_response(response, self.name, 'list'):
                 assert response.status_code == status.HTTP_200_OK
                 assert len(response.data) == len(expected_list)
-                print(response.data, expected_list)
                 for data, expected in zip(response.data, expected_list):
                     if expected is not None:
                         assert data["id"] == expected
