@@ -811,3 +811,161 @@ class TestCategorys(BaseTest):
                 'ascendants': ascendants,
             })
         return json
+
+
+@pytest.mark.django_db(transaction=True)
+class TestPlaces(BaseTest):
+    name = "place"
+    model = models.place
+
+    def create_test_db(self, user):
+        result = {}
+        self.pks = []
+
+        # create place without parent
+        place = models.place.objects.create(
+            parent=None,
+            title="My 1st Place",
+            cover_photo=None,
+        )
+        result[place.pk] = place
+        self.pks.append(place.pk)
+
+        # create place with parent
+        parent = place
+        place = models.place.objects.create(
+            parent=parent,
+            title="My 2nd Place",
+            cover_photo=None,
+        )
+        result[place.pk] = place
+        self.pks.append(place.pk)
+
+        # create place with parent that has a parent
+        parent = place
+        place = models.place.objects.create(
+            parent=parent,
+            title="My 3rd Place",
+            cover_photo=None,
+        )
+        result[place.pk] = place
+        self.pks.append(place.pk)
+
+        # return results
+        self.objs = result
+        return result
+
+    def get_test_creates(self, user):
+        json = {
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'ascendants': [],
+            'title': 'My Place',
+            'parent': None,
+            'address': None,
+            'address2': None,
+            'city': None,
+            'country': None,
+            'notes': None,
+            'postcode': None,
+            'state': None,
+            'url': None,
+            'urldesc': None,
+        }
+        return json
+
+    def get_test_lists(self, user):
+        l = [
+            ({}, self.pks),
+            ({'q': '2nd'}, [self.pks[1]]),
+        ]
+        return l
+
+    def get_test_updates(self, user):
+        a1, a2, a3 = self.pks
+
+        obj = self.objs[a1]
+        expected1 = self.model_to_json(obj, user)
+        expected1['title'] = 'My new title #1'
+
+        obj = self.objs[a2]
+        expected2 = self.model_to_json(obj, user)
+        expected2['title'] = 'My new title #2'
+        expected2['ascendants'][0]['title'] = 'My new title #1'
+
+        obj = self.objs[a3]
+        expected3 = self.model_to_json(obj, user)
+        expected3['title'] = 'My new title #3'
+        expected3['ascendants'][0]['title'] = 'My new title #2'
+        expected3['ascendants'][1]['title'] = 'My new title #1'
+
+        return [
+            (a1, {'title': 'My new title #1'}, expected1),
+            (a2, {'title': 'My new title #2'}, expected2),
+            (a3, {'title': 'My new title #3'}, expected3),
+        ]
+
+    def get_test_deletes(self):
+        a1, a2, a3 = self.pks
+        d = [
+            (a1, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete place with children'}),
+            (a2, status.HTTP_403_FORBIDDEN, {
+                'detail': 'Cannot delete place with children'}),
+            (a3, status.HTTP_204_NO_CONTENT, None),
+            (a2, status.HTTP_204_NO_CONTENT, None),
+            (a1, status.HTTP_204_NO_CONTENT, None),
+        ]
+        return d
+
+    def model_to_json(self, place, user):
+        json = {
+            'id': place.pk,
+            'cover_photo': None,
+            'cover_photo_pk': None,
+            'ascendants': [],
+            'title': place.title,
+            'parent': None,
+            'city': None,
+            'country': None,
+            'notes': None,
+            'postcode': None,
+            'state': None,
+            'url': None,
+            'urldesc': None,
+        }
+        if place.cover_photo is not None:
+            json.update({
+                'cover_photo': place.cover_photo.title,
+                'cover_photo_pk': place.cover_photo.pk,
+            })
+
+        parent = place.parent
+        ascendants = []
+        while parent is not None:
+            ascendants.append({
+                'id': parent.pk,
+                'title': parent.title,
+                'cover_photo': None,
+                'cover_photo_pk': None,
+            })
+            if parent.cover_photo is not None:
+                json.update({
+                    'cover_photo': parent.cover_photo.title,
+                    'cover_photo_pk': parent.cover_photo.pk,
+                })
+            parent = parent.parent
+
+        if place.parent is not None:
+            json.update({
+                'parent': place.parent.pk,
+                'ascendants': ascendants,
+            })
+
+        if user is not None and user.is_staff:
+            json.update({
+                'address': None,
+                'address2': None,
+            })
+
+        return json
