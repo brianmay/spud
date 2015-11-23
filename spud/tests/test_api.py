@@ -28,6 +28,28 @@ from rest_framework.test import APIClient
 from spud import models
 
 
+class unordered_list(object):
+    "A helper object that compares two unordered lists."
+
+    def __init__(self, l):
+        self.l = l
+
+    def __eq__(self, other):
+        t = list(self.l)   # make a mutable copy
+        try:
+            for elem in other:
+                t.remove(elem)
+        except ValueError:
+            return False
+        return not t
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __repr__(self):
+        return '<unordered_list %s>' % self.l
+
+
 def get_json_user(user):
     if user is None:
         return None
@@ -1804,6 +1826,7 @@ class TestPhotos(BaseTest):
             spouse=person1,
         )
 
+        result = []
         json = {
             'title': 'My Photo',
             'photo': "177A0782.JPG",
@@ -1885,8 +1908,126 @@ class TestPhotos(BaseTest):
             'timestamp': ANY,
             'view': None
         })
+        result.append((json, expected))
 
-        return [(json, expected)]
+        json = {
+            'title': 'My Video',
+            'photo': "177A4628.MOV",
+            'description': 'My Description',
+            'datetime': "2015-11-22T12:00:00",
+            'utc_offset': 600,
+            'albums_pk': [album1.pk, album2.pk],
+            'categorys_pk': [category1.pk, category2.pk],
+            'place_pk': place.pk,
+            'persons_pk': [person2.pk, person1.pk],
+            'photographer_pk': person1.pk,
+            'level': 1,
+        }
+
+        expected = dict(json)
+        del expected['photo']
+        expected.update({
+            'thumbs': {
+                'large': {
+                    'id': ANY,
+                    'url': '/images/thumb/large/2015/11/22/177A4628.jpg',
+                    'size': 'large',
+                    'width': 960,
+                    'height': 540,
+                    'photo': ANY,
+                },
+                'mid': {
+                    'id': ANY,
+                    'url': '/images/thumb/mid/2015/11/22/177A4628.jpg',
+                    'size': 'mid',
+                    'width': 480,
+                    'height': 270,
+                    'photo': ANY,
+                },
+                'thumb': {
+                    'id': ANY,
+                    'url': '/images/thumb/thumb/2015/11/22/177A4628.jpg',
+                    'size': 'thumb',
+                    'width': 120,
+                    'height': 67,
+                    'photo': ANY,
+                },
+            },
+            'videos': {
+                '320': unordered_list([
+                    {
+                        'id': ANY,
+                        'url': '/images/video/320/2015/11/22/177A4628.webm',
+                        'size': '320',
+                        'width': 568,
+                        'height': 320,
+                        'format': 'video/webm',
+                        'extension': 'webm',
+                        'photo': ANY,
+                    },
+                    {
+                        'id': ANY,
+                        'url': '/images/video/320/2015/11/22/177A4628.mp4',
+                        'size': '320',
+                        'width': 568,
+                        'height': 320,
+                        'format': 'video/mp4',
+                        'extension': 'mp4',
+                        'photo': ANY,
+                    },
+                    {
+                        'id': ANY,
+                        'url': '/images/video/320/2015/11/22/177A4628.ogv',
+                        'size': '320',
+                        'width': 568,
+                        'height': 320,
+                        'format': 'video/ogg',
+                        'extension': 'ogv',
+                        'photo': ANY,
+                    },
+                ])
+            },
+            'action': None,
+            'albums': [
+                album_to_json(album1, user),
+                album_to_json(album2, user),
+            ],
+            'aperture': 'F22.0',
+            'camera_make': 'Canon',
+            'camera_model': 'Canon EOS 5D Mark III',
+            'categorys': [
+                category_to_json(category1, user),
+                category_to_json(category2, user),
+            ],
+            'ccd_width': None,
+            'comment': None,
+            'compression': None,
+            'exposure': None,
+            'feedbacks': [],
+            'flash_used': 'N',
+            'focal_length': '28',
+            'focus_dist': '1.15131934983926',
+            'iso_equiv': '0',
+            'metering_mode': 'center weighted average',
+            'name': '177A4628.MOV',
+            'orig_url': '/images/orig/2015/11/22/177A4628.MOV',
+            'path': '2015/11/22',
+            'persons': [
+                person_to_simplified_json(person2, user),
+                person_to_simplified_json(person1, user),
+            ],
+            'photographer': person_to_simplified_json(person1, user),
+            'place': place_to_json(place, user),
+            'rating': None,
+            'relations': [],
+            'size': 3372332,
+            'timestamp': ANY,
+            'view': None
+        })
+
+        result.append((json, expected))
+
+        return result
 
     def test_obj_create(self, scenario, data_files, settings, tmpdir):
         settings.IMAGE_PATH = tmpdir.dirname
@@ -2073,7 +2214,9 @@ class TestPhotos(BaseTest):
                 'photo': pt.photo.pk,
             }
         for pv in photo.photo_video_set.all():
-            json['videos'][pv.size] = [{
+            if pv.size not in json['videos']:
+                json['videos'][pv.size] = []
+            json['videos'][pv.size].append({
                 'id': pv.pk,
                 'url': pv.get_url(),
                 'size': pv.size,
@@ -2082,7 +2225,7 @@ class TestPhotos(BaseTest):
                 'photo': pv.photo.pk,
                 'format': pv.format,
                 'extension': pv.extension,
-            }]
+            })
 
         if user is not None and user.is_staff:
             json.update({
