@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
 import datetime
+import os.path
 from mock import ANY
 
 from django.contrib.auth.models import User
@@ -119,6 +120,373 @@ def get_json_session(user):
         'perms': perms,
         'user': get_json_user(user),
     }
+
+
+def set_cover_photo(json, cover_photo):
+    if cover_photo is not None:
+        json.update({
+            'cover_photo': {
+                'id': cover_photo.pk,
+                'title': cover_photo.name,
+                'description': cover_photo.description,
+                'datetime': cover_photo.datetime.isoformat(),
+                'utc_offset': cover_photo.utc_offset,
+                'place': None,
+                'thumbs': {},
+                'videos': {},
+            },
+            'cover_photo_pk': cover_photo.pk,
+        })
+    else:
+        json.update({
+            'cover_photo': None,
+            'cover_photo_pk': None,
+        })
+
+
+def album_to_json(album, user):
+    json = {
+        'id': album.pk,
+        'ascendants': [],
+        'title': album.title,
+        'description': album.description,
+        'sort_name': album.sort_name,
+        'sort_order': album.sort_order,
+        'parent': None,
+    }
+    set_cover_photo(json, album.cover_photo)
+
+    parent = album.parent
+    ascendants = []
+    while parent is not None:
+        parent_json = {
+            'id': parent.pk,
+            'title': parent.title,
+        }
+        set_cover_photo(parent_json, parent.cover_photo)
+        ascendants.append(parent_json)
+        parent = parent.parent
+
+    if album.parent is not None:
+        json.update({
+            'parent': album.parent.pk,
+            'ascendants': ascendants,
+        })
+    if user is not None and user.is_staff:
+        json.update({
+            'revised': album.revised.isoformat(),
+            'revised_utc_offset': album.revised_utc_offset,
+        })
+    return json
+
+
+def category_to_json(category, user):
+    json = {
+        'id': category.pk,
+        'ascendants': [],
+        'title': category.title,
+        'description': category.description,
+        'sort_name': category.sort_name,
+        'sort_order': category.sort_order,
+        'parent': None,
+    }
+    set_cover_photo(json, category.cover_photo)
+
+    parent = category.parent
+    ascendants = []
+    while parent is not None:
+        parent_json = {
+            'id': parent.pk,
+            'title': parent.title,
+        }
+        set_cover_photo(parent_json, parent.cover_photo)
+        ascendants.append(parent_json)
+        parent = parent.parent
+
+    if category.parent is not None:
+        json.update({
+            'parent': category.parent.pk,
+            'ascendants': ascendants,
+        })
+    return json
+
+
+def place_to_json(place, user):
+    json = {
+        'id': place.pk,
+        'ascendants': [],
+        'title': place.title,
+        'parent': None,
+        'city': place.city,
+        'country': place.country,
+        'notes': place.notes,
+        'postcode': place.postcode,
+        'state': place.state,
+        'url': place.url,
+        'urldesc': place.urldesc,
+    }
+    set_cover_photo(json, place.cover_photo)
+
+    parent = place.parent
+    ascendants = []
+    while parent is not None:
+        parent_json = {
+            'id': parent.pk,
+            'title': parent.title,
+        }
+        set_cover_photo(parent_json, parent.cover_photo)
+        ascendants.append(parent_json)
+        parent = parent.parent
+
+    if place.parent is not None:
+        json.update({
+            'parent': place.parent.pk,
+            'ascendants': ascendants,
+        })
+
+    if user is not None and user.is_staff:
+        json.update({
+            'address': None,
+            'address2': None,
+        })
+
+    return json
+
+
+def person_to_simplified_json(person, user):
+    json = {
+        'id': person.pk,
+        'title': person.first_name,
+    }
+    set_cover_photo(json, person.cover_photo)
+    return json
+
+
+def person_to_json(person, user):
+    grandchildren = []
+    for p in person.grandchildren():
+        p_json = person_to_simplified_json(p, user)
+        grandchildren.append(p_json)
+
+    children = []
+    for p in person.children():
+        p_json = person_to_simplified_json(p, user)
+        children.append(p_json)
+
+    parents = []
+    for p in person.parents():
+        p_json = person_to_simplified_json(p, user)
+        parents.append(p_json)
+
+    grandparents = []
+    for p in person.grandparents():
+        p_json = person_to_simplified_json(p, user)
+        grandparents.append(p_json)
+
+    spouses = []
+    for p in person.spouses():
+        p_json = person_to_simplified_json(p, user)
+        spouses.append(p_json)
+
+    siblings = []
+    for p in person.siblings():
+        p_json = person_to_simplified_json(p, user)
+        siblings.append(p_json)
+
+    cousins = []
+    for p in person.cousins():
+        p_json = person_to_simplified_json(p, user)
+        cousins.append(p_json)
+
+    nephews_nieces = []
+    for p in person.nephews_nieces():
+        p_json = person_to_simplified_json(p, user)
+        nephews_nieces.append(p_json)
+
+    uncles_aunts = []
+    for p in person.uncles_aunts():
+        p_json = person_to_simplified_json(p, user)
+        uncles_aunts.append(p_json)
+
+    json = {
+        'id': person.pk,
+        'cover_photo': None,
+        'cover_photo_pk': None,
+        'first_name': person.first_name,
+        'middle_name': person.middle_name,
+        'last_name': person.last_name,
+        'called': person.called,
+        'title': person.first_name,
+    }
+    set_cover_photo(json, person.cover_photo)
+
+    if user is not None and user.is_staff:
+        json.update({
+            'children': children,
+            'cousins': cousins,
+            'dob': person.dob,
+            'dod': person.dod,
+            'email': person.email,
+            'father': None,
+            'father_pk': None,
+            'grandchildren': grandchildren,
+            'grandparents': grandparents,
+            'home': None,
+            'home_pk': None,
+            'mother': None,
+            'mother_pk': None,
+            'nephews_nieces': nephews_nieces,
+            'notes': person.notes,
+            'parents': parents,
+            'sex': person.sex,
+            'siblings': siblings,
+            'spouse': None,
+            'spouse_pk': None,
+            'spouses': spouses,
+            'uncles_aunts': uncles_aunts,
+            'work': None,
+            'work_pk': None,
+        })
+        if person.father is not None:
+            p_json = person_to_simplified_json(person.father, user)
+            json.update({
+                'father': p_json,
+                'father_pk': person.father.pk,
+            })
+        if person.mother is not None:
+            p_json = person_to_simplified_json(person.mother, user)
+            json.update({
+                'mother': p_json,
+                'mother_pk': person.mother.pk,
+            })
+        if person.spouse is not None:
+            p_json = person_to_simplified_json(person.spouse, user)
+            json.update({
+                'spouse': p_json,
+                'spouse_pk': person.spouse.pk,
+            })
+        if person.work is not None:
+            json.update({
+                'work': {
+                    'id': person.work.pk,
+                    'title': person.work.title,
+                    'address': person.work.address,
+                    'address2': person.work.address2,
+                    'city': person.work.city,
+                    'state': person.work.state,
+                    'postcode': person.work.postcode,
+                    'country': person.work.country,
+                    'url': person.work.url,
+                    'urldesc': person.work.urldesc,
+                    'notes': person.work.notes,
+                    'parent': None,
+                    'ascendants': [],
+                },
+                'work_pk': person.work.pk,
+            })
+            set_cover_photo(json['work'], person.work.cover_photo)
+        if person.home is not None:
+            json.update({
+                'home': {
+                    'id': person.home.pk,
+                    'title': person.home.title,
+                    'address': person.home.address,
+                    'address2': person.home.address2,
+                    'city': person.home.city,
+                    'state': person.home.state,
+                    'postcode': person.home.postcode,
+                    'country': person.home.country,
+                    'url': person.home.url,
+                    'urldesc': person.home.urldesc,
+                    'notes': person.home.notes,
+                    'parent': None,
+                    'ascendants': [],
+                },
+                'home_pk': person.home.pk,
+            })
+            set_cover_photo(json['home'], person.home.cover_photo)
+
+    return json
+
+
+def feedback_to_json(feedback, user):
+    json = {
+        'id': feedback.pk,
+        'comment': feedback.comment,
+        'ip_address': feedback.ip_address,
+        'is_public': feedback.is_public,
+        'is_removed': feedback.is_removed,
+        'rating': feedback.rating,
+        'submit_datetime': feedback.submit_datetime.isoformat(),
+        'user': feedback.user,
+        'user_email': feedback.user_email,
+        'user_name': feedback.user_name,
+        'user_url': feedback.user_url,
+        'utc_offset': feedback.utc_offset,
+        'parent': None,
+        'ascendants': [],
+    }
+    set_cover_photo(json, feedback.cover_photo)
+
+    parent = feedback.parent
+    ascendants = []
+    while parent is not None:
+        parent_json = {
+            'id': parent.pk,
+            'rating': parent.rating,
+            'comment': parent.comment,
+            'user_name': parent.user_name,
+            'user_email': parent.user_email,
+            'user_url': parent.user_url,
+            'submit_datetime': parent.submit_datetime.isoformat(),
+            'utc_offset': parent.utc_offset,
+            'ip_address': parent.ip_address,
+            'is_public': parent.is_public,
+            'is_removed': parent.is_removed,
+            'user': parent.user,
+        }
+        set_cover_photo(parent_json, parent.cover_photo)
+        ascendants.append(parent_json)
+        parent = parent.parent
+
+    if feedback.parent is not None:
+        json.update({
+            'parent': feedback.parent.pk,
+            'ascendants': ascendants,
+        })
+
+    return json
+
+
+def photo_relation_to_json(photo_relation, user):
+    json = {
+        'id': photo_relation.pk,
+        'photo_1': {
+            'id': photo_relation.photo_1.pk,
+            'title': photo_relation.photo_1.name,
+            'description': photo_relation.photo_1.description,
+            'datetime': photo_relation.photo_1.datetime.isoformat(),
+            'utc_offset': photo_relation.photo_1.utc_offset,
+            'place': None,
+            'thumbs': {},
+            'videos': {},
+        },
+        'photo_1_pk': photo_relation.photo_1.pk,
+        'photo_2': {
+            'id': photo_relation.photo_2.pk,
+            'title': photo_relation.photo_2.name,
+            'description': photo_relation.photo_2.description,
+            'datetime': photo_relation.photo_2.datetime.isoformat(),
+            'utc_offset': photo_relation.photo_2.utc_offset,
+            'place': None,
+            'thumbs': {},
+            'videos': {},
+        },
+        'photo_2_pk': photo_relation.photo_2.pk,
+        'desc_1': photo_relation.desc_1,
+        'desc_2': photo_relation.desc_2,
+    }
+    return json
 
 
 def login(client, user):
@@ -317,27 +685,6 @@ class BaseTest(object):
                 json = None
             result.append(json)
         return result
-
-    def set_cover_photo(self, json, cover_photo):
-        if cover_photo is not None:
-            json.update({
-                'cover_photo': {
-                    'id': cover_photo.pk,
-                    'title': cover_photo.name,
-                    'description': cover_photo.description,
-                    'datetime': cover_photo.datetime.isoformat(),
-                    'utc_offset': cover_photo.utc_offset,
-                    'place': None,
-                    'thumbs': {},
-                    'videos': {},
-                },
-                'cover_photo_pk': cover_photo.pk,
-            })
-        else:
-            json.update({
-                'cover_photo': None,
-                'cover_photo_pk': None,
-            })
 
     def get_list_url(self):
         return reverse('%s-list' % self.name)
@@ -653,39 +1000,7 @@ class TestAlbums(BaseTest):
         return d
 
     def model_to_json(self, album, user):
-        json = {
-            'id': album.pk,
-            'ascendants': [],
-            'title': album.title,
-            'description': album.description,
-            'sort_name': album.sort_name,
-            'sort_order': album.sort_order,
-            'parent': None,
-        }
-        self.set_cover_photo(json, album.cover_photo)
-
-        parent = album.parent
-        ascendants = []
-        while parent is not None:
-            parent_json = {
-                'id': parent.pk,
-                'title': parent.title,
-            }
-            self.set_cover_photo(parent_json, parent.cover_photo)
-            ascendants.append(parent_json)
-            parent = parent.parent
-
-        if album.parent is not None:
-            json.update({
-                'parent': album.parent.pk,
-                'ascendants': ascendants,
-            })
-        if user is not None and user.is_staff:
-            json.update({
-                'revised': album.revised.isoformat(),
-                'revised_utc_offset': album.revised_utc_offset,
-            })
-        return json
+        return album_to_json(album, user)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -797,34 +1112,7 @@ class TestCategorys(BaseTest):
         return d
 
     def model_to_json(self, category, user):
-        json = {
-            'id': category.pk,
-            'ascendants': [],
-            'title': category.title,
-            'description': category.description,
-            'sort_name': category.sort_name,
-            'sort_order': category.sort_order,
-            'parent': None,
-        }
-        self.set_cover_photo(json, category.cover_photo)
-
-        parent = category.parent
-        ascendants = []
-        while parent is not None:
-            parent_json = {
-                'id': parent.pk,
-                'title': parent.title,
-            }
-            self.set_cover_photo(parent_json, parent.cover_photo)
-            ascendants.append(parent_json)
-            parent = parent.parent
-
-        if category.parent is not None:
-            json.update({
-                'parent': category.parent.pk,
-                'ascendants': ascendants,
-            })
-        return json
+        return category_to_json(category, user)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -933,45 +1221,7 @@ class TestPlaces(BaseTest):
         return d
 
     def model_to_json(self, place, user):
-        json = {
-            'id': place.pk,
-            'ascendants': [],
-            'title': place.title,
-            'parent': None,
-            'city': None,
-            'country': None,
-            'notes': None,
-            'postcode': None,
-            'state': None,
-            'url': None,
-            'urldesc': None,
-        }
-        self.set_cover_photo(json, place.cover_photo)
-
-        parent = place.parent
-        ascendants = []
-        while parent is not None:
-            parent_json = {
-                'id': parent.pk,
-                'title': parent.title,
-            }
-            self.set_cover_photo(parent_json, parent.cover_photo)
-            ascendants.append(parent_json)
-            parent = parent.parent
-
-        if place.parent is not None:
-            json.update({
-                'parent': place.parent.pk,
-                'ascendants': ascendants,
-            })
-
-        if user is not None and user.is_staff:
-            json.update({
-                'address': None,
-                'address2': None,
-            })
-
-        return json
+        return place_to_json(place, user)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1188,161 +1438,8 @@ class TestPersons(BaseTest):
         ]
         return d
 
-    def _model_to_simplified(self, person, user):
-        json = {
-            'id': person.pk,
-            'title': person.first_name,
-            'cover_photo': None,
-            'cover_photo_pk': None,
-        }
-        self.set_cover_photo(json, person.cover_photo)
-        return json
-
     def model_to_json(self, person, user):
-        grandchildren = []
-        for p in person.grandchildren():
-            p_json = self._model_to_simplified(p, user)
-            grandchildren.append(p_json)
-
-        children = []
-        for p in person.children():
-            p_json = self._model_to_simplified(p, user)
-            children.append(p_json)
-
-        parents = []
-        for p in person.parents():
-            p_json = self._model_to_simplified(p, user)
-            parents.append(p_json)
-
-        grandparents = []
-        for p in person.grandparents():
-            p_json = self._model_to_simplified(p, user)
-            grandparents.append(p_json)
-
-        spouses = []
-        for p in person.spouses():
-            p_json = self._model_to_simplified(p, user)
-            spouses.append(p_json)
-
-        siblings = []
-        for p in person.siblings():
-            p_json = self._model_to_simplified(p, user)
-            siblings.append(p_json)
-
-        cousins = []
-        for p in person.cousins():
-            p_json = self._model_to_simplified(p, user)
-            cousins.append(p_json)
-
-        nephews_nieces = []
-        for p in person.nephews_nieces():
-            p_json = self._model_to_simplified(p, user)
-            nephews_nieces.append(p_json)
-
-        uncles_aunts = []
-        for p in person.uncles_aunts():
-            p_json = self._model_to_simplified(p, user)
-            uncles_aunts.append(p_json)
-
-        json = {
-            'id': person.pk,
-            'cover_photo': None,
-            'cover_photo_pk': None,
-            'first_name': person.first_name,
-            'middle_name': person.middle_name,
-            'last_name': person.last_name,
-            'called': person.called,
-            'title': person.first_name,
-        }
-        self.set_cover_photo(json, person.cover_photo)
-
-        if user is not None and user.is_staff:
-            json.update({
-                'children': children,
-                'cousins': cousins,
-                'dob': person.dob,
-                'dod': person.dod,
-                'email': person.email,
-                'father': None,
-                'father_pk': None,
-                'grandchildren': grandchildren,
-                'grandparents': grandparents,
-                'home': None,
-                'home_pk': None,
-                'mother': None,
-                'mother_pk': None,
-                'nephews_nieces': nephews_nieces,
-                'notes': person.notes,
-                'parents': parents,
-                'sex': person.sex,
-                'siblings': siblings,
-                'spouse': None,
-                'spouse_pk': None,
-                'spouses': spouses,
-                'uncles_aunts': uncles_aunts,
-                'work': None,
-                'work_pk': None,
-            })
-            if person.father is not None:
-                p_json = self._model_to_simplified(person.father, user)
-                json.update({
-                    'father': p_json,
-                    'father_pk': person.father.pk,
-                })
-            if person.mother is not None:
-                p_json = self._model_to_simplified(person.mother, user)
-                json.update({
-                    'mother': p_json,
-                    'mother_pk': person.mother.pk,
-                })
-            if person.spouse is not None:
-                p_json = self._model_to_simplified(person.spouse, user)
-                json.update({
-                    'spouse': p_json,
-                    'spouse_pk': person.spouse.pk,
-                })
-            if person.work is not None:
-                json.update({
-                    'work': {
-                        'id': person.work.pk,
-                        'title': person.work.title,
-                        'address': person.work.address,
-                        'address2': person.work.address2,
-                        'city': person.work.city,
-                        'state': person.work.state,
-                        'postcode': person.work.postcode,
-                        'country': person.work.country,
-                        'url': person.work.url,
-                        'urldesc': person.work.urldesc,
-                        'notes': person.work.notes,
-                        'parent': None,
-                        'ascendants': [],
-                    },
-                    'work_pk': person.work.pk,
-                })
-                self.set_cover_photo(json['work'], person.work.cover_photo)
-            if person.home is not None:
-                json.update({
-                    'home': {
-                        'id': person.home.pk,
-                        'title': person.home.title,
-                        'address': person.home.address,
-                        'address2': person.home.address2,
-                        'city': person.home.city,
-                        'state': person.home.state,
-                        'postcode': person.home.postcode,
-                        'country': person.home.country,
-                        'url': person.home.url,
-                        'urldesc': person.home.urldesc,
-                        'notes': person.home.notes,
-                        'parent': None,
-                        'ascendants': [],
-                    },
-                    'home_pk': person.home.pk,
-                })
-                self.set_cover_photo(json['home'], person.home.cover_photo)
-
-        return json
+        return person_to_json(person, user)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1418,7 +1515,7 @@ class TestFeedbacks(BaseTest):
             'parent': None,
             'ascendants': [],
         }
-        self.set_cover_photo(json, photo)
+        set_cover_photo(json, photo)
 
         expected = dict(json)
         expected.update({
@@ -1469,52 +1566,7 @@ class TestFeedbacks(BaseTest):
         return d
 
     def model_to_json(self, feedback, user):
-        json = {
-            'id': feedback.pk,
-            'comment': feedback.comment,
-            'ip_address': feedback.ip_address,
-            'is_public': feedback.is_public,
-            'is_removed': feedback.is_removed,
-            'rating': feedback.rating,
-            'submit_datetime': feedback.submit_datetime.isoformat(),
-            'user': feedback.user,
-            'user_email': feedback.user_email,
-            'user_name': feedback.user_name,
-            'user_url': feedback.user_url,
-            'utc_offset': feedback.utc_offset,
-            'parent': None,
-            'ascendants': [],
-        }
-        self.set_cover_photo(json, feedback.cover_photo)
-
-        parent = feedback.parent
-        ascendants = []
-        while parent is not None:
-            parent_json = {
-                'id': parent.pk,
-                'rating': parent.rating,
-                'comment': parent.comment,
-                'user_name': parent.user_name,
-                'user_email': parent.user_email,
-                'user_url': parent.user_url,
-                'submit_datetime': parent.submit_datetime.isoformat(),
-                'utc_offset': parent.utc_offset,
-                'ip_address': parent.ip_address,
-                'is_public': parent.is_public,
-                'is_removed': parent.is_removed,
-                'user': parent.user,
-            }
-            self.set_cover_photo(parent_json, parent.cover_photo)
-            ascendants.append(parent_json)
-            parent = parent.parent
-
-        if feedback.parent is not None:
-            json.update({
-                'parent': feedback.parent.pk,
-                'ascendants': ascendants,
-            })
-
-        return json
+        return feedback_to_json(feedback, user)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1614,31 +1666,427 @@ class TestPhotoRelations(BaseTest):
         return d
 
     def model_to_json(self, photo_relation, user):
+        return photo_relation_to_json(photo_relation, user)
+
+
+@pytest.mark.django_db(transaction=True)
+class TestPhotos(BaseTest):
+    name = "photo"
+    model = models.photo
+
+    def create_test_db(self, user):
+        result = {}
+        self.pks = []
+
+        album = models.album.objects.create(
+            parent=None,
+            title="My 1st Album",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+            revised=datetime.datetime(year=2015, month=11, day=8),
+            revised_utc_offset=600,
+        )
+
+        category = models.category.objects.create(
+            parent=None,
+            title="My 1st Category",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+        )
+
+        place = models.place.objects.create(
+            parent=None,
+            title="My 1st Place",
+            cover_photo=None,
+        )
+
+        person = models.person.objects.create(
+            first_name="My Grandfather",
+            sex="1",
+            cover_photo=None,
+            home=place,
+        )
+
+        photo = models.photo.objects.create(
+            name="test.jpg", path="a/b/c",
+            level=0,
+            datetime=datetime.datetime(2015, 11, 21), utc_offset=600)
+        result[photo.pk] = photo
+        self.pks.append(photo.pk)
+
+        photo = models.photo.objects.create(
+            name="test.jpg", path="a/b/c",
+            level=0,
+            datetime=datetime.datetime(2015, 11, 21), utc_offset=600,
+            place=place,
+            photographer=person,
+            )
+        result[photo.pk] = photo
+        self.pks.append(photo.pk)
+
+        models.photo_album.objects.create(photo=photo, album=album)
+        models.photo_category.objects.create(photo=photo, category=category)
+        models.photo_person.objects.create(
+            photo=photo, person=person, position=0)
+        models.photo_thumb.objects.create(
+            photo=photo, size="normal", width=100, height=100)
+        models.photo_video.objects.create(
+            photo=photo, size="normal", width=100, height=100,
+            format="avi", extension="avi")
+
+        # return results
+        self.objs = result
+        return result
+
+    def get_test_creates(self, user):
+        album1 = models.album.objects.create(
+            parent=None,
+            title="My 1st Album",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+            revised=datetime.datetime(year=2015, month=11, day=8),
+            revised_utc_offset=600,
+        )
+
+        album2 = models.album.objects.create(
+            parent=None,
+            title="My 1st Album",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-09",
+            revised=datetime.datetime(year=2015, month=11, day=8),
+            revised_utc_offset=600,
+        )
+
+        category1 = models.category.objects.create(
+            parent=None,
+            title="My 1st Category",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+        )
+
+        category2 = models.category.objects.create(
+            parent=None,
+            title="My 1st Category",
+            description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-09",
+        )
+
+        place = models.place.objects.create(
+            parent=None,
+            title="My 1st Place",
+            cover_photo=None,
+        )
+
+        person1 = models.person.objects.create(
+            first_name="My Grandfather",
+            sex="1",
+            cover_photo=None,
+            home=place,
+        )
+
+        person2 = models.person.objects.create(
+            first_name="My Grandmother",
+            sex="2",
+            cover_photo=None,
+            home=place,
+            spouse=person1,
+        )
+
         json = {
-            'id': photo_relation.pk,
-            'photo_1': {
-                'id': photo_relation.photo_1.pk,
-                'title': photo_relation.photo_1.name,
-                'description': photo_relation.photo_1.description,
-                'datetime': photo_relation.photo_1.datetime.isoformat(),
-                'utc_offset': photo_relation.photo_1.utc_offset,
-                'place': None,
-                'thumbs': {},
-                'videos': {},
-            },
-            'photo_1_pk': photo_relation.photo_1.pk,
-            'photo_2': {
-                'id': photo_relation.photo_2.pk,
-                'title': photo_relation.photo_2.name,
-                'description': photo_relation.photo_2.description,
-                'datetime': photo_relation.photo_2.datetime.isoformat(),
-                'utc_offset': photo_relation.photo_2.utc_offset,
-                'place': None,
-                'thumbs': {},
-                'videos': {},
-            },
-            'photo_2_pk': photo_relation.photo_2.pk,
-            'desc_1': photo_relation.desc_1,
-            'desc_2': photo_relation.desc_2,
+            'title': 'My Photo',
+            'photo': "177A0782.JPG",
+            'description': 'My Description',
+            'datetime': "2015-11-22T11:00:00",
+            'utc_offset': 600,
+            'albums_pk': [album1.pk, album2.pk],
+            'categorys_pk': [category1.pk, category2.pk],
+            'place_pk': place.pk,
+            'persons_pk': [person2.pk, person1.pk],
+            'photographer_pk': person1.pk,
+            'level': 1,
         }
+
+        expected = dict(json)
+        del expected['photo']
+        expected.update({
+            'thumbs': {
+                'large': {
+                    'id': ANY,
+                    'url': '/images/thumb/large/2015/11/22/177A0782.jpg',
+                    'size': 'large',
+                    'width': 960,
+                    'height': 640,
+                    'photo': ANY,
+                },
+                'mid': {
+                    'id': ANY,
+                    'url': '/images/thumb/mid/2015/11/22/177A0782.jpg',
+                    'size': 'mid',
+                    'width': 480,
+                    'height': 320,
+                    'photo': ANY,
+                },
+                'thumb': {
+                    'id': ANY,
+                    'url': '/images/thumb/thumb/2015/11/22/177A0782.jpg',
+                    'size': 'thumb',
+                    'width': 120,
+                    'height': 80,
+                    'photo': ANY,
+                },
+            },
+            'videos': {},
+            'action': None,
+            'albums': [
+                album_to_json(album1, user),
+                album_to_json(album2, user),
+            ],
+            'aperture': 'F4.0',
+            'camera_make': 'Canon',
+            'camera_model': 'Canon EOS 5D Mark III',
+            'categorys': [
+                category_to_json(category1, user),
+                category_to_json(category2, user),
+            ],
+            'ccd_width': None,
+            'comment': None,
+            'compression': None,
+            'exposure': '0.025',
+            'feedbacks': [],
+            'flash_used': 'N',
+            'focal_length': '24',
+            'focus_dist': '4.65227002571893',
+            'iso_equiv': '2500',
+            'metering_mode': 'pattern',
+            'name': '177A0782.JPG',
+            'orig_url': '/images/orig/2015/11/22/177A0782.JPG',
+            'path': '2015/11/22',
+            'persons': [
+                person_to_simplified_json(person2, user),
+                person_to_simplified_json(person1, user),
+            ],
+            'photographer': person_to_simplified_json(person1, user),
+            'place': place_to_json(place, user),
+            'rating': None,
+            'relations': [],
+            'size': 7784354,
+            'timestamp': ANY,
+            'view': None
+        })
+
+        return [(json, expected)]
+
+    def test_obj_create(self, scenario, data_files, settings, tmpdir):
+        settings.IMAGE_PATH = tmpdir.dirname
+
+        client = APIClient()
+        user = scenario.get_user()
+        login(client, user)
+
+        url = self.get_list_url()
+        creates = self.get_test_creates(user)
+
+        for json, expected in creates:
+
+            filename = os.path.join(data_files, json['photo'])
+            with open(filename, 'rb') as f:
+                json['photo'] = f
+                response = client.post(url, json, format="multipart")
+
+            if scenario.check_response(response, self.name, 'create'):
+                assert response.status_code == status.HTTP_201_CREATED
+                expected['id'] = response.data['id']
+                assert response.data == expected
+
+                # check obj exists
+                obj = self.model.objects.get(pk=response.data['id'])
+                assert self.model_to_json(obj, user) == expected
+
+    def get_test_lists(self, user):
+        json_list = self.pks_to_json(self.pks, user)
+        for json in json_list:
+            del json['action']
+            del json['albums']
+            del json['albums_pk']
+            del json['aperture']
+            del json['camera_make']
+            del json['camera_model']
+            del json['categorys']
+            del json['categorys_pk']
+            del json['ccd_width']
+            del json['comment']
+            del json['compression']
+            del json['exposure']
+            del json['feedbacks']
+            del json['flash_used']
+            del json['focal_length']
+            del json['focus_dist']
+            del json['iso_equiv']
+            del json['level']
+            del json['metering_mode']
+            del json['path']
+            del json['persons']
+            del json['persons_pk']
+            del json['photographer']
+            del json['photographer_pk']
+            del json['place_pk']
+            del json['rating']
+            del json['relations']
+            del json['size']
+            del json['timestamp']
+            del json['view']
+            del json['name']
+            if json['place'] is not None:
+                if user is not None and user.is_staff:
+                    del json['place']['address']
+                    del json['place']['address2']
+                del json['place']['ascendants']
+                del json['place']['city']
+                del json['place']['country']
+                del json['place']['cover_photo']
+                del json['place']['cover_photo_pk']
+                del json['place']['notes']
+                del json['place']['parent']
+                del json['place']['postcode']
+                del json['place']['state']
+                del json['place']['url']
+                del json['place']['urldesc']
+            if user is not None and user.is_staff:
+                del json['orig_url']
+        l = [
+            ({}, json_list),
+        ]
+        return l
+
+    def get_test_updates(self, user):
+        p = self.pks[0]
+
+        obj = self.objs[p]
+        expected = self.model_to_json(obj, user)
+        # name is read only
+        # expected['name'] = 'My new name.jpg'
+        expected['description'] = 'My new description'
+
+        return [
+            (p,
+             {'name': 'My new name.jpg', 'description': 'My new description'},
+             expected),
+        ]
+
+    def get_test_deletes(self):
+        p = self.pks[0]
+        d = [
+            (p, status.HTTP_204_NO_CONTENT, None),
+        ]
+        return d
+
+    def model_to_json(self, photo, user):
+        json = {
+            'id': photo.pk,
+            'title': photo.title or photo.name,
+            'name': photo.name,
+            'description': photo.description,
+            'datetime': photo.datetime.isoformat(),
+            'utc_offset': photo.utc_offset,
+            'place': None,
+            'place_pk': None,
+            'thumbs': {},
+            'videos': {},
+            'action': photo.action,
+            'albums': [],
+            'albums_pk': [],
+            'aperture': photo.aperture,
+            'camera_make': photo.camera_make,
+            'camera_model': photo.camera_model,
+            'categorys': [],
+            'categorys_pk': [],
+            'ccd_width': photo.ccd_width,
+            'comment': photo.comment,
+            'compression': photo.compression,
+            'exposure': photo.exposure,
+            'feedbacks': [],
+            'flash_used': photo.flash_used,
+            'focal_length': photo.focal_length,
+            'focus_dist': photo.focus_dist,
+            'iso_equiv': photo.iso_equiv,
+            'level': photo.level,
+            'metering_mode': photo.metering_mode,
+            'path': photo.path,
+            'persons': [],
+            'persons_pk': [],
+            'photographer': None,
+            'photographer_pk': None,
+            'rating': photo.rating,
+            'relations': [],
+            'size': photo.size,
+            'timestamp': photo.timestamp.isoformat(),
+            'view': photo.view,
+        }
+
+        if photo.photographer is not None:
+            json.update({
+                'photographer': person_to_simplified_json(
+                    photo.photographer, user),
+                'photographer_pk': photo.photographer.pk,
+            })
+
+        if photo.place is not None:
+            json.update({
+                'place': place_to_json(photo.place, user),
+                'place_pk': photo.place.pk,
+            })
+
+        for pa in photo.photo_album_set.all():
+            album_json = album_to_json(pa.album, user)
+            json['albums_pk'].append(pa.album.pk)
+            json['albums'].append(album_json)
+
+        for pc in photo.photo_category_set.all():
+            category_json = category_to_json(pc.category, user)
+            json['categorys_pk'].append(pc.category.pk)
+            json['categorys'].append(category_json)
+
+        for pp in photo.photo_person_set.all():
+            person_json = person_to_simplified_json(pp.person, user)
+            json['persons_pk'].append(pp.person.pk)
+            json['persons'].append(person_json)
+
+        for pt in photo.photo_thumb_set.all():
+            json['thumbs'][pt.size] = {
+                'id': pt.pk,
+                'url': pt.get_url(),
+                'size': pt.size,
+                'width': pt.width,
+                'height': pt.height,
+                'photo': pt.photo.pk,
+            }
+        for pv in photo.photo_video_set.all():
+            json['videos'][pv.size] = [{
+                'id': pv.pk,
+                'url': pv.get_url(),
+                'size': pv.size,
+                'width': pv.width,
+                'height': pv.height,
+                'photo': pv.photo.pk,
+                'format': pv.format,
+                'extension': pv.extension,
+            }]
+
+        if user is not None and user.is_staff:
+            json.update({
+                'orig_url': photo.get_orig_url(),
+            })
+
         return json

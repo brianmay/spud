@@ -28,6 +28,7 @@ from django.contrib.auth.models import User, Group
 
 from rest_framework import serializers, exceptions
 from rest_framework import fields as f
+from rest_framework.utils import html
 
 from . import models, media
 
@@ -97,7 +98,7 @@ class PhotoTitleField(CharField):
         value = super(PhotoTitleField, self).get_attribute(obj)
         if not value:
             value = obj.name
-        return value
+        return str(value)
 
 
 class NestedPhotoPlaceSerializer(ModelSerializer):
@@ -125,6 +126,7 @@ class NestedPhotoSerializer(ModelSerializer):
             'id', 'title', 'description', 'datetime', 'utc_offset', 'place',
             'thumbs', 'videos',
         )
+        list_serializer_class = ListSerializer
 
 
 class UserSerializer(ModelSerializer):
@@ -351,7 +353,9 @@ class PersonListSerializer(ListSerializer):
     child = PersonSerializer()
 
     def get_value(self, dictionary):
-        return dictionary.getlist(self.field_name)
+        if html.is_html_input(dictionary):
+            return dictionary.getlist(self.field_name)
+        return dictionary.get(self.field_name, [])
 
     def to_internal_value(self, data):
         raise NotImplemented()
@@ -368,10 +372,14 @@ class PersonPkListSerializer(ListSerializer):
     child = serializers.PrimaryKeyRelatedField(
         queryset=models.person.objects.all())
 
+    def get_value(self, dictionary):
+        if html.is_html_input(dictionary):
+            return dictionary.getlist(self.field_name)
+        return dictionary.get(self.field_name, [])
+
     def to_internal_value(self, data):
         r = []
         for index, pk in enumerate(data):
-
             try:
                 pk = int(pk)
             except ValueError:
@@ -384,11 +392,11 @@ class PersonPkListSerializer(ListSerializer):
                 raise exceptions.ValidationError(
                     "Person '%s' does not exist." % pk)
 
-            data = {
+            data_entry = {
                 'person_id': pk,
                 'position': index + 1,
             }
-            r.append(data)
+            r.append(data_entry)
         return r
 
     def to_representation(self, value):
@@ -625,7 +633,7 @@ class PhotoSerializer(ModelSerializer):
         try:
             if not os.path.lexists(os.path.dirname(dst)):
                 os.makedirs(os.path.dirname(dst), 0o755)
-            with open(dst, "w") as dst_file_obj:
+            with open(dst, "wb") as dst_file_obj:
                 file_obj.seek(0)
                 shutil.copyfileobj(file_obj, dst_file_obj)
         finally:
@@ -647,13 +655,16 @@ class PhotoSerializer(ModelSerializer):
         print("generating thumbnails  %s/%s" % (path, name))
         try:
             instance.generate_thumbnails(overwrite=False)
-        except:
+        except Exception as e:
+            print("... got exception %s", e)
             instance.action = 'R'
             instance.save()
 
+        print("generating thumbnails  %s/%s" % (path, name))
         try:
             instance.generate_videos(overwrite=False)
-        except:
+        except Exception as e:
+            print("... got exception %s", e)
             instance.action = 'R'
             instance.save()
 
@@ -760,7 +771,6 @@ class PhotoSerializer(ModelSerializer):
                     if pp.position == person['position'] and \
                             pp.person_id == person['person_id']:
                         found = index
-                    print(index, person, found)
                 if found is not None:
                     del persons[found]
                 else:

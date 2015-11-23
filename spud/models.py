@@ -749,9 +749,8 @@ class photo(base_model):
         (width, height) = m.get_size()
         self.size = os.path.getsize(self.get_orig_path())
 
-        # FIXME
-        # self.width = width
-        # self.height = height
+        self.width = width
+        self.height = height
         return
     rotate.alters_data = True
 
@@ -759,7 +758,7 @@ class photo(base_model):
         m = media.get_media(self.get_orig_path())
         umask = os.umask(0o022)
 
-        for size, s in settings.IMAGE_SIZES.iteritems():
+        for size, s in settings.IMAGE_SIZES.items():
             dst = self._get_thumb_path(size, self.path, self.name)
             if not os.path.lexists(os.path.dirname(dst)):
                 os.makedirs(os.path.dirname(dst), 0o755)
@@ -782,8 +781,8 @@ class photo(base_model):
         umask = os.umask(0o022)
 
         if m.is_video():
-            for size, s in settings.VIDEO_SIZES.iteritems():
-                for format, f in settings.VIDEO_FORMATS.iteritems():
+            for size, s in settings.VIDEO_SIZES.items():
+                for format, f in settings.VIDEO_FORMATS.items():
                     dst = self._get_video_path(
                         size, self.path, self.name, f['extension'])
                     if not os.path.lexists(os.path.dirname(dst)):
