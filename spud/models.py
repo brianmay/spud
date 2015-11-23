@@ -78,7 +78,7 @@ def action_to_string(action):
 
 # BASE ABSTRACT MODEL CLASS
 
-class base_model(models.Model):
+class BaseModel(models.Model):
 
     class Meta:
         abstract = True
@@ -93,7 +93,7 @@ class base_model(models.Model):
         return error_list
 
 
-class hierarchy_model(base_model):
+class HierarchyModel(BaseModel):
 
     class Meta:
         abstract = True
@@ -226,7 +226,7 @@ class hierarchy_model(base_model):
 
 
 @python_2_unicode_compatible
-class album(hierarchy_model):
+class album(HierarchyModel):
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -280,7 +280,7 @@ class album(hierarchy_model):
 
 
 @python_2_unicode_compatible
-class category(hierarchy_model):
+class category(HierarchyModel):
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -332,7 +332,7 @@ class category(hierarchy_model):
 
 
 @python_2_unicode_compatible
-class place(hierarchy_model):
+class place(HierarchyModel):
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
@@ -393,7 +393,7 @@ class place(hierarchy_model):
 
 
 @python_2_unicode_compatible
-class person(hierarchy_model):
+class person(HierarchyModel):
     first_name = models.CharField(max_length=96, db_index=True)
     last_name = models.CharField(
         max_length=96, null=True, blank=True, db_index=True)
@@ -542,7 +542,7 @@ class person(hierarchy_model):
         return photo
 
 
-class feedback(hierarchy_model):
+class feedback(HierarchyModel):
     cover_photo = models.ForeignKey(
         'photo', related_name="feedbacks",
         on_delete=models.CASCADE)
@@ -593,7 +593,7 @@ class feedback(hierarchy_model):
 
 
 @python_2_unicode_compatible
-class photo(base_model):
+class photo(BaseModel):
     name = models.CharField(max_length=128, db_index=True)
     path = models.CharField(max_length=255, db_index=True)
     size = models.IntegerField(null=True, blank=True)
@@ -970,7 +970,7 @@ class photo(base_model):
 # ---------------------------------------------------------------------------
 
 
-class photo_thumb(base_model):
+class photo_thumb(BaseModel):
     photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     size = models.CharField(max_length=10, db_index=True)
     width = models.IntegerField(null=True, blank=True)
@@ -996,7 +996,7 @@ class photo_thumb(base_model):
             os.unlink(path)
 
 
-class photo_video(base_model):
+class photo_video(BaseModel):
     photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     size = models.CharField(max_length=10, db_index=True)
     width = models.IntegerField(null=True, blank=True)
@@ -1024,17 +1024,17 @@ class photo_video(base_model):
             os.unlink(path)
 
 
-class photo_album(base_model):
+class photo_album(BaseModel):
     photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     album = models.ForeignKey(album, on_delete=models.CASCADE)
 
 
-class photo_category(base_model):
+class photo_category(BaseModel):
     photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     category = models.ForeignKey(category, on_delete=models.CASCADE)
 
 
-class photo_person(base_model):
+class photo_person(BaseModel):
     photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     person = models.ForeignKey(person, on_delete=models.CASCADE)
     position = models.IntegerField(null=True, blank=True)
@@ -1044,7 +1044,7 @@ class photo_person(base_model):
 
 
 @python_2_unicode_compatible
-class photo_relation(base_model):
+class photo_relation(BaseModel):
     photo_1 = models.ForeignKey(
         photo, db_column="photo_id_1", related_name="relations_1",
         on_delete=models.CASCADE)
@@ -1064,7 +1064,7 @@ class photo_relation(base_model):
 # ---------------------------------------------------------------------------
 
 
-class album_ascendant(base_model):
+class album_ascendant(BaseModel):
     ascendant = models.ForeignKey(album, related_name='descendant_set')
     descendant = models.ForeignKey(album, related_name='ascendant_set')
     position = models.IntegerField()
@@ -1073,7 +1073,7 @@ class album_ascendant(base_model):
         ordering = ['position']
 
 
-class category_ascendant(base_model):
+class category_ascendant(BaseModel):
     ascendant = models.ForeignKey(category, related_name='descendant_set')
     descendant = models.ForeignKey(category, related_name='ascendant_set')
     position = models.IntegerField()
@@ -1082,7 +1082,7 @@ class category_ascendant(base_model):
         ordering = ['position']
 
 
-class place_ascendant(base_model):
+class place_ascendant(BaseModel):
     ascendant = models.ForeignKey(place, related_name='descendant_set')
     descendant = models.ForeignKey(place, related_name='ascendant_set')
     position = models.IntegerField()
@@ -1091,7 +1091,7 @@ class place_ascendant(base_model):
         ordering = ['position']
 
 
-class person_ascendant(base_model):
+class person_ascendant(BaseModel):
     ascendant = models.ForeignKey(person, related_name='descendant_set')
     descendant = models.ForeignKey(person, related_name='ascendant_set')
     position = models.IntegerField()
@@ -1100,7 +1100,7 @@ class person_ascendant(base_model):
         ordering = ['position']
 
 
-class feedback_ascendant(base_model):
+class feedback_ascendant(BaseModel):
     ascendant = models.ForeignKey(feedback, related_name='descendant_set')
     descendant = models.ForeignKey(feedback, related_name='ascendant_set')
     position = models.IntegerField()
