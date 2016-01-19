@@ -73,15 +73,34 @@ if getattr(settings, 'API_ROOT_URL', None) is None:
     )
 
 
-if settings.DEBUG and settings.IMAGE_PATH is not None:
-    urlpatterns += patterns(
-        '',
-        url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.IMAGE_PATH}),
-    )
+import re
 if settings.DEBUG:
+
+    if settings.IMAGE_PATH is not None:
+        urlpatterns += patterns(
+            '',
+            url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
+                {'document_root': settings.IMAGE_PATH}),
+        )
+    if settings.DEBUG:
+        urlpatterns += patterns(
+            '',
+            url(r'^errors.html$', 'django.views.static.serve',
+                {'document_root': ".", 'path': "errors.html"}),
+        )
+
+elif settings.DEBUG_SERVE_STATIC:
+
     urlpatterns += patterns(
         '',
-        url(r'^errors.html$', 'django.views.static.serve',
-            {'document_root': ".", 'path': "errors.html"}),
+        url(r'^%s(?P<path>.*)$' % re.escape(settings.STATIC_URL.lstrip('/')),
+            'django.views.static.serve',
+            {'document_root': settings.STATIC_ROOT}),
     )
+
+    if settings.IMAGE_PATH is not None:
+        urlpatterns += patterns(
+            '',
+            url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
+                {'document_root': settings.IMAGE_PATH}),
+        )
