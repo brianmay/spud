@@ -156,35 +156,59 @@ ANONYMOUS_USER_ID = -1
 ###
 # DJANGO PIPELINE
 ###
-
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
-PIPELINE_EMBED_PATH = r'img/|images/'
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.cssmin.CSSMinCompressor'
-PIPELINE_CSS = {
-    'spud': {
-        'source_filenames': (
-            'css/*.css',
-        ),
-        'output_filename': 'min.css',
-        'variant': 'datauri',
+
+PIPELINE = {
+    'PIPELINE_ENABLED': False,
+    'EMBED_PATH': r'img/|images/',
+    'COMPILERS': (
+        'pipeline_typescript.compilers.TypescriptCompiler',
+    ),
+    'CSS_COMPRESSOR': 'pipeline.compressors.cssmin.CSSMinCompressor',
+    'STYLESHEETS': {
+        'spud': {
+            'source_filenames': (
+                'css/*.css',
+            ),
+            'output_filename': 'min.css',
+            'variant': 'datauri',
+        },
     },
-}
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.slimit.SlimItCompressor'
-PIPELINE_JS = {
-    'spud': {
-        'source_filenames': (
-            'js/jquery.js',
-            'js/jquery-ui.js',
-            'js/jcookie.js',
-            'js/showdown.js',
-            'js/moment-with-locales.js',
-            'js/moment-timezone-with-data.js',
-            'js/base.js',
-            'js/dialog.js',
-            'js/infobox.js',
-            'js/generic.js',
-            'js/*.js',
-        ),
-        'output_filename': 'min.js',
-    }
+    'JS_COMPRESSOR': 'pipeline.compressors.slimit.SlimItCompressor',
+    'JAVASCRIPT': {
+        'spud': {
+            'source_filenames': (
+                'js/external/jquery.js',
+                'js/external/jquery-ui.js',
+                'js/external/showdown.js',
+                'js/external/moment-with-locales.js',
+                'js/external/moment-timezone-with-data.js',
+
+                'js/jcookie.ts',
+
+                'js/globals.ts',
+                'js/signals.ts',
+
+                'js/base.ts',
+                'js/widgets.ts',
+
+                'js/dialog.ts',
+                'js/infobox.ts',
+                'js/generic.ts',
+
+                'js/session.ts',
+                'js/album.ts',
+                'js/category.ts',
+                'js/person.ts',
+                'js/place.ts',
+                'js/feedback.ts',
+                'js/photo.ts',
+
+                'js/state.ts',
+                'js/urls.ts',
+                'js/spud.ts',
+            ),
+            'output_filename': 'min.js',
+        }
+    },
 }
