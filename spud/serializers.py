@@ -818,8 +818,6 @@ class PhotoSerializer(ModelSerializer):
             'path': {'read_only': True},
             'name': {'read_only': True},
             'timestamp': {'read_only': True},
-
             'action': {'required': False},
-            'datetime': {'required': False},
         }
         list_serializer_class = PhotoListSerializer
