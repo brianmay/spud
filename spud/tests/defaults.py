@@ -26,8 +26,11 @@ class InvalidString(str):
 TEMPLATE_STRING_IF_INVALID = InvalidString("%s")
 
 DEBUG = True
+DEBUG_SERVE_STATIC = True
 TEMPLATE_DEBUG = DEBUG
 SESSION_COOKIE_SECURE = False
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 LOGGING = {
     'version': 1,
