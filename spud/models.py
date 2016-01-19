@@ -597,7 +597,8 @@ class photo(BaseModel):
     name = models.CharField(max_length=128, db_index=True)
     path = models.CharField(max_length=255, db_index=True)
     size = models.IntegerField(null=True, blank=True)
-    title = models.CharField(max_length=64, blank=True, db_index=True)
+    title = models.CharField(
+        max_length=64, null=True, blank=True, db_index=True)
     photographer = models.ForeignKey(
         person, null=True, blank=True, related_name='photographed',
         on_delete=models.SET_NULL)
