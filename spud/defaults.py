@@ -88,17 +88,6 @@ LOGIN_URL = "/spud/account/login/"
 LOGIN_REDIRECT_URL = "/spud/"
 LOGOUT_URL = "/spud/account/login/"
 
-AJAX_LOOKUP_CHANNELS = {
-    'person': ('spud.lookup', 'person_lookup'),
-    'place': ('spud.lookup', 'place_lookup'),
-    'album': ('spud.lookup', 'album_lookup'),
-    'category': ('spud.lookup', 'category_lookup'),
-    'feedback': ('spud.lookup', 'feedback_lookup'),
-    'photo': ('spud.lookup', 'photo_lookup'),
-}
-AJAX_SELECT_BOOTSTRAP = False
-AJAX_SELECT_INLINES = None
-
 IMAGE_PATH = "/var/lib/spud/images/"
 IMAGE_URL = "/images/"
 IMAGE_PATH = None
