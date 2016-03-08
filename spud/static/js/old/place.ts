@@ -1,3 +1,7 @@
+/// <reference path="globals.ts" />
+/// <reference path="base.ts" />
+/// <reference path="dialog.ts" />
+/// <reference path="infobox.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -17,9 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window._place_created = new signal()
-window._place_changed = new signal()
-window._place_deleted = new signal()
+window._place_created = new Signal()
+window._place_changed = new Signal()
+window._place_deleted = new Signal()
+
+class Place extends SpudObject {
+    _type_place : void
+}
+
+interface PlaceCriteria extends Criteria {
+}
 
 
 ///////////////////////////////////////
@@ -30,12 +41,12 @@ $.widget('spud.place_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
-            ["q", new text_input_field("Search for", false)],
-            ["instance", new ajax_select_field("Place", "places", false)],
-            ["mode", new select_input_field("Mode",
+            ["q", new TextInputField("Search for", false)],
+            ["instance", new AjaxSelectField("Place", "places", false)],
+            ["mode", new SelectInputField("Mode",
                 [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
-            ["root_only", new boolean_input_field("Root only", false)],
+            ["root_only", new booleanInputField("Root only", false)],
         ]
         this.options.title = "Search places"
         this.options.description = "Please search for an place."
@@ -59,18 +70,18 @@ $.widget('spud.place_search_dialog',  $.spud.form_dialog, {
 $.widget('spud.place_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
-            ["title", new text_input_field("Title", true)],
-            ["cover_photo_pk", new photo_select_field("Photo", false)],
-            ["address", new text_input_field("Address", false)],
-            ["address2", new text_input_field("Address(ctd)", false)],
-            ["city", new text_input_field("City", false)],
-            ["state", new text_input_field("State", false)],
-            ["country", new text_input_field("Country", false)],
-            ["postcode", new text_input_field("Postcode", false)],
-            ["url", new text_input_field("URL", false)],
-            ["urldesc", new text_input_field("URL desc", false)],
-            ["notes", new p_input_field("Notes", false)],
-            ["parent", new ajax_select_field("Parent", "places", false)],
+            ["title", new TextInputField("Title", true)],
+            ["cover_photo_pk", new PhotoSelectField("Photo", false)],
+            ["address", new TextInputField("Address", false)],
+            ["address2", new TextInputField("Address(ctd)", false)],
+            ["city", new TextInputField("City", false)],
+            ["state", new TextInputField("State", false)],
+            ["country", new TextInputField("Country", false)],
+            ["postcode", new TextInputField("Postcode", false)],
+            ["url", new TextInputField("URL", false)],
+            ["urldesc", new TextInputField("URL desc", false)],
+            ["notes", new PInputField("Notes", false)],
+            ["parent", new AjaxSelectField("Parent", "places", false)],
         ]
 
         this.options.title = "Change place"
@@ -235,19 +246,23 @@ $.widget('spud.place_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
-                        child.place_detail_screen("enable")
-                        child.place_detail_screen("set", place)
-                        child.place_detail_screen("set_loader", place_list_loader)
+                        let viewport : PlaceDetailViewport = child.data('widget')
+                        viewport.enable()
+                        viewport.set(place)
+                        viewport.set_loader(place_list_loader)
                         return false
                     }
                 }
 
-                var params = {
+                var params : ObjectDetailViewportOptions = {
                     id: child_id,
                     obj: place,
+                    obj_id : null,
                     object_list_loader: place_list_loader,
                 }
-                child = add_screen($.spud.place_detail_screen, params)
+                let viewport : PlaceDetailViewport
+                viewport = new PlaceDetailViewport(params)
+                child = add_viewport(viewport)
                 return false;
             })
             .data('photo', place.cover_photo)
@@ -276,24 +291,24 @@ $.widget('spud.place_detail',  $.spud.object_detail, {
         this._type_name = "Place"
 
         this.options.fields = [
-            ["address", new text_output_field("Address")],
-            ["address2", new text_output_field("Address(ctd)")],
-            ["city", new text_output_field("City")],
-            ["state", new text_output_field("State")],
-            ["postcode", new text_output_field("Postcode")],
-            ["country", new text_output_field("Country")],
+            ["address", new TextOutputField("Address")],
+            ["address2", new TextOutputField("Address(ctd)")],
+            ["city", new TextOutputField("City")],
+            ["state", new TextOutputField("State")],
+            ["postcode", new TextOutputField("Postcode")],
+            ["country", new TextOutputField("Country")],
             // FIXME
-            // ["url", new html_output_field("URL")],
-            ["home_of", new link_list_output_field("Home of", "places")],
-            ["work_of", new link_list_output_field("Work of", "places")],
-            ["notes", new p_output_field("notes")],
-            ["ascendants", new link_list_output_field("Ascendants", "places")],
+            // ["url", new HtmlOutputField("URL")],
+            ["home_of", new LinkListOutputField("Home of", "places")],
+            ["work_of", new LinkListOutputField("Work of", "places")],
+            ["notes", new POutputField("notes")],
+            ["ascendants", new LinkListOutputField("Ascendants", "places")],
         ]
         this.loader = null
 
         this.img = $("<div></div>")
-            .image({size: "mid", include_link: true})
-            .appendTo(this.element)
+        $.spud.image({size: "mid", include_link: true}, this.img)
+        this.img.appendTo(this.element)
 
         this._super();
     },
@@ -309,55 +324,78 @@ $.widget('spud.place_detail',  $.spud.object_detail, {
 
 
 ///////////////////////////////////////
-// place screens
+// place viewports
 ///////////////////////////////////////
 
-$.widget('spud.place_list_screen', $.spud.object_list_screen, {
-    _create: function() {
-        this._type = "places"
-        this._type_name = "Place"
+class PlaceListViewport extends ObjectListViewport {
+    constructor(options : ObjectListViewportOptions, element? : JQuery) {
+        this.type = "places"
+        this.type_name = "Place"
+        super(options, element)
+    }
 
-        this._super()
-    },
+    protected object_list(options : any, element : JQuery) : void {
+        $.spud.place_list(options, element)
+    }
 
-    _object_list: $.proxy($.spud.place_list, window),
-    _object_criteria: $.proxy($.spud.place_criteria, window),
-    _object_search_dialog: $.proxy($.spud.place_search_dialog, window),
-})
+    protected object_criteria(options : any, element : JQuery) : void {
+        $.spud.place_criteria(options, element)
+    }
+
+    protected object_search_dialog(options : any, element : JQuery) : void {
+        $.spud.place_search_dialog(options, element)
+    }
+}
 
 
-$.widget('spud.place_detail_screen', $.spud.object_detail_screen, {
-    _create: function() {
-        this._type = "places"
-        this._type_name = "Place"
+class PlaceDetailViewport extends ObjectDetailViewport {
+    constructor(options : ObjectDetailViewportOptions, element? : JQuery) {
+        this.type = "places"
+        this.type_name = "Place"
+        super(options, element)
+    }
 
-        this._super()
+    create(element : JQuery) : void {
+        super.create(element)
 
         var mythis = this
 
-        window._place_changed.add_listener(this, function(obj) {
+        window._place_changed.add_listener(this, function(obj : Place) {
             if (obj.id === this.options.obj_id) {
-                mythis._set(obj)
+                mythis.set(obj)
             }
         })
-        window._place_deleted.add_listener(this, function(obj_id) {
+        window._place_deleted.add_listener(this, function(obj_id : number) {
             if (obj_id === this.options.obj_id) {
-                mythis.close()
+                mythis.remove()
             }
         })
-    },
+    }
 
-
-    _get_photo_criteria: function() {
+    protected get_photo_criteria() : PhotoCriteria {
         return {
             'place': this.options.obj_id,
             'place_descendants': true,
         }
-    },
+    }
 
-    _object_list: $.proxy($.spud.place_list, window),
-    _object_detail: $.proxy($.spud.place_detail, window),
-    _object_list_screen: $.proxy($.spud.place_list_screen, window),
-    _object_change_dialog: $.proxy($.spud.place_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud.place_delete_dialog, window),
-})
+    object_list(options : any, element : JQuery) {
+        $.spud.place_list(options, element)
+    }
+
+    object_detail(options : any, element : JQuery) {
+        $.spud.place_detail(options, element)
+    }
+
+    protected get_object_list_viewport(options : ObjectListViewportOptions) : PlaceListViewport {
+        return new PlaceListViewport(options)
+    }
+
+    object_change_dialog(options : any, element : JQuery) {
+        $.spud.place_change_dialog(options, element)
+    }
+
+    object_delete_dialog(options : any, element : JQuery) {
+        $.spud.place_delete_dialog(options, element)
+    }
+}

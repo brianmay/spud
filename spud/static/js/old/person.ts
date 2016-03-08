@@ -1,3 +1,7 @@
+/// <reference path="globals.ts" />
+/// <reference path="base.ts" />
+/// <reference path="dialog.ts" />
+/// <reference path="infobox.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -17,10 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window._person_created = new signal()
-window._person_changed = new signal()
-window._person_deleted = new signal()
+window._person_created = new Signal()
+window._person_changed = new Signal()
+window._person_deleted = new Signal()
 
+
+class Person extends SpudObject {
+    _type_person : void
+}
+
+interface PersonCriteria extends Criteria {
+}
 
 ///////////////////////////////////////
 // person dialogs
@@ -30,12 +41,12 @@ $.widget('spud.person_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
-            ["q", new text_input_field("Search for", false)],
-            ["instance", new ajax_select_field("Person", "persons", false)],
-            ["mode", new select_input_field("Mode",
+            ["q", new TextInputField("Search for", false)],
+            ["instance", new AjaxSelectField("Person", "persons", false)],
+            ["mode", new SelectInputField("Mode",
                 [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
-            ["root_only", new boolean_input_field("Root only", false)],
+            ["root_only", new booleanInputField("Root only", false)],
         ]
         this.options.title = "Search persons"
         this.options.description = "Please search for an person."
@@ -60,25 +71,25 @@ $.widget('spud.person_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["cover_photo_pk", new photo_select_field("Photo", false)],
-                ["first_name", new text_input_field("First name", true)],
-                ["middle_name", new text_input_field("Middle name", false)],
-                ["last_name", new text_input_field("Last name", false)],
-                ["called", new text_input_field("Called", false)],
-                ["sex", new select_input_field("Sex", [ ["1", "Male"], ["2", "Female"] ], true)],
+                ["cover_photo_pk", new PhotoSelectField("Photo", false)],
+                ["first_name", new TextInputField("First name", true)],
+                ["middle_name", new TextInputField("Middle name", false)],
+                ["last_name", new TextInputField("Last name", false)],
+                ["called", new TextInputField("Called", false)],
+                ["sex", new SelectInputField("Sex", [ ["1", "Male"], ["2", "Female"] ], true)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
-                ["work_pk", new ajax_select_field("Work", "places", false)],
-                ["home_pk", new ajax_select_field("Home", "places", false)],
-                ["mother_pk", new ajax_select_field("Mother", "persons", false)],
-                ["father_pk", new ajax_select_field("Father", "persons", false)],
-                ["spouse_pk", new ajax_select_field("Spouse", "persons", false)],
+                ["work_pk", new AjaxSelectField("Work", "places", false)],
+                ["home_pk", new AjaxSelectField("Home", "places", false)],
+                ["mother_pk", new AjaxSelectField("Mother", "persons", false)],
+                ["father_pk", new AjaxSelectField("Father", "persons", false)],
+                ["spouse_pk", new AjaxSelectField("Spouse", "persons", false)],
             ]},
             {name: 'other', title: 'Other', fields: [
-                ["email", new text_input_field("E-Mail", false)],
-                ["dob", new date_input_field("Date of birth", false)],
-                ["dod", new date_input_field("Date of death", false)],
-                ["notes", new p_input_field("Notes", false)],
+                ["email", new TextInputField("E-Mail", false)],
+                ["dob", new DateInputField("Date of birth", false)],
+                ["dod", new DateInputField("Date of death", false)],
+                ["notes", new PInputField("Notes", false)],
             ]},
         ]
 
@@ -244,19 +255,23 @@ $.widget('spud.person_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
-                        child.person_detail_screen("enable")
-                        child.person_detail_screen("set", person)
-                        child.person_detail_screen("set_loader", person_list_loader)
+                        let viewport : PersonDetailViewport = child.data('widget')
+                        viewport.enable()
+                        viewport.set(person)
+                        viewport.set_loader(person_list_loader)
                         return false
                     }
                 }
 
-                var params = {
+                var params : ObjectDetailViewportOptions = {
                     id: child_id,
                     obj: person,
+                    obj_id : null,
                     object_list_loader: person_list_loader,
                 }
-                child = add_screen($.spud.person_detail_screen, params)
+                let viewport : PersonDetailViewport
+                viewport = new PersonDetailViewport(params)
+                child = add_viewport(viewport)
                 return false;
             })
             .data('photo', person.cover_photo)
@@ -285,32 +300,31 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
         this._type_name = "Person"
 
         this.options.fields = [
-            ["first_name", new text_output_field("First name")],
-            ["middle_name", new text_output_field("Middle name")],
-            ["last_name", new text_output_field("Last name")],
-            ["called", new text_output_field("Called")],
-            ["sex", new select_output_field("Sex", [ ["1", "Male"], ["2", "Female"] ]) ],
-            ["email", new text_output_field("E-Mail")],
-            ["dob", new text_output_field("Date of birth")],
-            ["dod", new text_output_field("Date of death")],
-            ["work", new link_output_field("Work", "places")],
-            ["home", new link_output_field("Home", "places")],
-            ["spouses", new link_list_output_field("Spouses", "persons")],
-            ["notes", new p_output_field("Notes")],
-            ["grandparents", new link_list_output_field("Grand Parents", "persons")],
-            ["uncles_aunts", new link_list_output_field("Uncles and Aunts", "persons")],
-            ["parents", new link_list_output_field("Parents", "persons")],
-            ["siblings", new link_list_output_field("Siblings", "persons")],
-            ["cousins", new link_list_output_field("Cousins", "persons")],
-            ["children", new link_list_output_field("Children", "persons")],
-            ["nephews_nieces", new link_list_output_field("Nephews and Nieces", "persons")],
-            ["grandchildren", new link_list_output_field("Grand children", "persons")],
+            ["middle_name", new TextOutputField("Middle name")],
+            ["last_name", new TextOutputField("Last name")],
+            ["called", new TextOutputField("Called")],
+            ["sex", new SelectOutputField("Sex", [ ["1", "Male"], ["2", "Female"] ]) ],
+            ["email", new TextOutputField("E-Mail")],
+            ["dob", new TextOutputField("Date of birth")],
+            ["dod", new TextOutputField("Date of death")],
+            ["work", new LinkOutputField("Work", "places")],
+            ["home", new LinkOutputField("Home", "places")],
+            ["spouses", new LinkListOutputField("Spouses", "persons")],
+            ["notes", new POutputField("Notes")],
+            ["grandparents", new LinkListOutputField("Grand Parents", "persons")],
+            ["uncles_aunts", new LinkListOutputField("Uncles and Aunts", "persons")],
+            ["parents", new LinkListOutputField("Parents", "persons")],
+            ["siblings", new LinkListOutputField("Siblings", "persons")],
+            ["cousins", new LinkListOutputField("Cousins", "persons")],
+            ["children", new LinkListOutputField("Children", "persons")],
+            ["nephews_nieces", new LinkListOutputField("Nephews and Nieces", "persons")],
+            ["grandchildren", new LinkListOutputField("Grand children", "persons")],
         ]
         this.loader = null
 
         this.img = $("<div></div>")
-            .image({size: "mid", include_link: true})
-            .appendTo(this.element)
+        $.spud.image({size: "mid", include_link: true}, this.img)
+        this.img.appendTo(this.element)
 
         this._super();
     },
@@ -326,53 +340,77 @@ $.widget('spud.person_detail',  $.spud.object_detail, {
 
 
 ///////////////////////////////////////
-// person screens
+// person viewports
 ///////////////////////////////////////
 
-$.widget('spud.person_list_screen', $.spud.object_list_screen, {
-    _create: function() {
-        this._type = "persons"
-        this._type_name = "Person"
+class PersonListViewport extends ObjectListViewport {
+    constructor(options : ObjectListViewportOptions, element? : JQuery) {
+        this.type = "persons"
+        this.type_name = "Person"
+        super(options, element)
+    }
 
-        this._super()
-    },
+    protected object_list(options : any, element : JQuery) : void {
+        $.spud.person_list(options, element)
+    }
 
-    _object_list: $.proxy($.spud.person_list, window),
-    _object_criteria: $.proxy($.spud.person_criteria, window),
-    _object_search_dialog: $.proxy($.spud.person_search_dialog, window),
-})
+    protected object_criteria(options : any, element : JQuery) : void {
+        $.spud.person_criteria(options, element)
+    }
+
+    protected object_search_dialog(options : any, element : JQuery) : void {
+        $.spud.person_search_dialog(options, element)
+    }
+}
 
 
-$.widget('spud.person_detail_screen', $.spud.object_detail_screen, {
-    _create: function() {
-        this._type = "persons"
-        this._type_name = "Person"
+class PersonDetailViewport extends ObjectDetailViewport {
+    constructor(options : ObjectDetailViewportOptions, element? : JQuery) {
+        this.type = "persons"
+        this.type_name = "Person"
+        super(options, element)
+    }
 
-        this._super()
+    create(element : JQuery) : void {
+        super.create(element)
 
         var mythis = this
 
-        window._person_changed.add_listener(this, function(obj) {
+        window._person_changed.add_listener(this, function(obj : Person) {
             if (obj.id === this.options.obj_id) {
-                mythis._set(obj)
+                mythis.set(obj)
             }
         })
-        window._person_deleted.add_listener(this, function(obj_id) {
+        window._person_deleted.add_listener(this, function(obj_id : number) {
             if (obj_id === this.options.obj_id) {
-                mythis.close()
+                mythis.remove()
             }
         })
-    },
+    }
 
-    _get_photo_criteria: function() {
+    protected get_photo_criteria() : PhotoCriteria {
         return {
             'person': this.options.obj_id,
         }
-    },
+    }
 
-    _object_list: $.proxy($.spud.person_list, window),
-    _object_detail: $.proxy($.spud.person_detail, window),
-    _object_list_screen: $.proxy($.spud.person_list_screen, window),
-    _object_change_dialog: $.proxy($.spud.person_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud.person_delete_dialog, window),
-})
+    object_list(options : any, element : JQuery) {
+        $.spud.person_list(options, element)
+    }
+
+    object_detail(options : any, element : JQuery) {
+        $.spud.person_detail(options, element)
+    }
+
+    protected get_object_list_viewport(options : ObjectListViewportOptions) : PersonListViewport {
+        return new PersonListViewport(options)
+    }
+
+    object_change_dialog(options : any, element : JQuery) {
+        $.spud.person_change_dialog(options, element)
+    }
+
+    object_delete_dialog(options : any, element : JQuery) {
+        $.spud.person_delete_dialog(options, element)
+    }
+}

@@ -1,3 +1,9 @@
+/// <reference path="globals.ts" />
+/// <reference path="generic.ts" />
+/// <reference path="DefinitelyTyped/moment.d.ts" />
+/// <reference path="DefinitelyTyped/moment-timezone.d.ts" />
+/// <reference path="DefinitelyTyped/jquery.d.ts" />
+/// <reference path="DefinitelyTyped/jqueryui.d.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -21,14 +27,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // * DIALOG BOXES *
 // ****************
 
-// define input_field
-function input_field(title, required) {
-    this.title = title
-    this.required = Boolean(required)
+interface DialogValues {
+    [ id : string ] : any
 }
 
-input_field.prototype = {
-    to_html: function(id) {
+interface IdInputField {
+    0 : string
+    1 : InputField
+}
+
+interface InputPage {
+    name : string
+    title : string
+    fields : Array<IdInputField>
+}
+
+// define input_field
+abstract class InputField {
+
+    title : string
+    required : boolean
+    input : JQuery
+    errors : JQuery
+    tr : JQuery
+
+    constructor(title : string, required : boolean) {
+        this.title = title
+        this.required = Boolean(required)
+    }
+
+    abstract create(id : string) : JQuery;
+
+    to_html(id : string) : JQuery {
         var html = this.create(id)
 
         var th = $("<th/>")
@@ -36,7 +66,7 @@ input_field.prototype = {
             .attr("for", "id_" + id)
             .text(this.title + ":")
             .appendTo(th)
-            .toggleClass("required", this.required)
+            .toggleClass("required", this.required.toString())
 
         this.errors = $("<div></div>")
 
@@ -50,9 +80,11 @@ input_field.prototype = {
             .append(td)
 
         return this.tr
-    },
+    }
 
-    get: function() {
+    abstract set(value : any) : void;
+
+    get() : any {
         var value = this.input.val()
         if (value) {
             value = value.trim()
@@ -60,17 +92,17 @@ input_field.prototype = {
             value = null
         }
         return value
-    },
+    }
 
-    validate: function() {
+    validate() : string {
         var value = this.input.val()
         if (this.required && !value) {
             return "This value is required"
         }
         return null
-    },
+    }
 
-    set_error: function(error) {
+    set_error(error : string) : void {
         this.tr.toggleClass("errors", Boolean(error))
         this.errors.toggleClass("errornote", Boolean(error))
         if (this.input) {
@@ -82,55 +114,56 @@ input_field.prototype = {
         } else {
             this.errors.text("")
         }
-    },
+    }
 
-    clear_error: function() {
+    clear_error() : void {
         this.set_error(null)
-    },
+    }
 
-    destroy: function() {
+    destroy() : void {
         this.tr.remove()
-    },
+    }
 
-    enable: function() {
+    enable() : void {
         this.input.attr('disabled', null)
-    },
+    }
 
-    disable: function() {
-        this.input.attr('disabled', true)
-    },
+    disable() : void {
+        this.input.attr('disabled', 'true')
+    }
 }
 
 
 // define text_input_field
-function text_input_field(title, required) {
-    input_field.call(this, title, required)
-}
+class TextInputField extends InputField {
+    constructor(title : string, required : boolean) {
+        super(title, required)
+    }
 
-text_input_field.prototype = {
-    create: function(id) {
+    create(id : string) : JQuery {
         this.input = $('<input />')
             .attr('type', "text")
             .attr('name', id)
             .attr('id', "id_" + id)
         return this.input
-    },
+    }
 
-    set: function(value) {
+    set(value : string) : void {
         this.input.val(value)
-    },
+    }
 }
-
-extend(input_field, text_input_field)
-
 
 // define datetime_input_field
-function datetime_input_field(title, required) {
-    input_field.call(this, title, required)
-}
+class DateTimeInputField extends InputField {
+    date : JQuery
+    time : JQuery
+    timezone : JQuery
 
-datetime_input_field.prototype = {
-    create: function(id) {
+    constructor(title : string, required : boolean) {
+        super(title, required)
+    }
+
+    create(id : string) : JQuery {
         this.date = $('<input />')
             .attr('id', "id_" + id + "_date")
             .attr('placeholder', 'YYYY-MM-DD')
@@ -154,12 +187,12 @@ datetime_input_field.prototype = {
             .append(this.date)
             .append(this.time)
             .append(this.timezone)
-    },
+    }
 
-    set: function(value) {
+    set(value : DateTimeZone) : void {
         if (value != null) {
-            var datetime = new moment.utc(value[0])
-            var utc_offset = value[1]
+            var datetime : moment.Moment = moment(value[0])
+            var utc_offset : number = value[1]
             datetime = datetime.zone(-utc_offset)
             this.date.datepicker("setDate", datetime.format("YYYY-MM-dd"))
             this.date.val(datetime.format("YYYY-MM-DD"))
@@ -168,8 +201,11 @@ datetime_input_field.prototype = {
             var hours = Math.floor(utc_offset / 60);
             var minutes = utc_offset - (hours * 60);
 
-            if (hours < 10) {hours = "0" + hours;}
-            if (minutes < 10) {minutes = "0" + minutes;}
+            var str_hours = hours.toString()
+            var str_minutes = minutes.toString()
+
+            if (hours < 10) {str_hours = "0" +  str_hours;}
+            if (minutes < 10) {str_minutes = "0" +  str_minutes;}
 
             this.timezone.val(hours + ":" + minutes)
         } else {
@@ -177,9 +213,9 @@ datetime_input_field.prototype = {
             this.time.val("")
             this.timezone.val("")
         }
-    },
+    }
 
-    validate: function() {
+    validate() : string {
         var date = this.date.val().trim()
         var time = this.time.val().trim()
         var timezone = this.timezone.val().trim()
@@ -253,9 +289,9 @@ datetime_input_field.prototype = {
         }
 
         return null
-    },
+    }
 
-    get: function() {
+    get() : DateTimeZone {
         var date = this.date.val().trim()
         var time = this.time.val().trim()
         var timezone = this.timezone.val().trim()
@@ -289,51 +325,47 @@ datetime_input_field.prototype = {
             datetime.utc()
         }
 
-        console.log(datetime.toISOString(), utc_offset)
+        console.log(datetime, utc_offset)
 
-        return [ datetime.toISOString(), utc_offset ]
-    },
+        return [ datetime, utc_offset ]
+    }
 
-    enable: function() {
+    enable() : void {
         this.date.attr('disabled', null)
         this.time.attr('disabled', null)
         this.timezone.attr('disabled', null)
-    },
+    }
 
-    disable: function() {
-        this.date.attr('disabled', true)
-        this.time.attr('disabled', true)
-        this.timezone.attr('disabled', true)
-    },
+    disable() : void {
+        this.date.attr('disabled', "true")
+        this.time.attr('disabled', "true")
+        this.timezone.attr('disabled', "true")
+    }
 }
-
-extend(input_field, datetime_input_field)
 
 // define password_input_field
-function password_input_field(title, required) {
-    text_input_field.call(this, title, required)
-}
+class PasswordInputField extends TextInputField {
 
-password_input_field.prototype = {
-    create: function(id) {
+    constructor(title, required) {
+        super(title, required)
+    }
+
+    create(id : string) : JQuery {
         this.input = $('<input />')
             .attr('type', "password")
             .attr('name', id)
             .attr('id', "id_" + id)
         return this.input
-    },
+    }
 }
-
-extend(text_input_field, password_input_field)
-
 
 // define date_input_field
-function date_input_field(title, required) {
-    text_input_field.call(this, title, required)
-}
+class DateInputField extends TextInputField {
+    constructor(title : string, required : boolean) {
+        super(title, required)
+    }
 
-date_input_field.prototype = {
-    create: function(id) {
+    create(id : string) : JQuery {
         this.input = $('<input />')
             .attr('id', "id_" + id)
             .datepicker({
@@ -342,9 +374,9 @@ date_input_field.prototype = {
                 dateFormat: "yy-mm-dd",
             })
         return this.input
-    },
+    }
 
-    validate: function() {
+    validate() : string {
         var date = this.get()
 
         if (date != null) {
@@ -361,97 +393,93 @@ date_input_field.prototype = {
             }
         }
         return null
-    },
+    }
 }
-
-extend(text_input_field, date_input_field)
 
 
 // define p_input_field
-function p_input_field(title, required) {
-    text_input_field.call(this, title, required)
-}
+class PInputField extends TextInputField {
+    constructor(title : string, required : boolean) {
+        super(title, required)
+    }
 
-p_input_field.prototype = {
-    create: function(id) {
+    create(id : string) : JQuery {
         this.input = $('<textarea />')
             .attr('rows', 10)
             .attr('cols', 40)
             .attr('name', id)
             .attr('id', "id_" + id)
         return this.input
-    },
+    }
 }
-
-extend(text_input_field, p_input_field)
 
 
 // define integer_input_field
-function integer_input_field(title, required) {
-    text_input_field.call(this, title, required)
-}
+class IntegerInputField extends TextInputField {
+    constructor(title : string, required : boolean) {
+        super(title, required)
+    }
 
-integer_input_field.prototype = {
-    validate: function() {
+    validate() : string {
         var value = this.get()
         var intRegex = /^\d+$/;
         if (value && !intRegex.test(value)) {
             return "Value must be integer"
         }
-        return text_input_field.prototype.validate.call(this, value)
-    },
+        return super.validate()
+    }
 }
-
-extend(text_input_field, integer_input_field)
-
 
 // define select_input_field
-function select_input_field(title, options, required) {
-    this.options_list = options
-    input_field.call(this, title, required)
-}
+class SelectInputField extends InputField {
+    options_list : Array<OptionKeyValue>
+    options : StringArray<JQuery>
 
-select_input_field.prototype = {
-    create: function(id) {
+    constructor(title : string, options : Array<OptionKeyValue>, required : boolean) {
+        this.options_list = options
+        super(title, required)
+    }
+
+    create(id : string) : JQuery {
         this.input = $('<select />')
             .attr('name', id)
             .attr('id', "id_" + id)
 
         this.set_options(this.options_list)
         return this.input
-    },
+    }
 
-    set_options: function(options) {
+    set_options(options : Array<OptionKeyValue>) : void {
         this.input.empty()
         this.options = {}
-        var mythis = this
         var null_option = "-----"
-        $.each(options, function(i, v){
-            var id = v[0]
-            var value = v[1]
-            if (value !== "") {
-                mythis.options[id] = $('<option />')
+
+        for (let option of options) {
+            let id : string = option[0]
+            let value : string = option[1]
+            if (typeof value != 'undefined') {
+                this.options[id] = $('<option />')
                     .attr('value', id)
                     .text(value)
-                    .appendTo(mythis.input)
+                    .appendTo(this.input)
             } else {
                 null_option = value
             }
-        })
+        }
         if (!this.required) {
-            mythis.options[""] = $('<option />')
+            this.options[""] = $('<option />')
                 .attr('value', "")
                 .text(null_option)
-                .prependTo(mythis.input)
+                .prependTo(this.input)
         }
         this.options_list = options
-    },
+    }
 
-    set: function(value) {
+    set(value : string) : void {
         this.input.val(value)
-    },
+    }
 
-    validate: function() {
+    validate() : string {
         var value = this.get()
         if (value == null) {
             value = ""
@@ -460,253 +488,220 @@ select_input_field.prototype = {
             return value + " is not valid option"
         }
         return null
-    },
+    }
 }
-
-extend(input_field, select_input_field)
-
 
 // define boolean_input_field
-function boolean_input_field(title, options, required) {
-    this.options_list = options
-    input_field.call(this, title, required)
-}
+class booleanInputField extends InputField {
+    constructor(title : string, required : boolean) {
+        super(title, required)
+    }
 
-boolean_input_field.prototype = {
-    create: function(id) {
+    create(id : string) : JQuery {
         this.input = $('<input />')
             .attr('type', 'checkbox')
             .attr('name', id)
             .attr('id', "id_" + id)
         return this.input
-    },
+    }
 
-    set: function(value) {
+    set(value : boolean) : void {
         if (value) {
             this.input.attr('checked', 'checked')
         } else {
             this.input.removeAttr('checked')
         }
-    },
+    }
 
-    get: function() {
+    get() : boolean {
         var value = this.input.is(":checked")
         return value
-    },
+    }
 }
-
-extend(input_field, boolean_input_field)
-
 
 // define ajax_select_field
-function ajax_select_field(title, type, required) {
-    input_field.call(this, title, required)
-    this.type = type
-}
+class AjaxSelectField extends InputField {
+    type : string
 
-ajax_select_field.prototype = {
-    create: function(id) {
+    constructor(title : string, type : string, required : boolean) {
+        super(title, required)
+        this.type = type
+    }
+
+    create(id : string) : JQuery {
         this.input = $("<span/>")
             .attr("name", id)
             .attr("id", "id_" + id)
-            .ajaxautocomplete({type: this.type})
+        $.spud.ajaxautocomplete({type: this.type}, this.input)
         return this.input
-    },
+    }
 
-    destroy: function() {
+    destroy() : void {
         this.input.ajaxautocomplete("destroy")
-    },
+    }
 
-    set: function(value) {
-        this.input.ajaxautocomplete("set", null, value)
-    },
+    set(value : SpudObject) : void {
+        this.input.ajaxautocomplete("set", value, null)
+    }
 
-    get: function() {
+    get() : SpudObject {
         return this.input.ajaxautocomplete("get")
-    },
+    }
 
-    enable: function() {
+    enable() : void {
         this.input.ajaxautocomplete("enable")
-    },
+    }
 
-    disable: function() {
+    disable() : void {
         this.input.ajaxautocomplete("disable")
-    },
+    }
 }
-
-extend(input_field, ajax_select_field)
-
-
-// define quick_select_field
-// function quick_select_field(title, type, required) {
-//     input_field.call(this, title, required)
-//     this.type = type
-// }
-//
-// quick_select_field.prototype = new input_field()
-// quick_select_field.constructor = quick_select_field
-// quick_select_field.prototype.create = function(id) {
-//     return this.input = $("<span/>")
-//         .attr("name", id)
-//         .attr("id", "id_" + id)
-//         .quickautocomplete({type: this.type})
-// }
-//
-// quick_select_field.prototype.destroy = function() {
-//     this.input.quickautocomplete("destroy")
-// }
-//
-// quick_select_field.prototype.set = function(value) {
-//     var item = null
-//     if (value != null) {
-//         item = {
-//             pk: value.id,
-//             repr: value.title,
-//         }
-//     }
-//     this.input.quickautocomplete("set", item)
-// }
-//
-// quick_select_field.prototype.get = function() {
-//     return this.input.quickautocomplete("get")
-// }
-
 
 // define ajax_select_multiple_field
-function ajax_select_multiple_field(title, type, required) {
-    input_field.call(this, title, required)
-    this.type = type
-}
+class AjaxSelectMultipleField extends InputField {
+    type : string
 
-ajax_select_multiple_field.prototype = {
-    create: function(id) {
+    constructor(title : string, type : string, required : boolean) {
+        super(title, required)
+        this.type = type
+    }
+
+    create(id : string) : JQuery {
         this.input = $("<span/>")
             .attr("name", id)
             .attr("id", "id_" + id)
-            .ajaxautocompletemultiple({type: this.type})
+        $.spud.ajaxautocompletemultiple({type: this.type}, this.input)
         return this.input
-    },
+    }
 
-    destroy: function() {
+    destroy() : void {
         this.input.ajaxautocompletemultiple("destroy")
-    },
+    }
 
-    set: function(value) {
-        this.input.ajaxautocompletemultiple("set", null, value)
-    },
+    set(value : Array<SpudObject>) : void {
+        this.input.ajaxautocompletemultiple("set", value, null)
+    }
 
-    get: function() {
+    get() : Array<SpudObject> {
         return this.input.ajaxautocompletemultiple("get")
-    },
+    }
 
-    enable: function() {
+    enable() : void {
         this.input.ajaxautocompletemultiple("enable")
-    },
+    }
 
-    disable: function() {
+    disable() : void {
         this.input.ajaxautocompletemultiple("disable")
-    },
+    }
 }
-
-extend(input_field, ajax_select_multiple_field)
-
 
 // define ajax_select_sorted_field
-function ajax_select_sorted_field(title, type, required) {
-    input_field.call(this, title, required)
-    this.type = type
-}
+class AjaxSelectSortedField extends InputField {
+    type : string
 
-ajax_select_sorted_field.prototype = {
-    create: function(id) {
+    constructor(title : string, type : string, required : boolean) {
+        super(title, required)
+        this.type = type
+    }
+
+    create(id : string) : JQuery {
         this.input = $("<span/>")
             .attr("name", id)
             .attr("id", "id_" + id)
-            .ajaxautocompletesorted({type: this.type})
+        $.spud.ajaxautocompletesorted({type: this.type}, this.input)
         return this.input
-    },
+    }
 
-    destroy: function() {
+    destroy() : void {
         this.input.ajaxautocompletesorted("destroy")
-    },
+    }
 
-    set: function(value) {
-        this.input.ajaxautocompletesorted("set", null, value)
-    },
+    set(value : Array<SpudObject>) : void {
+        this.input.ajaxautocompletesorted("set", value, null)
+    }
 
-    get: function() {
+    get() : Array<SpudObject> {
         return this.input.ajaxautocompletesorted("get")
-    },
+    }
 
-    enable: function() {
+    enable() : void {
         this.input.ajaxautocompletesorted("enable")
-    },
+    }
 
-    disable: function() {
+    disable() : void {
         this.input.ajaxautocompletesorted("disable")
-    },
+    }
 }
-
-extend(input_field, ajax_select_sorted_field)
 
 
 // define photo_select_field
-function photo_select_field(title, required) {
-    input_field.call(this, title, required)
-}
+class PhotoSelectField extends InputField {
+    constructor(title : string, required : boolean) {
+        super(title, required)
+    }
 
-photo_select_field.prototype = {
-    create: function(id) {
+    create(id : string) : JQuery {
         this.input = $("<span/>")
             .attr("name", id)
             .attr("id", "id_" + id)
-            .photo_select()
+        $.spud.photo_select({}, this.input)
         return this.input
-    },
+    }
 
-    destroy: function() {
+    destroy() : void {
         this.input.photo_select("destroy")
-    },
+    }
 
-    set: function(value) {
-        this.input.photo_select("set", null, value)
-    },
+    set(value : Photo) : void {
+        if (value != null) {
+            this.input.photo_select("set", value, null)
+        } else {
+            this.input.photo_select("set", null, null)
+        }
+    }
 
-    get: function() {
+    get() : Photo {
         return this.input.photo_select("get")
-    },
+    }
 
-    validate: function() {
-        var value = this.input.photo_select("get")
+    validate() : string {
+        var value : Photo = this.input.photo_select("get")
         if (this.required && !value) {
             return "This value is required"
         }
         return null
-    },
+    }
 
-    enable: function() {
+    enable() : void {
         this.input.photo_select("enable")
-    },
+    }
 
-    disable: function() {
+    disable() {
         this.input.photo_select("disable")
-    },
+    }
 }
 
-extend(input_field, photo_select_field)
-
-
 // define dialog
-$.widget('spud.form_dialog',  $.spud.base_dialog, {
-    _create: function() {
-        var mythis = this
+interface FormDialogOptions extends BaseDialogOptions {
+    pages? : Array<InputPage>
+    fields? : Array<IdInputField>
+    obj? : any
+}
 
-        $.each($(".autoclose"), function(i, dialog) {
-            var instance = $(dialog).data("dialog")
-            instance.close()
-        })
+abstract class FormDialog extends BaseDialog {
+    protected options : FormDialogOptions
+    private f : JQuery
+    private fields : StringArray<InputField>
+    private page : StringArray<JQuery>
+    private tabs : JQuery
+    private table : JQuery
 
-        this.element.addClass("autoclose")
+    constructor(options : FormDialogOptions, element? : JQuery) {
+        super(options, element)
+    }
+
+    show(element : JQuery) : void {
+        super.show(element)
 
         this.f = $("<form method='get' />")
             .appendTo(this.element)
@@ -720,9 +715,10 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
 
             var ul = $("<ul></ul>").appendTo(this.tabs)
 
-            $.each(mythis.options.pages, function(id, page) {
-                var name = page.name
-                var title = page.title
+            for (let i=0; i<this.options.pages.length; i++) {
+                let page : InputPage = this.options.pages[i]
+                let name = page.name
+                let title = page.title
                 $("<li/>")
                     .append(
                         $("<a/>")
@@ -731,28 +727,30 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
                     )
                     .appendTo(ul)
 
-                mythis.page[name] = $("<table/>")
+                this.page[name] = $("<table/>")
                     .attr('id', name)
-                    .appendTo(mythis.tabs)
+                    .appendTo(this.tabs)
 
-                mythis._create_fields(name, page.fields)
-            })
+                this.create_fields(name, page.fields)
+            }
 
-            mythis.tabs.tabs()
+            this.tabs.tabs()
         } else {
             this.table = $("<table/>")
                 .addClass("fields")
                 .appendTo(this.f)
-            this._create_fields(null, this.options.fields)
+            this.create_fields(null, this.options.fields)
         }
 
-        this._super()
-    },
+        if (this.options.obj != null) {
+            this.set(this.options.obj)
+        }
+    }
 
-    _check_submit: function() {
-        var mythis = this
+    protected check_submit() : void {
         var allok = true
-        $.each(mythis.fields, function(id, field) {
+        for (let id in this.fields) {
+            let field : InputField = this.fields[id]
             var error = field.validate()
             if (error) {
                 field.set_error(error)
@@ -760,57 +758,55 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
             } else {
                 field.clear_error()
             }
-        })
+        }
         if (allok) {
             this.disable()
-            this._submit()
+            this.submit()
         }
-    },
+    }
 
-    _create_fields: function(page, fields) {
+    private create_fields(page : string, fields : Array<IdInputField>) {
         if (fields != null) {
             this.add_fields(page, fields)
         }
-    },
+    }
 
-    _submit: function() {
-        var mythis = this
-        var values = {}
-        $.each(this.fields, function(id, field) {
-            void field
-            values[id] = mythis.get_value(id)
-        })
-        this._submit_values(values)
-    },
+    protected submit() {
+        var values : DialogValues = {}
+        for (let id in this.fields) {
+            let field : InputField = this.fields[id]
+            values[id] = this.get_value(id)
+        }
+        this.submit_values(values)
+    }
 
-    _disable: function() {
-        $.each(this.fields, function(id, field) {
+    disable() : void {
+        for (let id in this.fields) {
+            let field : InputField = this.fields[id]
             field.disable()
-        })
-        this._super()
-    },
+        }
+        super.disable()
+    }
 
-    _enable: function() {
-        $.each(this.fields, function(id, field) {
+    enable() : void {
+        for (let id in this.fields) {
+            let field : InputField = this.fields[id]
             field.enable()
-        })
-        this._super()
-    },
+        }
+        super.enable()
+    }
 
-    _submit_values: function(values) {
-        void values
-    },
+    protected submit_values(values : DialogValues) : void {
+    }
 
-    _set: function(values) {
-        var mythis = this
-        $.each(mythis.fields, function(id, field) {
-            void field
-            mythis.set_value(id, values[id])
-        })
-    },
+    set(values : DialogValues) : void {
+        for (let id in this.fields) {
+            this.set_value(id, values[id])
+        }
+    }
 
-    add_field: function(page, id, field) {
-        this.remove_field(id, field)
+    add_field(page : string, id : string, field : InputField) : void {
+        this.remove_field(id)
         var html = field.to_html(id)
         if (page == null) {
             this.table.append(html)
@@ -818,68 +814,62 @@ $.widget('spud.form_dialog',  $.spud.base_dialog, {
             this.page[page].append(html)
         }
         this.fields[id] = field
-        return this
-    },
+    }
 
-    add_fields: function(page, fields) {
-        var mythis = this
-        $.each(fields, function(i, v){
-            var id = v[0]
-            var field = v[1]
-            mythis.add_field(page, id, field)
-        })
-        return this
-    },
+    add_fields(page : string, fields : Array<IdInputField>) : void {
+        for (let item of fields) {
+            let id : string = item[0]
+            let field : InputField = item[1]
+            this.add_field(page, id, field)
+        }
+    }
 
-    remove_field: function(id) {
+    remove_field(id : string) : void {
         var field = this.fields[id]
-        if (field == null) {
-            return this
-        }
-        field.destroy()
-        delete this.fields[id]
-        return this
-    },
-
-    remove_all_fields: function() {
-        var mythis = this
-        $.each(this.fields, function(i, v) {
-            void v
-            mythis.remove_field(i)
-        })
-        return this
-    },
-
-    set_value: function(id, value) {
-        this.fields[id].set(value)
-        return this
-    },
-
-    set_error: function(id, message) {
-        this.fields[id].set_error(message)
-        return this
-    },
-
-    get_value: function(id) {
-        return this.fields[id].get()
-    },
-
-    _destroy: function() {
-        $.each(this.fields, function(id, field) {
+        if (field != null) {
             field.destroy()
-        })
-        this._super()
-    },
-
-    _save_error: function(message, data) {
-        var mythis = this
-        if (data != null) {
-            $.each(data, function(id, error) {
-                if (mythis.fields[id] != null) {
-                    mythis.fields[id].set_error(error)
-                }
-            })
+            delete this.fields[id]
         }
-        this._super(message, data)
-    },
-})
+    }
+
+    remove_all_fields() : void {
+        for (let id in this.fields) {
+            this.remove_field(id)
+        }
+    }
+
+    set_value(id : string, value : any) : void {
+        let field : InputField = this.fields[id]
+        field.set(value)
+    }
+
+    set_error(id : string, message : string) : void {
+        let field : InputField = this.fields[id]
+        field.set_error(message)
+    }
+
+    get_value(id : string) {
+        let field : InputField = this.fields[id]
+        return field.get()
+    }
+
+    destroy() : void {
+        for (let id in this.fields) {
+            let field : InputField = this.fields[id]
+            field.destroy()
+        }
+        super.destroy()
+    }
+
+    protected save_error(message : string, data : StringArray<string>) : void {
+        if (data != null) {
+            for (let id in data) {
+                let error : string = data[id]
+                if (this.fields[id] != null) {
+                    this.fields[id].set_error(error)
+                }
+            }
+        }
+        super.save_error(message, data)
+    }
+}

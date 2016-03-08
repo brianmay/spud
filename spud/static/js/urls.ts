@@ -1,3 +1,6 @@
+/// <reference path="globals.ts" />
+/// <reference path="jcookie.ts" />
+/// <reference path="generic.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -34,50 +37,43 @@ void static_url
 // *********
 // * LINKS *
 // *********
-function root_a() {
-    var title = "Home"
-    var a = $('<a/>')
-        .attr('href', root_url())
-        .on('click', function() { window.do_root(); return false; })
-        .text(title)
-    return a
-}
-
-void root_a
-
-function object_a(type, value) {
-    var screen
-
-    if (type === "albums") {
-        screen = $.spud.album_detail_screen
-    } else if (type === "categorys") {
-        screen = $.spud.category_detail_screen
-    } else if (type === "places") {
-        screen = $.spud.place_detail_screen
-    } else if (type === "persons") {
-        screen = $.spud.person_detail_screen
-    } else if (type === "photos") {
-        screen = $.spud.photo_detail_screen
-    } else if (type === "feedbacks") {
-        screen = $.spud.feedback_detail_screen
-    } else {
-        return null
+function object_a(type : string, value : SpudObject) {
+    let viewport : Viewport
+    let params = {
+        obj: null,
+        obj_id: value.id,
     }
 
+    if (type === "albums") {
+        viewport = new AlbumDetailViewport(params)
+    }
+    else if (type === "categorys") {
+        viewport = new CategoryDetailViewport(params)
+    }
+    else if (type === "places") {
+        viewport = new PlaceDetailViewport(params)
+    }
+    else if (type === "persons") {
+        viewport = new PersonDetailViewport(params)
+    }
+    else if (type === "photos") {
+        viewport = new PhotoDetailViewport(params)
+    }
+    else if (type === "feedbacks") {
+        viewport = new FeedbackDetailViewport(params)
+    }
+    else {
+        return null;
+    }
     var a = $('<a/>')
         .attr('href', root_url() + type + "/" + value.id + "/")
-        .on('click', function() {
-            var params = {}
-            // force a reload
-            params.obj = null
-            params.obj_id = value.id
-            add_screen(screen, params)
+        .on('click', function () {
+            add_viewport(viewport)
             return false;
         })
         .data('photo', value.cover_photo)
-        .text(value.title)
-
-    return a
+        .text(value.title);
+    return a;
 }
 
 function photo_a(photo) {
@@ -100,13 +96,24 @@ $.ajaxSetup({
     crossDomain: false, // obviates need for sameOrigin test
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type)) {
-            xhr.setRequestHeader("X-CSRFToken", $.jCookie("csrftoken"));
+            var token = $.jCookie("csrftoken")
+            xhr.setRequestHeader("X-CSRFToken", token);
         }
     }
 });
 
 
-function ajax(settings) {
+interface SuccessCallback {
+    (data : Streamable): void
+}
+
+interface ErrorCallback {
+    (message : string, data : Streamable): void
+}
+
+function ajax(settings : JQueryAjaxSettings,
+              success : SuccessCallback,
+              error : ErrorCallback) : JQueryXHR {
     settings = $.extend({
         dataType: 'json',
         cache: false,
@@ -117,29 +124,16 @@ function ajax(settings) {
         settings.contentType = 'application/json; charset=UTF-8'
     }
 
-    var success = settings.success
-    delete settings.success
+    var xhr : JQueryXHR = $.ajax(settings)
 
-    var error = settings.error
-    delete settings.error
-
-    if (success == null) {
-        throw new Error("success is not defined")
-    }
-
-    if (error == null) {
-        throw new Error("error is not defined")
-    }
-
-    var xhr = $.ajax(settings)
+    xhr
         .done(
-            function(data, textStatus, jqXHR) {
-                void jqXHR
+            (data : Streamable, textStatus : string, jqXHR : JQueryXHR) => {
                 success(data)
             }
         )
         .fail(
-            function(jqXHR, textStatus, errorThrown) {
+            function(jqXHR : JQueryXHR, textStatus : string, errorThrown : string) {
                 if (textStatus === "abort") {
                     return
                 }
@@ -157,5 +151,3 @@ function ajax(settings) {
 
     return xhr
 }
-
-void ajax

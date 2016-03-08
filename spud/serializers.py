@@ -124,7 +124,7 @@ class NestedPhotoSerializer(ModelSerializer):
         model = models.photo
         fields = (
             'id', 'title', 'description', 'datetime', 'utc_offset', 'place',
-            'thumbs', 'videos',
+            'action', 'thumbs', 'videos',
         )
         list_serializer_class = ListSerializer
 

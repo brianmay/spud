@@ -1,3 +1,4 @@
+/// <reference path="globals.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -17,59 +18,63 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window.do_root = function(session, params) {
-    void params
+window.do_root = function(session : Session, params : {}) : void {
     setup_page(session)
 }
 
-window.do_list = function(obj_type, session, params) {
-    var screen_class
+window.do_list = function(obj_type : string, session : Session, criteria : StringArray<string>) : void {
     setup_page(session)
-    if (obj_type === "albums") {
-        screen_class = $.spud.album_list_screen
-    } else if (obj_type === "categorys") {
-        screen_class = $.spud.category_list_screen
-    } else if (obj_type === "places") {
-        screen_class = $.spud.place_list_screen
-    } else if (obj_type === "persons") {
-        screen_class = $.spud.person_list_screen
-    } else if (obj_type === "photos") {
-        screen_class = $.spud.photo_list_screen
-    } else if (obj_type === "feedbacks") {
-        screen_class = $.spud.feedback_list_screen
+
+    let viewport : Viewport = null
+    let params = {
+        criteria: criteria,
     }
-    if (screen_class) {
-        params = {
-            criteria: params,
-        }
+
+    if (obj_type === "albums") {
+        viewport = new AlbumListViewport(params)
+    } else if (obj_type === "categorys") {
+        viewport = new CategoryListViewport(params)
+    } else if (obj_type === "places") {
+        viewport = new PlaceListViewport(params)
+    } else if (obj_type === "persons") {
+        viewport = new PersonListViewport(params)
+    } else if (obj_type === "photos") {
+        viewport = new PhotoListViewport(params)
+    } else if (obj_type === "feedbacks") {
+        viewport = new FeedbackListViewport(params)
+    }
+    if (viewport != null) {
         window._do_replace = true
-        add_screen(screen_class, params)
+        add_viewport(viewport)
         window._do_replace = false
     }
 }
 
-window.do_detail = function(obj_type, obj_id, session, params) {
+window.do_detail = function(obj_type : string, obj_id : number, session : Session) : void {
     setup_page(session)
-    var screen_class
-    if (obj_type === "albums") {
-        screen_class = $.spud.album_detail_screen
-    } else if (obj_type === "categorys") {
-        screen_class = $.spud.category_detail_screen
-    } else if (obj_type === "places") {
-        screen_class = $.spud.place_detail_screen
-    } else if (obj_type === "persons") {
-        screen_class = $.spud.person_detail_screen
-    } else if (obj_type === "photos") {
-        screen_class = $.spud.photo_detail_screen
-    } else if (obj_type === "feedbacks") {
-        screen_class = $.spud.feedback_detail_screen
+
+    let viewport : Viewport
+    let params = {
+        obj : null,
+        obj_id : obj_id,
     }
-    if (screen_class) {
-        params = {
-            obj_id: obj_id,
-        }
+
+    if (obj_type === "albums") {
+        viewport = new AlbumDetailViewport(params)
+    } else if (obj_type === "categorys") {
+        viewport = new CategoryDetailViewport(params)
+    } else if (obj_type === "places") {
+        viewport = new PlaceDetailViewport(params)
+    } else if (obj_type === "persons") {
+        viewport = new PersonDetailViewport(params)
+    } else if (obj_type === "photos") {
+        viewport = new PhotoDetailViewport(params)
+    } else if (obj_type === "feedbacks") {
+        viewport = new FeedbackDetailViewport(params)
+    }
+    if (viewport != null) {
         window._do_replace = true
-        add_screen(screen_class, params)
+        add_viewport(viewport)
         window._do_replace = false
     }
 }

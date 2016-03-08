@@ -1,3 +1,8 @@
+/// <reference path="globals.ts" />
+/// <reference path="base.ts" />
+/// <reference path="dialog.ts" />
+/// <reference path="infobox.ts" />
+/// <reference path="generic.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -17,9 +22,67 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict"
 
-window._photo_created = new signal()
-window._photo_changed = new signal()
-window._photo_deleted = new signal()
+window._photo_created = new Signal()
+window._photo_changed = new Signal()
+window._photo_deleted = new Signal()
+
+class PhotoVideo {
+    width : number
+    height : number
+    url : string
+    format : string
+}
+
+class PhotoThumb {
+}
+
+class Photo extends SpudObject {
+    action: string
+    datetime : DateTimeZone
+    photographer_pk : number
+    place_pk : number
+    camera_make : string
+    camera_model : string
+    videos : StringArray<Array<PhotoVideo>>
+    thumbs : StringArray<PhotoThumb>
+    orig_url : string
+    _type_photo : void
+}
+
+interface PhotoCriteria extends Criteria {
+    first_datetime? : DateTimeZone
+    last_datetime? : DateTimeZone
+    action? : string
+    mode? : string
+    instance? : number
+    q? : string
+
+    album? : number
+    category? : number
+    place? : number
+    person? : number
+
+    album_descendants? : boolean
+    category_descendants? : boolean
+    place_descendants? : boolean
+}
+
+interface PhotoUpdates {
+    title? : string
+    action? : string
+    datetime? : Date
+    utc_offset? : number
+    photographer_pk? : number
+    place_pk? : number
+    camera_make? : string
+    camera_model? : string
+    add_albums_pk? : Array<number>
+    rem_albums_pk? : Array<number>
+    add_category_pk? : Array<number>
+    rem_category_pk? : Array<number>
+    add_people_pk? : Array<number>
+    rem_people_pk? : Array<number>
+}
 
 
 ///////////////////////////////////////
@@ -28,41 +91,41 @@ window._photo_deleted = new signal()
 
 $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
 
-    _create: function() {
+    _create: function() : void {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["q", new text_input_field("Search for", false)],
-                ["first_datetime", new datetime_input_field("First date", false)],
-                ["last_datetime", new datetime_input_field("Last date", false)],
-                ["lower_rating", new integer_input_field("Upper rating", false)],
-                ["upper_rating", new integer_input_field("Lower rating", false)],
-                ["title", new text_input_field("Title", false)],
-                ["photographer", new ajax_select_field("Photographer", "persons", false)],
-                ["path", new text_input_field("Path", false)],
-                ["name", new text_input_field("Name", false)],
-                ["first_id", new integer_input_field("First id", false)],
-                ["last_id", new integer_input_field("Last id", false)],
+                ["q", new TextInputField("Search for", false)],
+                ["first_datetime", new DateTimeInputField("First date", false)],
+                ["last_datetime", new DateTimeInputField("Last date", false)],
+                ["lower_rating", new IntegerInputField("Upper rating", false)],
+                ["upper_rating", new IntegerInputField("Lower rating", false)],
+                ["title", new TextInputField("Title", false)],
+                ["photographer", new AjaxSelectField("Photographer", "persons", false)],
+                ["path", new TextInputField("Path", false)],
+                ["name", new TextInputField("Name", false)],
+                ["first_id", new IntegerInputField("First id", false)],
+                ["last_id", new IntegerInputField("Last id", false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
-                ["album", new ajax_select_field("Album", "albums", false)],
-                ["album_descendants", new boolean_input_field("Descend albums", false)],
-                ["album_none", new boolean_input_field("No albums", false)],
+                ["album", new AjaxSelectField("Album", "albums", false)],
+                ["album_descendants", new booleanInputField("Descend albums", false)],
+                ["album_none", new booleanInputField("No albums", false)],
 
-                ["category", new ajax_select_field("Category", "categorys", false)],
-                ["category_descendants", new boolean_input_field("Descend categories", false)],
-                ["category_none", new boolean_input_field("No categories", false)],
+                ["category", new AjaxSelectField("Category", "categorys", false)],
+                ["category_descendants", new booleanInputField("Descend categories", false)],
+                ["category_none", new booleanInputField("No categories", false)],
 
-                ["place", new ajax_select_field("Place", "places", false)],
-                ["place_descendants", new boolean_input_field("Descend places", false)],
-                ["place_none", new boolean_input_field("No places", false)],
+                ["place", new AjaxSelectField("Place", "places", false)],
+                ["place_descendants", new booleanInputField("Descend places", false)],
+                ["place_none", new booleanInputField("No places", false)],
 
-                ["person", new ajax_select_field("Person", "persons", false)],
-                ["person_none", new boolean_input_field("No people", false)],
-                ["person_descendants", new boolean_input_field("Descend people", false)],
+                ["person", new AjaxSelectField("Person", "persons", false)],
+                ["person_none", new booleanInputField("No people", false)],
+                ["person_descendants", new booleanInputField("Descend people", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
-                ["camera_make", new text_input_field("Camera Make", false)],
-                ["camera_model", new text_input_field("Camera Model", false)],
+                ["camera_make", new TextInputField("Camera Make", false)],
+                ["camera_model", new TextInputField("Camera Model", false)],
             ]},
         ]
         this.options.title = "Search photos"
@@ -71,7 +134,7 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
         this._super();
     },
 
-    _set: function(criteria) {
+    _set: function(criteria : PhotoCriteria) : void {
         var clone = $.extend({}, criteria)
 
         if (clone.first_datetime != null) {
@@ -85,8 +148,8 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
         this._super(clone)
     },
 
-    _submit_values: function(values) {
-        var criteria = {}
+    _submit_values: function(values : any) : void {
+        var criteria : PhotoCriteria = {}
 
         $.each(values, function (key, el) {
             if (el != null && el !== false) { criteria[key] = el }
@@ -106,13 +169,13 @@ $.widget('spud.photo_search_dialog',  $.spud.form_dialog, {
 })
 
 $.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
-    _create: function() {
+    _create: function() : void {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["datetime", new datetime_input_field("Date", true)],
-                ["title", new text_input_field("Title", true)],
-                ["photographer_pk", new ajax_select_field("Photographer", "persons", false)],
-                ["action", new select_input_field("Action", [
+                ["datetime", new DateTimeInputField("Date", true)],
+                ["title", new TextInputField("Title", true)],
+                ["photographer_pk", new AjaxSelectField("Photographer", "persons", false)],
+                ["action", new SelectInputField("Action", [
                     ["", "no action"],
                     ["D", "delete"],
                     ["R", "regenerate thumbnails & video"],
@@ -124,14 +187,14 @@ $.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
                 ], false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
-                ["albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
-                ["categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
-                ["place_pk", new ajax_select_field("Place", "places", false)],
-                ["persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
+                ["albums_pk", new AjaxSelectMultipleField("Album", "albums", false)],
+                ["categorys_pk", new AjaxSelectMultipleField("Category", "categorys", false)],
+                ["place_pk", new AjaxSelectField("Place", "places", false)],
+                ["persons_pk", new AjaxSelectSortedField("Person", "persons", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
-                ["camera_make", new text_input_field("Camera Make", false)],
-                ["camera_model", new text_input_field("Camera Model", false)],
+                ["camera_make", new TextInputField("Camera Make", false)],
+                ["camera_model", new TextInputField("Camera Model", false)],
             ]},
         ]
 
@@ -142,7 +205,7 @@ $.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
         this._super();
     },
 
-    _set: function(photo) {
+    _set: function(photo : Photo) : void {
         this.obj_id = photo.id
         if (photo.id != null) {
             this.set_title("Change photo")
@@ -157,7 +220,7 @@ $.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
         return this._super(clone);
     },
 
-    _submit_values: function(values) {
+    _submit_values: function(values : PhotoUpdates) {
         values.utc_offset = values.datetime[1]
         values.datetime = values.datetime[0]
 
@@ -178,16 +241,15 @@ $.widget('spud.photo_change_dialog',  $.spud.form_dialog, {
     },
 })
 
-
 $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["datetime", new datetime_input_field("Date", false)],
-                ["title", new text_input_field("Title", false)],
-                ["photographer_pk", new ajax_select_field("Photographer", "persons", false)],
-                ["place_pk", new ajax_select_field("Place", "places", false)],
-                ["action", new select_input_field("Action", [
+                ["datetime", new DateTimeInputField("Date", false)],
+                ["title", new TextInputField("Title", false)],
+                ["photographer_pk", new AjaxSelectField("Photographer", "persons", false)],
+                ["place_pk", new AjaxSelectField("Place", "places", false)],
+                ["action", new SelectInputField("Action", [
                     ["none", "no action"],
                     ["D", "delete"],
                     ["R", "regenerate thumbnails & video"],
@@ -199,18 +261,18 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
                 ], false)],
             ]},
             {name: 'add', title: 'Add', fields: [
-                ["add_albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
-                ["add_categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
-                ["add_persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
+                ["add_albums_pk", new AjaxSelectMultipleField("Album", "albums", false)],
+                ["add_categorys_pk", new AjaxSelectMultipleField("Category", "categorys", false)],
+                ["add_persons_pk", new AjaxSelectSortedField("Person", "persons", false)],
             ]},
             {name: 'rem', title: 'Remove', fields: [
-                ["rem_albums_pk", new ajax_select_multiple_field("Album", "albums", false)],
-                ["rem_categorys_pk", new ajax_select_multiple_field("Category", "categorys", false)],
-                ["rem_persons_pk", new ajax_select_sorted_field("Person", "persons", false)],
+                ["rem_albums_pk", new AjaxSelectMultipleField("Album", "albums", false)],
+                ["rem_categorys_pk", new AjaxSelectMultipleField("Category", "categorys", false)],
+                ["rem_persons_pk", new AjaxSelectSortedField("Person", "persons", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
-                ["camera_make", new text_input_field("Camera Make", false)],
-                ["camera_model", new text_input_field("Camera Model", false)],
+                ["camera_make", new TextInputField("Camera Make", false)],
+                ["camera_model", new TextInputField("Camera Model", false)],
             ]},
         ]
 
@@ -227,7 +289,7 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
     },
 
     _submit_values: function(values) {
-        var data = {}
+        var data : PhotoUpdates = {}
 
         $.each(values, function (key, el) {
             if (el != null && el !== false) { data[key] = el }
@@ -237,12 +299,6 @@ $.widget('spud.photo_bulk_update_dialog',  $.spud.form_dialog, {
             data.action = null
         }
 
-        if (data.set_datetime != null) {
-            data.set_utc_offset = data.set_datetime[1]
-            data.set_datetime = data.set_datetime[0]
-        }
-
-        console.log(data)
         this._data = data
         this.element.hide()
 
@@ -339,7 +395,7 @@ $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
         this._type = "photos"
 
         this._pb = $("<div/>").appendTo(this.element)
-        $.ui.progressbar({value: false}, this._pb)
+        this._pb.progressbar({value: false})
 
         this._status = $("<div/>")
             .text("Please wait")
@@ -362,7 +418,6 @@ $.widget('spud.photo_bulk_proceed_dialog',  $.spud.base_dialog, {
     },
 
     _save_success: function(data) {
-        void data
 //        $.each(data.results, function(photo) {
 //            window._photo_changed.trigger(photo)
 //        })
@@ -422,7 +477,7 @@ $.widget('spud.photo_criteria', $.spud.object_criteria, {
         this._super()
     },
 
-    _set: function(criteria) {
+    _set: function(criteria : PhotoCriteria) {
         var mythis = this
         mythis.element.removeClass("error")
 
@@ -573,19 +628,23 @@ $.widget('spud.photo_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
-                        child.photo_detail_screen("enable")
-                        child.photo_detail_screen("set", photo)
-                        child.photo_detail_screen("set_loader", photo_list_loader)
+                        let viewport : PhotoDetailViewport = child.data('widget')
+                        viewport.enable()
+                        viewport.set(photo)
+                        viewport.set_loader(photo_list_loader)
                         return false
                     }
                 }
 
-                var params = {
+                let params : PhotoDetailViewportOptions = {
                     id: child_id,
                     obj: photo,
+                    obj_id : null,
                     object_list_loader: photo_list_loader,
                 }
-                child = add_screen($.spud.photo_detail_screen, params)
+                let viewport : PhotoDetailViewport
+                viewport = new PhotoDetailViewport(params)
+                child = add_viewport(viewport)
                 return false;
             })
             .text(title)
@@ -595,11 +654,11 @@ $.widget('spud.photo_list', $.spud.object_list, {
     _create_li: function(photo) {
         var details = []
 
-        var datetime = new moment.utc(photo.datetime)
+        var datetime = moment.utc(photo.datetime)
         datetime.zone(-photo.utc_offset)
-        datetime = datetime.format("YYYY-MM-DD hh:mm")
+        var datetime_str = datetime.format("YYYY-MM-DD hh:mm")
 
-        details.push($("<div/>").text(datetime))
+        details.push($("<div/>").text(datetime_str))
         if (photo.place != null) {
             details.push($("<div/>").text(photo.place.title))
         }
@@ -636,39 +695,39 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
 
         this.options.pages = [
             {name: 'basic', title: 'Basics', fields: [
-                ["title", new text_output_field("Title")],
-                ["description", new p_output_field("Description")],
-                ["view", new p_output_field("View")],
-                ["comment", new p_output_field("Comment")],
-                ["name", new text_output_field("File")],
-                ["albums", new link_list_output_field("Albums", "albums")],
-                ["categorys", new link_list_output_field("Categories", "categorys")],
-                ["place", new link_output_field("Place", "places")],
-                ["persons", new link_list_output_field("People", "persons")],
-                ["datetime", new datetime_output_field("Date & time")],
-                ["photographer", new link_output_field("Photographer", "persons")],
-                ["rating", new text_output_field("Rating")],
-//                ["videos", new html_output_field("Videos")],
-//                ["related", new html_list_output_field("Related")],
-                ["action", new text_output_field("Action")],
+                ["title", new TextOutputField("Title")],
+                ["description", new POutputField("Description")],
+                ["view", new POutputField("View")],
+                ["comment", new POutputField("Comment")],
+                ["name", new TextOutputField("File")],
+                ["albums", new LinkListOutputField("Albums", "albums")],
+                ["categorys", new LinkListOutputField("Categories", "categorys")],
+                ["place", new LinkOutputField("Place", "places")],
+                ["persons", new LinkListOutputField("People", "persons")],
+                ["datetime", new DateTimeOutputField("Date & time")],
+                ["photographer", new LinkOutputField("Photographer", "persons")],
+                ["rating", new TextOutputField("Rating")],
+//                ["videos", new HtmlOutputField("Videos")],
+//                ["related", new HtmlListOutputField("Related")],
+                ["action", new TextOutputField("Action")],
             ]},
             {name: 'camera', title: 'Camera', fields: [
-                ["camera_make", new text_output_field("Camera make")],
-                ["camera_model", new text_output_field("Camera model")],
-                ["flash_used", new text_output_field("Flash")],
-                ["focal_length", new text_output_field("Focal Length")],
-                ["exposure", new text_output_field("Exposure")],
-                ["aperture", new text_output_field("Aperture")],
-                ["iso_equiv", new text_output_field("ISO")],
-                ["metering_mode", new text_output_field("Metering mode")],
+                ["camera_make", new TextOutputField("Camera make")],
+                ["camera_model", new TextOutputField("Camera model")],
+                ["flash_used", new TextOutputField("Flash")],
+                ["focal_length", new TextOutputField("Focal Length")],
+                ["exposure", new TextOutputField("Exposure")],
+                ["aperture", new TextOutputField("Aperture")],
+                ["iso_equiv", new TextOutputField("ISO")],
+                ["metering_mode", new TextOutputField("Metering mode")],
             ]},
         ]
         this.loader = null
 
         this.img = $("<div></div>")
             .addClass('subject')
-            .image({size: "mid", do_video: true, include_link: false})
-            .appendTo(this.element)
+        $.spud.image({size: "mid", do_video: true, include_link: false}, this.img)
+        this.img.appendTo(this.element)
 
         this._super();
     },
@@ -686,21 +745,25 @@ $.widget('spud.photo_detail',  $.spud.object_detail, {
     },
 })
 
-
 ///////////////////////////////////////
-// photo screens
+// photo viewports
 ///////////////////////////////////////
+interface PhotoListViewportOptions extends ObjectListViewportOptions {
+    criteria : PhotoCriteria
+}
 
-$.widget('spud.photo_list_screen', $.spud.object_list_screen, {
-    _create: function() {
-        this._type = "photos"
-        this._type_name = "Photo"
 
-        this._super()
-    },
+class PhotoListViewport extends ObjectListViewport {
+    protected options : PhotoListViewportOptions
 
-    _setup_menu: function(menu) {
-        this._super(menu)
+    constructor(options : PhotoListViewportOptions, element? : JQuery) {
+        this.type = "photos"
+        this.type_name = "Photo"
+        super(options, element)
+    }
+
+    protected setup_menu(menu : JQuery) : void {
+        super.setup_menu(menu)
 
         var mythis = this
         menu.append(
@@ -708,36 +771,59 @@ $.widget('spud.photo_list_screen', $.spud.object_list_screen, {
                 .text("Update")
                 .on("click", function(ev) {
                     void ev
-                    var instance = mythis._ol.data('object_list')
+                    var instance = mythis.ol.data('object_list')
                     instance.bulk_update()
                 })
         )
-    },
+    }
 
-    get_streamable_options: function() {
-        var options = this._super()
-        if (this._ol != null) {
-            var instance = this._ol.data('object_list')
-            options.object_list_options = {
+    get_streamable_options() : StreamableOptions {
+        var options = super.get_streamable_options()
+        if (this.ol != null) {
+            var instance = this.ol.data('object_list')
+            options['object_list_options'] = {
                 selection: instance.options.selection
             }
         }
         return options
-    },
+    }
 
-    _object_list: $.proxy($.spud.photo_list, window),
-    _object_criteria: $.proxy($.spud.photo_criteria, window),
-    _object_search_dialog: $.proxy($.spud.photo_search_dialog, window),
-})
+    protected object_list(options : any, element : JQuery) : void {
+        $.spud.photo_list(options, element)
+    }
+
+    protected object_criteria(options : any, element : JQuery) : void {
+        $.spud.photo_criteria(options, element)
+    }
+
+    protected object_search_dialog(options : any, element : JQuery) : void {
+        $.spud.photo_search_dialog(options, element)
+    }
+}
 
 
-$.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
-    _setup_menu: function(menu) {
+interface PhotoDetailViewportOptions extends ObjectDetailViewportOptions {
+    obj : Photo
+}
+
+
+class PhotoDetailViewport extends ObjectDetailViewport {
+    protected options : PhotoDetailViewportOptions
+    private orig : JQuery
+
+    constructor(options : PhotoDetailViewportOptions, element? : JQuery) {
+        this.type = "photos"
+        this.type_name = "Photo"
+        this.display_photo_list_link = false
+        super(options, element)
+    }
+
+    protected setup_menu(menu : JQuery) : void {
         var mythis = this
 
-        this._super(menu)
+        super.setup_menu(menu)
 
-        this._orig = $("<li/>")
+        this.orig = $("<li/>")
             .text("Original")
             .on("click", function(ev) {
                 void ev
@@ -748,46 +834,60 @@ $.widget('spud.photo_detail_screen', $.spud.object_detail_screen, {
             })
             .hide()
             .appendTo(menu)
-    },
+    }
 
-    _create: function() {
-        this._type = "photos"
-        this._type_name = "Photo"
-
-        this._super()
+    create(element : JQuery) : void {
+        super.create(element)
 
         var mythis = this
 
-        window._photo_changed.add_listener(this, function(obj) {
+        window._photo_changed.add_listener(this, function(obj : Photo) {
             if (obj.id === this.options.obj_id) {
-                mythis._set(obj)
+                mythis.set(obj)
             }
         })
-        window._photo_deleted.add_listener(this, function(obj_id) {
+        window._photo_deleted.add_listener(this, function(obj_id : number) {
             if (obj_id === this.options.obj_id) {
-                mythis.close()
+                mythis.remove()
             }
         })
-    },
+    }
 
-    _get_children_criteria: function() {
+    protected get_children_criteria() : PhotoCriteria {
         return {
             'instance': this.options.obj_id,
         }
-    },
+    }
 
-    _loaded: function(obj) {
-        this._orig.toggle(obj.orig_url != null)
+    protected loaded(obj) : void {
+        this.orig.toggle(obj.orig_url != null)
         this.div
             .toggleClass("removed", obj.action === "D")
             .toggleClass("regenerate", obj.action != null && obj.action !== "D")
-        this._super(obj);
-    },
+        super.loaded(obj)
+    }
 
-    _photo_list_screen: null,
-    _object_list: $.proxy($.spud.photo_list, window),
-    _object_detail: $.proxy($.spud.photo_detail, window),
-    _object_list_screen: $.proxy($.spud.photo_list_screen, window),
-    _object_change_dialog: $.proxy($.spud.photo_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud.photo_delete_dialog, window),
-})
+    protected get_photo_criteria() : PhotoCriteria {
+        return null
+    }
+
+    object_list(options : any, element : JQuery) {
+        $.spud.photo_list(options, element)
+    }
+
+    object_detail(options : any, element : JQuery) {
+        $.spud.photo_detail(options, element)
+    }
+
+    protected get_object_list_viewport(options : PhotoListViewportOptions) : PhotoListViewport {
+        return new PhotoListViewport(options)
+    }
+
+    object_change_dialog(options : any, element : JQuery) {
+        $.spud.photo_change_dialog(options, element)
+    }
+
+    object_delete_dialog(options : any, element : JQuery) {
+        $.spud.photo_delete_dialog(options, element)
+    }
+}

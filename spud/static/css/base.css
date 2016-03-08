@@ -93,7 +93,7 @@ ul.menubar .ui-menu-item {
 
 /* SCREEN */
 
-.screen .button {
+.viewport .button {
     float: right;
 }
 
@@ -102,7 +102,7 @@ ul.menubar .ui-menu-item {
     flex-direction: column;
 }
 
-.screen {
+.viewport {
     margin: 5px;
     padding: 0px;
     border-radius: 10px;
@@ -114,17 +114,17 @@ ul.menubar .ui-menu-item {
     flex: 0 1 auto;
 }
 
-.screen .removed {
+.viewport .removed {
     text-decoration: line-through;
     opacity: 0.5;
 }
 
-.screen .regenerate {
+.viewport .regenerate {
     background: #CCE;
     color: #333;
 }
 
-.screen .screen_header {
+.viewport .viewport_header {
     border: 1px solid #e78f08;
     background: #f6a828 url("images/ui-bg_gloss-wave_35_f6a828_500x100.png") 50% 50% repeat-x;
     color: #ffffff;
@@ -133,31 +133,31 @@ ul.menubar .ui-menu-item {
     padding: 5px 10px 5px 10px;
     flex: none;
 }
-.screen .screen_content {
+.viewport .viewport_content {
     padding: 10px;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
 }
 
-.screen.disabled {
+.viewport.disabled {
     background: #eee;
     flex: none;
 }
-.screen.disabled .screen_header {
+.viewport.disabled .viewport_header {
     border: none;
     color: #ccc;
     background: none;
 }
-.screen.disabled .screen_content {
+.viewport.disabled .viewport_content {
     display: none;
 }
 
-.screen .screen_content > * {
+.viewport .viewport_content > * {
     flex: none;
 }
 
-.screen .screen_content > .photo_list {
+.viewport .viewport_content > .photo_list {
     flex: 1 1 auto;
 }
 
@@ -165,23 +165,23 @@ ul.menubar .ui-menu-item {
 .maximize {
 }
 
-.maximize .screen  {
+.maximize .viewport  {
     margin: 0px;
     border: none;
     border-radius: 0;
 }
 
-.maximize .screen .screen_header {
+.maximize .viewport .viewport_header {
     border: none;
     border-radius: 0;
 }
 
-.maximize .screen.disabled {
+.maximize .viewport.disabled {
     display: none;
 }
 
 /*
-.maximize .screen  {
+.maximize .viewport  {
     margin: 0px;
     background: #fff;
     border: none;
@@ -196,22 +196,22 @@ ul.menubar .ui-menu-item {
     flex-direction: column;
 }
 
-.maximize .screen .screen_content {
+.maximize .viewport .viewport_content {
     display: flex;
     max-height: none;
 }
 
-.maximize .screen .screen_header {
+.maximize .viewport .viewport_header {
     border: none;
     border-radius: 0;
     flex: none;
 }
 
-.maximize .screen .infobox .image img {
+.maximize .viewport .infobox .image img {
     max-height: none;
 }
 
-.maximize .screen .photo_list {
+.maximize .viewport .photo_list {
     border: none;
     margin: 0 -10px 0 -10px;
 }
@@ -697,5 +697,5 @@ label {
 }
 
 /* MOBILE */
-@media screen and (max-width: 700px) {
+@media viewport and (max-width: 700px) {
 }

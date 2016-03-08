@@ -1,3 +1,7 @@
+/// <reference path="globals.ts" />
+/// <reference path="base.ts" />
+/// <reference path="dialog.ts" />
+/// <reference path="infobox.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -17,9 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window._category_created = new signal()
-window._category_changed = new signal()
-window._category_deleted = new signal()
+window._category_created = new Signal()
+window._category_changed = new Signal()
+window._category_deleted = new Signal()
+
+
+class Category extends SpudObject {
+    _type_category : void
+}
+
+interface CategoryCriteria extends Criteria {
+}
+
+///////////////////////////////////////
 
 
 ///////////////////////////////////////
@@ -30,12 +44,12 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
-            ["q", new text_input_field("Search for", false)],
-            ["instance", new ajax_select_field("Category", "categorys", false)],
-            ["mode", new select_input_field("Mode",
+            ["q", new TextInputField("Search for", false)],
+            ["instance", new AjaxSelectField("Category", "categorys", false)],
+            ["mode", new SelectInputField("Mode",
                 [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
-            ["root_only", new boolean_input_field("Root only", false)],
+            ["root_only", new booleanInputField("Root only", false)],
         ]
         this.options.title = "Search categorys"
         this.options.description = "Please search for an category."
@@ -59,12 +73,12 @@ $.widget('spud.category_search_dialog',  $.spud.form_dialog, {
 $.widget('spud.category_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
-            ["title", new text_input_field("Title", true)],
-            ["description", new p_input_field("Description", false)],
-            ["cover_photo_pk", new photo_select_field("Photo", false)],
-            ["sort_name", new text_input_field("Sort Name", false)],
-            ["sort_order", new text_input_field("Sort Order", false)],
-            ["parent", new ajax_select_field("Parent", "categorys", false)],
+            ["title", new TextInputField("Title", true)],
+            ["description", new PInputField("Description", false)],
+            ["cover_photo_pk", new PhotoSelectField("Photo", false)],
+            ["sort_name", new TextInputField("Sort Name", false)],
+            ["sort_order", new TextInputField("Sort Order", false)],
+            ["parent", new AjaxSelectField("Parent", "categorys", false)],
         ]
 
         this.options.title = "Change category"
@@ -229,19 +243,23 @@ $.widget('spud.category_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
-                        child.category_detail_screen("enable")
-                        child.category_detail_screen("set", category)
-                        child.category_detail_screen("set_loader", category_list_loader)
+                        let viewport : CategoryDetailViewport = child.data('widget')
+                        viewport.enable()
+                        viewport.set(category)
+                        viewport.set_loader(category_list_loader)
                         return false
                     }
                 }
 
-                var params = {
+                var params : ObjectDetailViewportOptions = {
                     id: child_id,
                     obj: category,
+                    obj_id : null,
                     object_list_loader: category_list_loader,
                 }
-                child = add_screen($.spud.category_detail_screen, params)
+                let viewport : CategoryDetailViewport
+                viewport = new CategoryDetailViewport(params)
+                child = add_viewport(viewport)
                 return false;
             })
             .data('photo', category.cover_photo)
@@ -270,17 +288,17 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
         this._type_name = "Category"
 
         this.options.fields = [
-            ["title", new text_output_field("Title")],
-            ["sort_name", new text_output_field("Sort Name")],
-            ["sort_order", new text_output_field("Sort Order")],
-            ["description", new p_output_field("Description")],
-            ["ascendants", new link_list_output_field("Ascendants", "categorys")],
+            ["title", new TextOutputField("Title")],
+            ["sort_name", new TextOutputField("Sort Name")],
+            ["sort_order", new TextOutputField("Sort Order")],
+            ["description", new POutputField("Description")],
+            ["ascendants", new LinkListOutputField("Ascendants", "categorys")],
         ]
         this.loader = null
 
         this.img = $("<div></div>")
-            .image({size: "mid", include_link: true})
-            .appendTo(this.element)
+        $.spud.image({size: "mid", include_link: true}, this.img)
+        this.img.appendTo(this.element)
 
         this._super();
     },
@@ -296,54 +314,78 @@ $.widget('spud.category_detail',  $.spud.object_detail, {
 
 
 ///////////////////////////////////////
-// category screens
+// category viewports
 ///////////////////////////////////////
 
-$.widget('spud.category_list_screen', $.spud.object_list_screen, {
-    _create: function() {
-        this._type = "categorys"
-        this._type_name = "Category"
+class CategoryListViewport extends ObjectListViewport {
+    constructor(options : ObjectListViewportOptions, element? : JQuery) {
+        this.type = "categorys"
+        this.type_name = "Category"
+        super(options, element)
+    }
 
-        this._super()
-    },
+    protected object_list(options : any, element : JQuery) : void {
+        $.spud.category_list(options, element)
+    }
 
-    _object_list: $.proxy($.spud.category_list, window),
-    _object_criteria: $.proxy($.spud.category_criteria, window),
-    _object_search_dialog: $.proxy($.spud.category_search_dialog, window),
-})
+    protected object_criteria(options : any, element : JQuery) : void {
+        $.spud.category_criteria(options, element)
+    }
+
+    protected object_search_dialog(options : any, element : JQuery) : void {
+        $.spud.category_search_dialog(options, element)
+    }
+}
 
 
-$.widget('spud.category_detail_screen', $.spud.object_detail_screen, {
-    _create: function() {
-        this._type = "categorys"
-        this._type_name = "Category"
+class CategoryDetailViewport extends ObjectDetailViewport {
+    constructor(options : ObjectDetailViewportOptions, element? : JQuery) {
+        this.type = "categorys"
+        this.type_name = "Category"
+        super(options, element)
+    }
 
-        this._super()
+    create(element : JQuery) : void {
+        super.create(element)
 
         var mythis = this
 
-        window._category_changed.add_listener(this, function(obj) {
+        window._category_changed.add_listener(this, function(obj : Category) {
             if (obj.id === this.options.obj_id) {
-                mythis._set(obj)
+                mythis.set(obj)
             }
         })
-        window._category_deleted.add_listener(this, function(obj_id) {
+        window._category_deleted.add_listener(this, function(obj_id : number) {
             if (obj_id === this.options.obj_id) {
-                mythis.close()
+                mythis.remove()
             }
         })
-    },
+    }
 
-    _get_photo_criteria: function() {
+    protected get_photo_criteria() : PhotoCriteria {
         return {
             'category': this.options.obj_id,
             'category_descendants': true,
         }
-    },
+    }
 
-    _object_list: $.proxy($.spud.category_list, window),
-    _object_detail: $.proxy($.spud.category_detail, window),
-    _object_list_screen: $.proxy($.spud.category_list_screen, window),
-    _object_change_dialog: $.proxy($.spud.category_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud.category_delete_dialog, window),
-})
+    object_list(options : any, element : JQuery) {
+        $.spud.category_list(options, element)
+    }
+
+    object_detail(options : any, element : JQuery) {
+        $.spud.category_detail(options, element)
+    }
+
+    protected get_object_list_viewport(options : ObjectListViewportOptions) : CategoryListViewport {
+        return new CategoryListViewport(options)
+    }
+
+    object_change_dialog(options : any, element : JQuery) {
+        $.spud.category_change_dialog(options, element)
+    }
+
+    object_delete_dialog(options : any, element : JQuery) {
+        $.spud.category_delete_dialog(options, element)
+    }
+}

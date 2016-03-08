@@ -1,3 +1,9 @@
+/// <reference path="globals.ts" />
+/// <reference path="base.ts" />
+/// <reference path="dialog.ts" />
+/// <reference path="infobox.ts" />
+/// <reference path="DefinitelyTyped/moment.d.ts" />
+/// <reference path="DefinitelyTyped/moment-timezone.d.ts" />
 /*
 spud - keep track of photos
 Copyright (C) 2008-2013 Brian May
@@ -17,10 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window._feedback_created = new signal()
-window._feedback_changed = new signal()
-window._feedback_deleted = new signal()
+window._feedback_created = new Signal()
+window._feedback_changed = new Signal()
+window._feedback_deleted = new Signal()
 
+class Feedback extends SpudObject {
+    _type_feedback : void
+}
+
+interface FeedbackCriteria extends Criteria {
+}
 
 function _feedback_html(feedback, feedback_a, include_children, include_photo, include_links) {
     if (feedback == null) {
@@ -50,9 +62,9 @@ function _feedback_html(feedback, feedback_a, include_children, include_photo, i
             .appendTo(div)
 
     } else {
-        var datetime = new moment.utc(feedback.submit_datetime)
+        var datetime = moment.utc(feedback.submit_datetime)
         datetime.zone(-feedback.utc_offset)
-        datetime = datetime.format("dddd, MMMM Do YYYY, h:mm:ss a")
+        var datetime_str = datetime.format("dddd, MMMM Do YYYY, h:mm:ss a")
 
         var datetime_node
         if (include_links) {
@@ -60,12 +72,12 @@ function _feedback_html(feedback, feedback_a, include_children, include_photo, i
         } else {
             datetime_node = $("<span></span>")
         }
-        datetime_node.text(datetime)
+        datetime_node.text(datetime_str)
 
         if (include_photo) {
-            $("<div />")
-                .image({ photo: feedback.photo, size: "thumb", include_link: true })
-                .appendTo(div)
+            let tmp_div = $("<div />")
+            $.spud.image({ photo: feedback.photo, size: "thumb", include_link: true }, tmp_div)
+            tmp_div.appendTo(div)
         }
 
         $("<div></div>")
@@ -154,12 +166,12 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
 
     _create: function() {
         this.options.fields = [
-            ["q", new text_input_field("Search for", false)],
-            ["instance", new ajax_select_field("Feedback", "feedbacks", false)],
-            ["mode", new select_input_field("Mode",
+            ["q", new TextInputField("Search for", false)],
+            ["instance", new AjaxSelectField("Feedback", "feedbacks", false)],
+            ["mode", new SelectInputField("Mode",
                 [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
-            ["root_only", new boolean_input_field("Root only", false)],
+            ["root_only", new booleanInputField("Root only", false)],
         ]
         this.options.title = "Search feedbacks"
         this.options.description = "Please search for an feedback."
@@ -183,7 +195,7 @@ $.widget('spud.feedback_search_dialog',  $.spud.form_dialog, {
 $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
     _create: function() {
         this.options.fields = [
-            ["rating", new select_input_field("Rating", [
+            ["rating", new SelectInputField("Rating", [
                 ["5", "5: Acceptable"],
                 ["6", "6: Good"],
                 ["7", "7: Excellent"],
@@ -195,11 +207,11 @@ $.widget('spud.feedback_change_dialog',  $.spud.form_dialog, {
                 ["2", "2: Has some value"],
                 ["3", "3: Barely acceptable"],
                 ["4", "4: Can't decide"],
-            ])],
-            ["user_name", new text_input_field("Name", true)],
-            ["user_email", new text_input_field("E-Mail", false)],
-            ["user_url", new text_input_field("URL", false)],
-            ["comment", new p_input_field("Comment", true)],
+            ], true)],
+            ["user_name", new TextInputField("Name", true)],
+            ["user_email", new TextInputField("E-Mail", false)],
+            ["user_url", new TextInputField("URL", false)],
+            ["comment", new PInputField("Comment", true)],
         ]
 
         this.options.title = "Change feedback"
@@ -370,19 +382,23 @@ $.widget('spud.feedback_list', $.spud.object_list, {
                 if (child_id != null) {
                     var child = $(document.getElementById(child_id))
                     if (child.length > 0) {
-                        child.feedback_detail_screen("enable")
-                        child.feedback_detail_screen("set", feedback)
-                        child.feedback_detail_screen("set_loader", feedback_list_loader)
+                        let viewport : FeedbackDetailViewport = child.data('widget')
+                        viewport.enable()
+                        viewport.set(feedback)
+                        viewport.set_loader(feedback_list_loader)
                         return false
                     }
                 }
 
-                var params = {
+                var params : ObjectDetailViewportOptions = {
                     id: child_id,
                     obj: feedback,
+                    obj_id : null,
                     object_list_loader: feedback_list_loader,
                 }
-                child = add_screen($.spud.feedback_detail_screen, params)
+                let viewport : FeedbackDetailViewport
+                viewport = new FeedbackDetailViewport(params)
+                child = add_viewport(viewport)
                 return false;
             })
             .data('photo', feedback.photo)
@@ -411,23 +427,23 @@ $.widget('spud.feedback_detail',  $.spud.object_detail, {
         this._type_name = "Feedback"
 
         this.options.fields = [
-            ["rating", new integer_output_field("Rating")],
-            ["user", new text_output_field("Name (verified)")],
-            ["user_name", new text_output_field("Name (unverified)")],
-            ["user_email", new text_output_field("E-Mail (unverified)")],
-            ["user_url", new text_output_field("URL (unverified)")],
-            ["parent", new link_output_field("In response to", "feedbacks")],
-            ["ip_address", new text_output_field("IP Address")],
-            ["is_public", new boolean_output_field("Is public")],
-            ["is_removed", new boolean_output_field("Is removed")],
-            ["submit_datetime", new datetime_output_field("Submit Date/Time")],
-            ["comment", new p_output_field("Comment")],
+            ["rating", new IntegerOutputField("Rating")],
+            ["user", new TextOutputField("Name (verified)")],
+            ["user_name", new TextOutputField("Name (unverified)")],
+            ["user_email", new TextOutputField("E-Mail (unverified)")],
+            ["user_url", new TextOutputField("URL (unverified)")],
+            ["parent", new LinkOutputField("In response to", "feedbacks")],
+            ["ip_address", new TextOutputField("IP Address")],
+            ["is_public", new booleanOutputField("Is public")],
+            ["is_removed", new booleanOutputField("Is removed")],
+            ["submit_datetime", new DateTimeOutputField("Submit Date/Time")],
+            ["comment", new POutputField("Comment")],
         ]
         this.loader = null
 
         this.img = $("<div></div>")
-            .image({size: "mid", include_link: true})
-            .appendTo(this.element)
+        $.spud.image({size: "mid", include_link: true}, this.img)
+        this.img.appendTo(this.element)
 
         this._super();
     },
@@ -447,52 +463,76 @@ $.widget('spud.feedback_detail',  $.spud.object_detail, {
 
 
 ///////////////////////////////////////
-// feedback screens
+// feedback viewports
 ///////////////////////////////////////
 
-$.widget('spud.feedback_list_screen', $.spud.object_list_screen, {
-    _create: function() {
-        this._type = "feedbacks"
-        this._type_name = "Feedback"
+class FeedbackListViewport extends ObjectListViewport {
+    constructor(options : ObjectListViewportOptions, element? : JQuery) {
+        this.type = "feedbacks"
+        this.type_name = "Feedback"
+        super(options, element)
+    }
 
-        this._super()
-    },
+    protected object_list(options : any, element : JQuery) : void {
+        $.spud.feedback_list(options, element)
+    }
 
-    _object_list: $.proxy($.spud.feedback_list, window),
-    _object_criteria: $.proxy($.spud.feedback_criteria, window),
-    _object_search_dialog: $.proxy($.spud.feedback_search_dialog, window),
-})
+    protected object_criteria(options : any, element : JQuery) : void {
+        $.spud.feedback_criteria(options, element)
+    }
+
+    protected object_search_dialog(options : any, element : JQuery) : void {
+        $.spud.feedback_search_dialog(options, element)
+    }
+}
 
 
-$.widget('spud.feedback_detail_screen', $.spud.object_detail_screen, {
-    _create: function() {
-        this._type = "feedbacks"
-        this._type_name = "Feedback"
+class FeedbackDetailViewport extends ObjectDetailViewport {
+    constructor(options : ObjectDetailViewportOptions, element? : JQuery) {
+        this.type = "feedbacks"
+        this.type_name = "Feedback"
+        super(options, element)
+    }
 
-        this._super()
+    create(element : JQuery) : void {
+        super.create(element)
 
         var mythis = this
 
-        window._feedback_changed.add_listener(this, function(obj) {
+        window._feedback_changed.add_listener(this, function(obj : Feedback) {
             if (obj.id === this.options.obj_id) {
-                mythis._set(obj)
+                mythis.set(obj)
             }
         })
-        window._feedback_deleted.add_listener(this, function(obj_id) {
+        window._feedback_deleted.add_listener(this, function(obj_id : number) {
             if (obj_id === this.options.obj_id) {
-                mythis.close()
+                mythis.remove()
             }
         })
-    },
+    }
 
-    _get_photo_criteria: function() {
+    protected get_photo_criteria() : PhotoCriteria {
         return {
         }
-    },
+    }
 
-    _object_list: $.proxy($.spud.feedback_list, window),
-    _object_detail: $.proxy($.spud.feedback_detail, window),
-    _object_list_screen: $.proxy($.spud.feedback_list_screen, window),
-    _object_change_dialog: $.proxy($.spud.feedback_change_dialog, window),
-    _object_delete_dialog: $.proxy($.spud.feedback_delete_dialog, window),
-})
+    object_list(options : any, element : JQuery) {
+        $.spud.feedback_list(options, element)
+    }
+
+    object_detail(options : any, element : JQuery) {
+        $.spud.feedback_detail(options, element)
+    }
+
+    protected get_object_list_viewport(options : ObjectListViewportOptions) : FeedbackListViewport {
+        return new FeedbackListViewport(options)
+    }
+
+    object_change_dialog(options : any, element : JQuery) {
+        $.spud.feedback_change_dialog(options, element)
+    }
+
+    object_delete_dialog(options : any, element : JQuery) {
+        $.spud.feedback_delete_dialog(options, element)
+    }
+}
