@@ -156,6 +156,7 @@ def set_cover_photo(json, cover_photo):
                 'place': None,
                 'thumbs': {},
                 'videos': {},
+                'action': None,
             },
             'cover_photo_pk': cover_photo.pk,
         })
@@ -492,6 +493,7 @@ def photo_relation_to_json(photo_relation, user):
             'place': None,
             'thumbs': {},
             'videos': {},
+            'action': photo_relation.photo_1.action,
         },
         'photo_1_pk': photo_relation.photo_1.pk,
         'photo_2': {
@@ -503,6 +505,7 @@ def photo_relation_to_json(photo_relation, user):
             'place': None,
             'thumbs': {},
             'videos': {},
+            'action': photo_relation.photo_2.action,
         },
         'photo_2_pk': photo_relation.photo_2.pk,
         'desc_1': photo_relation.desc_1,
@@ -750,8 +753,11 @@ class BaseTest(object):
             response = client.get(url, format='json')
             if scenario.check_response(response, self.name, 'list'):
                 assert response.status_code == status.HTTP_200_OK
-                assert len(response.data) == len(expected_list)
-                for data, expected in zip(response.data, expected_list):
+                assert response.data["count"] == len(expected_list)
+
+                results = response.data["results"]
+                assert len(results) == len(expected_list)
+                for data, expected in zip(results, expected_list):
                     if expected is not None:
                         assert data == expected
 
@@ -1642,6 +1648,7 @@ class TestPhotoRelations(BaseTest):
                 'place': None,
                 'thumbs': {},
                 'videos': {},
+                'action': None,
             },
             'photo_1_pk': photo1.pk,
             'photo_2': {
@@ -1653,6 +1660,7 @@ class TestPhotoRelations(BaseTest):
                 'place': None,
                 'thumbs': {},
                 'videos': {},
+                'action': None,
             },
             'photo_2_pk': photo2.pk,
             'desc_1': 'description 1',
@@ -2058,7 +2066,6 @@ class TestPhotos(BaseTest):
     def get_test_lists(self, user):
         json_list = self.pks_to_json(self.pks, user)
         for json in json_list:
-            del json['action']
             del json['albums']
             del json['albums_pk']
             del json['aperture']
