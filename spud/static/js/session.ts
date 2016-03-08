@@ -170,16 +170,6 @@ function setup_menu(session) {
         .appendTo(menu)
 
     $('<li/>')
-        .text("Feedback")
-        .on('click', (ev) => {
-            let criteria : FeedbackCriteria = {}
-            let viewport = new FeedbackListViewport({criteria: criteria})
-            add_viewport(viewport)
-            return false
-        })
-        .appendTo(menu)
-
-    $('<li/>')
         .text("Reload")
         .on('click', (ev) => {
             window._reload_all.trigger(null)

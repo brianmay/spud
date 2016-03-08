@@ -40,8 +40,6 @@ window.do_list = function(obj_type : string, session : Session, criteria : Strin
         viewport = new PersonListViewport(params)
     } else if (obj_type === "photos") {
         viewport = new PhotoListViewport(params)
-    } else if (obj_type === "feedbacks") {
-        viewport = new FeedbackListViewport(params)
     }
     if (viewport != null) {
         window._do_replace = true
@@ -69,8 +67,6 @@ window.do_detail = function(obj_type : string, obj_id : number, session : Sessio
         viewport = new PersonDetailViewport(params)
     } else if (obj_type === "photos") {
         viewport = new PhotoDetailViewport(params)
-    } else if (obj_type === "feedbacks") {
-        viewport = new FeedbackDetailViewport(params)
     }
     if (viewport != null) {
         window._do_replace = true

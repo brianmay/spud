@@ -3,7 +3,6 @@
 /// <reference path="category.ts" />
 /// <reference path="place.ts" />
 /// <reference path="person.ts" />
-/// <reference path="feedback.ts" />
 /// <reference path="photo.ts" />
 /*
 spud - keep track of photos
@@ -45,8 +44,6 @@ var _viewport_class_dict = {
     "place_detail": PlaceDetailViewport,
     "person_list": PersonListViewport,
     "person_detail": PersonDetailViewport,
-    "feedback_list": FeedbackListViewport,
-    "feedback_detail": FeedbackDetailViewport,
     "photo_list": PhotoListViewport,
     "photo_detail": PhotoDetailViewport,
 }

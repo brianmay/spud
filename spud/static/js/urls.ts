@@ -59,9 +59,6 @@ function object_a(type : string, value : SpudObject) {
     else if (type === "photos") {
         viewport = new PhotoDetailViewport(params)
     }
-    else if (type === "feedbacks") {
-        viewport = new FeedbackDetailViewport(params)
-    }
     else {
         return null;
     }
