@@ -353,7 +353,7 @@ class PhotoChangeDialog extends ObjectChangeDialog {
             {name: 'basic', title: 'Basics', fields: [
                 ["datetime", new DateTimeInputField("Date", true)],
                 ["title", new TextInputField("Title", true)],
-                ["photographer_pk", new AjaxSelectField("Photographer", "persons", false)],
+                ["photographer", new AjaxSelectField("Photographer", "persons", false)],
                 ["action", new SelectInputField("Action", [
                     ["", "no action"],
                     ["D", "delete"],
