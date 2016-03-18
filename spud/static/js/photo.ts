@@ -270,10 +270,10 @@ interface PhotoUpdates {
     camera_model? : string
     add_albums_pk? : Array<number>
     rem_albums_pk? : Array<number>
-    add_category_pk? : Array<number>
-    rem_category_pk? : Array<number>
-    add_people_pk? : Array<number>
-    rem_people_pk? : Array<number>
+    add_categorys_pk? : Array<number>
+    rem_categorys_pk? : Array<number>
+    add_persons_pk? : Array<number>
+    rem_persons_pk? : Array<number>
 }
 
 
@@ -413,8 +413,8 @@ class PhotoBulkUpdateDialog extends FormDialog {
             {name: 'basic', title: 'Basics', fields: [
                 ["datetime", new DateTimeInputField("Date", false)],
                 ["title", new TextInputField("Title", false)],
-                ["photographer_pk", new AjaxSelectField("Photographer", "persons", false)],
-                ["place_pk", new AjaxSelectField("Place", "places", false)],
+                ["photographer", new AjaxSelectField("Photographer", "persons", false)],
+                ["place", new AjaxSelectField("Place", "places", false)],
                 ["action", new SelectInputField("Action", [
                     ["none", "no action"],
                     ["D", "delete"],
@@ -427,14 +427,14 @@ class PhotoBulkUpdateDialog extends FormDialog {
                 ], false)],
             ]},
             {name: 'add', title: 'Add', fields: [
-                ["add_albums_pk", new AjaxSelectMultipleField("Album", "albums", false)],
-                ["add_categorys_pk", new AjaxSelectMultipleField("Category", "categorys", false)],
-                ["add_persons_pk", new AjaxSelectSortedField("Person", "persons", false)],
+                ["add_albums", new AjaxSelectMultipleField("Album", "albums", false)],
+                ["add_categorys", new AjaxSelectMultipleField("Category", "categorys", false)],
+                ["add_persons", new AjaxSelectSortedField("Person", "persons", false)],
             ]},
             {name: 'rem', title: 'Remove', fields: [
-                ["rem_albums_pk", new AjaxSelectMultipleField("Album", "albums", false)],
-                ["rem_categorys_pk", new AjaxSelectMultipleField("Category", "categorys", false)],
-                ["rem_persons_pk", new AjaxSelectSortedField("Person", "persons", false)],
+                ["rem_albums", new AjaxSelectMultipleField("Album", "albums", false)],
+                ["rem_categorys", new AjaxSelectMultipleField("Category", "categorys", false)],
+                ["rem_persons", new AjaxSelectSortedField("Person", "persons", false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
                 ["camera_make", new TextInputField("Camera Make", false)],
@@ -455,12 +455,65 @@ class PhotoBulkUpdateDialog extends FormDialog {
     protected submit_values(values : DialogValues) : void {
         var data : PhotoUpdates = {}
 
-        $.each(values, function (key, el) {
-            if (el != null && el !== false) { data[key] = el }
-        });
+        if (values["datetime"] != null) {
+            data.datetime = values["datetime"]
+        }
 
-        if (data.action === "none") {
+        if (values["title"] != null) {
+            data.title = values["title"]
+        }
+
+        if (values["photographer"] != null) {
+            data.photographer_pk = values["photographer"].id
+        }
+
+        if (values["place"] != null) {
+            data.place_pk = values["place"].id
+        }
+
+        if (values["action"] != null) {
             data.action = null
+            if (values["action"] != "none") {
+                data.action = values["action"]
+            }
+        }
+
+        data.add_albums_pk = []
+        for (let i=0; i<values["add_albums"].length; i++) {
+            data.add_albums_pk.push(values["add_albums"][i].id)
+        }
+
+        data.rem_albums_pk = []
+        for (let i=0; i<values["rem_albums"].length; i++) {
+            data.rem_albums_pk.push(values["rem_albums"][i].id)
+        }
+
+        data.add_categorys_pk = []
+        for (let i=0; i<values["add_categorys"].length; i++) {
+            data.add_categorys_pk.push(values["add_categorys"][i].id)
+        }
+
+        data.rem_categorys_pk = []
+        for (let i=0; i<values["rem_categorys"].length; i++) {
+            data.rem_categorys_pk.push(values["rem_categorys"][i].id)
+        }
+
+        data.add_persons_pk = []
+        for (let i=0; i<values["add_persons"].length; i++) {
+            data.add_persons_pk.push(values["add_persons"][i].id)
+        }
+
+        data.rem_persons_pk = []
+        for (let i=0; i<values["rem_persons"].length; i++) {
+            data.rem_persons_pk.push(values["rem_persons"][i].id)
+        }
+
+        if (values["camera_make"] != null) {
+            data.camera_make = values["camera_make"]
+        }
+
+        if (values["camera_model"] != null) {
+            data.camera_model = values["camera_model"]
         }
 
         this.data = data
@@ -510,8 +563,8 @@ class PhotoBulkConfirmDialog extends BaseDialog {
         this.proceed = false
         this.type = "photos"
 
-        this.options.title = "Confirm bulk update"
-        this.options.button = "Confirm"
+        options.title = "Confirm bulk update"
+        options.button = "Confirm"
 
         super(options, element)
     }
@@ -527,6 +580,7 @@ class PhotoBulkConfirmDialog extends BaseDialog {
         }
 
         this.photo_list = new PhotoListWidget(options, this.ol)
+        this.set(this.options.criteria)
     }
 
     set(values) : void {
@@ -575,10 +629,10 @@ class PhotoBulkProceedDialog extends BaseDialog {
     protected values : PhotoUpdates
 
     constructor(options : PhotoBulkProceedDialogOptions, element? : JQuery) {
-        this.options.title = "Bulk update"
-        this.options.button = "Retry"
-
         this.type = "photos"
+
+        options.title = "Bulk update"
+        options.button = "Retry"
 
         super(options, element)
     }
@@ -592,6 +646,7 @@ class PhotoBulkProceedDialog extends BaseDialog {
         this.status = $("<div/>")
             .text("Please wait")
             .appendTo(this.element)
+        this.set(this.options.obj)
     }
 
     set(values) : void {
@@ -773,10 +828,10 @@ class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
         let options : UiMySelectableOptions = {
             filter: "li",
             selected: ( event, ui ) => {
-                this.add_selection( $(ui.selected).data('photo') );
+                this.add_selection( $(ui.selected).data('item') );
             },
             unselected: ( event, ui ) => {
-                this.del_selection( $(ui.unselected).data('photo') );
+                this.del_selection( $(ui.unselected).data('item') );
             },
         }
 
@@ -832,6 +887,7 @@ class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
     protected create_li(photo : Photo, title : string,
                       details : Array<JQuery>, description : string, a : JQuery) {
         let li : JQuery = super.create_li(photo, title, details, description, a)
+        li.data("item", photo)
         li.toggleClass("removed", photo.action === "D")
         li.toggleClass("regenerate", photo.action != null && photo.action !== "D")
         li.toggleClass("ui-selected", this.is_photo_selected(photo))
