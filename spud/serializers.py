@@ -680,6 +680,9 @@ class PhotoSerializer(ModelSerializer):
         instance.save()
 
         self._process_m2m(instance, m2m_attrs)
+
+        # we need to get new object to ensure m2m attributes not cached
+        instance = models.photo.objects.get(pk=instance.pk)
         return instance
 
     def _pop_m2m_attrs(self, validated_attrs):

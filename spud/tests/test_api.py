@@ -1708,7 +1708,7 @@ class TestPhotos(BaseTest):
         result = {}
         self.pks = []
 
-        album = models.album.objects.create(
+        self.album = models.album.objects.create(
             parent=None,
             title="My 1st Album",
             description="My description",
@@ -1719,7 +1719,7 @@ class TestPhotos(BaseTest):
             revised_utc_offset=600,
         )
 
-        category = models.category.objects.create(
+        self.category = models.category.objects.create(
             parent=None,
             title="My 1st Category",
             description="My description",
@@ -1728,17 +1728,17 @@ class TestPhotos(BaseTest):
             sort_order="2015-11-08",
         )
 
-        place = models.place.objects.create(
+        self.place = models.place.objects.create(
             parent=None,
             title="My 1st Place",
             cover_photo=None,
         )
 
-        person = models.person.objects.create(
+        self.person = models.person.objects.create(
             first_name="My Grandfather",
             sex="1",
             cover_photo=None,
-            home=place,
+            home=self.place,
         )
 
         photo = models.photo.objects.create(
@@ -1752,16 +1752,17 @@ class TestPhotos(BaseTest):
             name="test.jpg", path="a/b/c",
             level=0,
             datetime=datetime.datetime(2015, 11, 21), utc_offset=600,
-            place=place,
-            photographer=person,
+            place=self.place,
+            photographer=self.person,
             )
         result[photo.pk] = photo
         self.pks.append(photo.pk)
 
-        models.photo_album.objects.create(photo=photo, album=album)
-        models.photo_category.objects.create(photo=photo, category=category)
+        models.photo_album.objects.create(photo=photo, album=self.album)
+        models.photo_category.objects.create(photo=photo,
+                                             category=self.category)
         models.photo_person.objects.create(
-            photo=photo, person=person, position=0)
+            photo=photo, person=self.person, position=0)
         models.photo_thumb.objects.create(
             photo=photo, size="normal", width=100, height=100)
         models.photo_video.objects.create(
@@ -2126,10 +2127,14 @@ class TestPhotos(BaseTest):
         # name is read only
         # expected['name'] = 'My new name.jpg'
         expected['description'] = 'My new description'
+        expected['categorys'] = [category_to_json(self.category, user)]
+        expected['categorys_pk'] = [self.category.pk]
 
         return [
             (p,
-             {'name': 'My new name.jpg', 'description': 'My new description'},
+             {'name': 'My new name.jpg',
+                 'description': 'My new description',
+                 'categorys_pk': [self.category.pk]},
              expected),
         ]
 
