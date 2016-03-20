@@ -16,6 +16,7 @@
 import pytest
 import datetime
 import os.path
+import copy
 from mock import ANY
 
 from django.contrib.auth.models import User
@@ -822,11 +823,15 @@ class BaseTest(object):
         objs = self.create_test_db(user)
         updates = self.get_test_updates(user)
 
-        for pk, _, expected in updates:
-            obj = objs[pk]
+        for pk, update, expected in updates:
+            # we need to get the current version as a previous update may have
+            # changed it
+            obj = type(objs[pk]).objects.get(pk=pk)
+            json = self.model_to_json(obj, user)
+            json.update(update)
 
             url = self.get_detail_url(obj.pk)
-            response = client.put(url, expected, format='json')
+            response = client.put(url, json, format='json')
             if scenario.check_response(response, self.name, 'change'):
                 assert response.status_code == status.HTTP_200_OK
                 assert response.data == expected
@@ -1719,10 +1724,30 @@ class TestPhotos(BaseTest):
             revised_utc_offset=600,
         )
 
+        self.album2 = models.album.objects.create(
+            parent=None,
+            title="My 2nd Album",
+            description="My 2nd description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+            revised=datetime.datetime(year=2015, month=11, day=8),
+            revised_utc_offset=600,
+        )
+
         self.category = models.category.objects.create(
             parent=None,
             title="My 1st Category",
             description="My description",
+            cover_photo=None,
+            sort_name="date",
+            sort_order="2015-11-08",
+        )
+
+        self.category2 = models.category.objects.create(
+            parent=None,
+            title="My 2nd Category",
+            description="My 2nd description",
             cover_photo=None,
             sort_name="date",
             sort_order="2015-11-08",
@@ -1739,6 +1764,14 @@ class TestPhotos(BaseTest):
             sex="1",
             cover_photo=None,
             home=self.place,
+        )
+
+        self.person2 = models.person.objects.create(
+            first_name="My Grandmother",
+            sex="2",
+            cover_photo=None,
+            home=self.place,
+            spouse=self.person,
         )
 
         photo = models.photo.objects.create(
@@ -2124,18 +2157,161 @@ class TestPhotos(BaseTest):
 
         obj = self.objs[p]
         expected = self.model_to_json(obj, user)
-        # name is read only
-        # expected['name'] = 'My new name.jpg'
-        expected['description'] = 'My new description'
-        expected['categorys'] = [category_to_json(self.category, user)]
-        expected['categorys_pk'] = [self.category.pk]
+
+        def update(dict):
+            expected.update(dict)
+            tmp = copy.deepcopy(expected)
+            return tmp
 
         return [
+            # name is read only
             (p,
-             {'name': 'My new name.jpg',
-                 'description': 'My new description',
-                 'categorys_pk': [self.category.pk]},
-             expected),
+             {'name': 'My new name.jpg'},
+             update({})),
+
+            # update description
+            (p,
+             {'description': 'My new description'},
+             update({'description': 'My new description'})),
+
+            # -------------
+            # set albums
+            (p,
+             {'albums_pk': [self.album.pk]},
+             update({
+                 'albums': [album_to_json(self.album, user)],
+                 'albums_pk': [self.album.pk]})),
+
+            # set albums
+            (p,
+             {'albums_pk': []},
+             update({
+                 'albums': [],
+                 'albums_pk': []})),
+
+            # add album
+            (p,
+             {'add_albums_pk':  [self.album2.pk]},
+             update({
+                 'albums': [album_to_json(self.album2, user)],
+                 'albums_pk': [self.album2.pk]})),
+
+            # add album
+            (p,
+             {'add_albums_pk':  [self.album.pk]},
+             update({
+                 'albums': unordered_list([
+                     album_to_json(self.album2, user),
+                     album_to_json(self.album, user)]),
+                 'albums_pk': unordered_list([
+                     self.album2.pk, self.album.pk])})),
+
+            # remove album
+            (p,
+             {'rem_albums_pk':  [self.album2.pk]},
+             update({
+                 'albums': [album_to_json(self.album, user)],
+                 'albums_pk': [self.album.pk]})),
+
+            # remove album
+            (p,
+             {'rem_albums_pk':  [self.album.pk]},
+             update({
+                 'albums': [],
+                 'albums_pk': []})),
+
+
+            # -------------
+            # set categorys
+            (p,
+             {'categorys_pk': [self.category.pk]},
+             update({
+                 'categorys': [category_to_json(self.category, user)],
+                 'categorys_pk': [self.category.pk]})),
+
+            # set categorys
+            (p,
+             {'categorys_pk': []},
+             update({
+                 'categorys': [],
+                 'categorys_pk': []})),
+
+            # add category
+            (p,
+             {'add_categorys_pk':  [self.category2.pk]},
+             update({
+                 'categorys': [category_to_json(self.category2, user)],
+                 'categorys_pk': [self.category2.pk]})),
+
+            # add category
+            (p,
+             {'add_categorys_pk':  [self.category.pk]},
+             update({
+                 'categorys': unordered_list([
+                     category_to_json(self.category2, user),
+                     category_to_json(self.category, user)]),
+                 'categorys_pk': unordered_list([
+                     self.category2.pk, self.category.pk])})),
+
+            # remove category
+            (p,
+             {'rem_categorys_pk':  [self.category2.pk]},
+             update({
+                 'categorys': [category_to_json(self.category, user)],
+                 'categorys_pk': [self.category.pk]})),
+
+            # remove category
+            (p,
+             {'rem_categorys_pk':  [self.category.pk]},
+             update({
+                 'categorys': [],
+                 'categorys_pk': []})),
+
+
+            # -------------
+            # set persons
+            (p,
+             {'persons_pk': [self.person.pk]},
+             update({
+                 'persons': [person_to_simplified_json(self.person, user)],
+                 'persons_pk': [self.person.pk]})),
+
+            # set persons
+            (p,
+             {'persons_pk': []},
+             update({
+                 'persons': [],
+                 'persons_pk': []})),
+
+            # add person
+            (p,
+             {'add_persons_pk':  [self.person2.pk]},
+             update({
+                 'persons': [person_to_simplified_json(self.person2, user)],
+                 'persons_pk': [self.person2.pk]})),
+
+            # add person
+            (p,
+             {'add_persons_pk':  [self.person.pk]},
+             update({
+                 'persons': [
+                     person_to_simplified_json(self.person2, user),
+                     person_to_simplified_json(self.person, user)],
+                 'persons_pk': [self.person2.pk, self.person.pk]})),
+
+            # remove person
+            (p,
+             {'rem_persons_pk':  [self.person2.pk]},
+             update({
+                 'persons': [person_to_simplified_json(self.person, user)],
+                 'persons_pk': [self.person.pk]})),
+
+            # remove person
+            (p,
+             {'rem_persons_pk':  [self.person.pk]},
+             update({
+                 'persons': [],
+                 'persons_pk': []})),
         ]
 
     def get_test_deletes(self):

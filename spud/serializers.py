@@ -355,7 +355,7 @@ class PersonListSerializer(ListSerializer):
     def get_value(self, dictionary):
         if html.is_html_input(dictionary):
             return dictionary.getlist(self.field_name)
-        return dictionary.get(self.field_name, [])
+        return dictionary.get(self.field_name, None)
 
     def to_internal_value(self, data):
         raise NotImplemented()
@@ -375,7 +375,7 @@ class PersonPkListSerializer(ListSerializer):
     def get_value(self, dictionary):
         if html.is_html_input(dictionary):
             return dictionary.getlist(self.field_name)
-        return dictionary.get(self.field_name, [])
+        return dictionary.get(self.field_name, None)
 
     def to_internal_value(self, data):
         r = []
@@ -537,11 +537,11 @@ class PhotoSerializer(ModelSerializer):
         child=NestedPersonSerializer(),
         source="photo_person_set", read_only=True)
     persons_pk = PersonPkListSerializer(
-        source="photo_person_set", required=False)
+        source="photo_person_set", required=False, allow_null=True)
     add_persons_pk = PersonPkListSerializer(
-        required=False, write_only=True)
+        required=False, write_only=True, allow_null=True)
     rem_persons_pk = PersonPkListSerializer(
-        required=False, write_only=True)
+        required=False, write_only=True, allow_null=True)
 
     photographer = NestedPersonSerializer(read_only=True)
     photographer_pk = serializers.PrimaryKeyRelatedField(
