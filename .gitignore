@@ -10,3 +10,4 @@ spud.egg-info
 spud/static/js/*.js
 spud/version.py
 tmp
+spud.db
