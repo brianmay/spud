@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'spud.tests.settings'
+
+import datetime
+
+import django
+from django.core import management
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from rest_framework.test import APIClient
+from rest_framework import status
+
+from spud import models
+
+django.setup()
+management.call_command('migrate')
+
+client = APIClient()
+user = User.objects.create_superuser('test', 'test@example.org', '1234')
+client.login(username="test", password="1234")
+
+url = reverse('photo-list')
+data_files = "../spud-test-data"
+
+filename = os.path.join(data_files, "177A0782.JPG")
+with open(filename, 'rb') as f:
+    json = {
+        'datetime': datetime.datetime(2015, 12, 10, 11, 00),
+        'utc_offset': 600,
+        'level': 0,
+    }
+    json['photo'] = f
+    response = client.post(url, json, format="multipart")
+    print(response.content)
+    assert response.status_code == status.HTTP_201_CREATED
+    photo_id = response.data['id']
+photo = models.photo.objects.get(pk=photo_id)
+
+parent = None
+for i in range(20):
+    parent = models.album.objects.create(
+        parent=parent,
+        title="Test Album #%d" % i,
+        description="My description for #%d" % i,
+        cover_photo=photo,
+        sort_name="date",
+        sort_order="2015-10-10",
+        revised=datetime.datetime(2015, 10, 10, 10, 00),
+        revised_utc_offset=600,
+    )
+
+parent = None
+for i in range(20):
+    parent = models.category.objects.create(
+        parent=parent,
+        title="Test Category #%d" % i,
+        description="My description for #%d" % i,
+        cover_photo=photo,
+        sort_name="date",
+        sort_order="2015-10-10",
+    )
+
+parent = None
+for i in range(20):
+    parent = models.place.objects.create(
+        parent=parent,
+        title="Test Place #%d" % i,
+        cover_photo=photo,
+    )
+
+person = models.person.objects.create(
+    first_name="My Grandfather",
+    sex="1",
+    cover_photo=None,
+)
+grandfather = person
+
+person = models.person.objects.create(
+    first_name="My Grandmother",
+    sex="2",
+    cover_photo=None,
+    spouse=grandfather,
+)
+grandmother = person
+
+person = models.person.objects.create(
+    first_name="My Father",
+    sex="1",
+    cover_photo=None,
+)
+father = person
+
+person = models.person.objects.create(
+    first_name="My Mother",
+    father=grandfather,
+    mother=grandmother,
+    cover_photo=None,
+    spouse=father,
+)
+mother = person
+
+person = models.person.objects.create(
+    first_name="Me",
+    sex="1",
+    father=father,
+    mother=mother,
+    cover_photo=None,
+)
+me = person
+
+person = models.person.objects.create(
+    first_name="My child",
+    father=me,
+    mother=mother,
+    cover_photo=None,
+)
