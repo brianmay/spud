@@ -92,8 +92,9 @@ function setup_user_tools(session) {
         $("<a/>")
             .text("logout")
             .on("click", (ev) => {
-                var div = $("<div/>")
-                new LogoutDialog({}, div)
+                let div = $("<div/>")
+                let dialog = new LogoutDialog({})
+                dialog.show(div)
             })
             .appendTo(ut)
     } else {
@@ -107,8 +108,9 @@ function setup_user_tools(session) {
             .text("login")
             .on("click", (ev) => {
                 void ev
-                var div = $("<div/>")
-                new LoginDialog({}, div)
+                let div = $("<div/>")
+                let dialog = new LoginDialog({})
+                dialog.show(div)
             })
             .appendTo(ut)
     }

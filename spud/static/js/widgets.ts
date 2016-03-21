@@ -13,13 +13,10 @@ class Widget {
     protected uuid : number
     // static class_name : string
 
-    constructor(options : WidgetOptions, element? : JQuery) {
+    constructor(options : WidgetOptions) {
         this.options = options
         this.uuid = widget_uuid
         widget_uuid = widget_uuid + 1
-        if (element) {
-            this.show(element)
-        }
     }
 
     protected get_uuid() : string {
@@ -79,8 +76,8 @@ abstract class Viewport extends Widget {
     private h1 : JQuery
     protected div : JQuery
 
-    constructor(options : ViewportOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ViewportOptions) {
+        super(options)
     }
 
     show(element : JQuery) : void {
@@ -248,9 +245,9 @@ abstract class BaseDialog extends Widget {
     private loading : boolean
     private xhr : JQueryXHR
 
-    constructor(options : BaseDialogOptions, element? : JQuery) {
+    constructor(options : BaseDialogOptions) {
+        super(options)
         this.loading = false
-        super(options, element)
     }
 
     show(element : JQuery) : void {
@@ -402,8 +399,8 @@ class ImageWidget extends Widget {
     private img : JQuery
     private a : JQuery
 
-    constructor(options : ImageWidgetOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ImageWidgetOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -429,7 +426,8 @@ class ImageWidget extends Widget {
             let img = $("<video controls='controls'/>")
 
             let size = "320"
-            for (let pv in photo.videos[size]) {
+            for (let i=0; i<photo.videos[size].length; i++) {
+                let pv : PriorityPhotoVideo = photo.videos[size][i]
                 let priority : number = pv[0]
                 let video : PhotoVideo = pv[1]
 
@@ -547,8 +545,8 @@ class ListWidget extends Widget {
     protected options : ListWidgetOptions
     protected ul : JQuery
 
-    constructor(options : ListWidgetOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ListWidgetOptions) {
+        super(options)
     }
 
     show(element : JQuery) : void {
@@ -587,8 +585,8 @@ class ImageListWidget extends ListWidget {
     protected options : PhotoListWidgetOptions
     // private images : Array<ImageWidget>
 
-    constructor(options : PhotoListWidgetOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : PhotoListWidgetOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -617,7 +615,8 @@ class ImageListWidget extends ListWidget {
             size: "thumb",
             do_video: false,
             include_link: false,
-        }, div)
+        })
+        image.show(div)
         // this.images.push(image)
         div.appendTo(a)
 

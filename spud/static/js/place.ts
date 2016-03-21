@@ -62,6 +62,7 @@ class Place extends SpudObject {
     _type_place : boolean
 
     constructor(streamable : PlaceStreamable) {
+        super(streamable)
         this.address = parse_string(streamable.address)
         this.address2 = parse_string(streamable.address2)
         this.city = parse_string(streamable.city)
@@ -82,7 +83,6 @@ class Place extends SpudObject {
                 this.parent = null
             }
         }
-        super(streamable)
     }
 
     to_streamable() : PlaceStreamable {
@@ -123,8 +123,8 @@ interface PlaceSearchDialogOptions extends ObjectSearchDialogOptions {
 class PlaceSearchDialog extends ObjectSearchDialog {
     protected options : PlaceSearchDialogOptions
 
-    constructor(options : PlaceSearchDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : PlaceSearchDialogOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -149,10 +149,10 @@ interface PlaceChangeDialogOptions extends ObjectChangeDialogOptions {
 class PlaceChangeDialog extends ObjectChangeDialog {
     protected options : PlaceChangeDialogOptions
 
-    constructor(options : PlaceChangeDialogOptions, element? : JQuery) {
+    constructor(options : PlaceChangeDialogOptions) {
+        super(options)
         this.type = "places"
         this.type_name = "place"
-        super(options, element)
     }
 
     show(element : JQuery) {
@@ -192,10 +192,10 @@ interface PlaceDeleteDialogOptions extends ObjectDeleteDialogOptions {
 }
 
 class PlaceDeleteDialog extends ObjectDeleteDialog {
-    constructor(options : PlaceDeleteDialogOptions, element? : JQuery) {
+    constructor(options : PlaceDeleteDialogOptions) {
+        super(options)
         this.type = "places"
         this.type_name = "place"
-        super(options, element)
     }
 
     protected save_success(data : Streamable) {
@@ -216,9 +216,9 @@ class PlaceCriteriaWidget extends ObjectCriteriaWidget {
     protected options : PlaceCriteriaWidgetOptions
     protected type : string
 
-    constructor(options : PlaceCriteriaWidgetOptions, element? : JQuery) {
+    constructor(options : PlaceCriteriaWidgetOptions) {
+        super(options)
         this.type = "places"
-        super(options, element)
     }
 
     set(input_criteria : PlaceCriteria) {
@@ -276,9 +276,9 @@ interface PlaceListWidgetOptions extends ObjectListWidgetOptions {
 class PlaceListWidget extends ObjectListWidget<PlaceStreamable, Place> {
     protected options : PlaceListWidgetOptions
 
-    constructor(options : PlaceListWidgetOptions, element? : JQuery) {
+    constructor(options : PlaceListWidgetOptions) {
+        super(options)
         this.type = "places"
-        super(options, element)
     }
 
     protected to_object(streamable : PlaceStreamable) : Place {
@@ -328,8 +328,8 @@ class PlaceDetailInfobox extends Infobox {
     protected options : PlaceDetailInfoboxOptions
     private img : ImageWidget
 
-    constructor(options : PlaceDetailInfoboxOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : PlaceDetailInfoboxOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -378,10 +378,10 @@ interface PlaceListViewportOptions extends ObjectListViewportOptions {
 class PlaceListViewport extends ObjectListViewport<PlaceStreamable, Place> {
     protected options : PlaceListViewportOptions
 
-    constructor(options : PlaceListViewportOptions, element? : JQuery) {
+    constructor(options : PlaceListViewportOptions) {
+        super(options)
         this.type = "places"
         this.type_name = "Place"
-        super(options, element)
     }
 
     protected to_object(streamable : PlaceStreamable) : Place {
@@ -406,10 +406,10 @@ interface PlaceDetailViewportOptions extends ObjectDetailViewportOptions<PlaceSt
 }
 
 class PlaceDetailViewport extends ObjectDetailViewport<PlaceStreamable, Place> {
-    constructor(options : PlaceDetailViewportOptions, element? : JQuery) {
+    constructor(options : PlaceDetailViewportOptions) {
+        super(options)
         this.type = "places"
         this.type_name = "Place"
-        super(options, element)
     }
 
     protected to_object(streamable : PlaceStreamable) : Place {

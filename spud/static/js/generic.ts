@@ -293,8 +293,8 @@ interface ObjectSearchDialogOptions extends FormDialogOptions {
 class ObjectSearchDialog extends FormDialog {
     protected options : ObjectSearchDialogOptions
 
-    constructor(options : ObjectSearchDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ObjectSearchDialogOptions) {
+        super(options)
     }
 
     protected submit_values(values : DialogValues) : void {
@@ -318,8 +318,8 @@ class ObjectChangeDialog extends FormDialog {
     protected type_name : string
     protected obj : SpudObject
 
-    constructor(options : ObjectChangeDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ObjectChangeDialogOptions) {
+        super(options)
     }
 
     set(obj : SpudObject) : void {
@@ -356,8 +356,8 @@ class ObjectDeleteDialog extends FormDialog {
     protected type_name : string
     protected obj_id : number
 
-    constructor(options : ObjectDeleteDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ObjectDeleteDialogOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -395,8 +395,8 @@ abstract class ObjectCriteriaWidget extends Widget {
     protected criteria : JQuery
     protected load_attributes : Array<LoadAttributes>
 
-    constructor(options : ObjectCriteriaWidgetOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ObjectCriteriaWidgetOptions) {
+        super(options)
     }
 
     show(element : JQuery) : void {
@@ -474,8 +474,8 @@ abstract class ObjectListWidget<T extends ObjectStreamable, U extends SpudObject
     private page : number
     protected loader : TrackedObjectListLoader<T>
 
-    constructor(options : ObjectListWidgetOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ObjectListWidgetOptions) {
+        super(options)
     }
 
     protected abstract to_object(streamable : T) : U
@@ -656,8 +656,8 @@ abstract class ObjectListViewport<T extends ObjectStreamable, U extends SpudObje
     private criteria : JQuery
     protected ol : ObjectListWidget<T, U>
 
-    constructor(options : ObjectListViewportOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : ObjectListViewportOptions) {
+        super(options)
     }
 
     protected abstract create_object_search_dialog(options : ObjectSearchDialogOptions) : ObjectSearchDialog
@@ -787,9 +787,9 @@ abstract class ObjectDetailViewport<T extends ObjectStreamable, U extends SpudOb
     private ol : ObjectListWidget<T, U>
     private loader : ObjectLoader<T>
 
-    constructor(options : ObjectDetailViewportOptions<T>, element? : JQuery) {
+    constructor(options : ObjectDetailViewportOptions<T>) {
+        super(options)
         this.display_photo_list_link = true
-        super(options, element)
     }
 
     protected abstract to_object(streamable : T) : U

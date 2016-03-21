@@ -255,8 +255,8 @@ interface PersonSearchDialogOptions extends ObjectSearchDialogOptions {
 class PersonSearchDialog extends ObjectSearchDialog {
     protected options : PersonSearchDialogOptions
 
-    constructor(options : PersonSearchDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : PersonSearchDialogOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -281,10 +281,10 @@ interface PersonChangeDialogOptions extends ObjectChangeDialogOptions {
 class PersonChangeDialog extends ObjectChangeDialog {
     protected options : PersonChangeDialogOptions
 
-    constructor(options : PersonChangeDialogOptions, element? : JQuery) {
+    constructor(options : PersonChangeDialogOptions) {
+        super(options)
         this.type = "persons"
         this.type_name = "person"
-        super(options, element)
     }
 
     show(element : JQuery) {
@@ -333,10 +333,10 @@ interface PersonDeleteDialogOptions extends ObjectDeleteDialogOptions {
 }
 
 class PersonDeleteDialog extends ObjectDeleteDialog {
-    constructor(options : PersonDeleteDialogOptions, element? : JQuery) {
+    constructor(options : PersonDeleteDialogOptions) {
+        super(options)
         this.type = "persons"
         this.type_name = "person"
-        super(options, element)
     }
 
     protected save_success(data : Streamable) {
@@ -357,9 +357,9 @@ class PersonCriteriaWidget extends ObjectCriteriaWidget {
     protected options : PersonCriteriaWidgetOptions
     protected type : string
 
-    constructor(options : PersonCriteriaWidgetOptions, element? : JQuery) {
+    constructor(options : PersonCriteriaWidgetOptions) {
+        super(options)
         this.type = "persons"
-        super(options, element)
     }
 
     set(input_criteria : PersonCriteria) {
@@ -417,9 +417,9 @@ interface PersonListWidgetOptions extends ObjectListWidgetOptions {
 class PersonListWidget extends ObjectListWidget<PersonStreamable, Person> {
     protected options : PersonListWidgetOptions
 
-    constructor(options : PersonListWidgetOptions, element? : JQuery) {
+    constructor(options : PersonListWidgetOptions) {
+        super(options)
         this.type = "persons"
-        super(options, element)
     }
 
     protected to_object(streamable : PersonStreamable) : Person {
@@ -469,8 +469,8 @@ class PersonDetailInfobox extends Infobox {
     protected options : PersonDetailInfoboxOptions
     private img : ImageWidget
 
-    constructor(options : PersonDetailInfoboxOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : PersonDetailInfoboxOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -526,10 +526,10 @@ interface PersonListViewportOptions extends ObjectListViewportOptions {
 class PersonListViewport extends ObjectListViewport<PersonStreamable, Person> {
     protected options : PersonListViewportOptions
 
-    constructor(options : PersonListViewportOptions, element? : JQuery) {
+    constructor(options : PersonListViewportOptions) {
+        super(options)
         this.type = "persons"
         this.type_name = "Person"
-        super(options, element)
     }
 
     protected create_object_list_widget(options : PersonListWidgetOptions) : PersonListWidget {
@@ -550,10 +550,10 @@ interface PersonDetailViewportOptions extends ObjectDetailViewportOptions<Person
 }
 
 class PersonDetailViewport extends ObjectDetailViewport<PersonStreamable, Person> {
-    constructor(options : PersonDetailViewportOptions, element? : JQuery) {
+    constructor(options : PersonDetailViewportOptions) {
+        super(options)
         this.type = "persons"
         this.type_name = "Person"
-        super(options, element)
     }
 
     protected to_object(streamable : PersonStreamable) : Person {

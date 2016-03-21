@@ -436,8 +436,8 @@ class SelectInputField extends InputField {
     options : StringArray<JQuery>
 
     constructor(title : string, options : Array<OptionKeyValue>, required : boolean) {
-        this.options_list = options
         super(title, required)
+        this.options_list = options
     }
 
     create(id : string) : JQuery {
@@ -696,8 +696,8 @@ abstract class FormDialog extends BaseDialog {
     private tabs : JQuery
     private table : JQuery
 
-    constructor(options : FormDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : FormDialogOptions) {
+        super(options)
     }
 
     show(element : JQuery) : void {

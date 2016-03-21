@@ -50,6 +50,7 @@ class Category extends SpudObject {
     _type_category : boolean
 
     constructor(streamable : CategoryStreamable) {
+        super(streamable)
         this.description = parse_string(streamable.description)
         this.sort_order = parse_string(streamable.sort_order)
         this.sort_name = parse_string(streamable.sort_name)
@@ -64,7 +65,6 @@ class Category extends SpudObject {
                 this.parent = null
             }
         }
-        super(streamable)
     }
 
     to_streamable() : CategoryStreamable {
@@ -99,8 +99,8 @@ interface CategorySearchDialogOptions extends ObjectSearchDialogOptions {
 class CategorySearchDialog extends ObjectSearchDialog {
     protected options : CategorySearchDialogOptions
 
-    constructor(options : CategorySearchDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : CategorySearchDialogOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -125,10 +125,10 @@ interface CategoryChangeDialogOptions extends ObjectChangeDialogOptions {
 class CategoryChangeDialog extends ObjectChangeDialog {
     protected options : CategoryChangeDialogOptions
 
-    constructor(options : CategoryChangeDialogOptions, element? : JQuery) {
+    constructor(options : CategoryChangeDialogOptions) {
+        super(options)
         this.type = "categorys"
         this.type_name = "category"
-        super(options, element)
     }
 
     show(element : JQuery) {
@@ -162,10 +162,10 @@ interface CategoryDeleteDialogOptions extends ObjectDeleteDialogOptions {
 }
 
 class CategoryDeleteDialog extends ObjectDeleteDialog {
-    constructor(options : CategoryDeleteDialogOptions, element? : JQuery) {
+    constructor(options : CategoryDeleteDialogOptions) {
+        super(options)
         this.type = "categorys"
         this.type_name = "category"
-        super(options, element)
     }
 
     protected save_success(data : Streamable) {
@@ -186,9 +186,9 @@ class CategoryCriteriaWidget extends ObjectCriteriaWidget {
     protected options : CategoryCriteriaWidgetOptions
     protected type : string
 
-    constructor(options : CategoryCriteriaWidgetOptions, element? : JQuery) {
+    constructor(options : CategoryCriteriaWidgetOptions) {
+        super(options)
         this.type = "categorys"
-        super(options, element)
     }
 
     set(input_criteria : CategoryCriteria) {
@@ -246,9 +246,9 @@ interface CategoryListWidgetOptions extends ObjectListWidgetOptions {
 class CategoryListWidget extends ObjectListWidget<CategoryStreamable, Category> {
     protected options : CategoryListWidgetOptions
 
-    constructor(options : CategoryListWidgetOptions, element? : JQuery) {
+    constructor(options : CategoryListWidgetOptions) {
+        super(options)
         this.type = "categorys"
-        super(options, element)
     }
 
     protected to_object(streamable : CategoryStreamable) : Category {
@@ -301,8 +301,8 @@ class CategoryDetailInfobox extends Infobox {
     protected options : CategoryDetailInfoboxOptions
     private img : ImageWidget
 
-    constructor(options : CategoryDetailInfoboxOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : CategoryDetailInfoboxOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -344,10 +344,10 @@ interface CategoryListViewportOptions extends ObjectListViewportOptions {
 class CategoryListViewport extends ObjectListViewport<CategoryStreamable, Category> {
     protected options : CategoryListViewportOptions
 
-    constructor(options : CategoryListViewportOptions, element? : JQuery) {
+    constructor(options : CategoryListViewportOptions) {
+        super(options)
         this.type = "categorys"
         this.type_name = "Category"
-        super(options, element)
     }
 
     protected create_object_list_widget(options : CategoryListWidgetOptions) : CategoryListWidget {
@@ -368,10 +368,10 @@ interface CategoryDetailViewportOptions extends ObjectDetailViewportOptions<Cate
 }
 
 class CategoryDetailViewport extends ObjectDetailViewport<CategoryStreamable, Category> {
-    constructor(options : CategoryDetailViewportOptions, element? : JQuery) {
+    constructor(options : CategoryDetailViewportOptions) {
+        super(options)
         this.type = "categorys"
         this.type_name = "Category"
-        super(options, element)
     }
 
     protected to_object(streamable : CategoryStreamable) : Category {

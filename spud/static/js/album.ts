@@ -53,6 +53,7 @@ class Album extends SpudObject {
     _type_album : boolean
 
     constructor(streamable : AlbumStreamable) {
+        super(streamable)
         this.description = parse_string(streamable.description)
         this.sort_order = parse_string(streamable.sort_order)
         this.sort_name = parse_string(streamable.sort_name)
@@ -68,7 +69,6 @@ class Album extends SpudObject {
                 this.parent = null
             }
         }
-        super(streamable)
     }
 
     to_streamable() : AlbumStreamable {
@@ -106,8 +106,8 @@ interface AlbumSearchDialogOptions extends ObjectSearchDialogOptions {
 class AlbumSearchDialog extends ObjectSearchDialog {
     protected options : AlbumSearchDialogOptions
 
-    constructor(options : AlbumSearchDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : AlbumSearchDialogOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -133,10 +133,10 @@ interface AlbumChangeDialogOptions extends ObjectChangeDialogOptions {
 class AlbumChangeDialog extends ObjectChangeDialog {
     protected options : AlbumChangeDialogOptions
 
-    constructor(options : AlbumChangeDialogOptions, element? : JQuery) {
+    constructor(options : AlbumChangeDialogOptions) {
+        super(options)
         this.type = "albums"
         this.type_name = "album"
-        super(options, element)
     }
 
     show(element : JQuery) {
@@ -171,10 +171,10 @@ interface AlbumDeleteDialogOptions extends ObjectDeleteDialogOptions {
 }
 
 class AlbumDeleteDialog extends ObjectDeleteDialog {
-    constructor(options : AlbumDeleteDialogOptions, element? : JQuery) {
+    constructor(options : AlbumDeleteDialogOptions) {
+        super(options)
         this.type = "albums"
         this.type_name = "album"
-        super(options, element)
     }
 
     protected save_success(data : Streamable) {
@@ -195,9 +195,9 @@ class AlbumCriteriaWidget extends ObjectCriteriaWidget {
     protected options : AlbumCriteriaWidgetOptions
     protected type : string
 
-    constructor(options : AlbumCriteriaWidgetOptions, element? : JQuery) {
+    constructor(options : AlbumCriteriaWidgetOptions) {
+        super(options)
         this.type = "albums"
-        super(options, element)
     }
 
     set(input_criteria : AlbumCriteria) {
@@ -259,9 +259,9 @@ interface AlbumListWidgetOptions extends ObjectListWidgetOptions {
 class AlbumListWidget extends ObjectListWidget<AlbumStreamable, Album> {
     protected options : AlbumListWidgetOptions
 
-    constructor(options : AlbumListWidgetOptions, element? : JQuery) {
+    constructor(options : AlbumListWidgetOptions) {
+        super(options)
         this.type = "albums"
-        super(options, element)
     }
 
     protected to_object(streamable : AlbumStreamable) : Album {
@@ -314,8 +314,8 @@ class AlbumDetailInfobox extends Infobox {
     protected options : AlbumDetailInfoboxOptions
     private img : ImageWidget
 
-    constructor(options : AlbumDetailInfoboxOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : AlbumDetailInfoboxOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -358,10 +358,10 @@ interface AlbumListViewportOptions extends ObjectListViewportOptions {
 class AlbumListViewport extends ObjectListViewport<AlbumStreamable, Album> {
     protected options : AlbumListViewportOptions
 
-    constructor(options : AlbumListViewportOptions, element? : JQuery) {
+    constructor(options : AlbumListViewportOptions) {
+        super(options)
         this.type = "albums"
         this.type_name = "Album"
-        super(options, element)
     }
 
     protected create_object_list_widget(options : AlbumListWidgetOptions) : AlbumListWidget {
@@ -382,10 +382,10 @@ interface AlbumDetailViewportOptions extends ObjectDetailViewportOptions<AlbumSt
 }
 
 class AlbumDetailViewport extends ObjectDetailViewport<AlbumStreamable, Album> {
-    constructor(options : AlbumDetailViewportOptions, element? : JQuery) {
+    constructor(options : AlbumDetailViewportOptions) {
+        super(options)
         this.type = "albums"
         this.type_name = "Album"
-        super(options, element)
     }
 
     protected to_object(streamable : AlbumStreamable) : Album {

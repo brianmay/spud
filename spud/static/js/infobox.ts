@@ -130,13 +130,13 @@ class SelectOutputField extends OutputField {
     options : StringArray<string>
 
     constructor(title : string, options : Array<OptionKeyValue>) {
+        super(title)
         this.options = {}
         for (let option of options) {
             var id : string = option[0]
             var value : string = option[1]
             this.options[id] = value
         }
-        super(title)
     }
 
     set(value : string) : void {
@@ -270,8 +270,8 @@ class LinkOutputField extends OutputField {
     type : string
 
     constructor(title : string, type : string) {
-        this.type = type
         super(title)
+        this.type = type
     }
 
     set(value) : void {
@@ -292,8 +292,8 @@ class LinkListOutputField extends OutputField {
     type : string
 
     constructor(title : string, type : string) {
-        this.type = type
         super(title)
+        this.type = type
     }
 
     set(value : Array<SpudObject>) : void {
@@ -326,14 +326,15 @@ class PhotoOutputField extends OutputField {
     private img : ImageWidget
 
     constructor(title : string, size : string, do_link : boolean) {
+        super(title)
         this.size = size
         this.do_link = do_link
-        super(title)
     }
 
     create(id : string) : JQuery {
         this.output = $('<div />')
-        this.img = new ImageWidget({ size: this.size, include_link: this.do_link }, this.output)
+        this.img = new ImageWidget({ size: this.size, include_link: this.do_link })
+        this.img.show(this.output)
         return this.output
     }
 
@@ -366,8 +367,8 @@ abstract class Infobox extends Widget {
     // private table : JQuery
     private dl : JQuery
 
-    constructor(options : InfoboxOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : InfoboxOptions) {
+        super(options)
     }
 
     show(element : JQuery){

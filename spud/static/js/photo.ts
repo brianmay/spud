@@ -125,6 +125,7 @@ class Photo extends SpudObject {
     _type_photo : boolean
 
     constructor(streamable : PhotoStreamable) {
+        super(streamable)
         this.action = parse_string(streamable.action)
         this.datetime = parse_datetimezone(streamable.datetime, streamable.datetime_utc_offset)
         this.description = parse_string(streamable.description)
@@ -191,7 +192,6 @@ class Photo extends SpudObject {
                 this.videos[size].push( [priority, video] )
             }
         }
-        super(streamable)
     }
 
     to_streamable() : PhotoStreamable {
@@ -288,8 +288,8 @@ interface PhotoSearchDialogOptions extends ObjectSearchDialogOptions {
 class PhotoSearchDialog extends ObjectSearchDialog {
     protected options : PhotoSearchDialogOptions
 
-    constructor(options : PhotoSearchDialogOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : PhotoSearchDialogOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -342,10 +342,10 @@ interface PhotoChangeDialogOptions extends ObjectChangeDialogOptions {
 class PhotoChangeDialog extends ObjectChangeDialog {
     protected options : PhotoChangeDialogOptions
 
-    constructor(options : PhotoChangeDialogOptions, element? : JQuery) {
+    constructor(options : PhotoChangeDialogOptions) {
+        super(options)
         this.type = "photos"
         this.type_name = "photo"
-        super(options, element)
     }
 
     show(element : JQuery) {
@@ -403,9 +403,9 @@ class PhotoBulkUpdateDialog extends FormDialog {
     protected options : PhotoBulkUpdateDialogOptions
     protected data : PhotoUpdates
 
-    constructor(options : PhotoBulkUpdateDialogOptions, element? : JQuery) {
+    constructor(options : PhotoBulkUpdateDialogOptions) {
+        super(options)
         this.type = "photos"
-        super(options, element)
     }
 
     show(element : JQuery) : void {
@@ -519,25 +519,27 @@ class PhotoBulkUpdateDialog extends FormDialog {
         this.data = data
         this.element.hide()
 
-        var params = {
+        let params = {
             criteria: this.options.criteria,
             obj: data,
             on_proceed: $.proxy(this.proceed, this),
             on_cancel: $.proxy(this.cancel, this),
         }
-        var div = $("<div/>")
-        new PhotoBulkConfirmDialog(params, div)
+        let div = $("<div/>")
+        let dialog = new PhotoBulkConfirmDialog(params)
+        dialog.show(div)
     }
 
     protected proceed() : void {
         this.remove()
 
-        var params : PhotoBulkProceedDialogOptions = {
+        let params : PhotoBulkProceedDialogOptions = {
             criteria: this.options.criteria,
             obj: this.data,
         }
-        var div = $("<div/>")
-        new PhotoBulkProceedDialog(params, div)
+        let div = $("<div/>")
+        let dialog = new PhotoBulkProceedDialog(params)
+        dialog.show(div)
     }
 
     protected cancel() : void {
@@ -559,14 +561,14 @@ class PhotoBulkConfirmDialog extends BaseDialog {
     private ul : JQuery
     protected options : PhotoBulkConfirmDialogOptions
 
-    constructor(options : PhotoBulkConfirmDialogOptions, element? : JQuery) {
-        this.proceed = false
-        this.type = "photos"
-
+    constructor(options : PhotoBulkConfirmDialogOptions) {
         options.title = "Confirm bulk update"
         options.button = "Confirm"
 
-        super(options, element)
+        super(options)
+
+        this.proceed = false
+        this.type = "photos"
     }
 
     show(element : JQuery) : void {
@@ -579,7 +581,8 @@ class PhotoBulkConfirmDialog extends BaseDialog {
         let options : PhotoListWidgetOptions = {
         }
 
-        this.photo_list = new PhotoListWidget(options, this.ol)
+        this.photo_list = new PhotoListWidget(options)
+        this.photo_list.show(this.ol)
         this.set(this.options.criteria)
     }
 
@@ -628,13 +631,13 @@ class PhotoBulkProceedDialog extends BaseDialog {
     protected options : PhotoBulkProceedDialogOptions
     protected values : PhotoUpdates
 
-    constructor(options : PhotoBulkProceedDialogOptions, element? : JQuery) {
-        this.type = "photos"
-
+    constructor(options : PhotoBulkProceedDialogOptions) {
         options.title = "Bulk update"
         options.button = "Retry"
 
-        super(options, element)
+        super(options)
+
+        this.type = "photos"
     }
 
     show(element: JQuery) : void {
@@ -679,10 +682,10 @@ interface PhotoDeleteDialogOptions extends ObjectDeleteDialogOptions {
 }
 
 class PhotoDeleteDialog extends ObjectDeleteDialog {
-    constructor(options : PhotoDeleteDialogOptions, element? : JQuery) {
+    constructor(options : PhotoDeleteDialogOptions) {
+        super(options)
         this.type = "photos"
         this.type_name = "photo"
-        super(options, element)
     }
 
     protected save_success(data : Streamable) {
@@ -703,7 +706,8 @@ class PhotoCriteriaWidget extends ObjectCriteriaWidget {
     protected options : PhotoCriteriaWidgetOptions
     protected type : string
 
-    constructor(options : PhotoCriteriaWidgetOptions, element? : JQuery) {
+    constructor(options : PhotoCriteriaWidgetOptions) {
+        super(options)
         this.type = "photos"
         this.load_attributes = [
             { name: 'album', type: 'albums' },
@@ -712,7 +716,6 @@ class PhotoCriteriaWidget extends ObjectCriteriaWidget {
             { name: 'person', type: 'persons' },
             { name: 'instance', type: 'photos' },
         ]
-        super(options, element)
     }
 
     set(input_criteria : PhotoCriteria) {
@@ -781,9 +784,9 @@ interface PhotoListWidgetOptions extends ObjectListWidgetOptions {
 class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
     protected options : PhotoListWidgetOptions
 
-    constructor(options : PhotoListWidgetOptions, element? : JQuery) {
+    constructor(options : PhotoListWidgetOptions) {
+        super(options)
         this.type = "photos"
-        super(options, element)
     }
 
     protected add_selection(photo) {
@@ -895,16 +898,17 @@ class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
     }
 
     bulk_update() {
-        var criteria = this.options.criteria
+        let criteria = this.options.criteria
         if (this.options.selection.length > 0) {
             criteria = $.extend({}, criteria)
             criteria.photos = this.options.selection
         }
-        var params = {
+        let params = {
             criteria: criteria,
         }
-        var div = $("<div/>")
-        new PhotoBulkUpdateDialog(params, div)
+        let div = $("<div/>")
+        let dialog = new PhotoBulkUpdateDialog(params)
+        dialog.show(div)
     }
 }
 
@@ -915,8 +919,8 @@ class PhotoDetailInfobox extends Infobox {
     protected options : PhotoDetailInfoboxOptions
     private img : ImageWidget
 
-    constructor(options : PhotoDetailInfoboxOptions, element? : JQuery) {
-        super(options, element)
+    constructor(options : PhotoDetailInfoboxOptions) {
+        super(options)
     }
 
     show(element : JQuery) {
@@ -981,10 +985,10 @@ class PhotoListViewport extends ObjectListViewport<PhotoStreamable, Photo> {
     protected options : PhotoListViewportOptions
     protected ol : PhotoListWidget
 
-    constructor(options : PhotoListViewportOptions, element? : JQuery) {
+    constructor(options : PhotoListViewportOptions) {
+        super(options)
         this.type = "photos"
         this.type_name = "Photo"
-        super(options, element)
     }
 
     protected setup_menu(menu : JQuery) : void {
@@ -1035,10 +1039,10 @@ class PhotoDetailViewport extends ObjectDetailViewport<PhotoStreamable, Photo> {
     options : PhotoDetailViewportOptions
     orig : JQuery
 
-    constructor(options : PhotoDetailViewportOptions, element? : JQuery) {
+    constructor(options : PhotoDetailViewportOptions) {
+        super(options)
         this.type = "photos"
         this.type_name = "Photo"
-        super(options, element)
     }
 
     protected setup_menu(menu : JQuery) : void {

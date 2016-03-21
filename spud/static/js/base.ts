@@ -32,15 +32,16 @@ $(document)
     .tooltip({
         items: "a",
         content: () => {
-            var photo = $(this).data('photo')
+            let photo = $(this).data('photo')
             if (photo != null) {
-                var div = $("<div></div>")
-                new ImageWidget({
+                let div = $("<div></div>")
+                let image = new ImageWidget({
                     size: 'thumb',
                     photo: photo,
                     do_video: false,
                     include_link: false,
-                }, div)
+                })
+                image.show(div)
                 return div
             }
             return null
@@ -510,7 +511,7 @@ $.widget('spud.ajaxautocompletemultiple',  $.spud.ajaxautocomplete, {
 
 $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
     _create: function(){
-        this.img = new ImageWidget({size: 'thumb'}, this.img)
+        this.img = new ImageWidget({size: 'thumb'})
         $("<div></div>")
             .set_widget(this.img)
             .appendTo(this.element)
