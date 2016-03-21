@@ -80,12 +80,6 @@ setup(
         'bin/spud_set_secret_key',
         'bin/spud_migrate_south',
     ],
-    data_files=[
-        ('/etc/spud', [
-            'conf/settings.py', 'conf/spud.wsgi']),
-        ('/etc/apache2/conf-available',
-            ['conf/spud.conf', ]),
-    ],
     tests_require=[
         'mock', 'django-environ',
     ],
