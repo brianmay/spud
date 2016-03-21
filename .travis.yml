@@ -1,22 +1,79 @@
 language: python
+sudo: false
 python:
-- 2.7
-- 3.3
-- 3.4
-- 3.5
-- pypy
+ - 2.7
+ - 3.3
+ - 3.4
+ - 3.5
 
 env:
- - DJANGO_VERSION=1.7.10
- - DJANGO_VERSION=1.8
+ - DJANGO_VERSION=1.7.10 DATABASE_URL=postgres://postgres@/django_guardian
+ - DJANGO_VERSION=1.8.11 DATABASE_URL=postgres://postgres@/django_guardian
+ - DJANGO_VERSION=1.9.4 DATABASE_URL=postgres://postgres@/django_guardian
+ - DJANGO_VERSION=master DATABASE_URL=postgres://postgres@/django_guardian
+
+ - DJANGO_VERSION=1.7.10 DATABASE_URL=mysql://root:@localhost/django_guardian
+ - DJANGO_VERSION=1.8.11 DATABASE_URL=mysql://root:@localhost/django_guardian
+ - DJANGO_VERSION=1.9.4 DATABASE_URL=mysql://root:@localhost/django_guardian
+ - DJANGO_VERSION=master DATABASE_URL=mysql://root:@localhost/django_guardian
+
+ - DJANGO_VERSION=1.7.10 DATABASE_URL=sqlite://
+ - DJANGO_VERSION=1.8.11 DATABASE_URL=sqlite://
+ - DJANGO_VERSION=1.9.4 DATABASE_URL=sqlite://
+ - DJANGO_VERSION=master DATABASE_URL=sqlite://
 
 install:
-    - travis_retry pip install -q Django==$DJANGO_VERSION pytest pytest-django djangorestframework django-pipeline django-ajax-selects django-cors-headers py-dateutil pytz pillow
+  - travis_retry pip install -q mock==1.0.1 pytest pytest-django pytest-cov django-environ setuptools_scm
+# Install django master or version
+  - bash -c "if [[ \"$DJANGO_VERSION\" == 'master' ]]; then pip install 'https://github.com/django/django/archive/master.tar.gz'; else pip install Django==$DJANGO_VERSION; fi; "
+# Install database drivers
+  - bash -c "if [[ $DATABASE_URL = postgres* ]]; then pip install psycopg2==2.6.1; fi; "
+  - bash -c "if [[ $DATABASE_URL = mysql* ]]; then pip install mysqlclient==1.3.7; fi; "
 
 script:
-  - py.test
+  - python ./setup.py --version
+  - py.test --cov=guardian
+
+notifications:
+  irc: "irc.freenode.net#django-guardian"
+
 
 matrix:
-    exclude:
-        - python: 3.5
-          env: DJANGO_VERSION=1.7.10
+  fast_finish: true
+  exclude:
+      # Drop python 3.3 and django 1.9
+      - python: 3.3
+        env: DJANGO_VERSION=1.9.4 DATABASE_URL=postgres://postgres@/django_guardian
+      - python: 3.3
+        env: DJANGO_VERSION=1.9.4 DATABASE_URL=mysql://root:@localhost/django_guardian
+      - python: 3.3
+        env: DJANGO_VERSION=1.9.4 DATABASE_URL=sqlite://
+      # Drop python 3.3 and django master
+      - python: 3.3
+        env: DJANGO_VERSION=master DATABASE_URL=postgres://postgres@/django_guardian
+      - python: 3.3
+        env: DJANGO_VERSION=master DATABASE_URL=mysql://root:@localhost/django_guardian
+      - python: 3.3
+        env: DJANGO_VERSION=master DATABASE_URL=sqlite://
+      # Drop python 3.5 and django 1.7
+      - python: 3.5
+        env: DJANGO_VERSION=1.7.10 DATABASE_URL=postgres://postgres@/django_guardian
+      - python: 3.5
+        env: DJANGO_VERSION=1.7.10 DATABASE_URL=mysql://root:@localhost/django_guardian
+      - python: 3.5
+        env: DJANGO_VERSION=1.7.10 DATABASE_URL=sqlite://
+      # Drop python 3.3 with postgres due lack of driver
+      - python: 3.3
+        env: DJANGO_VERSION=1.7.10 DATABASE_URL=postgres://postgres@/django_guardian
+      - python: 3.3
+        env: DJANGO_VERSION=1.8.11 DATABASE_URL=postgres://postgres@/django_guardian
+      - python: 3.3
+        env: DJANGO_VERSION=1.9.4 DATABASE_URL=postgres://postgres@/django_guardian
+  allow_failures:
+      - env: DJANGO_VERSION=master DATABASE_URL=postgres://postgres@/django_guardian
+      - env: DJANGO_VERSION=master DATABASE_URL=mysql://root:@localhost/django_guardian
+      - env: DJANGO_VERSION=master DATABASE_URL=sqlite://
+      # Support for 1.9.4 is broken, see https://code.djangoproject.com/ticket/26384
+      - env: DJANGO_VERSION=1.9.4 DATABASE_URL=postgres://postgres@/django_guardian
+      - env: DJANGO_VERSION=1.9.4 DATABASE_URL=mysql://root:@localhost/django_guardian
+      - env: DJANGO_VERSION=1.9.4 DATABASE_URL=sqlite://
