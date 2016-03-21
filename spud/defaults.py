@@ -150,9 +150,6 @@ STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 PIPELINE = {
     'PIPELINE_ENABLED': False,
     'EMBED_PATH': r'img/|images/',
-    'COMPILERS': (
-        'pipeline_typescript.compilers.TypescriptCompiler',
-    ),
     'CSS_COMPRESSOR': 'pipeline.compressors.cssmin.CSSMinCompressor',
     'STYLESHEETS': {
         'spud': {
