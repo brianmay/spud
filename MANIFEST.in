@@ -1,3 +1,4 @@
+include *.ini
 include *.txt
 include *.rst
 include *.py
