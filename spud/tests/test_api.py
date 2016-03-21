@@ -1325,7 +1325,7 @@ class TestPersons(BaseTest):
         self.pks.append(person.pk)
 
         person = models.person.objects.create(
-            first_name="My child",
+            first_name="My Child",
             father=me,
             mother=mother,
             cover_photo=None,
@@ -1376,7 +1376,7 @@ class TestPersons(BaseTest):
     def get_test_lists(self, user):
         grandfather, grandmother, father, mother, me, child = self.pks
         expected_list = self.pks_to_json([
-            me, father, grandfather, grandmother, mother, child], user)
+            me, child, father, grandfather, grandmother, mother], user)
 
         for expected in expected_list:
             del expected['first_name']
