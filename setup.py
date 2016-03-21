@@ -92,7 +92,6 @@ setup(
     install_requires=[
         "Django >= 1.6",
         "django-pipeline",
-        "South >= 0.7",
         "djangorestframework >= 3.0.5",
         "python-dateutil",
         "Pillow",
