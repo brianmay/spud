@@ -3,3 +3,4 @@
 .project
 .pydevproject
 spud/static/js/*.js
+spud/version.py

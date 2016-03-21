@@ -18,8 +18,6 @@
 
 from setuptools import setup
 import os
-with open('VERSION.txt', 'r') as f:
-    version = f.readline().strip()
 
 
 def fullsplit(path, result=None):
@@ -47,7 +45,10 @@ for dirpath, dirnames, filenames in os.walk("spud"):
 
 setup(
     name="spud",
-    version=version,
+    use_scm_version={
+        'write_to': "spud/version.py",
+    },
+    setup_requires=['setuptools_scm'],
     url='https://github.com/brianmay/spud',
     author='Brian May',
     author_email='brian@microcomaustralia.com.au',
