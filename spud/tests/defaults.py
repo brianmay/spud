@@ -15,6 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import os.path
+import environ
+
+env = environ.Env()
 
 
 class InvalidString(str):
@@ -69,17 +72,7 @@ LOGGING = {
     },
 }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'spud.db',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        'ATOMIC_REQUESTS': True,
-    }
-}
+DATABASES = {'default': env.db(default="sqlite://./spud.db")}
 SERVER_EMAIL = 'django@' + os.uname()[1]
 ACCOUNTS_EMAIL = 'accounts@vpac.org'
 APPROVE_ACCOUNTS_EMAIL = ACCOUNTS_EMAIL

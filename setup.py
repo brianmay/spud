@@ -86,6 +86,9 @@ setup(
         ('/etc/apache2/conf-available',
             ['conf/spud.conf', ]),
     ],
+    tests_require=[
+        'mock', 'django-environ',
+    ],
     install_requires=[
         "Django >= 1.6",
         "django-pipeline",
