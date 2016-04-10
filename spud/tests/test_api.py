@@ -826,11 +826,12 @@ class BaseTest(object):
         for pk, update, expected in updates:
             # we need to get the current version as a previous update may have
             # changed it
-            obj = type(objs[pk]).objects.get(pk=pk)
-            json = self.model_to_json(obj, user)
+            url = self.get_detail_url(pk)
+            response = client.get(url, format='json')
+            json = response.data
             json.update(update)
 
-            url = self.get_detail_url(obj.pk)
+            url = self.get_detail_url(pk)
             response = client.put(url, json, format='json')
             if scenario.check_response(response, self.name, 'change'):
                 assert response.status_code == status.HTTP_200_OK
@@ -2360,7 +2361,7 @@ class TestPhotos(BaseTest):
             'rating': photo.rating,
             'relations': [],
             'size': photo.size,
-            'timestamp': photo.timestamp.isoformat(),
+            'timestamp': ANY,
             'view': photo.view,
         }
 
