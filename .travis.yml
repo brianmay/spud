@@ -70,7 +70,3 @@ matrix:
       - env: DJANGO_VERSION=master DATABASE_URL=postgres://postgres@/spud
       - env: DJANGO_VERSION=master DATABASE_URL=mysql://root:@localhost/spud
       - env: DJANGO_VERSION=master DATABASE_URL=sqlite://
-      # Support for 1.9.4 is broken, see https://code.djangoproject.com/ticket/26384
-      - env: DJANGO_VERSION=1.9.4 DATABASE_URL=postgres://postgres@/spud
-      - env: DJANGO_VERSION=1.9.4 DATABASE_URL=mysql://root:@localhost/spud
-      - env: DJANGO_VERSION=1.9.4 DATABASE_URL=sqlite://
