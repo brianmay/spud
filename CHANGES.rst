@@ -1,3 +1,8 @@
+Release 2.0.4 (25 Apr 2016)
+===========================
+
+  * New release with fixed MANIFEST.in
+
 Release 2.0.3 (25 Apr 2016)
 ===========================
 
