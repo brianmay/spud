@@ -1,5 +1,5 @@
-Release 2.0.3 (UNRELEASED)
-==========================
+Release 2.0.3 (25 Apr 2016)
+===========================
 
   * Port Javascript to Typescript.
   * Add more tests.
