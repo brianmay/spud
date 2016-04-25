@@ -2,8 +2,15 @@ include *.ini
 include *.txt
 include *.rst
 include *.py
+include *.json
+include *.sh
 include MANIFEST.in
-recursive-include spud *
+exclude spud/version.py
+exclude spud/static/js/*.js
+recursive-include conf *.conf
+recursive-include conf *.py
+recursive-include conf *.wsgi
+recursive-include spud *.ts
+recursive-include contrib *.txt
 recursive-include bin *
-recursive-include conf *
 recursive-include experimental *
