@@ -48,7 +48,7 @@ setup(
     use_scm_version={
         'write_to': "spud/version.py",
     },
-    setup_requires=['setuptools_scm'],
+    setup_requires=['setuptools_scm', 'pytest-runner'],
     url='https://github.com/brianmay/spud',
     author='Brian May',
     author_email='brian@microcomaustralia.com.au',
