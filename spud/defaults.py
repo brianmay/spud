@@ -223,7 +223,6 @@ REST_FRAMEWORK = {
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 PIPELINE = {
-    'PIPELINE_ENABLED': False,
     'EMBED_PATH': r'img/|images/',
     'CSS_COMPRESSOR': 'pipeline.compressors.cssmin.CSSMinCompressor',
     'STYLESHEETS': {
