@@ -298,6 +298,3 @@ VIDEO_FORMATS = {
     'video/ogg': {'extension': 'ogv', 'priority': 2},
     'video/mp4': {'extension': 'mp4', 'priority': 3},
 }
-
-DEFAULT_TIMEZONE = {}
-DEFAULT_DTOFFSET = {}
