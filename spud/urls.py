@@ -18,9 +18,10 @@ from __future__ import unicode_literals
 
 from rest_framework import routers
 
-from django.conf.urls import url, include, patterns
+from django.conf.urls import url, include
 from django.conf import settings
 from django.contrib import admin
+import django.views.static
 
 from . import views
 
@@ -37,25 +38,25 @@ router.register(r'feedbacks', views.FeedbackViewSet)
 router.register(r'relations', views.PhotoRelationViewSet)
 router.register(r'photos', views.PhotoViewSet)
 
-urlpatterns = patterns(
-    '',
-    # # account management
+urlpatterns = [
+
+    # account management
     url(r'^$',
-        'spud.views.root', name='root'),
+        views.root, name='root'),
 
     url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$',
-        'spud.views.photo_thumb_redirect', name='photo_thumb_redirect'),
+        views.photo_thumb_redirect, name='photo_thumb_redirect'),
 
     url(r'^(?P<obj_type>\w+)/$',
-        'spud.views.obj_list', name='obj_list'),
+        views.obj_list, name='obj_list'),
 
     url(r'^(?P<obj_type>\w+)/(?P<obj_id>\d+)/$',
-        'spud.views.obj_detail', name='obj_detail'),
-)
+        views.obj_detail, name='obj_detail'),
+]
 
 if getattr(settings, 'API_ROOT_URL', None) is None:
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
+
         url(r'^admin/', include(admin.site.urls)),
 
         url(r'^api/session/$', views.SessionDetail.as_view(),
@@ -70,37 +71,33 @@ if getattr(settings, 'API_ROOT_URL', None) is None:
         url(r'^api/', include(router.urls)),
         url(r'^api-auth/', include('rest_framework.urls',
             namespace='rest_framework')),
-    )
+    ]
 
 
 import re
 if settings.DEBUG:
 
     if settings.IMAGE_PATH is not None:
-        urlpatterns += patterns(
-            '',
-            url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
+        urlpatterns += [
+            url(r'^images/(?P<path>.*)$', django.views.static.serve,
                 {'document_root': settings.IMAGE_PATH}),
-        )
+        ]
     if settings.DEBUG:
-        urlpatterns += patterns(
-            '',
-            url(r'^errors.html$', 'django.views.static.serve',
+        urlpatterns += [
+            url(r'^errors.html$', django.views.static.serve,
                 {'document_root': ".", 'path': "errors.html"}),
-        )
+        ]
 
 elif settings.DEBUG_SERVE_STATIC:
 
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
         url(r'^%s(?P<path>.*)$' % re.escape(settings.STATIC_URL.lstrip('/')),
-            'django.views.static.serve',
+            django.views.static.serve,
             {'document_root': settings.STATIC_ROOT}),
-    )
+    ]
 
     if settings.IMAGE_PATH is not None:
-        urlpatterns += patterns(
-            '',
-            url(r'^images/(?P<path>.*)$', 'django.views.static.serve',
+        urlpatterns += [
+            url(r'^images/(?P<path>.*)$', django.views.static.serve,
                 {'document_root': settings.IMAGE_PATH}),
-        )
+        ]
