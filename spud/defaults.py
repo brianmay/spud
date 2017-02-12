@@ -38,19 +38,39 @@ from socket import getfqdn
 # settings.py).
 DEBUG = False
 
-# A boolean that turns on/off template debug mode. If this is True, the fancy
-# error page will display a detailed report for any exception raised during
-# template rendering. This report contains the relevant snippet of the
-# template, with the appropriate line highlighted.
-#
-# Note that Django only displays fancy error pages if DEBUG is True, so you’ll
-# want to set that to take advantage of this setting.
-TEMPLATE_DEBUG = True
-
 # For debugging purposes, ensure that static files are served when DEBUG=False,
 # used for testing django-pipeline. Should never be set to True on production
 # box or for normal debugging.
 DEBUG_SERVE_STATIC = False
+
+# A list containing the settings for all template engines to be used with
+# Django. Each item of the list is a dictionary containing the options for an
+# individual engine.
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            "/etc/spud/templates",
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'spud.context_processors.common',
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+            'debug': True,
+            # 'string_if_invalid': InvalidString("%s"),
+        },
+    },
+]
+
 
 # Whether to use a secure cookie for the session cookie. If this is set to
 # True, the cookie will be marked as “secure,” which means browsers may ensure
@@ -70,29 +90,6 @@ STATIC_ROOT = "/var/lib/spud/static"
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 STATIC_URL = '/spud/static/'
 
-# A tuple of template loader classes, specified as strings. Each Loader class
-# knows how to import templates from a particular source. Optionally, a tuple
-# can be used instead of a string. The first item in the tuple should be the
-# Loader’s module, subsequent items are passed to the Loader during
-# initialization.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
-# A tuple of callables that are used to populate the context in
-# RequestContext. These callables take a request object as their argument and
-# return a dictionary of items to be merged into the context.
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "spud.context_processors.common",
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.request",
-    "django.core.context_processors.static",
-)
-
 # A tuple of middleware classes to use.
 MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
@@ -107,14 +104,6 @@ MIDDLEWARE_CLASSES = (
 # example: "mydjangoapps.urls". Can be overridden on a per-request basis by
 # setting the attribute urlconf on the incoming HttpRequest object.
 ROOT_URLCONF = 'spud.urls'
-
-# List of locations of the template source files searched by
-# django.template.loaders.filesystem.Loader, in search order.
-
-# Allow administrator to override templates.
-TEMPLATE_DIRS = (
-    "/etc/spud/templates",
-)
 
 # A list of strings designating all applications that are enabled in this
 # Django installation.
