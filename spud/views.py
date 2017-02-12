@@ -27,9 +27,8 @@ from rest_framework.response import Response
 
 from django.utils.dateparse import parse_datetime
 import django.contrib.auth
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.shortcuts import get_object_or_404
-from django.template import RequestContext
 from django.http import Http404
 from django.http.request import QueryDict
 from django.http import HttpResponseRedirect
@@ -852,11 +851,11 @@ def photo_thumb_redirect(request, object_id, size):
 def root(request):
     js_session = json.dumps(_get_session(request))
     js_params = json.dumps(request.GET)
-    return render_to_response('spud/static.html', {
+    return render(request, 'spud/static.html', {
         'title': 'Root',
         'onload': "window.do_root(%s, %s)"
                   % (js_session, js_params),
-    }, context_instance=RequestContext(request))
+    })
 
 
 _types = {
@@ -880,11 +879,11 @@ def obj_list(request, obj_type):
     obj_type = json.dumps(obj_type)
     js_session = json.dumps(_get_session(request))
     js_params = json.dumps(request.GET)
-    return render_to_response('spud/static.html', {
+    return render(request, 'spud/static.html', {
         'title': 'Object list',
         'onload': "window.do_list(%s, %s, %s)"
                   % (obj_type, js_session, js_params),
-    }, context_instance=RequestContext(request))
+    })
 
 
 @ensure_csrf_cookie
@@ -894,8 +893,8 @@ def obj_detail(request, obj_type, obj_id):
     obj_id = int(obj_id)
     js_session = json.dumps(_get_session(request))
     js_params = json.dumps(request.GET)
-    return render_to_response('spud/static.html', {
+    return render(request, 'spud/static.html', {
         'title': 'Object detail',
         'onload': "window.do_detail(%s, %d, %s, %s)"
                   % (obj_type, obj_id, js_session, js_params),
-    }, context_instance=RequestContext(request))
+    })
