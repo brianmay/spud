@@ -84,7 +84,7 @@ setup(
         'mock', 'django-environ',
     ],
     install_requires=[
-        "Django >= 1.6",
+        "Django >= 1.8",
         "django-pipeline",
         "djangorestframework >= 3.0.5",
         "python-dateutil",
