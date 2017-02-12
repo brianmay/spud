@@ -1,6 +1,6 @@
 setuptools_scm==1.15.0
 django-pipeline==1.6.11
-djangorestframework==3.3.3
+djangorestframework==3.4.7
 python-dateutil==2.6.0
 Pillow==4.0.0
 six==1.10.0
