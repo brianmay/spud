@@ -8,14 +8,17 @@ python:
 env:
  - DJANGO_VERSION=1.8.17 DATABASE_URL=postgres://postgres@/spud
  - DJANGO_VERSION=1.9.12 DATABASE_URL=postgres://postgres@/spud
+ - DJANGO_VERSION=1.10.5 DATABASE_URL=postgres://postgres@/spud
  - DJANGO_VERSION=master DATABASE_URL=postgres://postgres@/spud
 
  - DJANGO_VERSION=1.8.17 DATABASE_URL=mysql://root:@localhost/spud
  - DJANGO_VERSION=1.9.12 DATABASE_URL=mysql://root:@localhost/spud
+ - DJANGO_VERSION=1.10.5 DATABASE_URL=mysql://root:@localhost/spud
  - DJANGO_VERSION=master DATABASE_URL=mysql://root:@localhost/spud
 
  - DJANGO_VERSION=1.8.17 DATABASE_URL=sqlite://
  - DJANGO_VERSION=1.9.12 DATABASE_URL=sqlite://
+ - DJANGO_VERSION=1.10.5 DATABASE_URL=sqlite://
  - DJANGO_VERSION=master DATABASE_URL=sqlite://
 
 install:
