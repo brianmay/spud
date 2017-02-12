@@ -820,7 +820,7 @@ class BaseTest(object):
         user = scenario.get_user()
         login(client, user)
 
-        objs = self.create_test_db(user)
+        self.create_test_db(user)
         updates = self.get_test_updates(user)
 
         for pk, update, expected in updates:
