@@ -23,12 +23,13 @@ env:
  - DJANGO_VERSION=master DATABASE_URL=sqlite://
 
 install:
-  - travis_retry pip install -q mock==1.0.1 pytest pytest-django pytest-cov pytz python-dateutil Pillow djangorestframework django-pipeline django-environ django-cors-headers setuptools_scm
 # Install django master or version
   - bash -c "if [[ \"$DJANGO_VERSION\" == 'master' ]]; then pip install 'https://github.com/django/django/archive/master.tar.gz'; else pip install Django==$DJANGO_VERSION; fi; "
 # Install database drivers
   - bash -c "if [[ $DATABASE_URL = postgres* ]]; then pip install psycopg2==2.6.1; fi; "
   - bash -c "if [[ $DATABASE_URL = mysql* ]]; then pip install mysqlclient==1.3.7; fi; "
+# Install other dependancies
+  - pip install -rrequirements-tests.txt
 
 script:
   - python ./setup.py --version
