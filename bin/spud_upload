@@ -298,16 +298,30 @@ def import_photo(
 
     print("uploading photo %s" % photo)
 
-    photo = POST(
-        spud.photos,
-        Request(
-            data=photo,
-            files={'photo': open(src_filename, 'rb')}
+    try:
+        photo = POST(
+            spud.photos,
+            Request(
+                data=photo,
+                files={'photo': open(src_filename, 'rb')}
+            )
         )
-    )
-
-    print("imported  %s as %d"
-          % (src_filename, photo['id']))
+    except BeanBagException as e:
+        try:
+            json = e.response.json()
+        except Exception:
+            raise e
+        errors = json["non_field_errors"]
+        if len(errors)==1 and errors[0].startswith("File already exists at"):
+            splitted = errors[0].split(" ")
+            id = int(splitted[-1].rstrip("."))
+            print("skipping %s as already uploaded as %d"
+                  % (src_filename, id))
+        else:
+            raise
+    else:
+        print("imported  %s as %d"
+              % (src_filename, photo['id']))
 
     return photo
 
