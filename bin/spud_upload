@@ -104,11 +104,16 @@ def get_album(spud, parent, create_album):
     if create_album is not None:
         try:
             result = GET(spud.albums(
-                obj=create_album,
-                parent=parent_result["id"],
+                q=create_album,
+                instance=parent_result["id"],
+                mode="children",
             ))
 
+            if result["count"] < 1:
+                raise NotFoundError()
+
             assert result["count"] == 1
+            assert result["results"][0]["parent"] == parent_result["id"]
             result = result["results"][0]
 
         except NotFoundError:
