@@ -7,7 +7,6 @@ include *.sh
 include MANIFEST.in
 recursive-include conf *.conf
 recursive-include conf *.py
-recursive-include conf *.wsgi
 recursive-include spud *.ts
 recursive-include contrib *.txt
 recursive-include bin *
