@@ -87,7 +87,7 @@ jQuery.jCookie = function(sCookieName : string, oValue? : string, oExpires? : st
 		oExpires = (oExpires === null || (oValue === null && arguments.length == 2)) ? -1 : oExpires;
 
 		// calculate date in case it's no session cookie (expires missing or expires equals 'session' )
-		if (typeof(oExpires) === 'number' && oExpires != 'session' && oExpires !== undefined) {
+		if (typeof(oExpires) === 'number' && oExpires !== undefined) {
 			var _date = new Date();
 			_date.setTime(_date.getTime() + (Number(oExpires) * 24 * 60 * 60 * 1000));
 			sExpires = ["; expires=", _date.toUTCString()].join("");
