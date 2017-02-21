@@ -603,6 +603,7 @@ class SuperuserTests(object):
     def check_response(self, response, obj_type, action):
         return True
 
+
 scenario_unauth = ('scenario_unauth', {'scenario': UnauthTests()})
 scenario_user = ('scenario_user', {'scenario': UserTests()})
 scenario_superuser = ('scenario_superuser', {'scenario': SuperuserTests()})
