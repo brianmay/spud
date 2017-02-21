@@ -1,6 +1,6 @@
 *.bak
 *.pyc
-.coverage
+/.coverage
 /.cache/
 /.eggs/
 /.tox/
