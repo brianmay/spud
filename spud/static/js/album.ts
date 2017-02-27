@@ -32,18 +32,12 @@ window._album_created = new Signal<Album>()
 window._album_changed = new Signal<Album>()
 window._album_deleted = new Signal<number>()
 
-class AlbumStreamable extends ObjectStreamable {
-    revised : string
-    revised_utc_offset : number
-    description : string
-    sort_order : string
-    sort_name : string
-    ascendants : Array <AlbumStreamable>
-    parent : number
-}
+window._album_created.add_listener(null, () => {
+    window._reload_all.trigger(null);
+})
 
 class Album extends SpudObject {
-    static type : string = "albums"
+    static type : string = 'albums'
     revised : DateTimeZone
     description : string
     sort_order : string
@@ -52,178 +46,77 @@ class Album extends SpudObject {
     parent : Album
     _type_album : boolean
 
-    constructor(streamable : AlbumStreamable) {
-        super(streamable)
-        this.description = parse_string(streamable.description)
-        this.sort_order = parse_string(streamable.sort_order)
-        this.sort_name = parse_string(streamable.sort_name)
-        this.revised = parse_datetimezone(streamable.revised, streamable.revised_utc_offset)
-        if (streamable.ascendants != null) {
-            this.ascendants = []
-            for (let i=0; i<streamable.ascendants.length; i++) {
-                this.ascendants.push(new Album(streamable.ascendants[i]))
-            }
-            if (streamable.ascendants.length > 0) {
-                this.parent = this.ascendants[0]
-            } else {
-                this.parent = null
-            }
+    constructor(streamable? : PostStreamable) {
+        super(Album.type, streamable)
+    }
+
+    set_streamable(streamable : PostStreamable) {
+        super.set_streamable(streamable)
+
+        this.description = get_streamable_string(streamable, 'description')
+        this.sort_order = get_streamable_string(streamable, 'sort_order')
+        this.sort_name = get_streamable_string(streamable, 'sort_name')
+        let utc_offset : number = get_streamable_number(streamable, 'revised_utc_offset')
+        this.revised = get_streamable_datetimezone(streamable, 'revised', utc_offset)
+
+        let ascendants = get_streamable_array(streamable, 'ascendants')
+        this.ascendants = []
+        for (let i=0; i<ascendants.length; i++) {
+            let item : PostStreamable = streamable_to_object(ascendants[i])
+            this.ascendants.push(new Album(item))
+        }
+        if (ascendants.length > 0) {
+            let item : PostStreamable = streamable_to_object(ascendants[0])
+            this.parent = new Album(item)
+        } else {
+            this.parent = null
         }
     }
 
-    to_streamable() : AlbumStreamable {
-        let streamable : AlbumStreamable = <AlbumStreamable>super.to_streamable()
-        streamable.description = this.description
-        streamable.sort_order = this.sort_order
-        streamable.sort_name = this.sort_name
-        streamable.revised_utc_offset = streamable_datetimezone_offset(this.revised)
-        streamable.revised = streamable_datetimezone_datetime(this.revised)
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
+        streamable['description'] = this.description
+        streamable['sort_order'] = this.sort_order
+        streamable['sort_name'] = this.sort_name
+        streamable['revised_utc_offset'] = streamable_datetimezone_offset(this.revised)
+        streamable['revised'] = streamable_datetimezone_datetime(this.revised)
         if (this.parent != null) {
-            streamable.parent = this.parent.id
+            streamable['parent'] = this.parent.id
         } else {
-            streamable.parent = null
+            streamable['parent'] = null
         }
         return streamable
     }
 }
 
-interface AlbumCriteria extends Criteria {
-    mode? : string
-    root_only? : boolean
-    instance? : number
-    q? : string
-    needs_revision? : boolean
-}
+class AlbumCriteria extends Criteria {
+    mode : string
+    root_only : boolean
+    instance : Album
+    q : string
+    needs_revision : boolean
 
-///////////////////////////////////////
-// album dialogs
-///////////////////////////////////////
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
 
-interface AlbumSearchDialogOptions extends ObjectSearchDialogOptions {
-    on_success(criteria : AlbumCriteria) : boolean
-}
-
-class AlbumSearchDialog extends ObjectSearchDialog {
-    protected options : AlbumSearchDialogOptions
-
-    constructor(options : AlbumSearchDialogOptions) {
-        super(options)
-    }
-
-    show(element : JQuery) {
-        this.options.fields = [
-            ["q", new TextInputField("Search for", false)],
-            ["instance", new AjaxSelectField("Album", "albums", false)],
-            ["mode", new SelectInputField("Mode",
-                [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
-                false)],
-            ["root_only", new booleanInputField("Root only", false)],
-            ["needs_revision", new booleanInputField("Needs revision", false)],
-        ]
-        this.options.title = "Search albums"
-        this.options.description = "Please search for an album."
-        this.options.button = "Search"
-        super.show(element)
-    }
-}
-
-interface AlbumChangeDialogOptions extends ObjectChangeDialogOptions {
-}
-
-class AlbumChangeDialog extends ObjectChangeDialog {
-    protected options : AlbumChangeDialogOptions
-
-    constructor(options : AlbumChangeDialogOptions) {
-        super(options)
-        this.type = "albums"
-        this.type_name = "album"
-    }
-
-    show(element : JQuery) {
-        this.options.fields = [
-            ["title", new TextInputField("Title", true)],
-            ["description", new PInputField("Description", false)],
-            ["cover_photo", new PhotoSelectField("Photo", false)],
-            ["sort_name", new TextInputField("Sort Name", false)],
-            ["sort_order", new TextInputField("Sort Order", false)],
-            ["parent", new AjaxSelectField("Parent", "albums", false)],
-            ["revised", new DateTimeInputField("Revised", false)],
-        ]
-
-        this.options.title = "Change album"
-        this.options.button = "Save"
-
-        super.show(element)
-    }
-
-    protected save_success(data : AlbumStreamable) {
-        let album : Album = new Album(data)
-        if (this.obj.id != null) {
-            window._album_changed.trigger(album)
-        } else {
-            window._album_created.trigger(album)
+        let criteria : AlbumCriteria = this
+        set_streamable_value(streamable, 'mode', criteria.mode)
+        set_streamable_value(streamable, 'root_only', criteria.root_only)
+        if (criteria.instance != null) {
+            set_streamable_value(streamable, 'instance', criteria.instance.id)
         }
-        super.save_success(data)
-    }
-}
-
-interface AlbumDeleteDialogOptions extends ObjectDeleteDialogOptions {
-}
-
-class AlbumDeleteDialog extends ObjectDeleteDialog {
-    constructor(options : AlbumDeleteDialogOptions) {
-        super(options)
-        this.type = "albums"
-        this.type_name = "album"
+        set_streamable_value(streamable, 'q', criteria.q)
+        set_streamable_value(streamable, 'needs_revision', criteria.needs_revision)
+        return streamable
     }
 
-    protected save_success(data : Streamable) {
-        window._album_deleted.trigger(this.obj_id)
-        super.save_success(data)
-    }
-}
-
-
-///////////////////////////////////////
-// album widgets
-///////////////////////////////////////
-
-interface AlbumCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions {
-}
-
-class AlbumCriteriaWidget extends ObjectCriteriaWidget {
-    protected options : AlbumCriteriaWidgetOptions
-    protected type : string
-
-    constructor(options : AlbumCriteriaWidgetOptions) {
-        super(options)
-        this.type = "albums"
-    }
-
-    set(input_criteria : AlbumCriteria) {
-        var mythis = this
-        mythis.element.removeClass("error")
-
-        // this.options.criteria = criteria
-        var ul = this.criteria
-        this.criteria.empty()
-
-        let criteria = $.extend({}, input_criteria)
-
-        var title = null
-
-        var mode = criteria.mode || 'children'
-        delete criteria.mode
+    get_title() : string {
+        let criteria : AlbumCriteria = this
+        let title : string = null
+        let mode = criteria.mode || 'children'
 
         if (criteria.instance != null) {
-            var instance = criteria.instance
-            title = instance + " / " + mode
-
-            $("<li/>")
-                .text("instance" + " = " + instance + " (" + mode + ")")
-                .appendTo(ul)
-
-            delete criteria.instance
+            title = criteria.instance.title + " / " + mode
         }
 
         else if (criteria.q != null) {
@@ -242,30 +135,286 @@ class AlbumCriteriaWidget extends ObjectCriteriaWidget {
             title = "All"
         }
 
-        $.each(criteria, ( index, value ) => {
-            $("<li/>")
-                .text(index + " = " + value)
-                .appendTo(ul)
-        })
+        return title
+    }
 
-        this.finalize(input_criteria, title)
+    get_items() : Array<CriteriaItem> {
+        let criteria : AlbumCriteria = this
+        let result : Array<CriteriaItem> = []
+
+        result.push(new CriteriaItemObject(
+            "instance", "Album",
+            criteria.instance, new AlbumType()))
+        result.push(new CriteriaItemSelect(
+            "mode", "Mode",
+            criteria.mode, [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ]))
+        result.push(new CriteriaItemBoolean(
+            "root_only", "Root Only",
+            criteria.root_only))
+        result.push(new CriteriaItemString(
+            "q", "Search for",
+            criteria.q))
+        result.push(new CriteriaItemBoolean(
+            "needs_revision", "Needs revision",
+            criteria.needs_revision))
+        return result
+    }
+}
+
+class AlbumType extends ObjectType<Album, AlbumCriteria> {
+    constructor() {
+        super(Album.type, "album")
+    }
+
+    object_from_streamable(streamable : PostStreamable) : Album {
+        let obj = new Album()
+        obj.set_streamable(streamable)
+        return obj
+    }
+
+    criteria_from_streamable(streamable : PostStreamable, on_load : (object : AlbumCriteria) => void) : void {
+        let criteria = new AlbumCriteria()
+
+        criteria.mode = get_streamable_string(streamable, 'mode')
+        criteria.root_only = get_streamable_boolean(streamable, 'root_only')
+        criteria.q = get_streamable_string(streamable, 'q')
+        criteria.needs_revision = get_streamable_boolean(streamable, 'needs_revision')
+
+        let id = get_streamable_number(streamable, 'instance')
+        if (id != null) {
+            let obj_type = new AlbumType()
+            let loader = obj_type.load(id)
+            loader.loaded_item.add_listener(this, (object : Album) => {
+                criteria.instance = object
+                on_load(criteria)
+            })
+            loader.on_error.add_listener(this, (message : string) => {
+                console.log(message)
+                criteria.instance = new Album()
+                on_load(criteria)
+            })
+        } else {
+            criteria.instance = null
+            on_load(criteria)
+        }
+    }
+
+    // DIALOGS
+
+    create_dialog(parent : Album) : AlbumChangeDialog {
+        let obj : Album = new Album()
+        obj.parent = parent
+
+        let params : AlbumChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : AlbumChangeDialog = new AlbumChangeDialog(params)
+        return dialog
+    }
+
+    change_dialog(obj : Album) : AlbumChangeDialog {
+        let params : AlbumChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : AlbumChangeDialog = new AlbumChangeDialog(params)
+        return dialog
+    }
+
+    delete_dialog(obj : Album) : AlbumDeleteDialog {
+        let params : AlbumDeleteDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : AlbumDeleteDialog = new AlbumDeleteDialog(params)
+        return dialog
+    }
+
+    search_dialog(criteria : AlbumCriteria, on_success : on_success_function<AlbumCriteria>) : AlbumSearchDialog {
+        let params : AlbumSearchDialogOptions = {
+            obj: criteria,
+            on_success: on_success,
+        }
+
+        let dialog : AlbumSearchDialog = new AlbumSearchDialog(params)
+        return dialog
+    }
+
+    // WIDGETS
+
+    criteria_widget(criteria : AlbumCriteria) : AlbumCriteriaWidget {
+        let params : AlbumCriteriaWidgetOptions = {
+            obj: criteria,
+        }
+
+        let widget : AlbumCriteriaWidget = new AlbumCriteriaWidget(params)
+        return widget
+    }
+
+    list_widget(child_id : string, criteria : AlbumCriteria, disabled : boolean) : AlbumListWidget {
+        let params : AlbumListWidgetOptions = {
+            child_id: child_id,
+            criteria: criteria,
+            disabled: disabled,
+        }
+
+        let widget : AlbumListWidget = new AlbumListWidget(params)
+        return widget
+    }
+
+    detail_infobox() : Infobox {
+        let params : InfoboxOptions = {}
+        let widget : Infobox = new AlbumDetailInfobox(params)
+        return widget
+    }
+
+    // VIEWPORTS
+
+    detail_viewport(object_loader : ObjectLoader<Album, AlbumCriteria>, state : GetStreamable) : AlbumDetailViewport {
+        let params : AlbumDetailViewportOptions = {
+            object_loader: object_loader,
+            object_list_loader: null,
+        }
+
+        let viewport : AlbumDetailViewport = new AlbumDetailViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
+
+    list_viewport(criteria : AlbumCriteria, state : GetStreamable) : AlbumListViewport {
+        let params : AlbumListViewportOptions = {
+            criteria: criteria
+        }
+        let viewport : AlbumListViewport = new AlbumListViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
+}
+
+///////////////////////////////////////
+// album dialogs
+///////////////////////////////////////
+
+class AlbumSearchDialogOptions extends ObjectSearchDialogOptions<AlbumCriteria> {
+}
+
+class AlbumSearchDialog extends ObjectSearchDialog<AlbumCriteria> {
+    protected options : AlbumSearchDialogOptions
+
+    constructor(options : AlbumSearchDialogOptions) {
+        super(options)
+    }
+
+    protected new_criteria() : AlbumCriteria {
+        return new AlbumCriteria()
+    }
+
+    show(element : JQuery) {
+        this.options.fields = [
+            ["q", new TextInputField("Search for", false)],
+            ["instance", new AjaxSelectField("Album", new AlbumType(), false)],
+            ["mode", new SelectInputField("Mode",
+                [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
+                false)],
+            ["root_only", new booleanInputField("Root only", false)],
+            ["needs_revision", new booleanInputField("Needs revision", false)],
+        ]
+        this.options.title = "Search albums"
+        this.options.description = "Please search for an album."
+        this.options.button = "Search"
+        super.show(element)
+    }
+}
+
+class AlbumChangeDialogOptions extends ObjectChangeDialogOptions {
+}
+
+class AlbumChangeDialog extends ObjectChangeDialog<Album> {
+    protected options : AlbumChangeDialogOptions
+
+    constructor(options : AlbumChangeDialogOptions) {
+        super(options)
+        this.type = "albums"
+        this.type_name = "album"
+    }
+
+    show(element : JQuery) {
+        this.options.fields = [
+            ["title", new TextInputField("Title", true)],
+            ["description", new PInputField("Description", false)],
+            ["cover_photo", new PhotoSelectField("Photo", false)],
+            ["sort_name", new TextInputField("Sort Name", false)],
+            ["sort_order", new TextInputField("Sort Order", false)],
+            ["parent", new AjaxSelectField("Parent", new AlbumType(), false)],
+            ["revised", new DateTimeInputField("Revised", false)],
+        ]
+
+        this.options.title = "Change album"
+        this.options.button = "Save"
+
+        super.show(element)
+    }
+
+    protected save_success(data : PostStreamable) {
+        let album : Album = new Album()
+        album.set_streamable(data)
+        if (this.obj.id != null) {
+            window._album_changed.trigger(album)
+        } else {
+            window._album_created.trigger(album)
+        }
+        super.save_success(data)
+    }
+}
+
+class AlbumDeleteDialogOptions extends ObjectDeleteDialogOptions {
+}
+
+class AlbumDeleteDialog extends ObjectDeleteDialog<Album> {
+    constructor(options : AlbumDeleteDialogOptions) {
+        super(options)
+        this.type = "albums"
+        this.type_name = "album"
+    }
+
+    protected save_success(data : Streamable) {
+        window._album_deleted.trigger(this.obj_id)
+        super.save_success(data)
     }
 }
 
 
-interface AlbumListWidgetOptions extends ObjectListWidgetOptions {
+///////////////////////////////////////
+// album widgets
+///////////////////////////////////////
+
+class AlbumCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions<AlbumCriteria> {
 }
 
-class AlbumListWidget extends ObjectListWidget<AlbumStreamable, Album> {
-    protected options : AlbumListWidgetOptions
+class AlbumCriteriaWidget extends ObjectCriteriaWidget<Album, AlbumCriteria> {
+    protected options : AlbumCriteriaWidgetOptions
+    protected type : string
 
-    constructor(options : AlbumListWidgetOptions) {
+    constructor(options : AlbumCriteriaWidgetOptions) {
         super(options)
         this.type = "albums"
     }
+}
 
-    protected to_object(streamable : AlbumStreamable) : Album {
-        return new Album(streamable)
+
+class AlbumListWidgetOptions extends ObjectListWidgetOptions<AlbumCriteria> {
+}
+
+class AlbumListWidget extends ObjectListWidget<Album, AlbumCriteria> {
+    protected options : AlbumListWidgetOptions
+
+    constructor(options : AlbumListWidgetOptions) {
+        super(options, new AlbumType())
     }
 
     show(element : JQuery) {
@@ -285,8 +434,8 @@ class AlbumListWidget extends ObjectListWidget<AlbumStreamable, Album> {
         var child_id : string = this.options.child_id
         var params : AlbumDetailViewportOptions = {
             id: child_id,
-            obj: null,
-            obj_id: null,
+            object_loader: null,
+            object_list_loader: null,
         }
         let viewport : AlbumDetailViewport
         viewport = new AlbumDetailViewport(params)
@@ -307,7 +456,7 @@ class AlbumListWidget extends ObjectListWidget<AlbumStreamable, Album> {
     }
 }
 
-interface AlbumDetailInfoboxOptions extends InfoboxOptions {
+class AlbumDetailInfoboxOptions extends InfoboxOptions {
 }
 
 class AlbumDetailInfobox extends Infobox {
@@ -325,7 +474,7 @@ class AlbumDetailInfobox extends Infobox {
             ["sort_order", new TextOutputField("Sort Order")],
             ["revised", new DateTimeOutputField("Revised")],
             ["description", new POutputField("Description")],
-            ["ascendants", new LinkListOutputField("Ascendants", "albums")],
+            ["ascendants", new LinkListOutputField("Ascendants", new AlbumType())],
         ]
 
         super.show(element);
@@ -343,7 +492,11 @@ class AlbumDetailInfobox extends Infobox {
         super.set(album)
 
         this.options.obj = album
-        this.img.set(album.cover_photo)
+        if (album != null) {
+            this.img.set(album.cover_photo)
+        } else {
+            this.img.set(null)
+        }
     }
 }
 
@@ -352,87 +505,64 @@ class AlbumDetailInfobox extends Infobox {
 // album viewports
 ///////////////////////////////////////
 
-interface AlbumListViewportOptions extends ObjectListViewportOptions {
+class AlbumListViewportOptions extends ObjectListViewportOptions<AlbumCriteria> {
 }
 
-class AlbumListViewport extends ObjectListViewport<AlbumStreamable, Album> {
+class AlbumListViewport extends ObjectListViewport<Album, AlbumCriteria> {
     protected options : AlbumListViewportOptions
 
     constructor(options : AlbumListViewportOptions) {
-        super(options)
-        this.type = "albums"
-        this.type_name = "Album"
+        super(options, new AlbumType())
     }
 
-    protected create_object_list_widget(options : AlbumListWidgetOptions) : AlbumListWidget {
-        return new AlbumListWidget(options)
+    get_streamable_state() : GetStreamable {
+        let streamable : GetStreamable = super.get_streamable_state()
+        return streamable
     }
 
-    protected create_object_criteria_widget(options : AlbumCriteriaWidgetOptions) : AlbumCriteriaWidget {
-        return new AlbumCriteriaWidget(options)
-    }
-
-    protected create_object_search_dialog(options : AlbumSearchDialogOptions) : AlbumSearchDialog {
-        return new AlbumSearchDialog(options)
+    set_streamable_state(streamable : GetStreamable) : void {
+        // load streamable state, must be called before show() is called.
+        super.set_streamable_state(streamable)
     }
 }
 
 
-interface AlbumDetailViewportOptions extends ObjectDetailViewportOptions<AlbumStreamable> {
+class AlbumDetailViewportOptions extends ObjectDetailViewportOptions<Album, AlbumCriteria> {
 }
 
-class AlbumDetailViewport extends ObjectDetailViewport<AlbumStreamable, Album> {
+class AlbumDetailViewport extends ObjectDetailViewport<Album, AlbumCriteria> {
     constructor(options : AlbumDetailViewportOptions) {
-        super(options)
-        this.type = "albums"
-        this.type_name = "Album"
-    }
-
-    protected to_object(streamable : AlbumStreamable) : Album {
-        return new Album(streamable)
+        super(options, new AlbumType())
     }
 
     show(element : JQuery) : void {
         super.show(element)
 
-        var mythis = this
-
         window._album_changed.add_listener(this, (obj : Album) => {
-            if (obj.id === this.options.obj_id) {
-                mythis.set(obj)
+            let this_obj_id : number = this.get_obj_id()
+            if (obj.id === this_obj_id) {
+                this.set(this.obj_type.load(obj.id))
             }
         })
         window._album_deleted.add_listener(this, (obj_id : number) => {
-            if (obj_id === this.options.obj_id) {
-                mythis.remove()
+            let this_obj_id : number = this.get_obj_id()
+            if (obj_id === this_obj_id) {
+                this.remove()
             }
         })
     }
 
     protected get_photo_criteria() : PhotoCriteria {
-        return {
-            'album': this.options.obj_id,
-            'album_descendants': true,
-        }
+        let criteria : PhotoCriteria = new PhotoCriteria()
+        criteria.album = this.get_obj_id()
+        criteria.album_descendants = true
+        return criteria
     }
 
-    protected create_object_list_widget(options : AlbumListWidgetOptions) : AlbumListWidget {
-        return new AlbumListWidget(options)
-    }
-
-    protected create_object_detail_infobox(options : AlbumDetailInfoboxOptions) : AlbumDetailInfobox {
-        return new AlbumDetailInfobox(options)
-    }
-
-    protected create_object_list_viewport(options : AlbumListViewportOptions) : AlbumListViewport {
-        return new AlbumListViewport(options)
-    }
-
-    protected create_object_change_dialog(options : AlbumChangeDialogOptions) : AlbumChangeDialog {
-        return new AlbumChangeDialog(options)
-    }
-
-    protected create_object_delete_dialog(options : AlbumDeleteDialogOptions) : AlbumDeleteDialog {
-        return new AlbumDeleteDialog(options)
+    protected get_children_criteria() : AlbumCriteria {
+        let criteria : AlbumCriteria = new AlbumCriteria()
+        criteria.instance = this.get_obj()
+        criteria.mode = 'children'
+        return criteria
     }
 }

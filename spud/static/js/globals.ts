@@ -1,49 +1,78 @@
 /// <reference path="photo.ts" />
 
-interface Criteria {
-}
+type GetStreamableType = string|boolean|number;
+type PostStreamableType = GetStreamableType|PostStreamable|Array<GetStreamableType|PostStreamable>
 
 class Streamable {
 }
 
-class GenericStreamable {
-    [ index : string ] : string|boolean|number|Streamable
+class GetStreamable extends Streamable {
+    [ index : string ] : GetStreamableType
 }
 
-class StreamableList {
-    results: Array<ObjectStreamable>
-    count : number
+class PostStreamable extends Streamable {
+    [ index : string ] : PostStreamableType
 }
 
-class ObjectStreamable extends Streamable {
-    id : number
-    title : string
-    cover_photo : PhotoStreamable
-    cover_photo_pk : number
-}
+//class ListStreamable<T extends ObjectStreamable> extends PostStreamable {
+//    // results : Array<T>
+//    // count : string
+//}
+
+//class ObjectStreamable extends PostStreamable {
+//}
 
 class SpudObject {
     static type : string = null
+    private obj_type : string
     id : number
     title : string
     cover_photo : Photo
 
-    constructor(streamable : ObjectStreamable) {
-        this.id = parse_number(streamable.id)
-        this.title = parse_string(streamable.title)
-        if (streamable.cover_photo != null) {
-            this.cover_photo = new Photo(streamable.cover_photo)
+    constructor(obj_type : string, streamable? : PostStreamable) {
+        this.obj_type = obj_type
+        if (streamable != null) {
+            this.set_streamable(streamable)
         }
     }
 
-    to_streamable() : ObjectStreamable {
-        let streamable : ObjectStreamable = new ObjectStreamable
+    set_streamable(streamable : PostStreamable) {
+        this.id = get_streamable_number(streamable, "id")
+        this.title = get_streamable_string(streamable, "title")
+
+        let streamable_cover_photo = get_streamable_object(streamable, 'cover_photo')
+        if (streamable_cover_photo != null) {
+            this.cover_photo = new Photo(streamable_cover_photo)
+        }
+    }
+
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = new PostStreamable
         streamable['id'] = this.id
         streamable['title'] = this.title
         if (this.cover_photo != null) {
             streamable['cover_photo_pk'] = this.cover_photo.id
         }
         return streamable
+    }
+}
+
+abstract class Criteria {
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = {}
+        return streamable
+    }
+
+    abstract get_title() : string;
+    abstract get_items() : Array<CriteriaItem>;
+
+    get_idinputfields() : Array<IdInputField> {
+        let items : Array<CriteriaItem> = this.get_items()
+        let result : Array<IdInputField> = []
+        for (let i=0; i<items.length; i++) {
+            result.push(items[i].get_idinputfield())
+        }
+        return result
     }
 }
 
@@ -61,14 +90,14 @@ interface UiAutoCompleteOptions extends UiWidgetOptions {
 interface UiAutoCompleteHtmlOptions extends UiAutoCompleteOptions {
 }
 
-interface UiAjaxAutoCompleteOptions extends UiAutoCompleteHtmlOptions {
-    type : string
+interface UiAjaxAutoCompleteOptions<U extends SpudObject, ObjectCriteria extends Criteria> extends UiAutoCompleteHtmlOptions {
+    obj_type : ObjectType<U,ObjectCriteria>
 }
 
-interface UiAjaxAutoCompleteMultipleOptions extends UiAjaxAutoCompleteOptions {
+interface UiAjaxAutoCompleteMultipleOptions<U extends SpudObject, ObjectCriteria extends Criteria> extends UiAjaxAutoCompleteOptions<U, ObjectCriteria> {
 }
 
-interface UiAjaxAutoCompleteSortedOptions extends UiAjaxAutoCompleteOptions {
+interface UiAjaxAutoCompleteSortedOptions<U extends SpudObject, ObjectCriteria extends Criteria> extends UiAjaxAutoCompleteOptions<U, ObjectCriteria> {
 }
 
 // this inherits from UiAutoCompleteHtmlOptions not UiAjaxAutoCompleteOptions, as
@@ -108,9 +137,9 @@ interface SPUD {
     widget(options: UiWidgetOptions, div: JQuery): JQuery;
 
     autocompletehtml(options: UiAutoCompleteHtmlOptions, div: JQuery): JQuery;
-    ajaxautocomplete(options: UiAjaxAutoCompleteOptions, div: JQuery): JQuery;
-    ajaxautocompletemultiple(options: UiAjaxAutoCompleteMultipleOptions, div: JQuery): JQuery;
-    ajaxautocompletesorted(options: UiAjaxAutoCompleteSortedOptions, div: JQuery): JQuery;
+    ajaxautocomplete<U extends SpudObject, ObjectCriteria extends Criteria>(options: UiAjaxAutoCompleteOptions<U, ObjectCriteria>, div: JQuery): JQuery;
+    ajaxautocompletemultiple<U extends SpudObject, ObjectCriteria extends Criteria>(options: UiAjaxAutoCompleteMultipleOptions<U, ObjectCriteria>, div: JQuery): JQuery;
+    ajaxautocompletesorted<U extends SpudObject, ObjectCriteria extends Criteria>(options: UiAjaxAutoCompleteSortedOptions<U, ObjectCriteria>, div: JQuery): JQuery;
     photo_select(options: UiPhotoSelectOptions, div: JQuery): JQuery;
     myselectable(options: UiMySelectableOptions, div: JQuery): JQuery;
 }
@@ -121,20 +150,20 @@ interface JQueryStatic {
 
 interface JQuery {
     ajaxautocomplete(methodName: 'destroy'): void;
-    ajaxautocomplete(methodName: 'get'): SpudObject;
+    ajaxautocomplete<U extends SpudObject>(methodName: 'get'): U;
     ajaxautocomplete(methodName: string): any;
     ajaxautocomplete(methodName: 'set', obj: SpudObject, obj_pk: number): void;
     ajaxautocomplete(methodName: string, obj: SpudObject, obj_pk: number): void;
 
     ajaxautocompletemultiple(methodName: 'destroy'): void;
-    ajaxautocompletemultiple(methodName: 'get'): Array<SpudObject>;
-    ajaxautocompletemultiple(methodName: string): Array<SpudObject>;
+    ajaxautocompletemultiple<U extends SpudObject>(methodName: 'get'): Array<U>;
+    ajaxautocompletemultiple(methodName: string): any;
     ajaxautocompletemultiple(methodName: 'set', obj: Array<SpudObject>, obj_pk: number): void;
     ajaxautocompletemultiple(methodName: string, obj: Array<SpudObject>, obj_pk: number): void;
 
     ajaxautocompletesorted(methodName: 'destroy'): void;
-    ajaxautocompletesorted(methodName: 'get'): Array<SpudObject>;
-    ajaxautocompletesorted(methodName: string): Array<SpudObject>;
+    ajaxautocompletesorted<U extends SpudObject>(methodName: 'get'): Array<U>;
+    ajaxautocompletesorted(methodName: string): any;
     ajaxautocompletesorted(methodName: 'set', obj: Array<SpudObject>, obj_pk: number): void;
     ajaxautocompletesorted(methodName: string, obj: Array<SpudObject>, obj_pk: number): void;
 

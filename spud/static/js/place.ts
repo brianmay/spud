@@ -32,22 +32,12 @@ window._place_created = new Signal<Place>()
 window._place_changed = new Signal<Place>()
 window._place_deleted = new Signal<number>()
 
-
-class PlaceStreamable extends ObjectStreamable {
-    address : string
-    address2 : string
-    city : string
-    state : string
-    country : string
-    postcode : string
-    url : string
-    urldesc : string
-    notes : string
-    ascendants : Array <PlaceStreamable>
-    parent : number
-}
+window._place_created.add_listener(null, () => {
+    window._reload_all.trigger(null);
+})
 
 class Place extends SpudObject {
+    static type : string = 'place'
     address : string
     address2 : string
     city : string
@@ -61,76 +51,276 @@ class Place extends SpudObject {
     parent : Place
     _type_place : boolean
 
-    constructor(streamable : PlaceStreamable) {
-        super(streamable)
-        this.address = parse_string(streamable.address)
-        this.address2 = parse_string(streamable.address2)
-        this.city = parse_string(streamable.city)
-        this.state = parse_string(streamable.state)
-        this.country = parse_string(streamable.country)
-        this.postcode = parse_string(streamable.postcode)
-        this.url = parse_string(streamable.url)
-        this.urldesc = parse_string(streamable.urldesc)
-        this.notes = parse_string(streamable.notes)
-        if (streamable.ascendants != null) {
-            this.ascendants = []
-            for (let i=0; i<streamable.ascendants.length; i++) {
-                this.ascendants.push(new Place(streamable.ascendants[i]))
-            }
-            if (streamable.ascendants.length > 0) {
-                this.parent = this.ascendants[0]
-            } else {
-                this.parent = null
-            }
+    constructor(streamable? : PostStreamable) {
+        super(Place.type, streamable)
+    }
+
+    set_streamable(streamable? : PostStreamable) {
+        super.set_streamable(streamable)
+
+        this.address = get_streamable_string(streamable, 'address')
+        this.address2 = get_streamable_string(streamable, 'address2')
+        this.city = get_streamable_string(streamable, 'city')
+        this.state = get_streamable_string(streamable, 'state')
+        this.country = get_streamable_string(streamable, 'country')
+        this.postcode = get_streamable_string(streamable, 'postcode')
+        this.url = get_streamable_string(streamable, 'url')
+        this.urldesc = get_streamable_string(streamable, 'urldesc')
+        this.notes = get_streamable_string(streamable, 'notes')
+
+        let ascendants = get_streamable_array(streamable, 'ascendants')
+        this.ascendants = []
+        for (let i=0; i<ascendants.length; i++) {
+            let item : PostStreamable = streamable_to_object(ascendants[i])
+            this.ascendants.push(new Place(item))
+        }
+        if (ascendants.length > 0) {
+            let item : PostStreamable = streamable_to_object(ascendants[0])
+            this.parent = new Place(item)
+        } else {
+            this.parent = null
         }
     }
 
-    to_streamable() : PlaceStreamable {
-        let streamable : PlaceStreamable = <PlaceStreamable>super.to_streamable()
-        streamable.address = this.address
-        streamable.address2 = this.address2
-        streamable.city = this.city
-        streamable.state = this.state
-        streamable.country = this.country
-        streamable.postcode = this.postcode
-        streamable.url = this.url
-        streamable.urldesc = this.urldesc
-        streamable.notes = this.notes
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
+        streamable['address'] = this.address
+        streamable['address2'] = this.address2
+        streamable['city'] = this.city
+        streamable['state'] = this.state
+        streamable['country'] = this.country
+        streamable['postcode'] = this.postcode
+        streamable['url'] = this.url
+        streamable['urldesc'] = this.urldesc
+        streamable['notes'] = this.notes
         if (this.parent != null) {
-            streamable.parent = this.parent.id
+            streamable['parent'] = this.parent.id
         } else {
-            streamable.parent = null
+            streamable['parent'] = null
         }
         return streamable
     }
 }
 
-interface PlaceCriteria extends Criteria {
-    mode? : string
-    root_only? : boolean
-    instance? : number
-    q? : string
+class PlaceCriteria extends Criteria {
+    mode : string
+    root_only : boolean
+    instance : Place
+    q : string
+
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
+
+        let criteria : PlaceCriteria = this
+        set_streamable_value(streamable, 'mode', criteria.mode)
+        set_streamable_value(streamable, 'root_only', criteria.root_only)
+        if (criteria.instance != null) {
+            set_streamable_value(streamable, 'instance', criteria.instance.id)
+        }
+        set_streamable_value(streamable, 'q', criteria.q)
+        return streamable
+    }
+
+    get_title() : string {
+        let criteria : PlaceCriteria = this
+        let title : string = null
+        let mode = criteria.mode || 'children'
+
+        if (criteria.instance != null) {
+            title = criteria.instance.title + " / " + mode
+        }
+
+        else if (criteria.q != null) {
+            title = "search " + criteria.q
+        }
+
+        else if (criteria.root_only) {
+            title = "root only"
+        }
+
+        else {
+            title = "All"
+        }
+
+        return title
+    }
+
+    get_items() : Array<CriteriaItem> {
+        let criteria : PlaceCriteria = this
+        let result : Array<CriteriaItem> = []
+
+        result.push(new CriteriaItemObject(
+            "instance", "Place",
+            criteria.instance, new PlaceType()))
+        result.push(new CriteriaItemSelect(
+            "mode", "Mode",
+            criteria.mode, [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ]))
+        result.push(new CriteriaItemBoolean(
+            "root_only", "Root Only",
+            criteria.root_only))
+        result.push(new CriteriaItemString(
+            "q", "Search for",
+            criteria.q))
+        return result
+    }
+}
+
+class PlaceType extends ObjectType<Place, PlaceCriteria> {
+    constructor() {
+        super(Place.type, "place")
+    }
+
+    object_from_streamable(streamable : PostStreamable) : Place {
+        let obj = new Place()
+        obj.set_streamable(streamable)
+        return obj
+    }
+
+    criteria_from_streamable(streamable : PostStreamable, on_load : (object : PlaceCriteria) => void) : void {
+        let criteria = new PlaceCriteria()
+
+        criteria.mode = get_streamable_string(streamable, 'mode')
+        criteria.root_only = get_streamable_boolean(streamable, 'root_only')
+        criteria.q = get_streamable_string(streamable, 'q')
+
+        let id = get_streamable_number(streamable, 'instance')
+        if (id != null) {
+            let obj_type = new PlaceType()
+            let loader = obj_type.load(id)
+            loader.loaded_item.add_listener(this, (object : Place) => {
+                criteria.instance = object
+                on_load(criteria)
+            })
+            loader.on_error.add_listener(this, (message : string) => {
+                console.log(message)
+                criteria.instance = new Place()
+                on_load(criteria)
+            })
+        } else {
+            criteria.instance = null
+            on_load(criteria)
+        }
+    }
+
+    // DIALOGS
+
+    create_dialog(parent : Place) : PlaceChangeDialog {
+        let obj : Place = new Place()
+        obj.parent = parent
+
+        let params : PlaceChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : PlaceChangeDialog = new PlaceChangeDialog(params)
+        return dialog
+    }
+
+    change_dialog(obj : Place) : PlaceChangeDialog {
+        let params : PlaceChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : PlaceChangeDialog = new PlaceChangeDialog(params)
+        return dialog
+    }
+
+    delete_dialog(obj : Place) : PlaceDeleteDialog {
+        let params : PlaceDeleteDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : PlaceDeleteDialog = new PlaceDeleteDialog(params)
+        return dialog
+    }
+
+    search_dialog(criteria : PlaceCriteria, on_success : on_success_function<PlaceCriteria>) : PlaceSearchDialog {
+        let params : PlaceSearchDialogOptions = {
+            obj: criteria,
+            on_success: on_success,
+        }
+
+        let dialog : PlaceSearchDialog = new PlaceSearchDialog(params)
+        return dialog
+    }
+
+    // WIDGETS
+
+    criteria_widget(criteria : PlaceCriteria) : PlaceCriteriaWidget {
+        let params : PlaceCriteriaWidgetOptions = {
+            obj: criteria,
+        }
+
+        let widget : PlaceCriteriaWidget = new PlaceCriteriaWidget(params)
+        return widget
+    }
+
+    list_widget(child_id : string, criteria : PlaceCriteria, disabled : boolean) : PlaceListWidget {
+        let params : PlaceListWidgetOptions = {
+            child_id: child_id,
+            criteria: criteria,
+            disabled: disabled,
+        }
+
+        let widget : PlaceListWidget = new PlaceListWidget(params)
+        return widget
+    }
+
+    detail_infobox() : Infobox {
+        let params : InfoboxOptions = {}
+        let widget : Infobox = new PlaceDetailInfobox(params)
+        return widget
+    }
+
+    // VIEWPORTS
+
+    detail_viewport(object_loader : ObjectLoader<Place, PlaceCriteria>, state : GetStreamable) : PlaceDetailViewport {
+        let params : PlaceDetailViewportOptions = {
+            object_loader: object_loader,
+            object_list_loader: null,
+        }
+
+        let viewport : PlaceDetailViewport = new PlaceDetailViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
+
+    list_viewport(criteria : PlaceCriteria, state : GetStreamable) : PlaceListViewport {
+        let params : PlaceListViewportOptions = {
+            criteria: criteria
+        }
+        let viewport : PlaceListViewport = new PlaceListViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
 }
 
 ///////////////////////////////////////
 // place dialogs
 ///////////////////////////////////////
 
-interface PlaceSearchDialogOptions extends ObjectSearchDialogOptions {
-    on_success(criteria : PlaceCriteria) : boolean
+class PlaceSearchDialogOptions extends ObjectSearchDialogOptions<PlaceCriteria> {
 }
 
-class PlaceSearchDialog extends ObjectSearchDialog {
+class PlaceSearchDialog extends ObjectSearchDialog<PlaceCriteria> {
     protected options : PlaceSearchDialogOptions
 
     constructor(options : PlaceSearchDialogOptions) {
         super(options)
     }
 
+    protected new_criteria() : PlaceCriteria {
+        return new PlaceCriteria()
+    }
+
     show(element : JQuery) {
         this.options.fields = [
             ["q", new TextInputField("Search for", false)],
-            ["instance", new AjaxSelectField("Place", "places", false)],
+            ["instance", new AjaxSelectField("Place", new PlaceType(), false)],
             ["mode", new SelectInputField("Mode",
                 [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
@@ -143,10 +333,10 @@ class PlaceSearchDialog extends ObjectSearchDialog {
     }
 }
 
-interface PlaceChangeDialogOptions extends ObjectChangeDialogOptions {
+class PlaceChangeDialogOptions extends ObjectChangeDialogOptions {
 }
 
-class PlaceChangeDialog extends ObjectChangeDialog {
+class PlaceChangeDialog extends ObjectChangeDialog<Place> {
     protected options : PlaceChangeDialogOptions
 
     constructor(options : PlaceChangeDialogOptions) {
@@ -168,7 +358,7 @@ class PlaceChangeDialog extends ObjectChangeDialog {
             ["url", new TextInputField("URL", false)],
             ["urldesc", new TextInputField("URL desc", false)],
             ["notes", new PInputField("Notes", false)],
-            ["parent", new AjaxSelectField("Parent", "places", false)],
+            ["parent", new AjaxSelectField("Parent", new PlaceType(), false)],
         ]
 
         this.options.title = "Change place"
@@ -177,8 +367,9 @@ class PlaceChangeDialog extends ObjectChangeDialog {
         super.show(element)
     }
 
-    protected save_success(data : PlaceStreamable) {
-        let place : Place = new Place(data)
+    protected save_success(data : PostStreamable) {
+        let place : Place = new Place()
+        place.set_streamable(data)
         if (this.obj.id != null) {
             window._place_changed.trigger(place)
         } else {
@@ -188,10 +379,10 @@ class PlaceChangeDialog extends ObjectChangeDialog {
     }
 }
 
-interface PlaceDeleteDialogOptions extends ObjectDeleteDialogOptions {
+class PlaceDeleteDialogOptions extends ObjectDeleteDialogOptions{
 }
 
-class PlaceDeleteDialog extends ObjectDeleteDialog {
+class PlaceDeleteDialog extends ObjectDeleteDialog<Place> {
     constructor(options : PlaceDeleteDialogOptions) {
         super(options)
         this.type = "places"
@@ -209,80 +400,26 @@ class PlaceDeleteDialog extends ObjectDeleteDialog {
 // place widgets
 ///////////////////////////////////////
 
-interface PlaceCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions {
+class PlaceCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions<PlaceCriteria> {
 }
 
-class PlaceCriteriaWidget extends ObjectCriteriaWidget {
+class PlaceCriteriaWidget extends ObjectCriteriaWidget<Place, PlaceCriteria> {
     protected options : PlaceCriteriaWidgetOptions
-    protected type : string
 
     constructor(options : PlaceCriteriaWidgetOptions) {
         super(options)
-        this.type = "places"
-    }
-
-    set(input_criteria : PlaceCriteria) {
-        var mythis = this
-        mythis.element.removeClass("error")
-
-        // this.options.criteria = criteria
-        var ul = this.criteria
-        this.criteria.empty()
-
-        let criteria = $.extend({}, input_criteria)
-
-        var title = null
-
-        var mode = criteria.mode || 'children'
-        delete criteria.mode
-
-        if (criteria.instance != null) {
-            var instance = criteria.instance
-            title = instance + " / " + mode
-
-            $("<li/>")
-                .text("instance" + " = " + instance + " (" + mode + ")")
-                .appendTo(ul)
-
-            delete criteria.instance
-        }
-
-        else if (criteria.q != null) {
-            title = "search " + criteria.q
-        }
-
-        else if (criteria.root_only) {
-            title = "root only"
-        }
-
-        else {
-            title = "All"
-        }
-
-        $.each(criteria, ( index, value ) => {
-            $("<li/>")
-                .text(index + " = " + value)
-                .appendTo(ul)
-        })
-
-        this.finalize(input_criteria, title)
     }
 }
 
 
-interface PlaceListWidgetOptions extends ObjectListWidgetOptions {
+class PlaceListWidgetOptions extends ObjectListWidgetOptions<PlaceCriteria> {
 }
 
-class PlaceListWidget extends ObjectListWidget<PlaceStreamable, Place> {
+class PlaceListWidget extends ObjectListWidget<Place, PlaceCriteria> {
     protected options : PlaceListWidgetOptions
 
     constructor(options : PlaceListWidgetOptions) {
-        super(options)
-        this.type = "places"
-    }
-
-    protected to_object(streamable : PlaceStreamable) : Place {
-        return new Place(streamable)
+        super(options, new PlaceType())
     }
 
     show(element : JQuery) {
@@ -302,8 +439,8 @@ class PlaceListWidget extends ObjectListWidget<PlaceStreamable, Place> {
         var child_id : string = this.options.child_id
         var params : PlaceDetailViewportOptions = {
             id: child_id,
-            obj: null,
-            obj_id: null,
+            object_loader: null,
+            object_list_loader: null,
         }
         let viewport : PlaceDetailViewport
         viewport = new PlaceDetailViewport(params)
@@ -321,7 +458,7 @@ class PlaceListWidget extends ObjectListWidget<PlaceStreamable, Place> {
     }
 }
 
-interface PlaceDetailInfoboxOptions extends InfoboxOptions {
+class PlaceDetailInfoboxOptions extends InfoboxOptions {
 }
 
 class PlaceDetailInfobox extends Infobox {
@@ -342,10 +479,10 @@ class PlaceDetailInfobox extends Infobox {
             ["country", new TextOutputField("Country")],
             // FIXME
             // ["url", new HtmlOutputField("URL")],
-            ["home_of", new LinkListOutputField("Home of", "places")],
-            ["work_of", new LinkListOutputField("Work of", "places")],
+            ["home_of", new LinkListOutputField("Home of", new PlaceType())],
+            ["work_of", new LinkListOutputField("Work of", new PlaceType())],
             ["notes", new POutputField("notes")],
-            ["ascendants", new LinkListOutputField("Ascendants", "places")],
+            ["ascendants", new LinkListOutputField("Ascendants", new PlaceType())],
         ]
 
         super.show(element);
@@ -363,7 +500,11 @@ class PlaceDetailInfobox extends Infobox {
         super.set(place)
 
         this.options.obj = place
-        this.img.set(place.cover_photo)
+        if (place != null) {
+            this.img.set(place.cover_photo)
+        } else {
+            this.img.set(null)
+        }
     }
 }
 
@@ -372,91 +513,64 @@ class PlaceDetailInfobox extends Infobox {
 // place viewports
 ///////////////////////////////////////
 
-interface PlaceListViewportOptions extends ObjectListViewportOptions {
+class PlaceListViewportOptions extends ObjectListViewportOptions<PlaceCriteria> {
 }
 
-class PlaceListViewport extends ObjectListViewport<PlaceStreamable, Place> {
+class PlaceListViewport extends ObjectListViewport<Place, PlaceCriteria> {
     protected options : PlaceListViewportOptions
 
     constructor(options : PlaceListViewportOptions) {
-        super(options)
-        this.type = "places"
-        this.type_name = "Place"
+        super(options, new PlaceType())
     }
 
-    protected to_object(streamable : PlaceStreamable) : Place {
-        return new Place(streamable)
+    get_streamable_state() : GetStreamable {
+        let streamable : GetStreamable = super.get_streamable_state()
+        return streamable
     }
 
-    protected create_object_list_widget(options : PlaceListWidgetOptions) : PlaceListWidget {
-        return new PlaceListWidget(options)
-    }
-
-    protected create_object_criteria_widget(options : PlaceCriteriaWidgetOptions) : PlaceCriteriaWidget {
-        return new PlaceCriteriaWidget(options)
-    }
-
-    protected create_object_search_dialog(options : PlaceSearchDialogOptions) : PlaceSearchDialog {
-        return new PlaceSearchDialog(options)
+    set_streamable_state(streamable : GetStreamable) : void {
+        // load streamable state, must be called before show() is called.
+        super.set_streamable_state(streamable)
     }
 }
 
 
-interface PlaceDetailViewportOptions extends ObjectDetailViewportOptions<PlaceStreamable> {
+class PlaceDetailViewportOptions extends ObjectDetailViewportOptions<Place, PlaceCriteria> {
 }
 
-class PlaceDetailViewport extends ObjectDetailViewport<PlaceStreamable, Place> {
+class PlaceDetailViewport extends ObjectDetailViewport<Place, PlaceCriteria> {
     constructor(options : PlaceDetailViewportOptions) {
-        super(options)
-        this.type = "places"
-        this.type_name = "Place"
-    }
-
-    protected to_object(streamable : PlaceStreamable) : Place {
-        return new Place(streamable)
+        super(options, new PlaceType())
     }
 
     show(element : JQuery) : void {
         super.show(element)
 
-        var mythis = this
-
         window._place_changed.add_listener(this, (obj : Place) => {
-            if (obj.id === this.options.obj_id) {
-                mythis.set(obj)
+            let this_obj_id : number = this.get_obj_id()
+            if (obj.id === this_obj_id) {
+                this.set(this.obj_type.load(obj.id))
             }
         })
         window._place_deleted.add_listener(this, (obj_id : number) => {
-            if (obj_id === this.options.obj_id) {
-                mythis.remove()
+            let this_obj_id : number = this.get_obj_id()
+            if (obj_id === this_obj_id) {
+                this.remove()
             }
         })
     }
 
     protected get_photo_criteria() : PhotoCriteria {
-        return {
-            'place': this.options.obj_id,
-            'place_descendants': true,
-        }
+        let criteria : PhotoCriteria = new PhotoCriteria()
+        criteria.place = this.get_obj_id()
+        criteria.place_descendants = true
+        return criteria
     }
 
-    protected create_object_list_widget(options : PlaceListWidgetOptions) : PlaceListWidget {
-        return new PlaceListWidget(options)
-    }
-
-    protected create_object_detail_infobox(options : PlaceDetailInfoboxOptions) : PlaceDetailInfobox {
-        return new PlaceDetailInfobox(options)
-    }
-
-    protected create_object_list_viewport(options : PlaceListViewportOptions) : PlaceListViewport {
-        return new PlaceListViewport(options)
-    }
-
-    protected create_object_change_dialog(options : PlaceChangeDialogOptions) : PlaceChangeDialog {
-        return new PlaceChangeDialog(options)
-    }
-
-    protected create_object_delete_dialog(options : PlaceDeleteDialogOptions) : PlaceDeleteDialog {
-        return new PlaceDeleteDialog(options)
+    protected get_children_criteria() : PlaceCriteria {
+        let criteria : PlaceCriteria = new PlaceCriteria()
+        criteria.instance = this.get_obj()
+        criteria.mode = 'children'
+        return criteria
     }
 }

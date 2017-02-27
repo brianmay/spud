@@ -37,44 +37,25 @@ void static_url
 // *********
 // * LINKS *
 // *********
-function object_a(type : string, value : SpudObject) {
-    let viewport : Viewport
-    let params = {
-        obj: null,
-        obj_id: value.id,
-    }
+function object_a<U extends SpudObject, ObjectCriteria extends Criteria>
+        (obj_type : ObjectType<U, ObjectCriteria>, obj : U) {
 
-    if (type === "albums") {
-        viewport = new AlbumDetailViewport(params)
-    }
-    else if (type === "categorys") {
-        viewport = new CategoryDetailViewport(params)
-    }
-    else if (type === "places") {
-        viewport = new PlaceDetailViewport(params)
-    }
-    else if (type === "persons") {
-        viewport = new PersonDetailViewport(params)
-    }
-    else if (type === "photos") {
-        viewport = new PhotoDetailViewport(params)
-    }
-    else {
-        return null;
-    }
+    let loader : ObjectLoader<U, ObjectCriteria> = new ObjectLoader(obj_type, obj)
+    let viewport : Viewport = obj_type.detail_viewport(loader, null)
+    let type = obj_type.get_type()
     var a = $('<a/>')
-        .attr('href', root_url() + type + "/" + value.id + "/")
+        .attr('href', root_url() + type + "/" + obj.id + "/")
         .on('click', function () {
             add_viewport(viewport)
             return false;
         })
-        .data('photo', value.cover_photo)
-        .text(value.title);
+        .data('photo', obj.cover_photo)
+        .text(obj.title);
     return a;
 }
 
 function photo_a(photo) {
-    return object_a("photos", photo)
+    return object_a(new PhotoType(), photo)
 }
 
 void photo_a

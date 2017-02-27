@@ -124,7 +124,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Albums")
         .on('click', (ev) => {
-            let criteria : AlbumCriteria = {root_only: true}
+            let criteria : AlbumCriteria = new AlbumCriteria()
+            criteria.root_only = true
             let viewport = new AlbumListViewport({criteria: criteria})
             add_viewport(viewport)
             return false
@@ -134,7 +135,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Categories")
         .on('click', (ev) => {
-            let criteria : CategoryCriteria = {root_only: true}
+            let criteria : CategoryCriteria = new CategoryCriteria()
+            criteria.root_only = true
             let viewport = new CategoryListViewport({criteria: criteria})
             add_viewport(viewport)
             return false
@@ -144,7 +146,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("Places")
         .on('click', (ev) => {
-            let criteria : PlaceCriteria = {root_only: true}
+            let criteria : PlaceCriteria = new PlaceCriteria()
+            criteria.root_only = true
             let viewport = new PlaceListViewport({criteria: criteria})
             add_viewport(viewport)
             return false
@@ -154,7 +157,8 @@ function setup_menu(session) {
     $('<li/>')
         .text("People")
         .on('click', (ev) => {
-            let criteria : PersonCriteria = {}
+            let criteria : PersonCriteria = new PersonCriteria()
+            criteria.root_only = true
             let viewport = new PersonListViewport({criteria: criteria})
             add_viewport(viewport)
             return false
@@ -164,7 +168,7 @@ function setup_menu(session) {
     $('<li/>')
         .text("Photos")
         .on('click', (ev) => {
-            let criteria : PhotoCriteria = {}
+            let criteria : PhotoCriteria = new PhotoCriteria()
             let viewport = new PhotoListViewport({criteria: criteria})
             add_viewport(viewport)
             return false

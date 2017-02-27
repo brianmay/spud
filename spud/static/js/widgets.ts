@@ -1,7 +1,7 @@
 /// <reference path="generic.ts" />
 /// <reference path="DefinitelyTyped/jquery.d.ts" />
 
-interface WidgetOptions {
+class WidgetOptions {
     disabled? : boolean
 }
 
@@ -45,10 +45,13 @@ class Widget {
     }
 
     hide() : void {
-        this.element.filter(":data(widget)").each((key : number, el : Element) => {
+        this.element.find(":data(widget)").each((key : number, el : Element) => {
             let widget : Widget = $(el).data("widget")
-            widget.destroy()
+            if (widget != null) {
+                widget.destroy()
+            }
         })
+        this.destroy()
     }
 
     remove() : void {
@@ -64,7 +67,7 @@ class Widget {
     }
 }
 
-interface ViewportOptions extends WidgetOptions {
+class ViewportOptions extends WidgetOptions {
     id? : string
     title? : string
 }
@@ -86,7 +89,7 @@ abstract class Viewport extends Widget {
         if (this.options.id == null) {
             this.options.id = this.get_uuid()
         }
-        this.element.attr("id", this.options.id)
+        this.set_id(this.options.id)
 
         let header = $("<div/>")
             .addClass("viewport_header")
@@ -208,6 +211,15 @@ abstract class Viewport extends Widget {
         }
     }
 
+    private set_id(id) : void {
+        this.options.id = id
+        this.element.attr("id", id)
+    }
+
+    get_id() : string {
+        return this.options.id
+    }
+
     set_title(title) : void {
         this.h1.text(title)
         this.options.title = title
@@ -222,17 +234,27 @@ abstract class Viewport extends Widget {
 
     abstract get_url() : string;
 
-    get_streamable_options() : GenericStreamable {
-        let streamable : GenericStreamable = {}
-        streamable['disabled'] = this.options.disabled
-        streamable['title'] = this.options.title
-        streamable['id'] = this.options.id
+    set_streamable_state(streamable : GetStreamable) : void {
+        //if (state['disabled']) {
+        //    this.options.disabled = true
+        //} else {
+        //    this.options.disabled = false
+        //}
+        //this.options.title = parse_string(state['title'] + "")
+        //this.options.id = parse_string(state['id'] + "")
+    }
+
+    get_streamable_state() : GetStreamable {
+        let streamable : GetStreamable = {}
+        //state['disabled'] = this.options.disabled
+        //state['title'] = this.options.title
+        //state['id'] = this.options.id
         return streamable
     }
 }
 
 // define dialog
-interface BaseDialogOptions extends WidgetOptions {
+class BaseDialogOptions extends WidgetOptions {
     title? : any
     description? : string
     button? : string
@@ -366,7 +388,11 @@ abstract class BaseDialog extends Widget {
     }
 
     protected save(http_type : string, object_id : number, values : Streamable) : void {
-        this._save(http_type, object_id.toString(), values)
+        let str_object_id = null
+        if (object_id != null) {
+            str_object_id = object_id.toString()
+        }
+        this._save(http_type, str_object_id, values)
     }
 
     protected save_action(http_type : string, what : string, values : Streamable) : void {
@@ -385,7 +411,7 @@ abstract class BaseDialog extends Widget {
 }
 
 
-interface ImageWidgetOptions extends WidgetOptions {
+class ImageWidgetOptions extends WidgetOptions {
     photo? : Photo
     size : string
     do_video? : boolean
@@ -537,7 +563,7 @@ class ImageWidget extends Widget {
     }
 }
 
-interface ListWidgetOptions extends WidgetOptions {
+class ListWidgetOptions extends WidgetOptions {
 }
 
 
@@ -578,14 +604,14 @@ class ListWidget extends Widget {
     }
 }
 
-interface ImageListWidgetOptions extends ListWidgetOptions {
+class ImageListWidgetOptions extends ListWidgetOptions {
 }
 
 class ImageListWidget extends ListWidget {
-    protected options : PhotoListWidgetOptions
+    protected options : ImageListWidgetOptions
     // private images : Array<ImageWidget>
 
-    constructor(options : PhotoListWidgetOptions) {
+    constructor(options : ImageListWidgetOptions) {
         super(options)
     }
 

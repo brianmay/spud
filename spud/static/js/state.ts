@@ -27,11 +27,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // state
 ///////////////////////////////////////
 interface ViewportClass {
-    (options : ViewportOptions, element? : JQuery) : void
+    (options : ViewportOptions) : void
 }
 
 interface ViewportState {
-    options : Streamable
+    state : GetStreamable
     class_name : string
 }
 
@@ -63,9 +63,9 @@ function get_state() {
         }
 
         if (class_name) {
-            let streamable : Streamable = viewport.get_streamable_options()
+            let state : GetStreamable = viewport.get_streamable_state()
             results[i] = {
-                options: streamable,
+                state: state,
                 class_name: class_name,
             }
         }
@@ -79,9 +79,10 @@ function put_state(state : Array<ViewportState>) {
     $("#content").empty()
     for (let viewport_state of state) {
         let name : string = viewport_state.class_name
-        let options : Streamable = viewport_state.options
+        let state : GetStreamable = viewport_state.state
         let viewport_class : ViewportClass = _viewport_class_dict[name];
-        let viewport : Viewport = new viewport_class(options)
+        let viewport : Viewport = new viewport_class({})
+        viewport.set_streamable_state(state)
         add_viewport(viewport)
     }
 

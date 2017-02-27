@@ -32,55 +32,9 @@ window._photo_created = new Signal<Photo>()
 window._photo_changed = new Signal<Photo>()
 window._photo_deleted = new Signal<number>()
 
-
-class PhotoThumbStreamable extends Streamable {
-    width : number
-    height : number
-    url : string
-}
-
-class PhotoVideoStreamable extends Streamable {
-    width : number
-    height : number
-    url : string
-    format : string
-}
-
-class PriorityPhotoVideoStreamable {
-    0: number
-    1: PhotoVideoStreamable
-}
-
-class PhotoStreamable extends ObjectStreamable {
-    action : string
-    datetime : string
-    datetime_utc_offset : number
-    description : string
-    camera_make : string
-    camera_model : string
-    flash_used : string
-    focal_length : string
-    exposure : string
-    aperture : string
-    iso_equiv : string
-    metering_mode : string
-
-    albums : Array<AlbumStreamable>
-    categorys : Array<CategoryStreamable>
-    persons : Array<PersonStreamable>
-    photographer : PersonStreamable
-    place : PlaceStreamable
-
-    albums_pk : Array<number>
-    categorys_pk : Array<number>
-    persons_pk : Array<number>
-    photographer_pk : number
-    place_pk : number
-
-    orig_url : string
-    thumbs : StringArray<PhotoThumbStreamable>
-    videos : StringArray<Array<PriorityPhotoVideoStreamable>>
-}
+window._photo_created.add_listener(null, () => {
+    window._reload_all.trigger(null);
+})
 
 class PhotoThumb {
     width : number
@@ -101,6 +55,7 @@ class PriorityPhotoVideo {
 }
 
 class Photo extends SpudObject {
+    static type : string = 'photos'
     action : string
     datetime : DateTimeZone
     description : string
@@ -124,139 +79,290 @@ class Photo extends SpudObject {
     videos : StringArray<Array<PriorityPhotoVideo>>
     _type_photo : boolean
 
-    constructor(streamable : PhotoStreamable) {
-        super(streamable)
-        this.action = parse_string(streamable.action)
-        this.datetime = parse_datetimezone(streamable.datetime, streamable.datetime_utc_offset)
-        this.description = parse_string(streamable.description)
-        this.camera_make = parse_string(streamable.camera_make)
-        this.camera_model = parse_string(streamable.camera_model)
-        this.flash_used = parse_string(streamable.flash_used)
-        this.focal_length = parse_string(streamable.focal_length)
-        this.exposure = parse_string(streamable.exposure)
-        this.aperture = parse_string(streamable.aperture)
-        this.iso_equiv = parse_string(streamable.iso_equiv)
-        this.metering_mode = parse_string(streamable.metering_mode)
+    constructor(streamable? : PostStreamable) {
+        super(Photo.type, streamable)
+    }
 
-        if (streamable.albums != null) {
-            this.albums = []
-            for (let i=0; i<streamable.albums.length; i++) {
-                let album = streamable.albums[i]
-                this.albums.push(new Album(album))
-            }
+    set_streamable(streamable : PostStreamable) {
+        super.set_streamable(streamable)
+
+        this.action = get_streamable_string(streamable, 'action')
+        let utc_offset : number = get_streamable_number(streamable, 'datetime_utc_offset')
+        this.datetime = get_streamable_datetimezone(streamable, 'datetime', utc_offset)
+        this.description = get_streamable_string(streamable, 'description')
+        this.camera_make = get_streamable_string(streamable, 'camera_make')
+        this.camera_model = get_streamable_string(streamable, 'camera_model')
+        this.flash_used = get_streamable_string(streamable, 'flash_used')
+        this.focal_length = get_streamable_string(streamable, 'focal_length')
+        this.exposure = get_streamable_string(streamable, 'exposure')
+        this.aperture = get_streamable_string(streamable, 'aperture')
+        this.iso_equiv = get_streamable_string(streamable, 'iso_equiv')
+        this.metering_mode = get_streamable_string(streamable, 'metering_mode')
+        this.orig_url = get_streamable_string(streamable, 'orig_url')
+
+        let streamable_albums = get_streamable_array(streamable, 'albums')
+        this.albums = []
+        for (let i=0; i<streamable_albums.length; i++) {
+            let item = streamable_to_object(streamable_albums[i])
+            this.albums.push(new Album(item))
         }
-        if (streamable.categorys != null) {
-            this.categorys = []
-            for (let i=0; i<streamable.categorys.length; i++) {
-                let category = streamable.categorys[i]
-                this.categorys.push(new Category(category))
-            }
+
+        let streamable_categorys = get_streamable_array(streamable, 'categorys')
+        this.categorys = []
+        for (let i=0; i<streamable_categorys.length; i++) {
+            let item = streamable_to_object(streamable_categorys[i])
+            this.categorys.push(new Category(item))
         }
-        if (streamable.persons != null) {
-            this.persons = []
-            for (let i=0; i<streamable.persons.length; i++) {
-                let person = streamable.persons[i]
-                this.persons.push(new Person(person))
-            }
+
+        let streamable_persons = get_streamable_array(streamable, 'persons')
+        this.persons = []
+        for (let i=0; i<streamable_persons.length; i++) {
+            let item = streamable_to_object(streamable_persons[i])
+            this.persons.push(new Person(item))
         }
-        if (streamable.photographer != null) {
-            this.photographer = new Person(streamable.photographer)
+
+        let streamable_photographer = get_streamable_object(streamable, 'photographer')
+        if (streamable_photographer != null) {
+            this.photographer = new Person(streamable_photographer)
         }
-        if (streamable.place != null) {
-            this.place = new Place(streamable.place)
+
+        let streamable_place = get_streamable_object(streamable, 'place')
+        if (streamable_place != null) {
+            this.place = new Place(streamable_place)
         }
-        this.orig_url = streamable.orig_url
+
+        let streamable_thumbs = get_streamable_string_array(streamable, 'thumbs')
         this.thumbs = {}
-        for (let size in streamable.thumbs) {
+        for (let size in streamable_thumbs) {
+            let item = streamable_to_object(streamable_thumbs[size])
             let thumb : PhotoThumb = new PhotoThumb()
-            thumb.width = parse_number(streamable.thumbs[size].width)
-            thumb.height = parse_number(streamable.thumbs[size].height)
-            thumb.url = parse_string(streamable.thumbs[size].url)
+            thumb.width = get_streamable_number(item, 'width')
+            thumb.height = get_streamable_number(item, 'height')
+            thumb.url = get_streamable_string(item, 'url')
             this.thumbs[size] = thumb
         }
-        this.videos = {}
-        for (let size in streamable.videos) {
-            this.videos[size] = []
-            for (let i=0; i<streamable.videos[size].length; i++) {
-                let pv = streamable.videos[size][i]
 
-                let priority : number = parse_number(pv[0])
-                let svideo : PhotoVideoStreamable = pv[1]
+        let streamable_videos = get_streamable_string_array(streamable, 'videos')
+        this.videos = {}
+        for (let size in streamable_videos) {
+            let item = streamable_to_object(streamable_videos[size])
+
+            this.videos[size] = []
+            let streamable_array = streamable_to_array(item)
+            for (let i=0; i<streamable_array.length; i++) {
+                let array_item = streamable_to_array(streamable_array[i])
+
+                if (array_item.length != 2) {
+                    continue
+                }
+
+                let priority : number = streamable_to_number(array_item[0])
+                let svideo : PostStreamable = streamable_to_object(array_item[1])
 
                 let video : PhotoVideo = new PhotoVideo()
-                video.width = parse_number(svideo.width)
-                video.height = parse_number(svideo.height)
-                video.url = parse_string(svideo.url)
-                video.format = parse_string(svideo.format)
+                video.width = get_streamable_number(svideo, 'width')
+                video.height = get_streamable_number(svideo, 'height')
+                video.url = get_streamable_string(svideo, 'url')
+                video.format = get_streamable_string(svideo, 'format')
 
                 this.videos[size].push( [priority, video] )
             }
         }
     }
 
-    to_streamable() : PhotoStreamable {
-        let streamable : PhotoStreamable = <PhotoStreamable>super.to_streamable()
-        streamable.action = this.action
-        streamable.datetime_utc_offset = streamable_datetimezone_offset(this.datetime)
-        streamable.datetime = streamable_datetimezone_datetime(this.datetime)
-        streamable.description = this.description
-        streamable.camera_make = this.camera_make
-        streamable.camera_model = this.camera_model
-        streamable.flash_used = this.flash_used
-        streamable.focal_length = this.focal_length
-        streamable.exposure = this.exposure
-        streamable.aperture = this.aperture
-        streamable.iso_equiv = this.iso_equiv
-        streamable.metering_mode = this.metering_mode
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
 
-        streamable.albums_pk = []
+        streamable['action'] = this.action
+        streamable['datetime_utc_offset'] = streamable_datetimezone_offset(this.datetime)
+        streamable['datetime'] = streamable_datetimezone_datetime(this.datetime)
+        streamable['description'] = this.description
+        streamable['camera_make'] = this.camera_make
+        streamable['camera_model'] = this.camera_model
+        streamable['flash_used'] = this.flash_used
+        streamable['focal_length'] = this.focal_length
+        streamable['exposure'] = this.exposure
+        streamable['aperture'] = this.aperture
+        streamable['iso_equiv'] = this.iso_equiv
+        streamable['metering_mode'] = this.metering_mode
+
+        let streamable_albums : PostStreamableType = []
         for (let i=0; i<this.albums.length; i++) {
-            streamable.albums_pk.push(this.albums[i].id)
+            streamable_albums.push(this.albums[i].id)
         }
+        streamable['albums_pk'] = streamable_albums
 
-        streamable.categorys_pk = []
+        let streamable_categorys : PostStreamableType = []
         for (let i=0; i<this.categorys.length; i++) {
-            streamable.categorys_pk.push(this.categorys[i].id)
+            streamable_categorys.push(this.categorys[i].id)
         }
+        streamable['categorys_pk'] = streamable_categorys
 
-        streamable.persons_pk = []
+        let streamable_persons : PostStreamableType = []
         for (let i=0; i<this.persons.length; i++) {
-            streamable.persons_pk.push(this.persons[i].id)
+            streamable_persons.push(this.persons[i].id)
         }
+        streamable['persons_pk'] = streamable_persons
 
-        streamable.photographer_pk = null
+        streamable['photographer_pk'] = null
         if (this.photographer != null) {
-            streamable.photographer_pk = this.photographer.id
+            streamable['photographer_pk'] = this.photographer.id
         }
 
-        streamable.place_pk = null
+        streamable['place_pk'] = null
         if (this.place != null) {
-            streamable.place_pk = this.place.id
+            streamable['place_pk'] = this.place.id
         }
 
         return streamable
     }
 }
 
-interface PhotoCriteria extends Criteria {
-    photos? : Array<number>
+class PhotoCriteria extends Criteria {
+    photos : Array<number>
 
-    first_datetime? : DateTimeZone
-    last_datetime? : DateTimeZone
-    action? : string
-    mode? : string
-    instance? : number
-    q? : string
+    first_datetime : DateTimeZone
+    last_datetime : DateTimeZone
+    action : string
+    mode : string
+    instance : Photo
+    q : string
 
-    album? : number
-    category? : number
-    place? : number
-    person? : number
+    album : number
+    category : number
+    place : number
+    person : number
 
-    album_descendants? : boolean
-    category_descendants? : boolean
-    place_descendants? : boolean
-    person_descendants? : boolean
+    album_descendants : boolean
+    category_descendants : boolean
+    place_descendants : boolean
+    person_descendants : boolean
+
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
+
+        let criteria : PhotoCriteria = this
+        set_streamable_array_as_string(streamable, 'photos', criteria.photos)
+        set_streamable_datetimezone_datetime(streamable, 'first_datetime', criteria.first_datetime)
+        //set_streamable_datetimezone_offset(streamable, 'first_datetime_utc_offset', criteria.first_datetime)
+        set_streamable_datetimezone_datetime(streamable, 'last_datetime', criteria.last_datetime)
+        //set_streamable_datetimezone_offset(streamable, 'last_datetime_utc_offset', criteria.last_datetime)
+        set_streamable_value(streamable, 'action', criteria.action)
+        set_streamable_value(streamable, 'mode', criteria.mode)
+        if (criteria.instance != null) {
+            set_streamable_value(streamable, 'instance', criteria.instance.id)
+        }
+        set_streamable_value(streamable, 'q', criteria.q)
+
+        set_streamable_value(streamable, 'album', criteria.album)
+        set_streamable_value(streamable, 'category', criteria.category)
+        set_streamable_value(streamable, 'place', criteria.place)
+        set_streamable_value(streamable, 'person', criteria.person)
+
+        set_streamable_value(streamable, 'album_descendants', criteria.album_descendants)
+        set_streamable_value(streamable, 'category_descendants', criteria.category_descendants)
+        set_streamable_value(streamable, 'place_descendants', criteria.place_descendants)
+        set_streamable_value(streamable, 'person_descendants', criteria.person_descendants)
+        return streamable
+    }
+
+    get_title() : string {
+        let criteria : PhotoCriteria = this
+        let title : string = null
+        let mode = criteria.mode || 'children'
+
+        if (criteria.instance != null) {
+            title = criteria.instance.title + " / " + mode
+        }
+        else if (criteria.q != null) {
+            title = "search " + criteria.q
+        }
+        else if (criteria.album != null) {
+            title = "album " + criteria.album
+        }
+        else if (criteria.category != null) {
+            title = "category " + criteria.category
+        }
+        else if (criteria.place != null) {
+            title = "place " + criteria.place
+        }
+        else if (criteria.person != null) {
+            title = "person " + criteria.person
+        }
+        else {
+            title = "All"
+        }
+
+        return title
+    }
+
+    get_items() : Array<CriteriaItem> {
+        let criteria : PhotoCriteria = this
+        let result : Array<CriteriaItem> = []
+        let mode = criteria.mode || 'children'
+
+        result.push(new CriteriaItemObject(
+            "instance", "Photo",
+            criteria.instance, new PhotoType()))
+
+        result.push(new CriteriaItemSelect(
+            "mode", "Mode",
+            criteria.mode, [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ]))
+
+        //result.push("photos = " + criteria.photos)
+
+        result.push(new CriteriaItemDateTimeZone(
+            "first_datetime", "First Date Time",
+            criteria.first_datetime))
+        result.push(new CriteriaItemDateTimeZone(
+            "last_datetime", "Last Date Time",
+            criteria.last_datetime))
+
+        result.push(new CriteriaItemSelect(
+            "action", "Action",
+            criteria.action, [
+                ["", "no action"],
+                ["D", "delete"],
+                ["R", "regenerate thumbnails & video"],
+                ["M", "move photo"],
+                ["auto", "rotate automatic"],
+                ["90", "rotate 90 degrees clockwise"],
+                ["180", "rotate 180 degrees clockwise"],
+                ["270", "rotate 270 degrees clockwise"],
+            ]))
+
+        result.push(new CriteriaItemString(
+            "q", "Search for",
+            criteria.q))
+
+        result.push(new CriteriaItemNumber(
+            "album", "Album",
+            criteria.album))
+        result.push(new CriteriaItemNumber(
+            "category", "Category",
+            criteria.category))
+        result.push(new CriteriaItemNumber(
+            "place", "Place",
+            criteria.place))
+        result.push(new CriteriaItemNumber(
+            "person", "Person",
+            criteria.person))
+
+        result.push(new CriteriaItemBoolean(
+            "album_descendants", "Album Descendants",
+            criteria.album_descendants))
+        result.push(new CriteriaItemBoolean(
+            "category_descendants", "Category Descendants",
+            criteria.category_descendants))
+        result.push(new CriteriaItemBoolean(
+            "place_descendants", "Place Descendants",
+            criteria.place_descendants))
+        result.push(new CriteriaItemBoolean(
+            "person_descendants", "Person Descendants",
+            criteria.person_descendants))
+
+        return result
+    }
 }
 
 interface PhotoUpdates {
@@ -276,21 +382,171 @@ interface PhotoUpdates {
     rem_persons_pk? : Array<number>
 }
 
+class PhotoType extends ObjectType<Photo, PhotoCriteria> {
+    constructor() {
+        super(Photo.type, "photo")
+    }
+
+    object_from_streamable(streamable : PostStreamable) : Photo {
+        let obj = new Photo()
+        obj.set_streamable(streamable)
+        return obj
+    }
+
+    criteria_from_streamable(streamable : PostStreamable, on_load : (object : PhotoCriteria) => void) : void {
+        let criteria = new PhotoCriteria()
+
+        criteria.photos = get_streamable_number_array(streamable, 'photos')
+        let first_datetime_offset = get_streamable_number(streamable, 'first_datetime_utc_offset')
+        criteria.first_datetime = get_streamable_datetimezone(streamable, 'first_datetime', first_datetime_offset)
+        let last_datetime_offset = get_streamable_number(streamable, 'last_datetime_utc_offset')
+        criteria.last_datetime = get_streamable_datetimezone(streamable, 'last_datetime', last_datetime_offset)
+        criteria.action = get_streamable_string(streamable, 'action')
+        criteria.q = get_streamable_string(streamable, 'q')
+
+        criteria.album = get_streamable_number(streamable, 'album')
+        criteria.category = get_streamable_number(streamable, 'category')
+        criteria.place = get_streamable_number(streamable, 'place')
+        criteria.person = get_streamable_number(streamable, 'person')
+
+        criteria.album_descendants = get_streamable_boolean(streamable, 'album_descendants')
+        criteria.category_descendants = get_streamable_boolean(streamable, 'category_descendants')
+        criteria.place_descendants = get_streamable_boolean(streamable, 'place_descendants')
+        criteria.person_descendants = get_streamable_boolean(streamable, 'person_descendants')
+
+        let id = get_streamable_number(streamable, 'instance')
+        if (id != null) {
+            let obj_type = new PhotoType()
+            let loader = obj_type.load(id)
+            loader.loaded_item.add_listener(this, (object : Photo) => {
+                criteria.instance = object
+                on_load(criteria)
+            })
+            loader.on_error.add_listener(this, (message : string) => {
+                console.log(message)
+                criteria.instance = new Photo()
+                on_load(criteria)
+            })
+        } else {
+            criteria.instance = null
+            on_load(criteria)
+        }
+    }
+
+    // DIALOGS
+
+    create_dialog(parent : Photo) : PhotoChangeDialog {
+        let obj : Photo = new Photo()
+
+        let params : PhotoChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : PhotoChangeDialog = new PhotoChangeDialog(params)
+        return dialog
+    }
+
+    change_dialog(obj : Photo) : PhotoChangeDialog {
+        let params : PhotoChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : PhotoChangeDialog = new PhotoChangeDialog(params)
+        return dialog
+    }
+
+    delete_dialog(obj : Photo) : PhotoDeleteDialog {
+        let params : PhotoDeleteDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : PhotoDeleteDialog = new PhotoDeleteDialog(params)
+        return dialog
+    }
+
+    search_dialog(criteria : PhotoCriteria, on_success : on_success_function<PhotoCriteria>) : PhotoSearchDialog {
+        let params : PhotoSearchDialogOptions = {
+            obj: criteria,
+            on_success: on_success,
+        }
+
+        let dialog : PhotoSearchDialog = new PhotoSearchDialog(params)
+        return dialog
+    }
+
+    // WIDGETS
+
+    criteria_widget(criteria : PhotoCriteria) : PhotoCriteriaWidget {
+        let params : PhotoCriteriaWidgetOptions = {
+            obj: criteria,
+        }
+
+        let widget : PhotoCriteriaWidget = new PhotoCriteriaWidget(params)
+        return widget
+    }
+
+    list_widget(child_id : string, criteria : PhotoCriteria, disabled : boolean) : PhotoListWidget {
+        let params : PhotoListWidgetOptions = {
+            child_id: child_id,
+            criteria: criteria,
+            disabled: disabled,
+        }
+
+        let widget : PhotoListWidget = new PhotoListWidget(params)
+        return widget
+    }
+
+    detail_infobox() : Infobox {
+        let params : InfoboxOptions = {}
+        let widget : Infobox = new PhotoDetailInfobox(params)
+        return widget
+    }
+
+    // VIEWPORTS
+
+    detail_viewport(object_loader : ObjectLoader<Photo, PhotoCriteria>, state : GetStreamable) : PhotoDetailViewport {
+        let params : PhotoDetailViewportOptions = {
+            object_loader: object_loader,
+            object_list_loader: null,
+        }
+
+        let viewport : PhotoDetailViewport = new PhotoDetailViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
+
+    list_viewport(criteria : PhotoCriteria, state : GetStreamable) : PhotoListViewport {
+        let params : PhotoListViewportOptions = {
+            criteria: criteria
+        }
+        let viewport : PhotoListViewport = new PhotoListViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
+}
 
 ///////////////////////////////////////
 // photo dialogs
 ///////////////////////////////////////
 
-interface PhotoSearchDialogOptions extends ObjectSearchDialogOptions {
-    on_success(criteria : PhotoCriteria) : boolean
+class PhotoSearchDialogOptions extends ObjectSearchDialogOptions<PhotoCriteria> {
 }
 
-class PhotoSearchDialog extends ObjectSearchDialog {
+class PhotoSearchDialog extends ObjectSearchDialog<PhotoCriteria> {
     protected options : PhotoSearchDialogOptions
 
     constructor(options : PhotoSearchDialogOptions) {
         super(options)
     }
+
+    protected new_criteria() : PhotoCriteria {
+        return new PhotoCriteria()
+    }
+
 
     show(element : JQuery) {
         this.options.pages = [
@@ -301,26 +557,30 @@ class PhotoSearchDialog extends ObjectSearchDialog {
                 ["lower_rating", new IntegerInputField("Upper rating", false)],
                 ["upper_rating", new IntegerInputField("Lower rating", false)],
                 ["title", new TextInputField("Title", false)],
-                ["photographer", new AjaxSelectField("Photographer", "persons", false)],
+                ["photographer", new AjaxSelectField("Photographer", new PersonType(), false)],
                 ["path", new TextInputField("Path", false)],
                 ["name", new TextInputField("Name", false)],
                 ["first_id", new IntegerInputField("First id", false)],
                 ["last_id", new IntegerInputField("Last id", false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
-                ["album", new AjaxSelectField("Album", "albums", false)],
+                // ["album", new AjaxSelectField("Album", new AlbumType(), false)],
+                ["album", new IntegerInputField("Album ID", false)],
                 ["album_descendants", new booleanInputField("Descend albums", false)],
                 ["album_none", new booleanInputField("No albums", false)],
 
-                ["category", new AjaxSelectField("Category", "categorys", false)],
+                // ["category", new AjaxSelectField("Category", new CategoryType(), false)],
+                ["category", new IntegerInputField("Category ID", false)],
                 ["category_descendants", new booleanInputField("Descend categories", false)],
                 ["category_none", new booleanInputField("No categories", false)],
 
-                ["place", new AjaxSelectField("Place", "places", false)],
+                // ["place", new AjaxSelectField("Place", new PlaceType(), false)],
+                ["place", new IntegerInputField("Place ID", false)],
                 ["place_descendants", new booleanInputField("Descend places", false)],
                 ["place_none", new booleanInputField("No places", false)],
 
-                ["person", new AjaxSelectField("Person", "persons", false)],
+                // ["person", new AjaxSelectField("Person", new PersonType(), false)],
+                ["person", new IntegerInputField("Person ID", false)],
                 ["person_none", new booleanInputField("No people", false)],
                 ["person_descendants", new booleanInputField("Descend people", false)],
             ]},
@@ -336,10 +596,10 @@ class PhotoSearchDialog extends ObjectSearchDialog {
     }
 }
 
-interface PhotoChangeDialogOptions extends ObjectChangeDialogOptions {
+class PhotoChangeDialogOptions extends ObjectChangeDialogOptions {
 }
 
-class PhotoChangeDialog extends ObjectChangeDialog {
+class PhotoChangeDialog extends ObjectChangeDialog<Photo> {
     protected options : PhotoChangeDialogOptions
 
     constructor(options : PhotoChangeDialogOptions) {
@@ -353,7 +613,7 @@ class PhotoChangeDialog extends ObjectChangeDialog {
             {name: 'basic', title: 'Basics', fields: [
                 ["datetime", new DateTimeInputField("Date", true)],
                 ["title", new TextInputField("Title", true)],
-                ["photographer", new AjaxSelectField("Photographer", "persons", false)],
+                ["photographer", new AjaxSelectField("Photographer", new PersonType(), false)],
                 ["action", new SelectInputField("Action", [
                     ["", "no action"],
                     ["D", "delete"],
@@ -366,10 +626,10 @@ class PhotoChangeDialog extends ObjectChangeDialog {
                 ], false)],
             ]},
             {name: 'connections', title: 'Connections', fields: [
-                ["albums", new AjaxSelectMultipleField("Album", "albums", false)],
-                ["categorys", new AjaxSelectMultipleField("Category", "categorys", false)],
-                ["place", new AjaxSelectField("Place", "places", false)],
-                ["persons", new AjaxSelectSortedField("Person", "persons", false)],
+                ["albums", new AjaxSelectMultipleField("Album", new AlbumType(), false)],
+                ["categorys", new AjaxSelectMultipleField("Category", new CategoryType(), false)],
+                ["place", new AjaxSelectField("Place", new PlaceType(), false)],
+                ["persons", new AjaxSelectSortedField("Person", new PersonType(), false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
                 ["camera_make", new TextInputField("Camera Make", false)],
@@ -383,8 +643,9 @@ class PhotoChangeDialog extends ObjectChangeDialog {
         super.show(element)
     }
 
-    protected save_success(data : PhotoStreamable) {
-        let photo : Photo = new Photo(data)
+    protected save_success(data : PostStreamable) {
+        let photo : Photo = new Photo()
+        photo.set_streamable(data)
         if (this.obj.id != null) {
             window._photo_changed.trigger(photo)
         } else {
@@ -394,7 +655,7 @@ class PhotoChangeDialog extends ObjectChangeDialog {
     }
 }
 
-interface PhotoBulkUpdateDialogOptions extends FormDialogOptions {
+class PhotoBulkUpdateDialogOptions extends FormDialogOptions {
     criteria : PhotoCriteria
 }
 
@@ -413,8 +674,8 @@ class PhotoBulkUpdateDialog extends FormDialog {
             {name: 'basic', title: 'Basics', fields: [
                 ["datetime", new DateTimeInputField("Date", false)],
                 ["title", new TextInputField("Title", false)],
-                ["photographer", new AjaxSelectField("Photographer", "persons", false)],
-                ["place", new AjaxSelectField("Place", "places", false)],
+                ["photographer", new AjaxSelectField("Photographer", new PersonType(), false)],
+                ["place", new AjaxSelectField("Place", new PlaceType(), false)],
                 ["action", new SelectInputField("Action", [
                     ["none", "no action"],
                     ["D", "delete"],
@@ -427,14 +688,14 @@ class PhotoBulkUpdateDialog extends FormDialog {
                 ], false)],
             ]},
             {name: 'add', title: 'Add', fields: [
-                ["add_albums", new AjaxSelectMultipleField("Album", "albums", false)],
-                ["add_categorys", new AjaxSelectMultipleField("Category", "categorys", false)],
-                ["add_persons", new AjaxSelectSortedField("Person", "persons", false)],
+                ["add_albums", new AjaxSelectMultipleField("Album", new AlbumType(), false)],
+                ["add_categorys", new AjaxSelectMultipleField("Category", new CategoryType(), false)],
+                ["add_persons", new AjaxSelectSortedField("Person", new PersonType(), false)],
             ]},
             {name: 'rem', title: 'Remove', fields: [
-                ["rem_albums", new AjaxSelectMultipleField("Album", "albums", false)],
-                ["rem_categorys", new AjaxSelectMultipleField("Category", "categorys", false)],
-                ["rem_persons", new AjaxSelectSortedField("Person", "persons", false)],
+                ["rem_albums", new AjaxSelectMultipleField("Album", new AlbumType(), false)],
+                ["rem_categorys", new AjaxSelectMultipleField("Category", new CategoryType(), false)],
+                ["rem_persons", new AjaxSelectSortedField("Person", new PersonType(), false)],
             ]},
             {name: 'camera', title: 'Camera', fields: [
                 ["camera_make", new TextInputField("Camera Make", false)],
@@ -548,9 +809,12 @@ class PhotoBulkUpdateDialog extends FormDialog {
     }
 }
 
-interface PhotoBulkConfirmDialogOptions extends BaseDialogOptions {
-    on_proceed() : void
-    on_cancel() : void
+type on_proceed_function = () => void
+type on_cancel_function = () => void
+
+class PhotoBulkConfirmDialogOptions extends BaseDialogOptions {
+    on_proceed : on_proceed_function
+    on_cancel : on_cancel_function
     criteria : PhotoCriteria
 }
 
@@ -620,7 +884,7 @@ class PhotoBulkConfirmDialog extends BaseDialog {
     }
 }
 
-interface PhotoBulkProceedDialogOptions extends BaseDialogOptions {
+class PhotoBulkProceedDialogOptions extends BaseDialogOptions {
     criteria : PhotoCriteria
     obj : PhotoUpdates
 }
@@ -678,10 +942,10 @@ class PhotoBulkProceedDialog extends BaseDialog {
     }
 }
 
-interface PhotoDeleteDialogOptions extends ObjectDeleteDialogOptions {
+class PhotoDeleteDialogOptions extends ObjectDeleteDialogOptions {
 }
 
-class PhotoDeleteDialog extends ObjectDeleteDialog {
+class PhotoDeleteDialog extends ObjectDeleteDialog<Photo> {
     constructor(options : PhotoDeleteDialogOptions) {
         super(options)
         this.type = "photos"
@@ -699,94 +963,28 @@ class PhotoDeleteDialog extends ObjectDeleteDialog {
 // photo widgets
 ///////////////////////////////////////
 
-interface PhotoCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions {
+class PhotoCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions<PhotoCriteria> {
 }
 
-class PhotoCriteriaWidget extends ObjectCriteriaWidget {
+class PhotoCriteriaWidget extends ObjectCriteriaWidget<Photo, PhotoCriteria> {
     protected options : PhotoCriteriaWidgetOptions
-    protected type : string
 
     constructor(options : PhotoCriteriaWidgetOptions) {
         super(options)
-        this.type = "photos"
-        this.load_attributes = [
-            { name: 'album', type: 'albums' },
-            { name: 'category', type: 'categorys' },
-            { name: 'place', type: 'places' },
-            { name: 'person', type: 'persons' },
-            { name: 'instance', type: 'photos' },
-        ]
-    }
-
-    set(input_criteria : PhotoCriteria) {
-        var mythis = this
-        mythis.element.removeClass("error")
-
-        // this.options.criteria = criteria
-        var ul = this.criteria
-        this.criteria.empty()
-
-        let criteria = $.extend({}, input_criteria)
-
-        var title = null
-
-        var mode = criteria.mode || 'children'
-        delete criteria.mode
-
-        if (criteria.instance != null) {
-            var instance = criteria.instance
-            title = instance + " / " + mode
-
-            $("<li/>")
-                .text("instance" + " = " + instance + " (" + mode + ")")
-                .appendTo(ul)
-
-            delete criteria.instance
-        }
-
-        else if (criteria.q != null) {
-            title = "search " + criteria.q
-        }
-
-        else if (criteria.album != null) {
-            title = "album " + criteria.album
-        }
-        else if (criteria.category != null) {
-            title = "category " + criteria.category
-        }
-        else if (criteria.place != null) {
-            title = "place " + criteria.place
-        }
-        else if (criteria.person != null) {
-            title = "person " + criteria.person
-        }
-
-        else {
-            title = "All"
-        }
-
-        $.each(criteria, ( index, value ) => {
-            $("<li/>")
-                .text(index + " = " + value)
-                .appendTo(ul)
-        })
-
-        this.finalize(input_criteria, title)
     }
 }
 
 
-interface PhotoListWidgetOptions extends ObjectListWidgetOptions {
+class PhotoListWidgetOptions extends ObjectListWidgetOptions<PhotoCriteria> {
     selection? : Array<number>
     criteria? : PhotoCriteria
 }
 
-class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
+class PhotoListWidget extends ObjectListWidget<Photo, PhotoCriteria> {
     protected options : PhotoListWidgetOptions
 
     constructor(options : PhotoListWidgetOptions) {
-        super(options)
-        this.type = "photos"
+        super(options, new PhotoType())
     }
 
     protected add_selection(photo) {
@@ -814,10 +1012,6 @@ class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
         var selection = this.options.selection
         var index = selection.indexOf(photo.id)
         return index !== -1
-    }
-
-    protected to_object(streamable : PhotoStreamable) : Photo {
-        return new Photo(streamable)
     }
 
     show(element : JQuery) {
@@ -854,8 +1048,8 @@ class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
         var child_id : string = this.options.child_id
         var params : PhotoDetailViewportOptions = {
             id: child_id,
-            obj: null,
-            obj_id: null,
+            object_loader: null,
+            object_list_loader: null,
         }
         let viewport : PhotoDetailViewport
         viewport = new PhotoDetailViewport(params)
@@ -912,7 +1106,7 @@ class PhotoListWidget extends ObjectListWidget<PhotoStreamable, Photo> {
     }
 }
 
-interface PhotoDetailInfoboxOptions extends InfoboxOptions {
+class PhotoDetailInfoboxOptions extends InfoboxOptions {
 }
 
 class PhotoDetailInfobox extends Infobox {
@@ -931,12 +1125,12 @@ class PhotoDetailInfobox extends Infobox {
                 ["view", new POutputField("View")],
                 ["comment", new POutputField("Comment")],
                 ["name", new TextOutputField("File")],
-                ["albums", new LinkListOutputField("Albums", "albums")],
-                ["categorys", new LinkListOutputField("Categories", "categorys")],
-                ["place", new LinkOutputField("Place", "places")],
-                ["persons", new LinkListOutputField("People", "persons")],
+                ["albums", new LinkListOutputField("Albums", new AlbumType())],
+                ["categorys", new LinkListOutputField("Categories", new CategoryType())],
+                ["place", new LinkOutputField("Place", new PlaceType())],
+                ["persons", new LinkListOutputField("People", new PersonType())],
                 ["datetime", new DateTimeOutputField("Date & time")],
-                ["photographer", new LinkOutputField("Photographer", "persons")],
+                ["photographer", new LinkOutputField("Photographer", new PersonType())],
                 ["rating", new TextOutputField("Rating")],
 //                ["videos", new HtmlOutputField("Videos")],
 //                ["related", new HtmlListOutputField("Related")],
@@ -978,71 +1172,72 @@ class PhotoDetailInfobox extends Infobox {
 // photo viewports
 ///////////////////////////////////////
 
-interface PhotoListViewportOptions extends ObjectListViewportOptions {
+class PhotoListViewportOptions extends ObjectListViewportOptions<PhotoCriteria> {
+    // FIXME
+    object_list_options? : PhotoListWidgetOptions
 }
 
-class PhotoListViewport extends ObjectListViewport<PhotoStreamable, Photo> {
+class PhotoListViewport extends ObjectListViewport<Photo, PhotoCriteria> {
     protected options : PhotoListViewportOptions
     protected ol : PhotoListWidget
 
     constructor(options : PhotoListViewportOptions) {
-        super(options)
-        this.type = "photos"
-        this.type_name = "Photo"
+        super(options, new PhotoType())
     }
 
     protected setup_menu(menu : JQuery) : void {
         super.setup_menu(menu)
 
-        var mythis = this
         menu.append(
             $("<li/>")
                 .text("Update")
                 .on("click", function(ev) {
                     void ev
-                    var instance : PhotoListWidget = mythis.ol
+                    var instance : PhotoListWidget = this.ol
                     instance.bulk_update()
                 })
         )
     }
 
-    get_streamable_options() : GenericStreamable {
-        var options = super.get_streamable_options()
+    protected new_object_criteria_widget_options() : PhotoCriteriaWidgetOptions {
+        return new PhotoCriteriaWidgetOptions()
+    }
+
+    get_streamable_state() : GetStreamable {
+        let streamable : GetStreamable = super.get_streamable_state()
+
         if (this.ol != null) {
-            var instance : PhotoListWidget = this.ol
-            options['object_list_options'] = {
-                selection: instance.get_selection()
+            let instance : PhotoListWidget = this.ol
+            let selection : Array<number> = instance.get_selection()
+            if (selection.length > 0) {
+                set_streamable_array_as_string(streamable, 'selection', selection)
             }
         }
-        return options
+
+        return streamable
     }
 
-    protected create_object_list_widget(options : PhotoListWidgetOptions) : PhotoListWidget {
-        return new PhotoListWidget(options)
-    }
+    set_streamable_state(streamable : GetStreamable) : void {
+        // load streamable state, must be called before show() is called.
+        super.set_streamable_state(streamable)
 
-    protected create_object_criteria_widget(options : PhotoCriteriaWidgetOptions) : PhotoCriteriaWidget {
-        return new PhotoCriteriaWidget(options)
-    }
-
-    protected create_object_search_dialog(options : PhotoSearchDialogOptions) : PhotoSearchDialog {
-        return new PhotoSearchDialog(options)
+        let object_list_options : PhotoListWidgetOptions = {}
+        object_list_options.selection = get_streamable_number_array(streamable, 'selection')
+        // FIXME
+        this.options.object_list_options = object_list_options
     }
 }
 
 
-interface PhotoDetailViewportOptions extends ObjectDetailViewportOptions<PhotoStreamable> {
-    obj : Photo
+class PhotoDetailViewportOptions extends ObjectDetailViewportOptions<Photo, PhotoCriteria> {
 }
 
-class PhotoDetailViewport extends ObjectDetailViewport<PhotoStreamable, Photo> {
+class PhotoDetailViewport extends ObjectDetailViewport<Photo, PhotoCriteria> {
     options : PhotoDetailViewportOptions
     orig : JQuery
 
     constructor(options : PhotoDetailViewportOptions) {
-        super(options)
-        this.type = "photos"
-        this.type_name = "Photo"
+        super(options, new PhotoType())
     }
 
     protected setup_menu(menu : JQuery) : void {
@@ -1052,8 +1247,9 @@ class PhotoDetailViewport extends ObjectDetailViewport<PhotoStreamable, Photo> {
             .text("Original")
             .on("click", (ev) => {
                 void ev
-                if (this.options.obj.orig_url != null) {
-                    window.open(this.options.obj.orig_url)
+                let obj : Photo = this.get_obj()
+                if (obj.orig_url != null) {
+                    window.open(obj.orig_url)
                 }
 
             })
@@ -1061,10 +1257,6 @@ class PhotoDetailViewport extends ObjectDetailViewport<PhotoStreamable, Photo> {
             .appendTo(menu)
     }
 
-
-    protected to_object(streamable : PhotoStreamable) : Photo {
-        return new Photo(streamable)
-    }
 
     protected loaded(obj : Photo) : void {
         this.orig.toggle(obj.orig_url != null)
@@ -1077,16 +1269,16 @@ class PhotoDetailViewport extends ObjectDetailViewport<PhotoStreamable, Photo> {
     show(element : JQuery) : void {
         super.show(element)
 
-        var mythis = this
-
         window._photo_changed.add_listener(this, (obj : Photo) => {
-            if (obj.id === this.options.obj_id) {
-                mythis.set(obj)
+            let this_obj_id : number = this.get_obj_id()
+            if (obj.id === this_obj_id) {
+                this.set(this.obj_type.load(obj.id))
             }
         })
         window._photo_deleted.add_listener(this, (obj_id : number) => {
-            if (obj_id === this.options.obj_id) {
-                mythis.remove()
+            let this_obj_id : number = this.get_obj_id()
+            if (obj_id === this_obj_id) {
+                this.remove()
             }
         })
     }
@@ -1095,23 +1287,10 @@ class PhotoDetailViewport extends ObjectDetailViewport<PhotoStreamable, Photo> {
         return null
     }
 
-    protected create_object_list_widget(options : PhotoListWidgetOptions) : PhotoListWidget {
-        return new PhotoListWidget(options)
-    }
-
-    protected create_object_detail_infobox(options : PhotoDetailInfoboxOptions) : PhotoDetailInfobox {
-        return new PhotoDetailInfobox(options)
-    }
-
-    protected create_object_list_viewport(options : PhotoListViewportOptions) : PhotoListViewport {
-        return new PhotoListViewport(options)
-    }
-
-    protected create_object_change_dialog(options : PhotoChangeDialogOptions) : PhotoChangeDialog {
-        return new PhotoChangeDialog(options)
-    }
-
-    protected create_object_delete_dialog(options : PhotoDeleteDialogOptions) : PhotoDeleteDialog {
-        return new PhotoDeleteDialog(options)
+    protected get_children_criteria() : PhotoCriteria {
+        let criteria : PhotoCriteria = new PhotoCriteria()
+        criteria.instance = this.get_obj()
+        criteria.mode = 'children'
+        return criteria
     }
 }

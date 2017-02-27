@@ -32,16 +32,12 @@ window._category_created = new Signal<Category>()
 window._category_changed = new Signal<Category>()
 window._category_deleted = new Signal<number>()
 
-class CategoryStreamable extends ObjectStreamable {
-    description : string
-    sort_order : string
-    sort_name : string
-    ascendants : Array <CategoryStreamable>
-    parent : number
-}
+window._category_created.add_listener(null, () => {
+    window._reload_all.trigger(null);
+})
 
 class Category extends SpudObject {
-    static type : string = "categorys"
+    static type : string = 'categorys'
     description : string
     sort_order : string
     sort_name : string
@@ -49,64 +45,264 @@ class Category extends SpudObject {
     parent : Category
     _type_category : boolean
 
-    constructor(streamable : CategoryStreamable) {
-        super(streamable)
-        this.description = parse_string(streamable.description)
-        this.sort_order = parse_string(streamable.sort_order)
-        this.sort_name = parse_string(streamable.sort_name)
-        if (streamable.ascendants != null) {
-            this.ascendants = []
-            for (let i=0; i<streamable.ascendants.length; i++) {
-                this.ascendants.push(new Category(streamable.ascendants[i]))
-            }
-            if (streamable.ascendants.length > 0) {
-                this.parent = this.ascendants[0]
-            } else {
-                this.parent = null
-            }
+    constructor(streamable? : PostStreamable) {
+        super(Category.type, streamable)
+    }
+
+    set_streamable(streamable : PostStreamable) : void {
+        super.set_streamable(streamable)
+
+        this.description = get_streamable_string(streamable, 'description')
+        this.sort_order = get_streamable_string(streamable, 'sort_order')
+        this.sort_name = get_streamable_string(streamable, 'sort_name')
+
+        let ascendants = get_streamable_array(streamable, 'ascendants')
+        this.ascendants = []
+        for (let i=0; i<ascendants.length; i++) {
+            let item : PostStreamable = streamable_to_object(ascendants[i])
+            this.ascendants.push(new Category(item))
+        }
+        if (ascendants.length > 0) {
+            let item : PostStreamable = streamable_to_object(ascendants[0])
+            this.parent = new Category(item)
+        } else {
+            this.parent = null
         }
     }
 
-    to_streamable() : CategoryStreamable {
-        let streamable : CategoryStreamable = <CategoryStreamable>super.to_streamable()
-        streamable.description = this.description
-        streamable.sort_order = this.sort_order
-        streamable.sort_name = this.sort_name
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
+        streamable['description'] = this.description
+        streamable['sort_order'] = this.sort_order
+        streamable['sort_name'] = this.sort_name
         if (this.parent != null) {
-            streamable.parent = this.parent.id
+            streamable['parent'] = this.parent.id
         } else {
-            streamable.parent = null
+            streamable['parent'] = null
         }
         return streamable
     }
 }
 
-interface CategoryCriteria extends Criteria {
-    mode? : string
-    root_only? : boolean
-    instance? : number
-    q? : string
+class CategoryCriteria extends Criteria {
+    mode : string
+    root_only : boolean
+    instance : Category
+    q : string
+
+    get_streamable() : PostStreamable {
+        let streamable : PostStreamable = super.get_streamable()
+
+        let criteria : CategoryCriteria = this
+        set_streamable_value(streamable, 'mode', criteria.mode)
+        set_streamable_value(streamable, 'root_only', criteria.root_only)
+        if (criteria.instance != null) {
+            set_streamable_value(streamable, 'instance', criteria.instance.id)
+        }
+        set_streamable_value(streamable, 'q', criteria.q)
+        return streamable
+    }
+
+    get_title() : string {
+        let criteria : CategoryCriteria = this
+        let title : string = null
+        let mode = criteria.mode || 'children'
+
+        if (criteria.instance != null) {
+            title = criteria.instance.title + " / " + mode
+        }
+
+        else if (criteria.q != null) {
+            title = "search " + criteria.q
+        }
+
+        else if (criteria.root_only) {
+            title = "root only"
+        }
+
+        else {
+            title = "All"
+        }
+
+        return title
+    }
+
+    get_items() : Array<CriteriaItem> {
+        let criteria : CategoryCriteria = this
+        let result : Array<CriteriaItem> = []
+
+        result.push(new CriteriaItemObject(
+            "instance", "Category",
+            criteria.instance, new CategoryType()))
+        result.push(new CriteriaItemSelect(
+            "mode", "Mode",
+            criteria.mode, [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ]))
+        result.push(new CriteriaItemBoolean(
+            "root_only", "Root Only",
+            criteria.root_only))
+        result.push(new CriteriaItemString(
+            "q", "Search for",
+            criteria.q))
+        return result
+    }
+}
+
+class CategoryType extends ObjectType<Category, CategoryCriteria> {
+    constructor() {
+        super(Category.type, "category")
+    }
+
+    object_from_streamable(streamable : PostStreamable) : Category {
+        let obj = new Category()
+        obj.set_streamable(streamable)
+        return obj
+    }
+
+    criteria_from_streamable(streamable : PostStreamable, on_load : (object : CategoryCriteria) => void) : void {
+        let criteria = new CategoryCriteria()
+
+        criteria.mode = get_streamable_string(streamable, 'mode')
+        criteria.root_only = get_streamable_boolean(streamable, 'root_only')
+        criteria.q = get_streamable_string(streamable, 'q')
+
+        let id = get_streamable_number(streamable, 'instance')
+        if (id != null) {
+            let obj_type = new CategoryType()
+            let loader = obj_type.load(id)
+            loader.loaded_item.add_listener(this, (object : Category) => {
+                criteria.instance = object
+                on_load(criteria)
+            })
+            loader.on_error.add_listener(this, (message : string) => {
+                console.log(message)
+                criteria.instance = new Category()
+                on_load(criteria)
+            })
+        } else {
+            criteria.instance = null
+            on_load(criteria)
+        }
+    }
+
+    // DIALOGS
+
+    create_dialog(parent : Category) : CategoryChangeDialog {
+        let obj : Category = new Category()
+        obj.parent = parent
+
+        let params : CategoryChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : CategoryChangeDialog = new CategoryChangeDialog(params)
+        return dialog
+    }
+
+    change_dialog(obj : Category) : CategoryChangeDialog {
+        let params : CategoryChangeDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : CategoryChangeDialog = new CategoryChangeDialog(params)
+        return dialog
+    }
+
+    delete_dialog(obj : Category) : CategoryDeleteDialog {
+        let params : CategoryDeleteDialogOptions = {
+            obj: obj,
+        }
+
+        let dialog : CategoryDeleteDialog = new CategoryDeleteDialog(params)
+        return dialog
+    }
+
+    search_dialog(criteria : CategoryCriteria, on_success : on_success_function<CategoryCriteria>) : CategorySearchDialog {
+        let params : CategorySearchDialogOptions = {
+            obj: criteria,
+            on_success: on_success,
+        }
+
+        let dialog : CategorySearchDialog = new CategorySearchDialog(params)
+        return dialog
+    }
+
+    // WIDGETS
+
+    criteria_widget(criteria : CategoryCriteria) : CategoryCriteriaWidget {
+        let params : CategoryCriteriaWidgetOptions = {
+            obj: criteria,
+        }
+
+        let widget : CategoryCriteriaWidget = new CategoryCriteriaWidget(params)
+        return widget
+    }
+
+    list_widget(child_id : string, criteria : CategoryCriteria, disabled : boolean) : CategoryListWidget {
+        let params : CategoryListWidgetOptions = {
+            child_id: child_id,
+            criteria: criteria,
+            disabled: disabled,
+        }
+
+        let widget : CategoryListWidget = new CategoryListWidget(params)
+        return widget
+    }
+
+    detail_infobox() : Infobox {
+        let params : InfoboxOptions = {}
+        let widget : Infobox = new CategoryDetailInfobox(params)
+        return widget
+    }
+
+    // VIEWPORTS
+
+    detail_viewport(object_loader : ObjectLoader<Category, CategoryCriteria>, state : GetStreamable) : CategoryDetailViewport {
+        let params : CategoryDetailViewportOptions = {
+            object_loader: object_loader,
+            object_list_loader: null,
+        }
+
+        let viewport : CategoryDetailViewport = new CategoryDetailViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
+
+    list_viewport(criteria : CategoryCriteria, state : GetStreamable) : CategoryListViewport {
+        let params : CategoryListViewportOptions = {
+            criteria: criteria
+        }
+        let viewport : CategoryListViewport = new CategoryListViewport(params)
+        if (state != null) {
+            viewport.set_streamable_state(state)
+        }
+        return viewport
+    }
 }
 
 ///////////////////////////////////////
 // category dialogs
 ///////////////////////////////////////
 
-interface CategorySearchDialogOptions extends ObjectSearchDialogOptions {
-    on_success(criteria : CategoryCriteria) : boolean
+class CategorySearchDialogOptions extends ObjectSearchDialogOptions<CategoryCriteria> {
 }
 
-class CategorySearchDialog extends ObjectSearchDialog {
+class CategorySearchDialog extends ObjectSearchDialog<CategoryCriteria> {
     protected options : CategorySearchDialogOptions
 
     constructor(options : CategorySearchDialogOptions) {
         super(options)
     }
 
+    protected new_criteria() : CategoryCriteria {
+        return new CategoryCriteria()
+    }
+
     show(element : JQuery) {
         this.options.fields = [
             ["q", new TextInputField("Search for", false)],
-            ["instance", new AjaxSelectField("Category", "categorys", false)],
+            ["instance", new AjaxSelectField("Category", new CategoryType(), false)],
             ["mode", new SelectInputField("Mode",
                 [ ["children", "Children"], ["descendants", "Descendants"], ["ascendants", "Ascendants"] ],
                 false)],
@@ -119,10 +315,10 @@ class CategorySearchDialog extends ObjectSearchDialog {
     }
 }
 
-interface CategoryChangeDialogOptions extends ObjectChangeDialogOptions {
+class CategoryChangeDialogOptions extends ObjectChangeDialogOptions {
 }
 
-class CategoryChangeDialog extends ObjectChangeDialog {
+class CategoryChangeDialog extends ObjectChangeDialog<Category> {
     protected options : CategoryChangeDialogOptions
 
     constructor(options : CategoryChangeDialogOptions) {
@@ -138,7 +334,7 @@ class CategoryChangeDialog extends ObjectChangeDialog {
             ["cover_photo", new PhotoSelectField("Photo", false)],
             ["sort_name", new TextInputField("Sort Name", false)],
             ["sort_order", new TextInputField("Sort Order", false)],
-            ["parent", new AjaxSelectField("Parent", "categorys", false)],
+            ["parent", new AjaxSelectField("Parent", new CategoryType(), false)],
         ]
 
         this.options.title = "Change category"
@@ -147,8 +343,9 @@ class CategoryChangeDialog extends ObjectChangeDialog {
         super.show(element)
     }
 
-    protected save_success(data : CategoryStreamable) {
-        let category : Category = new Category(data)
+    protected save_success(data : PostStreamable) {
+        let category : Category = new Category()
+        category.set_streamable(data)
         if (this.obj.id != null) {
             window._category_changed.trigger(category)
         } else {
@@ -158,10 +355,10 @@ class CategoryChangeDialog extends ObjectChangeDialog {
     }
 }
 
-interface CategoryDeleteDialogOptions extends ObjectDeleteDialogOptions {
+class CategoryDeleteDialogOptions extends ObjectDeleteDialogOptions {
 }
 
-class CategoryDeleteDialog extends ObjectDeleteDialog {
+class CategoryDeleteDialog extends ObjectDeleteDialog<Category> {
     constructor(options : CategoryDeleteDialogOptions) {
         super(options)
         this.type = "categorys"
@@ -179,80 +376,26 @@ class CategoryDeleteDialog extends ObjectDeleteDialog {
 // category widgets
 ///////////////////////////////////////
 
-interface CategoryCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions {
+class CategoryCriteriaWidgetOptions extends ObjectCriteriaWidgetOptions<CategoryCriteria> {
 }
 
-class CategoryCriteriaWidget extends ObjectCriteriaWidget {
+class CategoryCriteriaWidget extends ObjectCriteriaWidget<Category, CategoryCriteria> {
     protected options : CategoryCriteriaWidgetOptions
-    protected type : string
 
     constructor(options : CategoryCriteriaWidgetOptions) {
         super(options)
-        this.type = "categorys"
-    }
-
-    set(input_criteria : CategoryCriteria) {
-        var mythis = this
-        mythis.element.removeClass("error")
-
-        // this.options.criteria = criteria
-        var ul = this.criteria
-        this.criteria.empty()
-
-        let criteria = $.extend({}, input_criteria)
-
-        var title = null
-
-        var mode = criteria.mode || 'children'
-        delete criteria.mode
-
-        if (criteria.instance != null) {
-            var instance = criteria.instance
-            title = instance + " / " + mode
-
-            $("<li/>")
-                .text("instance" + " = " + instance + " (" + mode + ")")
-                .appendTo(ul)
-
-            delete criteria.instance
-        }
-
-        else if (criteria.q != null) {
-            title = "search " + criteria.q
-        }
-
-        else if (criteria.root_only) {
-            title = "root only"
-        }
-
-        else {
-            title = "All"
-        }
-
-        $.each(criteria, ( index, value ) => {
-            $("<li/>")
-                .text(index + " = " + value)
-                .appendTo(ul)
-        })
-
-        this.finalize(input_criteria, title)
     }
 }
 
 
-interface CategoryListWidgetOptions extends ObjectListWidgetOptions {
+class CategoryListWidgetOptions extends ObjectListWidgetOptions<CategoryCriteria> {
 }
 
-class CategoryListWidget extends ObjectListWidget<CategoryStreamable, Category> {
+class CategoryListWidget extends ObjectListWidget<Category, CategoryCriteria> {
     protected options : CategoryListWidgetOptions
 
     constructor(options : CategoryListWidgetOptions) {
-        super(options)
-        this.type = "categorys"
-    }
-
-    protected to_object(streamable : CategoryStreamable) : Category {
-        return new Category(streamable)
+        super(options, new CategoryType())
     }
 
     show(element : JQuery) {
@@ -272,8 +415,8 @@ class CategoryListWidget extends ObjectListWidget<CategoryStreamable, Category> 
         var child_id : string = this.options.child_id
         var params : CategoryDetailViewportOptions = {
             id: child_id,
-            obj: null,
-            obj_id: null,
+            object_loader: null,
+            object_list_loader: null,
         }
         let viewport : CategoryDetailViewport
         viewport = new CategoryDetailViewport(params)
@@ -294,7 +437,7 @@ class CategoryListWidget extends ObjectListWidget<CategoryStreamable, Category> 
     }
 }
 
-interface CategoryDetailInfoboxOptions extends InfoboxOptions {
+class CategoryDetailInfoboxOptions extends InfoboxOptions {
 }
 
 class CategoryDetailInfobox extends Infobox {
@@ -311,7 +454,7 @@ class CategoryDetailInfobox extends Infobox {
             ["sort_name", new TextOutputField("Sort Name")],
             ["sort_order", new TextOutputField("Sort Order")],
             ["description", new POutputField("Description")],
-            ["ascendants", new LinkListOutputField("Ascendants", "categorys")],
+            ["ascendants", new LinkListOutputField("Ascendants", new CategoryType())],
         ]
 
         super.show(element);
@@ -329,7 +472,11 @@ class CategoryDetailInfobox extends Infobox {
         super.set(category)
 
         this.options.obj = category
-        this.img.set(category.cover_photo)
+        if (category != null) {
+            this.img.set(category.cover_photo)
+        } else {
+            this.img.set(null)
+        }
     }
 }
 
@@ -338,87 +485,64 @@ class CategoryDetailInfobox extends Infobox {
 // category viewports
 ///////////////////////////////////////
 
-interface CategoryListViewportOptions extends ObjectListViewportOptions {
+class CategoryListViewportOptions extends ObjectListViewportOptions<CategoryCriteria> {
 }
 
-class CategoryListViewport extends ObjectListViewport<CategoryStreamable, Category> {
+class CategoryListViewport extends ObjectListViewport<Category, CategoryCriteria> {
     protected options : CategoryListViewportOptions
 
     constructor(options : CategoryListViewportOptions) {
-        super(options)
-        this.type = "categorys"
-        this.type_name = "Category"
+        super(options, new CategoryType())
     }
 
-    protected create_object_list_widget(options : CategoryListWidgetOptions) : CategoryListWidget {
-        return new CategoryListWidget(options)
+    get_streamable_state() : GetStreamable {
+        let streamable : GetStreamable = super.get_streamable_state()
+        return streamable
     }
 
-    protected create_object_criteria_widget(options : CategoryCriteriaWidgetOptions) : CategoryCriteriaWidget {
-        return new CategoryCriteriaWidget(options)
-    }
-
-    protected create_object_search_dialog(options : CategorySearchDialogOptions) : CategorySearchDialog {
-        return new CategorySearchDialog(options)
+    set_streamable_state(streamable : GetStreamable) : void {
+        // load streamable state, must be called before show() is called.
+        super.set_streamable_state(streamable)
     }
 }
 
 
-interface CategoryDetailViewportOptions extends ObjectDetailViewportOptions<CategoryStreamable> {
+class CategoryDetailViewportOptions extends ObjectDetailViewportOptions<Category, CategoryCriteria> {
 }
 
-class CategoryDetailViewport extends ObjectDetailViewport<CategoryStreamable, Category> {
+class CategoryDetailViewport extends ObjectDetailViewport<Category, CategoryCriteria> {
     constructor(options : CategoryDetailViewportOptions) {
-        super(options)
-        this.type = "categorys"
-        this.type_name = "Category"
-    }
-
-    protected to_object(streamable : CategoryStreamable) : Category {
-        return new Category(streamable)
+        super(options, new CategoryType())
     }
 
     show(element : JQuery) : void {
         super.show(element)
 
-        var mythis = this
-
         window._category_changed.add_listener(this, (obj : Category) => {
-            if (obj.id === this.options.obj_id) {
-                mythis.set(obj)
+            let this_obj_id : number = this.get_obj_id()
+            if (obj.id === this_obj_id) {
+                this.set(this.obj_type.load(obj.id))
             }
         })
         window._category_deleted.add_listener(this, (obj_id : number) => {
-            if (obj_id === this.options.obj_id) {
-                mythis.remove()
+            let this_obj_id : number = this.get_obj_id()
+            if (obj_id === this_obj_id) {
+                this.remove()
             }
         })
     }
 
     protected get_photo_criteria() : PhotoCriteria {
-        return {
-            'category': this.options.obj_id,
-            'category_descendants': true,
-        }
+        let criteria : PhotoCriteria = new PhotoCriteria()
+        criteria.category = this.get_obj_id()
+        criteria.category_descendants = true
+        return criteria
     }
 
-    protected create_object_list_widget(options : CategoryListWidgetOptions) : CategoryListWidget {
-        return new CategoryListWidget(options)
-    }
-
-    protected create_object_detail_infobox(options : CategoryDetailInfoboxOptions) : CategoryDetailInfobox {
-        return new CategoryDetailInfobox(options)
-    }
-
-    protected create_object_list_viewport(options : CategoryListViewportOptions) : CategoryListViewport {
-        return new CategoryListViewport(options)
-    }
-
-    protected create_object_change_dialog(options : CategoryChangeDialogOptions) : CategoryChangeDialog {
-        return new CategoryChangeDialog(options)
-    }
-
-    protected create_object_delete_dialog(options : CategoryDeleteDialogOptions) : CategoryDeleteDialog {
-        return new CategoryDeleteDialog(options)
+    protected get_children_criteria() : CategoryCriteria {
+        let criteria : CategoryCriteria = new CategoryCriteria()
+        criteria.instance = this.get_obj()
+        criteria.mode = 'children'
+        return criteria
     }
 }

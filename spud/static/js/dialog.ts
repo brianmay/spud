@@ -520,19 +520,20 @@ class booleanInputField extends InputField {
 }
 
 // define ajax_select_field
-class AjaxSelectField extends InputField {
-    type : string
+class AjaxSelectField<U extends SpudObject, ObjectCriteria extends Criteria> extends InputField {
+    obj_type : ObjectType<U, ObjectCriteria>
 
-    constructor(title : string, type : string, required : boolean) {
+    constructor(title : string, obj_type : ObjectType<U, ObjectCriteria>, required : boolean) {
         super(title, required)
-        this.type = type
+        this.obj_type = obj_type
     }
 
     create(id : string) : JQuery {
         this.input = $("<span/>")
             .attr("name", id)
             .attr("id", "id_" + id)
-        $.spud.ajaxautocomplete({type: this.type}, this.input)
+
+        $.spud.ajaxautocomplete({obj_type: this.obj_type}, this.input)
         return this.input
     }
 
@@ -540,12 +541,12 @@ class AjaxSelectField extends InputField {
         this.input.ajaxautocomplete("destroy")
     }
 
-    set(value : SpudObject) : void {
+    set(value : U) : void {
         this.input.ajaxautocomplete("set", value, null)
     }
 
-    get() : SpudObject {
-        return this.input.ajaxautocomplete("get")
+    get() : U {
+        return this.input.ajaxautocomplete<U>("get")
     }
 
     enable() : void {
@@ -558,19 +559,20 @@ class AjaxSelectField extends InputField {
 }
 
 // define ajax_select_multiple_field
-class AjaxSelectMultipleField extends InputField {
-    type : string
+class AjaxSelectMultipleField<U extends SpudObject, ObjectCriteria extends Criteria> extends InputField {
+    obj_type : ObjectType<U, ObjectCriteria>
 
-    constructor(title : string, type : string, required : boolean) {
+    constructor(title : string, obj_type : ObjectType<U, ObjectCriteria>, required : boolean) {
         super(title, required)
-        this.type = type
+        this.obj_type = obj_type
     }
 
     create(id : string) : JQuery {
         this.input = $("<span/>")
             .attr("name", id)
             .attr("id", "id_" + id)
-        $.spud.ajaxautocompletemultiple({type: this.type}, this.input)
+
+        $.spud.ajaxautocompletemultiple({obj_type: this.obj_type}, this.input)
         return this.input
     }
 
@@ -578,12 +580,12 @@ class AjaxSelectMultipleField extends InputField {
         this.input.ajaxautocompletemultiple("destroy")
     }
 
-    set(value : Array<SpudObject>) : void {
+    set(value : Array<U>) : void {
         this.input.ajaxautocompletemultiple("set", value, null)
     }
 
-    get() : Array<SpudObject> {
-        return this.input.ajaxautocompletemultiple("get")
+    get() : Array<U> {
+        return this.input.ajaxautocompletemultiple<U>("get")
     }
 
     enable() : void {
@@ -596,19 +598,20 @@ class AjaxSelectMultipleField extends InputField {
 }
 
 // define ajax_select_sorted_field
-class AjaxSelectSortedField extends InputField {
-    type : string
+class AjaxSelectSortedField<U extends SpudObject, ObjectCriteria extends Criteria> extends InputField {
+    obj_type : ObjectType<U, ObjectCriteria>
 
-    constructor(title : string, type : string, required : boolean) {
+    constructor(title : string, obj_type : ObjectType<U, ObjectCriteria>, required : boolean) {
         super(title, required)
-        this.type = type
+        this.obj_type = obj_type
     }
 
     create(id : string) : JQuery {
         this.input = $("<span/>")
             .attr("name", id)
             .attr("id", "id_" + id)
-        $.spud.ajaxautocompletesorted({type: this.type}, this.input)
+
+        $.spud.ajaxautocompletesorted({obj_type: this.obj_type}, this.input)
         return this.input
     }
 
@@ -616,12 +619,12 @@ class AjaxSelectSortedField extends InputField {
         this.input.ajaxautocompletesorted("destroy")
     }
 
-    set(value : Array<SpudObject>) : void {
+    set(value : Array<U>) : void {
         this.input.ajaxautocompletesorted("set", value, null)
     }
 
-    get() : Array<SpudObject> {
-        return this.input.ajaxautocompletesorted("get")
+    get() : Array<U> {
+        return this.input.ajaxautocompletesorted<U>("get")
     }
 
     enable() : void {
@@ -682,7 +685,7 @@ class PhotoSelectField extends InputField {
 }
 
 // define dialog
-interface FormDialogOptions extends BaseDialogOptions {
+class FormDialogOptions extends BaseDialogOptions {
     pages? : Array<InputPage>
     fields? : Array<IdInputField>
     obj? : any

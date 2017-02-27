@@ -86,28 +86,171 @@ $.fn.append_csv = function(list){
     return this
 }
 
-function parse_number(value : number) : number {
-    if (typeof value == "number") {
+function get_streamable(streamable : PostStreamable, key : string) : PostStreamableType {
+    if (streamable == null) {
+        return null
+    }
+    return streamable[key]
+}
+
+function streamable_to_number(value : PostStreamableType) : number {
+    if (typeof value === "string") {
+        return parseInt(value, 10)
+    } else if (typeof value === "number") {
         return value
     } else {
         return null
     }
 }
 
-function parse_string(value : string) : string {
-    if (typeof value == "string") {
+function streamable_to_string(value : PostStreamableType) : string {
+    if (typeof value === "string") {
+        return value
+    } else if (typeof value === "number") {
+        return value + ""
+    } else if (typeof value === "boolean") {
+        return value + ""
+    } else {
+        return null
+    }
+}
+
+function streamable_to_boolean(value : PostStreamableType) : boolean {
+    if (typeof value === "string") {
+        if (value.toLowerCase()=="true") {
+            return true
+        } else if (value.toLowerCase()=="false") {
+            return false
+        } else {
+            return null
+        }
+    } else if (typeof value === "number") {
+        return (value)?true:false
+    } else if (typeof value === "boolean") {
         return value
     } else {
         return null
     }
 }
 
-function parse_datetimezone(value : string, offset : number) : DateTimeZone {
-    if (typeof value == "string") {
+function streamable_to_datetimezone(value : PostStreamableType, offset : number) : DateTimeZone {
+    if (typeof value === "string") {
         return [
-            moment.utc(parse_string(value)),
-            parse_number(offset),
+            moment.utc(value),
+            offset,
         ]
+    } else {
+        return null
+    }
+}
+
+function streamable_to_number_array(value : PostStreamableType) : Array<number> {
+    if (typeof value === "string") {
+        let str_array : Array<string> = value.split(",")
+        return $.map(str_array, (item : string) => { return parseInt(item, 10); })
+    } else {
+        return null
+    }
+}
+
+function streamable_to_array(value : PostStreamableType) : Array<PostStreamableType> {
+    if (value instanceof Array) {
+        return value
+    } else {
+        return []
+    }
+}
+
+function streamable_to_string_array(value : PostStreamableType) : StringArray<PostStreamableType> {
+    if (value instanceof Object) {
+        return value as StringArray<PostStreamableType>
+    } else {
+        return {}
+    }
+}
+
+
+function streamable_to_object(value : PostStreamableType) : PostStreamable {
+    if (value instanceof Object) {
+        return value as PostStreamable
+    } else {
+        return null
+    }
+}
+
+function get_streamable_number(streamable : PostStreamable, key : string) : number {
+    let value = get_streamable(streamable, key)
+    return streamable_to_number(value)
+}
+
+function get_streamable_string(streamable : PostStreamable, key : string) : string {
+    let value = get_streamable(streamable, key)
+    return streamable_to_string(value)
+}
+
+function get_streamable_boolean(streamable : PostStreamable, key : string) : boolean {
+    let value = get_streamable(streamable, key)
+    return streamable_to_boolean(value)
+}
+
+function get_streamable_datetimezone(streamable : PostStreamable, key : string, offset : number) : DateTimeZone {
+    let value = get_streamable(streamable, key)
+    return streamable_to_datetimezone(value, offset)
+}
+
+function get_streamable_number_array(streamable : PostStreamable, key : string) : Array<number> {
+    let value = get_streamable(streamable, key)
+    return streamable_to_number_array(value)
+}
+
+function get_streamable_array(streamable : PostStreamable, key : string) : Array<PostStreamableType> {
+    let value = get_streamable(streamable, key)
+    return streamable_to_array(value)
+}
+
+function get_streamable_string_array(streamable : PostStreamable, key : string) : StringArray<PostStreamableType> {
+    let value = get_streamable(streamable, key)
+    return streamable_to_string_array(value)
+}
+
+function get_streamable_object(streamable : PostStreamable, key : string) : PostStreamable {
+    let value = get_streamable(streamable, key)
+    return streamable_to_object(value)
+}
+
+function set_streamable_value(streamable : Streamable, key : string, value : string | number | boolean) : void {
+    if (value != null) {
+        streamable[key] = value
+    }
+}
+
+function set_streamable_array_as_string(streamable : Streamable, key : string, array : Array<string | number | boolean>) : void {
+    if (array != null) {
+        streamable[key] = array.join(",")
+    }
+}
+
+function set_streamable_array_as_array(streamable : PostStreamable, key : string, array : Array<string | number | boolean>) : void {
+    if (array != null) {
+        streamable[key] = array
+    }
+}
+
+function set_streamable_datetimezone_datetime(streamable : Streamable, key : string, value : DateTimeZone) : void {
+    if (value != null) {
+        streamable[key] = value[0].toISOString()
+    }
+}
+
+function set_streamable_datetimezone_offset(streamable : Streamable, key : string, value : DateTimeZone) : void {
+    if (value != null) {
+        streamable[key] = value[1]
+    }
+}
+
+function streamable_datetimezone_datetime(value : DateTimeZone) : string {
+    if (value != null) {
+        return value[0].toISOString()
     } else {
         return null
     }
@@ -121,13 +264,6 @@ function streamable_datetimezone_offset(value : DateTimeZone) : number {
     }
 }
 
-function streamable_datetimezone_datetime(value : DateTimeZone) : string {
-    if (value != null) {
-        return value[0].toISOString()
-    } else {
-        return null
-    }
-}
 
 // ****************
 // * BASE WIDGETS *
@@ -310,32 +446,31 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         }
     },
 
-    _convert: function(streamable : ObjectStreamable) : SpudObject {
-        return new SpudObject(streamable)
-    },
-
     _initSource: function() {
         this.source = ( request, response ) => {
-            if (this.loader != null) {
-                let loader : ObjectListLoader<ObjectStreamable> = this.loader
-                loader.abort()
-            }
-            let loader = create_object_list_loader<ObjectStreamable>(this.options.type, request)
-            loader.loaded_list.add_listener(this, (notification: ObjectListNotification<ObjectStreamable>) => {
-                this.loader = null
-                let list : Array<Photo> = []
-                for (let i=0; i<notification.list.length; i++) {
-                    let streamable : ObjectStreamable = notification.list[i]
-                    let obj : Photo = this._convert(streamable)
-                    list.push(obj)
-                }
-                response(list);
-            })
-            loader.on_error.add_listener(this, () => {
-            })
-            loader.load_next_page()
+            let obj_type = this.options.obj_type
 
-            this.loader = loader
+            if (this.loader != null) {
+                this.loader.remove_listener(this)
+            }
+
+            obj_type.criteria_from_streamable(request, (criteria) => {
+                let loader = obj_type.load_list(criteria)
+                loader.loaded_list.add_listener(this, (notification) => {
+                    this.loader = null
+                    let list : Array<Photo> = []
+                    for (let i=0; i<notification.list.length; i++) {
+                        let obj : Photo = notification.list[i]
+                        list.push(obj)
+                    }
+                    response(list);
+                })
+                loader.on_error.add_listener(this, () => {
+                })
+                loader.load_next_page()
+
+                this.loader = loader
+            })
         };
     },
 
@@ -369,16 +504,16 @@ $.widget('spud.ajaxautocomplete',  $.spud.autocompletehtml, {
         if (obj != null || obj_pk == null) {
             this._loaded_killer(repr, obj)
         } else {
-            var kill_loader : ObjectLoader<ObjectStreamable> = create_object_loader<ObjectStreamable>(this.options.type, obj_pk)
-            kill_loader.loaded_item.add_listener(this, (killer_obj : ObjectStreamable) => {
-                let obj : SpudObject = this._convert(killer_obj)
-                this._loaded_killer(repr, obj)
+            let obj_type = this.options.obj_type
+            let loader = obj_type.load(obj_pk)
+            loader.loaded_item.add_listener(this, (killer_obj : SpudObject) => {
+                this._loaded_killer(repr, killer_obj)
             })
-            kill_loader.on_error.add_listener(this, () => {
+            loader.on_error.add_listener(this, (message : string) => {
+                console.log(message)
                 repr.text("error")
                     .addClass("error")
             })
-            kill_loader.load()
         }
 
         killButton.on("click", (ev) => {
@@ -515,7 +650,7 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
         $("<div></div>")
             .set_widget(this.img)
             .appendTo(this.element)
-        this.options.type = "photos"
+        this.options.obj_type = new PhotoType()
         this._super();
     },
 
@@ -529,10 +664,6 @@ $.widget('spud.photo_select',  $.spud.ajaxautocomplete, {
         this._super(obj_pk, div);
         let img : ImageWidget = this.img
         img.set_none()
-    },
-
-    _convert: function(streamable : PhotoStreamable) : Photo {
-        return new Photo(streamable)
     },
 })
 

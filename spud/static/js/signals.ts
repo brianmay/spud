@@ -48,11 +48,15 @@ class Signal<T> {
     on_no_listeners : () => void
     listeners : StringArray<Listener<T>>
     objects : StringArray<any>
+    private immediate_dispatch : T
+    private no_new_listeners : boolean
 
     constructor() {
         this.on_no_listeners = null
         this.listeners = {}
         this.objects = {}
+        this.immediate_dispatch = null
+        this.no_new_listeners = false
     }
 
     add_listener(obj : any, listener : Listener<T>) : void {
@@ -63,13 +67,20 @@ class Signal<T> {
         if (this.listeners[key]) {
             this.remove_listener(key)
         }
-        this.listeners[key] = listener
-        this.objects[key] = obj
 
-        if (window._listeners[key] == null) {
-            window._listeners[key] = []
+        if (!this.no_new_listeners) {
+            this.listeners[key] = listener
+            this.objects[key] = obj
+
+            if (window._listeners[key] == null) {
+                window._listeners[key] = []
+            }
+            window._listeners[key].push(this)
         }
-        window._listeners[key].push(this)
+
+        if (this.immediate_dispatch != null) {
+            listener(this.immediate_dispatch)
+        }
     }
 
     remove_listener(obj : any) : void {
@@ -80,21 +91,35 @@ class Signal<T> {
         delete this.listeners[key]
         delete this.objects[key]
 
-        if (window._listeners[key] == null) {
+        if (window._listeners[key] === null) {
             var index = window._listeners[key].indexOf(this)
             if (index !== -1) {
                 // Don't do this; is called from within loop in
                 // remove_all_listeners
                 // window._listeners[key].splice(index, 1)
-                delete window._listeners[key]
+                window._listeners[key][index] = null
             }
         }
 
         if (!this.is_any_listeners()) {
+            // FIXME check this isn't run multiple times
             if (this.on_no_listeners != null) {
                 this.on_no_listeners()
             }
         }
+    }
+
+    disable(immediate_dispatch : T) : void {
+        let objects : Array<any> = $.extend({}, this.objects);
+        for (let key in objects) {
+            this.remove_listener(objects[key])
+        }
+        this.immediate_dispatch = immediate_dispatch
+        this.no_new_listeners = true
+    }
+
+    set_immediate_dispatch(immediate_dispatch : T) : void {
+        this.immediate_dispatch = immediate_dispatch
     }
 
     is_any_listeners() : boolean {

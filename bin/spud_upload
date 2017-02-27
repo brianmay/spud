@@ -466,6 +466,7 @@ def main():
         print(result)
 
     except BeanBagException as e:
+        print("Raw error:", e.response)
         json = e.response.json()
         if json is not None:
             if 'detail' in json:

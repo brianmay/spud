@@ -18,28 +18,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
 
-window.do_root = function(session : Session, params : {}) : void {
+window.do_root = function(session : Session, params : GetStreamable) : void {
     setup_page(session)
 }
 
-window.do_list = function(obj_type : string, session : Session, criteria : StringArray<string>) : void {
+window.do_list = function(type : string, session : Session, state : GetStreamable) : void {
     setup_page(session)
 
     let viewport : Viewport = null
-    let params = {
-        criteria: criteria,
-    }
 
-    if (obj_type === "albums") {
-        viewport = new AlbumListViewport(params)
-    } else if (obj_type === "categorys") {
-        viewport = new CategoryListViewport(params)
-    } else if (obj_type === "places") {
-        viewport = new PlaceListViewport(params)
-    } else if (obj_type === "persons") {
-        viewport = new PersonListViewport(params)
-    } else if (obj_type === "photos") {
-        viewport = new PhotoListViewport(params)
+    if (type === "albums") {
+        let obj_type = new AlbumType()
+        viewport = obj_type.list_viewport(null, state)
+    } else if (type === "categorys") {
+        let obj_type = new CategoryType()
+        viewport = obj_type.list_viewport(null, state)
+    } else if (type === "places") {
+        let obj_type = new PlaceType()
+        viewport = obj_type.list_viewport(null, state)
+    } else if (type === "persons") {
+        let obj_type = new PersonType()
+        viewport = obj_type.list_viewport(null, state)
+    } else if (type === "photos") {
+        let obj_type = new PhotoType()
+        viewport = obj_type.list_viewport(null, state)
     }
     if (viewport != null) {
         window._do_replace = true
@@ -48,25 +50,26 @@ window.do_list = function(obj_type : string, session : Session, criteria : Strin
     }
 }
 
-window.do_detail = function(obj_type : string, obj_id : number, session : Session) : void {
+window.do_detail = function(type : string, obj_id : number, session : Session, state : GetStreamable) : void {
     setup_page(session)
 
-    let viewport : Viewport
-    let params = {
-        obj : null,
-        obj_id : obj_id,
-    }
+    let viewport : Viewport = null
 
-    if (obj_type === "albums") {
-        viewport = new AlbumDetailViewport(params)
-    } else if (obj_type === "categorys") {
-        viewport = new CategoryDetailViewport(params)
-    } else if (obj_type === "places") {
-        viewport = new PlaceDetailViewport(params)
-    } else if (obj_type === "persons") {
-        viewport = new PersonDetailViewport(params)
-    } else if (obj_type === "photos") {
-        viewport = new PhotoDetailViewport(params)
+    if (type === "albums") {
+        let obj_type = new AlbumType()
+        viewport = obj_type.detail_viewport(obj_type.load(obj_id), state)
+    } else if (type === "categorys") {
+        let obj_type = new CategoryType()
+        viewport = obj_type.detail_viewport(obj_type.load(obj_id), state)
+    } else if (type === "places") {
+        let obj_type = new PlaceType()
+        viewport = obj_type.detail_viewport(obj_type.load(obj_id), state)
+    } else if (type === "persons") {
+        let obj_type = new PersonType()
+        viewport = obj_type.detail_viewport(obj_type.load(obj_id), state)
+    } else if (type === "photos") {
+        let obj_type = new PhotoType()
+        viewport = obj_type.detail_viewport(obj_type.load(obj_id), state)
     }
     if (viewport != null) {
         window._do_replace = true

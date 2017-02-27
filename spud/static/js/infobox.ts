@@ -199,9 +199,7 @@ class DateTimeOutputField extends OutputField {
 
         this.datetime = null
 
-        var mythis = this
-
-        var div = $('<div/>')
+        let div = $('<div/>')
 
         this.output = $('<div />').appendTo(div)
 
@@ -222,10 +220,10 @@ class DateTimeOutputField extends OutputField {
                     .text("local")
             )
             .val(this.timezone)
-            .on("change", function(ev) {
+            .on("change", (ev) => {
                 void ev
-                mythis.timezone = $(this).val()
-                mythis.set(mythis.value)
+                this.timezone = $(this).val()
+                this.set(this.value)
             })
             .appendTo(div)
 
@@ -238,8 +236,8 @@ class DateTimeOutputField extends OutputField {
         this.output.empty()
 
         if (value != null) {
-            var datetime : moment.Moment = moment(value[0])
-            var utc_offset = value[1]
+            let datetime : moment.Moment = moment(value[0])
+            let utc_offset = value[1]
             if (this.timezone === "local") {
                 datetime.local()
             } else if (this.timezone === "source") {
@@ -248,7 +246,7 @@ class DateTimeOutputField extends OutputField {
                 datetime = datetime.tz(this.timezone)
             }
 
-            var datetime_str : string
+            let datetime_str : string
             if (datetime != null) {
                 datetime_str = datetime.format("dddd, MMMM Do YYYY, h:mm:ss a")
             } else {
@@ -266,10 +264,10 @@ class DateTimeOutputField extends OutputField {
 }
 
 // define link_output_field
-class LinkOutputField extends OutputField {
-    type : string
+class LinkOutputField<U extends SpudObject, ObjectCriteria extends Criteria> extends OutputField {
+    type : ObjectType<U, ObjectCriteria>
 
-    constructor(title : string, type : string) {
+    constructor(title : string, type : ObjectType<U, ObjectCriteria>) {
         super(title)
         this.type = type
     }
@@ -288,10 +286,10 @@ class LinkOutputField extends OutputField {
 }
 
 // define link_list_output_field
-class LinkListOutputField extends OutputField {
-    type : string
+class LinkListOutputField<U extends SpudObject, ObjectCriteria extends Criteria> extends OutputField {
+    type : ObjectType<U, ObjectCriteria>
 
-    constructor(title : string, type : string) {
+    constructor(title : string, type : ObjectType<U, ObjectCriteria>) {
         super(title)
         this.type = type
     }
@@ -351,7 +349,7 @@ class PhotoOutputField extends OutputField {
 
 // define infobox widget
 
-interface InfoboxOptions extends WidgetOptions {
+class InfoboxOptions extends WidgetOptions {
     title? : string
     pages? : Array<OutputPage>
     fields? : Array<IdOutputField>
@@ -445,10 +443,14 @@ abstract class Infobox extends Widget {
     }
 
     set(values : InfoboxValues) : void {
-        var visible = false
+        let visible = false
         for (let id in this.fields) {
             let field : OutputField = this.fields[id]
-            this.set_value(id, values[id])
+            if (values != null) {
+                this.set_value(id, values[id])
+            } else {
+                this.set_value(id, null)
+            }
             if (field.visible) {
                 visible = true
             }
