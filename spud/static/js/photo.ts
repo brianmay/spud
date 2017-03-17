@@ -1199,10 +1199,6 @@ class PhotoListViewport extends ObjectListViewport<Photo, PhotoCriteria> {
         )
     }
 
-    protected new_object_criteria_widget_options() : PhotoCriteriaWidgetOptions {
-        return new PhotoCriteriaWidgetOptions()
-    }
-
     get_streamable_state() : GetStreamable {
         let streamable : GetStreamable = super.get_streamable_state()
 
