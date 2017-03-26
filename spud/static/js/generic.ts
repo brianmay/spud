@@ -1004,7 +1004,7 @@ abstract class ObjectDetailViewport<U extends SpudObject, ObjectCriteria extends
     private prev_button : JQuery
     private next_button : JQuery
     private od : Infobox
-    private ol : ObjectListWidget<U, ObjectCriteria>
+    protected ol : ObjectListWidget<U, ObjectCriteria>
 
     constructor(options : ObjectDetailViewportOptions<U, ObjectCriteria>, obj_type : ObjectType<U, ObjectCriteria>) {
         super(options)

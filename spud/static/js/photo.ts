@@ -1004,6 +1004,10 @@ class PhotoListWidget extends ObjectListWidget<Photo, PhotoCriteria> {
         }
     }
 
+    set_selection(selection : Array<number>) : void {
+        //FIXME
+    }
+
     get_selection() : Array<number> {
         return this.options.selection
     }
@@ -1173,13 +1177,12 @@ class PhotoDetailInfobox extends Infobox {
 ///////////////////////////////////////
 
 class PhotoListViewportOptions extends ObjectListViewportOptions<PhotoCriteria> {
-    // FIXME
-    object_list_options? : PhotoListWidgetOptions
 }
 
 class PhotoListViewport extends ObjectListViewport<Photo, PhotoCriteria> {
     protected options : PhotoListViewportOptions
     protected ol : PhotoListWidget
+    private selection : Array<number>
 
     constructor(options : PhotoListViewportOptions) {
         super(options, new PhotoType())
@@ -1218,9 +1221,21 @@ class PhotoListViewport extends ObjectListViewport<Photo, PhotoCriteria> {
         super.set_streamable_state(streamable)
 
         let object_list_options : PhotoListWidgetOptions = {}
-        object_list_options.selection = get_streamable_number_array(streamable, 'selection')
+        let selection = get_streamable_number_array(streamable, 'selection')
         // FIXME
-        this.options.object_list_options = object_list_options
+        if (this.element != null) {
+            this.ol.set_selection(selection)
+        } else {
+            this.selection = selection
+        }
+    }
+
+    filter(value : PhotoCriteria) : void {
+        super.filter(value)
+        if (this.element != null) {
+            this.ol.set_selection(null)
+            this.selection = null
+        }
     }
 }
 
