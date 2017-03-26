@@ -1,0 +1,34 @@
+Template: spud/run_migrations
+Type: boolean
+_Description: Do you want to migrate the database now?
+ There are database schema changes with this release.
+ You can upgrade automatically now or migrate manually later.
+ Karaage will be unstable until database migrations are applied.
+ .
+ Note: Migrations can take some time on large databases.
+
+Template: spud/pending_migrations
+Type: note
+_Description: Pending Migrations
+ You will need to run migrations manually in order to complete the upgrade.
+ .
+  spud migrate
+
+Template: spud/pending_south_migrations
+Type: note
+_Description: Pending South Migrations
+ You will need to run south migrations manually in order to complete the
+ upgrade.
+ .
+  spud-migrate-south
+  spud migrate
+ .
+ Do not run "spud migrate" until after the spud-migrate-south has
+ completed successfully or you may end up with a broken system.
+
+Template: spud/error_migrations
+Type: note
+_Description: Error with migrations
+ Please identify the problem and fix it. Spud will not be reliable until
+ this is completed.
+

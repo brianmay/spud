@@ -1,0 +1,128 @@
+#!/bin/sh -e
+. /usr/share/debconf/confmodule
+
+#DEBHELPER#
+
+apache_force_reload() {
+    if apache2ctl configtest 2>/dev/null; then
+        #invoke-rc.d apache2 force-reload || true
+        # use "restart" as a workaround for bug #558608
+        #
+        # breaks debconf; see https://bugs.debian.org/713967
+        # invoke-rc.d apache2 restart < /dev/null || true
+        echo "Your apache2 is old, please restart apache2 manually." >&2
+    else
+        echo "Your apache2 configuration is broken, please fix it and restart apache2 manually." >&2
+    fi
+}
+
+test_configured() {
+    export DJANGO_SETTINGS_MODULE="spud.settings"
+    python - <<END
+from django.conf import settings;
+d=getattr(settings,'DATABASES',{});
+if 'default' not in d:
+    exit(1)
+if d['default']['ENGINE'] == 'django.db.backends.dummy':
+    exit(1)
+exit(0)
+END
+    RC="$?"
+    unset DJANGO_SETTINGS_MODULE
+    return "$RC"
+}
+
+if [ "$1" = "configure" ]; then
+    for i in /var/lib/spud
+    do
+        # only do something when no setting exists
+        if ! dpkg-statoverride --list $i >/dev/null 2>&1
+        then
+            dpkg-statoverride --update --add root www-data 775 $i
+        fi
+    done
+
+    if [ "$2" = "" ]; then
+        spud_set_secret_key
+    fi
+
+    spud collectstatic --noinput
+
+    if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+        # apache 2.4
+        . /usr/share/apache2/apache2-maintscript-helper
+        apache2_invoke enconf spud.conf
+    elif command -v apache2 > /dev/null && apache2 -v | sed -n 's/^Server version: //p' | grep -q 'Apache/2.2'; then
+        # apache 2.2
+        ln -sf ../conf-available/spud.conf /etc/apache2/conf.d/spud.conf
+        apache_force_reload
+    fi
+
+    if test_configured; then
+        # spud is configured
+
+        # create temp file
+        TMPFILE=$(mktemp)
+        trap "rm -f -- '$TMPFILE'" EXIT HUP INT TERM
+
+        # save output of migrate to temp file
+        spud=$(command -v spud)
+        python "$spud" migrate --list > "$TMPFILE"
+
+        # guess what we need to do
+        if grep "(.)" "$TMPFILE" > /dev/null; then
+
+            # Django 1.6 installed
+            if grep "( )" "$TMPFILE" > /dev/null; then
+                # There are unapplied South migrations + and we are still
+                # running Django 1.6.
+                db_fset spud/run_migrations seen "false"
+                db_input high spud/run_migrations || true
+                db_go
+
+                db_get spud/run_migrations
+                if [ "$RET" = "true" ]; then
+                    python "$spud" migrate --all
+                else
+                    db_input high spud/pending_migrations || true
+                    db_go
+                fi
+            fi
+
+        elif grep "\[.\]" "$TMPFILE" > /dev/null; then
+
+            # Django 1.7 installed
+            if ! grep "\[X\]"  "$TMPFILE" > /dev/null; then
+                # no Django 1.7 migrations applied, don't do anything
+                db_input high spud/pending_south_migrations || true
+                db_go
+
+            elif grep "\[ \]" "$TMPFILE" > /dev/null; then
+                # There are unapplied Django 1.7 migrations and we are
+                # running Django 1.7
+                db_fset spud/run_migrations seen "false"
+                db_input high spud/run_migrations || true
+                db_go
+
+                db_get spud/run_migrations
+                if [ "$RET" = "true" ]; then
+                    "$spud" migrate
+                else
+                    db_input high spud/pending_migrations || true
+                    db_go
+                fi
+            fi
+
+        else
+            # Something went wrong. We couldn't tell which version of
+            # django installed.
+            db_fset spud/error_migrations seen "false"
+            db_input critical spud/error_migrations || true
+            db_go
+
+        fi
+
+    else
+        echo "Spud is not configured; not running migrations." >&2
+    fi
+fi

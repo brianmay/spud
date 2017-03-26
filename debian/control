@@ -1,0 +1,30 @@
+Source: spud
+Section: python
+Priority: optional
+Maintainer: Brian May <bam@debian.org>
+Build-Depends: debhelper (>=9), dh-python, libjs-jquery, libjs-jquery-ui,
+ python-all (>= 2.6.6-3~), python-setuptools, python-six, python-flake8, python-django-cors-headers,
+ python-dateutil, python-pil, python-tz, python-django, python3-django-cors-headers,
+ python-django-pipeline, python-djangorestframework (>= 3.0.5), node-typescript,
+ python-setuptools-scm, python-pytest, python-pytest-django, python-mock,
+ python-django-environ, python-pytest-runner,
+ cssmin, slimit,
+Homepage: https://github.com/brianmay/spud
+Vcs-Git: git://github.com/brianmay/spud-debian
+Vcs-Browser: https://github.com/brianmay/spud-debian
+Standards-Version: 3.9.8
+X-Python-Version: >= 2.7
+
+Package: spud
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends},
+ libapache2-mod-wsgi | httpd-wsgi,
+ apache2 | httpd,
+ libimage-exiftool-perl, libav-tools, exiftran,
+ libjs-jquery,
+Recommends: dcraw
+Suggests: python-psycopg2 | python-mysqldb | python-mysql.connector
+Description: Sortable Photo album Using a Django based database
+ A database for photos and videos. Search photos by exif information, albums,
+ place, categories, and people. Uses static files for all media contacts.
+ Postgres is recommended, although any database supported by Django should work.

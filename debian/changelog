@@ -1,0 +1,346 @@
+spud (2.0.5-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Brian May <bam@debian.org>  Sun, 01 May 2016 17:25:42 +1000
+
+spud (2.0.3-1) unstable; urgency=medium
+
+  * Port Javascript to Typescript.
+  * Add more tests.
+  * Remove pipeline TypescriptCompiler - has problems with debugging.
+
+ -- Brian May <bam@debian.org>  Mon, 25 Apr 2016 18:53:49 +1000
+
+spud (2.0.2-1) unstable; urgency=medium
+
+  * Work around django-pipeline/slimit js curruption.
+  * Change default url prefix.
+  * Add support for CORS.
+  * Fix new PEP8 issues.
+
+ -- Brian May <bam@debian.org>  Sun, 09 Aug 2015 17:41:37 +1000
+
+spud (2.0.1-1) unstable; urgency=medium
+
+  * Numerous bugs fixed.
+
+ -- Brian May <bam@debian.org>  Sun, 12 Apr 2015 10:59:47 +1000
+
+spud (2.0.0-1) unstable; urgency=medium
+
+  * New release.
+  * Rewritten code with django-rest-framework.
+
+ -- Brian May <bam@debian.org>  Mon, 16 Mar 2015 13:57:24 +1100
+
+spud (1.14-1) unstable; urgency=low
+
+  * Python 3 fixes.
+  * Django 1.7 fixes.
+
+ -- Brian May <bam@debian.org>  Wed, 05 Nov 2014 16:39:45 +1100
+
+spud (1.13-1) unstable; urgency=low
+
+  * Fix various bugs.
+
+ -- Brian May <bam@debian.org>  Tue, 05 Nov 2013 11:44:17 +1100
+
+spud (1.12-1) unstable; urgency=low
+
+  * Fix various bugs.
+
+ -- Brian May <bam@debian.org>  Mon, 05 Aug 2013 09:10:29 +1000
+
+spud (1.11-1) unstable; urgency=low
+
+  * Various bug fixes.
+
+ -- Brian May <bam@debian.org>  Sat, 01 Jun 2013 12:41:57 +1000
+
+spud (1.10-1) unstable; urgency=low
+
+  * Improvements for video.
+  * Various bug fixes.
+
+ -- Brian May <bam@debian.org>  Wed, 15 May 2013 10:10:03 +1000
+
+spud (1.9-1) unstable; urgency=low
+
+  * Various updates for video support.
+
+ -- Brian May <bam@debian.org>  Sun, 12 May 2013 16:09:30 +1000
+
+spud (1.8-1) unstable; urgency=low
+
+  * Various bug fixes.
+  * Improve quality for video support.
+
+ -- Brian May <bam@debian.org>  Sun, 12 May 2013 11:22:48 +1000
+
+spud (1.7-1) unstable; urgency=low
+
+  * Preliminary support for video files.
+
+ -- Brian May <bam@debian.org>  Sat, 11 May 2013 16:51:05 +1000
+
+spud (1.6-2) unstable; urgency=low
+
+  * Transition to dh_python2. See
+    http://wiki.debian.org/Python/TransitionToDHPython2.
+  * Add recommends for dcraw.
+
+ -- Brian May <bam@debian.org>  Thu, 09 May 2013 11:21:14 +1000
+
+spud (1.6-1) unstable; urgency=low
+
+  * More bug fixes.
+
+ -- Brian May <bam@debian.org>  Mon, 06 May 2013 15:40:42 +1000
+
+spud (1.5-1) unstable; urgency=low
+
+  * Bugs fixed.
+  * Minor schema change.
+
+ -- Brian May <bam@debian.org>  Sat, 04 May 2013 12:01:20 +1000
+
+spud (1.4-1) unstable; urgency=low
+
+  * Fullscreen mode.
+  * Style changes.
+  * Bugs fixed.
+
+ -- Brian May <bam@debian.org>  Sat, 04 May 2013 11:31:30 +1000
+
+spud (1.3-1) unstable; urgency=low
+
+  * Version 1.2 was missing be5492b897743334a841d923c1377a784cea0d58. Retry.
+
+ -- Brian May <bam@debian.org>  Wed, 01 May 2013 11:06:30 +1000
+
+spud (1.2-1) unstable; urgency=low
+
+  * Schema updates.
+  * Fixes for slideshow mode.
+
+ -- Brian May <bam@debian.org>  Wed, 01 May 2013 10:15:04 +1000
+
+spud (1.1-1) unstable; urgency=low
+
+  * Various bugs fixed.
+  * Improvements to style sheets.
+
+ -- Brian May <bam@debian.org>  Tue, 30 Apr 2013 15:47:37 +1000
+
+spud (1.0-1) unstable; urgency=low
+
+  * Major rewrite in AJAX/Javascript.
+
+ -- Brian May <bam@debian.org>  Sun, 28 Apr 2013 16:15:46 +1000
+
+spud (0.25-1) unstable; urgency=low
+
+  * Fix media issues.
+
+ -- Brian May <bam@debian.org>  Tue, 18 Sep 2012 13:36:50 +1000
+
+spud (0.24-1) unstable; urgency=low
+
+  * Use Django 1.3 static file support.
+  * Make common commands django management commands.
+  * Small SQL optimizations.
+
+ -- Brian May <bam@debian.org>  Fri, 14 Sep 2012 13:20:29 +1000
+
+spud (0.23-1) unstable; urgency=low
+
+  * Bugs fixed.
+  * Automatically change filename if it conflicts and photo is different.
+  * Search for photos based on id.
+
+ -- Brian May <bam@debian.org>  Sat, 05 May 2012 16:57:10 +1000
+
+spud (0.22-1) unstable; urgency=low
+
+  * Bugs fixed.
+  * Timezone tracking updated.
+  * Date searches improved.
+  * Code restructured.
+
+ -- Brian May <bam@debian.org>  Wed, 28 Mar 2012 12:11:33 +1100
+
+spud (0.21-1) unstable; urgency=low
+
+  * Update to support at least django-tables 0.9.4
+  * Other issues fixed.
+
+ -- Brian May <bam@debian.org>  Fri, 09 Mar 2012 13:13:50 +1100
+
+spud (0.20-1) unstable; urgency=low
+
+  * Improve formatting of AJAX lists.
+  * Disable auth checks in AJAX lookups.
+  * Exclude deleted photos from being cover photo.
+
+ -- Brian May <bam@debian.org>  Thu, 29 Dec 2011 11:01:06 +1100
+
+spud (0.19-1) unstable; urgency=low
+
+  * Bug fixes.
+  * Support django-ajax-select 1.2.3.
+
+ -- Brian May <bam@debian.org>  Wed, 28 Dec 2011 15:49:28 +1100
+
+spud (0.18-1) unstable; urgency=low
+
+  * Improve Javascript.
+  * Improve other stuff.
+
+ -- Brian May <bam@debian.org>  Fri, 15 Jul 2011 10:41:33 +1000
+
+spud (0.17-1) unstable; urgency=low
+
+  * Fix various broken things.
+
+ -- Brian May <bam@debian.org>  Fri, 08 Jul 2011 15:07:00 +1000
+
+spud (0.16-1) unstable; urgency=low
+
+  * Update style.
+  * Improve Javascript code.
+  * Convert floats to inline-blocks.
+  * Fix error conditions.
+
+ -- Brian May <bam@debian.org>  Sun, 03 Jul 2011 11:40:55 +1000
+
+spud (0.15-1) unstable; urgency=low
+
+  * Store image sizes in database.
+  * Fix quirks in user interface. e.g. image resized after it is displayed.
+
+ -- Brian May <bam@debian.org>  Thu, 30 Jun 2011 16:10:35 +1000
+
+spud (0.14-1) unstable; urgency=low
+
+  * Experimental changes designed to improve mobile phone experience.
+
+ -- Brian May <bam@debian.org>  Wed, 29 Jun 2011 18:29:31 +1000
+
+spud (0.13-1) unstable; urgency=low
+
+  * Fix error templates.
+
+ -- Brian May <bam@debian.org>  Fri, 24 Jun 2011 11:56:23 +1000
+
+spud (0.12-1) unstable; urgency=low
+
+  * Update standards version to 3.9.2.
+  * Fix XHTML Errors.
+  * Split django-webs stuff into separate package.
+
+ -- Brian May <bam@debian.org>  Thu, 23 Jun 2011 11:59:13 +1000
+
+spud (0.11-1) unstable; urgency=low
+
+  * Remove whitespace after edit photo command.
+  * New edit form.
+  * Don't hardcode large image size.
+  * Fix processing of actions.
+  * Fix various issues surrounding photo relations.
+
+ -- Brian May <bam@debian.org>  Tue, 03 May 2011 14:25:24 +1000
+
+spud (0.10-1) unstable; urgency=low
+
+  * Remove obsolete command line option to import program.
+  * Various bugs fixed.
+  * Don't hard code image size or photos per page anywhere. Except for "large".
+  * Allow customization of default settings.
+  * Improve stylesheet for Mobile phone use.
+  * Fix error with migrations on sqlite.
+
+ -- Brian May <bam@debian.org>  Sat, 30 Apr 2011 11:58:45 +1000
+
+spud (0.9-1) unstable; urgency=low
+
+  * Improve JavaScript.
+  * Rename database tables.
+
+ -- Brian May <bam@debian.org>  Tue, 26 Apr 2011 15:22:08 +1000
+
+spud (0.8-1) unstable; urgency=low
+
+  * Fix permission checks. Security issue, anybody could edit photos.
+  * Fix broken XHTML.
+  * Make timezones more flexible. Can specify UTC+nn or UTC-nn for imports.
+  * Improve photo editor, have links to most popular items.
+  * Fix problems with add person and set person logic.
+  * Limit width of photo summary in css.
+  * Optimize how search string is generated.
+  * Don't use CSRF protection for post requests that don't have side effects.
+
+ -- Brian May <bam@debian.org>  Sun, 24 Apr 2011 09:16:42 +1000
+
+spud (0.7-1) lucid; urgency=low
+
+  * Fix error when accessing non-existant images.
+  * Work around innodb bug, see http://south.aeracode.org/ticket/466.
+  * Fiddle with stylesheets, etc.
+
+ -- Brian May <brian@debian.org>  Tue, 05 Apr 2011 14:57:40 +1000
+
+spud (0.6-1) lucid; urgency=low
+
+  * Use secure session cookies by default.
+  * Add missing error templates.
+  * Other minor changes.
+
+ -- Brian May <bam@debian.org>  Mon, 04 Apr 2011 14:57:23 +1000
+
+spud (0.5-1) lucid; urgency=low
+
+  * Fix typo that caused error when adding category to image.
+  * Updates to templates. Good? Bad?
+  * Edit now supports showing image in different sizes.
+
+ -- Brian May <bam@debian.org>  Mon, 04 Apr 2011 10:43:47 +1000
+
+spud (0.4-1) lucid; urgency=low
+
+  * Enable sql transaction support by default.
+  * Add ability to override src timezone and offset on per camera basis.
+  * Fix errors when display photos using redirect urls.
+  * Fix errors in breadcrumbs for creating albums,categories and places.
+  * Add extended abilities for large image photos.
+
+ -- Brian May <bam@debian.org>  Sat, 02 Apr 2011 16:19:01 +1100
+
+spud (0.3-1) lucid; urgency=low
+
+  * Add missing depends on python-pyparsing and python-imaging.
+  * Add suggests on python-mysqldb.
+  * Add spud_process_actions binary to package.
+
+ -- Brian May <brian@debian.org>  Wed, 02 Mar 2011 11:28:33 +1100
+
+spud (0.2-2) lucid; urgency=low
+
+  * Fix postinst script.
+  * Remove obsolete fastcgi stuff.
+  * Turn on following symlinks under media directory.
+
+ -- Brian May <bam@debian.org>  Tue, 19 Oct 2010 09:37:30 +1100
+
+spud (0.2-1) lucid; urgency=low
+
+  * Many bugs removed to a better place.
+
+ -- Brian May <bam@debian.org>  Mon, 13 Sep 2010 13:15:09 +1000
+
+spud (0.1-1) lucid; urgency=low
+
+  * Initial release.
+
+ -- Brian May <bam@debian.org>  Sat, 17 Jul 2010 10:30:08 +1000

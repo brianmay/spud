@@ -1,0 +1,3 @@
+conf/settings.py /etc/spud
+conf/spud.wsgi /etc/spud
+conf/spud.conf /etc/apache2/conf-available
