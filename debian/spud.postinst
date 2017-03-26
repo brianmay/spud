@@ -18,7 +18,7 @@ apache_force_reload() {
 
 test_configured() {
     export DJANGO_SETTINGS_MODULE="spud.settings"
-    python - <<END
+    python3 - <<END
 from django.conf import settings;
 d=getattr(settings,'DATABASES',{});
 if 'default' not in d:
@@ -67,7 +67,7 @@ if [ "$1" = "configure" ]; then
 
         # save output of migrate to temp file
         spud=$(command -v spud)
-        python "$spud" migrate --list > "$TMPFILE"
+        python3 "$spud" migrate --list > "$TMPFILE"
 
         # guess what we need to do
         if grep "(.)" "$TMPFILE" > /dev/null; then
@@ -82,7 +82,7 @@ if [ "$1" = "configure" ]; then
 
                 db_get spud/run_migrations
                 if [ "$RET" = "true" ]; then
-                    python "$spud" migrate --all
+                    python3 "$spud" migrate --all
                 else
                     db_input high spud/pending_migrations || true
                     db_go
