@@ -21,9 +21,7 @@ from django.core.urlresolvers import reverse
 
 def common(request):
     """ Set context with common variables. """
-    api_root_url = getattr(settings, 'API_ROOT_URL', None)
-    if api_root_url is None:
-        api_root_url = reverse('root')
+    api_root_url = getattr(settings, 'API_ROOT_URL', reverse('root'))
 
     ctx = {
         'API_ROOT_URL': api_root_url,
