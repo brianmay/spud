@@ -2,7 +2,6 @@
 # -*- makefile -*-
 
 PREFIX = debian/spud
-export SETUPTOOLS_SCM_PRETEND_VERSION=$(shell cat PKG-INFO | sed -n 's/^Version: //p')
 
 export PYBUILD_NAME=spud
 
