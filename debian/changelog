@@ -3,6 +3,7 @@ spud (2.0.6-1) UNRELEASED; urgency=medium
   * New upstream version.
   * Significant changes to TypeScript code.
   * Use python3 instead of python2.
+  * Fix python3 issues in legacy upstream code.
 
  -- Brian May <bam@debian.org>  Mon, 27 Mar 2017 08:16:27 +1100
 

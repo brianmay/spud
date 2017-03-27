@@ -1,0 +1,105 @@
+From: Brian May <brian@linuxpenguins.xyz>
+Date: Mon, 27 Mar 2017 17:39:03 +1100
+Subject: Fix Python3 incompatibilities in legacy code
+
+---
+ spud/south_migrations/0013_timezone.py       |  2 +-
+ spud/south_migrations/0016_fix_ascendants.py | 28 ++++++++++++++--------------
+ 2 files changed, 15 insertions(+), 15 deletions(-)
+
+diff --git a/spud/south_migrations/0013_timezone.py b/spud/south_migrations/0013_timezone.py
+index d29dd84..8cd2834 100644
+--- a/spud/south_migrations/0013_timezone.py
++++ b/spud/south_migrations/0013_timezone.py
+@@ -32,7 +32,7 @@ class Migration(DataMigration):
+             local = local.astimezone(to_tz)
+ 
+             photo.utc_offset = local.utcoffset().total_seconds() / 60
+-            print photo.timezone, photo.datetime, local, photo.utc_offset
++            print(photo.timezone, photo.datetime, local, photo.utc_offset)
+ 
+             photo.save()
+ 
+diff --git a/spud/south_migrations/0016_fix_ascendants.py b/spud/south_migrations/0016_fix_ascendants.py
+index f0ea55e..a484877 100644
+--- a/spud/south_migrations/0016_fix_ascendants.py
++++ b/spud/south_migrations/0016_fix_ascendants.py
+@@ -11,11 +11,11 @@ def _ascendants_glue(instance, position, seen, cache, parent_attributes):
+         return glue
+ 
+     if instance.pk in cache:
+-        print "<--- getting", instance.pk,  [(i[0], i[1]+position) for i in cache[instance.pk]]
++        print("<--- getting", instance.pk,  [(i[0], i[1]+position) for i in cache[instance.pk]])
+         return [(i[0], i[1]+position) for i in cache[instance.pk]]
+ 
+     if instance.pk in seen:
+-        print "<--- loop detected", instance.pk
++        print("<--- loop detected", instance.pk)
+         return glue
+ 
+     glue.append((instance.pk, position))
+@@ -24,7 +24,7 @@ def _ascendants_glue(instance, position, seen, cache, parent_attributes):
+     for attr in parent_attributes:
+         parent = getattr(instance, attr)
+         if parent is not None:
+-            print "descending", instance.pk, parent.pk
++            print("descending", instance.pk, parent.pk)
+         new_glue = _ascendants_glue(
+             parent, position+1, seen, cache, parent_attributes)
+         # make sure there are no duplicates
+@@ -34,7 +34,7 @@ def _ascendants_glue(instance, position, seen, cache, parent_attributes):
+             if item not in glue:
+                 glue.append(item)
+ 
+-    print "---> caching", instance.pk, [(i[0], i[1]-position) for i in glue]
++    print("---> caching", instance.pk, [(i[0], i[1]-position) for i in glue])
+     cache[instance.pk] = [(i[0], i[1]-position) for i in glue]
+     return glue
+ 
+@@ -53,36 +53,36 @@ def _fix_ascendants(self, parent_attributes, glue_class, cache, do_descendants):
+     else:
+         instance_list = [self]
+ 
+-    print "((("
++    print("(((")
+     for instance in instance_list:
+         new_glue = _ascendants_glue(instance, 0, {}, cache, parent_attributes)
+-        print "----"
+-        print instance, instance.pk
+-        print "ng", [(i[0], i[1]) for i in new_glue]
+-        print "cache", cache.keys()
++        print("----")
++        print(instance, instance.pk)
++        print("ng", [(i[0], i[1]) for i in new_glue])
++        print("cache", cache.keys())
+ 
+         old_glue = [
+             (i.ascendant.pk, i.position)
+             for i in instance.ascendant_set.all()]
+ 
+-        print "og1", old_glue
++        print("og1", old_glue)
+ 
+         for glue in new_glue:
+             if glue in old_glue:
+-                print "nothing", glue
++                print("nothing", glue)
+                 old_glue.remove(glue)
+             else:
+-                print "adding", glue
++                print("adding", glue)
+                 ascendant = type(self).objects.get(pk=glue[0])
+                 glue_class.objects.create(
+                     ascendant=ascendant, descendant=self, position=glue[1])
+ 
+         for glue in old_glue:
+-            print "removing", glue
++            print("removing", glue)
+             glue_class.objects.filter(
+                 ascendant__pk=glue[0], descendant=self, position=glue[1]
+             ).delete()
+-    print ")))"
++    print(")))")
+ 
+ 
+ class Migration(DataMigration):
