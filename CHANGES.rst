@@ -1,3 +1,13 @@
+Release 2.0.6 (27 Mar 2017)
+===========================
+
+  * Drop Django 1.7 support.
+  * Drop Python 3.3 support.
+  * Add Django 1.10 support.
+  * Rewrite lots of typescript.
+  * Fix many bugs.
+  * Rename ``spud.wsgi`` to ``wsgi.py``.
+
 Release 2.0.5 (01 May 2016)
 ===========================
 
