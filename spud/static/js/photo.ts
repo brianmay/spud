@@ -1005,7 +1005,7 @@ class PhotoListWidget extends ObjectListWidget<Photo, PhotoCriteria> {
     }
 
     set_selection(selection : Array<number>) : void {
-        //FIXME
+        this.options.selection = selection
     }
 
     get_selection() : Array<number> {
