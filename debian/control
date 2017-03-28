@@ -8,7 +8,7 @@ Build-Depends: debhelper (>=9), dh-python, libjs-jquery, libjs-jquery-ui,
  python3-django-pipeline, python3-djangorestframework (>= 3.0.5), node-typescript,
  python3-setuptools-scm, python3-pytest, python3-pytest-django, python3-mock,
  python3-django-environ, python3-pytest-runner,
- cssmin, python3-slimit,
+ python3-cssmin, python3-slimit,
 Homepage: https://github.com/brianmay/spud
 Vcs-Git: git://github.com/brianmay/spud-debian
 Vcs-Browser: https://github.com/brianmay/spud-debian

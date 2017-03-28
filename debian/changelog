@@ -1,3 +1,9 @@
+spud (2.0.6-2) unstable; urgency=medium
+
+  * Depend on python3-cssmin, instead of cssmin.
+
+ -- Brian May <bam@debian.org>  Tue, 28 Mar 2017 17:01:30 +1100
+
 spud (2.0.6-1) unstable; urgency=medium
 
   * New upstream version.
