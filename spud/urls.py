@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import re
 from rest_framework import routers
 
 from django.conf.urls import url, include
@@ -44,14 +45,6 @@ urlpatterns = [
     url(r'^$',
         views.root, name='root'),
 
-    url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$',
-        views.photo_thumb_redirect, name='photo_thumb_redirect'),
-
-    url(r'^(?P<obj_type>\w+)/$',
-        views.obj_list, name='obj_list'),
-
-    url(r'^(?P<obj_type>\w+)/(?P<obj_id>\d+)/$',
-        views.obj_detail, name='obj_detail'),
 ]
 
 if getattr(settings, 'API_ROOT_URL', None) is None:
@@ -74,7 +67,19 @@ if getattr(settings, 'API_ROOT_URL', None) is None:
     ]
 
 
-import re
+urlpatterns += [
+
+    url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$',
+        views.photo_thumb_redirect, name='photo_thumb_redirect'),
+
+    url(r'^(?P<obj_type>\w+)/$',
+        views.obj_list, name='obj_list'),
+
+    url(r'^(?P<obj_type>\w+)/(?P<obj_id>\d+)/$',
+        views.obj_detail, name='obj_detail'),
+]
+
+
 if settings.DEBUG:
 
     if settings.IMAGE_PATH is not None:
