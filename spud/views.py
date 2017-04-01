@@ -664,7 +664,10 @@ class PhotoViewSet(ModelViewSet):
         value = _get_object(params, "place", models.place)
         if value is not None:
             if ld:
-                search = search & Q(place__ascendant_set__ascendant=value)
+                search = (
+                    search &
+                    Q(place__ascendant_set__ascendant=value).distinct()
+                )
             else:
                 search = search & Q(place=value)
 
@@ -674,7 +677,7 @@ class PhotoViewSet(ModelViewSet):
         if value is not None:
             if pd:
                 queryset = queryset.filter(
-                    persons__ascendant_set__ascendant=value)
+                    persons__ascendant_set__ascendant=value).distinct()
             else:
                 queryset = queryset.filter(persons=value)
 
@@ -682,7 +685,7 @@ class PhotoViewSet(ModelViewSet):
         if value is not None:
             if ad:
                 queryset = queryset.filter(
-                    albums__ascendant_set__ascendant=value)
+                    albums__ascendant_set__ascendant=value).distinct()
             else:
                 queryset = queryset.filter(albums=value)
 
@@ -690,7 +693,7 @@ class PhotoViewSet(ModelViewSet):
         if value is not None:
             if cd:
                 queryset = queryset.filter(
-                    categorys__ascendant_set__ascendant=value)
+                    categorys__ascendant_set__ascendant=value).distinct()
             else:
                 queryset = queryset.filter(categorys=value)
 

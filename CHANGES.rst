@@ -1,3 +1,8 @@
+Release 2.0.7 (01 Apr 2017)
+===========================
+
+  * Fix duplicate results for some searches.
+
 Release 2.0.6 (27 Mar 2017)
 ===========================
 
