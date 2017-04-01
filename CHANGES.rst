@@ -1,3 +1,8 @@
+Release 2.0.7 (UNRELEASED)
+==========================
+
+  * Fix error displaying photo list for places.
+
 Release 2.0.7 (01 Apr 2017)
 ===========================
 

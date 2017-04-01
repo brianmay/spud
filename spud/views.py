@@ -668,12 +668,10 @@ class PhotoViewSet(ModelViewSet):
         value = _get_object(params, "place", models.place)
         if value is not None:
             if ld:
-                search = (
-                    search &
-                    Q(place__ascendant_set__ascendant=value).distinct()
-                )
+                queryset = queryset.filter(
+                    place__ascendant_set__ascendant=value).distinct()
             else:
-                search = search & Q(place=value)
+                queryset = queryset.filter(persons=value)
 
         del value
 
