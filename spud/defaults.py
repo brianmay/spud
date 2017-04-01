@@ -116,7 +116,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.staticfiles',
 )
 
@@ -153,11 +152,6 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # When USE_TZ is True and the database supports time zones (e.g. PostgreSQL),
 # it is an error to set this option.
 TIME_ZONE = 'UTC'
-
-# Default content type to use for all HttpResponse objects, if a MIME type
-# isn’t manually specified. Used with DEFAULT_CHARSET to construct the
-# Content-Type header.
-DEFAULT_CONTENT_TYPE = "application/xhtml+xml"
 
 # A list of strings representing the host/domain names that this Django site
 # can serve. This is a security measure to prevent HTTP Host header attacks,
