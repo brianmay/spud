@@ -142,6 +142,7 @@ def get_json_session(user):
     return {
         'perms': perms,
         'user': get_json_user(user),
+        'token': ANY,
     }
 
 

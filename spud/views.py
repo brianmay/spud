@@ -24,6 +24,7 @@ from rest_framework import viewsets, status, exceptions as drf_exceptions
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 
 from django.utils.dateparse import parse_datetime
 import django.contrib.auth
@@ -206,6 +207,9 @@ def _get_session(request):
     }
 
     if user.is_authenticated():
+        token, __ = Token.objects.get_or_create(user=user)
+        data['token'] = token.key
+
         serializer = serializers.UserSerializer(
             user, context={'request': request})
         data['user'] = serializer.data
