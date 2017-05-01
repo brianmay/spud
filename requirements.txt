@@ -4,7 +4,7 @@ djangorestframework==3.6.2
 python-dateutil==2.6.0
 Pillow==4.1.1
 six==1.10.0
-pytz==2016.10
+pytz==2017.2
 cssmin==0.2.0
 slimit==0.8.1
 django-cors-headers==2.0.2
