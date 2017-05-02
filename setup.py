@@ -48,7 +48,7 @@ setup(
     use_scm_version={
         'write_to': "spud/version.py",
     },
-    setup_requires=['setuptools_scm', 'pytest-runner'],
+    setup_requires=['setuptools_scm'],
     url='https://github.com/brianmay/spud',
     author='Brian May',
     author_email='brian@microcomaustralia.com.au',
@@ -81,7 +81,10 @@ setup(
         'bin/spud_migrate_south',
     ],
     tests_require=[
-        'mock', 'django-environ',
+        'mock',
+        'django-environ',
+        'pytest',
+        'pytest-runner',
     ],
     install_requires=[
         "Django >= 1.8",
