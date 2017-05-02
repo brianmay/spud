@@ -34,6 +34,7 @@ def fullsplit(path, result=None):
         return result
     return fullsplit(head, [tail] + result)
 
+
 packages = []
 for dirpath, dirnames, filenames in os.walk("spud"):
     # Ignore dirnames that start with '.'
