@@ -240,7 +240,7 @@ class album(HierarchyModel):
     sort_order = models.CharField(max_length=96, null=True, blank=True)
     revised = models.DateTimeField(null=True, blank=True)
     revised_utc_offset = models.IntegerField(null=True, blank=True)
-    objects = managers.HierarchyManager()
+    objects = managers.AlbumManager()
 
     class Meta:
         ordering = ['sort_name', 'sort_order', 'title']
@@ -291,7 +291,7 @@ class category(HierarchyModel):
         on_delete=models.SET_NULL)
     sort_name = models.CharField(max_length=96, null=True, blank=True)
     sort_order = models.CharField(max_length=96, null=True, blank=True)
-    objects = managers.HierarchyManager()
+    objects = managers.CategoryManager()
 
     class Meta:
         ordering = ['sort_name', 'sort_order', 'title']
@@ -349,7 +349,7 @@ class place(HierarchyModel):
         'photo', related_name='place_cover_of', null=True, blank=True,
         on_delete=models.SET_NULL)
     notes = models.TextField(null=True, blank=True)
-    objects = managers.HierarchyManager()
+    objects = managers.PlaceManager()
 
     class Meta:
         ordering = ['title']
@@ -551,6 +551,7 @@ class feedback(HierarchyModel):
         on_delete=models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField(null=True, blank=True)
+    objects = managers.FeedbackManager()
 
     # Information about the user leaving the comment
     user = models.ForeignKey(

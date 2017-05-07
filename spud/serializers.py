@@ -527,16 +527,16 @@ class PhotoListSerializer(ListSerializer):
         for photo in iterable.all():
             result = self.child.to_representation(photo)
 
-            if 'related_photo' in self.context:
-                related_photo = self.context['related_photo']
+            if 'related_photo_pk' in self.context:
+                related_photo_pk = self.context['related_photo_pk']
                 try:
-                    pr = photo.relations_2.get(photo_1=related_photo)
+                    pr = photo.relations_2.get(photo_1__id=related_photo_pk)
                     result['relation'] = pr.desc_2
                 except models.photo_relation.DoesNotExist:
                     pass
 
                 try:
-                    pr = photo.relations_1.get(photo_2=related_photo)
+                    pr = photo.relations_1.get(photo_2__id=related_photo_pk)
                     result['relation'] = pr.desc_1
                 except models.photo_relation.DoesNotExist:
                     pass
