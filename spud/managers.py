@@ -246,7 +246,8 @@ class AlbumManager(HierarchyManager):
         return queryset
 
     def get_search_queryset(self, user, queryset, params):
-        queryset = super().get_search_queryset(user, queryset, params)
+        queryset = super(AlbumManager, self).get_search_queryset(
+            user, queryset, params)
 
         if user.is_staff:
             needs_revision = _get_boolean(params, 'needs_revision', False)
