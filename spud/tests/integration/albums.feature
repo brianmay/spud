@@ -28,7 +28,7 @@ Feature: Testing albums
         When we update an album called <name>
         Then we should get the error: <error>
         And the album called <name> should exist
-        And the album <name> description should be description
+        And the album <name> description should be Testing «ταБЬℓσ»
 
     Examples:
         | username        | password  | name   | error                                              |
@@ -53,7 +53,7 @@ Feature: Testing albums
         When we patch an album called <name>
         Then we should get the error: <error>
         And the album called <name> should exist
-        And the album <name> description should be description
+        And the album <name> description should be Testing «ταБЬℓσ»
 
     Examples:
         | username        | password  | name   | error                                              |
