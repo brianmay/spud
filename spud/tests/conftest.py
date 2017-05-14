@@ -61,3 +61,34 @@ def albums():
         parent=results['Parent'],
     )
     return results
+
+
+@pytest.fixture
+def categorys():
+    results = {}
+
+    results['Parent'] = models.category.objects.create(
+        title='Parent',
+        cover_photo=None,
+        description='Testing «ταБЬℓσ»',
+        sort_name='sort name',
+        sort_order='sort order',
+        parent=None,
+    )
+    results['First'] = models.category.objects.create(
+        title='First',
+        cover_photo=None,
+        description='Testing «ταБЬℓσ»',
+        sort_name='sort name',
+        sort_order='sort order',
+        parent=results['Parent'],
+    )
+    results['Second'] = models.category.objects.create(
+        title='Second',
+        cover_photo=None,
+        description='Testing «ταБЬℓσ»',
+        sort_name='sort name',
+        sort_order='sort order',
+        parent=results['Parent'],
+    )
+    return results
