@@ -188,7 +188,7 @@ class AlbumSerializer(ModelSerializer):
         fields = [
             'id', 'cover_photo', 'cover_photo_pk', 'ascendants', 'title',
             'description', 'sort_name', 'sort_order',
-            'revised', 'revised_utc_offset', 'parent', 'cover_photo'
+            'revised', 'revised_utc_offset', 'parent',
         ]
 
 
