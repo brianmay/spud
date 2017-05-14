@@ -347,6 +347,7 @@ def person_to_json(person, user):
 
     if user is not None and user.is_staff:
         json.update({
+            'ascendants': ANY,
             'children': children,
             'cousins': cousins,
             'dob': person.dob,
@@ -1342,6 +1343,7 @@ class TestPersons(BaseTest):
 
     def get_test_creates(self, user):
         json = {
+            'ascendants': [],
             'cover_photo': None,
             'cover_photo_pk': None,
             'first_name': 'My Person',
@@ -1387,6 +1389,7 @@ class TestPersons(BaseTest):
             del expected['last_name']
             del expected['called']
             if user is not None and user.is_staff:
+                del expected['ascendants']
                 del expected['children']
                 del expected['cousins']
                 del expected['dob']
