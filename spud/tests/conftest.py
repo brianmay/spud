@@ -92,3 +92,27 @@ def categorys():
         parent=results['Parent'],
     )
     return results
+
+
+@pytest.fixture
+def persons():
+    results = {}
+
+    results['Parent'] = models.person.objects.create(
+        first_name='Parent',
+        cover_photo=None,
+        notes='Testing «ταБЬℓσ»',
+    )
+    results['First'] = models.person.objects.create(
+        first_name='First',
+        cover_photo=None,
+        notes='Testing «ταБЬℓσ»',
+        mother=results['Parent'],
+    )
+    results['Second'] = models.person.objects.create(
+        first_name='Second',
+        cover_photo=None,
+        notes='Testing «ταБЬℓσ»',
+        father=results['Parent'],
+    )
+    return results

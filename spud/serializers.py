@@ -335,6 +335,9 @@ class PersonSerializer(ModelSerializer):
     nephews_nieces = NestedPersonSerializer(many=True, read_only=True)
     grandchildren = NestedPersonSerializer(many=True, read_only=True)
 
+    ascendants = NestedPersonSerializer(
+        source="list_ascendants", many=True, read_only=True)
+
     def set_request(self, request):
         super(PersonSerializer, self).set_request(request)
 
@@ -363,6 +366,7 @@ class PersonSerializer(ModelSerializer):
             del self.fields['grandchildren']
             del self.fields['notes']
             del self.fields['email']
+            del self.fields['ascendants']
 
     class Meta:
         model = models.person
@@ -383,6 +387,7 @@ class PersonSerializer(ModelSerializer):
             'children',
             'nephews_nieces',
             'grandchildren',
+            'ascendants',
             'first_name', 'last_name', 'middle_name',
             'called', 'sex', 'dob', 'dod', 'notes', 'email',
             'cover_photo'
