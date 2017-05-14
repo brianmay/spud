@@ -16,12 +16,13 @@ Feature: Testing albums
         Given we login as <username> with <password>
         When we create an album called <name>
         Then we should get a created result
-        And we should get a valid album named <name>
+        And we should get a valid album named <name> with <fields>
         And the album called <name> should exist
+        And the album <name> description should be description
 
     Examples:
-        | username        | password  | name   |
-        | superuser       | super1234 | Second |
+        | username        | password  | name   | fields |
+        | superuser       | super1234 | Second | all    |
 
     Scenario Outline: Update album with error
         Given we login as <username> with <password>
@@ -39,14 +40,14 @@ Feature: Testing albums
         Given we login as <username> with <password>
         When we update an album called <name>
         Then we should get a successful result
-        And we should get a valid album named <name>
+        And we should get a valid album named <name> with <fields>
         And we should get an album with description new description
         And the album called <name> should exist
         And the album <name> description should be new description
 
     Examples:
-        | username        | password  | name   |
-        | superuser       | super1234 | Second |
+        | username        | password  | name   | fields |
+        | superuser       | super1234 | Second | all    |
 
     Scenario Outline: Patch album with error
         Given we login as <username> with <password>
@@ -64,36 +65,38 @@ Feature: Testing albums
         Given we login as <username> with <password>
         When we patch an album called <name>
         Then we should get a successful result
-        And we should get a valid album named <name>
+        And we should get a valid album named <name> with <fields>
         And we should get an album with description new description
         And the album called <name> should exist
         And the album <name> description should be new description
 
     Examples:
-        | username        | password  | name   |
-        | superuser       | super1234 | Second |
+        | username        | password  | name   | fields |
+        | superuser       | super1234 | Second | all    |
 
     Scenario Outline: Get album
         Given we login as <username> with <password>
         When we get an album called <name>
         Then we should get a successful result
-        And we should get a valid album named <name>
+        And we should get a valid album named <name> with <fields>
 
     Examples:
-        | username        | password  | name   |
-        | anonymous       | none      | Parent |
-        | authenticated   | 1234      | First  |
-        | superuser       | super1234 | Second |
+        | username        | password  | name   | fields     |
+        | anonymous       | none      | Parent | restricted |
+        | authenticated   | 1234      | First  | restricted |
+        | superuser       | super1234 | Second | all        |
 
     Scenario Outline: List albums
         Given we login as <username> with <password>
         When we list all albums
         Then we should get a successful result
-        And we should get 3 valid albums
+        And we should get 3 valid albums with <fields>
 
     Examples:
-        | username        | password  |
-        | superuser       | super1234 |
+        | username        | password  | fields     |
+        | anonymous       | none      | restricted |
+        | authenticated   | 1234      | restricted |
+        | superuser       | super1234 | all        |
 
     Scenario Outline: Delete album with error
         Given we login as <username> with <password>

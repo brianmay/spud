@@ -18,6 +18,7 @@ Feature: Testing categorys
         Then we should get a created result
         And we should get a valid category named <name>
         And the category called <name> should exist
+        And the category <name> description should be description
 
     Examples:
         | username        | password  | name   |
@@ -93,6 +94,8 @@ Feature: Testing categorys
 
     Examples:
         | username        | password  |
+        | anonymous       | none      |
+        | authenticated   | 1234      |
         | superuser       | super1234 |
 
     Scenario Outline: Delete category with error

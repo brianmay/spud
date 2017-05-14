@@ -89,8 +89,8 @@ def step_test_album_not_exist(name):
         models.album.objects.get(title=name)
 
 
-@then('we should get a valid album named <name>')
-def step_test_r_valid_album(session, name):
+@then('we should get a valid album named <name> with <fields>')
+def step_test_r_valid_album(session, name, fields):
     album = session.obj
     assert isinstance(album['ascendants'], list)
     assert isinstance(album['cover_photo'], (type(None), dict))
@@ -99,9 +99,12 @@ def step_test_r_valid_album(session, name):
     assert isinstance(album['sort_name'], six.string_types)
     assert isinstance(album['sort_order'], six.string_types)
     assert isinstance(album['title'], six.string_types)
-    # These fields are privileged, and may not exist.
-    # assert isinstance(album['revised'], (type(None), six.string_types))
-    # assert isinstance(album['revised_utc_offset'], int)
+    if fields == "restricted":
+        assert 'revised' not in album
+        assert 'revised_utc_offset' not in album
+    else:
+        assert isinstance(album['revised'], (type(None), six.string_types))
+        assert isinstance(album['revised_utc_offset'], int)
 
 
 @then(parsers.cfparse('we should get an album with description {description}'))
@@ -110,8 +113,8 @@ def step_test_r_album_description(session, description):
     assert album['description'] == description
 
 
-@then(parsers.cfparse('we should get {number:d} valid albums'))
-def step_test_r_n_results(session, number):
+@then(parsers.cfparse('we should get {number:d} valid albums with <fields>'))
+def step_test_r_n_results(session, number, fields):
     data = session.obj
     assert data['count'] == number
     assert len(data['results']) == number
@@ -124,6 +127,9 @@ def step_test_r_n_results(session, number):
         assert isinstance(album['sort_name'], six.string_types)
         assert isinstance(album['sort_order'], six.string_types)
         assert isinstance(album['title'], six.string_types)
-        # These fields are privileged, and may not exist.
-        # assert isinstance(album['revised'], (type(None), six.string_types))
-        # assert isinstance(album['revised_utc_offset'], int)
+        if fields == "restricted":
+            assert 'revised' not in album
+            assert 'revised_utc_offset' not in album
+        else:
+            assert isinstance(album['revised'], (type(None), six.string_types))
+            assert isinstance(album['revised_utc_offset'], int)
