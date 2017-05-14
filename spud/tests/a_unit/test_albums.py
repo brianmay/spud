@@ -6,7 +6,7 @@ from django.db.models import QuerySet, Q
 from mock import call, MagicMock, ANY
 import pytest
 
-from .. import models, serializers, exceptions
+from spud import models, serializers, exceptions
 
 
 @pytest.mark.django_db(transaction=True)
