@@ -89,6 +89,7 @@ def step_test_category_not_exist(name):
 @then('we should get a valid category named <name>')
 def step_test_r_valid_category(session, name):
     category = session.obj
+    assert category['title'] == name
     assert isinstance(category['ascendants'], list)
     assert isinstance(category['cover_photo'], (type(None), dict))
     assert isinstance(category['description'], six.string_types)

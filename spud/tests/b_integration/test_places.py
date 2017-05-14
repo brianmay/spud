@@ -85,6 +85,7 @@ def step_test_place_not_exist(name):
 @then('we should get a valid place named <name>')
 def step_test_r_valid_place(session, name):
     place = session.obj
+    assert place['title'] == name
     assert isinstance(place['ascendants'], list)
     assert isinstance(place['cover_photo'], (type(None), dict))
     assert isinstance(place['notes'], six.string_types)

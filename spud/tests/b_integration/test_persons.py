@@ -83,6 +83,8 @@ def step_test_person_not_exist(name):
 @then('we should get a valid person named <name> with <fields>')
 def step_test_r_valid_person(session, name, fields):
     person = session.obj
+    assert person['title'] == name
+    assert person['first_name'] == name
     assert isinstance(person['cover_photo'], (type(None), dict))
     assert isinstance(person['title'], six.string_types)
     assert isinstance(person['first_name'], six.string_types)

@@ -92,6 +92,7 @@ def step_test_album_not_exist(name):
 @then('we should get a valid album named <name> with <fields>')
 def step_test_r_valid_album(session, name, fields):
     album = session.obj
+    assert album['title'] == name
     assert isinstance(album['ascendants'], list)
     assert isinstance(album['cover_photo'], (type(None), dict))
     assert isinstance(album['description'], six.string_types)
