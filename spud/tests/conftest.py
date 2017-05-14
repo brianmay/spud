@@ -116,3 +116,28 @@ def persons():
         father=results['Parent'],
     )
     return results
+
+
+@pytest.fixture
+def places():
+    results = {}
+
+    results['Parent'] = models.place.objects.create(
+        title='Parent',
+        cover_photo=None,
+        notes='Testing «ταБЬℓσ»',
+        parent=None,
+    )
+    results['First'] = models.place.objects.create(
+        title='First',
+        cover_photo=None,
+        notes='Testing «ταБЬℓσ»',
+        parent=results['Parent'],
+    )
+    results['Second'] = models.place.objects.create(
+        title='Second',
+        cover_photo=None,
+        notes='Testing «ταБЬℓσ»',
+        parent=results['Parent'],
+    )
+    return results
