@@ -1067,8 +1067,10 @@ class photo_relation(BaseModel):
 
 
 class album_ascendant(BaseModel):
-    ascendant = models.ForeignKey(album, related_name='descendant_set')
-    descendant = models.ForeignKey(album, related_name='ascendant_set')
+    ascendant = models.ForeignKey(album, related_name='descendant_set',
+                                  on_delete=models.CASCADE)
+    descendant = models.ForeignKey(album, related_name='ascendant_set',
+                                   on_delete=models.CASCADE)
     position = models.IntegerField()
 
     class Meta:
@@ -1076,8 +1078,10 @@ class album_ascendant(BaseModel):
 
 
 class category_ascendant(BaseModel):
-    ascendant = models.ForeignKey(category, related_name='descendant_set')
-    descendant = models.ForeignKey(category, related_name='ascendant_set')
+    ascendant = models.ForeignKey(category, related_name='descendant_set',
+                                  on_delete=models.CASCADE)
+    descendant = models.ForeignKey(category, related_name='ascendant_set',
+                                   on_delete=models.CASCADE)
     position = models.IntegerField()
 
     class Meta:
@@ -1085,8 +1089,10 @@ class category_ascendant(BaseModel):
 
 
 class place_ascendant(BaseModel):
-    ascendant = models.ForeignKey(place, related_name='descendant_set')
-    descendant = models.ForeignKey(place, related_name='ascendant_set')
+    ascendant = models.ForeignKey(place, related_name='descendant_set',
+                                  on_delete=models.CASCADE)
+    descendant = models.ForeignKey(place, related_name='ascendant_set',
+                                   on_delete=models.CASCADE)
     position = models.IntegerField()
 
     class Meta:
@@ -1094,8 +1100,10 @@ class place_ascendant(BaseModel):
 
 
 class person_ascendant(BaseModel):
-    ascendant = models.ForeignKey(person, related_name='descendant_set')
-    descendant = models.ForeignKey(person, related_name='ascendant_set')
+    ascendant = models.ForeignKey(person, related_name='descendant_set',
+                                  on_delete=models.CASCADE)
+    descendant = models.ForeignKey(person, related_name='ascendant_set',
+                                   on_delete=models.CASCADE)
     position = models.IntegerField()
 
     class Meta:
@@ -1103,8 +1111,10 @@ class person_ascendant(BaseModel):
 
 
 class feedback_ascendant(BaseModel):
-    ascendant = models.ForeignKey(feedback, related_name='descendant_set')
-    descendant = models.ForeignKey(feedback, related_name='ascendant_set')
+    ascendant = models.ForeignKey(feedback, related_name='descendant_set',
+                                  on_delete=models.CASCADE)
+    descendant = models.ForeignKey(feedback, related_name='ascendant_set',
+                                   on_delete=models.CASCADE)
     position = models.IntegerField()
 
     class Meta:
