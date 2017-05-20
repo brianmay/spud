@@ -10,8 +10,8 @@ Build-Depends: debhelper (>=9), dh-python, libjs-jquery, libjs-jquery-ui,
  python3-django-environ, python3-pytest-runner,
  python3-cssmin, python3-slimit,
 Homepage: https://github.com/brianmay/spud
-Vcs-Git: git://github.com/brianmay/spud-debian
-Vcs-Browser: https://github.com/brianmay/spud-debian
+Vcs-Git: git://github.com/brianmay/spud
+Vcs-Browser: https://github.com/brianmay/spud
 Standards-Version: 3.9.8
 X-Python-Version: >= 2.7
 
