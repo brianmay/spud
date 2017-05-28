@@ -41,7 +41,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s '
