@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 from django.contrib.auth.models import User
 import pytest
 
@@ -138,6 +140,43 @@ def places():
         title='Second',
         cover_photo=None,
         notes='Testing «ταБЬℓσ»',
+        parent=results['Parent'],
+    )
+    return results
+
+
+@pytest.fixture
+def photo():
+    return models.photo.objects.create(
+        level=0,
+        utc_offset=600,
+        datetime=datetime.datetime.now(),
+    )
+
+
+@pytest.fixture
+def feedbacks(photo):
+    results = {}
+
+    results['Parent'] = models.feedback.objects.create(
+        pk=1,
+        cover_photo=photo,
+        comment='Testing «ταБЬℓσ»',
+        rating=0,
+        parent=None,
+    )
+    results['First'] = models.feedback.objects.create(
+        pk=2,
+        cover_photo=photo,
+        comment='Testing «ταБЬℓσ»',
+        rating=0,
+        parent=results['Parent'],
+    )
+    results['Second'] = models.feedback.objects.create(
+        pk=3,
+        cover_photo=photo,
+        comment='Testing «ταБЬℓσ»',
+        rating=0,
         parent=results['Parent'],
     )
     return results
