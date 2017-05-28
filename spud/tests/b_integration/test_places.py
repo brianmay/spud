@@ -82,7 +82,7 @@ def step_test_place_not_exist(name):
         models.place.objects.get(title=name)
 
 
-@then('we should get a valid place named <name>')
+@then('we should get a valid place called <name>')
 def step_test_r_valid_place(session, name):
     place = session.obj
     assert place['title'] == name

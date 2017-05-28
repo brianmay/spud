@@ -86,7 +86,7 @@ def step_test_category_not_exist(name):
         models.category.objects.get(title=name)
 
 
-@then('we should get a valid category named <name>')
+@then('we should get a valid category called <name>')
 def step_test_r_valid_category(session, name):
     category = session.obj
     assert category['title'] == name

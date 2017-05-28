@@ -16,7 +16,7 @@ Feature: Testing categorys
         Given we login as <username> with <password>
         When we create an category called <name>
         Then we should get a created result
-        And we should get a valid category named <name>
+        And we should get a valid category called <name>
         And the category called <name> should exist
         And the category <name> description should be description
 
@@ -40,7 +40,7 @@ Feature: Testing categorys
         Given we login as <username> with <password>
         When we update an category called <name>
         Then we should get a successful result
-        And we should get a valid category named <name>
+        And we should get a valid category called <name>
         And we should get an category with description new description
         And the category called <name> should exist
         And the category <name> description should be new description
@@ -65,7 +65,7 @@ Feature: Testing categorys
         Given we login as <username> with <password>
         When we patch an category called <name>
         Then we should get a successful result
-        And we should get a valid category named <name>
+        And we should get a valid category called <name>
         And we should get an category with description new description
         And the category called <name> should exist
         And the category <name> description should be new description
@@ -78,7 +78,7 @@ Feature: Testing categorys
         Given we login as <username> with <password>
         When we get an category called <name>
         Then we should get a successful result
-        And we should get a valid category named <name>
+        And we should get a valid category called <name>
 
     Examples:
         | username        | password  | name   |

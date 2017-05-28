@@ -89,7 +89,7 @@ def step_test_album_not_exist(name):
         models.album.objects.get(title=name)
 
 
-@then('we should get a valid album named <name> with <fields>')
+@then('we should get a valid album called <name> with <fields>')
 def step_test_r_valid_album(session, name, fields):
     album = session.obj
     assert album['title'] == name

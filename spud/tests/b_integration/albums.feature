@@ -16,7 +16,7 @@ Feature: Testing albums
         Given we login as <username> with <password>
         When we create an album called <name>
         Then we should get a created result
-        And we should get a valid album named <name> with <fields>
+        And we should get a valid album called <name> with <fields>
         And the album called <name> should exist
         And the album <name> description should be description
 
@@ -40,7 +40,7 @@ Feature: Testing albums
         Given we login as <username> with <password>
         When we update an album called <name>
         Then we should get a successful result
-        And we should get a valid album named <name> with <fields>
+        And we should get a valid album called <name> with <fields>
         And we should get an album with description new description
         And the album called <name> should exist
         And the album <name> description should be new description
@@ -65,7 +65,7 @@ Feature: Testing albums
         Given we login as <username> with <password>
         When we patch an album called <name>
         Then we should get a successful result
-        And we should get a valid album named <name> with <fields>
+        And we should get a valid album called <name> with <fields>
         And we should get an album with description new description
         And the album called <name> should exist
         And the album <name> description should be new description
@@ -78,7 +78,7 @@ Feature: Testing albums
         Given we login as <username> with <password>
         When we get an album called <name>
         Then we should get a successful result
-        And we should get a valid album named <name> with <fields>
+        And we should get a valid album called <name> with <fields>
 
     Examples:
         | username        | password  | name   | fields     |

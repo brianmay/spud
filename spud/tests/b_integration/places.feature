@@ -16,7 +16,7 @@ Feature: Testing places
         Given we login as <username> with <password>
         When we create an place called <name>
         Then we should get a created result
-        And we should get a valid place named <name>
+        And we should get a valid place called <name>
         And the place called <name> should exist
         And the place <name> notes should be notes
 
@@ -40,7 +40,7 @@ Feature: Testing places
         Given we login as <username> with <password>
         When we update an place called <name>
         Then we should get a successful result
-        And we should get a valid place named <name>
+        And we should get a valid place called <name>
         And we should get an place with notes new notes
         And the place called <name> should exist
         And the place <name> notes should be new notes
@@ -65,7 +65,7 @@ Feature: Testing places
         Given we login as <username> with <password>
         When we patch an place called <name>
         Then we should get a successful result
-        And we should get a valid place named <name>
+        And we should get a valid place called <name>
         And we should get an place with notes new notes
         And the place called <name> should exist
         And the place <name> notes should be new notes
@@ -78,7 +78,7 @@ Feature: Testing places
         Given we login as <username> with <password>
         When we get an place called <name>
         Then we should get a successful result
-        And we should get a valid place named <name>
+        And we should get a valid place called <name>
 
     Examples:
         | username        | password  | name   |

@@ -80,7 +80,7 @@ def step_test_person_not_exist(name):
         models.person.objects.get(first_name=name)
 
 
-@then('we should get a valid person named <name> with <fields>')
+@then('we should get a valid person called <name> with <fields>')
 def step_test_r_valid_person(session, name, fields):
     person = session.obj
     assert person['title'] == name

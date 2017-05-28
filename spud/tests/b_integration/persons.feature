@@ -16,7 +16,7 @@ Feature: Testing persons
         Given we login as <username> with <password>
         When we create an person called <name>
         Then we should get a created result
-        And we should get a valid person named <name> with <fields>
+        And we should get a valid person called <name> with <fields>
         And the person called <name> should exist
         And the person <name> notes should be notes
 
@@ -40,7 +40,7 @@ Feature: Testing persons
         Given we login as <username> with <password>
         When we update an person called <name>
         Then we should get a successful result
-        And we should get a valid person named <name> with <fields>
+        And we should get a valid person called <name> with <fields>
         And we should get an person with notes new notes
         And the person called <name> should exist
         And the person <name> notes should be new notes
@@ -65,7 +65,7 @@ Feature: Testing persons
         Given we login as <username> with <password>
         When we patch an person called <name>
         Then we should get a successful result
-        And we should get a valid person named <name> with <fields>
+        And we should get a valid person called <name> with <fields>
         And we should get an person with notes new notes
         And the person called <name> should exist
         And the person <name> notes should be new notes
@@ -78,7 +78,7 @@ Feature: Testing persons
         Given we login as <username> with <password>
         When we get an person called <name>
         Then we should get a successful result
-        And we should get a valid person named <name> with <fields>
+        And we should get a valid person called <name> with <fields>
 
     Examples:
         | username        | password  | name   | fields     |
