@@ -155,6 +155,48 @@ def photo():
 
 
 @pytest.fixture
+def photos():
+    results = {}
+
+    results['Parent'] = models.photo.objects.create(
+        title='Parent',
+        level=0,
+        utc_offset=600,
+        datetime=datetime.datetime.now(),
+        description='Testing «ταБЬℓσ»',
+    )
+    results['First'] = models.photo.objects.create(
+        title='First',
+        level=0,
+        utc_offset=600,
+        datetime=datetime.datetime.now(),
+        description='Testing «ταБЬℓσ»',
+    )
+    results['Second'] = models.photo.objects.create(
+        title='Second',
+        level=0,
+        utc_offset=600,
+        datetime=datetime.datetime.now(),
+        description='Testing «ταБЬℓσ»',
+    )
+
+    models.photo_relation.objects.create(
+        photo_1=results['Parent'],
+        desc_1='Parent Photo',
+        photo_2=results['First'],
+        desc_2='First Photo',
+    )
+    models.photo_relation.objects.create(
+        photo_1=results['Parent'],
+        desc_1='Parent Photo',
+        photo_2=results['Second'],
+        desc_2='Second Photo',
+    )
+
+    return results
+
+
+@pytest.fixture
 def feedbacks(photo):
     results = {}
 

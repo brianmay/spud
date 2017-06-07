@@ -672,7 +672,8 @@ class PhotoSerializer(ModelSerializer):
         return attrs
 
     def create(self, validated_attrs):
-        assert 'photo' in self.initial_data
+        if 'photo' not in self.initial_data:
+            raise exceptions.ValidationError('Photo file not supplied')
 
         file_obj = self.initial_data['photo']
 

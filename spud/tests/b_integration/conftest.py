@@ -36,29 +36,29 @@ class Session(object):
             self.obj = None
         return self.obj
 
-    def get(self, url):
+    def get(self, url, **kwargs):
         url = self.live_server.url + url
-        r = requests.get(url, headers=self.headers)
+        r = requests.get(url, headers=self.headers, **kwargs)
         return self.process_response(r)
 
-    def delete(self, url):
+    def delete(self, url, **kwargs):
         url = self.live_server.url + url
-        r = requests.delete(url, headers=self.headers)
+        r = requests.delete(url, headers=self.headers, **kwargs)
         return self.process_response(r)
 
-    def post(self, url, json):
+    def post(self, url, **kwargs):
         url = self.live_server.url + url
-        r = requests.post(url, json=json, headers=self.headers)
+        r = requests.post(url, headers=self.headers, **kwargs)
         return self.process_response(r)
 
-    def put(self, url, json):
+    def put(self, url, **kwargs):
         url = self.live_server.url + url
-        r = requests.put(url, json=json, headers=self.headers)
+        r = requests.put(url, headers=self.headers, **kwargs)
         return self.process_response(r)
 
-    def patch(self, url, json):
+    def patch(self, url, **kwargs):
         url = self.live_server.url + url
-        r = requests.patch(url, json=json, headers=self.headers)
+        r = requests.patch(url, headers=self.headers, **kwargs)
         return self.process_response(r)
 
 
