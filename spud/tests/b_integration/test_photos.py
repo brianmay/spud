@@ -8,8 +8,8 @@ from spud import models
 scenarios('photos.feature')
 
 
-@when('we create an photo called <name>')
-def step_create_photo(session, name, data_files):
+@when('we create an photo called <name> using <filename>')
+def step_create_photo(session, name, filename, data_files):
     url = "/api/photos/"
     data = {
         'title': name,
@@ -18,7 +18,7 @@ def step_create_photo(session, name, data_files):
         'datetime': '2012-12-20 12:34:56',
         'level': 0,
     }
-    files = {'photo': open(os.path.join(data_files, '177A0782.JPG'), 'rb')}
+    files = {'photo': open(os.path.join(data_files, filename), 'rb')}
     session.post(url, data=data, files=files)
 
 

@@ -16,15 +16,16 @@ Feature: Testing photos
 
     Scenario Outline: Create photo
         Given we login as <username> with <password>
-        When we create an photo called <name>
+        When we create an photo called <name> using <filename>
         Then we should get a created result
         And we should get a valid photo called <name>
         And the photo called <name> should exist
         And the photo <name> description should be description
 
     Examples:
-        | username        | password  | name   |
-        | superuser       | super1234 | Second |
+        | username        | password  | name   | filename     |
+        | superuser       | super1234 | Second | 177A0782.JPG |
+        | superuser       | super1234 | Second | 177A4628.MOV |
 
     Scenario Outline: Update photo with error
         Given we login as <username> with <password>
