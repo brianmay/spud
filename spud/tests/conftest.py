@@ -179,17 +179,23 @@ def photos():
         datetime=datetime.datetime.now(),
         description='Testing «ταБЬℓσ»',
     )
+    return results
 
-    models.photo_relation.objects.create(
-        photo_1=results['Parent'],
+
+@pytest.fixture
+def relations(photos):
+    results = {}
+
+    results['a'] = models.photo_relation.objects.create(
+        photo_1=photos['Parent'],
         desc_1='Parent Photo',
-        photo_2=results['First'],
+        photo_2=photos['First'],
         desc_2='First Photo',
     )
-    models.photo_relation.objects.create(
-        photo_1=results['Parent'],
+    results['b'] = models.photo_relation.objects.create(
+        photo_1=photos['Parent'],
         desc_1='Parent Photo',
-        photo_2=results['Second'],
+        photo_2=photos['Second'],
         desc_2='Second Photo',
     )
 
