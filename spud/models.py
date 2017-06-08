@@ -1058,6 +1058,7 @@ class photo_relation(BaseModel):
 
     class Meta:
         unique_together = ('photo_1', 'photo_2')
+        ordering = ['photo_1', 'photo_2']
 
     def __str__(self):
         return "relationship '%s' to '%s'" % (self.photo_1, self.photo_2)
