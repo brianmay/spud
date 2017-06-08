@@ -1,91 +1,12 @@
-import datetime
-
+""" Run tests on album search filters. """
 from django.contrib.auth import models as auth_models
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet
 
 from mock import call, MagicMock, ANY
 import pytest
 
-from spud import models, serializers, exceptions
-
-
-@pytest.mark.django_db(transaction=True)
-def test_serializer_encode(albums):
-    child = models.album.objects.create(
-        cover_photo=None,
-        description='description',
-        parent=albums['Parent'],
-        revised='2010-01-01 12:00:00',
-        revised_utc_offset=600,
-        sort_name='sort name',
-        sort_order='sort order',
-        title='Child',
-    )
-    serializer = serializers.AlbumSerializer(child)
-
-    expected = {
-        'ascendants': [
-            {
-                'id': albums['Parent'].pk,
-                'title': 'Parent',
-                'cover_photo': None,
-                'cover_photo_pk': None,
-            },
-        ],
-        'cover_photo': None,
-        'cover_photo_pk': None,
-        'description': 'description',
-        'id': child.pk,
-        'parent': albums['Parent'].pk,
-        'revised': '2010-01-01 12:00:00',
-        'revised_utc_offset': 600,
-        'sort_name': 'sort name',
-        'sort_order': 'sort order',
-        'title': 'Child'
-    }
-    assert serializer.data == expected
-
-
-@pytest.mark.django_db(transaction=True)
-def test_serializer_decode(albums):
-    data = {
-        'cover_photo_pk': None,
-        'description': 'description',
-        'id': 10,
-        'parent': albums['Parent'].pk,
-        'revised': '2010-01-01 12:00:00',
-        'revised_utc_offset': 600,
-        'sort_name': 'sort name',
-        'sort_order': 'sort order',
-        'title': 'Child'
-    }
-    serializer = serializers.AlbumSerializer(data=data)
-
-    expected = {
-        'cover_photo': None,
-        'description': 'description',
-        'parent': albums['Parent'],
-        'revised': datetime.datetime(2010, 1, 1, 12, 0),
-        'revised_utc_offset': 600,
-        'sort_name': 'sort name',
-        'sort_order': 'sort order',
-        'title': 'Child'
-    }
-    assert serializer.is_valid()
-    assert serializer.validated_data == expected
-
-
-class MyQ(Q):
-    def __eq__(self, other):
-        if not isinstance(other, Q):
-            return False
-        if self.connector != other.connector:
-            return False
-        if self.children != other.children:
-            return False
-        if self.negated != other.negated:
-            return False
-        return True
+from spud import models, exceptions
+from ..utils import MyQ
 
 
 def test_search_all():
