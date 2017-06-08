@@ -11,15 +11,16 @@ def test_fix_ascendants_new(albums):
     albums['First'].fix_ascendants()
     albums['Second'].fix_ascendants()
 
-    qs = album_ascendant.objects.all()
+    qs = album_ascendant.objects.all().order_by(
+        'position', 'ascendant__title', 'descendant__title')
     assert qs.count() == 5
 
-    assert qs[0].ascendant == albums['Parent']
-    assert qs[0].descendant == albums['Parent']
+    assert qs[0].ascendant == albums['First']
+    assert qs[0].descendant == albums['First']
     assert qs[0].position == 0
 
-    assert qs[1].ascendant == albums['First']
-    assert qs[1].descendant == albums['First']
+    assert qs[1].ascendant == albums['Parent']
+    assert qs[1].descendant == albums['Parent']
     assert qs[1].position == 0
 
     assert qs[2].ascendant == albums['Second']
@@ -41,15 +42,16 @@ def test_fix_ascendants_replace(albums):
     albums['First'].fix_ascendants()
     albums['Second'].fix_ascendants()
 
-    qs = album_ascendant.objects.all()
+    qs = album_ascendant.objects.all().order_by(
+        'position', 'ascendant__title', 'descendant__title')
     assert qs.count() == 5
 
-    assert qs[0].ascendant == albums['Parent']
-    assert qs[0].descendant == albums['Parent']
+    assert qs[0].ascendant == albums['First']
+    assert qs[0].descendant == albums['First']
     assert qs[0].position == 0
 
-    assert qs[1].ascendant == albums['First']
-    assert qs[1].descendant == albums['First']
+    assert qs[1].ascendant == albums['Parent']
+    assert qs[1].descendant == albums['Parent']
     assert qs[1].position == 0
 
     assert qs[2].ascendant == albums['Second']
