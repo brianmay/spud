@@ -2,7 +2,7 @@
 from django.contrib.auth import models as auth_models
 from django.db.models import QuerySet
 
-from mock import call, MagicMock, ANY
+from mock import call, MagicMock
 import pytest
 
 from spud import models, exceptions
@@ -21,7 +21,8 @@ def test_search_all():
         .prefetch_related.return_value) = expected_result
 
     params = {}
-    result = models.category.objects.get_search_queryset(user, queryset, params)
+    result = models.category.objects.get_search_queryset(
+        user, queryset, params)
 
     chained = (
        call
@@ -46,7 +47,8 @@ def test_search_q():
         .filter.return_value) = expected_result
 
     params = {'q': ['meow']}
-    result = models.category.objects.get_search_queryset(user, queryset, params)
+    result = models.category.objects.get_search_queryset(
+        user, queryset, params)
 
     q = MyQ(title__icontains='meow') | MyQ(description__icontains='meow')
     chained = (
@@ -74,7 +76,8 @@ def test_search_children(categorys):
         .filter.return_value) = expected_result
 
     params = {'instance': categorys['Parent'].pk, 'mode': 'children'}
-    result = models.category.objects.get_search_queryset(user, queryset, params)
+    result = models.category.objects.get_search_queryset(
+        user, queryset, params)
 
     chained = (
        call
@@ -101,7 +104,8 @@ def test_search_ascendants(categorys):
         .filter.return_value) = expected_result
 
     params = {'instance': categorys['Parent'].pk, 'mode': 'ascendants'}
-    result = models.category.objects.get_search_queryset(user, queryset, params)
+    result = models.category.objects.get_search_queryset(
+        user, queryset, params)
 
     chained = (
        call
@@ -130,7 +134,8 @@ def test_search_descendants(categorys):
         .filter.return_value) = expected_result
 
     params = {'instance': categorys['Parent'].pk, 'mode': 'descendants'}
-    result = models.category.objects.get_search_queryset(user, queryset, params)
+    result = models.category.objects.get_search_queryset(
+        user, queryset, params)
 
     chained = (
        call
@@ -158,7 +163,8 @@ def test_search_root_only():
         .filter.return_value) = expected_result
 
     params = {'root_only': True}
-    result = models.category.objects.get_search_queryset(user, queryset, params)
+    result = models.category.objects.get_search_queryset(
+        user, queryset, params)
 
     chained = (
        call
@@ -189,13 +195,16 @@ def test_get_by_name_parent_failure(categorys):
 def test_get_by_name_child_success(categorys):
     category_child = categorys['First']
     assert category_child == models.category.objects.get_by_name('First')
-    assert category_child == models.category.objects.get_by_name('Parent/First')
+    assert category_child == models.category.objects.get_by_name(
+        'Parent/First')
 
 
 @pytest.mark.django_db(transaction=True)
 def test_get_by_name_child_failure(categorys):
     category_child = categorys['First']
     with pytest.raises(exceptions.NameDoesNotExist):
-        assert category_child == models.category.objects.get_by_name('Parent/Child')
+        assert category_child == models.category.objects.get_by_name(
+            'Parent/Child')
     with pytest.raises(exceptions.NameDoesNotExist):
-        assert category_child == models.category.objects.get_by_name('Child/First')
+        assert category_child == models.category.objects.get_by_name(
+            'Child/First')
