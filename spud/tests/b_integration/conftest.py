@@ -28,6 +28,7 @@ class Session(object):
         return headers
 
     def process_response(self, r):
+        print(r.text)
         assert r.status_code != 500
         self.r = r
         if r.headers.get('content-type') == "application/json":

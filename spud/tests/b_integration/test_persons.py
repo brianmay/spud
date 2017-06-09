@@ -7,7 +7,7 @@ from spud import models
 scenarios('persons.feature')
 
 
-@when('we create an person called <name>')
+@when('we create a person called <name>')
 def step_create_person(session, name):
     url = "/api/persons/"
     data = {
@@ -18,7 +18,7 @@ def step_create_person(session, name):
     session.post(url, json=data)
 
 
-@when('we update an person called <name>')
+@when('we update a person called <name>')
 def step_update_person(session, persons, name):
     desired_person = models.person.objects.get(first_name=name)
     url = "/api/persons/%d/" % desired_person.id
@@ -30,7 +30,7 @@ def step_update_person(session, persons, name):
     session.put(url, json=data)
 
 
-@when('we patch an person called <name>')
+@when('we patch a person called <name>')
 def step_patch_person(session, persons, name):
     desired_person = models.person.objects.get(first_name=name)
     url = "/api/persons/%d/" % desired_person.id
@@ -40,7 +40,7 @@ def step_patch_person(session, persons, name):
     session.patch(url, json=data)
 
 
-@when('we get an person called <name>')
+@when('we get a person called <name>')
 def step_get_person(session, persons, name):
     desired_person = models.person.objects.get(first_name=name)
 
@@ -48,7 +48,7 @@ def step_get_person(session, persons, name):
     session.get(url)
 
 
-@when('we delete an person called <name>')
+@when('we delete a person called <name>')
 def step_delete_person(session, persons, name):
     desired_person = models.person.objects.get(first_name=name)
 
@@ -101,7 +101,7 @@ def step_test_r_valid_person(session, name, fields):
 
 
 @then(parsers.cfparse(
-    'we should get an person with notes {notes}'))
+    'we should get a person with notes {notes}'))
 def step_test_r_person_notes(session, notes):
     person = session.obj
     assert person.get('notes') == notes

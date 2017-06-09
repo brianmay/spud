@@ -3,7 +3,7 @@ Feature: Testing categorys
 
     Scenario Outline: Create category with error
         Given we login as <username> with <password>
-        When we create an category called <name>
+        When we create a category called <name>
         Then we should get the error: <error>
         And the category called <name> should not exist
 
@@ -14,7 +14,7 @@ Feature: Testing categorys
 
     Scenario Outline: Create category
         Given we login as <username> with <password>
-        When we create an category called <name>
+        When we create a category called <name>
         Then we should get a created result
         And we should get a valid category called <name>
         And the category called <name> should exist
@@ -26,7 +26,7 @@ Feature: Testing categorys
 
     Scenario Outline: Update category with error
         Given we login as <username> with <password>
-        When we update an category called <name>
+        When we update a category called <name>
         Then we should get the error: <error>
         And the category called <name> should exist
         And the category <name> description should be Testing «ταБЬℓσ»
@@ -38,10 +38,10 @@ Feature: Testing categorys
 
     Scenario Outline: Update category
         Given we login as <username> with <password>
-        When we update an category called <name>
+        When we update a category called <name>
         Then we should get a successful result
         And we should get a valid category called <name>
-        And we should get an category with description new description
+        And we should get a category with description new description
         And the category called <name> should exist
         And the category <name> description should be new description
 
@@ -51,7 +51,7 @@ Feature: Testing categorys
 
     Scenario Outline: Patch category with error
         Given we login as <username> with <password>
-        When we patch an category called <name>
+        When we patch a category called <name>
         Then we should get the error: <error>
         And the category called <name> should exist
         And the category <name> description should be Testing «ταБЬℓσ»
@@ -63,10 +63,10 @@ Feature: Testing categorys
 
     Scenario Outline: Patch category
         Given we login as <username> with <password>
-        When we patch an category called <name>
+        When we patch a category called <name>
         Then we should get a successful result
         And we should get a valid category called <name>
-        And we should get an category with description new description
+        And we should get a category with description new description
         And the category called <name> should exist
         And the category <name> description should be new description
 
@@ -76,7 +76,7 @@ Feature: Testing categorys
 
     Scenario Outline: Get category
         Given we login as <username> with <password>
-        When we get an category called <name>
+        When we get a category called <name>
         Then we should get a successful result
         And we should get a valid category called <name>
 
@@ -100,7 +100,7 @@ Feature: Testing categorys
 
     Scenario Outline: Delete category with error
         Given we login as <username> with <password>
-        When we delete an category called <name>
+        When we delete a category called <name>
         Then we should get the error: <error>
         And the category called <name> should exist
 
@@ -112,7 +112,7 @@ Feature: Testing categorys
 
     Scenario Outline: Delete category
         Given we login as <username> with <password>
-        When we delete an category called <name>
+        When we delete a category called <name>
         Then we should get a no content result
         And the category called <name> should not exist
 

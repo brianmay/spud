@@ -7,7 +7,7 @@ from spud import models
 scenarios('feedbacks.feature')
 
 
-@when('we create an feedback')
+@when('we create a feedback')
 def step_create_feedback(session, photo):
     url = "/api/feedbacks/"
     data = {
@@ -19,7 +19,7 @@ def step_create_feedback(session, photo):
     session.post(url, json=data)
 
 
-@when('we update an feedback with id <id>')
+@when('we update a feedback with id <id>')
 def step_update_feedback(session, feedbacks, photo, id):
     url = "/api/feedbacks/%d/" % int(id)
     data = {
@@ -31,7 +31,7 @@ def step_update_feedback(session, feedbacks, photo, id):
     session.put(url, json=data)
 
 
-@when('we patch an feedback with id <id>')
+@when('we patch a feedback with id <id>')
 def step_patch_feedback(session, feedbacks, id):
     url = "/api/feedbacks/%d/" % int(id)
     data = {
@@ -41,13 +41,13 @@ def step_patch_feedback(session, feedbacks, id):
     session.patch(url, json=data)
 
 
-@when('we get an feedback with id <id>')
+@when('we get a feedback with id <id>')
 def step_get_feedback(session, feedbacks, id):
     url = "/api/feedbacks/%d/" % int(id)
     session.get(url)
 
 
-@when('we delete an feedback with id <id>')
+@when('we delete a feedback with id <id>')
 def step_delete_feedback(session, feedbacks, id):
     url = "/api/feedbacks/%d/" % int(id)
     session.delete(url)
@@ -87,7 +87,7 @@ def step_test_r_valid_feedback(session):
 
 
 @then(parsers.cfparse(
-    'we should get an feedback with comment {comment}'))
+    'we should get a feedback with comment {comment}'))
 def step_test_r_feedback_comment(session, comment):
     feedback = session.obj
     assert feedback['comment'] == comment

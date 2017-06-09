@@ -3,7 +3,7 @@ Feature: Testing places
 
     Scenario Outline: Create place with error
         Given we login as <username> with <password>
-        When we create an place called <name>
+        When we create a place called <name>
         Then we should get the error: <error>
         And the place called <name> should not exist
 
@@ -14,7 +14,7 @@ Feature: Testing places
 
     Scenario Outline: Create place
         Given we login as <username> with <password>
-        When we create an place called <name>
+        When we create a place called <name>
         Then we should get a created result
         And we should get a valid place called <name>
         And the place called <name> should exist
@@ -26,7 +26,7 @@ Feature: Testing places
 
     Scenario Outline: Update place with error
         Given we login as <username> with <password>
-        When we update an place called <name>
+        When we update a place called <name>
         Then we should get the error: <error>
         And the place called <name> should exist
         And the place <name> notes should be Testing «ταБЬℓσ»
@@ -38,10 +38,10 @@ Feature: Testing places
 
     Scenario Outline: Update place
         Given we login as <username> with <password>
-        When we update an place called <name>
+        When we update a place called <name>
         Then we should get a successful result
         And we should get a valid place called <name>
-        And we should get an place with notes new notes
+        And we should get a place with notes new notes
         And the place called <name> should exist
         And the place <name> notes should be new notes
 
@@ -51,7 +51,7 @@ Feature: Testing places
 
     Scenario Outline: Patch place with error
         Given we login as <username> with <password>
-        When we patch an place called <name>
+        When we patch a place called <name>
         Then we should get the error: <error>
         And the place called <name> should exist
         And the place <name> notes should be Testing «ταБЬℓσ»
@@ -63,10 +63,10 @@ Feature: Testing places
 
     Scenario Outline: Patch place
         Given we login as <username> with <password>
-        When we patch an place called <name>
+        When we patch a place called <name>
         Then we should get a successful result
         And we should get a valid place called <name>
-        And we should get an place with notes new notes
+        And we should get a place with notes new notes
         And the place called <name> should exist
         And the place <name> notes should be new notes
 
@@ -76,7 +76,7 @@ Feature: Testing places
 
     Scenario Outline: Get place
         Given we login as <username> with <password>
-        When we get an place called <name>
+        When we get a place called <name>
         Then we should get a successful result
         And we should get a valid place called <name>
 
@@ -100,7 +100,7 @@ Feature: Testing places
 
     Scenario Outline: Delete place with error
         Given we login as <username> with <password>
-        When we delete an place called <name>
+        When we delete a place called <name>
         Then we should get the error: <error>
         And the place called <name> should exist
 
@@ -112,7 +112,7 @@ Feature: Testing places
 
     Scenario Outline: Delete place
         Given we login as <username> with <password>
-        When we delete an place called <name>
+        When we delete a place called <name>
         Then we should get a no content result
         And the place called <name> should not exist
 

@@ -3,7 +3,7 @@ Feature: Testing relations
 
     Scenario Outline: Create relation with error
         Given we login as <username> with <password>
-        When we create an relation between <photo_1> and <photo_2>
+        When we create a relation between <photo_1> and <photo_2>
         Then we should get the error: <error>
         And the relation between <photo_1> and <photo_2> should not exist
 
@@ -14,7 +14,7 @@ Feature: Testing relations
 
     Scenario Outline: Create relation
         Given we login as <username> with <password>
-        When we create an relation between <photo_1> and <photo_2>
+        When we create a relation between <photo_1> and <photo_2>
         Then we should get a created result
         And we should get a valid relation between <photo_1> and <photo_2>
         And the relation between <photo_1> and <photo_2> should exist
@@ -27,7 +27,7 @@ Feature: Testing relations
 
     Scenario Outline: Update relation with error
         Given we login as <username> with <password>
-        When we update an relation between <photo_1> and <photo_2>
+        When we update a relation between <photo_1> and <photo_2>
         Then we should get the error: <error>
         And the relation between <photo_1> and <photo_2> should exist
         And the relation between <photo_1> and <photo_2> description 1 should be Parent Photo
@@ -40,11 +40,11 @@ Feature: Testing relations
 
     Scenario Outline: Update relation
         Given we login as <username> with <password>
-        When we update an relation between <photo_1> and <photo_2>
+        When we update a relation between <photo_1> and <photo_2>
         Then we should get a successful result
         And we should get a valid relation between <photo_1> and <photo_2>
-        And we should get an relation with description 1 photo 1 new description
-        And we should get an relation with description 2 photo 2 new description
+        And we should get a relation with description 1 photo 1 new description
+        And we should get a relation with description 2 photo 2 new description
         And the relation between <photo_1> and <photo_2> should exist
         And the relation between <photo_1> and <photo_2> description 1 should be photo 1 new description
         And the relation between <photo_1> and <photo_2> description 2 should be photo 2 new description
@@ -55,7 +55,7 @@ Feature: Testing relations
 
     Scenario Outline: Patch relation with error
         Given we login as <username> with <password>
-        When we patch an relation between <photo_1> and <photo_2>
+        When we patch a relation between <photo_1> and <photo_2>
         Then we should get the error: <error>
         And the relation between <photo_1> and <photo_2> should exist
         And the relation between <photo_1> and <photo_2> description 1 should be Parent Photo
@@ -68,11 +68,11 @@ Feature: Testing relations
 
     Scenario Outline: Patch relation
         Given we login as <username> with <password>
-        When we patch an relation between <photo_1> and <photo_2>
+        When we patch a relation between <photo_1> and <photo_2>
         Then we should get a successful result
         And we should get a valid relation between <photo_1> and <photo_2>
-        And we should get an relation with description 1 photo 1 new description
-        And we should get an relation with description 2 photo 2 new description
+        And we should get a relation with description 1 photo 1 new description
+        And we should get a relation with description 2 photo 2 new description
         And the relation between <photo_1> and <photo_2> should exist
         And the relation between <photo_1> and <photo_2> description 1 should be photo 1 new description
         And the relation between <photo_1> and <photo_2> description 2 should be photo 2 new description
@@ -83,7 +83,7 @@ Feature: Testing relations
 
     Scenario Outline: Get relation
         Given we login as <username> with <password>
-        When we get an relation between <photo_1> and <photo_2>
+        When we get a relation between <photo_1> and <photo_2>
         Then we should get a successful result
         And we should get a valid relation between <photo_1> and <photo_2>
 
@@ -107,7 +107,7 @@ Feature: Testing relations
 
     Scenario Outline: Delete relation with error
         Given we login as <username> with <password>
-        When we delete an relation between <photo_1> and <photo_2>
+        When we delete a relation between <photo_1> and <photo_2>
         Then we should get the error: <error>
         And the relation between <photo_1> and <photo_2> should exist
 
@@ -118,7 +118,7 @@ Feature: Testing relations
 
     Scenario Outline: Delete relation
         Given we login as <username> with <password>
-        When we delete an relation between <photo_1> and <photo_2>
+        When we delete a relation between <photo_1> and <photo_2>
         Then we should get a no content result
         And the relation between <photo_1> and <photo_2> should not exist
 

@@ -7,7 +7,7 @@ from spud import models
 scenarios('categorys.feature')
 
 
-@when('we create an category called <name>')
+@when('we create a category called <name>')
 def step_create_category(session, name):
     url = "/api/categorys/"
     data = {
@@ -21,7 +21,7 @@ def step_create_category(session, name):
     session.post(url, json=data)
 
 
-@when('we update an category called <name>')
+@when('we update a category called <name>')
 def step_update_category(session, categorys, name):
     desired_category = models.category.objects.get(title=name)
     url = "/api/categorys/%d/" % desired_category.id
@@ -36,7 +36,7 @@ def step_update_category(session, categorys, name):
     session.put(url, json=data)
 
 
-@when('we patch an category called <name>')
+@when('we patch a category called <name>')
 def step_patch_category(session, categorys, name):
     desired_category = models.category.objects.get(title=name)
     url = "/api/categorys/%d/" % desired_category.id
@@ -46,7 +46,7 @@ def step_patch_category(session, categorys, name):
     session.patch(url, json=data)
 
 
-@when('we get an category called <name>')
+@when('we get a category called <name>')
 def step_get_category(session, categorys, name):
     desired_category = models.category.objects.get(title=name)
 
@@ -54,7 +54,7 @@ def step_get_category(session, categorys, name):
     session.get(url)
 
 
-@when('we delete an category called <name>')
+@when('we delete a category called <name>')
 def step_delete_category(session, categorys, name):
     desired_category = models.category.objects.get(title=name)
 
@@ -100,7 +100,7 @@ def step_test_r_valid_category(session, name):
 
 
 @then(parsers.cfparse(
-    'we should get an category with description {description}'))
+    'we should get a category with description {description}'))
 def step_test_r_category_description(session, description):
     category = session.obj
     assert category['description'] == description

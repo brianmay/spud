@@ -3,7 +3,7 @@ Feature: Testing persons
 
     Scenario Outline: Create person with error
         Given we login as <username> with <password>
-        When we create an person called <name>
+        When we create a person called <name>
         Then we should get the error: <error>
         And the person called <name> should not exist
 
@@ -14,7 +14,7 @@ Feature: Testing persons
 
     Scenario Outline: Create person
         Given we login as <username> with <password>
-        When we create an person called <name>
+        When we create a person called <name>
         Then we should get a created result
         And we should get a valid person called <name> with <fields>
         And the person called <name> should exist
@@ -26,7 +26,7 @@ Feature: Testing persons
 
     Scenario Outline: Update person with error
         Given we login as <username> with <password>
-        When we update an person called <name>
+        When we update a person called <name>
         Then we should get the error: <error>
         And the person called <name> should exist
         And the person <name> notes should be Testing «ταБЬℓσ»
@@ -38,10 +38,10 @@ Feature: Testing persons
 
     Scenario Outline: Update person
         Given we login as <username> with <password>
-        When we update an person called <name>
+        When we update a person called <name>
         Then we should get a successful result
         And we should get a valid person called <name> with <fields>
-        And we should get an person with notes new notes
+        And we should get a person with notes new notes
         And the person called <name> should exist
         And the person <name> notes should be new notes
 
@@ -51,7 +51,7 @@ Feature: Testing persons
 
     Scenario Outline: Patch person with error
         Given we login as <username> with <password>
-        When we patch an person called <name>
+        When we patch a person called <name>
         Then we should get the error: <error>
         And the person called <name> should exist
         And the person <name> notes should be Testing «ταБЬℓσ»
@@ -63,10 +63,10 @@ Feature: Testing persons
 
     Scenario Outline: Patch person
         Given we login as <username> with <password>
-        When we patch an person called <name>
+        When we patch a person called <name>
         Then we should get a successful result
         And we should get a valid person called <name> with <fields>
-        And we should get an person with notes new notes
+        And we should get a person with notes new notes
         And the person called <name> should exist
         And the person <name> notes should be new notes
 
@@ -76,7 +76,7 @@ Feature: Testing persons
 
     Scenario Outline: Get person
         Given we login as <username> with <password>
-        When we get an person called <name>
+        When we get a person called <name>
         Then we should get a successful result
         And we should get a valid person called <name> with <fields>
 
@@ -100,7 +100,7 @@ Feature: Testing persons
 
     Scenario Outline: Delete person with error
         Given we login as <username> with <password>
-        When we delete an person called <name>
+        When we delete a person called <name>
         Then we should get the error: <error>
         And the person called <name> should exist
 
@@ -112,7 +112,7 @@ Feature: Testing persons
 
     Scenario Outline: Delete person
         Given we login as <username> with <password>
-        When we delete an person called <name>
+        When we delete a person called <name>
         Then we should get a no content result
         And the person called <name> should not exist
 

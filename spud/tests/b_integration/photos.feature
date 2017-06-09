@@ -5,7 +5,7 @@ Feature: Testing photos
     #
     # Scenario Outline: Create photo with error
     #     Given we login as <username> with <password>
-    #     When we create an photo called <name>
+    #     When we create a photo called <name>
     #     Then we should get the error: <error>
     #     And the photo called <name> should not exist
     #
@@ -16,7 +16,7 @@ Feature: Testing photos
 
     Scenario Outline: Create photo
         Given we login as <username> with <password>
-        When we create an photo called <name> using <filename>
+        When we create a photo called <name> using <filename>
         Then we should get a created result
         And we should get a valid photo called <name>
         And the photo called <name> should exist
@@ -29,7 +29,7 @@ Feature: Testing photos
 
     Scenario Outline: Update photo with error
         Given we login as <username> with <password>
-        When we update an photo called <name>
+        When we update a photo called <name>
         Then we should get the error: <error>
         And the photo called <name> should exist
         And the photo <name> description should be Testing «ταБЬℓσ»
@@ -41,10 +41,10 @@ Feature: Testing photos
 
     Scenario Outline: Update photo
         Given we login as <username> with <password>
-        When we update an photo called <name>
+        When we update a photo called <name>
         Then we should get a successful result
         And we should get a valid photo called <name>
-        And we should get an photo with description new description
+        And we should get a photo with description new description
         And the photo called <name> should exist
         And the photo <name> description should be new description
 
@@ -54,7 +54,7 @@ Feature: Testing photos
 
     Scenario Outline: Patch photo with error
         Given we login as <username> with <password>
-        When we patch an photo called <name>
+        When we patch a photo called <name>
         Then we should get the error: <error>
         And the photo called <name> should exist
         And the photo <name> description should be Testing «ταБЬℓσ»
@@ -66,10 +66,10 @@ Feature: Testing photos
 
     Scenario Outline: Patch photo
         Given we login as <username> with <password>
-        When we patch an photo called <name>
+        When we patch a photo called <name>
         Then we should get a successful result
         And we should get a valid photo called <name>
-        And we should get an photo with description new description
+        And we should get a photo with description new description
         And the photo called <name> should exist
         And the photo <name> description should be new description
 
@@ -79,7 +79,7 @@ Feature: Testing photos
 
     Scenario Outline: Get photo
         Given we login as <username> with <password>
-        When we get an photo called <name>
+        When we get a photo called <name>
         Then we should get a successful result
         And we should get a valid photo called <name>
 
@@ -103,7 +103,7 @@ Feature: Testing photos
 
     Scenario Outline: Delete photo with error
         Given we login as <username> with <password>
-        When we delete an photo called <name>
+        When we delete a photo called <name>
         Then we should get the error: <error>
         And the photo called <name> should exist
 
@@ -114,7 +114,7 @@ Feature: Testing photos
 
     Scenario Outline: Delete photo
         Given we login as <username> with <password>
-        When we delete an photo called <name>
+        When we delete a photo called <name>
         Then we should get a no content result
         And the photo called <name> should not exist
 

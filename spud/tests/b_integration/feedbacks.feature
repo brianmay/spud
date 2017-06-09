@@ -3,7 +3,7 @@ Feature: Testing feedbacks
 
     Scenario Outline: Create feedback with error
         Given we login as <username> with <password>
-        When we create an feedback
+        When we create a feedback
         Then we should get the error: <error>
 
     Examples:
@@ -13,7 +13,7 @@ Feature: Testing feedbacks
 
     Scenario Outline: Create feedback
         Given we login as <username> with <password>
-        When we create an feedback
+        When we create a feedback
         Then we should get a created result
         And we should get a valid feedback
 
@@ -23,7 +23,7 @@ Feature: Testing feedbacks
 
     Scenario Outline: Update feedback with error
         Given we login as <username> with <password>
-        When we update an feedback with id <id>
+        When we update a feedback with id <id>
         Then we should get the error: <error>
         And the feedback with id <id> should exist
         And the feedback <id> comment should be Testing «ταБЬℓσ»
@@ -35,10 +35,10 @@ Feature: Testing feedbacks
 
     Scenario Outline: Update feedback
         Given we login as <username> with <password>
-        When we update an feedback with id <id>
+        When we update a feedback with id <id>
         Then we should get a successful result
         And we should get a valid feedback
-        And we should get an feedback with comment new comment
+        And we should get a feedback with comment new comment
         And the feedback with id <id> should exist
         And the feedback <id> comment should be new comment
 
@@ -48,7 +48,7 @@ Feature: Testing feedbacks
 
     Scenario Outline: Patch feedback with error
         Given we login as <username> with <password>
-        When we patch an feedback with id <id>
+        When we patch a feedback with id <id>
         Then we should get the error: <error>
         And the feedback with id <id> should exist
         And the feedback <id> comment should be Testing «ταБЬℓσ»
@@ -60,10 +60,10 @@ Feature: Testing feedbacks
 
     Scenario Outline: Patch feedback
         Given we login as <username> with <password>
-        When we patch an feedback with id <id>
+        When we patch a feedback with id <id>
         Then we should get a successful result
         And we should get a valid feedback
-        And we should get an feedback with comment new comment
+        And we should get a feedback with comment new comment
         And the feedback with id <id> should exist
         And the feedback <id> comment should be new comment
 
@@ -73,7 +73,7 @@ Feature: Testing feedbacks
 
     Scenario Outline: Get feedback
         Given we login as <username> with <password>
-        When we get an feedback with id <id>
+        When we get a feedback with id <id>
         Then we should get a successful result
         And we should get a valid feedback
 
@@ -97,7 +97,7 @@ Feature: Testing feedbacks
 
     Scenario Outline: Delete feedback with error
         Given we login as <username> with <password>
-        When we delete an feedback with id <id>
+        When we delete a feedback with id <id>
         Then we should get the error: <error>
         And the feedback with id <id> should exist
 
@@ -108,7 +108,7 @@ Feature: Testing feedbacks
 
     Scenario Outline: Delete feedback
         Given we login as <username> with <password>
-        When we delete an feedback with id <id>
+        When we delete a feedback with id <id>
         Then we should get a no content result
         And the feedback with id <id> should not exist
 

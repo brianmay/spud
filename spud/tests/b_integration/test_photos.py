@@ -8,7 +8,7 @@ from spud import models
 scenarios('photos.feature')
 
 
-@when('we create an photo called <name> using <filename>')
+@when('we create a photo called <name> using <filename>')
 def step_create_photo(session, name, filename, data_files):
     url = "/api/photos/"
     data = {
@@ -22,7 +22,7 @@ def step_create_photo(session, name, filename, data_files):
     session.post(url, data=data, files=files)
 
 
-@when('we update an photo called <name>')
+@when('we update a photo called <name>')
 def step_update_photo(session, photos, name):
     desired_photo = models.photo.objects.get(title=name)
     url = "/api/photos/%d/" % desired_photo.id
@@ -36,7 +36,7 @@ def step_update_photo(session, photos, name):
     session.put(url, json=data)
 
 
-@when('we patch an photo called <name>')
+@when('we patch a photo called <name>')
 def step_patch_photo(session, photos, name):
     desired_photo = models.photo.objects.get(title=name)
     url = "/api/photos/%d/" % desired_photo.id
@@ -46,7 +46,7 @@ def step_patch_photo(session, photos, name):
     session.patch(url, json=data)
 
 
-@when('we get an photo called <name>')
+@when('we get a photo called <name>')
 def step_get_photo(session, photos, name):
     desired_photo = models.photo.objects.get(title=name)
 
@@ -54,7 +54,7 @@ def step_get_photo(session, photos, name):
     session.get(url)
 
 
-@when('we delete an photo called <name>')
+@when('we delete a photo called <name>')
 def step_delete_photo(session, photos, name):
     desired_photo = models.photo.objects.get(title=name)
 
@@ -95,7 +95,7 @@ def step_test_r_valid_photo(session, name):
 
 
 @then(parsers.cfparse(
-    'we should get an photo with description {description}'))
+    'we should get a photo with description {description}'))
 def step_test_r_photo_description(session, description):
     photo = session.obj
     assert photo['description'] == description

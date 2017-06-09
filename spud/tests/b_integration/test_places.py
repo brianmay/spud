@@ -7,7 +7,7 @@ from spud import models
 scenarios('places.feature')
 
 
-@when('we create an place called <name>')
+@when('we create a place called <name>')
 def step_create_place(session, name):
     url = "/api/places/"
     data = {
@@ -19,7 +19,7 @@ def step_create_place(session, name):
     session.post(url, json=data)
 
 
-@when('we update an place called <name>')
+@when('we update a place called <name>')
 def step_update_place(session, places, name):
     desired_place = models.place.objects.get(title=name)
     url = "/api/places/%d/" % desired_place.id
@@ -32,7 +32,7 @@ def step_update_place(session, places, name):
     session.put(url, json=data)
 
 
-@when('we patch an place called <name>')
+@when('we patch a place called <name>')
 def step_patch_place(session, places, name):
     desired_place = models.place.objects.get(title=name)
     url = "/api/places/%d/" % desired_place.id
@@ -42,7 +42,7 @@ def step_patch_place(session, places, name):
     session.patch(url, json=data)
 
 
-@when('we get an place called <name>')
+@when('we get a place called <name>')
 def step_get_place(session, places, name):
     desired_place = models.place.objects.get(title=name)
 
@@ -50,7 +50,7 @@ def step_get_place(session, places, name):
     session.get(url)
 
 
-@when('we delete an place called <name>')
+@when('we delete a place called <name>')
 def step_delete_place(session, places, name):
     desired_place = models.place.objects.get(title=name)
 
@@ -94,7 +94,7 @@ def step_test_r_valid_place(session, name):
 
 
 @then(parsers.cfparse(
-    'we should get an place with notes {notes}'))
+    'we should get a place with notes {notes}'))
 def step_test_r_place_notes(session, notes):
     place = session.obj
     assert place['notes'] == notes

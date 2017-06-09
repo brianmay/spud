@@ -7,7 +7,7 @@ from spud import models
 scenarios('relations.feature')
 
 
-@when('we create an relation between <photo_1> and <photo_2>')
+@when('we create a relation between <photo_1> and <photo_2>')
 def step_create_relation(session, photo_1, photo_2, photos):
     url = "/api/relations/"
 
@@ -24,7 +24,7 @@ def step_create_relation(session, photo_1, photo_2, photos):
     session.post(url, json=data)
 
 
-@when('we update an relation between <photo_1> and <photo_2>')
+@when('we update a relation between <photo_1> and <photo_2>')
 def step_update_relation(session, relations, photo_1, photo_2, photos):
     photo_1 = photos[photo_1]
     photo_2 = photos[photo_2]
@@ -41,7 +41,7 @@ def step_update_relation(session, relations, photo_1, photo_2, photos):
     session.put(url, json=data)
 
 
-@when('we patch an relation between <photo_1> and <photo_2>')
+@when('we patch a relation between <photo_1> and <photo_2>')
 def step_patch_relation(session, relations, photo_1, photo_2, photos):
     photo_1 = photos[photo_1]
     photo_2 = photos[photo_2]
@@ -56,7 +56,7 @@ def step_patch_relation(session, relations, photo_1, photo_2, photos):
     session.patch(url, json=data)
 
 
-@when('we get an relation between <photo_1> and <photo_2>')
+@when('we get a relation between <photo_1> and <photo_2>')
 def step_get_relation(session, relations, photo_1, photo_2, photos):
     photo_1 = photos[photo_1]
     photo_2 = photos[photo_2]
@@ -67,7 +67,7 @@ def step_get_relation(session, relations, photo_1, photo_2, photos):
     session.get(url)
 
 
-@when('we delete an relation between <photo_1> and <photo_2>')
+@when('we delete a relation between <photo_1> and <photo_2>')
 def step_delete_relation(session, relations, photo_1, photo_2, photos):
     photo_1 = photos[photo_1]
     photo_2 = photos[photo_2]
@@ -136,14 +136,14 @@ def step_test_r_valid_relation(session, photo_1, photo_2, photos):
 
 
 @then(parsers.cfparse(
-    'we should get an relation with description 1 {description}'))
+    'we should get a relation with description 1 {description}'))
 def step_test_r_relation_description_1(session, description):
     relation = session.obj
     assert relation['desc_1'] == description
 
 
 @then(parsers.cfparse(
-    'we should get an relation with description 2 {description}'))
+    'we should get a relation with description 2 {description}'))
 def step_test_r_relation_description_2(session, description):
     relation = session.obj
     assert relation['desc_2'] == description
