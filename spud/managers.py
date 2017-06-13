@@ -166,10 +166,11 @@ class HierarchyManager(models.Manager):
         first = split.pop(0)
 
         if first == "":
-            qtmp = qtmp.filter(parent__isnull=True)
+            qtmp = self.get_parent_queryset(qtmp, None)
             first = split.pop(0)
         try:
-            instance = qtmp.get(title=first)
+            qtmp = self.get_name_queryset(qtmp, first)
+            instance = qtmp.get()
         except self.model.DoesNotExist:
             raise exceptions.NameDoesNotExist(
                 "%s '%s' does not exist"
@@ -182,9 +183,9 @@ class HierarchyManager(models.Manager):
         qtmp = self.get_queryset()
         for search in split:
             try:
-                instance = qtmp.get(
-                    parent=instance,
-                    title=search)
+                qtmp = self.get_parent_queryset(qtmp, instance)
+                qtmp = self.get_name_queryset(qtmp, search)
+                instance = qtmp.get()
             except self.model.DoesNotExist:
                 raise exceptions.NameDoesNotExist(
                     "%s '%s' does not exist"
@@ -200,6 +201,16 @@ class HierarchyManager(models.Manager):
         for r in q:
             queryset = queryset.filter(Q(title__icontains=r))
         return queryset
+
+    def get_name_queryset(self, queryset, name):
+        queryset = queryset.filter(title__iexact=name)
+        return queryset
+
+    def get_parent_queryset(self, queryset, parent):
+        if parent is None:
+            return queryset.filter(parent__isnull=True)
+        else:
+            return queryset.filter(parent=parent)
 
     def get_search_queryset(self, user, queryset, params):
         queryset = queryset.select_related('cover_photo')
@@ -286,32 +297,23 @@ class PlaceManager(HierarchyManager):
         return queryset
 
 
-class PersonManager(models.Manager):
+class PersonManager(HierarchyManager):
 
-    def get_by_name(self, name):
-        type_name = self.model._meta.verbose_name.title()
-
-        qtmp = self.get_queryset()
+    def get_name_queryset(self, queryset, name):
         for val in name.split(" "):
-            qtmp = qtmp.filter(
+            queryset = queryset.filter(
                 Q(first_name__iexact=val) |
                 Q(middle_name__iexact=val) |
                 Q(last_name__iexact=val) |
                 Q(called__iexact=val)
             )
+        return queryset
 
-        try:
-            instance = qtmp.get()
-        except self.model.DoesNotExist:
-            raise exceptions.NameDoesNotExist(
-                "%s '%s' does not exist"
-                % (type_name, name))
-        except self.model.MultipleObjectsReturned:
-            raise exceptions.NameDoesNotExist(
-                "Multiple results returned for %s '%s'"
-                % (type_name, name))
-
-        return instance
+    def get_parent_queryset(self, queryset, parent):
+        if parent is None:
+            return queryset.filter(mother__isnull=True, father__isnull=True)
+        else:
+            return queryset.filter(Q(mother=parent) | Q(father=parent))
 
     def get_search_queryset(self, user, queryset, params, action):
         queryset = queryset.select_related('cover_photo')
