@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """ Run tests on feedback serializers. """
 import pytest
 
