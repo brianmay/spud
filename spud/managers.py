@@ -577,6 +577,10 @@ class PhotoManager(models.Manager):
 
 class FeedbackManager(models.Manager):
     def get_search_queryset(self, user, queryset, params):
+        queryset = queryset.select_related('cover_photo')
+        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+
         q = _get_list(params, 'q')
         for r in q:
             queryset = queryset.filter(

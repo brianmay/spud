@@ -150,7 +150,7 @@ def photo():
     return models.photo.objects.create(
         level=0,
         utc_offset=600,
-        datetime=datetime.datetime.now(),
+        datetime="2017-06-14T20:03:42",
     )
 
 
@@ -210,8 +210,10 @@ def feedbacks(photo):
         pk=1,
         cover_photo=photo,
         comment='Testing «ταБЬℓσ»',
-        rating=0,
+        rating=1,
         parent=None,
+        submit_datetime='2017-06-14T10:41:59',
+        utc_offset=600,
     )
     results['First'] = models.feedback.objects.create(
         pk=2,
@@ -219,12 +221,16 @@ def feedbacks(photo):
         comment='Testing «ταБЬℓσ»',
         rating=0,
         parent=results['Parent'],
+        submit_datetime='2017-06-14T10:41:59',
+        utc_offset=600,
     )
     results['Second'] = models.feedback.objects.create(
         pk=3,
         cover_photo=photo,
         comment='Testing «ταБЬℓσ»',
-        rating=0,
+        rating=2,
         parent=results['Parent'],
+        submit_datetime='2017-06-14T10:41:59',
+        utc_offset=600,
     )
     return results
