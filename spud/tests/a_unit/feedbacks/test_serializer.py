@@ -34,7 +34,7 @@ def test_serializer_encode(feedbacks, photo):
                     'videos': {},
                 },
                 'cover_photo_pk': photo.pk,
-                'comment': 'Testing «ταБЬℓσ»',
+                'comment': u'Testing «ταБЬℓσ»',
                 'ip_address': None,
                 'is_public': True,
                 'is_removed': False,
