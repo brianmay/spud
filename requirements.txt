@@ -1,4 +1,4 @@
-setuptools_scm==1.15.5
+setuptools-scm==1.15.6
 django-pipeline==1.6.13
 djangorestframework==3.6.3
 python-dateutil==2.6.0
