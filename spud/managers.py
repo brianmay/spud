@@ -371,7 +371,7 @@ class PhotoManager(models.Manager):
         qtmp = self.get_queryset()
 
         try:
-            instance = qtmp.get(name=name)
+            instance = qtmp.get(title=name)
         except self.model.DoesNotExist:
             raise exceptions.NameDoesNotExist(
                 "%s '%s' does not exist"
