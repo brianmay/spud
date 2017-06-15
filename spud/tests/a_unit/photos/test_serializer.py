@@ -1,6 +1,6 @@
 """ Run tests on photo serializers. """
 import datetime
-from unittest.mock import ANY
+from mock import ANY
 
 import pytest
 
