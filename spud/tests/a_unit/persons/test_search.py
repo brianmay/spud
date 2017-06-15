@@ -23,7 +23,7 @@ def test_search_all():
 
     params = {}
     result = models.person.objects.get_search_queryset(
-        user, queryset, params, 'retrieve')
+        user, queryset, params, 'detail')
 
     chained = (
        call
@@ -51,7 +51,7 @@ def test_search_q():
 
     params = {'q': ['meow']}
     result = models.person.objects.get_search_queryset(
-        user, queryset, params, 'retrieve')
+        user, queryset, params, 'detail')
 
     q = (
         MyQ(first_name__icontains='meow')
@@ -87,7 +87,7 @@ def test_search_children(persons):
 
     params = {'instance': persons['Parent'].pk, 'mode': 'children'}
     result = models.person.objects.get_search_queryset(
-        user, queryset, params, 'retrieve')
+        user, queryset, params, 'detail')
 
     chained = (
        call
@@ -117,7 +117,7 @@ def test_search_ascendants(persons):
 
     params = {'instance': persons['Parent'].pk, 'mode': 'ascendants'}
     result = models.person.objects.get_search_queryset(
-        user, queryset, params, 'retrieve')
+        user, queryset, params, 'detail')
 
     chained = (
        call
@@ -149,7 +149,7 @@ def test_search_descendants(persons):
 
     params = {'instance': persons['Parent'].pk, 'mode': 'descendants'}
     result = models.person.objects.get_search_queryset(
-        user, queryset, params, 'retrieve')
+        user, queryset, params, 'detail')
 
     chained = (
        call
@@ -180,7 +180,7 @@ def test_search_root_only():
 
     params = {'root_only': True}
     result = models.person.objects.get_search_queryset(
-        user, queryset, params, 'retrieve')
+        user, queryset, params, 'detail')
 
     chained = (
        call
