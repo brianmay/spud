@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """ Run tests on photo serializers. """
 import datetime
 from mock import ANY
@@ -10,8 +11,8 @@ from spud import models, serializers
 @pytest.mark.django_db(transaction=True)
 def test_serializer_encode(photos):
     child = models.photo.objects.create(
-        description='description',
-        title='Child',
+        description=u'description «ταБЬℓσ»',
+        title=u'Child «ταБЬℓσ»',
         utc_offset=600,
         datetime="2015-11-22T12:00:00",
         level=10,
@@ -19,9 +20,9 @@ def test_serializer_encode(photos):
     serializer = serializers.PhotoSerializer(child)
 
     expected = {
-        'description': 'description',
+        'description': u'description «ταБЬℓσ»',
         'id': child.pk,
-        'title': 'Child',
+        'title': u'Child «ταБЬℓσ»',
         'action': None,
         'albums': [],
         'albums_pk': [],
@@ -67,9 +68,9 @@ def test_serializer_encode(photos):
 def test_serializer_decode(photos):
     data = {
         'cover_photo_pk': None,
-        'description': 'description',
+        'description': u'description «ταБЬℓσ»',
         'id': 10,
-        'title': 'Child',
+        'title': u'Child «ταБЬℓσ»',
         'utc_offset': 600,
         'datetime': '2015-11-22T12:00:00',
         'level': 5,
@@ -77,8 +78,8 @@ def test_serializer_decode(photos):
     serializer = serializers.PhotoSerializer(data=data)
 
     expected = {
-        'description': 'description',
-        'title': 'Child',
+        'description': u'description «ταБЬℓσ»',
+        'title': u'Child «ταБЬℓσ»',
         'add_persons_pk': None,
         'datetime': datetime.datetime(2015, 11, 22, 12, 0),
         'level': 5,

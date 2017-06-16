@@ -103,7 +103,7 @@ class PhotoTitleField(CharField):
         value = super(PhotoTitleField, self).get_attribute(obj)
         if not value:
             value = obj.name
-        return str(value)
+        return value
 
 
 class NestedPhotoPlaceSerializer(ModelSerializer):
