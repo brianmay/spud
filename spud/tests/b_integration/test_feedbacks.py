@@ -19,9 +19,11 @@ def step_create_feedback(session, photo):
     session.post(url, json=data)
 
 
-@when('we update a feedback with id <id>')
-def step_update_feedback(session, feedbacks, photo, id):
-    url = "/api/feedbacks/%d/" % int(id)
+@when('we update a feedback with photo <photo_name>')
+def step_update_feedback(session, feedbacks, photos, photo_name):
+    photo = photos[photo_name]
+    feedback = models.feedback.objects.get(cover_photo=photo)
+    url = "/api/feedbacks/%d/" % int(feedback.pk)
     data = {
         'cover_photo_pk': photo.pk,
         'comment': 'new comment',
@@ -31,9 +33,11 @@ def step_update_feedback(session, feedbacks, photo, id):
     session.put(url, json=data)
 
 
-@when('we patch a feedback with id <id>')
-def step_patch_feedback(session, feedbacks, id):
-    url = "/api/feedbacks/%d/" % int(id)
+@when('we patch a feedback with photo <photo_name>')
+def step_patch_feedback(session, photos, feedbacks, photo_name):
+    photo = photos[photo_name]
+    feedback = models.feedback.objects.get(cover_photo=photo)
+    url = "/api/feedbacks/%d/" % int(feedback.pk)
     data = {
         'comment': 'new comment',
         'rating': -10,
@@ -41,15 +45,19 @@ def step_patch_feedback(session, feedbacks, id):
     session.patch(url, json=data)
 
 
-@when('we get a feedback with id <id>')
-def step_get_feedback(session, feedbacks, id):
-    url = "/api/feedbacks/%d/" % int(id)
+@when('we get a feedback with photo <photo_name>')
+def step_get_feedback(session, photos, feedbacks, photo_name):
+    photo = photos[photo_name]
+    feedback = models.feedback.objects.get(cover_photo=photo)
+    url = "/api/feedbacks/%d/" % int(feedback.pk)
     session.get(url)
 
 
-@when('we delete a feedback with id <id>')
-def step_delete_feedback(session, feedbacks, id):
-    url = "/api/feedbacks/%d/" % int(id)
+@when('we delete a feedback with photo <photo_name>')
+def step_delete_feedback(session, photos, feedbacks, photo_name):
+    photo = photos[photo_name]
+    feedback = models.feedback.objects.get(cover_photo=photo)
+    url = "/api/feedbacks/%d/" % int(feedback.pk)
     session.delete(url)
 
 
@@ -60,21 +68,24 @@ def step_list_feedbacks(session, feedbacks):
 
 
 @then(parsers.cfparse(
-    'the feedback <id> comment should be {comment}'))
-def step_test_feedback_comment(id, comment):
-    feedback = models.feedback.objects.get(pk=int(id))
+    'the feedback <photo_name> comment should be {comment}'))
+def step_test_feedback_comment(photos, photo_name, comment):
+    photo = photos[photo_name]
+    feedback = models.feedback.objects.get(cover_photo=photo)
     assert feedback.comment == comment
 
 
-@then('the feedback with id <id> should exist')
-def step_test_feedback_valid(id):
-    models.feedback.objects.get(pk=int(id))
+@then('the feedback with photo <photo_name> should exist')
+def step_test_feedback_valid(photos, photo_name):
+    photo = photos[photo_name]
+    models.feedback.objects.get(cover_photo=photo)
 
 
-@then('the feedback with id <id> should not exist')
-def step_test_feedback_not_exist(id):
+@then('the feedback with photo <photo_name> should not exist')
+def step_test_feedback_not_exist(photos, photo_name):
+    photo = photos[photo_name]
     with pytest.raises(models.feedback.DoesNotExist):
-        models.feedback.objects.get(pk=int(id))
+        models.feedback.objects.get(cover_photo=photo)
 
 
 @then('we should get a valid feedback')

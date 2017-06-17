@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-
 from django.contrib.auth.models import User
 import pytest
 
@@ -162,21 +160,21 @@ def photos():
         title='Parent',
         level=0,
         utc_offset=600,
-        datetime=datetime.datetime.now(),
+        datetime="2017-06-14T20:03:42",
         description='Testing «ταБЬℓσ»',
     )
     results['First'] = models.photo.objects.create(
         title='First',
         level=0,
         utc_offset=600,
-        datetime=datetime.datetime.now(),
+        datetime="2017-06-14T20:03:42",
         description='Testing «ταБЬℓσ»',
     )
     results['Second'] = models.photo.objects.create(
         title='Second',
         level=0,
         utc_offset=600,
-        datetime=datetime.datetime.now(),
+        datetime="2017-06-14T20:03:42",
         description='Testing «ταБЬℓσ»',
     )
     return results
@@ -203,12 +201,11 @@ def relations(photos):
 
 
 @pytest.fixture
-def feedbacks(photo):
+def feedbacks(photos):
     results = {}
 
     results['Parent'] = models.feedback.objects.create(
-        pk=1,
-        cover_photo=photo,
+        cover_photo=photos['Parent'],
         comment='Testing «ταБЬℓσ»',
         rating=1,
         parent=None,
@@ -216,8 +213,7 @@ def feedbacks(photo):
         utc_offset=600,
     )
     results['First'] = models.feedback.objects.create(
-        pk=2,
-        cover_photo=photo,
+        cover_photo=photos['First'],
         comment='Testing «ταБЬℓσ»',
         rating=0,
         parent=results['Parent'],
@@ -225,8 +221,7 @@ def feedbacks(photo):
         utc_offset=600,
     )
     results['Second'] = models.feedback.objects.create(
-        pk=3,
-        cover_photo=photo,
+        cover_photo=photos['Second'],
         comment='Testing «ταБЬℓσ»',
         rating=2,
         parent=results['Parent'],

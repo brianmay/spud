@@ -6,7 +6,7 @@ from spud import models, serializers
 
 
 @pytest.mark.django_db(transaction=True)
-def test_serializer_encode(feedbacks, photo):
+def test_serializer_encode(feedbacks, photos, photo):
     child = models.feedback.objects.create(
         cover_photo=photo,
         comment='description',
@@ -23,9 +23,9 @@ def test_serializer_encode(feedbacks, photo):
                 'id': feedbacks['Parent'].pk,
                 'cover_photo': {
                     'action': None,
-                    'id': photo.pk,
-                    'title': '',
-                    'description': None,
+                    'id': photos['Parent'].pk,
+                    'title': 'Parent',
+                    'description': u'Testing «ταБЬℓσ»',
                     'datetime': '2017-06-14T20:03:42',
                     'utc_offset': 600,
                     'place': None,
@@ -33,7 +33,7 @@ def test_serializer_encode(feedbacks, photo):
                     'thumbs': {},
                     'videos': {},
                 },
-                'cover_photo_pk': photo.pk,
+                'cover_photo_pk': photos['Parent'].pk,
                 'comment': u'Testing «ταБЬℓσ»',
                 'ip_address': None,
                 'is_public': True,
@@ -75,8 +75,6 @@ def test_serializer_encode(feedbacks, photo):
         'utc_offset': 600,
     }
 
-    assert serializer.data['cover_photo'] == expected['cover_photo']
-    assert serializer.data['ascendants'] == expected['ascendants']
     assert serializer.data == expected
 
 
