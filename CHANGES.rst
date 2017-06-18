@@ -1,21 +1,37 @@
-Release 2.0.7 (UNRELEASED)
-==========================
+==========
+Change log
+==========
+All notable changes to this project will be documented in this file. The format
+is based on `Keep a Changelog`_ and this project
+adheres to `Semantic Versioning`_.
 
-  * Fix error displaying photo list for places.
+.. _`Keep a Changelog`: http://keepachangelog.com/
+.. _`Semantic Versioning`: http://semver.org/
+
+
+2.0.8 - UNRELEASED
+------------------
+
+Added
+~~~~~
   * Support Django 1.11 and Python 3.6.
+
+Fixed
+~~~~~
+  * Fix error displaying photo list for places.
   * Rewrite tests.
   * Some minor bug fixes.
 
-Release 2.0.7 (01 Apr 2017)
-===========================
+2.0.7 - 2017-04-01
+------------------
 
   * Fix duplicate results for some searches.
   * Fix problems with Django admin.
   * Add support for token authentication.
   * Remove legacy and broken south migrations.
 
-Release 2.0.6 (27 Mar 2017)
-===========================
+2.0.6 - 2017-03-27
+------------------
 
   * Drop Django 1.7 support.
   * Drop Python 3.3 support.
@@ -24,223 +40,223 @@ Release 2.0.6 (27 Mar 2017)
   * Fix many bugs.
   * Rename ``spud.wsgi`` to ``wsgi.py``.
 
-Release 2.0.5 (01 May 2016)
-===========================
+2.0.5 - 2016-05-01
+------------------
 
   * Various bug fixes.
 
-Release 2.0.4 (25 Apr 2016)
-===========================
+2.0.4 - 2016-04-25
+------------------
 
   * New release with fixed MANIFEST.in
 
-Release 2.0.3 (25 Apr 2016)
-===========================
+2.0.3 - 2016-04-25
+------------------
 
   * Port Javascript to Typescript.
   * Add more tests.
   * Remove pipeline TypescriptCompiler - has problems with debugging.
   * Split out Debian packaging.
 
-Release 2.0.2 (09 Aug 2015)
-===========================
+2.0.2 - 2015-08-09
+------------------
 
   * Work around django-pipeline/slimit js curruption.
   * Change default url prefix.
   * Add support for CORS.
   * Fix new PEP8 issues.
 
-Release 2.0.1 (12 Apr 2015)
-===========================
+2.0.1 - 2015-04-12
+------------------
 
   * Numerous bugs fixed.
 
-Release 2.0.0 (16 Mar 2015)
-===========================
+2.0.0 - 2015-03-16
+------------------
 
   * New release.
   * Rewritten code with django-rest-framework.
 
-Release 1.14 (05 Nov 2014)
-==========================
+1.14 - 2014-11-05
+-----------------
 
   * Python 3 fixes.
   * Django 1.7 fixes.
 
-Release 1.13 (05 Nov 2013)
-==========================
+1.13 - 2013-11-05
+-----------------
 
   * Fix various bugs.
 
-Release 1.12 (05 Aug 2013)
-==========================
+1.12 - 2013-08-05
+-----------------
 
   * Fix various bugs.
 
-Release 1.11 (01 Jun 2013)
-==========================
+1.11 - 2013-06-01
+-----------------
 
   * Various bug fixes.
 
-Release 1.10 (15 May 2013)
-==========================
+1.10 - 2013-05-15
+-----------------
 
   * Improvements for video.
   * Various bug fixes.
 
-Release 1.9 (12 May 2013)
-=========================
+1.9 - 2013-05-12
+----------------
 
   * Various updates for video support.
 
-Release 1.8 (12 May 2013)
-=========================
+1.8 - 2013-05-12
+----------------
 
   * Various bug fixes.
   * Improve quality for video support.
 
-Release 1.7 (11 May 2013)
-=========================
+1.7 - 2013-05-11
+----------------
 
   * Preliminary support for video files.
 
-Release 1.6 (09 May 2013)
-=========================
+1.6 - 2013-05-09
+----------------
 
   * Transition to dh_python2. See
     http://wiki.debian.org/Python/TransitionToDHPython2.
   * Add recommends for dcraw.
 
-Release 1.6 (06 May 2013)
-===========================
+1.6 - 2013-05-06
+----------------
 
   * More bug fixes.
 
-Release 1.5 (04 May 2013)
-=========================
+1.5 - 2013-05-04
+----------------
 
   * Bugs fixed.
   * Minor schema change.
 
-Release 1.4 (04 May 2013)
-=========================
+1.4 - 2013-05-04
+----------------
 
   * Fullscreen mode.
   * Style changes.
   * Bugs fixed.
 
-Release 1.3 (01 May 2013)
-=========================
+1.3 - 2013-05-01
+----------------
 
   * Version 1.2 was missing be5492b897743334a841d923c1377a784cea0d58. Retry.
 
-Release 1.2 (01 May 2013)
-=========================
+1.2 - 2013-05-01
+----------------
 
   * Schema updates.
   * Fixes for slideshow mode.
 
-Release 1.1 (30 Apr 2013)
-=========================
+1.1 - 2013-04-30
+----------------
 
   * Various bugs fixed.
   * Improvements to style sheets.
 
-Release 1.0 (28 Apr 2013)
-=========================
+1.0 - 2013-04-28
+----------------
 
   * Major rewrite in AJAX/Javascript.
 
-Release 0.25 (18 Sep 2012)
-==========================
+0.25 - 2012-09-18
+-----------------
 
   * Fix media issues.
 
-Release 0.24 (14 Sep 2012)
-==========================
+0.24 - 2012-09-14
+-----------------
 
   * Use Django 1.3 static file support.
   * Make common commands django management commands.
   * Small SQL optimizations.
 
-Release 0.23 (05 May 2012)
-==========================
+0.23 - 2012-05-05
+-----------------
 
   * Bugs fixed.
   * Automatically change filename if it conflicts and photo is different.
   * Search for photos based on id.
 
-Release 0.22 (28 Mar 2012)
-==========================
+0.22 - 2012-03-28
+-----------------
 
   * Bugs fixed.
   * Timezone tracking updated.
   * Date searches improved.
   * Code restructured.
 
-Release 0.21 (09 Mar 2012)
-==========================
+0.21 - 2012-03-09
+-----------------
 
   * Update to support at least django-tables 0.9.4
   * Other issues fixed.
 
-Release 0.20 (29 Dec 2011)
-==========================
+0.20 - 2011-12-29
+-----------------
 
   * Improve formatting of AJAX lists.
   * Disable auth checks in AJAX lookups.
   * Exclude deleted photos from being cover photo.
 
-Release 0.19 (28 Dec 2011)
-==========================
+0.19 - 2011-12-28
+-----------------
 
   * Bug fixes.
   * Support django-ajax-select 1.2.3.
 
-Release 0.18 (15 Jul 2011)
-=========================
+0.18 - 2011-07-15
+-----------------
 
   * Improve Javascript.
   * Improve other stuff.
 
-Release 0.17 (08 Jul 2011)
-==========================
+0.17 - 2011-07-08
+-----------------
 
   * Fix various broken things.
 
-Release 0.16 (03 Jul 2011)
-==========================
+0.16 - 2011-07-03
+-----------------
 
   * Update style.
   * Improve Javascript code.
   * Convert floats to inline-blocks.
   * Fix error conditions.
 
-Release 0.15 (30 Jun 2011)
-==========================
+0.15 - 2011-06-30
+-----------------
 
   * Store image sizes in database.
   * Fix quirks in user interface. e.g. image resized after it is displayed.
 
-Release 0.14 (29 Jun 2011)
-==========================
+0.14 - 2011-06-29
+-----------------
 
   * Experimental changes designed to improve mobile phone experience.
 
-Release 0.13 (24 Jun 2011)
-==========================
+0.13 - 2011-06-24
+-----------------
 
   * Fix error templates.
 
-Release 0.12 (23 Jun 2011)
-==========================
+0.12 - 2011-06-23
+-----------------
 
   * Update standards version to 3.9.2.
   * Fix XHTML Errors.
   * Split django-webs stuff into separate package.
 
-Release 0.11 (03 May 2011)
-==========================
+0.11 - 2011-05-03
+-----------------
 
   * Remove whitespace after edit photo command.
   * New edit form.
@@ -248,8 +264,8 @@ Release 0.11 (03 May 2011)
   * Fix processing of actions.
   * Fix various issues surrounding photo relations.
 
-Release 0.10 (30 Apr 2011)
-==========================
+0.10 - 2011-04-30
+-----------------
 
   * Remove obsolete command line option to import program.
   * Various bugs fixed.
@@ -258,14 +274,14 @@ Release 0.10 (30 Apr 2011)
   * Improve stylesheet for Mobile phone use.
   * Fix error with migrations on sqlite.
 
-Release 0.9 (26 Apr 2011)
-=========================
+0.9 - 2011-04-26
+----------------
 
   * Improve JavaScript.
   * Rename database tables.
 
-Release 0.8 (24 Apr 2011)
-=========================
+0.8 - 2011-04-24
+----------------
 
   * Fix permission checks. Security issue, anybody could edit photos.
   * Fix broken XHTML.
@@ -276,29 +292,29 @@ Release 0.8 (24 Apr 2011)
   * Optimize how search string is generated.
   * Don't use CSRF protection for post requests that don't have side effects.
 
-Release 0.7 (05 Apr 2011)
-=========================
+0.7 - 2011-04-05
+----------------
 
   * Fix error when accessing non-existant images.
   * Work around innodb bug, see http://south.aeracode.org/ticket/466.
   * Fiddle with stylesheets, etc.
 
-Release 0.6 (04 Apr 2011)
-=========================
+0.6 - 2011-04-04
+----------------
 
   * Use secure session cookies by default.
   * Add missing error templates.
   * Other minor changes.
 
-Release 0.5 (04 Apr 2011)
-=========================
+0.5 - 2011-04-04
+----------------
 
   * Fix typo that caused error when adding category to image.
   * Updates to templates. Good? Bad?
   * Edit now supports showing image in different sizes.
 
-Release 0.4 (02 Apr 2011)
-=========================
+0.4 - 2011-04-02
+----------------
 
   * Enable sql transaction support by default.
   * Add ability to override src timezone and offset on per camera basis.
@@ -306,26 +322,22 @@ Release 0.4 (02 Apr 2011)
   * Fix errors in breadcrumbs for creating albums,categories and places.
   * Add extended abilities for large image photos.
 
-Release 0.3 (02 Mar 2011)
-=========================
+0.3 - 2011-03-02
+----------------
 
   * Add missing depends on python-pyparsing and python-imaging.
   * Add suggests on python-mysqldb.
   * Add spud_process_actions binary to package.
 
-Release 0.2 (19 Oct 2010)
-=========================
+0.2 - 2010-10-19
+----------------
 
   * Fix postinst script.
   * Remove obsolete fastcgi stuff.
   * Turn on following symlinks under media directory.
-
-Release 0.2 (13 Sep 2010)
-=========================
-
   * Many bugs removed to a better place.
 
-Release 0.1 (17 Jul 2010)
-=========================
+0.1 - 2010-07-17
+----------------
 
   * Initial release.
