@@ -312,7 +312,7 @@ def import_photo(
         except Exception:
             raise e
         errors = json["non_field_errors"]
-        if len(errors)==1 and errors[0].startswith("File already exists at"):
+        if len(errors) == 1 and errors[0].startswith("File already exists at"):
             splitted = errors[0].split(" ")
             id = int(splitted[-1].rstrip("."))
             print("skipping %s as already uploaded as %d"
@@ -480,6 +480,7 @@ def main():
         raise
 
     return
+
 
 if __name__ == "__main__":
     main()

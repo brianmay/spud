@@ -62,6 +62,7 @@ class PhotoThumbSerializer(ModelSerializer):
 
     class Meta:
         model = models.photo_thumb
+        fields = ['id', 'url', 'size', 'width', 'height', 'photo']
 
 
 class PhotoThumbListSerializer(ListSerializer):
@@ -79,6 +80,10 @@ class PhotoVideoSerializer(ModelSerializer):
 
     class Meta:
         model = models.photo_video
+        fields = [
+            'id', 'url', 'size', 'width', 'height', 'format',
+            'extension', 'photo'
+        ]
 
 
 class PhotoVideoListSerializer(ListSerializer):
@@ -98,15 +103,15 @@ class PhotoTitleField(CharField):
         value = super(PhotoTitleField, self).get_attribute(obj)
         if not value:
             value = obj.name
-        return str(value)
+        return value
 
 
 class NestedPhotoPlaceSerializer(ModelSerializer):
     class Meta:
         model = models.place
-        fields = (
+        fields = [
             'id', 'title',
-        )
+        ]
         list_serializer_class = ListSerializer
 
 
@@ -122,25 +127,26 @@ class NestedPhotoSerializer(ModelSerializer):
 
     class Meta:
         model = models.photo
-        fields = (
+        fields = [
             'id', 'title', 'description', 'datetime', 'utc_offset', 'place',
             'action', 'thumbs', 'videos',
-        )
+        ]
         list_serializer_class = ListSerializer
 
 
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            'id', 'username', 'first_name', 'last_name', 'email', 'groups')
+        fields = [
+            'id', 'username', 'first_name', 'last_name', 'email', 'groups'
+        ]
         list_serializer_class = ListSerializer
 
 
 class GroupSerializer(ModelSerializer):
     class Meta:
         model = Group
-        fields = ('id', 'name')
+        fields = ['id', 'name']
         list_serializer_class = ListSerializer
 
 
@@ -153,9 +159,9 @@ class NestedAlbumSerializer(ModelSerializer):
 
     class Meta:
         model = models.album
-        fields = (
+        fields = [
             'id', 'title', 'cover_photo', 'cover_photo_pk',
-        )
+        ]
         list_serializer_class = ListSerializer
 
 
@@ -179,6 +185,11 @@ class AlbumSerializer(ModelSerializer):
     class Meta:
         model = models.album
         list_serializer_class = ListSerializer
+        fields = [
+            'id', 'cover_photo', 'cover_photo_pk', 'ascendants', 'title',
+            'description', 'sort_name', 'sort_order',
+            'revised', 'revised_utc_offset', 'parent',
+        ]
 
 
 class NestedCategorySerializer(ModelSerializer):
@@ -190,9 +201,9 @@ class NestedCategorySerializer(ModelSerializer):
 
     class Meta:
         model = models.category
-        fields = (
+        fields = [
             'id', 'title', 'cover_photo', 'cover_photo_pk',
-        )
+        ]
         list_serializer_class = ListSerializer
 
 
@@ -209,6 +220,10 @@ class CategorySerializer(ModelSerializer):
     class Meta:
         model = models.category
         list_serializer_class = ListSerializer
+        fields = [
+            'id', 'cover_photo', 'cover_photo_pk', 'ascendants', 'title',
+            'description', 'sort_name', 'sort_order', 'parent', 'cover_photo'
+        ]
 
 
 class NestedPlaceSerializer(ModelSerializer):
@@ -220,9 +235,9 @@ class NestedPlaceSerializer(ModelSerializer):
 
     class Meta:
         model = models.place
-        fields = (
+        fields = [
             'id', 'title', 'cover_photo', 'cover_photo_pk',
-        )
+        ]
         list_serializer_class = ListSerializer
 
 
@@ -246,6 +261,11 @@ class PlaceSerializer(ModelSerializer):
     class Meta:
         model = models.place
         list_serializer_class = ListSerializer
+        fields = [
+            'id', 'cover_photo', 'cover_photo_pk', 'ascendants', 'title',
+            'address', 'address2', 'city', 'state', 'postcode', 'country',
+            'url', 'urldesc', 'notes', 'parent', 'cover_photo'
+        ]
 
 
 class PersonTitleField(CharField):
@@ -266,9 +286,9 @@ class NestedPersonSerializer(ModelSerializer):
 
     class Meta:
         model = models.photo
-        fields = (
+        fields = [
             'id', 'title', 'cover_photo', 'cover_photo_pk',
-        )
+        ]
         list_serializer_class = ListSerializer
 
 
@@ -315,6 +335,9 @@ class PersonSerializer(ModelSerializer):
     nephews_nieces = NestedPersonSerializer(many=True, read_only=True)
     grandchildren = NestedPersonSerializer(many=True, read_only=True)
 
+    ascendants = NestedPersonSerializer(
+        source="list_ascendants", many=True, read_only=True)
+
     def set_request(self, request):
         super(PersonSerializer, self).set_request(request)
 
@@ -343,10 +366,32 @@ class PersonSerializer(ModelSerializer):
             del self.fields['grandchildren']
             del self.fields['notes']
             del self.fields['email']
+            del self.fields['ascendants']
 
     class Meta:
         model = models.person
         list_serializer_class = ListSerializer
+        fields = [
+            'id', 'title',
+            'cover_photo', 'cover_photo_pk',
+            'home', 'home_pk',
+            'work', 'work_pk',
+            'mother', 'mother_pk',
+            'father', 'father_pk',
+            'spouse', 'spouse_pk', 'spouses',
+            'grandparents',
+            'uncles_aunts',
+            'parents',
+            'siblings',
+            'cousins',
+            'children',
+            'nephews_nieces',
+            'grandchildren',
+            'ascendants',
+            'first_name', 'last_name', 'middle_name',
+            'called', 'sex', 'dob', 'dod', 'notes', 'email',
+            'cover_photo'
+        ]
 
 
 class PersonListSerializer(ListSerializer):
@@ -416,13 +461,13 @@ class NestedFeedbackSerializer(ModelSerializer):
 
     class Meta:
         model = models.feedback
-        fields = (
+        fields = [
             'id', 'cover_photo', 'cover_photo_pk', 'rating', 'comment',
             'user_name', 'user_email', 'user_url',
             'submit_datetime', 'utc_offset',
             'ip_address', 'is_public', 'is_removed',
             'user',
-        )
+        ]
         list_serializer_class = ListSerializer
 
 
@@ -443,12 +488,23 @@ class FeedbackSerializer(ModelSerializer):
             'submit_datetime': {'read_only': True},
             'utc_offset': {'read_only': True},
         }
+        fields = [
+            'id', 'cover_photo', 'cover_photo_pk', 'ascendants',
+            'rating', 'comment', 'user_name', 'user_email', 'user_url',
+            'submit_datetime', 'utc_offset', 'ip_address', 'is_public',
+            'is_removed', 'cover_photo', 'parent', 'user'
+        ]
 
 
 class PhotoRelationSerializer(ModelSerializer):
     class Meta:
         model = models.photo_relation
         list_serializer_class = ListSerializer
+        fields = [
+            'id',
+            'photo_1', 'photo_1_pk', 'desc_1',
+            'photo_2', 'photo_2_pk', 'desc_2',
+        ]
 
     photo_1 = NestedPhotoSerializer(read_only=True)
     photo_1_pk = serializers.PrimaryKeyRelatedField(
@@ -461,6 +517,7 @@ class PhotoRelationSerializer(ModelSerializer):
         queryset=models.photo.objects.all(), source="photo_2",
         allow_null=True,
         style={'base_template': 'input.html'})
+
 
 default_timezone = pytz.timezone(settings.TIME_ZONE)
 
@@ -475,16 +532,16 @@ class PhotoListSerializer(ListSerializer):
         for photo in iterable.all():
             result = self.child.to_representation(photo)
 
-            if 'related_photo' in self.context:
-                related_photo = self.context['related_photo']
+            if 'related_photo_pk' in self.context:
+                related_photo_pk = self.context['related_photo_pk']
                 try:
-                    pr = photo.relations_2.get(photo_1=related_photo)
+                    pr = photo.relations_2.get(photo_1__id=related_photo_pk)
                     result['relation'] = pr.desc_2
                 except models.photo_relation.DoesNotExist:
                     pass
 
                 try:
-                    pr = photo.relations_1.get(photo_2=related_photo)
+                    pr = photo.relations_1.get(photo_2__id=related_photo_pk)
                     result['relation'] = pr.desc_1
                 except models.photo_relation.DoesNotExist:
                     pass
@@ -615,7 +672,8 @@ class PhotoSerializer(ModelSerializer):
         return attrs
 
     def create(self, validated_attrs):
-        assert 'photo' in self.initial_data
+        if 'photo' not in self.initial_data:
+            raise exceptions.ValidationError('Photo file not supplied')
 
         file_obj = self.initial_data['photo']
 
@@ -824,3 +882,21 @@ class PhotoSerializer(ModelSerializer):
             'action': {'required': False},
         }
         list_serializer_class = PhotoListSerializer
+        fields = [
+            'id', 'orig_url', 'title',
+            'albums', 'albums_pk', 'add_albums_pk', 'rem_albums_pk',
+            'categorys',
+            'categorys_pk', 'add_categorys_pk', 'rem_categorys_pk',
+            'place', 'place_pk',
+            'persons', 'persons_pk',
+            'add_persons_pk', 'rem_persons_pk',
+            'photographer', 'photographer_pk',
+            'feedbacks', 'thumbs', 'videos',
+            'name', 'path', 'size', 'title', 'view', 'rating',
+            'description', 'utc_offset', 'datetime', 'camera_make',
+            'camera_model', 'flash_used', 'focal_length', 'exposure',
+            'compression', 'aperture', 'level', 'iso_equiv', 'metering_mode',
+            'focus_dist', 'ccd_width', 'comment', 'action', 'timestamp',
+            'photographer',
+            'relations'
+        ]
