@@ -2,6 +2,9 @@ Release 2.0.7 (UNRELEASED)
 ==========================
 
   * Fix error displaying photo list for places.
+  * Support Django 1.11 and Python 3.6.
+  * Rewrite tests.
+  * Some minor bug fixes.
 
 Release 2.0.7 (01 Apr 2017)
 ===========================
