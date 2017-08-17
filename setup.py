@@ -46,10 +46,7 @@ for dirpath, dirnames, filenames in os.walk("spud"):
 
 setup(
     name="spud",
-    use_scm_version={
-        'write_to': "spud/version.py",
-    },
-    setup_requires=['setuptools_scm'],
+    version='2.0.8',
     url='https://github.com/brianmay/spud',
     author='Brian May',
     author_email='brian@microcomaustralia.com.au',
