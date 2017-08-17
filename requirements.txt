@@ -8,3 +8,4 @@ cssmin==0.2.0
 slimit==0.8.1
 django-cors-headers==2.1.0
 django-environ==0.4.3
+psycopg2==2.7.3
