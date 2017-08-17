@@ -88,7 +88,7 @@ STATIC_ROOT = "/var/lib/spud/static"
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-STATIC_URL = '/spud/static/'
+STATIC_URL = '/photos/static/'
 
 # A tuple of middleware classes to use.
 MIDDLEWARE_CLASSES = (
