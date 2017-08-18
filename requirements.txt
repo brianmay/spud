@@ -1,11 +1,11 @@
-setuptools-scm==1.15.6
 django-pipeline==1.6.13
 djangorestframework==3.6.3
-python-dateutil==2.6.0
-Pillow==4.1.1
+python-dateutil==2.6.1
+Pillow==4.2.1
 six==1.10.0
 pytz==2017.2
 cssmin==0.2.0
 slimit==0.8.1
 django-cors-headers==2.1.0
 django-environ==0.4.3
+psycopg2==2.7.3

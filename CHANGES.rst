@@ -9,6 +9,16 @@ adheres to `Semantic Versioning`_.
 .. _`Semantic Versioning`: http://semver.org/
 
 
+2.0.9 - 2017-08-18
+------------------
+
+Changed
+~~~~~~~
+* Update 3rd party requirements.
+* Use bumpversion for version bump instead of setuptools_scm.
+* Minor fixes to sample config files.
+
+
 2.0.8 - 2017-06-19
 ------------------
 
