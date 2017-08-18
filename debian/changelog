@@ -1,3 +1,10 @@
+spud (2.0.9-1) UNRELEASED; urgency=medium
+
+  * New upstream version.
+  * New packaging. Include all dependancies.
+
+ -- Brian May <bam@debian.org>  Fri, 18 Aug 2017 14:09:40 +1000
+
 spud (2.0.8-1) unstable; urgency=medium
 
   * New upstream version.

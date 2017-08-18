@@ -3,18 +3,15 @@
 
 PREFIX = debian/spud
 
+export HOME=${CURDIR}/tmp
 export PYBUILD_NAME=spud
 
 %:
-	dh $@ --with python3 --buildsystem=pybuild
+	dh $@ --with python-virtualenv
 
-override_dh_auto_test:
-	PYTHONPATH=. \
-	    dh_auto_test -- --system=custom --test-args="{interpreter} -m pytest"
-
-override_dh_auto_build:
+override_dh_virtualenv:
 	tsc spud/static/js/*.ts
-	dh_auto_build
+	dh_virtualenv --python python3
 
 .PHONY: override_dh_clean
 override_dh_clean:

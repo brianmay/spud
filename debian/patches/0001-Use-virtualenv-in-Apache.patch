@@ -1,0 +1,18 @@
+From: Brian May <brian@linuxpenguins.xyz>
+Date: Fri, 18 Aug 2017 14:08:45 +1000
+Subject: Use virtualenv in Apache
+
+---
+ conf/spud.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/conf/spud.conf b/conf/spud.conf
+index 3eb8772..e7f46c0 100644
+--- a/conf/spud.conf
++++ b/conf/spud.conf
+@@ -1,4 +1,4 @@
+-WSGIDaemonProcess       spud threads=25
++WSGIDaemonProcess       spud threads=25 python-home=/opt/venvs/spud
+ WSGIProcessGroup        spud
+ WSGIScriptReloading     Off
+ WSGIPassAuthorization   On

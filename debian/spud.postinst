@@ -33,6 +33,8 @@ END
 }
 
 if [ "$1" = "configure" ]; then
+    PATH=/opt/venvs/spud/bin:$PATH
+
     for i in /var/lib/spud
     do
         # only do something when no setting exists
@@ -67,7 +69,7 @@ if [ "$1" = "configure" ]; then
 
         # save output of migrate to temp file
         spud=$(command -v spud)
-        python3 "$spud" migrate --list > "$TMPFILE"
+        python3 "$spud" showmigrations > "$TMPFILE"
 
         # guess what we need to do
         if grep "(.)" "$TMPFILE" > /dev/null; then

@@ -1,3 +1,16 @@
 postinst-uses-db-input
 apache2-reverse-dependency-calls-invoke-rc.d
 image-file-in-usr-lib
+unconditional-use-of-dpkg-statoverride
+
+arch-independent-package-contains-binary-or-object
+dir-or-file-in-opt
+duplicate-font-file
+embedded-javascript-library
+embedded-library
+executable-not-elf-or-script
+extra-license-file
+package-installs-python-pycache-dir
+script-not-executable
+unstripped-binary-or-object
+wrong-path-for-interpreter
