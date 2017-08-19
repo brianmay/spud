@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-spud collectstatic --noinput
-spud manage.py migrate --noinput
+python3 manage.py collectstatic --noinput
+python3 manage.py migrate --noinput
 
 # Start Gunicorn processes
 echo Starting Gunicorn.
