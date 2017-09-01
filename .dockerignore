@@ -8,5 +8,6 @@
 dist/
 spud.egg-info/
 spud/static/js/*.js
+local/
 tmp/
 spud.db
