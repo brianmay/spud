@@ -8,4 +8,4 @@
 /spud.egg-info/
 /spud/static/js/*.js
 /tmp/
-spud.db
+/spud.db

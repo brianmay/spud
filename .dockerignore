@@ -1,0 +1,12 @@
+**/*.bak
+**/*.pyc
+.coverage
+.cache/
+.eggs/
+.tox/
+.git/
+dist/
+spud.egg-info/
+spud/static/js/*.js
+tmp/
+spud.db
