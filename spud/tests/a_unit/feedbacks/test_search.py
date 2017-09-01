@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from mock import call, MagicMock
 import pytest
 
-from spud import models, exceptions
+from spud import models
 from ..utils import MyQ
 
 
