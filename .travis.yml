@@ -23,7 +23,7 @@ install:
 # Install django master or version
   - bash -c "if [[ \"$DJANGO_VERSION\" == 'master' ]]; then pip install 'https://github.com/django/django/archive/master.tar.gz'; else pip install Django==$DJANGO_VERSION; fi; "
 # Install other dependancies
-  - pip install -rrequirements-tests.txt
+  - pip install -rrequirements/tests.txt
 
 script:
   - python ./setup.py --version

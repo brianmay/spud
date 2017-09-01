@@ -11,8 +11,8 @@ RUN mkdir -p /opt/spud /etc/spud
 WORKDIR /opt/spud
 
 # Install our requirements.
-ADD requirements.txt requirements-docker.txt /opt/spud/
-RUN pip install -r requirements-docker.txt
+ADD requirements/*.txt /opt/spud/
+RUN pip install -r requirements/docker.txt
 
 # Copy all our files into the image.
 COPY . /opt/spud/
