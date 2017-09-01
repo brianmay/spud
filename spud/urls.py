@@ -16,7 +16,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import re
 from rest_framework import routers
 
 from django.conf.urls import url, include
@@ -91,18 +90,4 @@ if settings.DEBUG:
         urlpatterns += [
             url(r'^errors.html$', django.views.static.serve,
                 {'document_root': ".", 'path': "errors.html"}),
-        ]
-
-elif settings.DEBUG_SERVE_STATIC:
-
-    urlpatterns += [
-        url(r'^%s(?P<path>.*)$' % re.escape(settings.STATIC_URL.lstrip('/')),
-            django.views.static.serve,
-            {'document_root': settings.STATIC_ROOT}),
-    ]
-
-    if settings.IMAGE_PATH is not None:
-        urlpatterns += [
-            url(r'^images/(?P<path>.*)$', django.views.static.serve,
-                {'document_root': settings.IMAGE_PATH}),
         ]

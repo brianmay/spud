@@ -38,11 +38,6 @@ from socket import getfqdn
 # settings.py).
 DEBUG = False
 
-# For debugging purposes, ensure that static files are served when DEBUG=False,
-# used for testing django-pipeline. Should never be set to True on production
-# box or for normal debugging.
-DEBUG_SERVE_STATIC = False
-
 # A list containing the settings for all template engines to be used with
 # Django. Each item of the list is a dictionary containing the options for an
 # individual engine.
