@@ -5,10 +5,13 @@ include *.py
 include *.json
 include *.sh
 include MANIFEST.in
+include Dockerfile
 recursive-include conf *.conf
 recursive-include conf *.py
 recursive-include spud *.ts
+recursive-include spud *.feature
 recursive-include contrib *.txt
 recursive-include bin *
 recursive-include experimental *
+recursive-include requirements *.txt
 exclude spud/static/js/*.js
