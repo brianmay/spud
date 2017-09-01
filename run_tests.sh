@@ -47,15 +47,6 @@ then
 fi
 
 echo ""
-echo "TESTS - Python 2"
-echo "############################"
-python2 -m pytest
-if [ ! $? -eq 0 ]
-then
-    RETURN=1
-fi
-
-echo ""
 echo "TESTS - Python 3"
 echo "############################"
 python3 -m pytest
