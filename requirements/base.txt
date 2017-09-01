@@ -1,5 +1,5 @@
 django-pipeline==1.6.13
-djangorestframework==3.6.3
+djangorestframework==3.6.4
 python-dateutil==2.6.1
 Pillow==4.2.1
 six==1.10.0
