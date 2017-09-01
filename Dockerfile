@@ -26,7 +26,8 @@ COPY . /opt/spud/
 RUN find -type d -print0 | xargs -0 chmod 755 \
  && find -type f -print0 | xargs -0 chmod 644 \
  && find scripts -type f -name "*.sh" -print0 | xargs -0 chmod 755 \
- && chmod 755 *.py
+ && chmod 755 *.py \
+ && chmod 644 conftest.py
 
 # Specify the command to run when the image is run.
 EXPOSE 8000
