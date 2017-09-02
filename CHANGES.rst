@@ -9,6 +9,18 @@ adheres to `Semantic Versioning`_.
 .. _`Semantic Versioning`: http://semver.org/
 
 
+2.1.0 - 2017-09-02
+------------------
+
+Added
+~~~~~
+* Docker support.
+
+Removed
+~~~~~~~
+* Removed support for Python < 3.5 and Django < 1.11.
+
+
 2.0.9 - 2017-08-18
 ------------------
 
