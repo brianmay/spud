@@ -46,7 +46,7 @@ for dirpath, dirnames, filenames in os.walk("spud"):
 
 setup(
     name="spud",
-    version='2.0.9',
+    version='2.1.0',
     url='https://github.com/brianmay/spud',
     author='Brian May',
     author_email='brian@microcomaustralia.com.au',
