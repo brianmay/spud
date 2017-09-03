@@ -31,5 +31,5 @@ RUN find -type d -print0 | xargs -0 chmod 755 \
 
 # Specify the command to run when the image is run.
 EXPOSE 8000
-VOLUME '/etc/spud', '/var/lib/spud'
+VOLUME '/etc/spud' '/var/lib/spud'
 CMD /opt/spud/scripts/docker.sh
