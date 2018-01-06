@@ -74,7 +74,7 @@ setup(
             '*.jpg', '*.png', '*.gif', '*.map', '*.txt'],
     },
     scripts=[
-        'start.sh',
+        'scripts/start.sh',
         'bin/spud',
         'bin/spud_set_secret_key',
         'bin/spud_migrate_south',
