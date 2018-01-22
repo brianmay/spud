@@ -1,4 +1,4 @@
-django-pipeline==1.6.13
+django-pipeline==1.6.14
 djangorestframework==3.7.7
 python-dateutil==2.6.1
 Pillow==4.3.0
