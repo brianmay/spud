@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update \
  && apt-get install -y \
     sudo \
+    libimage-exiftool-perl, libav-tools, exiftran \
  && rm -rf /var/lib/apt/lists/*
 
 # Make application directory
