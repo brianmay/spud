@@ -5,25 +5,12 @@ python:
  - 3.6
 
 env:
- - DJANGO_VERSION=1.11.3 DATABASE_URL=postgres://postgres@/spud
- - DJANGO_VERSION=master DATABASE_URL=postgres://postgres@/spud
-
- - DJANGO_VERSION=1.11.3 DATABASE_URL=sqlite://
- - DJANGO_VERSION=master DATABASE_URL=sqlite://
+ - DATABASE_URL=postgres://postgres@/spud
+ - DATABASE_URL=sqlite://
 
 install:
-# Install django master or version
-  - bash -c "if [[ \"$DJANGO_VERSION\" == 'master' ]]; then pip install 'https://github.com/django/django/archive/master.tar.gz'; else pip install Django==$DJANGO_VERSION; fi; "
-# Install other dependancies
-  - pip install -rrequirements/tests.txt
+ - pip install -rrequirements/tests.txt
 
 script:
-  - python ./setup.py --version
-  - py.test --cov=spud
-
-
-matrix:
-  fast_finish: true
-  allow_failures:
-      - env: DJANGO_VERSION=master DATABASE_URL=postgres://postgres@/spud
-      - env: DJANGO_VERSION=master DATABASE_URL=sqlite://
+ - python ./setup.py --version
+ - py.test --cov=spud
