@@ -4,6 +4,7 @@
 /.cache/
 /.eggs/
 /.tox/
+/.pytest_cache/
 /dist/
 /spud.egg-info/
 /spud/static/js/*.js
