@@ -49,7 +49,7 @@ urlpatterns = [
 if getattr(settings, 'API_ROOT_URL', None) is None:
     urlpatterns += [
 
-        url(r'^admin/', admin.site.urls),
+        url(r'^admin/', include(admin.site.urls)),
 
         url(r'^api/session/$', views.SessionDetail.as_view(),
             name="session-detail"),
