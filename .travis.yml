@@ -23,7 +23,6 @@ jobs:
       - docker build
             --file "Dockerfile"
             --tag "brianmay/spud:latest"
-            --build-arg "SLURM_VER=16.05"
             --build-arg "BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`"
             --build-arg "VCS_REF=$TRAVIS_COMMIT"
             .
