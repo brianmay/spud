@@ -6,7 +6,6 @@ python:
 
 env:
  - DATABASE_URL=postgres://postgres@/spud
- - DATABASE_URL=sqlite://
 
 install:
  - pip install -rrequirements/tests.txt
