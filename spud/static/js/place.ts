@@ -37,7 +37,7 @@ window._place_created.add_listener(null, () => {
 })
 
 class Place extends SpudObject {
-    static type : string = 'place'
+    static type : string = 'places'
     address : string
     address2 : string
     city : string
