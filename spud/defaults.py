@@ -86,7 +86,7 @@ STATIC_ROOT = "/var/lib/spud/static"
 STATIC_URL = '/photos/static/'
 
 # A tuple of middleware classes to use.
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -94,7 +94,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-)
+]
 
 # A string representing the full Python import path to your root URLconf. For
 # example: "mydjangoapps.urls". Can be overridden on a per-request basis by

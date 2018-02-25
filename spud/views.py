@@ -106,7 +106,7 @@ def _get_session(request):
         'perms': perms
     }
 
-    if user.is_authenticated():
+    if user.is_authenticated:
         token, __ = Token.objects.get_or_create(user=user)
         data['token'] = token.key
 

@@ -16,7 +16,7 @@
 # along with Karaage  If not, see <http://www.gnu.org/licenses/>.
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 def common(request):
