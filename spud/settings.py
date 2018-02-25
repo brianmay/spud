@@ -16,6 +16,13 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import environ
+
 from .defaults import *  # NOQA
 
 exec(open("/etc/spud/settings.py", "rb").read())
+
+# SETTINGS FROM DOCKER
+env = environ.Env()
+BUILD_DATE = env('BUILD_DATE', default=None)
+VCS_REF = env('VCS_REF', default=None)

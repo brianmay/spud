@@ -30,6 +30,12 @@ RUN find -type d -print0 | xargs -0 chmod 755 \
  && chmod 755 *.py \
  && chmod 644 conftest.py
 
+# Setup access to version information
+ARG BUILD_DATE=
+ARG VCS_REF=
+ENV BUILD_DATE=${BUILD_DATE}
+ENV VCS_REF=${VCS_REF}
+
 # Specify the command to run when the image is run.
 EXPOSE 8000
 VOLUME '/etc/spud' '/var/lib/spud'

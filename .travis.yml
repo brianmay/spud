@@ -14,3 +14,19 @@ install:
 script:
  - python ./setup.py --version
  - py.test --cov=spud
+
+jobs:
+  include:
+    - stage: deploy
+      if: branch = master and type = push
+      install:
+      script:
+      - docker build
+            --file "Dockerfile"
+            --tag "brianmay/spud:latest"
+            --build-arg "SLURM_VER=16.05"
+            --build-arg "BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`"
+            --build-arg "VCS_REF=$TRAVIS_COMMIT"
+            .
+      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - docker push "brianmay/spud:latest"

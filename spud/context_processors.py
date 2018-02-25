@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Karaage  If not, see <http://www.gnu.org/licenses/>.
 
+from spud import __version__
 from django.conf import settings
 from django.urls import reverse
 
@@ -25,6 +26,9 @@ def common(request):
 
     ctx = {
         'API_ROOT_URL': api_root_url,
+        'version': __version__,
+        'BUILD_DATE': settings.BUILD_DATE,
+        'VCS_REF': settings.VCS_REF,
     }
 
     return ctx
