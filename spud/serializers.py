@@ -678,7 +678,7 @@ class PhotoSerializer(ModelSerializer):
         file_obj = self.initial_data['photo']
 
         validated_attrs['size'] = file_obj.size
-        validated_attrs['action'] = None
+        validated_attrs['action'] = 'R'
 
         path = validated_attrs['path']
         name = validated_attrs['name']
@@ -710,24 +710,7 @@ class PhotoSerializer(ModelSerializer):
         instance = models.photo.objects.create(**validated_attrs)
         self._process_m2m(instance, m2m_attrs)
 
-        print("generating thumbnails  %s/%s" % (path, name))
-        try:
-            instance.generate_thumbnails(overwrite=False)
-        except Exception as e:
-            print("... got exception %s", e)
-            instance.action = 'R'
-            instance.save()
-
-        print("generating thumbnails  %s/%s" % (path, name))
-        try:
-            instance.generate_videos(overwrite=False)
-        except Exception as e:
-            print("... got exception %s", e)
-            instance.action = 'R'
-            instance.save()
-
         print("imported  %s/%s as %d" % (path, name, instance.pk))
-
         return instance
 
     def update(self, instance, validated_attrs):
