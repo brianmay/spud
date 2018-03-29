@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 from spud import models
 
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
         help = 'Process pending actions in spud'
 
-        def handle_noargs(self, **options):
+        def handle(self, **options):
 
             for p in models.photo.objects.filter(
                     action__isnull=False).order_by("pk"):
