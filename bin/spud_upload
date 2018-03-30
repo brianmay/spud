@@ -229,8 +229,6 @@ def import_photo(
         photographer, place, albums, categorys,
         src_timezone, dst_timezone, offset, dry_run):
 
-    print()
-
     # check source file
     if not os.path.exists(src_filename):
         raise RuntimeError("source photo doesn't exist at %s" % (src_filename))
@@ -324,7 +322,7 @@ def import_photo(
         else:
             raise
     else:
-        print("imported  %s as %d"
+        print("imported %s as %d"
               % (src_filename, photo['id']))
 
     return photo
@@ -374,7 +372,6 @@ def main():
     password = config.get("spud", "password")
     url = config.get("spud", "url")
 
-    session = Session()
     spud = Spud(
         base_url=url,
         username=username,
@@ -382,56 +379,29 @@ def main():
     )
 
     try:
-        print("")
-        print("login")
-        print("-----")
         spud.login()
-
-        print("")
-        print("get_session")
-        print("-----------")
-        session = spud.get_session()
-        print(session)
-
-        print("")
-        print("get_albums")
-        print("----------")
+        # session = spud.get_session()
         albums = spud.get_albums(args.album)
-        print(albums)
-
-        print("")
-        print("get_categorys")
-        print("-------------")
         categorys = spud.get_categorys(args.category)
-        print(categorys)
 
         place = None
         if args.place:
-            print("")
-            print("get_place")
-            print("---------")
             place = spud.get_place(args.place)
-            print(place)
 
-        # print("")
-        # print("get_persons")
-        # print("------------")
         # persons = spud.get_persons(args.person)
-        # print(persons)
 
         photographer = None
         if args.photographer:
-            print("")
-            print("get_photographer")
-            print("------------")
             photographer = spud.get_person(args.photographer)
-            print(photographer)
 
         src_timezone = None
         dst_timezone = None
         offset = 0
 
         for filename in args.files:
+            print()
+            print(filename)
+            print("-"*20)
             albums_copy = albums
 
             if args.album_prefix:
@@ -439,12 +409,7 @@ def main():
                 dirname = os.path.dirname(filename)
                 dirname = os.path.basename(dirname)
 
-                print("")
-                print("get_album")
-                print("---------")
-                print(dirname)
                 album_id = spud.get_album(args.album_prefix, dirname)
-                print("%s/%s --> %s" % (args.album_prefix, dirname, album_id))
 
                 albums_copy = list(albums)
                 albums_copy.append(album_id)
@@ -454,16 +419,7 @@ def main():
                 photographer, place, albums_copy, categorys,
                 src_timezone, dst_timezone, offset, args.dry_run)
 
-        print("")
-        print("logout")
-        print("------")
         spud.logout()
-
-        print("")
-        print("get_session")
-        print("-----------")
-        session = spud.get_session()
-        print(session)
 
     except HTTPError as e:
         print("HTTP error:", e)
