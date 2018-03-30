@@ -621,7 +621,7 @@ class photo(BaseModel):
     level = models.IntegerField()
     iso_equiv = models.CharField(max_length=8, null=True, blank=True)
     metering_mode = models.CharField(max_length=32, null=True, blank=True)
-    focus_dist = models.CharField(max_length=16, null=True, blank=True)
+    focus_dist = models.CharField(max_length=20, null=True, blank=True)
     ccd_width = models.CharField(max_length=16, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     action = models.CharField(
