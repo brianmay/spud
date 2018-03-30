@@ -22,6 +22,7 @@ import os
 import shutil
 import datetime
 
+from django.db import transaction
 from django.db.models import Max
 from django.conf import settings
 from django.contrib.auth.models import User, Group
@@ -697,21 +698,24 @@ class PhotoSerializer(ModelSerializer):
         finally:
             os.umask(umask)
 
-        m = media.get_media(dst)
+        try:
+            m = media.get_media(dst)
+            exif = m.get_normalized_exif()
+            assert 'datetime' not in exif
+            exif.update(validated_attrs)
+            validated_attrs = exif
 
-        # (validated_attrs['width'], validated_attrs['height']) = m.get_size()
+            with transaction.atomic():
+                m2m_attrs = self._pop_m2m_attrs(validated_attrs)
+                instance = models.photo.objects.create(**validated_attrs)
+                self._process_m2m(instance, m2m_attrs)
 
-        exif = m.get_normalized_exif()
-        assert 'datetime' not in exif
-        exif.update(validated_attrs)
-        validated_attrs = exif
-
-        m2m_attrs = self._pop_m2m_attrs(validated_attrs)
-        instance = models.photo.objects.create(**validated_attrs)
-        self._process_m2m(instance, m2m_attrs)
-
-        print("imported  %s/%s as %d" % (path, name, instance.pk))
-        return instance
+            print("imported  %s/%s as %d" % (path, name, instance.pk))
+            return instance
+        except Exception:
+            print("deleting failed import %s" % dst)
+            os.remove(dst)
+            raise
 
     def update(self, instance, validated_attrs):
         m2m_attrs = self._pop_m2m_attrs(validated_attrs)
