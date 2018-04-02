@@ -7,6 +7,7 @@ from spud import models, serializers
 @pytest.mark.django_db(transaction=True)
 def test_serializer_encode(persons):
     child = models.person.objects.create(
+        description='Fake description.',
         cover_photo=None,
         mother=persons['Parent'],
         first_name='Child',
@@ -22,6 +23,7 @@ def test_serializer_encode(persons):
                 'cover_photo_pk': None,
             },
         ],
+        'description': 'Fake description.',
         'cover_photo': None,
         'cover_photo_pk': None,
         'id': child.pk,
@@ -87,8 +89,8 @@ def test_serializer_encode(persons):
 @pytest.mark.django_db(transaction=True)
 def test_serializer_decode(persons):
     data = {
+        'description': 'Fake description.',
         'cover_photo_pk': None,
-        'description': 'description',
         'id': 10,
         'mother_pk': persons['Parent'].pk,
         'first_name': 'Child'
@@ -96,6 +98,7 @@ def test_serializer_decode(persons):
     serializer = serializers.PersonSerializer(data=data)
 
     expected = {
+        'description': 'Fake description.',
         'cover_photo': None,
         'mother': persons['Parent'],
         'first_name': 'Child'

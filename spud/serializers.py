@@ -263,7 +263,7 @@ class PlaceSerializer(ModelSerializer):
         fields = [
             'id', 'cover_photo', 'cover_photo_pk', 'ascendants', 'title',
             'address', 'address2', 'city', 'state', 'postcode', 'country',
-            'url', 'urldesc', 'notes', 'parent', 'cover_photo'
+            'url', 'urldesc', 'notes', 'parent', 'cover_photo', 'description',
         ]
 
 
@@ -371,7 +371,7 @@ class PersonSerializer(ModelSerializer):
         model = models.person
         list_serializer_class = ListSerializer
         fields = [
-            'id', 'title',
+            'id', 'title', 'description',
             'cover_photo', 'cover_photo_pk',
             'home', 'home_pk',
             'work', 'work_pk',

@@ -333,6 +333,7 @@ class place(HierarchyModel):
     parent = models.ForeignKey(
         'self', related_name='children', null=True, blank=True,
         on_delete=models.PROTECT)
+    description = models.TextField(null=True, blank=True)
     title = models.CharField(max_length=192, db_index=True)
     address = models.CharField(max_length=192, null=True,  blank=True)
     address2 = models.CharField(max_length=192, null=True, blank=True)
@@ -391,6 +392,7 @@ class place(HierarchyModel):
 
 @python_2_unicode_compatible
 class person(HierarchyModel):
+    description = models.TextField(null=True, blank=True)
     first_name = models.CharField(max_length=96, db_index=True)
     last_name = models.CharField(
         max_length=96, null=True, blank=True, db_index=True)
