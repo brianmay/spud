@@ -13,18 +13,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
+import datetime
+
+import six
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.http import Http404
 from django.http.request import QueryDict
 from django.utils.dateparse import parse_datetime
-
-import datetime
-import six
 from rest_framework import exceptions as drf_exceptions
 
 from . import exceptions

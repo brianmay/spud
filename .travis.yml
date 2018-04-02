@@ -11,6 +11,8 @@ install:
  - pip install -rrequirements/tests.txt
 
 script:
+ - isort -rc --check --diff karaage
+ - flake8
  - python ./setup.py --version
  - py.test --cov=spud
 

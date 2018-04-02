@@ -13,27 +13,24 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
+import datetime
+import filecmp
+import os
+import os.path
+import shutil
+
+import dateutil.tz
+import pytz
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django.utils.encoding import iri_to_uri
+from django.utils.encoding import iri_to_uri, python_2_unicode_compatible
 from django.utils.http import urlquote
-from django.utils.encoding import python_2_unicode_compatible
 
-import dateutil.tz
-import os
-import os.path
-import datetime
-import pytz
-import shutil
-import filecmp
+from . import managers, media
 
-from . import media
-from . import managers
 
 SEX_CHOICES = (
     ('1', 'male'),

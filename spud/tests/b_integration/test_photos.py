@@ -1,9 +1,11 @@
-import pytest
-from pytest_bdd import scenarios, when, then, parsers
-import six
 import os
 
+import pytest
+import six
+from pytest_bdd import parsers, scenarios, then, when
+
 from spud import models
+
 
 scenarios('photos.feature')
 

@@ -1,6 +1,6 @@
-import requests
 import pytest
-from pytest_bdd import given, when, then, parsers
+import requests
+from pytest_bdd import given, parsers, then, when
 
 
 def pytest_bdd_apply_tag(tag, function):

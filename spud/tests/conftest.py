@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from django.contrib.auth.models import User
 import pytest
+from django.contrib.auth.models import User
 
 from spud import models
 

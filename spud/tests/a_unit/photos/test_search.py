@@ -1,11 +1,11 @@
 """ Run tests on photo search filters. """
+import pytest
 from django.contrib.auth import models as auth_models
 from django.db.models import QuerySet
+from mock import MagicMock, call
 
-from mock import call, MagicMock
-import pytest
+from spud import exceptions, models
 
-from spud import models, exceptions
 from ..utils import MyQ
 
 

@@ -16,10 +16,12 @@
 # along with Karaage  If not, see <http://www.gnu.org/licenses/>.
 import os
 import os.path
+
 import environ
 
 from spud.defaults import *  # NOQA
 from spud.defaults import TEMPLATES
+
 
 env = environ.Env()
 

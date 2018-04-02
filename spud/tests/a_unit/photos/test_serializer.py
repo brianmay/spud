@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """ Run tests on photo serializers. """
 import datetime
-from mock import ANY
 
 import pytest
+from mock import ANY
 
 from spud import models, serializers
 

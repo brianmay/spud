@@ -13,25 +13,23 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
-import pytz
+import datetime
 import os
 import shutil
-import datetime
 
+import pytz
+from django.conf import settings
+from django.contrib.auth.models import Group, User
 from django.db import transaction
 from django.db.models import Max
-from django.conf import settings
-from django.contrib.auth.models import User, Group
-
-from rest_framework import serializers, exceptions
+from rest_framework import exceptions
 from rest_framework import fields as f
+from rest_framework import serializers
 from rest_framework.utils import html
 
-from . import models, media
+from . import media, models
 
 
 class ListSerializer(serializers.ListSerializer):

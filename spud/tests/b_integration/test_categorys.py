@@ -1,8 +1,9 @@
 import pytest
-from pytest_bdd import scenarios, when, then, parsers
 import six
+from pytest_bdd import parsers, scenarios, then, when
 
 from spud import models
+
 
 scenarios('categorys.feature')
 

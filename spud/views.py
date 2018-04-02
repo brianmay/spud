@@ -13,28 +13,24 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import json
 
-from rest_framework import viewsets, status, exceptions as drf_exceptions
-from rest_framework.views import APIView
+import django.contrib.auth
+from django.contrib.auth.models import Group, User
+from django.http import Http404, HttpResponseRedirect
+from django.http.request import QueryDict
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework import exceptions as drf_exceptions
+from rest_framework import status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
 
-import django.contrib.auth
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-from django.http import Http404
-from django.http.request import QueryDict
-from django.http import HttpResponseRedirect
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.contrib.auth.models import User, Group
-
-from . import models
-from . import serializers
+from . import models, serializers
 
 
 def _decode_int(title, string):

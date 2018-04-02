@@ -1,11 +1,11 @@
 """ Run tests on feedback search filters. """
+import pytest
 from django.contrib.auth import models as auth_models
 from django.db.models import QuerySet
-
-from mock import call, MagicMock
-import pytest
+from mock import MagicMock, call
 
 from spud import models
+
 from ..utils import MyQ
 
 

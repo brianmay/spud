@@ -13,17 +13,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
+from __future__ import absolute_import, print_function, unicode_literals
+
+import datetime
+import os
+import subprocess
+import tempfile
 
 import six
-import tempfile
-import subprocess
-import os
 from PIL import Image
+
 import spud.exif
-import datetime
 
 
 class UnknownMediaType(Exception):
