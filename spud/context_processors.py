@@ -16,17 +16,13 @@
 # along with Karaage  If not, see <http://www.gnu.org/licenses/>.
 
 from django.conf import settings
-from django.urls import reverse
 
 from spud import __version__
 
 
 def common(request):
     """ Set context with common variables. """
-    api_root_url = getattr(settings, 'API_ROOT_URL', reverse('root'))
-
     ctx = {
-        'API_ROOT_URL': api_root_url,
         'version': __version__,
         'BUILD_DATE': settings.BUILD_DATE,
         'VCS_REF': settings.VCS_REF,

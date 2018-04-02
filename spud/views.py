@@ -15,14 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, unicode_literals
 
-import json
-
 import django.contrib.auth
 from django.contrib.auth.models import Group, User
 from django.http import Http404, HttpResponseRedirect
 from django.http.request import QueryDict
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.shortcuts import get_object_or_404
 from rest_framework import exceptions as drf_exceptions
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
@@ -371,17 +368,6 @@ def photo_thumb_redirect(request, object_id, size):
     return HttpResponseRedirect(url)
 
 
-@ensure_csrf_cookie
-def root(request):
-    js_session = json.dumps(_get_session(request))
-    js_params = json.dumps(request.GET)
-    return render(request, 'spud/static.html', {
-        'title': 'Root',
-        'onload': "window.do_root(%s, %s)"
-                  % (js_session, js_params),
-    })
-
-
 _types = {
     'albums',
     'categorys',
@@ -395,30 +381,3 @@ _types = {
 def _assert_type(obj_type):
     if obj_type not in _types:
         raise Http404("Unknown type '%s'" % obj_type)
-
-
-@ensure_csrf_cookie
-def obj_list(request, obj_type):
-    _assert_type(obj_type)
-    obj_type = json.dumps(obj_type)
-    js_session = json.dumps(_get_session(request))
-    js_params = json.dumps(request.GET)
-    return render(request, 'spud/static.html', {
-        'title': 'Object list',
-        'onload': "window.do_list(%s, %s, %s)"
-                  % (obj_type, js_session, js_params),
-    })
-
-
-@ensure_csrf_cookie
-def obj_detail(request, obj_type, obj_id):
-    _assert_type(obj_type)
-    obj_type = json.dumps(obj_type)
-    obj_id = int(obj_id)
-    js_session = json.dumps(_get_session(request))
-    js_params = json.dumps(request.GET)
-    return render(request, 'spud/static.html', {
-        'title': 'Object detail',
-        'onload': "window.do_detail(%s, %d, %s, %s)"
-                  % (obj_type, obj_id, js_session, js_params),
-    })

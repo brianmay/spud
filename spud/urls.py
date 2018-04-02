@@ -38,55 +38,32 @@ router.register(r'relations', views.PhotoRelationViewSet)
 router.register(r'photos', views.PhotoViewSet)
 
 urlpatterns = [
+    url(r'^admin/', admin.site.urls),
 
-    # account management
-    url(r'^$',
-        views.root, name='root'),
+    url(r'^api/session/$', views.SessionDetail.as_view(),
+        name="session-detail"),
 
+    url(r'^api/session/login/$', views.Login.as_view(),
+        name="session-login"),
+
+    url(r'^api/session/logout/$', views.Logout.as_view(),
+        name="session-logout"),
+
+    url(r'^api/', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls',
+        namespace='rest_framework')),
 ]
-
-if getattr(settings, 'API_ROOT_URL', None) is None:
-    urlpatterns += [
-
-        url(r'^admin/', admin.site.urls),
-
-        url(r'^api/session/$', views.SessionDetail.as_view(),
-            name="session-detail"),
-
-        url(r'^api/session/login/$', views.Login.as_view(),
-            name="session-login"),
-
-        url(r'^api/session/logout/$', views.Logout.as_view(),
-            name="session-logout"),
-
-        url(r'^api/', include(router.urls)),
-        url(r'^api-auth/', include('rest_framework.urls',
-            namespace='rest_framework')),
-    ]
 
 
 urlpatterns += [
-
     url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$',
         views.photo_thumb_redirect, name='photo_thumb_redirect'),
-
-    url(r'^(?P<obj_type>\w+)/$',
-        views.obj_list, name='obj_list'),
-
-    url(r'^(?P<obj_type>\w+)/(?P<obj_id>\d+)/$',
-        views.obj_detail, name='obj_detail'),
 ]
 
 
 if settings.DEBUG:
-
     if settings.IMAGE_PATH is not None:
         urlpatterns += [
             url(r'^images/(?P<path>.*)$', django.views.static.serve,
                 {'document_root': settings.IMAGE_PATH}),
-        ]
-    if settings.DEBUG:
-        urlpatterns += [
-            url(r'^errors.html$', django.views.static.serve,
-                {'document_root': ".", 'path': "errors.html"}),
         ]
