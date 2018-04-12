@@ -13,6 +13,7 @@ install:
 script:
  - isort -rc --check --diff spud
  - flake8
+ - python ./manage.py migrate --settings=spud.tests.settings
  - python ./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
  - python ./setup.py --version
  - py.test --cov=spud
