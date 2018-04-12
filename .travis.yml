@@ -11,7 +11,7 @@ install:
  - pip install -rrequirements/tests.txt
 
 script:
- - isort -rc --check --diff karaage
+ - isort -rc --check --diff spud
  - flake8
  - python ./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
  - python ./setup.py --version
