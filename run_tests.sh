@@ -31,7 +31,7 @@ fi
 echo ""
 echo "STATIC FILES"
 echo "############################"
-./manage.py makemigrations --check --dry-run
+./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
 if [ ! $? -eq 0 ]
 then
     RETURN=1
