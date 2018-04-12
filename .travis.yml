@@ -13,6 +13,7 @@ install:
 script:
  - isort -rc --check --diff karaage
  - flake8
+ - python ./manage.py makemigrations --check --dry-run
  - python ./setup.py --version
  - py.test --cov=spud
 

@@ -31,6 +31,11 @@ fi
 echo ""
 echo "STATIC FILES"
 echo "############################"
+./manage.py makemigrations --check --dry-run
+if [ ! $? -eq 0 ]
+then
+    RETURN=1
+fi
 ./manage.py collectstatic --settings=spud.tests.settings -v 2 --noinput
 if [ ! $? -eq 0 ]
 then
