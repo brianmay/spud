@@ -10,11 +10,14 @@ env:
 install:
  - pip install -rrequirements/tests.txt
 
+before_script:
+  - psql -c 'create database spud;' -U postgres
+
 script:
  - isort -rc --check --diff spud
  - flake8
- - python ./manage.py migrate --settings=spud.tests.settings
  - python ./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
+ - python ./manage.py migrate --settings=spud.tests.settings
  - python ./setup.py --version
  - py.test --cov=spud
 

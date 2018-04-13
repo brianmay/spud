@@ -31,8 +31,12 @@ fi
 echo ""
 echo "MIGRATIONS"
 echo "############################"
-./manage.py migrate --settings=spud.tests.settings
 ./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
+if [ ! $? -eq 0 ]
+then
+    RETURN=1
+fi
+./manage.py migrate --settings=spud.tests.settings
 if [ ! $? -eq 0 ]
 then
     RETURN=1
