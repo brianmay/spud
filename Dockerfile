@@ -1,6 +1,6 @@
 # Start with a Python image.
 FROM python:3.6-stretch
-MAINTAINER brian@linuxpenguins.xyz
+LABEL maintainer="Brian May <brian@linuxpenguins.xyz>"
 
 # Some stuff that everyone has been copy-pasting
 # since the dawn of time.
