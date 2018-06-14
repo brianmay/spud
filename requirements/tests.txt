@@ -7,4 +7,4 @@ pytest-bdd==2.21.0
 pytest-django==3.2.1
 pytest-cov==2.5.1
 pytest-runner==4.2
-requests==2.19.0
+requests==2.19.1
