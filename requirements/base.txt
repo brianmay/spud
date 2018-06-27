@@ -9,7 +9,7 @@ six==1.11.0
 pytz==2018.4
 cssmin==0.2.0
 slimit==0.8.1
-django-cors-headers==2.2.1
+django-cors-headers==2.3.0
 django-environ==0.4.4
 psycopg2-binary==2.7.5
 whitenoise==3.3.1
