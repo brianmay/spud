@@ -4,7 +4,7 @@ flake8==3.5.0
 mock==2.0.0
 pytest==3.7.0
 pytest-bdd==2.21.0
-pytest-django==3.4.1
+pytest-django==3.4.2
 pytest-cov==2.5.1
 pytest-runner==4.2
 requests==2.19.1
