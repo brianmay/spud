@@ -45,6 +45,7 @@ requests = "==2.19.1"
 Django = "==2.0.8"
 Pillow = "==5.2.0"
 tox = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.6"
