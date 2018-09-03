@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from spud import models
+
 
 def main():
 

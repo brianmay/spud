@@ -1,17 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
+import datetime
 import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'spud.settings'
 
 import django
+import pytz
+
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'spud.settings'
+
 django.setup()
 
-import datetime
 
-from spud import models
 
-import pytz
 
 types = [
     models.album,

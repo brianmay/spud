@@ -1,16 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
+import datetime
 import os
 import re
-import datetime
-import pytz
 import shutil
 
-
+import pytz
 from django.conf import settings
 
-from spud import models
 
 for p in models.photo.objects.all():
     print p
@@ -57,4 +55,3 @@ for p in models.photo.objects.all():
         shutil.move(src,dst)
 
     p.save()
-
