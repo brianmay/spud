@@ -11,3 +11,5 @@
 /local/
 /tmp/
 /spud.db
+/.tool-versions
+/.venv/

@@ -18,8 +18,9 @@ RUN mkdir -p /opt/spud /etc/spud
 WORKDIR /opt/spud
 
 # Install our requirements.
-ADD requirements/*.txt /opt/spud/requirements/
-RUN pip install -r requirements/docker.txt
+RUN pip install pipenv
+ADD Pipfile Pipfile.lock /opt/spud/
+RUN pipenv install --system --deploy
 
 # Copy all our files into the image.
 COPY . /opt/spud/
