@@ -21,52 +21,52 @@ from spud import models
 
 
 class Command(BaseCommand):
-        help = 'Process pending actions in spud'
+    help = 'Process pending actions in spud'
 
-        def handle(self, **options):
+    def handle(self, **options):
 
-            for p in models.photo.objects.filter(
-                    action__isnull=False).order_by("pk"):
-                if p.action == "D":
-                    print("delete '%s'." % (p.get_orig_path()))
-                    p.delete()
-                elif p.action == "R":
-                    print("regenerate thumbnail '%s'" % (p.get_orig_path()))
-                    p.generate_thumbnails(overwrite=True)
-                    p.generate_videos(overwrite=True)
-                elif p.action == "auto":
-                    print("rotate '%s' by '%s'"
-                          % (p.get_orig_path(), p.action))
-                    p.rotate(p.action)
-                    print("regenerate thumbnail '%s'" % (p.get_orig_path()))
-                    p.generate_thumbnails(overwrite=True)
-                elif p.action == "90":
-                    print("rotate '%s' by '%s'"
-                          % (p.get_orig_path(), p.action))
-                    p.rotate(p.action)
-                    print("regenerate thumbnail '%s'" % (p.get_orig_path()))
-                    p.generate_thumbnails(overwrite=True)
-                elif p.action == "180":
-                    print("rotate '%s' by '%s'"
-                          % (p.get_orig_path(), p.action))
-                    p.rotate(p.action)
-                    print("regenerate thumbnail '%s'" % (p.get_orig_path()))
-                    p.generate_thumbnails(overwrite=True)
-                elif p.action == "270":
-                    print("rotate '%s' by '%s'"
-                          % (p.get_orig_path(), p.action))
-                    p.rotate(p.action)
-                    print("regenerate thumbnail '%s'" % (p.get_orig_path()))
-                    p.generate_thumbnails(overwrite=True)
-                elif p.action == "M":
-                    pass
-                else:
-                    raise RuntimeError(
-                        "Uknown action '%s' for '%s'" %
-                        (p.action, p.get_orig_path()))
+        for p in models.photo.objects.filter(
+                action__isnull=False).order_by("pk"):
+            if p.action == "D":
+                print("delete '%s'." % (p.get_orig_path()))
+                p.delete()
+            elif p.action == "R":
+                print("regenerate thumbnail '%s'" % (p.get_orig_path()))
+                p.generate_thumbnails(overwrite=True)
+                p.generate_videos(overwrite=True)
+            elif p.action == "auto":
+                print("rotate '%s' by '%s'"
+                      % (p.get_orig_path(), p.action))
+                p.rotate(p.action)
+                print("regenerate thumbnail '%s'" % (p.get_orig_path()))
+                p.generate_thumbnails(overwrite=True)
+            elif p.action == "90":
+                print("rotate '%s' by '%s'"
+                      % (p.get_orig_path(), p.action))
+                p.rotate(p.action)
+                print("regenerate thumbnail '%s'" % (p.get_orig_path()))
+                p.generate_thumbnails(overwrite=True)
+            elif p.action == "180":
+                print("rotate '%s' by '%s'"
+                      % (p.get_orig_path(), p.action))
+                p.rotate(p.action)
+                print("regenerate thumbnail '%s'" % (p.get_orig_path()))
+                p.generate_thumbnails(overwrite=True)
+            elif p.action == "270":
+                print("rotate '%s' by '%s'"
+                      % (p.get_orig_path(), p.action))
+                p.rotate(p.action)
+                print("regenerate thumbnail '%s'" % (p.get_orig_path()))
+                p.generate_thumbnails(overwrite=True)
+            elif p.action == "M":
+                pass
+            else:
+                raise RuntimeError(
+                    "Uknown action '%s' for '%s'" %
+                    (p.action, p.get_orig_path()))
 
-                if p.action != "D":
-                    print("move '%s'." % (p.get_orig_path()))
-                    p.move()
-                    p.action = None
-                    p.save()
+            if p.action != "D":
+                print("move '%s'." % (p.get_orig_path()))
+                p.move()
+                p.action = None
+                p.save()

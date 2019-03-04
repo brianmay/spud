@@ -644,9 +644,9 @@ class photo(BaseModel):
 
     def __str__(self):
         if self.title is None or self.title == "":
-                return self.name
+            return self.name
         else:
-                return self.title
+            return self.title
 
     @property
     def timezone(self):

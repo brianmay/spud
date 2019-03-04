@@ -402,7 +402,7 @@ class PersonListSerializer(ListSerializer):
         return dictionary.get(self.field_name, None)
 
     def to_internal_value(self, data):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def to_representation(self, value):
         result = []
