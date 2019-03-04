@@ -49,7 +49,6 @@ jobs:
       - run:
           name: run tests
           command: |
-            . venv/bin/activate
             pipenv run isort -rc --check --diff spud
             pipenv run flake8 spud
             pipenv run ./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
