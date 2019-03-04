@@ -57,7 +57,7 @@ jobs:
             mkdir test-reports
             pipenv run py.test --cov=spud --junitxml=test-reports/junit.xml
       - store_test_results:
-          path: test-results
+          path: test-reports
       - store_artifacts:
           path: test-reports
           destination: test-reports
