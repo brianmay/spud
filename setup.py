@@ -16,10 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import os
 
 from setuptools import setup
+from setuptools import Command
 
+
+VERSION="2.1.0"
 
 def fullsplit(path, result=None):
     """
@@ -45,9 +49,32 @@ for dirpath, dirnames, filenames in os.walk("spud"):
     if filenames:
         packages.append('.'.join(fullsplit(dirpath)))
 
+
+class VerifyVersionCommand(Command):
+    """Custom command to verify that the git tag matches our version"""
+    description = 'verify that the git tag matches our version'
+    user_options = [
+      ('version=', None, 'expected version'),
+    ]
+
+    def initialize_options(self):
+        self.version = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        version = self.version
+
+        if version != VERSION:
+            info = "{0} does not match the version of this app: {1}".format(
+                version, VERSION
+            )
+            sys.exit(info)
+
 setup(
     name="spud",
-    version='2.1.0',
+    version=VERSION,
     url='https://github.com/brianmay/spud',
     author='Brian May',
     author_email='brian@microcomaustralia.com.au',
@@ -99,4 +126,7 @@ setup(
         "django-cors-headers",
         "django-environ",
     ],
+    cmdclass={
+        'verify': VerifyVersionCommand,
+    }
 )

@@ -33,6 +33,8 @@ pytest-cov = "*"
 pytest-runner = "*"
 tox = "*"
 mypy = "*"
+wheel = "*"
+twine = "*"
 
 [requires]
 python_version = "3.7"
