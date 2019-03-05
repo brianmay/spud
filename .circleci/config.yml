@@ -21,17 +21,14 @@ jobs:
           POSTGRES_USER: root
           POSTGRES_DB: circle_test
 
-    working_directory: ~/repo
-
     steps:
       - checkout
 
-      # Download and cache dependencies
       - restore_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
 
       - run:
-          name: install dependencies
+          name: Install dependencies
           command: |
             sudo pip install pipenv
             pipenv install --dev
@@ -39,21 +36,20 @@ jobs:
       - save_cache:
           paths:
             - ".venv"
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
 
-      # run tests!
-      # this example uses Django's built-in test-runner
-      # other common Python testing frameworks include pytest and nose
-      # https://pytest.org
-      # https://nose.readthedocs.io
       - run:
-          name: run tests
+          name: Print version
+          command: |
+            pipenv run ./setup.py --version
+
+      - run:
+          name: Run tests
           command: |
             pipenv run isort -rc --check --diff spud
             pipenv run flake8 spud
             pipenv run ./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
             pipenv run ./manage.py migrate --settings=spud.tests.settings
-            pipenv run ./setup.py --version
             mkdir test-reports
             pipenv run py.test --cov=spud --junitxml=test-reports/junit.xml
       - store_test_results:
@@ -66,7 +62,7 @@ jobs:
     docker:
       - image: circleci/python:3.7
     steps:
-      - checkout # check out the code in the project directory
+      - checkout
       - setup_remote_docker:
           docker_layer_caching: true
       - run: |
@@ -79,32 +75,39 @@ jobs:
           docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
           docker push "brianmay/spud:latest"
 
+  verify-version:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          name: Verify git tag vs. version
+          command: |
+            pipenv run ./setup.py verify --version "$CIRCLE_TAG"
+
   deploy-prod-pypi:
     docker:
       - image: circleci/python:3.7
     steps:
-      - checkout # check out the code in the project directory
+      - checkout
       - restore_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
-          name: verify git tag vs. version
-          command: |
-            pipenv run setup.py verify --version "$CIRCLE_TAG"
-      - run:
-          name: init .pypirc
+          name: Init .pypirc
           command: |
             echo -e "[pypi]" >> ~/.pypirc
             echo -e "username = $PYPI_USER" >> ~/.pypirc
             echo -e "password = $PYPI_PASS" >> ~/.pypirc
       - run:
-          name: create packages
+          name: Create packages
           command: |
-            pipenv run setup.py sdist bdist_wheel
+            pipenv run ./setup.py sdist bdist_wheel
       - run:
-          name: upload to pypi
+          name: Upload to pypi
           command: |
-            . venv/bin/activate
-            twine upload dist/*
+            pipenv run twine upload dist/*
 
   deploy-prod-docker:
     docker:
@@ -114,7 +117,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: build and upload docker image |
+          name: Build and upload docker image
           command: |
             docker build \
               --file "Dockerfile" \
@@ -129,7 +132,10 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /.*/
       - deploy-beta:
           context: Docker
           requires:
@@ -137,7 +143,7 @@ workflows:
           filters:
             branches:
               only: master
-      - deploy-prod-pypi:
+      - verify-version:
           context: pypi
           requires:
             - build
@@ -146,12 +152,17 @@ workflows:
               only: /[0-9]+(\.[0-9]+)*/
             branches:
               ignore: /.*/
+      - deploy-prod-pypi:
+          context: pypi
+          requires:
+            - verify-version
+          filters:
+            tags:
+              only: /.*/
       - deploy-prod-docker:
           context: Docker
           requires:
-            - build
+            - verify-version
           filters:
             tags:
-              only: /[0-9]+(\.[0-9]+)*/
-            branches:
-              ignore: /.*/
+              only: /.*/
