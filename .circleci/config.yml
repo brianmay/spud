@@ -142,12 +142,14 @@ workflows:
               only: master
       - deploy-prod-pypi:
           context: pypi
+          filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
             branches:
               ignore: /.*/
       - deploy-prod-docker:
           context: Docker
+          filters:
             tags:
               only: /[0-9]+(\.[0-9]+)*/
             branches:
