@@ -31,7 +31,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo pip install pipenv
-            pipenv install --dev
+            pipenv sync --dev
 
       - save_cache:
           paths:
