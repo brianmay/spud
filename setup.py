@@ -105,7 +105,6 @@ setup(
         'scripts/start.sh',
         'bin/spud',
         'bin/spud_set_secret_key',
-        'bin/spud_migrate_south',
     ],
     tests_require=[
         'mock',

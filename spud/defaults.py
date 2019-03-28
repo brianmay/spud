@@ -116,10 +116,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 )
 
-# South not available for Python 3+ or Django 1.7+
-if sys.version_info < (3, 0) and django.VERSION < (1, 7):
-    INSTALLED_APPS += ('south',)
-
 # The URL where requests are redirected for login, especially when
 # using the login_required() decorator.
 LOGIN_URL = "/spud/account/login/"
