@@ -115,7 +115,6 @@ setup(
     ],
     install_requires=[
         "Django >= 1.8",
-        "django-pipeline",
         "djangorestframework >= 3.0.5",
         "python-dateutil",
         "Pillow",

@@ -106,7 +106,6 @@ ROOT_URLCONF = 'spud.urls'
 # Django installation.
 INSTALLED_APPS = (
     'spud',
-    'pipeline',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -196,63 +195,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
-}
-
-
-###
-# DJANGO PIPELINE
-###
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
-
-PIPELINE = {
-    'EMBED_PATH': r'img/|images/',
-    'CSS_COMPRESSOR': 'pipeline.compressors.cssmin.CSSMinCompressor',
-    'STYLESHEETS': {
-        'spud': {
-            'source_filenames': (
-                'css/*.css',
-            ),
-            'output_filename': 'min.css',
-            'variant': 'datauri',
-        },
-    },
-    'JS_COMPRESSOR': 'pipeline.compressors.slimit.SlimItCompressor',
-    'JAVASCRIPT': {
-        'spud': {
-            'source_filenames': (
-                'js/external/jquery.js',
-                'js/external/jquery-ui.js',
-                'js/external/showdown.js',
-                'js/external/moment-with-locales.js',
-                'js/external/moment-timezone-with-data.js',
-
-                'js/jcookie.js',
-
-                'js/globals.js',
-                'js/signals.js',
-
-                'js/base.js',
-                'js/widgets.js',
-
-                'js/dialog.js',
-                'js/infobox.js',
-                'js/generic.js',
-
-                'js/session.js',
-                'js/album.js',
-                'js/category.js',
-                'js/person.js',
-                'js/place.js',
-                'js/feedback.js',
-                'js/photo.js',
-
-                'js/state.js',
-                'js/urls.js',
-                'js/spud.js',
-            ),
-            'output_filename': 'min.js',
-        }
-    },
 }
 
 
