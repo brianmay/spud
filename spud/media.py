@@ -16,6 +16,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import datetime
+import hashlib
 import os
 import subprocess
 import tempfile
@@ -97,6 +98,17 @@ class media:
         del value
 
         return dt
+
+    def get_sha256_hash(self):
+        filename = self.get_path()
+        sha256_hash = hashlib.sha256()
+        with open(filename, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        return sha256_hash.digest()
+
+    def get_num_bytes(self):
+        return os.path.getsize(self.get_fp())
 
     def create_thumbnail(self, dst_path, max_size):
         fp = self.get_fp()

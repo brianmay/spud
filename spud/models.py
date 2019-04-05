@@ -971,6 +971,193 @@ class photo(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+class photo_file(BaseModel):
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
+    size_key = models.CharField(max_length=10)
+    width = models.IntegerField()
+    height = models.IntegerField()
+    mime_type = models.CharField(max_length=20)
+    dir = models.CharField(max_length=128)
+    name = models.CharField(max_length=128)
+    is_video = models.BooleanField()
+    sha256_hash = models.BinaryField(max_length=32, unique=True)
+    num_bytes = models.IntegerField()
+
+    class Meta:
+        unique_together = (
+            ("photo", "size_key", "mime_type"),
+            ("dir", "name"),
+        )
+
+    def get_path(self):
+        return os.path.join(
+            settings.IMAGE_PATH,
+            self.dir,
+            self.name,
+        )
+
+    def get_url(self):
+        return iri_to_uri(os.path.join(
+            settings.IMAGE_URL,
+            urlquote(self.dir),
+            urlquote(self.name),
+        ))
+
+    def delete(self):
+        path = self.get_path()
+        if os.path.lexists(path):
+            os.unlink(path)
+        super(photo_file, self).delete()
+    delete.alters_data = True
+
+    def rotate(self, amount):
+        m = media.get_media(self.get_path())
+        m.rotate(amount)
+        self.update_size()
+        return
+    rotate.alters_data = True
+
+    def move(self, new_photo_dir, new_photo_name):
+        old_path = self.get_path()
+
+        # Ensure new_name has correct extension
+        _, extension = os.path.splitext(self.name)
+        new_short_name, _ = os.path.splitext(new_photo_name)
+        new_name = f"{new_short_name}{extension}"
+
+        # Get full file path
+        new_dir = self.build_dir(self.is_video, self.size_key, new_photo_dir)
+        self.dir = new_dir
+        self.name = new_name
+        new_path = self.get_path()
+
+        if old_path != new_path:
+            # generate new non-conflicting name
+            new_dir, new_name = self.get_new_name(new_dir, new_name)
+
+            # Get revised full file path
+            self.dir = new_dir
+            self.name = new_name
+            new_path = self.get_path()
+
+            full_old_path = os.join(settings.IMAGE_PATH, old_path)
+            full_new_path = os.join(settings.IMAGE_PATH, new_path)
+
+            # Actually move the file
+            print(f"Moving '{full_old_path}' to '{full_new_path}'.")
+            if not os.path.lexists(os.path.dirname(full_new_path)):
+                os.makedirs(os.path.dirname(full_new_path), 0o755)
+            shutil.move(full_old_path, full_new_path)
+
+            self.save()
+    move.alters_data = True
+
+    def update_size(self):
+        dst = self.get_path()
+        mt = media.get_media(dst)
+        width, height = mt.get_size()
+        self.width = width
+        self.height = height
+        self.sha256_hash = mt.get_sha256_hash()
+        self.num_bytes = mt.get_num_bytes()
+        self.save()
+    update_size.alters_data = True
+
+    @classmethod
+    def check_all_files(cls):
+        errors = []
+
+        for pt in photo_file.objects.all():
+            dst = pt.get_path()
+            full_dst = os.path.join(settings.IMAGE_PATH, dst)
+            print(f"Checking {full_dst}.")
+
+            # Duplicates should never happen due to unique constraint.
+            duplicates = photo_file.objects.filter(
+                dir=pt.dir, name=pt.name).exclude(pk=pt.pk)
+            if duplicates.count() > 0:
+                errors.append(f"{dst}: path is duplicated")
+
+            if os.path.lexists(full_dst):
+                mt = media.get_media(dst)
+                width, height = mt.get_size()
+
+                if pt.width != width:
+                    errors.append(f"{dst}: has incorrect width.")
+
+                if pt.height != height:
+                    errors.append(f"{dst}: has incorrect height.")
+
+                if bytes(pt.sha256_hash) != mt.get_sha256_hash():
+                    errors.append(f"{dst}: has incorrect sha256 hash.")
+
+                if pt.num_bytes != mt.get_num_bytes():
+                    errors.append(f"{dst}: has incorrect num bytes.")
+            else:
+                errors.append(f"{dst}: File is missing")
+
+        return errors
+
+    @property
+    def size(self):
+        """ Backward comparability. """
+        return self.size_key
+
+    @classmethod
+    def get_conflicts(cls, new_dir, new_name, sha256_hash):
+        # check for conflicts or errors
+        (short_name, extension) = os.path.splitext(new_name)
+        dups = photo_file.objects.filter(
+            Q(dir=new_dir, name__startswith=f"{short_name}.")
+            | Q(sha256_hash=sha256_hash)
+        )
+        return dups\
+
+    @classmethod
+    def get_conflicting_names(cls, new_dir, new_name):
+        # check for conflicts or errors
+        (short_name, extension) = os.path.splitext(new_name)
+        dups = photo_file.objects.filter(
+            Q(dir=new_dir, name__startswith=f"{short_name}.")
+        )
+        return dups
+
+    @classmethod
+    def check_filename_free(cls, new_dir, new_name):
+        full_path = os.path.join(settings.IMAGE_PATH, new_dir, new_name)
+        if os.path.lexists(full_path):
+            raise RuntimeError(
+                "file already exists at %s but has no db entry" % full_path)
+
+    @classmethod
+    def get_new_name(cls, new_dir, new_name):
+        append = ['', 'a', 'b', 'c', 'd']
+
+        for a in append:
+            (short_name, extension) = os.path.splitext(new_name)
+            tmp_name = short_name + a + extension
+            dups = cls.get_conflicting_names(new_dir, tmp_name)
+            count = dups.count()
+            if count == 0:
+                cls.check_filename_free(new_dir, tmp_name)
+                return new_dir, tmp_name
+
+        raise RuntimeError(
+            "Cannot get non-conflicting filename for %s/%s" %
+            (new_dir, new_name))
+
+    @classmethod
+    def build_dir(cls, is_video, size_key, photo_dir):
+        if size_key == "orig":
+            return os.path.join("orig", photo_dir)
+        elif not is_video and size_key in settings.IMAGE_SIZES:
+            return os.path.join("thumb", size_key, photo_dir)
+        elif is_video and size_key in settings.VIDEO_SIZES:
+            return os.path.join("video", size_key, photo_dir)
+        else:
+            raise RuntimeError(f"Unknown image size '{size_key}'")
+
+
 class photo_thumb(BaseModel):
     photo = models.ForeignKey(photo, on_delete=models.CASCADE)
     size = models.CharField(max_length=10, db_index=True)
