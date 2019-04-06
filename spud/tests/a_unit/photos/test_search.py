@@ -31,11 +31,6 @@ def test_search_all():
         .prefetch_related.return_value
         .prefetch_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value
         .filter.return_value) = expected_result
 
@@ -46,27 +41,21 @@ def test_search_all():
     chained = (
        call
        .select_related('place')
-       .prefetch_related('photo_thumb_set')
-       .prefetch_related('photo_video_set')
+       .prefetch_related('photo_file_set')
        .prefetch_related('place__cover_photo')
-       .prefetch_related('place__cover_photo__photo_thumb_set')
-       .prefetch_related('place__cover_photo__photo_video_set')
+       .prefetch_related('place__cover_photo__photo_file_set')
        .prefetch_related('feedbacks')
        .prefetch_related('albums')
        .prefetch_related('albums__cover_photo')
-       .prefetch_related('albums__cover_photo__photo_thumb_set')
-       .prefetch_related('albums__cover_photo__photo_video_set')
+       .prefetch_related('albums__cover_photo__photo_file_set')
        .prefetch_related('categorys')
        .prefetch_related('categorys__cover_photo')
-       .prefetch_related('categorys__cover_photo__photo_thumb_set')
-       .prefetch_related('categorys__cover_photo__photo_video_set')
+       .prefetch_related('categorys__cover_photo__photo_file_set')
        .prefetch_related('photo_person_set')
        .prefetch_related('photo_person_set__person')
        .prefetch_related('photo_person_set__person__cover_photo')
        .prefetch_related(
-           'photo_person_set__person__cover_photo__photo_thumb_set')
-       .prefetch_related(
-           'photo_person_set__person__cover_photo__photo_video_set')
+           'photo_person_set__person__cover_photo__photo_file_set')
        .filter(MyQ())
        .filter(MyQ())
     )
@@ -82,11 +71,6 @@ def test_search_q():
     expected_result = MagicMock(spec=QuerySet)
     (queryset
         .select_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
         .prefetch_related.return_value
         .prefetch_related.return_value
         .prefetch_related.return_value
@@ -117,27 +101,21 @@ def test_search_q():
     chained = (
        call
        .select_related('place')
-       .prefetch_related('photo_thumb_set')
-       .prefetch_related('photo_video_set')
+       .prefetch_related('photo_file_set')
        .prefetch_related('place__cover_photo')
-       .prefetch_related('place__cover_photo__photo_thumb_set')
-       .prefetch_related('place__cover_photo__photo_video_set')
+       .prefetch_related('place__cover_photo__photo_file_set')
        .prefetch_related('feedbacks')
        .prefetch_related('albums')
        .prefetch_related('albums__cover_photo')
-       .prefetch_related('albums__cover_photo__photo_thumb_set')
-       .prefetch_related('albums__cover_photo__photo_video_set')
+       .prefetch_related('albums__cover_photo__photo_file_set')
        .prefetch_related('categorys')
        .prefetch_related('categorys__cover_photo')
-       .prefetch_related('categorys__cover_photo__photo_thumb_set')
-       .prefetch_related('categorys__cover_photo__photo_video_set')
+       .prefetch_related('categorys__cover_photo__photo_file_set')
        .prefetch_related('photo_person_set')
        .prefetch_related('photo_person_set__person')
        .prefetch_related('photo_person_set__person__cover_photo')
        .prefetch_related(
-           'photo_person_set__person__cover_photo__photo_thumb_set')
-       .prefetch_related(
-           'photo_person_set__person__cover_photo__photo_video_set')
+           'photo_person_set__person__cover_photo__photo_file_set')
        .filter(MyQ())
        .filter(MyQ())
        .filter(q)
@@ -169,11 +147,6 @@ def test_search_related(photos):
         .prefetch_related.return_value
         .prefetch_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value
         .filter.return_value
         .filter.return_value
@@ -186,27 +159,21 @@ def test_search_related(photos):
     chained = (
        call
        .select_related('place')
-       .prefetch_related('photo_thumb_set')
-       .prefetch_related('photo_video_set')
+       .prefetch_related('photo_file_set')
        .prefetch_related('place__cover_photo')
-       .prefetch_related('place__cover_photo__photo_thumb_set')
-       .prefetch_related('place__cover_photo__photo_video_set')
+       .prefetch_related('place__cover_photo__photo_file_set')
        .prefetch_related('feedbacks')
        .prefetch_related('albums')
        .prefetch_related('albums__cover_photo')
-       .prefetch_related('albums__cover_photo__photo_thumb_set')
-       .prefetch_related('albums__cover_photo__photo_video_set')
+       .prefetch_related('albums__cover_photo__photo_file_set')
        .prefetch_related('categorys')
        .prefetch_related('categorys__cover_photo')
-       .prefetch_related('categorys__cover_photo__photo_thumb_set')
-       .prefetch_related('categorys__cover_photo__photo_video_set')
+       .prefetch_related('categorys__cover_photo__photo_file_set')
        .prefetch_related('photo_person_set')
        .prefetch_related('photo_person_set__person')
        .prefetch_related('photo_person_set__person__cover_photo')
        .prefetch_related(
-           'photo_person_set__person__cover_photo__photo_thumb_set')
-       .prefetch_related(
-           'photo_person_set__person__cover_photo__photo_video_set')
+           'photo_person_set__person__cover_photo__photo_file_set')
        .filter(MyQ())
        .filter(MyQ())
        .filter(

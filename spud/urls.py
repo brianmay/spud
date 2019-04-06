@@ -56,7 +56,7 @@ urlpatterns = [
 
 
 urlpatterns += [
-    url(r'^file/(?P<object_id>\d+)/size/(?P<size>\w+)/$',
+    url(r'^file/(?P<object_id>\d+)/size/(?P<size_key>\w+)/$',
         views.photo_thumb_redirect, name='photo_thumb_redirect'),
 ]
 

@@ -18,7 +18,6 @@ def test_search_all():
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .select_related.return_value) = expected_result
 
     params = {}
@@ -28,8 +27,7 @@ def test_search_all():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .select_related('mother', 'father', 'spouse', 'home', 'work')
     )
     assert queryset.mock_calls == chained.call_list()
@@ -44,7 +42,6 @@ def test_search_q():
     expected_result = MagicMock(spec=QuerySet)
     (queryset
         .select_related.return_value
-        .prefetch_related.return_value
         .prefetch_related.return_value
         .select_related.return_value
         .filter.return_value) = expected_result
@@ -62,8 +59,7 @@ def test_search_q():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .select_related('mother', 'father', 'spouse', 'home', 'work')
        .filter(q)
     )
@@ -81,7 +77,6 @@ def test_search_children(persons):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .select_related.return_value
         .filter.return_value) = expected_result
 
@@ -92,8 +87,7 @@ def test_search_children(persons):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .select_related('mother', 'father', 'spouse', 'home', 'work')
        .filter(MyQ(mother=persons['Parent']) | MyQ(father=persons['Parent']))
     )
@@ -111,7 +105,6 @@ def test_search_ascendants(persons):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .select_related.return_value
         .filter.return_value) = expected_result
 
@@ -122,8 +115,7 @@ def test_search_ascendants(persons):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .select_related('mother', 'father', 'spouse', 'home', 'work')
        .filter(
            descendant_set__descendant=persons['Parent'],
@@ -143,7 +135,6 @@ def test_search_descendants(persons):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .select_related.return_value
         .filter.return_value) = expected_result
 
@@ -154,8 +145,7 @@ def test_search_descendants(persons):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .select_related('mother', 'father', 'spouse', 'home', 'work')
        .filter(
            ascendant_set__ascendant=persons['Parent'],
@@ -174,7 +164,6 @@ def test_search_root_only():
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .select_related.return_value
         .filter.return_value) = expected_result
 
@@ -185,8 +174,7 @@ def test_search_root_only():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .select_related('mother', 'father', 'spouse', 'home', 'work')
        .filter(mother__isnull=True, father__isnull=True)
     )

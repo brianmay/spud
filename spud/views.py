@@ -289,7 +289,9 @@ class PhotoViewSet(ModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'list':
+        if self.action == 'create':
+            return serializers.CreatePhotoSerializer
+        elif self.action == 'list':
             # PhotoSerializer too slow for lists
             return serializers.NestedPhotoSerializer
         else:
@@ -356,13 +358,13 @@ def photo_orig_redirect(request, object_id):
     return HttpResponseRedirect(url)
 
 
-def photo_thumb_redirect(request, object_id, size):
+def photo_thumb_redirect(request, object_id, size_key):
     instance = get_object_or_404(models.photo, pk=object_id)
 
     try:
-        thumb = instance.photo_thumb_set.get(size=size)
-    except models.photo_thumb.DoesNotExist:
-        raise Http404("Thumb for size '%s' does not exist" % (size))
+        thumb = instance.photo_file_set.get(size_key=size_key, is_video=False)
+    except models.photo_file.DoesNotExist:
+        raise Http404("Thumb for size '%s' does not exist" % (size_key))
 
     url = thumb.get_url()
     return HttpResponseRedirect(url)

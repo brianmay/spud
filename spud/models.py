@@ -16,7 +16,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import datetime
-import filecmp
 import os
 import os.path
 import shutil
@@ -73,6 +72,11 @@ def action_to_string(action):
     return "unknown action"
 
 
+def _swap_extension(filename, new_extension):
+    (shortname, extension) = os.path.splitext(filename)
+    return f"{shortname}.{new_extension}"
+
+
 # BASE ABSTRACT MODEL CLASS
 
 class BaseModel(models.Model):
@@ -98,9 +102,7 @@ class HierarchyModel(BaseModel):
     def get_descendants(self, include_self):
         queryset = self.descendant_set.all()
         queryset = queryset.prefetch_related(
-            'descendant__cover_photo__photo_thumb_set')
-        queryset = queryset.prefetch_related(
-            'descendant__cover_photo__photo_video_set')
+            'descendant__cover_photo__photo_file_set')
 
         if include_self:
             results = 0
@@ -119,9 +121,7 @@ class HierarchyModel(BaseModel):
     def get_ascendants(self, include_self):
         queryset = self.ascendant_set.all()
         queryset = queryset.prefetch_related(
-            'ascendant__cover_photo__photo_thumb_set')
-        queryset = queryset.prefetch_related(
-            'ascendant__cover_photo__photo_video_set')
+            'ascendant__cover_photo__photo_file_set')
 
         if include_self:
             for i in queryset.all():
@@ -463,8 +463,7 @@ class person(HierarchyModel):
         queryset = person.objects.all()
         queryset = queryset.select_related(
             'cover_photo', 'mother', 'father', 'spouse', 'home', 'work')
-        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
-        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_file_set')
         return queryset
 
     # spouses
@@ -595,8 +594,6 @@ class feedback(HierarchyModel):
 @python_2_unicode_compatible
 class photo(BaseModel):
     name = models.CharField(max_length=128, db_index=True)
-    path = models.CharField(max_length=255, db_index=True)
-    size = models.IntegerField(null=True, blank=True)
     title = models.CharField(
         max_length=64, null=True, blank=True, db_index=True)
     photographer = models.ForeignKey(
@@ -671,56 +668,36 @@ class photo(BaseModel):
     # Internal functions for creating new photos
 
     @classmethod
-    def _get_thumb_path(cls, size, path, name):
-        if size in settings.IMAGE_SIZES:
-            (shortname, _) = os.path.splitext(name)
-            return os.path.join(
-                settings.IMAGE_PATH, "thumb",
-                size, path, shortname + ".jpg")
-        else:
-            raise RuntimeError("unknown image size %s" % (size))
-
-    @classmethod
-    def _get_video_path(cls, size, path, name, extension):
-        if size in settings.VIDEO_SIZES:
-            (shortname, _) = os.path.splitext(name)
-            return os.path.join(
-                settings.IMAGE_PATH, "video",
-                size, path, shortname + "." + extension)
-        else:
-            raise RuntimeError("unknown image size %s" % (size))
-
-    @classmethod
-    def _get_orig_path(cls, path, name):
-        return os.path.join(settings.IMAGE_PATH, "orig", path, name)
+    def build_photo_dir(cls, utc_datetime, utc_offset):
+        from_tz = pytz.utc
+        to_tz = pytz.FixedOffset(utc_offset)
+        to_offset = datetime.timedelta(minutes=utc_offset)
+        local = from_tz.localize(utc_datetime)
+        local = (local + to_offset).replace(tzinfo=to_tz)
+        return "%04d/%02d/%02d" % (local.year, local.month, local.day)
 
     # Public methods
 
-    def get_orig_path(self):
-        return self._get_orig_path(self.path, self.name)
+    def get_orig(self):
+        return self.photo_file_set.get(size_key='orig')
 
-    def get_orig_url(self):
-        return iri_to_uri(os.path.join(
-            settings.IMAGE_URL, "orig",
-            urlquote(self.path), urlquote(self.name)))
-
-    def get_thumb(self, size):
+    def get_thumb(self, size_key, mime_type):
         try:
-            return self.photo_thumb_set.get(size=size)
-        except photo_thumb.DoesNotExist:
+            return self.photo_file_set.get(size_key=size_key, mime_type=mime_type, is_video=False)
+        except photo_file.DoesNotExist:
             return None
 
     def get_thumbs(self):
-        return list(self.photo_thumb_set.all())
+        return list(self.photo_file_set.filter(is_video=False))
 
-    def get_video(self, size, format):
+    def get_video(self, size_key, mime_type):
         try:
-            return self.photo_video_set.get(size=size, format=format)
-        except photo_thumb.DoesNotExist:
+            return self.photo_file_set.get(size_key=size_key, mime_type=mime_type, is_video=True)
+        except photo_file.DoesNotExist:
             return None
 
     def get_videos(self):
-        return list(self.photo_video_set.all())
+        return list(self.photo_file_set.filter(is_video=True))
 
     # Other stuff
     def check_delete(self):
@@ -728,49 +705,53 @@ class photo(BaseModel):
         return errorlist
 
     def delete(self):
-        if self.name:
-            path = self.get_orig_path()
-            if os.path.lexists(path):
-                os.unlink(path)
-        for pt in self.photo_thumb_set.all():
-            path = pt.get_path()
-            if os.path.lexists(path):
-                os.unlink(path)
-        for pt in self.photo_video_set.all():
-            path = pt.get_path()
-            if os.path.lexists(path):
-                os.unlink(path)
+        for pt in self.photo_file_set.all():
+            pt.delete()
         super(photo, self).delete()
     delete.alters_data = True
 
-    def rotate(self, amount):
-        m = media.get_media(self.get_orig_path())
-        m.rotate(amount)
-
-        (width, height) = m.get_size()
-        self.size = os.path.getsize(self.get_orig_path())
-
-        self.width = width
-        self.height = height
+    def rotate_orig(self, amount):
+        pt = self.get_orig()
+        pt.rotate(amount)
         return
-    rotate.alters_data = True
+    rotate_orig.alters_data = True
+
+    def rotate_all(self, amount):
+        for pt in self.photo_file_set.all():
+            pt.rotate(amount)
+        return
+    rotate_all.alters_data = True
 
     def generate_thumbnails(self, overwrite):
-        m = media.get_media(self.get_orig_path())
+        orig = self.get_orig()
+        m = media.get_media(orig.get_path())
         umask = os.umask(0o022)
 
-        for size, s in settings.IMAGE_SIZES.items():
-            dst = self._get_thumb_path(size, self.path, self.name)
+        for size_key, s in settings.IMAGE_SIZES.items():
+            try:
+                pt = photo_file.objects.get(photo=self, size_key=size_key, mime_type="image/jpeg")
+            except photo_file.DoesNotExist:
+                photo_dir = self.build_photo_dir(self.datetime, self.utc_offset)
+                pt = photo_file(photo=self, size_key=size_key, mime_type="image/jpeg")
+                pt.dir = photo_file.build_dir(False, size_key, photo_dir)
+                pt.name = _swap_extension(self.name, 'jpg')
+                photo_file.check_filename_free(pt.dir, pt.name)
+
+            dst = pt.get_path()
+
             if not os.path.lexists(os.path.dirname(dst)):
                 os.makedirs(os.path.dirname(dst), 0o755)
             if overwrite or not os.path.lexists(dst):
-                xysize = m.create_thumbnail(dst, s)
-            else:
-                mt = media.get_media(dst)
-                xysize = mt.get_size()
-            pt, _ = photo_thumb.objects.get_or_create(photo=self, size=size)
-            pt.width = xysize[0]
-            pt.height = xysize[1]
+                m.create_thumbnail(dst, s)
+
+            mt = media.get_media(dst)
+            xy_size = mt.get_size()
+
+            pt.is_video = False
+            pt.sha256_hash = mt.get_sha256_hash()
+            pt.num_bytes = mt.get_num_bytes()
+            pt.width = xy_size[0]
+            pt.height = xy_size[1]
             pt.save()
 
         os.umask(umask)
@@ -778,194 +759,64 @@ class photo(BaseModel):
     generate_thumbnails.alters_data = True
 
     def generate_videos(self, overwrite):
-        m = media.get_media(self.get_orig_path())
+        orig = self.get_orig()
+        m = media.get_media(orig.get_path())
         umask = os.umask(0o022)
 
-        if m.is_video():
-            for size, s in settings.VIDEO_SIZES.items():
-                for format, f in settings.VIDEO_FORMATS.items():
-                    dst = self._get_video_path(
-                        size, self.path, self.name, f['extension'])
+        if orig.is_video and m.is_video():
+            for size_key, s in settings.VIDEO_SIZES.items():
+                for mime_type, f in settings.VIDEO_FORMATS.items():
+                    try:
+                        pt = photo_file.objects.get(photo=self, size_key=size_key, mime_type=mime_type)
+                    except photo_file.DoesNotExist:
+                        photo_dir = self.build_photo_dir(self.datetime, self.utc_offset)
+                        pt = photo_file(photo=self, size_key=size_key, mime_type=mime_type)
+                        pt.dir = photo_file.build_dir(True, size_key, photo_dir)
+                        pt.name = _swap_extension(self.name, f['extension'])
+                        photo_file.check_filename_free(pt.dir, pt.name)
+
+                    dst = pt.get_path()
+
                     if not os.path.lexists(os.path.dirname(dst)):
                         os.makedirs(os.path.dirname(dst), 0o755)
                     if overwrite or not os.path.lexists(dst):
-                        xysize = m.create_video(dst, s, format)
-                    else:
-                        mt = media.get_media(dst)
-                        xysize = mt.get_size()
-                    if xysize is not None:
-                        pt, _ = photo_video.objects.get_or_create(
-                            photo=self, size=size, format=format)
-                        pt.extension = f['extension']
-                        pt.width = xysize[0]
-                        pt.height = xysize[1]
-                        pt.save()
+                        m.create_video(dst, s, mime_type)
+
+                    mt = media.get_media(dst)
+                    xy_size = mt.get_size()
+
+                    pt.is_video = True
+                    pt.sha256_hash = mt.get_sha256_hash()
+                    pt.num_bytes = mt.get_num_bytes()
+                    pt.width = xy_size[0]
+                    pt.height = xy_size[1]
+                    pt.save()
 
         os.umask(umask)
         return
     generate_videos.alters_data = True
 
     def update_size(self):
-        for pt in self.photo_thumb_set.all():
-            dst = pt.get_path()
-            mt = media.get_media(dst)
-            xysize = mt.get_size()
-            pt.width = xysize[0]
-            pt.height = xysize[1]
-            pt.save()
-        for pt in self.photo_video_set.all():
-            dst = pt.get_path()
-            mt = media.get_media(dst)
-            xysize = mt.get_size()
-            pt.width = xysize[0]
-            pt.height = xysize[1]
-            pt.save()
+        for pt in self.photo_file_set.all():
+            pt.update_size()
         return
     update_size.alters_data = True
 
-    @classmethod
-    def get_conflicts(cls, new_path, new_name):
-        # check for conflicts or errors
-        (shortname, extension) = os.path.splitext(new_name)
-        dups = photo.objects.filter(
-            path=new_path, name__startswith="%s." % (shortname))
-        count = dups.count()
-        if count > 0:
-            return dups, count
-
-        full_path = cls._get_orig_path(new_path, new_name)
-        if os.path.lexists(full_path):
-            raise RuntimeError(
-                "file already exists at %s but has no db entry" % full_path)
-
-        for size in settings.IMAGE_SIZES:
-            full_path = cls._get_thumb_path(size, new_path, new_name)
-            if os.path.lexists(full_path):
-                raise RuntimeError(
-                    "file already exists at %s but has no db entry" %
-                    full_path)
-
-        return [], 0
-
-    @classmethod
-    def get_new_name(cls, old_file, new_path, new_name):
-        append = ['', 'a', 'b', 'c', 'd']
-
-        for a in append:
-            (shortname, extension) = os.path.splitext(new_name)
-            tmp_name = shortname + a + extension
-            dups, count = cls.get_conflicts(new_path, tmp_name)
-            if count == 0:
-                return new_path, tmp_name
-            elif count > 1:
-                raise RuntimeError(
-                    "Multiple DB entries exist for %s/%s" %
-                    (new_path, tmp_name))
-
-            dupfile = dups[0].get_orig_path()
-            if filecmp.cmp(old_file, dupfile):
-                raise PhotoAlreadyExistsError(
-                    "same photo %d already exists at %s/%s as %s/%s" %
-                    (dups[0].pk, new_path, new_name,
-                        dups[0].path, dups[0].name))
-
-        raise RuntimeError(
-            "Cannot get non-conflicting filename for %s/%s" %
-            (new_path, new_name))
-
     def move(self, new_name=None):
-        move_list = []
-
-        # get current path
-        old_orig_path = self.get_orig_path()
-        if not os.path.lexists(old_orig_path):
-            raise RuntimeError(
-                "Source '%s' not already exists" % (old_orig_path))
-
-        # Work out new path
-        from_tz = pytz.utc
-        to_tz = pytz.FixedOffset(self.utc_offset)
-        to_offset = datetime.timedelta(minutes=self.utc_offset)
-        local = from_tz.localize(self.datetime)
-        local = (local + to_offset).replace(tzinfo=to_tz)
         if new_name is None:
             new_name = self.name
-        new_path = "%04d/%02d/%02d" % (local.year, local.month, local.day)
 
-        # Check that something has changed
-        if self.path == new_path and self.name == new_name:
-            # nothing to do, good bye cruel world
-            return
+        new_dir = self.build_photo_dir(self.datetime, self.utc_offset)
 
-        # generate new non-conflicting name
-        new_path, new_name = photo.get_new_name(
-            old_orig_path, new_path, new_name)
+        for pt in self.photo_file_set.all():
+            pt.move(new_dir, new_name)
 
-        # create move list
-        move_list.append(
-            (old_orig_path, self._get_orig_path(new_path, new_name))
-        )
-        for pt in self.photo_thumb_set.all():
-            src = pt.get_path()
-            if not os.path.lexists(src):
-                raise RuntimeError("Source '%s' not already exists" % (src))
-            move_list.append(
-                (src, self._get_thumb_path(pt.size, new_path, new_name))
-            )
-        for pt in self.photo_video_set.all():
-            src = pt.get_path()
-            if not os.path.lexists(src):
-                raise RuntimeError("Source '%s' not already exists" % (src))
-            move_list.append(
-                (src, self._get_video_path(
-                    pt.size, new_path, new_name, pt.extension))
-            )
-
-        # move the files
-        for src, dst in move_list:
-            if src != dst:
-                print("Moving '%s' to '%s'" % (src, dst))
-                if not os.path.lexists(os.path.dirname(dst)):
-                    os.makedirs(os.path.dirname(dst), 0o755)
-                shutil.move(src, dst)
-
-        # Hurry! Save the new path and name before we forgot
-        self.path = new_path
+        # Hurry! Save the new name before we forgot
         self.name = new_name
         # ... err what did we just do?
         self.save()
         return
     move.alters_data = True
-
-    def error_list(self):
-        error_list = []
-
-        if settings.IMAGE_CHECK_EXISTS:
-            dst = self.get_orig_path()
-            if not os.path.lexists(dst):
-                error_list.append("Original file '%s' is missing" % (dst))
-
-            for pt in self.photo_thumb_set.all():
-                dst = pt.get_path()
-                if not os.path.lexists(dst):
-                    error_list.append(
-                        "Thumb file '%s' for size '%s' is missing" %
-                        (dst, pt.size))
-
-            for pt in self.photo_video_set.all():
-                dst = pt.get_path()
-                if not os.path.lexists(dst):
-                    error_list.append(
-                        "Video file '%s' for size '%s' is missing" %
-                        (dst, pt.size))
-
-        duplicates = photo.objects.filter(
-            path=self.path, name=self.name).exclude(pk=self.pk)
-        if duplicates.count() > 0:
-            error_list.append(
-                "photo path %s/%s is duplicated" % (self.path, self.name))
-
-        return error_list
 
 
 # ---------------------------------------------------------------------------
@@ -1157,60 +1008,6 @@ class photo_file(BaseModel):
             return os.path.join("video", size_key, photo_dir)
         else:
             raise RuntimeError(f"Unknown image size '{size_key}'")
-
-
-class photo_thumb(BaseModel):
-    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
-    size = models.CharField(max_length=10, db_index=True)
-    width = models.IntegerField(null=True, blank=True)
-    height = models.IntegerField(null=True, blank=True)
-
-    def get_path(self):
-        photo = self.photo
-        (shortname, _) = os.path.splitext(photo.name)
-        return os.path.join(
-            settings.IMAGE_PATH, "thumb", self.size,
-            photo.path, shortname + ".jpg")
-
-    def get_url(self):
-        photo = self.photo
-        (shortname, _) = os.path.splitext(photo.name)
-        return iri_to_uri(os.path.join(
-            settings.IMAGE_URL, "thumb", urlquote(self.size),
-            urlquote(photo.path), urlquote(shortname + ".jpg")))
-
-    def delete(self):
-        path = self.get_path()
-        if os.path.lexists(path):
-            os.unlink(path)
-
-
-class photo_video(BaseModel):
-    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
-    size = models.CharField(max_length=10, db_index=True)
-    width = models.IntegerField(null=True, blank=True)
-    height = models.IntegerField(null=True, blank=True)
-    format = models.CharField(max_length=20)
-    extension = models.CharField(max_length=4)
-
-    def get_path(self):
-        photo = self.photo
-        (shortname, _) = os.path.splitext(photo.name)
-        return os.path.join(
-            settings.IMAGE_PATH, "video", self.size,
-            photo.path, shortname + "." + self.extension)
-
-    def get_url(self):
-        photo = self.photo
-        (shortname, _) = os.path.splitext(photo.name)
-        return iri_to_uri(os.path.join(
-            settings.IMAGE_URL, "video", urlquote(self.size),
-            urlquote(photo.path), urlquote(shortname + "." + self.extension)))
-
-    def delete(self):
-        path = self.get_path()
-        if os.path.lexists(path):
-            os.unlink(path)
 
 
 class photo_album(BaseModel):

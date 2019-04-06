@@ -1,10 +1,11 @@
+import base64
 import os
 
 import pytest
 import six
 from pytest_bdd import parsers, scenarios, then, when
 
-from spud import models
+from spud import media, models
 
 
 scenarios('photos.feature')
@@ -13,14 +14,16 @@ scenarios('photos.feature')
 @when('we create a photo called <name> using <filename>')
 def step_create_photo(session, name, filename, data_files):
     url = "/api/photos/"
+    path = os.path.join(data_files, filename)
     data = {
         'title': name,
         'description': 'description',
         'utc_offset': 660,
         'datetime': '2012-12-20 12:34:56',
         'level': 0,
+        'sha256_hash': base64.encodebytes(media.get_media(path).get_sha256_hash()),
     }
-    files = {'photo': open(os.path.join(data_files, filename), 'rb')}
+    files = {'photo': open(path, 'rb')}
     session.post(url, data=data, files=files)
 
 

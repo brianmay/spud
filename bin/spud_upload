@@ -18,6 +18,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import argparse
+import base64
 import datetime
 import os.path
 
@@ -248,6 +249,7 @@ def import_photo(
     photo['albums_pk'] = albums
     photo['categorys_pk'] = categorys
     photo['level'] = 1
+    photo['sha256_hash'] = base64.encodebytes(m.get_sha256_hash())
 
     camera = None
     if 'camera_model' in exif:
@@ -312,7 +314,7 @@ def import_photo(
     except BadRequestError as e:
         json = e.json
         errors = json["non_field_errors"]
-        if len(errors) == 1 and errors[0].startswith("File already exists at"):
+        if len(errors) == 1 and errors[0].startswith("File already exists "):
             splitted = errors[0].split(" ")
             id = int(splitted[-1].rstrip("."))
             print("skipping %s as already uploaded as %d"
@@ -421,17 +423,14 @@ def main():
 
     except HTTPError as e:
         print("HTTP error:", e)
-        # json = e.response.json()
-        # if json is not None:
-        #     if 'detail' in json:
-        #         print("Server error: %s" % json['detail'])
-        #     else:
-        #         print("Server error: %s" % json)
-        #     exit(1)
-        # else:
-        # print("Server error:", e.msg)
-        # print("Error:", e.msg.content)
-        # raise
+        exit(1)
+
+    except BadRequestError as e:
+        if 'detail' in e.json:
+            print("Server error: %s" % e.json['detail'])
+        else:
+            print("Server error: %s" % e.json)
+        exit(1)
 
     return
 

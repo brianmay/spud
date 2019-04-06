@@ -15,7 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function, unicode_literals
 
-import datetime
+import base64
+import mimetypes
 import os
 import shutil
 
@@ -30,6 +31,19 @@ from rest_framework import serializers
 from rest_framework.utils import html
 
 from . import media, models
+
+
+class BinaryField(serializers.Field):
+
+    def to_internal_value(self, data):
+        return base64.decodebytes(data.encode('ASCII'))
+
+    def to_representation(self, value):
+        return base64.encodebytes(value)
+
+
+class CharField(f.CharField):
+    default_empty_html = None
 
 
 class ListSerializer(serializers.ListSerializer):
@@ -52,48 +66,21 @@ class ModelSerializer(serializers.ModelSerializer):
                 field.set_request(request)
 
 
-class CharField(f.CharField):
-    default_empty_html = None
-
-
-class PhotoThumbSerializer(ModelSerializer):
+class PhotoFileSerializer(ModelSerializer):
     url = f.URLField(source="get_url")
 
     class Meta:
-        model = models.photo_thumb
-        fields = ['id', 'url', 'size', 'width', 'height', 'photo']
+        model = models.photo_file
+        fields = ['id', 'url', 'size', 'size_key', 'width', 'height', 'mime_type', 'is_video',  'photo']
 
 
-class PhotoThumbListSerializer(ListSerializer):
-    child = PhotoThumbSerializer()
+class PhotoFileListSerializer(ListSerializer):
+    child = PhotoFileSerializer()
 
     def to_representation(self, value):
         result = {}
         for v in value:
-            result[v.size] = self.child.to_representation(v)
-        return result
-
-
-class PhotoVideoSerializer(ModelSerializer):
-    url = f.URLField(source="get_url")
-
-    class Meta:
-        model = models.photo_video
-        fields = [
-            'id', 'url', 'size', 'width', 'height', 'format',
-            'extension', 'photo'
-        ]
-
-
-class PhotoVideoListSerializer(ListSerializer):
-    child = PhotoVideoSerializer()
-
-    def to_representation(self, value):
-        result = {}
-        for v in value:
-            if v.size not in result:
-                result[v.size] = []
-            result[v.size].append(self.child.to_representation(v))
+            result[v.size_key] = self.child.to_representation(v)
         return result
 
 
@@ -119,9 +106,9 @@ class NestedPhotoSerializer(ModelSerializer):
 
     place = NestedPhotoPlaceSerializer(read_only=True)
 
-    thumbs = PhotoThumbListSerializer(
+    thumbs = PhotoFileListSerializer(
         source="get_thumbs", read_only=True)
-    videos = PhotoVideoListSerializer(
+    videos = PhotoFileListSerializer(
         source="get_videos", read_only=True)
 
     class Meta:
@@ -550,6 +537,197 @@ class PhotoListSerializer(ListSerializer):
         return results
 
 
+class CreatePhotoSerializer(ModelSerializer):
+    orig_url = f.URLField(source="get_orig_url", read_only=True)
+
+    title = PhotoTitleField(required=False, allow_null=True)
+
+    albums_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.album.objects.all(), source="albums",
+        many=True, required=False,
+        style={'base_template': 'input.html'})
+
+    categorys_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.category.objects.all(), source="categorys",
+        many=True, required=False,
+        style={'base_template': 'input.html'})
+
+    place_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.place.objects.all(), source="place",
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
+
+    persons_pk = PersonPkListSerializer(
+        source="photo_person_set", required=False, allow_null=True)
+
+    photographer_pk = serializers.PrimaryKeyRelatedField(
+        queryset=models.person.objects.all(), source="photographer",
+        required=False, allow_null=True,
+        style={'base_template': 'input.html'})
+
+    sha256_hash = BinaryField(write_only=True)
+
+    def validate(self, attrs):
+        if 'photo' not in self.initial_data:
+            raise exceptions.ValidationError('Photo was not supplied.')
+
+        file_obj = self.initial_data['photo']
+
+        if settings.IMAGE_PATH is None:
+            raise exceptions.PermissionDenied(
+                'This site does not support uploads.')
+
+        # if file_obj.size > options["maxfilesize"]:
+        #     raise exceptions.ValidationError('Maximum file size exceeded.')
+
+        try:
+            m = media.get_media(file_obj.name, file_obj)
+        except media.UnknownMediaType:
+            raise exceptions.ValidationError('File type not supported.')
+
+        width, height = m.get_size()
+        photo_dir = models.photo.build_photo_dir(attrs['datetime'], attrs['utc_offset'])
+        new_name = file_obj.name
+        sha256_hash = m.get_sha256_hash()
+        mime_type, _ = mimetypes.guess_type(new_name)
+        is_video = m.is_video()
+        size_key = "orig"
+
+        if attrs['sha256_hash'] != sha256_hash:
+            raise exceptions.ValidationError(
+                "File received with incorrect sha256 hash")
+        del attrs['sha256_hash']
+
+        dups = models.photo_file.get_conflicts(dir, new_name, size_key, sha256_hash)
+        if dups.count() > 0:
+            raise exceptions.ValidationError(
+                'File already exists in db at %s.'
+                % ",".join([str(d.id) for d in dups]))
+
+        new_dir = models.photo_file.build_dir(is_video, size_key, photo_dir)
+        models.photo_file.check_filename_free(new_dir, new_name)
+
+        pf = {
+            'size_key': size_key,
+            'width': width,
+            'height': height,
+            'mime_type':  mime_type,
+            'dir': new_dir,
+            'name': new_name,
+            'is_video': is_video,
+            'sha256_hash': sha256_hash,
+            'num_bytes': file_obj.size,
+        }
+        attrs['photo_file_set'] = [pf]
+        attrs['name'] = new_name
+
+        return attrs
+
+    def create(self, validated_attrs):
+        if 'photo' not in self.initial_data:
+            raise exceptions.ValidationError('Photo file not supplied')
+
+        file_obj = self.initial_data['photo']
+
+        validated_attrs['action'] = 'R'
+
+        pf = validated_attrs['photo_file_set'][0]
+        dir = pf['dir']
+        name = pf['name']
+        dst = os.path.join(settings.IMAGE_PATH, dir, name)
+
+        # Go ahead and do stuff
+        print("importing to %s" % dst)
+
+        umask = os.umask(0o022)
+        try:
+            if not os.path.lexists(os.path.dirname(dst)):
+                os.makedirs(os.path.dirname(dst), 0o755)
+            with open(dst, "wb") as dst_file_obj:
+                file_obj.seek(0)
+                shutil.copyfileobj(file_obj, dst_file_obj)
+        finally:
+            os.umask(umask)
+
+        try:
+            m = media.get_media(dst)
+            exif = m.get_normalized_exif()
+            assert 'datetime' not in exif
+            exif.update(validated_attrs)
+            validated_attrs = exif
+
+            with transaction.atomic():
+                m2m_attrs = self._pop_m2m_attrs(validated_attrs)
+                print(validated_attrs)
+                instance = models.photo.objects.create(**validated_attrs)
+                self._process_m2m(instance, m2m_attrs)
+
+            print("imported  %s/%s as %d" % (dir, name, instance.pk))
+            return instance
+        except Exception:
+            print("deleting failed import %s" % dst)
+            os.remove(dst)
+            raise
+
+    def _pop_m2m_attrs(self, validated_attrs):
+        return {
+            'albums': validated_attrs.pop("albums", None),
+            'categorys': validated_attrs.pop("categorys", None),
+            'persons': validated_attrs.pop("photo_person_set", None),
+            'photo_file_set': validated_attrs.pop("photo_file_set", []),
+        }
+
+    def _process_m2m(self, instance, m2m_attrs):
+        albums = m2m_attrs["albums"]
+        categorys = m2m_attrs["categorys"]
+        persons = m2m_attrs["persons"]
+        photo_file_set = m2m_attrs["photo_file_set"]
+
+        print("albums", albums)
+        print("categorys", categorys)
+        print("persons", persons)
+        print("photo_file_set", photo_file_set)
+
+        if albums is not None:
+            for value in albums:
+                models.photo_album.objects.create(
+                    photo=instance, album=value)
+                del value
+
+        if categorys is not None:
+            for value in categorys:
+                models.photo_category.objects.create(
+                    photo=instance, category=value)
+                del value
+
+        if persons is not None:
+            for person in persons:
+                models.photo_person.objects.create(
+                    photo=instance, **person)
+                del person
+
+        for pf in photo_file_set:
+            instance.photo_file_set.create(**pf)
+
+        return instance
+
+    class Meta:
+        model = models.photo
+        list_serializer_class = PhotoListSerializer
+        fields = [
+            'id', 'orig_url', 'sha256_hash', 'title',
+            'albums_pk', 'categorys_pk', 'persons_pk',
+            'place_pk', 'photographer_pk',
+            'title', 'view', 'rating',
+            'description', 'utc_offset', 'datetime', 'camera_make',
+            'camera_model', 'flash_used', 'focal_length', 'exposure',
+            'compression', 'aperture', 'level', 'iso_equiv', 'metering_mode',
+            'focus_dist', 'ccd_width', 'comment',
+            'photographer',
+            'relations'
+        ]
+
+
 class PhotoSerializer(ModelSerializer):
     orig_url = f.URLField(source="get_orig_url", read_only=True)
 
@@ -607,113 +785,10 @@ class PhotoSerializer(ModelSerializer):
 
     feedbacks = FeedbackSerializer(many=True, read_only=True)
 
-    thumbs = PhotoThumbListSerializer(
+    thumbs = PhotoFileListSerializer(
         source="get_thumbs", read_only=True)
-    videos = PhotoVideoListSerializer(
+    videos = PhotoFileListSerializer(
         source="get_videos", read_only=True)
-
-    def validate(self, attrs):
-        if 'photo' not in self.initial_data:
-            return attrs
-
-        # settings for the file upload
-        #   you can define other parameters here
-        #   and check validity late in the code
-        options = {
-            # the maximum file size (must be in bytes)
-            "maxfilesize": 1000 * 2 ** 20,  # 1000 Mb
-            # the minimum file size (must be in bytes)
-            "minfilesize": 1 * 2 ** 10,  # 1 Kb
-            # the file types which are going to be allowed for upload
-            #   must be a content_type
-            "acceptedformats": (
-                "image/jpeg",
-                "image/png",
-                "video/mp4",
-                "video/ogg",
-                "video/webm",
-                "video/quicktime",
-            )
-        }
-
-        file_obj = self.initial_data['photo']
-
-        if settings.IMAGE_PATH is None:
-            raise exceptions.PermissionDenied(
-                'This site does not support uploads.')
-
-        # if file_obj.size > options["maxfilesize"]:
-        #     raise exceptions.ValidationError('Maximum file size exceeded.')
-
-        if file_obj.size < options["minfilesize"]:
-            raise exceptions.ValidationError('Minimum file size exceeded.')
-
-        try:
-            media.get_media(file_obj.name, file_obj)
-        except media.UnknownMediaType:
-            raise exceptions.ValidationError('File type not supported.')
-
-        from_tz = pytz.utc
-        to_tz = pytz.FixedOffset(attrs['utc_offset'])
-        to_offset = datetime.timedelta(minutes=attrs['utc_offset'])
-        local = from_tz.localize(attrs['datetime'])
-        local = (local + to_offset).replace(tzinfo=to_tz)
-
-        attrs['path'] = "%04d/%02d/%02d" % (local.year, local.month, local.day)
-        attrs['name'] = file_obj.name
-
-        dups, count = models.photo.get_conflicts(attrs['path'], attrs['name'])
-        if count > 0:
-            raise exceptions.ValidationError(
-                'File already exists at %s.'
-                % ",".join([str(d.id) for d in dups]))
-
-        return attrs
-
-    def create(self, validated_attrs):
-        if 'photo' not in self.initial_data:
-            raise exceptions.ValidationError('Photo file not supplied')
-
-        file_obj = self.initial_data['photo']
-
-        validated_attrs['size'] = file_obj.size
-        validated_attrs['action'] = 'R'
-
-        path = validated_attrs['path']
-        name = validated_attrs['name']
-        dst = os.path.join(settings.IMAGE_PATH, "orig", path, name)
-
-        # Go ahead and do stuff
-        print("importing to %s" % dst)
-
-        umask = os.umask(0o022)
-        try:
-            if not os.path.lexists(os.path.dirname(dst)):
-                os.makedirs(os.path.dirname(dst), 0o755)
-            with open(dst, "wb") as dst_file_obj:
-                file_obj.seek(0)
-                shutil.copyfileobj(file_obj, dst_file_obj)
-        finally:
-            os.umask(umask)
-
-        try:
-            m = media.get_media(dst)
-            exif = m.get_normalized_exif()
-            assert 'datetime' not in exif
-            exif.update(validated_attrs)
-            validated_attrs = exif
-
-            with transaction.atomic():
-                m2m_attrs = self._pop_m2m_attrs(validated_attrs)
-                instance = models.photo.objects.create(**validated_attrs)
-                self._process_m2m(instance, m2m_attrs)
-
-            print("imported  %s/%s as %d" % (path, name, instance.pk))
-            return instance
-        except Exception:
-            print("deleting failed import %s" % dst)
-            os.remove(dst)
-            raise
 
     def update(self, instance, validated_attrs):
         m2m_attrs = self._pop_m2m_attrs(validated_attrs)
@@ -860,8 +935,6 @@ class PhotoSerializer(ModelSerializer):
     class Meta:
         model = models.photo
         extra_kwargs = {
-            'size': {'read_only': True},
-            'path': {'read_only': True},
             'name': {'read_only': True},
             'timestamp': {'read_only': True},
             'action': {'required': False},
@@ -877,7 +950,7 @@ class PhotoSerializer(ModelSerializer):
             'add_persons_pk', 'rem_persons_pk',
             'photographer', 'photographer_pk',
             'feedbacks', 'thumbs', 'videos',
-            'name', 'path', 'size', 'title', 'view', 'rating',
+            'name', 'title', 'view', 'rating',
             'description', 'utc_offset', 'datetime', 'camera_make',
             'camera_model', 'flash_used', 'focal_length', 'exposure',
             'compression', 'aperture', 'level', 'iso_equiv', 'metering_mode',

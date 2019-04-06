@@ -17,7 +17,6 @@ def test_search_all():
     expected_result = MagicMock(spec=QuerySet)
     (queryset
         .select_related.return_value
-        .prefetch_related.return_value
         .prefetch_related.return_value) = expected_result
 
     params = {}
@@ -26,8 +25,7 @@ def test_search_all():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
     )
     assert queryset.mock_calls == chained.call_list()
     assert result is expected_result
@@ -42,7 +40,6 @@ def test_search_q():
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'q': ['meow']}
@@ -52,8 +49,7 @@ def test_search_q():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(q)
     )
     assert queryset.mock_calls == chained.call_list()
@@ -70,7 +66,6 @@ def test_search_children(albums):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'instance': albums['Parent'].pk, 'mode': 'children'}
@@ -79,8 +74,7 @@ def test_search_children(albums):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(parent=albums['Parent'])
     )
     assert queryset.mock_calls == chained.call_list()
@@ -97,7 +91,6 @@ def test_search_ascendants(albums):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'instance': albums['Parent'].pk, 'mode': 'ascendants'}
@@ -106,8 +99,7 @@ def test_search_ascendants(albums):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(
            descendant_set__descendant=albums['Parent'],
            descendant_set__position__gt=0)
@@ -126,7 +118,6 @@ def test_search_descendants(albums):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'instance': albums['Parent'].pk, 'mode': 'descendants'}
@@ -135,8 +126,7 @@ def test_search_descendants(albums):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(
            ascendant_set__ascendant=albums['Parent'],
            ascendant_set__position__gt=0)
@@ -154,7 +144,6 @@ def test_search_root_only():
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'root_only': True}
@@ -163,8 +152,7 @@ def test_search_root_only():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(parent__isnull=True)
     )
     assert queryset.mock_calls == chained.call_list()
@@ -180,7 +168,6 @@ def test_search_needs_revision():
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value
         .annotate.return_value
         .order_by.return_value) = expected_result
@@ -191,8 +178,7 @@ def test_search_needs_revision():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(MyQ(revised__lt=ANY) | MyQ(revised__isnull=True))
        .annotate(null_revised=ANY)
        .order_by('null_revised', 'revised', '-pk')

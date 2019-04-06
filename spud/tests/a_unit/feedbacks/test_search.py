@@ -17,7 +17,6 @@ def test_search_all():
     expected_result = MagicMock(spec=QuerySet)
     (queryset
         .select_related.return_value
-        .prefetch_related.return_value
         .prefetch_related.return_value) = expected_result
 
     params = {}
@@ -27,8 +26,7 @@ def test_search_all():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
     )
     assert queryset.mock_calls == chained.call_list()
     assert result is expected_result
@@ -42,7 +40,6 @@ def test_search_q():
     expected_result = MagicMock(spec=QuerySet)
     (queryset
         .select_related.return_value
-        .prefetch_related.return_value
         .prefetch_related.return_value
         .filter.return_value) = expected_result
 
@@ -58,8 +55,7 @@ def test_search_q():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(q)
     )
     assert queryset.mock_calls == chained.call_list()
@@ -76,7 +72,6 @@ def test_search_children(feedbacks):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'instance': feedbacks['Parent'].pk, 'mode': 'children'}
@@ -86,8 +81,7 @@ def test_search_children(feedbacks):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(parent=feedbacks['Parent'])
     )
     assert queryset.mock_calls == chained.call_list()
@@ -104,7 +98,6 @@ def test_search_ascendants(feedbacks):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'instance': feedbacks['Parent'].pk, 'mode': 'ascendants'}
@@ -114,8 +107,7 @@ def test_search_ascendants(feedbacks):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(
            descendant_set__descendant=feedbacks['Parent'],
            descendant_set__position__gt=0)
@@ -134,7 +126,6 @@ def test_search_descendants(feedbacks):
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'instance': feedbacks['Parent'].pk, 'mode': 'descendants'}
@@ -144,8 +135,7 @@ def test_search_descendants(feedbacks):
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(
            ascendant_set__ascendant=feedbacks['Parent'],
            ascendant_set__position__gt=0)
@@ -163,7 +153,6 @@ def test_search_root_only():
     (queryset
         .select_related.return_value
         .prefetch_related.return_value
-        .prefetch_related.return_value
         .filter.return_value) = expected_result
 
     params = {'root_only': True}
@@ -173,8 +162,7 @@ def test_search_root_only():
     chained = (
        call
        .select_related('cover_photo')
-       .prefetch_related('cover_photo__photo_thumb_set')
-       .prefetch_related('cover_photo__photo_video_set')
+       .prefetch_related('cover_photo__photo_file_set')
        .filter(parent__isnull=True)
     )
     assert queryset.mock_calls == chained.call_list()

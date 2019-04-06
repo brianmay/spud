@@ -212,8 +212,7 @@ class HierarchyManager(models.Manager):
 
     def get_search_queryset(self, user, queryset, params):
         queryset = queryset.select_related('cover_photo')
-        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
-        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_file_set')
 
         album = _get_object_by_name(params, 'obj', self.model)
         if album is not None:
@@ -315,8 +314,7 @@ class PersonManager(HierarchyManager):
 
     def get_search_queryset(self, user, queryset, params, action):
         queryset = queryset.select_related('cover_photo')
-        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
-        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_file_set')
 
         if action != 'list':
             queryset = queryset.select_related(
@@ -388,14 +386,11 @@ class PhotoManager(models.Manager):
 
         queryset = queryset.select_related('place')
 
-        queryset = queryset.prefetch_related('photo_thumb_set')
-        queryset = queryset.prefetch_related('photo_video_set')
+        queryset = queryset.prefetch_related('photo_file_set')
 
         queryset = queryset.prefetch_related('place__cover_photo')
         queryset = queryset.prefetch_related(
-            'place__cover_photo__photo_thumb_set')
-        queryset = queryset.prefetch_related(
-            'place__cover_photo__photo_video_set')
+            'place__cover_photo__photo_file_set')
 
         if action != 'list':
             queryset = queryset.prefetch_related('feedbacks')
@@ -403,25 +398,19 @@ class PhotoManager(models.Manager):
             queryset = queryset.prefetch_related('albums')
             queryset = queryset.prefetch_related('albums__cover_photo')
             queryset = queryset.prefetch_related(
-                'albums__cover_photo__photo_thumb_set')
-            queryset = queryset.prefetch_related(
-                'albums__cover_photo__photo_video_set')
+                'albums__cover_photo__photo_file_set')
 
             queryset = queryset.prefetch_related('categorys')
             queryset = queryset.prefetch_related('categorys__cover_photo')
             queryset = queryset.prefetch_related(
-                'categorys__cover_photo__photo_thumb_set')
-            queryset = queryset.prefetch_related(
-                'categorys__cover_photo__photo_video_set')
+                'categorys__cover_photo__photo_file_set')
 
             queryset = queryset.prefetch_related('photo_person_set')
             queryset = queryset.prefetch_related('photo_person_set__person')
             queryset = queryset.prefetch_related(
                 'photo_person_set__person__cover_photo')
             queryset = queryset.prefetch_related(
-                'photo_person_set__person__cover_photo__photo_thumb_set')
-            queryset = queryset.prefetch_related(
-                'photo_person_set__person__cover_photo__photo_video_set')
+                'photo_person_set__person__cover_photo__photo_file_set')
 
         pd = _get_boolean(params, "person_descendants", False)
         ld = _get_boolean(params, "place_descendants", False)
@@ -576,8 +565,7 @@ class PhotoManager(models.Manager):
 class FeedbackManager(models.Manager):
     def get_search_queryset(self, user, queryset, params):
         queryset = queryset.select_related('cover_photo')
-        queryset = queryset.prefetch_related('cover_photo__photo_thumb_set')
-        queryset = queryset.prefetch_related('cover_photo__photo_video_set')
+        queryset = queryset.prefetch_related('cover_photo__photo_file_set')
 
         q = _get_list(params, 'q')
         for r in q:
