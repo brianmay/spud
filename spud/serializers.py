@@ -80,7 +80,9 @@ class PhotoFileListSerializer(ListSerializer):
     def to_representation(self, value):
         result = {}
         for v in value:
-            result[v.size_key] = self.child.to_representation(v)
+            if v.size_key not in result:
+                result[v.size_key] = []
+            result[v.size_key].append(self.child.to_representation(v))
         return result
 
 
