@@ -11,6 +11,7 @@ RUN apt-get update \
  && apt-get install -y \
     sudo \
     libimage-exiftool-perl libav-tools exiftran \
+    dcraw \
  && rm -rf /var/lib/apt/lists/*
 
 # Make application directory
