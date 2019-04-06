@@ -594,6 +594,8 @@ class feedback(HierarchyModel):
 @python_2_unicode_compatible
 class photo(BaseModel):
     name = models.CharField(max_length=128, db_index=True)
+    path = models.CharField(max_length=255, db_index=True)
+    size = models.IntegerField(null=True, blank=True)
     title = models.CharField(
         max_length=64, null=True, blank=True, db_index=True)
     photographer = models.ForeignKey(
@@ -1008,6 +1010,22 @@ class photo_file(BaseModel):
             return os.path.join("video", size_key, photo_dir)
         else:
             raise RuntimeError(f"Unknown image size '{size_key}'")
+
+
+class photo_thumb(BaseModel):
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
+    size = models.CharField(max_length=10, db_index=True)
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
+
+
+class photo_video(BaseModel):
+    photo = models.ForeignKey(photo, on_delete=models.CASCADE)
+    size = models.CharField(max_length=10, db_index=True)
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
+    format = models.CharField(max_length=20)
+    extension = models.CharField(max_length=4)
 
 
 class photo_album(BaseModel):
