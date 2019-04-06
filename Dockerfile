@@ -1,5 +1,5 @@
 # Start with a Python image.
-FROM python:3.6-stretch
+FROM python:3.7-stretch
 LABEL maintainer="Brian May <brian@linuxpenguins.xyz>"
 
 # Some stuff that everyone has been copy-pasting
