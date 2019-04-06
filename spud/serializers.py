@@ -110,14 +110,12 @@ class NestedPhotoSerializer(ModelSerializer):
 
     thumbs = PhotoFileListSerializer(
         source="get_thumbs", read_only=True)
-    videos = PhotoFileListSerializer(
-        source="get_videos", read_only=True)
 
     class Meta:
         model = models.photo
         fields = [
             'id', 'title', 'description', 'datetime', 'utc_offset', 'place',
-            'action', 'thumbs', 'videos',
+            'action', 'thumbs',
         ]
         list_serializer_class = ListSerializer
 
