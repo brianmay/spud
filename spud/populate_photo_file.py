@@ -30,7 +30,7 @@ def populate(photo_file, p):
         mime_type=mime_type,
         dir=dir,
         name=p.name,
-        is_video=False,
+        is_video=media.is_video(),
         sha256_hash=sha256_hash,
         num_bytes=num_bytes,
     )
