@@ -840,8 +840,10 @@ class photo_file(BaseModel):
         unique_together = (
             ("photo", "size_key", "mime_type"),
             ("dir", "name"),
-            ("size_key", "sha256_hash"),
         )
+        indexes = [
+            models.Index(fields=['size_key', 'sha256_hash']),
+        ]
 
     def get_path(self):
         return os.path.join(

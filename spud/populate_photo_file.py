@@ -45,10 +45,6 @@ def populate(photo_file, p):
         num_bytes = media.get_num_bytes()
 
         print(f"---> {pf.pk} {full_path} {base64.encodebytes(sha256_hash)}")
-        if photo_file.objects.filter(size_key=pf.size, sha256_hash=sha256_hash).count() > 0:
-            print(f"---> SKIPPING {pf.pk} {full_path} {base64.encodebytes(sha256_hash)}")
-            continue
-
         photo_file.objects.create(
             photo_id=pf.photo_id,
             size_key=pf.size,
