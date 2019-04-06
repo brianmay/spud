@@ -980,13 +980,14 @@ class photo_file(BaseModel):
     dir = models.CharField(max_length=128)
     name = models.CharField(max_length=128)
     is_video = models.BooleanField()
-    sha256_hash = models.BinaryField(max_length=32, unique=True)
+    sha256_hash = models.BinaryField(max_length=32)
     num_bytes = models.IntegerField()
 
     class Meta:
         unique_together = (
             ("photo", "size_key", "mime_type"),
             ("dir", "name"),
+            ("size_key", "sha256_hash"),
         )
 
     def get_path(self):
@@ -1104,14 +1105,14 @@ class photo_file(BaseModel):
         return self.size_key
 
     @classmethod
-    def get_conflicts(cls, new_dir, new_name, sha256_hash):
+    def get_conflicts(cls, new_dir, new_name, size_key, sha256_hash):
         # check for conflicts or errors
         (short_name, extension) = os.path.splitext(new_name)
         dups = photo_file.objects.filter(
             Q(dir=new_dir, name__startswith=f"{short_name}.")
-            | Q(sha256_hash=sha256_hash)
+            | Q(size_key=size_key, sha256_hash=sha256_hash)
         )
-        return dups\
+        return dups
 
     @classmethod
     def get_conflicting_names(cls, new_dir, new_name):

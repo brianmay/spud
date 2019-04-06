@@ -26,15 +26,16 @@ def populate_photo_files(apps, schema_editor):
         sha256_hash = media.get_sha256_hash()
         xy_size = media.get_size()
         num_bytes = media.get_num_bytes()
+        size_key = 'orig'
 
         print(f"{p.pk} {full_path} {base64.encodebytes(sha256_hash)}")
-        if photo_file.objects.filter(sha256_hash=sha256_hash).count() > 0:
+        if photo_file.objects.filter(size_key=size_key, sha256_hash=sha256_hash).count() > 0:
             print("SKIPPING {p.pk} {full_path} {base64.encodebytes(sha256_hash)}")
             continue
 
         photo_file.objects.create(
             photo_id=p.pk,
-            size_key="orig",
+            size_key=size_key,
             width=xy_size[0],
             height=xy_size[1],
             mime_type=mime_type,
