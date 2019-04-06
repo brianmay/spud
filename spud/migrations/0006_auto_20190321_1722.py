@@ -13,14 +13,14 @@ def populate_photo_files(apps, schema_editor):
 
     photo = apps.get_model('spud', 'photo')
 
-    for p in photo.objects.filter(datetime__year__lt=2000):
+    for p in photo.objects.filter(datetime__year__gte=2000, datetime__year__lt=2010):
         populate(photo_file, p)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('spud', '0004_auto_20190324_1831'),
+        ('spud', '0005_auto_20190321_1722'),
     ]
 
     operations = [
