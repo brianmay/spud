@@ -27,7 +27,7 @@ def populate_photo_files(apps, schema_editor):
         num_bytes = media.get_num_bytes()
 
         print(f"{p.pk} {p.full_path} {sha256_hash}")
-        if photo_file.objects.filter(sha256_hash).count > 0:
+        if photo_file.objects.filter(sha256_hash).count() > 0:
             print("SKIPPING {pf.pk} {pf.full_path} {sha256_hash}")
             continue
 
