@@ -321,15 +321,21 @@ class PhotoViewSet(ModelViewSet):
         criteria = request.data['criteria']
         values = request.data['values']
 
-        queryset = self._get_photo_search(self.request.user, criteria)
-        count = 0
+        queryset = models.photo.objects.get_search_queryset(
+            self.request.user,
+            self.queryset,
+            criteria,
+            action="bulk_update",
+        )
 
+        count = 0
         for instance in queryset:
             serializer = self.get_serializer(
                 instance, data=values, partial=partial)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             count = count + 1
+
         return Response({'count': count})
 
     def patch(self, request, *args, **kwargs):
