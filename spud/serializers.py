@@ -71,7 +71,7 @@ class PhotoFileSerializer(ModelSerializer):
 
     class Meta:
         model = models.photo_file
-        fields = ['id', 'url', 'size', 'size_key', 'width', 'height', 'mime_type', 'is_video',  'photo']
+        fields = ['id', 'url', 'size_key', 'width', 'height', 'mime_type', 'is_video',  'photo']
 
 
 class PhotoFileListSerializer(ListSerializer):

@@ -954,11 +954,6 @@ class photo_file(BaseModel):
 
         return errors
 
-    @property
-    def size(self):
-        """ Backward comparability. """
-        return self.size_key
-
     @classmethod
     def get_conflicts(cls, new_dir, new_name, size_key, sha256_hash):
         # check for conflicts or errors
