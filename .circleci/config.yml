@@ -50,6 +50,7 @@ jobs:
             pipenv run flake8 spud
             pipenv run ./manage.py makemigrations --settings=spud.tests.settings --check --dry-run
             pipenv run ./manage.py migrate --settings=spud.tests.settings
+            pipenv run ./manage.py check
             mkdir test-reports
             pipenv run py.test --cov=spud --junitxml=test-reports/junit.xml
       - store_test_results:
