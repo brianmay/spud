@@ -381,9 +381,9 @@
         },
         "mako": {
             "hashes": [
-                "sha256:0cfa65de3a835e87eeca6ac856b3013aade55f49e32515f65d999f91a2324162"
+                "sha256:95ee720cc3453063788515d55bd7ce4a2a77b7b209e4ac70ec5c86091eb02541"
             ],
-            "version": "==1.0.12"
+            "version": "==1.0.13"
         },
         "markupsafe": {
             "hashes": [
@@ -435,11 +435,11 @@
         },
         "more-itertools": {
             "hashes": [
-                "sha256:2112d2ca570bb7c3e53ea1a35cd5df42bb0fd10c45f0fb97178679c3c03d64c7",
-                "sha256:c3e4748ba1aad8dba30a4886b0b1a2004f9a863837b8654e7059eebf727afa5a"
+                "sha256:3ad685ff8512bf6dc5a8b82ebf73543999b657eded8c11803d9ba6b648986f4d",
+                "sha256:8bb43d1f51ecef60d81854af61a3a880555a14643691cc4b64a6ee269c78f09a"
             ],
             "markers": "python_version > '2.7'",
-            "version": "==7.0.0"
+            "version": "==7.1.0"
         },
         "mypy": {
             "hashes": [
@@ -613,11 +613,11 @@
         },
         "tox": {
             "hashes": [
-                "sha256:45a265e953368fb372cca3eac33b69fdb1b1453e5b114be231c84fc3dfadceed",
-                "sha256:f5cb0b5b8d14f2100982b0981c750d840228180a348e6bad355aa38e949fbc3f"
+                "sha256:dab0b0160dd187b654fc33d690ee1d7bf328bd5b8dc6ef3bb3cc468969c659ba",
+                "sha256:ee35ffce74933a6c6ac10c9a0182e41763140a5a5070e21b114feca56eaccdcd"
             ],
             "index": "pypi",
-            "version": "==3.13.1"
+            "version": "==3.13.2"
         },
         "tqdm": {
             "hashes": [
