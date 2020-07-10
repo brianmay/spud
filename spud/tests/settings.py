@@ -19,10 +19,8 @@ import os.path
 
 import environ
 
-from spud.defaults import TEMPLATES
-
-
 from spud.defaults import *  # NOQA
+from spud.defaults import TEMPLATES
 
 
 env = environ.Env()
