@@ -733,7 +733,7 @@ class photo(BaseModel):
             try:
                 pt = photo_file.objects.get(photo=self, size_key=size_key, mime_type="image/jpeg")
             except photo_file.DoesNotExist:
-                photo_dir = self.build_photo_dir(self.datetime, self.utc_offset)
+                photo_dir = orig.path
                 pt = photo_file(photo=self, size_key=size_key, mime_type="image/jpeg")
                 pt.dir = photo_file.build_dir(False, size_key, photo_dir)
                 pt.name = _swap_extension(self.name, 'jpg')
@@ -771,7 +771,7 @@ class photo(BaseModel):
                     try:
                         pt = photo_file.objects.get(photo=self, size_key=size_key, mime_type=mime_type)
                     except photo_file.DoesNotExist:
-                        photo_dir = self.build_photo_dir(self.datetime, self.utc_offset)
+                        photo_dir = orig.path
                         pt = photo_file(photo=self, size_key=size_key, mime_type=mime_type)
                         pt.dir = photo_file.build_dir(True, size_key, photo_dir)
                         pt.name = _swap_extension(self.name, f['extension'])
@@ -815,6 +815,7 @@ class photo(BaseModel):
 
         # Hurry! Save the new name before we forgot
         self.name = new_name
+        self.path = new_dir
         # ... err what did we just do?
         self.save()
         return
@@ -896,8 +897,8 @@ class photo_file(BaseModel):
             self.name = new_name
             new_path = self.get_path()
 
-            full_old_path = os.join(settings.IMAGE_PATH, old_path)
-            full_new_path = os.join(settings.IMAGE_PATH, new_path)
+            full_old_path = os.path.join(settings.IMAGE_PATH, old_path)
+            full_new_path = os.path.join(settings.IMAGE_PATH, new_path)
 
             # Actually move the file
             print(f"Moving '{full_old_path}' to '{full_new_path}'.")

@@ -32,37 +32,46 @@ class Command(BaseCommand):
                 print(f"delete '{name}'.")
                 p.delete()
             elif p.action == "R":
+                print(f"move '{name}'.")
+                p.move()
                 print(f"regenerate thumbnail '{name}'")
                 p.generate_thumbnails(overwrite=True)
                 p.generate_videos(overwrite=True)
             elif p.action == "auto":
+                print(f"move '{name}'.")
+                p.move()
                 print(f"rotate '{name}' by '{p.action}'")
                 p.rotate_orig(p.action)
                 print(f"regenerate thumbnail '{name}'")
                 p.generate_thumbnails(overwrite=True)
             elif p.action == "90":
+                print(f"move '{name}'.")
+                p.move()
                 print(f"rotate '{name}' by '{p.action}'")
                 p.rotate_orig(p.action)
                 print(f"regenerate thumbnail '{name}'")
                 p.generate_thumbnails(overwrite=True)
             elif p.action == "180":
+                print(f"move '{name}'.")
+                p.move()
                 print(f"rotate '{name}' by '{p.action}'")
                 p.rotate_orig(p.action)
                 print(f"regenerate thumbnail '{name}'")
                 p.generate_thumbnails(overwrite=True)
             elif p.action == "270":
+                print(f"move '{name}'.")
+                p.move()
                 print(f"rotate '{name}' by '{p.action}'")
                 p.rotate_orig(p.action)
                 print(f"regenerate thumbnail '{name}'")
                 p.generate_thumbnails(overwrite=True)
             elif p.action == "M":
-                pass
+                print(f"move '{name}'.")
+                p.move()
             else:
                 raise RuntimeError(
                     f"Uknown action '{p.action}' for '{name}'")
 
             if p.action != "D":
-                print(f"move '{name}'.")
-                p.move()
                 p.action = None
                 p.save()
