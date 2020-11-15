@@ -202,13 +202,14 @@ IMAGE_PATH = None
 IMAGE_SIZES = {
     'thumb': {'size': 120, 'draft': True},
     'mid': {'size': 480, 'draft': True},
-    'large': {'size': 960, 'draft': False},
+    'large': {'size': 1080, 'draft': False},
 }
 
 DEFAULT_LIST_SIZE = 'thumb'
 
 VIDEO_SIZES = {
     '320': {'size': 320},
+    '1080': {'size': 1080},
 }
 
 VIDEO_FORMATS = {
