@@ -733,7 +733,7 @@ class photo(BaseModel):
             try:
                 pt = photo_file.objects.get(photo=self, size_key=size_key, mime_type="image/jpeg")
             except photo_file.DoesNotExist:
-                photo_dir = orig.path
+                photo_dir = self.path
                 pt = photo_file(photo=self, size_key=size_key, mime_type="image/jpeg")
                 pt.dir = photo_file.build_dir(False, size_key, photo_dir)
                 pt.name = _swap_extension(self.name, 'jpg')
@@ -771,7 +771,7 @@ class photo(BaseModel):
                     try:
                         pt = photo_file.objects.get(photo=self, size_key=size_key, mime_type=mime_type)
                     except photo_file.DoesNotExist:
-                        photo_dir = orig.path
+                        photo_dir = self.path
                         pt = photo_file(photo=self, size_key=size_key, mime_type=mime_type)
                         pt.dir = photo_file.build_dir(True, size_key, photo_dir)
                         pt.name = _swap_extension(self.name, f['extension'])
