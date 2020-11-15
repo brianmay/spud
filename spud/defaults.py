@@ -208,8 +208,8 @@ IMAGE_SIZES = {
 DEFAULT_LIST_SIZE = 'thumb'
 
 VIDEO_SIZES = {
-    '320': {'size': 320},
-    '1080': {'size': 1080},
+    'mid': {'size': 480},
+    'large': {'size': 1080},
 }
 
 VIDEO_FORMATS = {
