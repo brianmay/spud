@@ -27,6 +27,10 @@ from PIL import Image
 import spud.exif
 
 
+def _round(x, base):
+    return base * round(x/base)
+
+
 class UnknownMediaType(Exception):
     pass
 
@@ -284,7 +288,7 @@ class media_video(media):
 
         if height > size['size']:
             subst = {
-                'w': size['size'] * width/height,
+                'w': _round(size['size'] * width/height, 2),
                 'h': size['size'],
             }
         else:
