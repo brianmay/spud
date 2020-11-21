@@ -8,7 +8,7 @@ jobs:
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
         environment:
           PIPENV_VENV_IN_PROJECT: true
           DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
@@ -61,7 +61,7 @@ jobs:
 
   deploy-beta:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
     steps:
       - checkout
       - setup_remote_docker
@@ -77,7 +77,7 @@ jobs:
 
   verify-version:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
         environment:
           PIPENV_VENV_IN_PROJECT: true
     steps:
@@ -91,7 +91,7 @@ jobs:
 
   deploy-prod-pypi:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
         environment:
           PIPENV_VENV_IN_PROJECT: true
     steps:
@@ -115,7 +115,7 @@ jobs:
 
   deploy-prod-docker:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.8
     steps:
       - checkout # check out the code in the project directory
       - setup_remote_docker
