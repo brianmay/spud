@@ -275,7 +275,7 @@ class media_video(media):
 
         with tempfile.NamedTemporaryFile() as tmp_file:
             subprocess.check_call([
-                "avconv", "-v", "quiet", "-y", "-ss", "0",
+                "ffmpeg", "-v", "quiet", "-y", "-ss", "0",
                 "-i",  path, "-vframes",  "1", "-f", "image2", tmp_file.name])
 
             image = Image.open(tmp_file.name)
@@ -288,7 +288,7 @@ class media_video(media):
 
         if height > size['size']:
             subst = {
-                'w': _round(size['size'] * width/height, 2),
+                'w': _round(size['size'] * width/height, 1),
                 'h': size['size'],
             }
         else:
@@ -298,7 +298,7 @@ class media_video(media):
             }
 
         cmd = [
-            "avconv", "-y", "-i", self.get_path(),
+            "ffmpeg", "-y", "-i", self.get_path(),
             "-b:v", "400k",
             "-filter:v", "scale=%(w)s:%(h)s" % subst
         ]
