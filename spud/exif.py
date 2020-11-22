@@ -62,7 +62,7 @@ class ExifTool(object):
 
 def ffprobe(filename):
     process = subprocess.Popen([
-        "avprobe", "-v", "quiet", "-of", "json",
+        "ffprobe", "-v", "quiet", "-of", "json",
         "-show_format", "-show_streams", filename],
         stdout=subprocess.PIPE)
     (stdout, stderr) = process.communicate()
