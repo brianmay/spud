@@ -700,30 +700,43 @@ class photo(BaseModel):
     def get_videos(self):
         return list(self.photo_file_set.filter(is_video=True))
 
+    def check_files(self):
+        errors = []
+
+        for pt in self.photo_file_set.all():
+            errors.extend(pt.check_file())
+
+        return errors
+
     # Other stuff
     def check_delete(self):
         errorlist = []
         return errorlist
 
     def delete(self):
+        self.check_files()
         for pt in self.photo_file_set.all():
             pt.delete()
         super(photo, self).delete()
     delete.alters_data = True
 
     def rotate_orig(self, amount):
+        self.check_files()
         pt = self.get_orig()
         pt.rotate(amount)
         return
     rotate_orig.alters_data = True
 
     def rotate_all(self, amount):
+        self.check_files()
         for pt in self.photo_file_set.all():
             pt.rotate(amount)
         return
     rotate_all.alters_data = True
 
     def generate_thumbnails(self, overwrite):
+        self.check_files()
+
         orig = self.get_orig()
         m = media.get_media(orig.get_path())
         umask = os.umask(0o022)
@@ -760,6 +773,8 @@ class photo(BaseModel):
     generate_thumbnails.alters_data = True
 
     def generate_videos(self, overwrite):
+        self.check_files()
+
         orig = self.get_orig()
         m = media.get_media(orig.get_path())
         umask = os.umask(0o022)
@@ -804,6 +819,8 @@ class photo(BaseModel):
     update_size.alters_data = True
 
     def move(self, new_name=None):
+        self.check_files()
+
         if new_name is None:
             new_name = self.name
 
@@ -924,33 +941,39 @@ class photo_file(BaseModel):
         errors = []
 
         for pt in photo_file.objects.all():
-            dst = pt.get_path()
-            full_dst = os.path.join(settings.IMAGE_PATH, dst)
-            print(f"Checking {full_dst}.")
+            errors.extend(pt.check_file())
 
-            # Duplicates should never happen due to unique constraint.
-            duplicates = photo_file.objects.filter(
-                dir=pt.dir, name=pt.name).exclude(pk=pt.pk)
-            if duplicates.count() > 0:
-                errors.append(f"{dst}: path is duplicated")
+        return errors
 
-            if os.path.lexists(full_dst):
-                mt = media.get_media(dst)
-                width, height = mt.get_size()
+    def check_file(self):
+        errors = []
+        dst = self.get_path()
+        full_dst = os.path.join(settings.IMAGE_PATH, dst)
+        print(f"Checking {full_dst}.")
 
-                if pt.width != width:
-                    errors.append(f"{dst}: has incorrect width.")
+        # Duplicates should never happen due to unique constraint.
+        duplicates = photo_file.objects.filter(
+            dir=self.dir, name=self.name).exclude(pk=self.pk)
+        if duplicates.count() > 0:
+            errors.append(f"{dst}: path is duplicated")
 
-                if pt.height != height:
-                    errors.append(f"{dst}: has incorrect height.")
+        if os.path.lexists(full_dst):
+            mt = media.get_media(dst)
+            width, height = mt.get_size()
 
-                if bytes(pt.sha256_hash) != mt.get_sha256_hash():
-                    errors.append(f"{dst}: has incorrect sha256 hash.")
+            if self.width != width:
+                errors.append(f"{dst}: has incorrect width.")
 
-                if pt.num_bytes != mt.get_num_bytes():
-                    errors.append(f"{dst}: has incorrect num bytes.")
-            else:
-                errors.append(f"{dst}: File is missing")
+            if self.height != height:
+                errors.append(f"{dst}: has incorrect height.")
+
+            if bytes(self.sha256_hash) != mt.get_sha256_hash():
+                errors.append(f"{dst}: has incorrect sha256 hash.")
+
+            if self.num_bytes != mt.get_num_bytes():
+                errors.append(f"{dst}: has incorrect num bytes.")
+        else:
+            errors.append(f"{dst}: File is missing")
 
         return errors
 
