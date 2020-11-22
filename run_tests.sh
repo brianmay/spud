@@ -13,7 +13,7 @@ fi
 echo ""
 echo "ISORT"
 echo "############################"
-isort -rc --check --diff spud
+isort --check --diff spud
 if [ "$?" -ne 0 ]
 then
     exit 1
