@@ -124,7 +124,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # A boolean that specifies if datetimes will be timezone-aware by default or
 # not. If this is set to True, Django will use timezone-aware datetimes
 # internally. Otherwise, Django will use naive datetimes in local time.
-# USE_TZ = True
+USE_TZ = False
 
 # A string representing the time zone for datetimes stored in this database
 # (assuming that it doesn’t support time zones) or None. The same values are

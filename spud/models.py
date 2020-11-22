@@ -671,10 +671,9 @@ class photo(BaseModel):
 
     @classmethod
     def build_photo_dir(cls, utc_datetime, utc_offset):
-        from_tz = pytz.utc
         to_tz = pytz.FixedOffset(utc_offset)
         to_offset = datetime.timedelta(minutes=utc_offset)
-        local = from_tz.localize(utc_datetime)
+        local = utc_datetime
         local = (local + to_offset).replace(tzinfo=to_tz)
         return "%04d/%02d/%02d" % (local.year, local.month, local.day)
 

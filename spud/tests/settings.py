@@ -84,7 +84,7 @@ APPROVE_ACCOUNTS_EMAIL = ACCOUNTS_EMAIL
 EMAIL_SUBJECT_PREFIX = '[Grunt VPAC] - '
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-TIME_ZONE = 'Australia/Melbourne'
+TIME_ZONE = 'UTC'
 LANGUAGE_CODE = 'en-au'
 
 SECRET_KEY = '5hvhpe6gv2t5x4$3dtq(w2v#vg@)sx4p3r_@wv%l41g!stslc*'
