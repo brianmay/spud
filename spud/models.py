@@ -949,7 +949,6 @@ class photo_file(BaseModel):
         errors = []
         dst = self.get_path()
         full_dst = os.path.join(settings.IMAGE_PATH, dst)
-        print(f"Checking {full_dst}.")
 
         # Duplicates should never happen due to unique constraint.
         duplicates = photo_file.objects.filter(
