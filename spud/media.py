@@ -288,7 +288,7 @@ class media_video(media):
 
         if height > size['size']:
             subst = {
-                'w': _round(size['size'] * width/height, 1),
+                'w': _round(size['size'] * width/height, 2),
                 'h': size['size'],
             }
         else:
