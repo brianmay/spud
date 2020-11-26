@@ -302,7 +302,7 @@ class media_video(media):
 
         cmd = [
             "ffmpeg", "-y", "-i", self.get_path(),
-            "-b:v", "400k",
+            "-b:v", "400k", "-max_muxing_queue_size", "1024",
             "-filter:v", "scale=%(w)s:%(h)s" % subst
         ]
 
