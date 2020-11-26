@@ -274,9 +274,12 @@ class media_video(media):
         path = self.get_path()
 
         with tempfile.NamedTemporaryFile() as tmp_file:
-            subprocess.check_call([
+            cmd = [
                 "ffmpeg", "-v", "quiet", "-y", "-ss", "0",
-                "-i",  path, "-vframes",  "1", "-f", "image2", tmp_file.name])
+                "-i",  path, "-vframes",  "1", "-f", "image2", tmp_file.name
+            ]
+            print(cmd)
+            subprocess.check_call(cmd)
 
             image = Image.open(tmp_file.name)
             rc = self._create_thumbnail(dst_path, max_size, image)
