@@ -93,7 +93,7 @@ class media:
         width = _round(width, 2)
         height = _round(height, 2)
 
-        return {width, height}
+        return width, height
 
     def get_exif(self) -> dict:
         path = self.get_path()
