@@ -200,16 +200,16 @@ IMAGE_URL = "/images/"
 IMAGE_PATH = None
 
 IMAGE_SIZES = {
-    'thumb': {'size': 120, 'draft': True},
-    'mid': {'size': 480, 'draft': True},
-    'large': {'size': 1080, 'draft': False},
+    'thumb': {'max_width': 120, 'draft': True},
+    'mid': {'max_width': 480, 'draft': True},
+    'large': {'max_width': 1920, 'draft': False},
 }
 
 DEFAULT_LIST_SIZE = 'thumb'
 
 VIDEO_SIZES = {
-    'mid': {'size': 480},
-    'large': {'size': 1080},
+    'mid': {'max_width': 480},
+    'large': {'max_width': 1920},
 }
 
 VIDEO_FORMATS = {

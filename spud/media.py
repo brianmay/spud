@@ -20,6 +20,7 @@ import hashlib
 import os
 import subprocess
 import tempfile
+from typing import BinaryIO, Optional, Tuple
 
 import six
 from PIL import Image
@@ -36,16 +37,16 @@ class UnknownMediaType(Exception):
 
 
 class media:
-    def __init__(self, fp):
+    def __init__(self, fp) -> None:
         self._fp = fp
         self._tmp_file = None
 
-    def get_fp(self):
+    def get_fp(self) -> BinaryIO:
         if not isinstance(self._fp, six.string_types):
             self._fp.seek(0)
         return self._fp
 
-    def get_path(self):
+    def get_path(self) -> str:
         if isinstance(self._fp, six.string_types):
             return self._fp
 
@@ -62,24 +63,45 @@ class media:
 
         return self._tmp_file
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self._tmp_file is not None:
             print("removing temp file %s" % self._tmp_file)
             os.unlink(self._tmp_file)
             self._tmp_file = None
 
-    def get_size(self):
+    def get_size(self) -> Tuple[int, int]:
         fp = self.get_fp()
         im = Image.open(fp)
         return im.size
 
-    def get_exif(self):
+    def get_new_size(self, size: dict) -> Tuple[int, int]:
+        width, height = self.get_size()
+
+        max_height = size.get('max_height')
+        max_width = size.get('max_width')
+
+        if max_height is not None:
+            if height > max_height:
+                width = max_height * width/height
+                height = max_height
+
+        if max_width is not None:
+            if width > max_width:
+                height = max_width * height/width
+                width = max_width
+
+        width = _round(width, 2)
+        height = _round(height, 2)
+
+        return {width, height}
+
+    def get_exif(self) -> dict:
         path = self.get_path()
         with spud.exif.ExifTool() as e:
             exif = e.get_metadata(path)
         return exif
 
-    def get_datetime(self):
+    def get_datetime(self) -> datetime.datetime:
         exif = self.get_exif()
         dt = None
 
@@ -103,7 +125,7 @@ class media:
 
         return dt
 
-    def get_sha256_hash(self):
+    def get_sha256_hash(self) -> bytes:
         filename = self.get_path()
         sha256_hash = hashlib.sha256()
         with open(filename, "rb") as f:
@@ -111,48 +133,33 @@ class media:
                 sha256_hash.update(byte_block)
         return sha256_hash.digest()
 
-    def get_num_bytes(self):
+    def get_num_bytes(self) -> int:
         return os.path.getsize(self.get_fp())
 
-    def create_thumbnail(self, dst_path, max_size):
+    def create_thumbnail(self, dst_path: str, max_size: dict) -> Tuple[int, int]:
         fp = self.get_fp()
         image = Image.open(fp)
         return self._create_thumbnail(dst_path, max_size, image)
 
-    def _create_thumbnail(self, dst_path, max_size, image):
-        (width, height) = image.size
+    def _create_thumbnail(self, dst_path: str, max_size: dict, image: Image) -> Tuple[int, int]:
+        width, height = self.get_new_size(max_size)
 
-        if width > max_size['size'] or height > max_size['size']:
-            thumb_width = max_size['size']
-            thumb_height = max_size['size']
-
-            if width > height:
-                thumb_height = int(max_size['size']*1.0/width * height)
-            else:
-                thumb_width = int(max_size['size']*1.0/height * width)
-
-            if max_size['draft']:
-                image.thumbnail(
-                    (thumb_width, thumb_height), Image.ANTIALIAS)
-            else:
-                image = image.resize(
-                    (thumb_width, thumb_height), Image.ANTIALIAS)
-            thumb_width, thumb_height = image.size
+        if max_size['draft']:
+            image.thumbnail((width, height), Image.ANTIALIAS)
         else:
-            thumb_width = width
-            thumb_height = height
+            image = image.resize((width, height), Image.ANTIALIAS)
 
         image.save(dst_path)
 
-        return (thumb_width, thumb_height)
+        return image.size
 
-    def rotate(self, amount):
+    def rotate(self, amount: int) -> None:
         raise NotImplementedError("rotate not implemented")
 
-    def is_video(self):
+    def is_video(self) -> bool:
         return False
 
-    def get_normalized_exif(self):
+    def get_normalized_exif(self) -> dict:
         r = {}
         exif = self.get_exif()
 
@@ -237,7 +244,7 @@ class media:
 
 
 class media_jpeg(media):
-    def rotate(self, amount):
+    def rotate(self, amount: int) -> None:
         if amount == "auto":
             arg = "-a"
         elif amount == "0":
@@ -258,7 +265,7 @@ class media_jpeg(media):
 
 class media_video(media):
 
-    def _get_ffprobe_vs(self):
+    def _get_ffprobe_vs(self) -> dict:
         path = self.get_path()
         videometadata = spud.exif.ffprobe(path)
 
@@ -270,7 +277,7 @@ class media_video(media):
         assert len(vs) == 1
         return vs[0]
 
-    def create_thumbnail(self, dst_path, max_size):
+    def create_thumbnail(self, dst_path: str, max_size: dict) -> Tuple[int, int]:
         path = self.get_path()
 
         with tempfile.NamedTemporaryFile() as tmp_file:
@@ -286,24 +293,13 @@ class media_video(media):
 
         return rc
 
-    def create_video(self, dst_path, size, format):
-        width, height = self.get_size()
-
-        if height > size['size']:
-            subst = {
-                'w': _round(size['size'] * width/height, 2),
-                'h': size['size'],
-            }
-        else:
-            subst = {
-                'w': width,
-                'h': height,
-            }
+    def create_video(self, dst_path: str, size: dict, format: str) -> Optional[Tuple[int, int]]:
+        width, height = self.get_new_size(size)
 
         cmd = [
             "ffmpeg", "-y", "-i", self.get_path(),
             "-b:v", "400k", "-max_muxing_queue_size", "1024",
-            "-filter:v", "scale=%(w)s:%(h)s" % subst
+            "-filter:v", f"scale={width}:{height}"
         ]
 
         if format == "video/ogg":
@@ -322,24 +318,24 @@ class media_video(media):
         print(cmd)
         try:
             subprocess.check_call(cmd)
-            return subst['w'], subst['h']
+            return width, height
         except subprocess.CalledProcessError:
             os.unlink(dst_path)
             return None
 
-    def get_size(self):
+    def get_size(self) -> Tuple[int, int]:
         vs = self._get_ffprobe_vs()
         width = int(vs['width'])
         height = int(vs['height'])
         return width, height
 
-    def is_video(self):
+    def is_video(self) -> bool:
         return True
 
 
 class media_raw(media):
 
-    def create_thumbnail(self, dst_path, max_size):
+    def create_thumbnail(self, dst_path: str, max_size: dict) -> Tuple[int, int]:
         path = self.get_path()
         cmd = ["dcraw", "-T", "-c", path]
         t = tempfile.TemporaryFile()
@@ -354,7 +350,7 @@ class media_raw(media):
         t.close()
         return xysize
 
-    def get_size(self):
+    def get_size(self) -> None:
         path = self.get_path()
         cmd = ["dcraw", "-T", "-c", path]
         t = tempfile.TemporaryFile()
@@ -369,7 +365,7 @@ class media_raw(media):
         return image.size
 
 
-def get_media(filename, fp=None):
+def get_media(filename: str, fp: BinaryIO = None) -> media:
     if fp is None:
         fp = filename
 
